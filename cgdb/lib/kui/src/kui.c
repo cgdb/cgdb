@@ -1,4 +1,4 @@
-#include <string.h>
+#include <string.h> /* strdup */
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
@@ -119,12 +119,32 @@ int kui_map_get_key ( struct kui_map *map, char **key ) {
 	return 0;
 }
 
+int kui_map_get_literal_key ( struct kui_map *map, int **key ) { 
+
+	if ( !map )
+		return -1;
+
+	*key = map->literal_key;
+
+	return 0;
+}
+
 int kui_map_get_value ( struct kui_map *map, char **value ) {
 
 	if ( !map )
 		return -1;
 
 	*value = map->original_value;
+
+	return 0;
+}
+
+int kui_map_get_literal_value ( struct kui_map *map, int **value ) {
+
+	if ( !map )
+		return -1;
+
+	*value = map->literal_value;
 
 	return 0;
 }
@@ -225,13 +245,98 @@ int kui_ms_destroy ( struct kui_map_set *kui_ms ) {
 	return 0;
 }
 
+/**
+ * A compare function for 2 int arrays.
+ * The int arrays should be null terminated.
+ *
+ * \param one
+ * The first item to compare
+ *
+ * \param two
+ * The second item to compare
+ *
+ * @return
+ * returns an integer less than, equal to, or greater than zero if the first n bytes of
+ * s1 is found, respectively, to be less than, to match, or be greater than the first n
+ * bytes of s2.
+ *
+ */
+static int intcmp ( const int *one, const int *two ) {
+	int i = 0;
+	int retval = 0;
+
+	while ( 1 ) {
+		/* They both are at the end */
+		if ( one[i] == 0 && two[i] == 0 ) {
+			retval = 0;
+			break;
+		} else if ( one[i] == 0 ) {
+			retval = -1;
+			break;
+		} else if ( two[i] == 0 ) {
+			retval = 1;
+			break;
+		} else if ( one[i] < two[i] ) {
+			retval = -1;
+			break;
+		} else if ( one[i] > two[i] ) {
+			retval = 1;
+			break;
+		}
+
+		++i;
+	}
+
+	return retval;
+}
+
+/* a safe intncmp, it won't over run the bounds */
+static int intncmp ( const int *one, const int *two, const int n ) {
+	int i = 0;
+	int retval = 0;
+	int pos = 0;
+
+	while ( pos < n) {
+		/* They both are at the end */
+		if ( one[i] == 0 && two[i] == 0 ) {
+			retval = 0;
+			break;
+		} else if ( one[i] == 0 ) {
+			retval = -1;
+			break;
+		} else if ( two[i] == 0 ) {
+			retval = 1;
+			break;
+		} else if ( one[i] < two[i] ) {
+			retval = -1;
+			break;
+		} else if ( one[i] > two[i] ) {
+			retval = 1;
+			break;
+		}
+
+		++i;
+		++pos;
+	}
+
+	return retval;
+}
+
+static int intlen ( const int *val ) {
+	int length = 0;
+	while ( val[length] != 0 )
+		++length;
+
+	return length;
+}
+
 static int kui_map_compare_callback ( 
 		const void *a,
 		const void *b ) {
 	struct kui_map *one = (struct kui_map *)a;
 	struct kui_map *two = (struct kui_map *)b;
 
-	return strcmp ( one->original_key, two->original_key );
+	return intcmp ( one->literal_key, two->literal_key );
 }
 
 int kui_ms_register_map ( 
@@ -393,8 +498,8 @@ static int kui_ms_finalize_state ( struct kui_map_set *kui_ms ) {
  * \param kui_ms
  * The map set to update
  *
- * \param c
- * The character to match
+ * \param key
+ * The input value to match
  *
  * \param position
  * The position of character in the mapping
@@ -404,9 +509,9 @@ static int kui_ms_finalize_state ( struct kui_map_set *kui_ms ) {
  */
 static int kui_ms_update_state ( 
 		struct kui_map_set *kui_ms, 
-		char c,
+		int key,
 	    int position ) {
-	char *matched, *cur;
+	int *int_matched, *int_cur;
 	int strncmp_return_value;
 	int cur_length;
 	std_list_iterator iter;
@@ -418,7 +523,7 @@ static int kui_ms_update_state (
 	if ( position < 0 )
 		return -1;
 
-	if ( c < 0 )
+	if ( key < 0 )
 		return -1;
 
 	/* Assertion: Should only try to update the state if still looking */
@@ -435,7 +540,7 @@ static int kui_ms_update_state (
 
 		map = (struct kui_map *)data;
 
-		if ( kui_map_get_key ( map, &matched ) == -1 )
+		if ( kui_map_get_literal_key ( map, &int_matched ) == -1 )
 			return -1;
 	}
 
@@ -451,20 +556,21 @@ static int kui_ms_update_state (
 
 		map = (struct kui_map *)data;
 
-		if ( kui_map_get_key ( map, &cur ) == -1 )
+		if ( kui_map_get_literal_key ( map, &int_cur ) == -1 )
 			return -1;
 
-		strncmp_return_value = strncmp ( matched, cur, position );
+		/* Use intcmp */
+		strncmp_return_value = intncmp ( int_matched, int_cur, position );
 
 		/* Once the value is passed, stop looking. */
 		if ( ( strncmp_return_value != 0 ) ||
-			 ( strncmp_return_value == 0 && cur[position] > c ) ) {
+			 ( strncmp_return_value == 0 && int_cur[position] > key ) ) {
 			kui_ms->map_state = KUI_MAP_NOT_FOUND;
 			break;
 		}
 		
 		/* A successful find */
-		if ( strncmp_return_value == 0 && cur[position] == c ) {
+		if ( strncmp_return_value == 0 && int_cur[position] == key ) {
 			kui_ms->map_state = KUI_MAP_STILL_LOOKING;
 			break;
 		}
@@ -491,7 +597,7 @@ static int kui_ms_update_state (
 	 * the current value. If you are at the last spot in the list,
 	 * and the first rule holds, it is definatly FOUND.
 	 */
-	cur_length = strlen ( cur );
+	cur_length = intlen ( int_cur );
 
 	if ( cur_length != position + 1) {
 	   return 0; /* STILL_LOOKING */
@@ -522,13 +628,13 @@ static int kui_ms_update_state (
 
 		map = (struct kui_map *)data;
 
-		if ( kui_map_get_key ( map, &matched ) == -1 )
+		if ( kui_map_get_literal_key ( map, &int_matched ) == -1 )
 			return -1;
 
 	}
 
 	/* The value is not the same, found. */
-	if ( strncmp ( matched, cur, position+1 ) != 0 ) {
+	if ( intncmp ( int_matched, int_cur, position+1 ) != 0 ) {
 		kui_ms->map_state = KUI_MAP_FOUND;
 		return 0;
 	}
@@ -572,14 +678,14 @@ static int kui_ms_destroy_callback ( void *param ) {
 	return 0;
 }
 
-static int kui_ms_destroy_char_callback ( void *param ) {
-	char *c = (char*)param;
+static int kui_ms_destroy_int_callback ( void *param ) {
+	int *i = (int*)param;
 
-	if ( !c )
+	if ( !i )
 		return -1;
 
-	free ( c );
-	c = NULL;
+	free ( i );
+	i = NULL;
 
 	return 0;
 }
@@ -603,7 +709,7 @@ struct kuictx *kui_create(int stdinfd) {
 
 	kctx->fd = stdinfd;
 
-	kctx->buffer = std_list_create ( kui_ms_destroy_char_callback );
+	kctx->buffer = std_list_create ( kui_ms_destroy_int_callback );
 
 	return kctx;
 }
@@ -657,8 +763,8 @@ int kui_add_map_set (
  * @return
  * 0 on success, or -1 on error.
  */
-static char kui_findchar ( struct kuictx *kctx ) {
-	char c;
+static int kui_findchar ( struct kuictx *kctx ) {
+	int key;
 	int length;
 	void *data;
 	std_list_iterator iter;
@@ -680,7 +786,7 @@ static char kui_findchar ( struct kuictx *kctx ) {
 			return -1;
 
 		/* Get the char */
-		c = *(char*)data;
+		key = *(int*)data;
 
 		/* Delete the item */
 		if ( std_list_remove ( kctx->buffer, iter ) == NULL )
@@ -688,10 +794,10 @@ static char kui_findchar ( struct kuictx *kctx ) {
 		
 	} else {
 		/* otherwise, look to read in a char */
-		c = io_getchar ( kctx->fd, 1000 );
+		key = io_getchar ( kctx->fd, 1000 );
 	}
 
-	return c;
+	return key;
 }
 
 /**
@@ -730,8 +836,8 @@ static int kui_reset_state_data ( struct kuictx *kctx ) {
  * \param kctx
  * The kui context to operate on.
  *
- * \param c
- * The character to match
+ * \param key
+ * The input value to match
  *
  * \param position
  * The position of character in the mapping
@@ -741,7 +847,7 @@ static int kui_reset_state_data ( struct kuictx *kctx ) {
  */
 static int kui_update_each_list ( 
 		struct kuictx *kctx, 
-		char c,
+		int key,
 	    int position	) {
     std_list_iterator iter;
 	struct kui_map_set *map_set;
@@ -764,7 +870,7 @@ static int kui_update_each_list (
 			return -1;
 
 		if ( map_state != KUI_MAP_NOT_FOUND ) {
-			if ( kui_ms_update_state ( map_set, c, position ) == -1 )
+			if ( kui_ms_update_state ( map_set, key, position ) == -1 )
 				return -1;
 		}
 	}
@@ -918,7 +1024,6 @@ static int kui_was_map_found (
 				return -1;
 
 			*the_map_found = ( struct kui_map *)data;
-			fprintf ( stderr, "MAP FOUND(%s)\r\n", (*the_map_found)->original_value );
 			*was_map_found = 1;
 		}
 	}
@@ -945,7 +1050,7 @@ static int kui_was_map_found (
  * \param bufmax
  * ???
  *
- * \param c
+ * \param key
  * ???
  *
  * @return
@@ -980,8 +1085,8 @@ static int kui_update_buffer (
 		struct kui_map *the_map_found,
 	    int map_was_found,
 	    int position,
-		char *bufmax,
-		char *c) {
+		int *bufmax,
+		int *key) {
 	int i;
 	int j;
 
@@ -989,17 +1094,17 @@ static int kui_update_buffer (
 	/* Find extra chars */
 	if ( map_was_found )
 		/* For the example, this would be 'ab' 2 */
-		i = strlen ( the_map_found->original_key );
+		i = intlen ( the_map_found->literal_key );
 	else {
 		i = 1; /* bufmax[0] will be returned to the user */
-		*c = bufmax[0];
+		*key = bufmax[0];
 	}
 
 	/* for the example, position would be 5 
 	 * Assertion: bufmax[position] is valid 
 	 */
 	for ( j = position ; j >= i; --j ) {
-		char *val = malloc ( sizeof ( char ) );
+		int *val = malloc ( sizeof ( int ) );
 		if ( !val )
 			return -1;
 
@@ -1014,13 +1119,13 @@ static int kui_update_buffer (
 		int length;
 
 		/* Add the value onto the buffer */
-		length = strlen ( the_map_found->original_value );
+		length = intlen ( the_map_found->literal_value );
 		for ( i = length-1; i >= 0; --i ) {
-			char *val = malloc ( sizeof ( char ) );
+			int *val = malloc ( sizeof ( int ) );
 			if ( !val )
 				return -1;
 
-			*val = the_map_found->original_value[i];
+			*val = the_map_found->literal_value[i];
 
 			if ( std_list_prepend ( kctx->buffer, val ) == -1 )
 				return -1;
@@ -1046,10 +1151,10 @@ static int kui_findkey (
 		struct kuictx *kctx,
 	    int *was_map_found ) {
 
-	char c;
+	int key;
 	int position;
 	int should_continue;
-	char bufmax[1024]; /* This constant limits this function */
+	int bufmax[1024]; /* This constant limits this function */
 	struct kui_map *the_map_found;
 
 	/* Validate parameters */
@@ -1063,7 +1168,7 @@ static int kui_findkey (
 		return -1;
 
 	/* Initialize variables on stack */
-	c = -1;
+	key = -1;
 	position = -1;
 	*was_map_found = 0;
 	should_continue = 0;
@@ -1074,18 +1179,18 @@ static int kui_findkey (
 
 	/* Start the main loop */
 	while ( 1 ) {
-		c = kui_findchar ( kctx );
+		key = kui_findchar ( kctx );
 
 		/* If there is no more data ready, stop. */
-		if ( c == 0 )
+		if ( key == 0 )
 			break; 
 
 		++position;
 
-		bufmax[position] = c;
+		bufmax[position] = key;
 
 		/* Update each list, with the character read, and the position. */
-		if ( kui_update_each_list ( kctx, c, position ) == -1 )
+		if ( kui_update_each_list ( kctx, key, position ) == -1 )
 			return -1;
 
 		/* Check to see if at least a single map is being matched */
@@ -1096,7 +1201,7 @@ static int kui_findkey (
 			break;
 	}
 
-	c = 0; /* This should no longer be used. Enforcing that. */
+	key = 0; /* This should no longer be used. Enforcing that. */
 
 	/* All done looking for chars, let lists that matched a mapping
 	 * be known. ex KUI_MAP_STILL_LOOKING => KUI_MAP_FOUND. This 
@@ -1117,26 +1222,26 @@ static int kui_findkey (
 		return -1;
 
 	/* Update the buffer and get the final char. */
-	if ( kui_update_buffer ( kctx, the_map_found, *was_map_found, position, bufmax, &c ) == -1 )
+	if ( kui_update_buffer ( kctx, the_map_found, *was_map_found, position, bufmax, &key ) == -1 )
 		return -1;
 
-	return c;
+	return key;
 }
 
 int kui_getkey ( struct kuictx *kctx ) {
 	int map_found; 
-	int c;
+	int key;
 
 	/* If a map was found, restart the algorithm. */
 	do {
-		c = kui_findkey ( kctx, &map_found );
+		key = kui_findkey ( kctx, &map_found );
 
-		if ( c == -1 )
+		if ( key == -1 )
 			return -1;
 
 	} while ( map_found == 1 );
 
-	return c;
+	return key;
 }
 
 int kui_cangetkey ( struct kuictx *kctx ) {

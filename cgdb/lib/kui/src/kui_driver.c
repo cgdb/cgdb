@@ -88,7 +88,14 @@ void main_loop(struct kuictx *i) {
 					fprintf ( stderr, "User aborted\n" );
 					return;
 				} else {
-					fprintf(stderr, "(%c:%d)\r\n", c, c);
+					if ( kui_term_is_cgdb_key ( c ) ) {
+						char *val;	
+
+						val = kui_term_get_string_from_cgdb_key ( c );
+
+						fprintf ( stderr, "%s\r\n", val );
+					} else
+						fprintf(stderr, "%c\r\n", c);
 				}
 
 				if ( kui_cangetkey ( i ) == 1 )
