@@ -131,36 +131,12 @@ AM_CFLAGS = -g -Wall \
 # This depends on input
 noinst_LIBRARIES = libgdbmi.a
 
-libgdbmi_a_SOURCES = \
-gdbmi_parser.c \
-gdbmi_tgdb.c \
-gdbmi_grammar.y \
-gdbmi_lexer.l \
-gdbmi_pt.c
-
-
-# Installs the driver programs into progs directory
-noinst_bin_PROGRAMS = gdbmi_driver
-noinst_bindir = $(top_builddir)/progs
+libgdbmi_a_SOURCES = gdbmi_tgdb.c
 
 libgdbmi_a_DEPENDENCIES = \
 $(top_srcdir)/various/util/src \
 $(top_srcdir)/various/adt/src
 
-
-# This is the input driver
-gdbmi_driver_SOURCES = \
-	gdbmi_driver.c \
-	gdbmi_grammar.y \
-	gdbmi_lexer.l \
-	gdbmi_parser.c \
-	gdbmi_pt.c
-
-
-gdbmi_driver_LDFLAGS = \
--L$(top_builddir)/various/util/src
-
-gdbmi_driver_LDADD = -lutil
 subdir = tgdb/gdbmi/src
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
@@ -169,41 +145,25 @@ LIBRARIES = $(noinst_LIBRARIES)
 
 libgdbmi_a_AR = $(AR) cru
 libgdbmi_a_LIBADD =
-am_libgdbmi_a_OBJECTS = gdbmi_parser.$(OBJEXT) gdbmi_tgdb.$(OBJEXT) \
-	gdbmi_grammar.$(OBJEXT) gdbmi_lexer.$(OBJEXT) \
-	gdbmi_pt.$(OBJEXT)
+am_libgdbmi_a_OBJECTS = gdbmi_tgdb.$(OBJEXT)
 libgdbmi_a_OBJECTS = $(am_libgdbmi_a_OBJECTS)
-noinst_bin_PROGRAMS = gdbmi_driver$(EXEEXT)
-PROGRAMS = $(noinst_bin_PROGRAMS)
-
-am_gdbmi_driver_OBJECTS = gdbmi_driver.$(OBJEXT) gdbmi_grammar.$(OBJEXT) \
-	gdbmi_lexer.$(OBJEXT) gdbmi_parser.$(OBJEXT) gdbmi_pt.$(OBJEXT)
-gdbmi_driver_OBJECTS = $(am_gdbmi_driver_OBJECTS)
-gdbmi_driver_DEPENDENCIES =
 
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
-@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/gdbmi_driver.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/gdbmi_grammar.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/gdbmi_lexer.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/gdbmi_parser.Po ./$(DEPDIR)/gdbmi_pt.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/gdbmi_tgdb.Po
+@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/gdbmi_tgdb.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-LEXCOMPILE = $(LEX) $(LFLAGS) $(AM_LFLAGS)
-YLWRAP = $(top_srcdir)/config/ylwrap
-YACCCOMPILE = $(YACC) $(YFLAGS) $(AM_YFLAGS)
-DIST_SOURCES = $(libgdbmi_a_SOURCES) $(gdbmi_driver_SOURCES)
-DIST_COMMON = Makefile.am Makefile.in gdbmi_grammar.c gdbmi_lexer.c
-SOURCES = $(libgdbmi_a_SOURCES) $(gdbmi_driver_SOURCES)
+DIST_SOURCES = $(libgdbmi_a_SOURCES)
+DIST_COMMON = Makefile.am Makefile.in
+SOURCES = $(libgdbmi_a_SOURCES)
 
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .l .o .obj .y
+.SUFFIXES: .c .o .obj
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
 	cd $(top_srcdir) && \
 	  $(AUTOMAKE) --gnu  tgdb/gdbmi/src/Makefile
@@ -218,33 +178,6 @@ libgdbmi.a: $(libgdbmi_a_OBJECTS) $(libgdbmi_a_DEPENDENCIES)
 	-rm -f libgdbmi.a
 	$(libgdbmi_a_AR) libgdbmi.a $(libgdbmi_a_OBJECTS) $(libgdbmi_a_LIBADD)
 	$(RANLIB) libgdbmi.a
-noinst_binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
-install-noinst_binPROGRAMS: $(noinst_bin_PROGRAMS)
-	@$(NORMAL_INSTALL)
-	$(mkinstalldirs) $(DESTDIR)$(noinst_bindir)
-	@list='$(noinst_bin_PROGRAMS)'; for p in $$list; do \
-	  p1=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
-	  if test -f $$p \
-	  ; then \
-	    f=`echo "$$p1" | sed 's,^.*/,,;$(transform);s/$$/$(EXEEXT)/'`; \
-	   echo " $(INSTALL_PROGRAM_ENV) $(noinst_binPROGRAMS_INSTALL) $$p $(DESTDIR)$(noinst_bindir)/$$f"; \
-	   $(INSTALL_PROGRAM_ENV) $(noinst_binPROGRAMS_INSTALL) $$p $(DESTDIR)$(noinst_bindir)/$$f || exit 1; \
-	  else :; fi; \
-	done
-
-uninstall-noinst_binPROGRAMS:
-	@$(NORMAL_UNINSTALL)
-	@list='$(noinst_bin_PROGRAMS)'; for p in $$list; do \
-	  f=`echo "$$p" | sed 's,^.*/,,;s/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/'`; \
-	  echo " rm -f $(DESTDIR)$(noinst_bindir)/$$f"; \
-	  rm -f $(DESTDIR)$(noinst_bindir)/$$f; \
-	done
-
-clean-noinst_binPROGRAMS:
-	-test -z "$(noinst_bin_PROGRAMS)" || rm -f $(noinst_bin_PROGRAMS)
-gdbmi_driver$(EXEEXT): $(gdbmi_driver_OBJECTS) $(gdbmi_driver_DEPENDENCIES) 
-	@rm -f gdbmi_driver$(EXEEXT)
-	$(LINK) $(gdbmi_driver_LDFLAGS) $(gdbmi_driver_OBJECTS) $(gdbmi_driver_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT) core *.core
@@ -252,11 +185,6 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdbmi_driver.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdbmi_grammar.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdbmi_lexer.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdbmi_parser.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdbmi_pt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdbmi_tgdb.Po@am__quote@
 
 distclean-depend:
@@ -283,12 +211,6 @@ distclean-depend:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(COMPILE) -c `if test -f '$<'; then $(CYGPATH_W) '$<'; else $(CYGPATH_W) '$(srcdir)/$<'`
-
-.l.c:
-	$(SHELL) $(YLWRAP) `test -f '$<' || echo '$(srcdir)/'`$< $(LEX_OUTPUT_ROOT).c $@ -- $(LEXCOMPILE)
-
-.y.c:
-	$(SHELL) $(YLWRAP) `test -f '$<' || echo '$(srcdir)/'`$< y.tab.c $@ y.tab.h $*.h y.output $*.output -- $(YACCCOMPILE)
 uninstall-info-am:
 
 ETAGS = etags
@@ -376,10 +298,9 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(LIBRARIES) $(PROGRAMS)
+all-am: Makefile $(LIBRARIES)
 
 installdirs:
-	$(mkinstalldirs) $(DESTDIR)$(noinst_bindir)
 
 install: install-am
 install-exec: install-exec-am
@@ -405,12 +326,9 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-	-rm -f gdbmi_lexer.c
-	-rm -f gdbmi_grammar.c
 clean: clean-am
 
-clean-am: clean-generic clean-noinstLIBRARIES clean-noinst_binPROGRAMS \
-	mostlyclean-am
+clean-am: clean-generic clean-noinstLIBRARIES mostlyclean-am
 
 distclean: distclean-am
 
@@ -425,7 +343,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-noinst_binPROGRAMS
+install-data-am:
 
 install-exec-am:
 
@@ -451,28 +369,19 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-info-am uninstall-noinst_binPROGRAMS
+uninstall-am: uninstall-info-am
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
-	clean-noinstLIBRARIES clean-noinst_binPROGRAMS ctags distclean \
-	distclean-compile distclean-depend distclean-generic \
-	distclean-tags distdir dvi dvi-am info info-am install \
-	install-am install-data install-data-am install-exec \
-	install-exec-am install-info install-info-am install-man \
-	install-noinst_binPROGRAMS install-strip installcheck \
+	clean-noinstLIBRARIES ctags distclean distclean-compile \
+	distclean-depend distclean-generic distclean-tags distdir dvi \
+	dvi-am info info-am install install-am install-data \
+	install-data-am install-exec install-exec-am install-info \
+	install-info-am install-man install-strip installcheck \
 	installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
-	uninstall-am uninstall-info-am uninstall-noinst_binPROGRAMS
+	uninstall-am uninstall-info-am
 
-
-clean:
-	rm -f gdbmi_lexer.c \
-	gdbmi_grammar.c \
-	gdbmi_grammar.h \
-	gdbmi_grammar.output \
-	gdbmi_grammar.tab.c \
-	gdbmi_grammar.tab.h
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

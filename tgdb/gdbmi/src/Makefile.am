@@ -8,37 +8,8 @@ AM_CFLAGS = -g -Wall \
 # This depends on input
 noinst_LIBRARIES = libgdbmi.a
 
-libgdbmi_a_SOURCES = \
-gdbmi_parser.c \
-gdbmi_tgdb.c \
-gdbmi_grammar.y \
-gdbmi_lexer.l \
-gdbmi_pt.c
-
-# Installs the driver programs into progs directory
-noinst_bin_PROGRAMS = gdbmi_driver
-noinst_bindir = $(top_builddir)/progs
+libgdbmi_a_SOURCES = gdbmi_tgdb.c
 
 libgdbmi_a_DEPENDENCIES = \
 $(top_srcdir)/various/util/src \
 $(top_srcdir)/various/adt/src
- 
-# This is the input driver
-gdbmi_driver_SOURCES = \
-	gdbmi_driver.c \
-	gdbmi_grammar.y \
-	gdbmi_lexer.l \
-	gdbmi_parser.c \
-	gdbmi_pt.c
-
-gdbmi_driver_LDFLAGS = \
--L$(top_builddir)/various/util/src
-gdbmi_driver_LDADD = -lutil
-
-clean:
-	rm -f gdbmi_lexer.c \
-	gdbmi_grammar.c \
-	gdbmi_grammar.h \
-	gdbmi_grammar.output \
-	gdbmi_grammar.tab.c \
-	gdbmi_grammar.tab.h
