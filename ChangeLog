@@ -2,6 +2,10 @@ version 0.5.0 (07/14/2004):
 
 07/12/2004 Bob Rossi <bob@brasko.net>
 
+    * release-todo.txt: Update instructions
+
+07/12/2004 Bob Rossi <bob@brasko.net>
+
     * configure.in: Changed version number to 0.5.0 for release
 
 07/12/2004 Bob Rossi <bob@brasko.net>

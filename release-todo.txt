@@ -38,7 +38,7 @@ Steps for releasing a new CGDB version:
       * Optionally, put a note in the index.shtml file (News section)
     * ssh cgdb.sourceforge.net
     * cd /home/groups/c/cg/cgdb/htdocs
-	* tar the file up and scp it there. Then put it in place.
+	* run 'cvs update'
 
 8.  Create a cvs tag for the tree to be able to get back to the 
     version number. If the version is cgdb-0.3.3, name the tag
