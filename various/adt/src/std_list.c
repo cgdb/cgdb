@@ -1,7 +1,3 @@
-/* std_list.c:
- * -----------
- */
-
 /* Standard Includes */
 #include <string.h>
 
@@ -11,8 +7,7 @@
 /**
  * A node in the linked list.
  */
-struct std_list_node
-{
+struct std_list_node {
 	/**
 	 * The data stored in the node.
 	 */ 
@@ -35,8 +30,7 @@ struct std_list_node
  * This stores the begin and end (one past last node) of the list,
  * and can store any state data associated with a list context.
  */
-struct std_list
-{
+struct std_list {
 	/**
 	 * A pointer to the first node in the list.
 	 *

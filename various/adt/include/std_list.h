@@ -4,18 +4,39 @@
 #include <stdlib.h>
 #include "std_types.h"
 
+/*! 
+ * \file
+ * std_list.h
+ *
+ * \brief
+ * An STL style doubly linked list.
+ */
+
 /**
  * The doubly linked list context.
  */
 struct std_list;
+
+/**
+ * A typedef for an std_list.
+ * This is what the programmer should declare.
+ */
 typedef struct std_list *std_list;
+
+/**
+ * A forward declaration, only around to satisfy the iterator typedef.
+ */
 struct std_list_node;
+
+/**
+ * A std_list_iterator. This is used to iterator over a std_list.
+ */
 typedef struct std_list_node *std_list_iterator;
 
 /**
  * Create a list.
  *
- * \param destroyFunc
+ * \param destroy_func
  * DestroyFunc will be called on the data, before it is removed.
  *
  * @return
@@ -166,9 +187,6 @@ std_list_iterator std_list_remove (
  * \param func
  * The function to call for each element. 
  * It should return 0 when the desired element is found.
- *
- * \param iter
- * The found list element iterator, or NULL if it is not found.
  *
  * @return
  * the found iterator on success,

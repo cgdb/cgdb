@@ -1,5 +1,9 @@
 03/22/2004 Bob Rossi <bob@brasko.net>
 
+    * std_list.h: Fully doxygenized.
+	* std_list.c: Ditto
+03/22/2004 Bob Rossi <bob@brasko.net>
+
     * std_list.c: Documented std_list_node and std_list.
 
 03/18/2004 Bob Rossi <bob@brasko.net>
