@@ -1,3 +1,16 @@
+09/26/2003 Bob Rossi <bob@brasko.net>
+
+   * types.h: Changed comments.
+   * types.c: tgdb_print_item, changed case TGDB_UPDATE_FILE_POSITION,
+   TGDB_UPDATE_SOURCE_FILES, TGDB_SOURCES_DENIED,
+   TGDB_ABSOLUTE_SOURCE_ACCEPTED, TGDB_ABSOLUTE_SOURCE_DENIED,
+   TGDB_DISPLAY_UPDATE, TDGB_QUIT_NORMAL, TGDB_QUIT_ABNORMAL.
+   removed comments.
+   tgdb_delete_command, changed case TGDB_UPDATE_FILE_POSITION,
+   TGDB_UPDATE_SOURCE_FILES, TGDB_SOURCES_DENIED,
+   TGDB_ABSOLUTE_SOURCE_ACCEPTED, TGDB_ABSOLUTE_SOURCE_DENIED,
+   TGDB_DISPLAY_UPDATE, TGDB_QUIT_NORMAL, TGDB_QUIT_ABNORMAL.
+
 09/25/2003 Bob Rossi <bob@brasko.net>
 
    * commands.c: 'struct commands' changed member 'struct queue

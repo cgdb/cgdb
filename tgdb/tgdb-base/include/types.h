@@ -28,31 +28,31 @@ extern "C" {
 
 #include "queue.h"
 
-/* INTERFACE_COMMANDS:
- * -------------------
+/* INTERFACE_COMMANDS
+ * ------------------
  *
  *  This is the interface mechanism used between the gui/tgdb.
  *  When tgdb is responding to a request or when an event is being generated
  *  the gui will find out about it through one of these enums.
  *
- *  TGDB_UPDATE_BREAKPOINTS: 
- *  ------------------------
+ *  TGDB_UPDATE_BREAKPOINTS
+ *  -----------------------
  *
  *      All breakpoints that are set.
  *
  *      This is a 'struct tgdb_list *'
  *          It contains a 'struct tgdb_breakpoint *' for each breakpoint.
  *
- *  TGDB_UPDATE_FILE_POSITION:
- *  --------------------------
+ *  TGDB_UPDATE_FILE_POSITION
+ *  -------------------------
  *
  *      This tells the gui what filename/line number the debugger is on.
  *      It gets generated whenever it changes.
  *
  *		This is a 'struct tgdb_file_position *'
  *
- *  TGDB_UPDATE_SOURCE_FILES:
- *  -------------------------
+ *  TGDB_UPDATE_SOURCE_FILES
+ *  ------------------------
  *
  *      This returns a list of all the source files that make up the 
  *      inferior program.
@@ -61,42 +61,49 @@ extern "C" {
  *          It contains a const char* for each filename. The filename may
  *          be represented as a relative or absolute path. 
  *
- *  TGDB_SOURCES_DENIED:
- *  --------------------
+ *  TGDB_SOURCES_DENIED
+ *  -------------------
  *
  *      This is a response to the tgdb_get_sources function call.
  *      If the sources can not be recieved you will get this response.
  *
  *          The data will be NULL.
  *
- *  TGDB_ABSOLUTE_SOURCE_ACCEPTED:
- *  ------------------------------
+ *  TGDB_ABSOLUTE_SOURCE_ACCEPTED
+ *  -----------------------------
  *      
  *      This is a response to the function call tgdb_get_source_absolute_filename.
  *      It returns the absolute path to the relative path asked for.
  *
  *      This is a struct string representing the absolute filename.
- *      The client should call string_free on this.
  *
- *  TGDB_ABSOLUTE_SOURCE_DENIED:
- *  ----------------------------
+ *  TGDB_ABSOLUTE_SOURCE_DENIED
+ *  ---------------------------
  *
  *      This is a response to the function call tgdb_get_source_absolute_filename.
  *      It happens when gdb failed to know what the absolute path to the relative
  *      path asked for was.
  *
  *      This is a struct string representing the absolute filename.
- *      The client should call string_free on this.
  *
- *  TGDB_DISPLAY_UPDATE:
- *  --------------------
+ *  TGDB_DISPLAY_UPDATE
+ *  -------------------
  *
  *      Currently not used.
  *
- *  TGDB_QUIT:
- *  ----------
+ *  TGDB_QUIT_ABNORMAL
+ *  ------------------
  *
- *      libtgdb is done. You will get no more responses after this one.
+ * 		This happens when gdb quits abnormally.
+ *      libtgdb is done. 
+ *      You will get no more responses after this one.
+ *
+ *  TGDB_QUIT_NORMAL
+ *  ----------------
+ *
+ * 		This happens when gdb quits normally.
+ *      libtgdb is done. 
+ *      You will get no more responses after this one.
  */
 enum INTERFACE_COMMANDS {       
     TGDB_UPDATE_BREAKPOINTS,

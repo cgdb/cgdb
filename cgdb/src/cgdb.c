@@ -390,8 +390,6 @@ static void process_commands(struct tgdb *tgdb)
                 char *file = string_get ( s );
                 if_show_file( file, 1);
                 source_set_relative_path(if_get_sview(), file, last_relative_file);
-                string_free ( s );
-                s = NULL;
                 break;
              }
 
@@ -405,8 +403,6 @@ static void process_commands(struct tgdb *tgdb)
                 if ( file[0] )
                     if_display_message("No such file:", 0, " %s", file);
 
-                string_free ( s );
-                s = NULL;
                 break;
              }
 

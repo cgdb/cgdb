@@ -60,77 +60,57 @@ static void tgdb_print_item(void *item) {
            {
 				struct tgdb_file_position *tfp = (struct tgdb_file_position *)com->data;
 
-                fprintf ( stderr, 
+                fprintf ( fd, 
                   "TGDB_UPDATE_FILE_POSITION ABSOLUTE(%s)RELATIVE(%s)LINE(%d)\n",
                   string_get ( tfp->absolute_path ), 
                   string_get ( tfp->relative_path ), 
                   tfp->line_number);
+           		break;
            }
-           break;
         case TGDB_UPDATE_SOURCE_FILES:
             {
 				struct tgdb_list *list = ( struct tgdb_list *) com->data;
 				tgdb_list_iterator *i;
                 char *s;
 
+				fprintf ( fd, "Inferior source files start\n" );
 				i = tgdb_list_get_first ( list );
 
                 while ( i ) {
 					s = (char*)tgdb_list_get_item ( i );
-                    fprintf ( stderr, "TGDB_SOURCE_FILE (%s)\n", s );
+                    fprintf ( fd, "TGDB_SOURCE_FILE (%s)\n", s );
 					i = tgdb_list_next ( i );
                 }
+				fprintf ( fd, "Inferior source files end\n" );
+            	break;
             }
-
-            break;
         case TGDB_SOURCES_DENIED:
-			fprintf ( stderr, "TGDB_SOURCES_DENIED\n" );
-           break;
+			fprintf ( fd, "TGDB_SOURCES_DENIED\n" );
+           	break;
         case TGDB_ABSOLUTE_SOURCE_ACCEPTED:
-           break;
+			{
+				struct string *s = ( struct string * ) com->data;
+				char *file = string_get ( s );
+				fprintf( fd, "TGDB_ABSOLUTE_SOURCE_ACCEPTED(%s)\n", file );
+				break;
+			}
         case TGDB_ABSOLUTE_SOURCE_DENIED:
-           break;
+			{
+				struct string *s = ( struct string * ) com->data;
+				char *file = string_get ( s );
+				fprintf( fd, "TGDB_ABSOLUTE_SOURCE_DENIED(%s)\n", file );
+				break;
+			}
         case TGDB_DISPLAY_UPDATE:
-           break;
+			fprintf ( fd, "TGDB_DISPLAY_UPDATE\n" );
+           	break;
         case TGDB_QUIT_ABNORMAL:
+			fprintf ( fd, "TGDB_QUIT_ABNORMAL\n" );
+			break;
 		case TGDB_QUIT_NORMAL:
-           break;
-
-        default:
-
-            break;
+			fprintf ( fd, "TGDB_QUIT_NORMAL\n" );
+           	break;
     }
-
-//    switch(com->header) {
-//        case BREAKPOINTS_BEGIN:
-//            fprintf(fd, "TGDB_BREAKPOINTS_BEGIN(%s)\n", com->data);         break;
-//        case BREAKPOINT:
-//            fprintf(fd, "TGDB_BREAKPOINT(%s)\n", com->data);                break;
-//        case BREAKPOINTS_END:
-//            fprintf(fd, "TGDB_BREAKPOINT_END(%s)\n", com->data);            break;
-//        case SOURCE_FILE_UPDATE:
-//            fprintf(fd, "TGDB_SOURCE_FILE_UPDATE(%s)\n", com->data);        break;
-//        case CURRENT_FILE_UPDATE:
-//            fprintf(fd, "TGDB_CURRENT_FILE_UPDATE(%s)\n", com->data);       break;
-//        case LINE_NUMBER_UPDATE:
-//            fprintf(fd, "TGDB_LINE_NUMBER_UPDATE(%s)\n", com->data);        break;
-//        case SOURCES_START:
-//            fprintf(fd, "TGDB_SOURCES_START(%s)\n", com->data);             break;
-//        case SOURCE_FILE:
-//            fprintf(fd, "TGDB_SOURCE_FILE(%s)\n", com->data);               break;
-//        case SOURCES_END:
-//            fprintf(fd, "TGDB_SOURCES_END(%s)\n", com->data);               break;
-//        case SOURCES_DENIED:
-//            fprintf(fd, "TGDB_SOURCES_DENIED(%s)\n", com->data);            break;
-//        case ABSOLUTE_SOURCE_ACCEPTED:
-//            fprintf(fd, "TGDB_ABSOLUTE_SOURCE_ACCEPTED(%s)\n", com->data);  break;
-//        case ABSOLUTE_SOURCE_DENIED:
-//            fprintf(fd, "TGDB_ABSOLUTE_SOURCE_DENIED(%s)\n", com->data);    break;
-//        case QUIT:
-//            fprintf(fd, "TGDB_QUIT(%s)\n", com->data);                      break;
-//        default:
-//            fprintf(fd, "%s:%d ERROR TGDB_UNKNOWN\n", __FILE__, __LINE__);  break;
-//    }
 }
 
 static int tgdb_breakpoint_free ( void *data ) {
@@ -167,11 +147,12 @@ void tgdb_delete_command(void *item){
 			struct tgdb_list *list = (struct tgdb_list *)com->data;
 
 			tgdb_list_free ( list, tgdb_breakpoint_free );
-           	break;
+			break;
 		}
         case TGDB_UPDATE_FILE_POSITION:
 		{
-			struct tgdb_file_position *tfp = (struct tgdb_file_position *)com->data;
+			struct tgdb_file_position *tfp = 
+					(struct tgdb_file_position *)com->data;
 
 			string_free ( tfp->absolute_path ), 
 			tfp->absolute_path = NULL;
@@ -180,22 +161,34 @@ void tgdb_delete_command(void *item){
 
 			free ( tfp );
 			tfp = NULL;
-
 			break;
 		}
         case TGDB_UPDATE_SOURCE_FILES:
-            {
-				struct tgdb_list *list = ( struct tgdb_list *) com->data;
-				tgdb_list_free ( list, tgdb_source_files_free );
-            }
+		{
+			struct tgdb_list *list = ( struct tgdb_list *) com->data;
+			tgdb_list_free ( list, tgdb_source_files_free );
+			break;
+		}
         case TGDB_SOURCES_DENIED:
+			/* Nothing to do */
+			break;
         case TGDB_ABSOLUTE_SOURCE_ACCEPTED:
         case TGDB_ABSOLUTE_SOURCE_DENIED:
+		{
+		   struct string *s = ( struct string * ) com->data;
+		   string_free ( s );
+		   s = NULL;
+		   break;
+		}
         case TGDB_DISPLAY_UPDATE:
+			/* Nothing to do */
+			break;
         case TGDB_QUIT_ABNORMAL:
+			/* Nothing to do */
+			break;
 		case TGDB_QUIT_NORMAL:
-        default:
-            break;
+			/* Nothing to do */
+			break;
     }
   
     free(com);
