@@ -22,10 +22,6 @@
 #include <sys/stat.h>
 #endif
 
-#if HAVE_LIMITS_H
-#include <limits.h>
-#endif /* HAVE_LIMITS_H */
-
 #if HAVE_SIGNAL_H
 #include <signal.h>
 #endif /* HAVE_SIGNAL_H */
@@ -40,10 +36,10 @@
 #define MAXLINE 4096
 
 int fs_util_is_valid ( const char *dir ) {
-    char actual_dir[PATH_MAX];
+    char actual_dir[FSUTIL_PATH_MAX];
 #ifdef HAVE_CYGWIN
     extern void cygwin_conv_to_full_win32_path(const char *path, char *win32_path);
-    char cygwin_actual_dir[PATH_MAX];
+    char cygwin_actual_dir[FSUTIL_PATH_MAX];
 #endif
 
     if(dir == NULL) {
@@ -76,12 +72,12 @@ int fs_util_is_valid ( const char *dir ) {
 
 
 int fs_util_create_dir ( const char *dir ) {
-    char actual_dir[PATH_MAX];
+    char actual_dir[FSUTIL_PATH_MAX];
     struct stat st;
 
 #ifdef HAVE_CYGWIN
     extern void cygwin_conv_to_full_win32_path(const char *path, char *win32_path);
-    char cygwin_actual_dir[PATH_MAX];
+    char cygwin_actual_dir[FSUTIL_PATH_MAX];
 #endif
 
     if(dir == NULL) {
@@ -124,7 +120,7 @@ int fs_util_create_dir ( const char *dir ) {
 }
 
 int fs_util_create_dir_in_base ( const char *base, const char *dirname ) {
-    char dir[PATH_MAX];
+    char dir[FSUTIL_PATH_MAX];
 
     /* Make surr the directory is valid */
     if ( !fs_util_is_valid ( base ) ) {
@@ -137,7 +133,7 @@ int fs_util_create_dir_in_base ( const char *base, const char *dirname ) {
 }
 
 void fs_util_get_path ( const char *base, const char *name, char *path ) {
-    char dir[PATH_MAX];
+    char dir[FSUTIL_PATH_MAX];
 
     sprintf( dir, "%s/%s", base, name );
 

@@ -26,10 +26,6 @@
 #include <sys/stat.h>
 #endif
 
-#if HAVE_LIMITS_H
-#include <limits.h>
-#endif /* HAVE_LIMITS_H */
-
 #if HAVE_SIGNAL_H
 #include <signal.h>
 #endif /* HAVE_SIGNAL_H */
