@@ -2,7 +2,7 @@
 
 $LINE_NUMBER = 0;
 open ( FILE, "../../README" ) or die "Can't open file for reading ../../README";
-open ( OUT,  ">helptext.h" ) or die "Can't open file for writing helptext.h" ;
+open ( OUT,  ">../include/helptext.h" ) or die "Can't open file for writing helptext.h" ;
 
 print OUT "#ifndef __HELPTEXT_H__\n";
 print OUT "#define __HELPTEXT_H__\n";

@@ -1,3 +1,12 @@
+06/22/2003 Bob Rossi <bob_rossi@cox.net>
+
+	* include/helptext.h: updating using ht.pl.
+	* src/ht.pl: Make it generate include/helptext.h instead of src/helptext.h
+
+06/21/2003 Bob Rossi <bob_rossi@cox.net>
+
+	* command_lexer.h: Add EOL to enumeration. Fix compile error.
+
 06/21/2003 Peter Kovacs <peter@kovax.org>
 
     * command_lexer.l: Return EOL token when scanning \n\r combinations
