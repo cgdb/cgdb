@@ -316,10 +316,10 @@ int invoke_pty_process(
             err_msg("(%s:%d) execvp failed", __FILE__, __LINE__);
             err_msg("(%s:%d) %s is not in path", __FILE__, __LINE__, name);
             pty_free_memory(slavename, *masterfd, argc, local_argv);
-            return -1;
+            exit(-1);
         }
 
-        return -1;
+        exit(-1);
     } // end if 
 
     xclose(pin[0]);

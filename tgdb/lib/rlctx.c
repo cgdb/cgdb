@@ -88,6 +88,22 @@ struct rlctx *rlctx_init(const char *home_dir, const char *unique_id) {
         return NULL;
     }
 
+    /* Verify that the child started, by reading a byte */
+    {
+        char c;
+        if ( read(n->mfd, &c, 1) != 1 ) {
+            /* This means that the process didn't start */
+            err_msg("%s:%d read error", __FILE__, __LINE__);
+            fprintf(stderr, "*************************************************\n");
+            fprintf(stderr, "Error: rlctx_prog failed to start via execvp.\n");
+            fprintf(stderr, "This is probably becuase it is not in your path.\n");
+            fprintf(stderr, "Please do a ./configure, make and make install.\n");
+            fprintf(stderr, "Then add the install directory to your path.\n");
+            fprintf(stderr, "*************************************************\n");
+            return NULL;
+        }
+    }
+
     n->rlctx_com = string_init();
     n->command_callback     = NULL;
     n->completion_callback  = NULL;
@@ -104,11 +120,11 @@ struct rlctx *rlctx_init(const char *home_dir, const char *unique_id) {
 }
 
 int rlctx_close(struct rlctx *rl) {
-    if ( rl->save_history)
+    if ( rl && rl->save_history)
         rlctx_write_history(rl);
 
     /* Can only close the slavename when the process is dead */
-    if ( tgdb_util_pty_free_process(&rl->mfd, rl->tty_name) == -1 ) {
+    if ( rl && tgdb_util_pty_free_process(&rl->mfd, rl->tty_name) == -1 ) {
         err_msg("%s:%d tgdb_util_free_tty error", __FILE__, __LINE__);
         return -1;
     }
@@ -150,6 +166,16 @@ static int rlctx_send_char_internal(int fd, char c) {
 }
 
 int rlctx_send_char(struct rlctx *rl, char c) {
+    /* This is important.
+     * Readline will not run a command entered during reverse-search-history
+     * if '\n' is sent to it. It will only select the command. 
+     *
+     * Readline has to recieve '\r' to select and run the command. If a command
+     * is not run then libtgdb does not function properly.
+     */
+    if ( c == '\n' )
+        c == '\r';
+
     return rlctx_send_char_internal(rl->mfd, c);
 }
 

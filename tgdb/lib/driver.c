@@ -192,7 +192,7 @@ int main(int argc, char **argv){
 
     if ( tgdb_start(NULL, argc-1, argv+1, &gdb_fd, &child_fd, &tgdb_rlctx) == -1 ) {
         err_msg("%s:%d tgdb_start error\n", __FILE__, __LINE__);
-        return -1;
+        goto driver_end;
     }
 
     q = queue_init();
@@ -201,6 +201,8 @@ int main(int argc, char **argv){
 
     if(tgdb_shutdown() == -1)
         err_msg("%s:%d -> could not shutdown\n", __FILE__, __LINE__);
+
+driver_end:
 
     if ( tty_reset(STDIN_FILENO) == -1 )
         err_msg("%s:%d tty_reset error\n", __FILE__, __LINE__);

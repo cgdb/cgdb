@@ -301,6 +301,9 @@ static int rlctx_setup_signals(void) {
 int main(int argc, char **argv) {
     int fd = atoi(argv[1]);
 
+    /* Write a single byte to tell caller that this program was started */
+    fprintf(stderr, "\032");
+
     command = string_init();
 
     if ( rlctx_setup_signals() == -1 ) {
