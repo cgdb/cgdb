@@ -29,6 +29,7 @@ Steps for releasing a new CGDB version:
     * go to admin, then edit/release files
 	* you should be able to put whats new in the NEWS file into the
 	  release notes.
+	* Copy new README file into readme.txt
 
 6.  Download and test the new version from sourceforge.
 

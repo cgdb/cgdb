@@ -1,6 +1,8 @@
 07/15/2003 Bob Rossi <bob@brasko.net>
 
 	* release-todo.txt: Adding the 'cvs tag' command to list.
+	Adding the README file to the website.
+	* README: Removing the tabs from the README file
 
 version 0.3.3 (07/15/2003):
 

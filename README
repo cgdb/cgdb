@@ -23,8 +23,8 @@ Quick Reference
     ^b          -> up a page
     ^u          -> up 1/2 a page
     page down   -> down a page
-	^f          -> down a page
-	^d          -> down 1/2 a page
+    ^f          -> down a page
+    ^d          -> down 1/2 a page
     gg          -> top of file
     G           -> bottom of file
     /           -> search
