@@ -129,6 +129,17 @@ AM_CFLAGS = -g -Wall \
 noinst_LIBRARIES = librlctx.a
 librlctx_a_SOURCES = rlctx.c rlctx_main.c
 librlctx_a_DEPENDENCIES = ../../util/src ../../adt/src
+
+# Installs the driver programs into progs directory
+noinst_bin_PROGRAMS = rlctx_driver
+noinst_bindir = $(top_srcdir)/progs
+
+# This is the input driver
+rlctx_driver_LDFLAGS = -L. -L../../util/src -L../../rlctx/src -L../../adt/src
+rlctx_driver_LDADD = -lrlctx -ladt -lutil
+rlctx_driver_SOURCES = rlctx_driver.c
+rlctx_driver_DEPENDENCIES = ../../util/src ../../rlctx/src ../../adt/src
+rlctx_driver_CFLAGS = $(AM_CFLAGS)
 subdir = various/rlctx/src
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
@@ -139,18 +150,25 @@ librlctx_a_AR = $(AR) cru
 librlctx_a_LIBADD =
 am_librlctx_a_OBJECTS = rlctx.$(OBJEXT) rlctx_main.$(OBJEXT)
 librlctx_a_OBJECTS = $(am_librlctx_a_OBJECTS)
+noinst_bin_PROGRAMS = rlctx_driver$(EXEEXT)
+PROGRAMS = $(noinst_bin_PROGRAMS)
+
+am_rlctx_driver_OBJECTS = rlctx_driver-rlctx_driver.$(OBJEXT)
+rlctx_driver_OBJECTS = $(am_rlctx_driver_OBJECTS)
 
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
-@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/rlctx.Po ./$(DEPDIR)/rlctx_main.Po
+@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/rlctx.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/rlctx_driver-rlctx_driver.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/rlctx_main.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES = $(librlctx_a_SOURCES)
+DIST_SOURCES = $(librlctx_a_SOURCES) $(rlctx_driver_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in
-SOURCES = $(librlctx_a_SOURCES)
+SOURCES = $(librlctx_a_SOURCES) $(rlctx_driver_SOURCES)
 
 all: all-am
 
@@ -170,6 +188,34 @@ librlctx.a: $(librlctx_a_OBJECTS) $(librlctx_a_DEPENDENCIES)
 	-rm -f librlctx.a
 	$(librlctx_a_AR) librlctx.a $(librlctx_a_OBJECTS) $(librlctx_a_LIBADD)
 	$(RANLIB) librlctx.a
+noinst_binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
+install-noinst_binPROGRAMS: $(noinst_bin_PROGRAMS)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(noinst_bindir)
+	@list='$(noinst_bin_PROGRAMS)'; for p in $$list; do \
+	  p1=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
+	  if test -f $$p \
+	  ; then \
+	    f=`echo "$$p1" | sed 's,^.*/,,;$(transform);s/$$/$(EXEEXT)/'`; \
+	   echo " $(INSTALL_PROGRAM_ENV) $(noinst_binPROGRAMS_INSTALL) $$p $(DESTDIR)$(noinst_bindir)/$$f"; \
+	   $(INSTALL_PROGRAM_ENV) $(noinst_binPROGRAMS_INSTALL) $$p $(DESTDIR)$(noinst_bindir)/$$f || exit 1; \
+	  else :; fi; \
+	done
+
+uninstall-noinst_binPROGRAMS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(noinst_bin_PROGRAMS)'; for p in $$list; do \
+	  f=`echo "$$p" | sed 's,^.*/,,;s/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/'`; \
+	  echo " rm -f $(DESTDIR)$(noinst_bindir)/$$f"; \
+	  rm -f $(DESTDIR)$(noinst_bindir)/$$f; \
+	done
+
+clean-noinst_binPROGRAMS:
+	-test -z "$(noinst_bin_PROGRAMS)" || rm -f $(noinst_bin_PROGRAMS)
+rlctx_driver-rlctx_driver.$(OBJEXT): rlctx_driver.c
+rlctx_driver$(EXEEXT): $(rlctx_driver_OBJECTS) $(rlctx_driver_DEPENDENCIES) 
+	@rm -f rlctx_driver$(EXEEXT)
+	$(LINK) $(rlctx_driver_LDFLAGS) $(rlctx_driver_OBJECTS) $(rlctx_driver_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT) core *.core
@@ -178,6 +224,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rlctx.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rlctx_driver-rlctx_driver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rlctx_main.Po@am__quote@
 
 distclean-depend:
@@ -204,6 +251,28 @@ distclean-depend:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(COMPILE) -c `if test -f '$<'; then $(CYGPATH_W) '$<'; else $(CYGPATH_W) '$(srcdir)/$<'`
+
+rlctx_driver-rlctx_driver.o: rlctx_driver.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rlctx_driver_CFLAGS) $(CFLAGS) -MT rlctx_driver-rlctx_driver.o -MD -MP -MF "$(DEPDIR)/rlctx_driver-rlctx_driver.Tpo" \
+@am__fastdepCC_TRUE@	  -c -o rlctx_driver-rlctx_driver.o `test -f 'rlctx_driver.c' || echo '$(srcdir)/'`rlctx_driver.c; \
+@am__fastdepCC_TRUE@	then mv "$(DEPDIR)/rlctx_driver-rlctx_driver.Tpo" "$(DEPDIR)/rlctx_driver-rlctx_driver.Po"; \
+@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/rlctx_driver-rlctx_driver.Tpo"; exit 1; \
+@am__fastdepCC_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='rlctx_driver.c' object='rlctx_driver-rlctx_driver.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/rlctx_driver-rlctx_driver.Po' tmpdepfile='$(DEPDIR)/rlctx_driver-rlctx_driver.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rlctx_driver_CFLAGS) $(CFLAGS) -c -o rlctx_driver-rlctx_driver.o `test -f 'rlctx_driver.c' || echo '$(srcdir)/'`rlctx_driver.c
+
+rlctx_driver-rlctx_driver.obj: rlctx_driver.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rlctx_driver_CFLAGS) $(CFLAGS) -MT rlctx_driver-rlctx_driver.obj -MD -MP -MF "$(DEPDIR)/rlctx_driver-rlctx_driver.Tpo" \
+@am__fastdepCC_TRUE@	  -c -o rlctx_driver-rlctx_driver.obj `if test -f 'rlctx_driver.c'; then $(CYGPATH_W) 'rlctx_driver.c'; else $(CYGPATH_W) '$(srcdir)/rlctx_driver.c'`; \
+@am__fastdepCC_TRUE@	then mv "$(DEPDIR)/rlctx_driver-rlctx_driver.Tpo" "$(DEPDIR)/rlctx_driver-rlctx_driver.Po"; \
+@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/rlctx_driver-rlctx_driver.Tpo"; exit 1; \
+@am__fastdepCC_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='rlctx_driver.c' object='rlctx_driver-rlctx_driver.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/rlctx_driver-rlctx_driver.Po' tmpdepfile='$(DEPDIR)/rlctx_driver-rlctx_driver.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rlctx_driver_CFLAGS) $(CFLAGS) -c -o rlctx_driver-rlctx_driver.obj `if test -f 'rlctx_driver.c'; then $(CYGPATH_W) 'rlctx_driver.c'; else $(CYGPATH_W) '$(srcdir)/rlctx_driver.c'`
 uninstall-info-am:
 
 ETAGS = etags
@@ -291,9 +360,10 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(LIBRARIES)
+all-am: Makefile $(LIBRARIES) $(PROGRAMS)
 
 installdirs:
+	$(mkinstalldirs) $(DESTDIR)$(noinst_bindir)
 
 install: install-am
 install-exec: install-exec-am
@@ -321,7 +391,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-noinstLIBRARIES mostlyclean-am
+clean-am: clean-generic clean-noinstLIBRARIES clean-noinst_binPROGRAMS \
+	mostlyclean-am
 
 distclean: distclean-am
 
@@ -336,7 +407,7 @@ info: info-am
 
 info-am:
 
-install-data-am:
+install-data-am: install-noinst_binPROGRAMS
 
 install-exec-am:
 
@@ -362,18 +433,19 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-info-am
+uninstall-am: uninstall-info-am uninstall-noinst_binPROGRAMS
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
-	clean-noinstLIBRARIES ctags distclean distclean-compile \
-	distclean-depend distclean-generic distclean-tags distdir dvi \
-	dvi-am info info-am install install-am install-data \
-	install-data-am install-exec install-exec-am install-info \
-	install-info-am install-man install-strip installcheck \
+	clean-noinstLIBRARIES clean-noinst_binPROGRAMS ctags distclean \
+	distclean-compile distclean-depend distclean-generic \
+	distclean-tags distdir dvi dvi-am info info-am install \
+	install-am install-data install-data-am install-exec \
+	install-exec-am install-info install-info-am install-man \
+	install-noinst_binPROGRAMS install-strip installcheck \
 	installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
-	uninstall-am uninstall-info-am
+	uninstall-am uninstall-info-am uninstall-noinst_binPROGRAMS
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

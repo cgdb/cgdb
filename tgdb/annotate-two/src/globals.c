@@ -68,15 +68,25 @@ void global_reset_info_source_started(void){
 
  /* Lists a file */
 static unsigned short list_started = FALSE;
+static unsigned short list_had_error = FALSE;
 
 void global_set_start_list(void){
    list_started = TRUE;
+   list_had_error = FALSE;
 }
 
 int global_has_list_started(void){
    return list_started;
 }
 
-void global_reset_list_started(void){
+void global_list_finished ( void ){
    list_started = FALSE;
+}
+
+unsigned short global_list_had_error ( void ) {
+    return list_had_error;
+}
+
+void global_set_list_error ( unsigned short error ) {
+    list_had_error = error;
 }

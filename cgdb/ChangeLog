@@ -1,3 +1,8 @@
+05/01/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * cgdb.c: tgdb interface changed. Removing old call to tgdb_init and 
+    tgdb_start and calling only tgdb_init with the correct parameters.
+
 version 0.3.1 (04/28/2003):
 
 04/27/2003 Bob Rossi <bob_rossi@cox.net>

@@ -110,11 +110,22 @@ static void stdin_input(int fd) {
 
     for ( i = 0; i < size; i++ ) {
         /* For testing only */
-        /*if ( command[i] == '8' )  {
-            tgdb_send("next", 2);
+        if ( command[i] == '8' )  {
+//            tgdb_end("break driver.c:21", 2);
+            tgdb_get_sources( );
             continue;
-        }*/
+        } 
+        if ( command[i] == '9' )  {
+//            tgdb_end("break driver.c:21", 2);
+            tgdb_get_source_absolute_filename ( "/home/bob/cvs/cgdb/tgdb/tgdb-base/src/test.c" );
+            continue;
+        } 
         
+        if ( command[i] == '0' )  {
+//            tgdb_end("break driver.c:21", 2);
+            tgdb_get_source_absolute_filename ( "afjldkafsd.h" );
+            continue;
+        } 
         tgdb_send_input(command[i]);
     }
 }
@@ -179,7 +190,7 @@ int main(int argc, char **argv){
    
     int gdb_fd, child_fd, tgdb_rlctx;
 
-#if 0
+#if 1
    int c;
    read(0, &c ,1);
 #endif
@@ -187,9 +198,7 @@ int main(int argc, char **argv){
     if ( tty_cbreak(STDIN_FILENO) == -1 )
         err_msg("%s:%d tty_cbreak error\n", __FILE__, __LINE__);
 
-    tgdb_init();
-
-    if ( tgdb_start(NULL, argc-1, argv+1, &gdb_fd, &child_fd, &tgdb_rlctx) == -1 ) {
+    if ( tgdb_init(NULL, argc-1, argv+1, &gdb_fd, &child_fd, &tgdb_rlctx) == -1 ) {
         err_msg("%s:%d tgdb_start error\n", __FILE__, __LINE__);
         goto driver_end;
     }

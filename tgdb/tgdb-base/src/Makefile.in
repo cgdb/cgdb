@@ -132,7 +132,8 @@ noinst_LIBRARIES = libtgdb.a
 
 libtgdb_a_SOURCES = \
 tgdb.c \
-types.c
+types.c \
+tgdb_interface.c
 
 
 noinst_bin_PROGRAMS = tgdb_driver
@@ -167,7 +168,8 @@ LIBRARIES = $(noinst_LIBRARIES)
 
 libtgdb_a_AR = $(AR) cru
 libtgdb_a_LIBADD =
-am_libtgdb_a_OBJECTS = tgdb.$(OBJEXT) types.$(OBJEXT)
+am_libtgdb_a_OBJECTS = tgdb.$(OBJEXT) types.$(OBJEXT) \
+	tgdb_interface.$(OBJEXT)
 libtgdb_a_OBJECTS = $(am_libtgdb_a_OBJECTS)
 noinst_bin_PROGRAMS = tgdb_driver$(EXEEXT)
 PROGRAMS = $(noinst_bin_PROGRAMS)
@@ -179,7 +181,7 @@ DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
 @AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/driver.Po ./$(DEPDIR)/tgdb.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/types.Po
+@AMDEP_TRUE@	./$(DEPDIR)/tgdb_interface.Po ./$(DEPDIR)/types.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
@@ -242,6 +244,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/driver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tgdb.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tgdb_interface.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/types.Po@am__quote@
 
 distclean-depend:

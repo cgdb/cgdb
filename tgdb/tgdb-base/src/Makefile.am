@@ -10,7 +10,8 @@ noinst_LIBRARIES = libtgdb.a
 
 libtgdb_a_SOURCES = \
 tgdb.c \
-types.c
+types.c \
+tgdb_interface.c
 
 noinst_bin_PROGRAMS = tgdb_driver
 noinst_bindir = $(top_srcdir)/progs

@@ -32,6 +32,8 @@ void global_reset_info_source_started(void);
  /* Lists a file */
 void global_set_start_list(void);
 int global_has_list_started(void);
-void global_reset_list_started(void);
+void global_list_finished ( void );
+unsigned short global_list_had_error ( void );
+void global_set_list_error ( unsigned short error );
 
 #endif

@@ -134,12 +134,10 @@ noinst_LIBRARIES = libannotate_two.a
 libannotate_two_a_SOURCES = \
 a2-tgdb.c \
 annotate.c \
-buffer.c \
 commands.c \
 data.c \
 globals.c \
-state_machine.c \
-tgdb_init.c
+state_machine.c
 
 
 libannotate_two_a_DEPENDENCIES = \
@@ -156,18 +154,16 @@ LIBRARIES = $(noinst_LIBRARIES)
 libannotate_two_a_AR = $(AR) cru
 libannotate_two_a_LIBADD =
 am_libannotate_two_a_OBJECTS = a2-tgdb.$(OBJEXT) annotate.$(OBJEXT) \
-	buffer.$(OBJEXT) commands.$(OBJEXT) data.$(OBJEXT) \
-	globals.$(OBJEXT) state_machine.$(OBJEXT) tgdb_init.$(OBJEXT)
+	commands.$(OBJEXT) data.$(OBJEXT) globals.$(OBJEXT) \
+	state_machine.$(OBJEXT)
 libannotate_two_a_OBJECTS = $(am_libannotate_two_a_OBJECTS)
 
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
 @AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/a2-tgdb.Po ./$(DEPDIR)/annotate.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/buffer.Po ./$(DEPDIR)/commands.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/data.Po ./$(DEPDIR)/globals.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/state_machine.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/tgdb_init.Po
+@AMDEP_TRUE@	./$(DEPDIR)/commands.Po ./$(DEPDIR)/data.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/globals.Po ./$(DEPDIR)/state_machine.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
@@ -203,12 +199,10 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/a2-tgdb.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/annotate.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/buffer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/commands.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/data.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/globals.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/state_machine.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tgdb_init.Po@am__quote@
 
 distclean-depend:
 	-rm -rf ./$(DEPDIR)

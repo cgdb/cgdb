@@ -10,12 +10,13 @@
 #include <string.h>
 #endif /* HAVE_STRING_H */
 
-#include "buffer.h"
+#include "tgdb_interface.h"
 #include "types.h"
+#include "queue.h"
 #include "error.h"
 #include "sys_util.h"
 
-void buffer_free_item( void *item ) {
+void tgdb_interface_free_command( void* item) {
    struct command *com;
    if ( item == NULL ) 
       return;
@@ -27,11 +28,12 @@ void buffer_free_item( void *item ) {
    com = NULL;
 }
 
-struct command *buffer_new_item(    
-        char *ndata, 
+struct command *tgdb_interface_new_command(    
+        const char *ndata, 
         enum buffer_command_type    ncom_type, 
         enum buffer_output_type     nout_type,
-        enum buffer_command_to_run  ncom_to_run) {
+        enum buffer_command_to_run  ncom_to_run,
+        void *client_data) {
 
     struct command *command = ( struct command * ) xmalloc ( sizeof (struct command) );
     if ( ndata != NULL ) {
@@ -41,16 +43,17 @@ struct command *buffer_new_item(
     } else 
         command->data = NULL;
 
-    command->com_type   = ncom_type;
-    command->out_type   = nout_type;
-    command->com_to_run = ncom_to_run;
+    command->com_type       = ncom_type;
+    command->out_type       = nout_type;
+    command->com_to_run     = ncom_to_run;
+    command->client_data    = client_data;
       
     return command;
 }
 
 
-void buffer_print_item ( void *item ) {
-    struct command *i = (struct command *) item;
+void tgdb_interface_print_command ( struct command *item ) {
+    struct command *i = item;
     fprintf(stderr, "ITEM:\n");
     fprintf(stderr, "\tDATA(%s)\n", i->data);
 
@@ -77,20 +80,20 @@ void buffer_print_item ( void *item ) {
     }
 
     switch(i->com_to_run) {
-        case COMMANDS_INFO_SOURCES:
-            fprintf(stderr, "\tCOM_TYPE: COMMANDS_INFO_SOURCES\n");             break;
-        case COMMANDS_INFO_LIST:
-            fprintf(stderr, "\tCOM_TYPE: COMMANDS_INFO_LIST\n");                break;
-        case COMMANDS_INFO_SOURCE_RELATIVE:
-            fprintf(stderr, "\tCOM_TYPE: COMMANDS_INFO_SOURCE_RELATIVE\n");     break;
-        case COMMANDS_INFO_SOURCE_ABSOLUTE:
-            fprintf(stderr, "\tCOM_TYPE: COMMANDS_INFO_SOURCE_ABSOLUTE\n");     break;
-        case COMMANDS_INFO_BREAKPOINTS:
-            fprintf(stderr, "\tCOM_TYPE: COMMANDS_INFO_BREAKPOINTS\n");         break;
-        case COMMANDS_TTY:
-            fprintf(stderr, "\tCOM_TYPE: COMMANDS_INFO_TTY\n");                 break;
-        case COMMANDS_VOID:
-            fprintf(stderr, "\tCOM_TYPE: COMMANDS_INFO_VOID\n");                break;
+//        case ANNOTATE2_COMMANDS_INFO_SOURCES:
+//            fprintf(stderr, "\tCOM_TYPE: ANNOTATE2_COMMANDS_INFO_SOURCES\n");             break;
+//        case ANNOTATE2_COMMANDS_INFO_LIST:
+//            fprintf(stderr, "\tCOM_TYPE: ANNOTATE2_COMMANDS_INFO_LIST\n");                break;
+//        case ANNOTATE2_COMMANDS_INFO_SOURCE_RELATIVE:
+//            fprintf(stderr, "\tCOM_TYPE: ANNOTATE2_COMMANDS_INFO_SOURCE_RELATIVE\n");     break;
+//        case ANNOTATE2_COMMANDS_INFO_SOURCE_ABSOLUTE:
+//            fprintf(stderr, "\tCOM_TYPE: ANNOTATE2_COMMANDS_INFO_SOURCE_ABSOLUTE\n");     break;
+//        case ANNOTATE2_COMMANDS_INFO_BREAKPOINTS:
+//            fprintf(stderr, "\tCOM_TYPE: ANNOTATE2_COMMANDS_INFO_BREAKPOINTS\n");         break;
+//        case ANNOTATE2_COMMANDS_TTY:
+//            fprintf(stderr, "\tCOM_TYPE: ANNOTATE2_COMMANDS_INFO_TTY\n");                 break;
+//        case ANNOTATE2_COMMANDS_VOID:
+//            fprintf(stderr, "\tCOM_TYPE: ANNOTATE2_COMMANDS_INFO_VOID\n");                break;
 
         default:
             fprintf(stderr, "\tCOM_TYPE: ERROR\n");                             break;

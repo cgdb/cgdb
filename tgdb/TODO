@@ -4,15 +4,19 @@ A lot of work to do for cgdb-0.4.0
 
 2. Create a better interface to the front ends
 
-3. Rework tgdb to be able to support multiple types of debugging (annotate,mi)
-   This involves making a better interface to running commands through the
-   debbuger and through readline.
-
-    4. Integrate gdbmi into libtgdb
-
-    5. Make driver use both annotate and gdbmi
+3. Integrate gdbmi stubs into libtgdb
+    The actual integration of gdbmi will be done by 0.5.0
 
 Finished:
+
+Rework tgdb to be able to support multiple types of debugging (annotate,mi)
+This involves making a better interface to running commands through the
+debbuger and through readline.
+
+Make annotate-two use the new architecture. This way, gdbmi will integrate 
+easier. This is done, however, there is still no clear interface between
+annotate and tgdb-base. This needs to be clearly defined before going 
+trying to add gdbmi.
 
 Get configure to only build cgdb, and build the driver programs on request.
 

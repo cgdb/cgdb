@@ -265,12 +265,7 @@ static int create_help_file(void) {
  *  Returns:  -1 on error, 0 on success
  */
 static int start_gdb(int argc, char *argv[]) {
-    if ( tgdb_init() == -1 ) {
-        err_msg("%s:%d tgdb_init error\n", __FILE__, __LINE__);
-        return -1;
-    }
-
-    if ( tgdb_start(debugger_path, argc, argv, &gdb_fd, &tty_fd, &tgdb_readline_fd) == -1 )
+    if ( tgdb_init(debugger_path, argc, argv, &gdb_fd, &tty_fd, &tgdb_readline_fd) == -1 )
         return -1;
 
     return 0;

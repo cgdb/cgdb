@@ -1,3 +1,5 @@
+.
+
 04/30/2003 Bob Rossi <bob_rossi@cox.net>
 
     * Adding include/terminal.h and src/terminal.c: They provide functions to

@@ -24,19 +24,19 @@ static pid_t gdb_pid = 0;
 static int master_tty_fd = -1, slave_tty_fd = -1;
 static char child_tty_name[SLAVE_SIZE];  /* the name of the slave psuedo-termainl */
 
-int gdbmi_tgdb_init(char *debugger, int argc, char **argv, int *gdb, int *child, int *readline){
-    if(( gdb_pid = invoke_debugger(debugger, argc, argv, &gdb_stdin, &gdb_stdout, 1)) == -1 ) {
-        err_msg("(%s:%d) invoke_debugger failed", __FILE__, __LINE__);
-        return -1;
-    }
-
-   if ( util_new_tty(&master_tty_fd, &slave_tty_fd, child_tty_name) == -1){
-      err_msg("%s:%d tgdb_util_new_tty error", __FILE__, __LINE__);
-      return -1;
-   }
-
-   *gdb       = gdb_stdout;
-   *child     = master_tty_fd;
+int gdbmi_tgdb_init(int *readline){
+//    if(( gdb_pid = invoke_debugger(debugger, argc, argv, &gdb_stdin, &gdb_stdout, 1)) == -1 ) {
+//        err_msg("(%s:%d) invoke_debugger failed", __FILE__, __LINE__);
+//        return -1;
+//    }
+//
+//   if ( util_new_tty(&master_tty_fd, &slave_tty_fd, child_tty_name) == -1){
+//      err_msg("%s:%d tgdb_util_new_tty error", __FILE__, __LINE__);
+//      return -1;
+//   }
+//
+//   *gdb       = gdb_stdout;
+//   *child     = master_tty_fd;
 
    return 0;
 }

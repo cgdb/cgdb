@@ -12,12 +12,10 @@ noinst_LIBRARIES = libannotate_two.a
 libannotate_two_a_SOURCES = \
 a2-tgdb.c \
 annotate.c \
-buffer.c \
 commands.c \
 data.c \
 globals.c \
-state_machine.c \
-tgdb_init.c
+state_machine.c
 
 libannotate_two_a_DEPENDENCIES = \
 $(top_srcdir)/various/util/src \

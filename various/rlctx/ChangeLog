@@ -1,3 +1,9 @@
+05/31/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * Makefile.am: Added rlctx_driver program to test rlctx.
+    * rlctx.c: Modified config file reading to use new fs_util libirary.
+               Removed limits.h.
+
 version 0.3.1 (04/28/2003):
 
 04/27/2003 Bob Rossi <bob_rossi@cox.net>

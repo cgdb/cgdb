@@ -17,10 +17,6 @@
 #include "error.h"
 #include "a2-tgdb.h"
 
-static int car_ret_counter = 0;
-static int server_counter = 8;
-static int temp_data_state = 0;
-
 static enum internal_state data_state = VOID;
 
 #define GDB_PROMPT_SIZE 1024
@@ -28,7 +24,8 @@ static char gdb_prompt[GDB_PROMPT_SIZE];
 static char gdb_prompt_last[GDB_PROMPT_SIZE];
 static int gdb_prompt_size = 0;
 
-int COMMAND_TYPED_AT_PROMPT = 0; 
+int COMMAND_TYPED_AT_PROMPT = 0;
+int COMMAND_ALREADY_GIVEN = 0; 
 
 /* Used to determine if the car ret is from readline */
 static enum CAR_RET_STATE {
@@ -40,18 +37,12 @@ enum internal_state data_get_state(void){
    return data_state;
 }
 
-void data_prepare_run_command(void){
-   car_ret_counter = 0;
-   server_counter = 8;
-   temp_data_state = 1;
-}
-
 void data_set_state(enum internal_state state){
    /* if tgdb is at an internal command, than nothing changes that
     * state unless tgdb gets to the prompt annotation. This means that
     * the internal command is done */
-   if(data_state == INTERNAL_COMMAND && state != USER_AT_PROMPT)
-      return;
+   if(data_state == INTERNAL_COMMAND && state != USER_AT_PROMPT )
+       return;
 
    data_state = state;
    switch(data_state){
@@ -60,7 +51,6 @@ void data_set_state(enum internal_state state){
          gdb_prompt_size = 0;
          break;
       case USER_AT_PROMPT:    
-
          /* Null-Terminate the prompt */
          gdb_prompt[gdb_prompt_size] = '\0';  
 
@@ -70,8 +60,8 @@ void data_set_state(enum internal_state state){
             a2_tgdb_change_prompt(gdb_prompt_last);
          }
 
-         commands_set_state(VOID, NULL);
          COMMAND_TYPED_AT_PROMPT = 0;
+         COMMAND_ALREADY_GIVEN = 0;
          global_set_signal_recieved(FALSE);
 
          break;

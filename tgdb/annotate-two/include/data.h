@@ -1,3 +1,13 @@
+/* data:
+ * -----
+ *
+ * This unit recieves all of the data that was not an annotation from gdb.
+ * It gets the data 1 character at a time and passes it along to the
+ * commands unit when necessary.
+ *
+ */
+
+
 #ifndef __DATA_H__
 #define __DATA_H__
 
@@ -36,15 +46,6 @@ enum internal_state data_get_state(void);
  *    n     -  This is the current size of buf.
  */
 void data_process(char a, char *buf, int *n, struct queue *q);
-
-/* This must be called before any command is written to gdb.  */
-void data_prepare_run_command(void);
-
-/* data_user_has_typed: This returns if the user has any characters present
- * at the gdb prompt.
- * Returns: 1 if char's are present, otherwise 0.
- */
-int data_user_has_typed(void);
 
 #ifdef __cplusplus
 }

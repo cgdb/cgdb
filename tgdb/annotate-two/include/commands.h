@@ -2,7 +2,9 @@
 #define __COMMANDS_H__
 
 #include "types.h"
-#include "buffer.h"
+#include "tgdb_interface.h"
+#include "a2-tgdb.h"
+
 
 /* These are the state that an internal command could lead to */
 enum COMMAND_STATE {
@@ -21,7 +23,10 @@ enum COMMAND_STATE {
    /* Related to the 'info source' command */
    INFO_LIST,
    INFO_SOURCE_ABSOLUTE,
-   INFO_SOURCE_RELATIVE
+   INFO_SOURCE_RELATIVE,
+
+   /* Related to tab completion */
+   TAB_COMPLETE
 };
 
 /* commands_init: Initialize the commands unit */
@@ -60,7 +65,21 @@ void commands_set_field_num(int field_num);
 enum COMMAND_STATE commands_get_state(void);
 
 /* runs a simple command, output goes to user  */
-int commands_run_command(int fd, struct command *com);
+/*int commands_run_command(int fd, struct command *com);*/
+
+
+/* commands_issue_command:
+ * -----------------------
+ *  
+ *  This is used by the annotations library to internally issure commands to
+ *  the debugger. It sends a command to tgdb-base.
+ *
+ *  Returns -1 on error, 0 on success
+ */
+int commands_issue_command (
+        enum annotate_commands com, 
+        const char *data,
+        int oob );
 
 /* commands_process: This function recieves the output from gdb when gdb
  *                   is running a command on behalf of this package.
@@ -106,5 +125,33 @@ void commands_send_source_absolute_source_file(struct queue *q);
  *    RETURNS: 1 if there is commands to run, otherwise 0 
  */
 int commands_has_commnands_to_run(void);
+
+/* commands_prepare_for_command:
+ * -----------------------------
+ *
+ *  Prepare's the client for the command COM to be run.
+ *
+ *  com:    The command to be run.
+ *
+ *  Returns: -1 if this command should not be run. 0 otherwise.
+ */
+int commands_prepare_for_command ( struct command *com );
+
+/* commands_finalize_command:
+ * --------------------------
+ *
+ *  This can be called to finalize work when the end of a command is reached.
+ */
+void commands_finalize_command ( struct queue *q );
+
+/* commands_user_ran_command:
+ * --------------------------
+ *
+ * This lets the clients know that the user ran a command.
+ * The client can update itself here if it need to.
+ *
+ * Returns: -1 on error, 0 on success
+ */
+int commands_user_ran_command ( void );
 
 #endif

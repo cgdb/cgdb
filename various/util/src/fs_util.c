@@ -39,76 +39,105 @@
 
 #define MAXLINE 4096
 
-
-static char global_config_dir[PATH_MAX];
-
-char *tgdb_util_get_config_dir(void){
-    return global_config_dir; 
-}
-
-char *tgdb_util_get_config_gdbinit_file(void){
-    static char filename[PATH_MAX];
-    strncpy(filename, global_config_dir, strlen(global_config_dir) + 1);
+int fs_util_is_valid ( char *dir ) {
+    char actual_dir[PATH_MAX];
 #ifdef HAVE_CYGWIN
-    strcat( filename, "\\gdb_init");
-#else
-    strcat( filename, "/gdb_init");
+    extern void cygwin_conv_to_full_win32_path(const char *path, char *win32_path);
+    char cygwin_actual_dir[PATH_MAX];
 #endif
-    return filename;
-}
 
-char *tgdb_util_get_config_gdb_debug_file(void){
-    static char filename[PATH_MAX];
-    strncpy(filename, global_config_dir, strlen(global_config_dir) + 1);
+    if(dir == NULL) {
+        err_msg("%s:%d -> $HOME is not set", __FILE__, __LINE__);
+        return 0;
+    }
+
+   /* Get the directory to check */
 #ifdef HAVE_CYGWIN
-    strcat( filename, "\\tgdb_debug");
-#else
-    strcat( filename, "/tgdb_debug");
+    cygwin_conv_to_full_win32_path(dir, cygwin_actual_dir);
+    strncpy( actual_dir, cygwin_actual_dir, strlen(cygwin_actual_dir) + 1);
+#else 
+    strncpy( actual_dir, dir, strlen(dir) + 1);
 #endif
-    return filename;
+
+    /* Check if directory dir is readable and writeable */
+    if ( access ( actual_dir, R_OK | W_OK ) == -1 ) {
+        if ( errno == ENOENT ) {
+            err_msg("%s:%d directory '%s' is not set", __FILE__, __LINE__, dir);
+            return 0; 
+        }
+
+        err_msg("%s:%d directory '%s' does not have read/write permissions", 
+                __FILE__, __LINE__, dir);
+        return 0;
+   }
+
+    return 1;
 }
 
-int tgdb_util_set_home_dir(void) {
-    char tgdb_config_dir_unix_path[MAXLINE];
-    char homeDir[MAXLINE];
-    char *env = getenv("HOME");
+
+int fs_util_create_dir ( char *dir ) {
+    char actual_dir[PATH_MAX];
     struct stat st;
 
 #ifdef HAVE_CYGWIN
-   char tgdb_config_dir_win_path[MAXLINE];
-   char win32_homedir[MAXLINE];
-   extern void cygwin_conv_to_full_win32_path(const char *path, char *win32_path);
+    extern void cygwin_conv_to_full_win32_path(const char *path, char *win32_path);
+    char cygwin_actual_dir[PATH_MAX];
 #endif
 
-   if(env == NULL)
-      err_quit("%s:%d -> $HOME is not set", __FILE__, __LINE__);
+    if(dir == NULL) {
+        err_msg("%s:%d -> $HOME is not set", __FILE__, __LINE__);
+        return 0;
+    }
 
-   sprintf( tgdb_config_dir_unix_path, "%s/.tgdb", env );
-
+   /* Get the directory to check */
 #ifdef HAVE_CYGWIN
-   cygwin_conv_to_full_win32_path(tgdb_config_dir_unix_path, tgdb_config_dir_win_path);
-   strncpy( tgdb_config_dir_unix_path, tgdb_config_dir_win_path, strlen(tgdb_config_dir_win_path) + 1);
-   cygwin_conv_to_full_win32_path(env, win32_homedir);
-   strncpy( homeDir, win32_homedir, strlen(win32_homedir) + 1);
+    cygwin_conv_to_full_win32_path(dir, cygwin_actual_dir);
+    strncpy( actual_dir, cygwin_actual_dir, strlen(cygwin_actual_dir) + 1);
 #else 
-   strncpy( homeDir, env, strlen(env) + 1);
+    strncpy( actual_dir, dir, strlen(dir) + 1);
 #endif
 
-   /* Check to see if already exists, if does not exist continue */
-   if ( stat( tgdb_config_dir_unix_path, &st ) == -1 && errno == ENOENT ) {
-       /* Create home config directory if does not exist */
-       if ( access( env, R_OK | W_OK ) == -1 )
-           return -1;
+    /* Check to see if already exists, if does not exist continue */
+    if ( !stat( actual_dir, &st ) ) {
+        /* The file exists, see if it is a directory */
+        if ( S_ISDIR ( st.st_mode ) )
+            return 1;
+        else {
+            err_msg("%s:%d file %d is not a directory", __FILE__, __LINE__, actual_dir);
+            return 0;
+        }
+    } else {
+        /* The file does not exist, create it */
+        if ( errno == ENOENT ) {
+            if ( mkdir( actual_dir, 0755 ) == -1 ) {
+                err_msg("%s:%d directory %s could not be made", __FILE__, __LINE__, actual_dir);
+                return 0;
+            } else
+                return 1;
+        }
 
-       if ( mkdir( tgdb_config_dir_unix_path, 0755 ) == -1 )
-           return -1;
-   }
+        /* Error */
+        return 0;
+    }
+
+    return 1;
+}
+
+int fs_util_create_dir_in_base ( char *base, char *dirname ) {
+    char dir[PATH_MAX];
+
+    sprintf( dir, "%s/%s", base, dirname );
+    return fs_util_create_dir ( dir );
+}
+
+void fs_util_get_path ( const char *base, const char *name, char *path ) {
+    char dir[PATH_MAX];
+
+    sprintf( dir, "%s/%s", base, name );
 
 #ifdef HAVE_CYGWIN
-   sprintf( global_config_dir, "%s\\", tgdb_config_dir_unix_path );
-#else
-   sprintf( global_config_dir, "%s/", tgdb_config_dir_unix_path );
+    cygwin_conv_to_full_win32_path(dir, path);
+#else 
+    strncpy( path, dir, strlen(dir) + 1);
 #endif
-
-   return 0;
 }

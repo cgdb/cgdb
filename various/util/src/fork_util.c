@@ -226,12 +226,16 @@ void free_memory(int argc, char *argv[]) {
     free(argv);
 }
 
-int invoke_debugger(char *path, int argc, char *argv[], int *in, int *out, int choice) {
+int invoke_debugger(
+            char *path, 
+            int argc, char *argv[], 
+            int *in, int *out, 
+            int choice, char *filename) {
     pid_t pid;
     const char * const GDB               = "gdb";
     const char * const NW                = "--nw";
     const char * const X                 = "-x";
-    char *F                              = tgdb_util_get_config_gdbinit_file();
+    char *F                              = filename;
     char **local_argv;
     int i, j = 0, extra = 5;
     int pin[2] = { -1, -1 }, pout[2] = { -1, -1 };

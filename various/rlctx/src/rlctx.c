@@ -26,6 +26,10 @@
 #include <stdio.h>
 #endif
 
+#if HAVE_LIMITS_H
+#include <limits.h>     /* This is for PATH_MAX */
+#endif /* HAVE_LIMITS_H */
+
 #include "rlctx.h"
 #include "rlctx_main.h"
 #include "sys_util.h"
@@ -33,6 +37,7 @@
 #include "pseudo.h"
 #include "error.h"
 #include "fork_util.h"
+#include "fs_util.h"
 
 struct rlctx {
     int mfd; /* Master fd */
@@ -59,7 +64,7 @@ struct rlctx *rlctx_init(const char *home_dir, const char *unique_id) {
     struct rlctx *n = (struct rlctx *)xmalloc(sizeof(struct rlctx));
     pid_t pid;
     struct stat st;
-
+    static char rlctx_filename[PATH_MAX];
 
     /* Check that file permisions are correct */
     if ( home_dir == NULL || unique_id == NULL )
@@ -68,11 +73,13 @@ struct rlctx *rlctx_init(const char *home_dir, const char *unique_id) {
         n->save_history = 1;
 
     if ( n->save_history ) {
-        n->config_file = (char *)xmalloc(sizeof(char)*(strlen(home_dir) + strlen(unique_id) + 14));
-        strcpy(n->config_file, home_dir);
-        strcat(n->config_file, "readline-"); /* 9 */
-        strcat(n->config_file, unique_id);
-        strcat(n->config_file, ".dat");      /* 4 and '\0' -> 5 */
+        n->config_file = (char *)xmalloc(sizeof(char)*PATH_MAX);
+
+        strcpy ( rlctx_filename, "readline-" );
+        strcat ( rlctx_filename, unique_id );
+        strcat ( rlctx_filename, ".dat" );
+
+        fs_util_get_path ( home_dir, rlctx_filename, n->config_file );
 
         /* Check to see if already exists, if does not exist continue */
         if ( stat( n->config_file, &st ) == -1 && errno == ENOENT ) {

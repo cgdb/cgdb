@@ -1,6 +1,13 @@
 #ifndef __TGDB_H__
 #define __TGDB_H__
 
+/* tgdb:
+ * -----
+ *
+ *  This is the interface to the gui.
+ *  The gui can call any functions in this interface.
+ */
+
 #ifdef __cplusplus
 extern "C" {
 #endif 
@@ -14,13 +21,6 @@ extern "C" {
 #endif /* HAVE_SYS_TYPES_H */
 
 #include "types.h"
-
-/* tgdb_init: Allows libtgdb to configure itself.
- * Returns: 0 on success or -1 on error.
- * If this function returns -1 then it can not correctly be used 
- * to interface with gdb.
- */
-int tgdb_init(void);
 
 /* tgdb_start: This starts up gdb and returns a fd to gdb's output and to
  *            the childs output. Both fd's should only be used by the library. 
@@ -41,38 +41,54 @@ int tgdb_init(void);
  *
  * RETURNS: 0 on success or -1 on error
  */
-int (*tgdb_start)(char *debugger, int argc, char **argv, 
-                    int *gdb, int *child, int *readline);
+int tgdb_init(
+            char *debugger, 
+            int argc, char **argv, 
+            int *gdb, int *child, int *readline);
 
-/* tgdb_send: Sends a command to the debugger
+/* tgdb_send: 
+ * ----------
  *
- *    command  - the user typed command to send
- *               If line is null, then the '\n' command is assummed.
- *               The command should not have a '\n' at the end.
- *    out_type - if 1, the command will be shown before the output.
- *               if 2, the command will not be shown, just output.
+ *  Sends a command to the debugger
+ *
+ *  command  - The user typed command to send
+ *             If line is null, then the '\n' command is assummed.
+ *             The command should not have a '\n' at the end.
+ *  out_type - if 1, the command will be shown before the output.
+ *             if 2, the command will not be shown, just output.
  *
  * RETURNS: NULL on error else a pointer to a NULL-terminated string
  *          that should be displayed to the user.
  *          This string is statically allocated, so do not free it.
  */
-char *(*tgdb_send)(char *command, int out_type);
+char *tgdb_send(char *command, int out_type);
 
-/* tgdb_send_input: GUI should send every char the user is typing to gdb
+/* tgdb_send_input: 
+ * ----------------
  *
- * c        - Every character typed by the user to gdb.
- * RETURNS: 0 on success or -1 on error
- */
-int (*tgdb_send_input)(char c);
-
-/* tgdb_recv_input: All data returned from this should be displayed.
+ *  All input to the debugger should be passed here.
  *
- * buf        - This buf should be displayed
- * RETURNS: 0 on success or -1 on error
+ *  c - The character to pass to the debugger.
+ *
+ *  Returns: 0 on success or -1 on error
  */
-int (*tgdb_recv_input)(char *buf);
+int tgdb_send_input(char c);
 
-/* tgdb_tty_send: Sends a character to the program being debugged by gdb.
+/* tgdb_recv_input: 
+ * ----------------
+ *
+ *  The output of the debugger can be recieved here.
+ *
+ *  buf - The output of the debugger will be retured in this buffer.
+ *
+ *  Returns: 0 on success or -1 on error
+ */
+int tgdb_recv_input(char *buf);
+
+/* tgdb_tty_send: 
+ * --------------
+ *
+ *  Sends a character to the inferior program.
  *
  *    c     - the character to send
  *
@@ -80,9 +96,12 @@ int (*tgdb_recv_input)(char *buf);
  *          that should be displayed by the GUI in the GDB pane.
  *          This string is statically allocated, so do not free it.
  */
-char *(*tgdb_tty_send)(char c);
+char *tgdb_tty_send(char c);
 
-/* tgdb_recv: Gets output from the debugger and from the library.
+/* tgdb_recv: 
+ * ----------
+ *
+ *  Gets output from the debugger and from the library.
  *      
  *    buf   -  The output from gdb that should be displayed to the user.
  *    n     -  The size of buf.
@@ -94,7 +113,7 @@ char *(*tgdb_tty_send)(char c);
  *          before the calling this function again. The first time
  *          the user can call this function without worrying.
  */
-size_t (*tgdb_recv)(char *buf, size_t n, struct queue *q); 
+size_t tgdb_recv(char *buf, size_t n, struct queue *q); 
 
 /* tgdb_tty_recv: 
  * 
@@ -104,7 +123,7 @@ size_t (*tgdb_recv)(char *buf, size_t n, struct queue *q);
  *
  * RETURNS: the amount of bytes in buf on success or -1 on error
  */
-size_t (*tgdb_tty_recv)(char *buf, size_t n);
+size_t tgdb_tty_recv(char *buf, size_t n);
 
 /* tgdb_new_tty:
  *
@@ -118,7 +137,7 @@ size_t (*tgdb_tty_recv)(char *buf, size_t n);
  *      not whether gdb accepted the tty, since this can only be determined 
  *      when gdb responds, not when the command is given.
  */
-int (*tgdb_new_tty)(void);
+int tgdb_new_tty(void);
 
 /* tgdb_tty_name:
  *
@@ -126,7 +145,7 @@ int (*tgdb_new_tty)(void);
  * to communicate with gdb in regards to the program being debugged.
  * It returns a string that is at most SLAVE_SIZE characters long.
  */
-char *(*tgdb_tty_name)(void);
+char *tgdb_tty_name(void);
 
 /* tgdb_get_sources: Gets a list of source files that make up the program
  * being debugged.
@@ -155,7 +174,7 @@ char* (*tgdb_err_msg)(void);
  *
  * RETURNS: 0 on success or -1 on error
  */
-int (*tgdb_shutdown)(void);
+int tgdb_shutdown(void);
 
 #ifdef __cplusplus
 }

@@ -20,7 +20,6 @@
 #include "data.h"
 #include "globals.h"
 
-
 /* This package looks for annotations coming from gdb's output.
  * The program that is being debugged does not have its ouput pass
  * through here. So only gdb's ouput is filtered here.

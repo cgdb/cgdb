@@ -60,17 +60,7 @@ static int handle_prompt(const char *buf, size_t n, struct queue *q){
       return 0;
    } 
 
-   if(global_has_list_started() == TRUE){
-      global_reset_list_started();
-      commands_list_command_finished(q, 1);
-      return 0;
-   }
-
-   if(global_has_info_source_started() == TRUE ) {
-      global_reset_info_source_started();
-      commands_send_source_absolute_source_file(q);
-      return 0;
-   }
+   commands_finalize_command ( q );
    
    return 0;
 }
@@ -130,12 +120,12 @@ static int handle_error_begin(const char *buf, size_t n, struct queue *q){
 
    /* if the user tried to list a file that does not exist */
    if(global_has_list_started() == TRUE){
-      global_reset_list_started();
+      global_list_finished();
+      global_set_list_error ( TRUE );
       commands_list_command_finished(q, 0);
       return 0;
    }
 
-   data_set_state(POST_PROMPT);  /* TEMPORARY */
    return 0;
 }
 

@@ -11,7 +11,7 @@
 
 #include "types.h"
 
-int gdbmi_tgdb_init(char *debugger, int argc, char **argv, int *gdb, int *child, int *readline);
+int gdbmi_tgdb_init(int *readline);
 int gdbmi_tgdb_shutdown(void);
 int gdbmi_tgdb_run_command(char *com);
 int gdbmi_tgdb_get_source_absolute_filename(char *file);

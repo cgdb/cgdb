@@ -1,3 +1,12 @@
+05/01/2003 Bob Rossi <bob_rossi@cox.net>
+    
+    * First big step at generalizing the protocol used to communicate
+      with gdb and the main loop used to send commands to it.
+      This is a first step at getting multiple types of communication
+      to work with gdb ( annotate 2, gdbmi, possibly even annotate 1).
+      However, since the changes are overwhelming, I will not comment
+      on them.
+
 04/30/2003 Bob Rossi <bob_rossi@cox.net>
 
     * Removed terminal.h & terminal.c: They now live in the libutil
