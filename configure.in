@@ -2,7 +2,7 @@ dnl Process this file with autoconf to produce a configure script.
 AC_INIT(src)
 AC_CONFIG_AUX_DIR(config)
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(cgdb, 0.3.0)
+AM_INIT_AUTOMAKE(cgdb, 0.3.0-cvs)
 AM_MAINTAINER_MODE
 
 dnl Checks for programs.

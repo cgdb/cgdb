@@ -104,9 +104,3 @@ void data_process(char a, char *buf, int *n, struct queue *q){
         case POST_PROMPT:  break;
     } /* end switch */
 }
-
-char *data_get_prompt(void) {
-    if ( gdb_prompt[0] )
-        return gdb_prompt;
-    return "(tgdb) ";
-}
