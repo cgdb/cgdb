@@ -9,11 +9,9 @@ struct kui_sequence_set {
 
 /** Needs doco */
 struct kuictx {
-	/*
 	int stdinfd;
 	struct kui_sequence_set *kui_ss;
 	struct input *ictx;
-	*/
 };
 
 struct kuictx *kui_create(int stdinfd) {
