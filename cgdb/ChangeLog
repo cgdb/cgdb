@@ -1,4 +1,10 @@
-05/01/2003 Bob Rossi <bob_rossi@cox.net>
+06/01/2003 Bob Rossi <bob_rossi@cox.net>
+    
+    * cgdb.c: init_home_dir now uses fs_util interface instead of
+    trying to figure out paths itself.
+    * cgdb.c: create_help_file now also uses fs_util interface.
+
+06/01/2003 Bob Rossi <bob_rossi@cox.net>
 
     * cgdb.c: tgdb interface changed. Removing old call to tgdb_init and 
     tgdb_start and calling only tgdb_init with the correct parameters.

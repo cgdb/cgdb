@@ -1,4 +1,9 @@
-.
+06/01/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * fs_util.h: Changed 'char *' to 'const char *' in prototypes where needed
+    * fs_util.h: Removed invalid return comment in fs_util_get_path
+    * fs_util.h: Added better comment for fs_util_create_dir_in_base
+    * fs_util.c: Changed definitions from 'char *' to 'const char *'
 
 04/30/2003 Bob Rossi <bob_rossi@cox.net>
 

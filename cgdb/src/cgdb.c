@@ -68,6 +68,7 @@
 #include "helptext.h"
 #include "queue.h"
 #include "input.h"
+#include "fs_util.h"
 
 /* --------------- */
 /* Local Variables */
@@ -185,48 +186,19 @@ static void parse_long_options(int *argc, char ***argv) {
  */
 
 static int init_home_dir(void) {
-    char cgdb_config_dir_unix_path[MAXLINE];
-    char homeDir[MAXLINE];
-    char *env = getenv("HOME");
-    struct stat st;
+    /* Get the home directory */
+    char *home_dir = getenv("HOME");
+    const char *cgdb_dir = ".cgdb";
 
-#ifdef HAVE_CYGWIN
-   char cgdb_config_dir_win_path[MAXLINE];
-   char win32_homedir[MAXLINE];
-   extern void cygwin_conv_to_full_win32_path(const char *path, char *win32_path);
-#endif
+    /* Create the config directory */
+    if ( ! fs_util_create_dir_in_base ( home_dir, cgdb_dir ) ) {
+        err_msg("%s:%d fs_util_create_dir_in_base error", __FILE__, __LINE__);
+        return -1; 
+    }
 
-   if(env == NULL)
-      err_quit("%s:%d -> $HOME is not set", __FILE__, __LINE__);
+    fs_util_get_path ( home_dir, cgdb_dir, cgdb_home_dir );
 
-   sprintf( cgdb_config_dir_unix_path, "%s/.cgdb", env );
-
-#ifdef HAVE_CYGWIN
-   cygwin_conv_to_full_win32_path(cgdb_config_dir_unix_path, cgdb_config_dir_win_path);
-   strncpy( cgdb_config_dir_unix_path, cgdb_config_dir_win_path, strlen(cgdb_config_dir_win_path) + 1);
-   cygwin_conv_to_full_win32_path(env, win32_homedir);
-   strncpy( homeDir, win32_homedir, strlen(win32_homedir) + 1);
-#else 
-   strncpy( homeDir, env, strlen(env) + 1);
-#endif
-
-   /* Check to see if already exists, if does not exist continue */
-   if ( stat( cgdb_config_dir_unix_path, &st ) == -1 && errno == ENOENT ) {
-       /* Create home config directory if does not exist */
-       if ( access( env, R_OK | W_OK ) == -1 )
-           return -1;
-
-       if ( mkdir( cgdb_config_dir_unix_path, 0755 ) == -1 )
-           return -1;
-   }
-
-#ifdef HAVE_CYGWIN
-   sprintf( cgdb_home_dir, "%s\\", cgdb_config_dir_unix_path );
-#else
-   sprintf( cgdb_home_dir, "%s/", cgdb_config_dir_unix_path );
-#endif
-
-   return 0;
+    return 0;
 }
 
 /* create_help_file: Creates the file help.txt in $HOME/.cgdb
@@ -238,8 +210,7 @@ static int create_help_file(void) {
    static FILE *fd = NULL;
    char *dashes = NULL;
 
-
-   sprintf(cgdb_help_file, "%shelp.txt", cgdb_home_dir);
+   fs_util_get_path ( cgdb_home_dir, "help.txt", cgdb_help_file );
    
    if ( (fd = fopen(cgdb_help_file, "w")) == NULL)
        return -1;

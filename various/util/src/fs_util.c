@@ -39,7 +39,7 @@
 
 #define MAXLINE 4096
 
-int fs_util_is_valid ( char *dir ) {
+int fs_util_is_valid ( const char *dir ) {
     char actual_dir[PATH_MAX];
 #ifdef HAVE_CYGWIN
     extern void cygwin_conv_to_full_win32_path(const char *path, char *win32_path);
@@ -75,7 +75,7 @@ int fs_util_is_valid ( char *dir ) {
 }
 
 
-int fs_util_create_dir ( char *dir ) {
+int fs_util_create_dir ( const char *dir ) {
     char actual_dir[PATH_MAX];
     struct stat st;
 
@@ -85,7 +85,7 @@ int fs_util_create_dir ( char *dir ) {
 #endif
 
     if(dir == NULL) {
-        err_msg("%s:%d -> $HOME is not set", __FILE__, __LINE__);
+        err_msg("%s:%d dir is NULL", __FILE__, __LINE__);
         return 0;
     }
 
@@ -123,8 +123,14 @@ int fs_util_create_dir ( char *dir ) {
     return 1;
 }
 
-int fs_util_create_dir_in_base ( char *base, char *dirname ) {
+int fs_util_create_dir_in_base ( const char *base, const char *dirname ) {
     char dir[PATH_MAX];
+
+    /* Make surr the directory is valid */
+    if ( !fs_util_is_valid ( base ) ) {
+        err_msg("%s:%d fs_util_is_valid error", __FILE__, __LINE__);
+        return -1;
+    }
 
     sprintf( dir, "%s/%s", base, dirname );
     return fs_util_create_dir ( dir );

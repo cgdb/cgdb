@@ -1,4 +1,9 @@
-05/01/2003 Bob Rossi <bob_rossi@cox.net>
+06/01/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * tgdb.c: tgdb_initialize now uses fs_util in a more usefull way.
+    calling fs_util_create_dir_in_base instead of fs_util_create_dir.
+
+06/01/2003 Bob Rossi <bob_rossi@cox.net>
     
     * First big step at generalizing the protocol used to communicate
       with gdb and the main loop used to send commands to it.

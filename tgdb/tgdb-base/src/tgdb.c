@@ -277,7 +277,7 @@ char *tgdb_send(char *command, int out_type) {
  * return       - 0 on success or -1 on error
  */
 int tgdb_dispatch_command ( struct command *com ) {
-    int ret;
+    int ret = 0;
 
     switch ( com->com_type ) {
         case BUFFER_GUI_COMMAND:
@@ -506,26 +506,15 @@ static int tgdb_initialize ( char *config_dir ) {
     
     /* Get the home directory */
     char *home_dir = getenv("HOME");
-
-
-    if ( !home_dir ) {
-        err_msg("%s:%d HOME environment variable is not set", __FILE__, __LINE__);
-        return -1;
-    }
-
-    /* Checks to see if $HOME is there and is read/write accesible */
-    if ( !fs_util_is_valid ( home_dir ) ) {
-        err_msg("%s:%d fs_util_is_valid error", __FILE__, __LINE__);
-        return -1;
-    }
+    const char *tgdb_dir = ".tgdb";
 
     /* Create the config directory */
-    if ( ! fs_util_create_dir_in_base ( home_dir, ".tgdb" ) ) {
+    if ( ! fs_util_create_dir_in_base ( home_dir, tgdb_dir ) ) {
         err_msg("%s:%d fs_util_create_dir_in_base error", __FILE__, __LINE__);
         return -1; 
     }
 
-    fs_util_get_path ( home_dir, ".tgdb", config_dir );
+    fs_util_get_path ( home_dir, tgdb_dir, config_dir );
 
     return 0;
 }
