@@ -1,3 +1,8 @@
+03/29/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * Fixed all of cgdb's to work with autoconf: All of the files that make up
+    cgdb now test to see if a header is available before it is included.
+
 03/27/2003 Bob Rossi <bob_rossi@cox.net>
 
     * Changed cgdb to version 0.3.0 in cvs.

@@ -1,11 +1,46 @@
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
+#if HAVE_CURSES_H
+#include <curses.h>
+#endif /* HAVE_CURSES_H */
+
+#if HAVE_STDLIB_H 
 #include <stdlib.h>
+#endif  /* HAVE_STDLIB_H */
+
+#if HAVE_STRING_H
 #include <string.h>
+#endif /* HAVE_STRING_H */
+
+#if HAVE_MATH_H
 #include <math.h>
+#endif /* HAVE_MATH_H */
 
 #include "filedlg.h"
 #include "cgdb.h"
 #include "highlight.h"
 #include "input.h"
+
+struct file_buffer {
+   int length;                     /* Number of files in program */
+   char **files;                   /* Array containing file */
+   char *cur_line;                 /* cur line may have unique color */
+   int    max_width;                  /* Width of longest line in file */
+
+   int               sel_line;     /* Current line selected in file dialog */
+   int               sel_col;      /* Current column selected in file dialog */
+
+   int               sel_col_rbeg; /* Current beg column matched in regex */
+   int               sel_col_rend; /* Current end column matched in regex */
+   int               sel_rline;    /* Current line used by regex */
+};
+
+struct filedlg{
+   struct file_buffer    *buf;     /* All of the widget's data ( files ) */
+   WINDOW *win;                    /* Curses window */
+};
 
 static char regex_line[MAX_LINE];       /* The regex the user enters */
 static int regex_line_pos;              /* The index into the current regex */

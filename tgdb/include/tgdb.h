@@ -5,11 +5,13 @@
 extern "C" {
 #endif 
 
-#include <config.h>
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
 
-#ifdef HAVE_SYS_TYPES_H
+#if HAVE_SYS_TYPES_H
 #include <sys/types.h>
-#endif 
+#endif /* HAVE_SYS_TYPES_H */
 
 #include "types.h"
 #include "tgdb_util.h"

@@ -16,8 +16,18 @@ extern "C" {
 #define FALSE 0
 #endif
 
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
+#if HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif /* HAVE_SYS_TYPES_H */
+
+#if HAVE_STDIO_H
 #include <stdio.h>
+#endif
+
 #include "queue.h"
 
 enum INTERFACE_COMMANDS {

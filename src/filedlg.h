@@ -1,26 +1,7 @@
 #ifndef _FILEDLG_H_
 #define _FILEDLG_H_
 
-#include <curses.h>
-
-struct file_buffer {
-   int length;                     /* Number of files in program */
-   char **files;                   /* Array containing file */
-   char *cur_line;                 /* cur line may have unique color */
-   int    max_width;                  /* Width of longest line in file */
-
-   int               sel_line;     /* Current line selected in file dialog */
-   int               sel_col;      /* Current column selected in file dialog */
-
-   int               sel_col_rbeg; /* Current beg column matched in regex */
-   int               sel_col_rend; /* Current end column matched in regex */
-   int               sel_rline;    /* Current line used by regex */
-};
-
-struct filedlg{
-   struct file_buffer    *buf;     /* All of the widget's data ( files ) */
-   WINDOW *win;                    /* Curses window */
-};
+struct filedlg;
 
 /* filedlg_new: Create a new file dialog.
  * ____________

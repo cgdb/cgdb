@@ -1,9 +1,14 @@
-/* From configure */
+#if HAVE_CONFIG_H
 #include "config.h"
+#endif /* HAVE_CONFIG_H */
 
-/* Library includes */
+#if HAVE_STRING_H
 #include <string.h>
+#endif /* HAVE_STRING_H */
+
+#if HAVE_STDLIB_H 
 #include <stdlib.h>
+#endif  /* HAVE_STDLIB_H */
 
 /* Local includes */
 #include "types.h"

@@ -14,8 +14,14 @@
 #ifndef _SOURCES_H_
 #define _SOURCES_H_
 
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
 /* System Includes */
+#if HAVE_CURSES_H
 #include <curses.h>
+#endif /* HAVE_CURSES_H */
 
 /* ----------- */
 /* Definitions */

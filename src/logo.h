@@ -5,8 +5,9 @@
 #ifndef _LOGO_H_
 #define _LOGO_H_
 
-/* System Includes */
+#if HAVE_CURSES_H
 #include <curses.h>
+#endif /* HAVE_CURSES_H */
 
 /* ------------------- */
 /* Function Prototypes */

@@ -1,12 +1,38 @@
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
+#if HAVE_STDLIB_H 
 #include <stdlib.h>
+#endif  /* HAVE_STDLIB_H */
+
+#if HAVE_STRING_H
 #include <string.h>
-#include <stdio.h>
-#include <errno.h>
+#endif /* HAVE_STRING_H */
+
+#if HAVE_STDIO_H
+#include <stdio.h> 
+#endif /* HAVE_STDIO_H */
+
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif  /* HAVE_UNISTD_H */
+
+#if HAVE_SYS_STAT_H
 #include <sys/stat.h>
-#include <sys/types.h>
+#endif
+
+#if HAVE_LIMITS_H
 #include <limits.h>
+#endif /* HAVE_LIMITS_H */
+
+#if HAVE_SIGNAL_H
 #include <signal.h>
+#endif /* HAVE_SIGNAL_H */
+
+#if HAVE_ERRNO_H
+#include <errno.h>
+#endif /* HAVE_ERRNO_H */
 
 #include "a2-tgdb.h"
 #include "tgdb_util.h"

@@ -1,12 +1,19 @@
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
+#if HAVE_STRING_H
+#include <string.h>
+#endif /* HAVE_STRING_H */
+
+#if HAVE_ERRNO_H
+#include <errno.h>
+#endif /* HAVE_ERRNO_H */
+
 #include "rlctx.h"
 #include "util.h"
 #include "types.h"
 #include "string.h"
-
-/* Library includes */
-#include <string.h>
-#include <errno.h>
-
 
 struct rlctx {
     int mfd; /* Master fd */

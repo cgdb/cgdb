@@ -1,18 +1,63 @@
+#if HAVE_CONFIG_H
 #include "config.h"
+#endif /* HAVE_CONFIG_H */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <curses.h>
-#include <term.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/select.h>
-#include <sys/time.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <errno.h>
+#if HAVE_STDIO_H
+#include <stdio.h> 
+#endif /* HAVE_STDIO_H */
+
+#if HAVE_STDARG_H 
 #include <stdarg.h>
+#endif /* HAVE_STDARG_H */
+
+#if HAVE_STDLIB_H 
+#include <stdlib.h>
+#endif  /* HAVE_STDLIB_H */
+
+#if HAVE_CURSES_H
+#include <curses.h>
+#endif /* HAVE_CURSES_H */
+
+#if HAVE_STRING_H
+#include <string.h>
+#endif /* HAVE_STRING_H */
+
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
+#endif /* HAVE_FCNTL_H */
+
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif  /* HAVE_UNISTD_H */
+
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif /* HAVE_SYS_TYPES_H */
+
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
+
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif  /* HAVE_SYS_SELECT_H */
+
+#if HAVE_ERRNO_H
+#include <errno.h>
+#endif /* HAVE_ERRNO_H */
+
+#if HAVE_CTYPE_H
 #include <ctype.h>
+#endif
+
+/* term.h prototypes */
+extern int tgetent();
+extern int tgetflag();
+extern int tgetnum();
+extern char *tgetstr();
+extern int tputs();
+extern char *tgoto();
+
 #include "util.h"
 #include "input.h"
 #include "error.h"
@@ -344,7 +389,7 @@ static void import_keyseqs(void) {
 int input_read(int fd, int block) {
     char c;
     int ret;
-    int flag;
+    int flag = 0;
 
 #if defined(HAVE_SELECT)
     fd_set readfds, exceptfds;

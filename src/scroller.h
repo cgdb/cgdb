@@ -10,7 +10,13 @@
 #define _SCROLLER_H_
 
 /* Local Includes */
+#if HAVE_CONFIG_H
 #include "config.h"
+#endif /* HAVE_CONFIG_H */
+
+#if HAVE_CURSES_H
+#include <curses.h>
+#endif /* HAVE_CURSES_H */
 
 /* --------------- */
 /* Data Structures */

@@ -1,8 +1,27 @@
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
+#if HAVE_STRINGS_H
 #include <string.h>
-#include <stdio.h>
+#endif /* HAVE_STRING_H */
+
+#if HAVE_STDIO_H
+#include <stdio.h> 
+#endif /* HAVE_STDIO_H */
+
+#if HAVE_STDARG_H
 #include <stdarg.h>     /* ANSI C header file */
-#include <stdlib.h>     /* exit ... */
-#include <errno.h>      /* errno */
+#endif /* HAVE_STDARG_H */
+
+#if HAVE_STDLIB_H 
+#include <stdlib.h>
+#endif  /* HAVE_STDLIB_H */
+
+#if HAVE_ERRNO_H
+#include <errno.h>
+#endif /* HAVE_ERRNO_H */
+
 #include "error.h"
 
 #define MAXLINE 4096

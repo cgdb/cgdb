@@ -7,8 +7,6 @@
 #ifndef _CGDB_H_
 #define _CGDB_H_
 
-#include "config.h"
-
 /* ----------- */
 /* Definitions */
 /* ----------- */

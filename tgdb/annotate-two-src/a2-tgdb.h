@@ -1,7 +1,14 @@
 #ifndef __A2_TGDB_H__
 #define __A2_TGDB_H__
 
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif /* HAVE_SYS_TYPES_H */
+
 #include "types.h"
 
 int a2_tgdb_init(char *debugger, int argc, char **argv, int *gdb, int *child, int *readline);

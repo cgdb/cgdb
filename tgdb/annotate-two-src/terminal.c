@@ -1,6 +1,19 @@
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
+#if HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
+#endif /* HAVE_SYS_IOCTL_H */
+
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif  /* HAVE_UNISTD_H */
+
+#if HAVE_TERMIOS_H
 #include <termios.h>
+#endif /* HAVE_TERMIOS_H */
+
 #include "terminal.h"
 #include "error.h"
 

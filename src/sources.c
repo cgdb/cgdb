@@ -11,15 +11,38 @@
  *
  */
 
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
 /* System Includes */
-#include <curses.h>
+#if HAVE_MATH_H
 #include <math.h>
-#include <stdio.h>
+#endif
+
+#if HAVE_STDIO_H
+#include <stdio.h> 
+#endif /* HAVE_STDIO_H */
+
+#if HAVE_STDLIB_H 
 #include <stdlib.h>
+#endif  /* HAVE_STDLIB_H */
+
+#if HAVE_STRING_H
 #include <string.h>
-#include <sys/types.h>
+#endif /* HAVE_STRING_H */
+
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
+
+#if HAVE_SYS_STAT_H
 #include <sys/stat.h>
+#endif
+
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif  /* HAVE_UNISTD_H */
 
 /* Local Includes */
 #include "highlight.h"

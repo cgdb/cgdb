@@ -104,7 +104,7 @@ stdarg.h stdio.h stdlib.h string.h sys/ioctl.h \
 sys/stat.h sys/time.h sys/types.h unistd.h,,AC_MSG_ERROR)
 
 dnl determine headers for cgdb
-AC_CHECK_HEADERS(ctype.h curses.h limits.h math.h)
+AC_CHECK_HEADERS(ctype.h curses.h limits.h math.h regex.h time.h)
 
 dnl Check for getopt.h, If this is here then getopt_long can be used.
 AC_CHECK_HEADER(getopt.h, AC_DEFINE(HAVE_GETOPT_H, 1, have getopt_long))

@@ -1,10 +1,20 @@
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
+#if HAVE_STDIO_H 
+#include <stdio.h>
+#endif  /* HAVE_STDLIB_H */
+
+#if HAVE_STRING_H
+#include <string.h>
+#endif /* HAVE_STRING_H */
+
 #include "data.h"
 #include "commands.h"
 #include "globals.h"
 #include "io.h"
 #include "error.h"
-#include <stdio.h>
-#include <string.h>
 
 static int car_ret_counter = 0;
 static int server_counter = 8;

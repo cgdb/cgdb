@@ -90,6 +90,9 @@
 /* Define to 1 if you have the <readline/readline.h> header file. */
 #undef HAVE_READLINE_READLINE_H
 
+/* Define to 1 if you have the <regex.h> header file. */
+#undef HAVE_REGEX_H
+
 /* Define to 1 if you have the `select' function. */
 #undef HAVE_SELECT
 
@@ -146,6 +149,9 @@
 
 /* Define to 1 if you have the <termios.h> header file. */
 #undef HAVE_TERMIOS_H
+
+/* Define to 1 if you have the <time.h> header file. */
+#undef HAVE_TIME_H
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H

@@ -1,8 +1,17 @@
 #ifndef __IO_H__
 #define __IO_H__
 
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
+#if HAVE_UNISTD_H
 #include <unistd.h>
-#include <stdio.h>
+#endif  /* HAVE_UNISTD_H */
+
+#if HAVE_STDIO_H
+#include <stdio.h> 
+#endif /* HAVE_STDIO_H */
 
 #define MAX_LINE 4096
 

@@ -1,30 +1,58 @@
 /* cgdb.c:
  * -------
  */
+#if HAVE_CONFIG_H
 #include "config.h"
-/* This include must stay above readline, some readline's don't include it */
-#include <stdio.h> 
+#endif /* HAVE_CONFIG_H */
 
-/* System Includes */
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif /* HAVE_SYS_TYPES_H */
+
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
+#endif /* HAVE_FCNTL_H */
+
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif  /* HAVE_UNISTD_H */
+
+#if HAVE_STDLIB_H 
+#include <stdlib.h>
+#endif  /* HAVE_STDLIB_H */
+
+#if HAVE_STDIO_H
+#include <stdio.h> 
+#endif /* HAVE_STDIO_H */
+
+#if HAVE_CURSES_H
 #include <curses.h>
-#ifdef HAVE_SYS_SELECT_H
-#include <sys/select.h>
-#endif
+#endif /* HAVE_CURSES_H */
+
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
+
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif  /* HAVE_SYS_SELECT_H */
+
+#if HAVE_SYS_STAT_H
 #include <sys/stat.h>
-#include <sys/wait.h>
-#include <stdlib.h>
+#endif
+
+#if HAVE_STRING_H
 #include <string.h>
+#endif /* HAVE_STRING_H */
+
+#if HAVE_ERRNO_H
 #include <errno.h>
+#endif /* HAVE_ERRNO_H */
+
+/* This is for PATH_MAX */
+#if HAVE_LIMITS_H
 #include <limits.h>
+#endif /* HAVE_LIMITS_H */
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
@@ -455,6 +483,7 @@ static int cgdb_resize_term(int fd) {
         err_msg("%s:%d %s: Unreasonable terminal size\n", __FILE__, __LINE__, my_name);
         return -1;
     }
+    return 0;
 }
 
 static void main_loop(void) {

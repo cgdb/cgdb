@@ -1,9 +1,19 @@
-/* From configure */
+#if HAVE_CONFIG_H
 #include "config.h"
+#endif /* HAVE_CONFIG_H */
 
-#include <stdio.h>
+#if HAVE_STDIO_H
+#include <stdio.h> 
+#endif /* HAVE_STDIO_H */
+
+#if HAVE_STRING_H
 #include <string.h>
+#endif /* HAVE_STRING_H */
+
+#if HAVE_STDLIB_H 
 #include <stdlib.h>
+#endif  /* HAVE_STDLIB_H */
+
 #include "state_machine.h"
 #include "annotate.h"
 #include "error.h"

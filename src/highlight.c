@@ -5,14 +5,34 @@
  *
  */
 
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
 /* System Includes */
+#if HAVE_CTYPE_H
 #include <ctype.h>
+#endif /* HAVE_CTYPE_H */
+
+#if HAVE_LIMITS_H
 #include <limits.h>
-#include <curses.h>
+#endif /* HAVE_LIMITS_H */
+
+#if HAVE_STRING_H
 #include <string.h>
+#endif /* HAVE_STRING_H */
+
+#if HAVE_STDLIB_H 
 #include <stdlib.h>
+#endif  /* HAVE_STDLIB_H */
+
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif /* HAVE_SYS_TYPES_H */
+
+#if HAVE_REGEX_H
 #include <regex.h>
+#endif /* HAVE_REGEX_H */
 
 /* Local Includes */
 #include "highlight.h"

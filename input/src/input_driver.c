@@ -1,6 +1,23 @@
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
+#if HAVE_CURSES_H
 #include <curses.h>
-#include <term.h>
+#endif /* HAVE_CURSES_H */
+
+/* term.h prototypes */
+extern int tgetent();
+extern int tgetflag();
+extern int tgetnum();
+extern char *tgetstr();
+extern int tputs();
+extern char *tgoto();
+
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif  /* HAVE_UNISTD_H */
+
 #include "input.h"
 
 int main(int argc, char **argv){

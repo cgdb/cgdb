@@ -1,7 +1,13 @@
 #ifndef __UTIL_H__
 #define __UTIL_H__
 
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
+#if HAVE_STDLIB_H
 #include <stdlib.h>
+#endif /* HAVE_STDLIB_H */
 
 /* These are wrappers for the memory management functions 
  * If a memory allocation fails cgdb will exit

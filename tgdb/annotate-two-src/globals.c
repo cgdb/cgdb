@@ -1,9 +1,13 @@
-/* From configure */
+#if HAVE_CONFIG_H
 #include "config.h"
+#endif /* HAVE_CONFIG_H */
+
+#if HAVE_STRING_H
+#include <string.h>
+#endif /* HAVE_STRING_H */
 
 #include "types.h"
 #include "globals.h"
-#include <string.h>
 
 /* This turns true if tgdb gets a misc prompt. This is so that we do not 
  * send commands to gdb at this point.

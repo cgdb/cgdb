@@ -1,7 +1,20 @@
-#include "util.h"
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
+#if HAVE_STRING_H
 #include <string.h>
+#endif /* HAVE_STRING_H */
+
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif  /* HAVE_UNISTD_H */
+
+#if HAVE_ERRNO_H
 #include <errno.h>
+#endif /* HAVE_ERRNO_H */
+
+#include "util.h"
 
 void *xcalloc(size_t nmemb, size_t size) {
     void *t = calloc(nmemb, size);

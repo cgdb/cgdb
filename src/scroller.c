@@ -6,11 +6,23 @@
  * the scroller.
  */
 
+/* Local Includes */
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
 /* System Includes */
+#if HAVE_CTYPE_H
 #include <ctype.h>
-#include <curses.h>
+#endif
+
+#if HAVE_STDLIB_H 
 #include <stdlib.h>
+#endif  /* HAVE_STDLIB_H */
+
+#if HAVE_STRING_H
 #include <string.h>
+#endif /* HAVE_STRING_H */
 
 /* Local Includes */
 #include "cgdb.h"

@@ -1,3 +1,9 @@
+03/29/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * Fixed all files to work with autoconf: All of the files that make up
+    the input lib now test to see if a header is available before it is 
+    included.
+
 03/27/2003 Bob Rossi <bob_rossi@cox.net>
 
     * Adding an initial list of key alt and alt-shift key bindings

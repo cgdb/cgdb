@@ -1,24 +1,35 @@
-/* From configure */
+#if HAVE_CONFIG_H
 #include "config.h"
+#endif /* HAVE_CONFIG_H */
 
-/* This include must stay above readline, some readline's don't include it */
+#if HAVE_STDIO_H
 #include <stdio.h> 
+#endif /* HAVE_STDIO_H */
+
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
 
 /* Library includes */
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
+
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
+
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+
+#if HAVE_STRING_H
 #include <string.h>
+#endif /* HAVE_STRING_H */
+
+#if HAVE_ERRNO_H
 #include <errno.h>
+#endif /* HAVE_ERRNO_H */
 
 /* Local includes */
 #include "tgdb.h"

@@ -1,12 +1,39 @@
-#include <stdio.h>
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
+#if HAVE_STDIO_H
+#include <stdio.h> 
+#endif /* HAVE_STDIO_H */
+
+#if HAVE_STDARG_H 
 #include <stdarg.h>
+#endif /* HAVE_STDARG_H */
+
+#if HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif /* HAVE_SYS_TYPES_H */
+
+#if HAVE_SYS_STAT_H
 #include <sys/stat.h>
-#include <sys/wait.h>
+#endif
+
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif  /* HAVE_UNISTD_H */
+
+#if HAVE_STRING_H
 #include <string.h>
+#endif /* HAVE_STRING_H */
+
+#if HAVE_STDLIB_H 
 #include <stdlib.h>
+#endif  /* HAVE_STDLIB_H */
+
+#if HAVE_ERRNO_H
 #include <errno.h>
+#endif /* HAVE_ERRNO_H */
+
 #include "io.h"
 #include "error.h"
 #include "globals.h"
