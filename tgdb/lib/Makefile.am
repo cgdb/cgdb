@@ -27,8 +27,10 @@ $(tgdb_srcdir)/annotate-two-src/buffer.c \
 $(tgdb_srcdir)/gdbmi-src/gdbmi_tgdb.c \
 $(tgdb_srcdir)/gdbmi-src/gdbmi_parse.c
 
-EXTRA_PROGRAMS=driver
-bin_PROGRAMS = @BUILD_DRIVER@ rlctx_prog
+#EXTRA_PROGRAMS=driver
+#bin_PROGRAMS = @BUILD_DRIVER@ rlctx_prog
+bin_PROGRAMS = driver rlctx_prog
+
 driver_LDFLAGS = -L.
 driver_LDADD = -ltgdb
 driver_SOURCES = driver.c

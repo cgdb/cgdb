@@ -1,3 +1,10 @@
+04/01/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * Automatically building getch_driver and input_driver: This is done
+    because 'make' seems to be failing to build the programs correctly
+    when they are extra's. Its probably a configure problem that needs to
+    be solved.
+
 03/29/2003 Bob Rossi <bob_rossi@cox.net>
 
     * Fixed all of tgdb's to work with autoconf: All of the files that make up

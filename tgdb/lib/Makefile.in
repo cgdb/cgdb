@@ -151,8 +151,10 @@ $(tgdb_srcdir)/gdbmi-src/gdbmi_tgdb.c \
 $(tgdb_srcdir)/gdbmi-src/gdbmi_parse.c
 
 
-EXTRA_PROGRAMS = driver
-bin_PROGRAMS = @BUILD_DRIVER@ rlctx_prog
+#EXTRA_PROGRAMS=driver
+#bin_PROGRAMS = @BUILD_DRIVER@ rlctx_prog
+bin_PROGRAMS = driver rlctx_prog
+
 driver_LDFLAGS = -L.
 driver_LDADD = -ltgdb
 driver_SOURCES = driver.c
@@ -179,8 +181,7 @@ am_libtgdb_a_OBJECTS = tgdb.$(OBJEXT) tgdb_util.$(OBJEXT) \
 	tgdb_init.$(OBJEXT) buffer.$(OBJEXT) gdbmi_tgdb.$(OBJEXT) \
 	gdbmi_parse.$(OBJEXT)
 libtgdb_a_OBJECTS = $(am_libtgdb_a_OBJECTS)
-EXTRA_PROGRAMS = driver$(EXEEXT)
-bin_PROGRAMS = @BUILD_DRIVER@ rlctx_prog$(EXEEXT)
+bin_PROGRAMS = driver$(EXEEXT) rlctx_prog$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 
 am_driver_OBJECTS = driver.$(OBJEXT)

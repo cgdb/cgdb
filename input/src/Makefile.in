@@ -123,8 +123,9 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 AM_CFLAGS = -Wall -I$(top_srcdir)/tgdb/include -I$(top_srcdir)/input/include
 
-EXTRA_PROGRAMS = input_driver getch_driver
-bin_PROGRAMS = @BUILD_INPUT_DRIVER@
+#EXTRA_PROGRAMS=input_driver getch_driver
+#bin_PROGRAMS = @BUILD_INPUT_DRIVER@
+bin_PROGRAMS = input_driver getch_driver
 input_driver_LDFLAGS = -L ../../tgdb/lib
 input_driver_LDADD = -ltgdb
 input_driver_SOURCES = input_driver.c input.c
@@ -139,8 +140,7 @@ subdir = input/src
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
-EXTRA_PROGRAMS = input_driver$(EXEEXT) getch_driver$(EXEEXT)
-bin_PROGRAMS = @BUILD_INPUT_DRIVER@
+bin_PROGRAMS = input_driver$(EXEEXT) getch_driver$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 
 am_getch_driver_OBJECTS = getch_driver.$(OBJEXT)
