@@ -8,9 +8,11 @@ L       [a-zA-Z_]
 
 #include <stdio.h>
 #include "tokenizer.h"
+//\"(\\.|[^\\"])*\"     { return(TOKENIZER_LITERAL); }
 %}
 
 %x comment
+%x string_literal
 
 %%
 "auto" 					{ return(TOKENIZER_TYPE); }
@@ -101,7 +103,14 @@ L       [a-zA-Z_]
 
 #{L}+					{ return(TOKENIZER_DIRECTIVE); }
 
-L?\"(\\.|[^\\"])*\"     { return(TOKENIZER_LITERAL); }
+\"											{ BEGIN(string_literal); 	return(TOKENIZER_LITERAL);}
+<string_literal>(\\|\\[^\r\n]|[^\\"\r\n])* 	{ return(TOKENIZER_LITERAL); }
+<string_literal>\n          				{ return(TOKENIZER_NEWLINE); }
+<string_literal>\r          				{ return(TOKENIZER_NEWLINE); }
+<string_literal>\r\n        				{ return(TOKENIZER_NEWLINE); }
+<string_literal>\"        					{ BEGIN(INITIAL); 			return(TOKENIZER_LITERAL);}
+
+
 {D}+                { return(TOKENIZER_LITERAL); }
 '.'                { return(TOKENIZER_LITERAL); }
 

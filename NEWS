@@ -1,3 +1,7 @@
+cgdb-0.3.3b
+
+	* Fixed string literal bug where files don't highlight properly in C/C++.
+
 cgdb-0.3.3a
 
 	* Fixed bug in the file dialog window. It would not accept the enter
