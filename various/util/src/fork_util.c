@@ -191,7 +191,7 @@ int util_new_tty(int *masterfd, int *slavefd, char *sname) {
    return 0;
 }
 
-int util_free_tty(int *masterfd, int *slavefd, char *sname) {
+int util_free_tty(int *masterfd, int *slavefd, const char *sname) {
 
    xclose(*masterfd);
    xclose(*slavefd);
@@ -227,7 +227,7 @@ void free_memory(int argc, char *argv[]) {
 }
 
 int invoke_debugger(
-            char *path, 
+            const char *path, 
             int argc, char *argv[], 
             int *in, int *out, 
             int choice, char *filename) {

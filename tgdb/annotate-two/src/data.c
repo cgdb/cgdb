@@ -16,51 +16,59 @@
 #include "io.h"
 #include "error.h"
 #include "a2-tgdb.h"
+#include "sys_util.h"
 
-static enum internal_state data_state = VOID;
 
-#define GDB_PROMPT_SIZE 1024
-static char gdb_prompt[GDB_PROMPT_SIZE];
-static char gdb_prompt_last[GDB_PROMPT_SIZE];
-static int gdb_prompt_size = 0;
+struct data {
+	#define GDB_PROMPT_SIZE 1024
+	enum internal_state data_state;	
+	char gdb_prompt[GDB_PROMPT_SIZE];
+	char gdb_prompt_last[GDB_PROMPT_SIZE];
+	int gdb_prompt_size;
+};
 
-extern command_completed command_completed_callback;
+struct data *data_initialize ( void ) {
+	struct data *d = (struct data *)xmalloc ( sizeof ( struct data ) );
 
-/* Used to determine if the car ret is from readline */
-static enum CAR_RET_STATE {
-   OTHER,
-   WHITE_SPACE
-} local_car_ret = OTHER;
+	d->data_state 		= VOID;
+	d->gdb_prompt_size 	= 0;
 
-enum internal_state data_get_state(void){
-   return data_state;
+	return d;
 }
 
-void data_set_state(enum internal_state state){
+void data_shutdown ( struct data *d ) {
+	free ( d );
+	d = NULL;
+}
+
+enum internal_state data_get_state( struct data *d){
+   return d->data_state;
+}
+
+void data_set_state ( struct annotate_two *a2, enum internal_state state ) {
    /* if tgdb is at an internal command, than nothing changes that
     * state unless tgdb gets to the prompt annotation. This means that
     * the internal command is done */
-   if(data_state == INTERNAL_COMMAND && state != USER_AT_PROMPT )
+   if(a2->data->data_state == INTERNAL_COMMAND && state != USER_AT_PROMPT )
        return;
 
-   data_state = state;
-   switch(data_state){
+   a2->data->data_state = state;
+   switch(a2->data->data_state){
       case VOID:              break;
       case AT_PROMPT:         
-         gdb_prompt_size = 0;
+         a2->data->gdb_prompt_size = 0;
          break;
       case USER_AT_PROMPT:    
          /* Null-Terminate the prompt */
-         gdb_prompt[gdb_prompt_size] = '\0';  
+         a2->data->gdb_prompt[a2->data->gdb_prompt_size] = '\0';  
 
-         if ( strcmp(gdb_prompt, gdb_prompt_last) != 0 ) {
-            strcpy(gdb_prompt_last, gdb_prompt);
+         if ( strcmp(a2->data->gdb_prompt, a2->data->gdb_prompt_last) != 0 ) {
+            strcpy(a2->data->gdb_prompt_last, a2->data->gdb_prompt);
             /* Update the prompt */
-            a2_tgdb_change_prompt(gdb_prompt_last);
+            a2_change_prompt(a2, a2->data->gdb_prompt_last);
          }
 
-		 command_completed_callback();
-         global_set_signal_recieved(FALSE);
+		 a2->command_completed_callback();
 
 		 /* This is important, because it resets the commands state.
 		  * With this line not here, if the user hits 'o' from cgdb,
@@ -68,12 +76,11 @@ void data_set_state(enum internal_state state){
 		  * user hits ^c from the gdb window, the error occurs because 
 		  * commands state is INFO_SOURCES instead of VOID.
 		  */
-		 commands_set_state ( VOID, NULL );
+		 commands_set_state ( a2->c, VOID, NULL );
 
          break;
       case POST_PROMPT:    
-            data_state = VOID;
-            local_car_ret = OTHER;
+            a2->data->data_state = VOID;
             break;
       case GUI_COMMAND:    break;
       case INTERNAL_COMMAND: break;
@@ -81,19 +88,19 @@ void data_set_state(enum internal_state state){
    } /* end switch */
 }
 
-void data_process(char a, char *buf, int *n, struct queue *q){
-    switch(data_state){
+void data_process( struct annotate_two *a2, char a, char *buf, int *n, struct queue *q){
+    switch(a2->data->data_state){
         case VOID:    buf[(*n)++] = a;   break;
         case AT_PROMPT:         
-            gdb_prompt[gdb_prompt_size++] = a;  
+            a2->data->gdb_prompt[a2->data->gdb_prompt_size++] = a;  
             buf[(*n)++] = a;
             break;
         case USER_AT_PROMPT:             break;
         case GUI_COMMAND:
         case INTERNAL_COMMAND:
-            if(data_state == INTERNAL_COMMAND)
-                commands_process(a, q);
-            else if(data_state == GUI_COMMAND)
+            if(a2->data->data_state == INTERNAL_COMMAND)
+                commands_process(a2->c, a, q);
+            else if(a2->data->data_state == GUI_COMMAND)
                 buf[(*n)++] = a;
       
             break; /* do nothing */

@@ -584,7 +584,7 @@ char *tgdb_tty_name(void);
  *  containing a list of all the source files. Otherwise the gui will get
  *  back TGDB_SOURCES_DENIED.
  */
-int (*tgdb_get_sources)(void);
+int tgdb_get_sources ( void );
 
 /* tgdb_get_source_absolute_filename:
  * ----------------------------------
@@ -595,7 +595,7 @@ int (*tgdb_get_sources)(void);
  * If this functions succeeds TGDB_ABSOLUTE_SOURCE_ACCEPTED will be returned.
  * Otherwise, TGDB_ABSOLUTE_SOURCE_DENIED gets returned.
  */
-int (*tgdb_get_source_absolute_filename)(char *file);
+int tgdb_get_source_absolute_filename(char *file);
 
 /* tgdb_err_msg: Returns an error message from the last library call that
  *               generated an error message.
@@ -605,7 +605,7 @@ int (*tgdb_get_source_absolute_filename)(char *file);
  * call. If the client desires to keep it they should copy it.
  * If there is no error message, NULL is returned.
  */
-char* (*tgdb_err_msg)(void);
+char* tgdb_err_msg(void);
 
 /*  tgdb_shutdown: Terminates tgdb's library support.
  *

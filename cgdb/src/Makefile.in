@@ -155,7 +155,7 @@ scroller.c \
 sources.c \
 logo.c \
 command_lexer.l \
-commands.c
+cgdbrc.c
 
 
 # links cgdb if common is changed
@@ -178,14 +178,14 @@ PROGRAMS = $(bin_PROGRAMS)
 
 am_cgdb_OBJECTS = cgdb.$(OBJEXT) highlight.$(OBJEXT) interface.$(OBJEXT) \
 	filedlg.$(OBJEXT) scroller.$(OBJEXT) sources.$(OBJEXT) \
-	logo.$(OBJEXT) command_lexer.$(OBJEXT) commands.$(OBJEXT)
+	logo.$(OBJEXT) command_lexer.$(OBJEXT) cgdbrc.$(OBJEXT)
 cgdb_OBJECTS = $(am_cgdb_OBJECTS)
 
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
-@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/cgdb.Po ./$(DEPDIR)/command_lexer.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/commands.Po ./$(DEPDIR)/filedlg.Po \
+@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/cgdb.Po ./$(DEPDIR)/cgdbrc.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/command_lexer.Po ./$(DEPDIR)/filedlg.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/highlight.Po ./$(DEPDIR)/interface.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/logo.Po ./$(DEPDIR)/scroller.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/sources.Po
@@ -242,8 +242,8 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cgdb.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cgdbrc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/command_lexer.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/commands.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/filedlg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/highlight.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/interface.Po@am__quote@

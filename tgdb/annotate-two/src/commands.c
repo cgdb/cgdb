@@ -22,60 +22,107 @@
 #include "ibuf.h"
 #include "a2-tgdb.h"
 #include "rlctx.h"
+#include "queue.h"
+#include "annotate_two.h"
 
-static struct string *absolute_path;
-static struct string *line_number;
+struct commands {
+	struct string *absolute_path;
+	struct string *line_number;
+
+	enum COMMAND_STATE cur_command_state;
+	int cur_field_num;
+
+	/* breakpoint information */
+	struct queue *breakpoint_queue;
+	struct string *breakpoint_string;
+	int breakpoint_table;
+	int breakpoint_enabled;
+	int breakpoint_started;
+
+	/* 'info source' information */
+	struct string *info_source_string;
+	int info_source_ready;
+	char last_info_source_requested[MAXLINE];
+
+	/* 'info sources' information */
+	int sources_ready;
+	struct string *info_sources_string;
+	struct queue *source_files; /* The queue of current files */
+
+	/* String that is output by gdb to get the absolute path to a file */
+	const char *source_prefix;
+	int source_prefix_length;
+
+	/* String that is output by gdb to get the relative path to a file */
+	const char *source_relative_prefix;
+	int source_relative_prefix_length;
+
+	/* This is used to store all of the entries that are possible to
+	 * tab complete. It should be blasted each time the completion
+	 * is run, populated, and then parsed.
+	 */
+	//static struct queue *tab_completion_entries = NULL;
+	char last_tab_completion_command[MAXLINE];
+};
 
 
-static enum COMMAND_STATE cur_command_state = VOID_COMMAND;
-static int cur_field_num = 0;
+struct commands *commands_initialize(void) {
+	struct commands *c = (struct commands *)
+		xmalloc ( sizeof ( struct commands ));
 
-/* breakpoint information */
-struct queue *breakpoint_queue;
-struct string *breakpoint_string;
-static int breakpoint_table = 0;
-static int breakpoint_enabled = FALSE;
-static int breakpoint_started = FALSE;
+    c->absolute_path       	= string_init();
+    c->line_number         	= string_init();
 
-/* 'info source' information */
-static struct string *info_source_string;
-static int info_source_ready = 0;
-static char last_info_source_requested[MAXLINE];
+	c->cur_command_state 	= VOID_COMMAND;
+	c->cur_field_num 		= 0;
 
-/* 'info sources' information */
-static int sources_ready = 0;
-static struct string *info_sources_string;
-static struct queue *source_files; /* The queue of current files */
+    c->breakpoint_queue    	= queue_init();
+    c->breakpoint_string   	= string_init();
+	c->breakpoint_table    	= 0;
+	c->breakpoint_enabled   = FALSE;
+	c->breakpoint_started   = FALSE;
 
-/* String that is output by gdb to get the absolute path to a file */
-static char *source_prefix = "Located in ";
-static int source_prefix_length = 11;
+    c->info_source_string  	= string_init();
+	c->info_source_ready   	= 0;
 
-/* String that is output by gdb to get the relative path to a file */
-static char *source_relative_prefix = "Current source file is ";
-static int source_relative_prefix_length = 23;
+	c->sources_ready 		= 0;
+    c->info_sources_string 	= string_init();
+    c->source_files        	= queue_init();
 
-/* Temporary prototypes */
-static void commands_prepare_info_source(enum COMMAND_STATE state);
+	c->source_prefix 		= "Located in ";
+	c->source_prefix_length = 11;
 
-/* This is used to store all of the entries that are possible to
- * tab complete. It should be blasted each time the completion
- * is run, populated, and then parsed.
- */
-//static struct queue *tab_completion_entries = NULL;
-static char last_tab_completion_command[MAXLINE];
+	c->source_relative_prefix 	= "Current source file is ";
+	c->source_relative_prefix_length 	= 23;
 
-void commands_init(void) {
-    absolute_path       = string_init();
-    line_number         = string_init();
-    info_source_string  = string_init();
-    info_sources_string = string_init();
-    breakpoint_string   = string_init();
-    breakpoint_queue    = queue_init();
-    source_files        = queue_init();
+	return c;
 }
 
-int commands_parse_field(const char *buf, size_t n, int *field){
+void commands_shutdown ( struct commands *c ) {
+	if ( c == NULL )
+		return;
+
+	string_free ( c->absolute_path );
+	c->absolute_path = NULL;
+
+	string_free ( c->line_number );
+	c->line_number = NULL;
+
+	/* TODO: free breakpoint queue */
+
+	string_free ( c->breakpoint_string );
+	c->breakpoint_string = NULL;
+
+	string_free ( c->info_sources_string );
+	c->info_sources_string = NULL;
+	
+	/* TODO: free source_files queue */
+
+	free ( c );
+	c = NULL;
+}
+
+int commands_parse_field(struct commands *c, const char *buf, size_t n, int *field){
    if(sscanf(buf, "field %d", field) != 1)
       err_msg("%s:%d -> parsing field annotation failed (%s)\n", __FILE__, __LINE__, buf);
 
@@ -83,7 +130,7 @@ int commands_parse_field(const char *buf, size_t n, int *field){
 }
 
 /* source filename:line:character:middle:addr */
-int commands_parse_source(const char *buf, size_t n, struct queue *q){
+int commands_parse_source(struct commands *c, const char *buf, size_t n, struct queue *q){
     int i = 0;
     char copy[n];
     char *cur = copy + n;
@@ -105,13 +152,13 @@ int commands_parse_source(const char *buf, size_t n, struct queue *q){
     if(sscanf(copy, "source %s", file) != 1)
         err_msg("%s:%d -> Could not get file name", __FILE__, __LINE__);
    
-    string_clear( absolute_path );
-    string_add ( absolute_path, file );
-    string_clear( line_number );
-    string_add ( line_number, line );
+    string_clear( c->absolute_path );
+    string_add ( c->absolute_path, file );
+    string_clear( c->line_number );
+    string_add ( c->line_number, line );
 
     /* set up the info_source command to get the relative path */
-    if ( commands_issue_command ( ANNOTATE_INFO_SOURCE_RELATIVE, NULL, 1 ) == -1 ) {
+    if ( commands_issue_command ( c, ANNOTATE_INFO_SOURCE_RELATIVE, NULL, 1 ) == -1 ) {
         err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
         return -1;
     }
@@ -119,8 +166,8 @@ int commands_parse_source(const char *buf, size_t n, struct queue *q){
     return 0;
 }
 
-static void parse_breakpoint(struct queue *q){
-    unsigned long size = string_length(breakpoint_string);
+static void parse_breakpoint(struct commands *c, struct queue *q){
+    unsigned long size = string_length(c->breakpoint_string);
     char copy[size + 1];
     char *cur = copy + size, *fcur;
     char fname[MAXLINE + 2], file[MAXLINE], line[MAXLINE];
@@ -131,7 +178,7 @@ static void parse_breakpoint(struct queue *q){
     memset(file, '\0', MAXLINE);
     memset(line, '\0', MAXLINE);
 
-    info_ptr = string_get(breakpoint_string);
+    info_ptr = string_get(c->breakpoint_string);
 
     strncpy(copy, info_ptr, size + 1); /* modify local copy */
 
@@ -157,7 +204,7 @@ static void parse_breakpoint(struct queue *q){
 
     strncpy(file, fcur, strlen(fcur));
 
-    if(breakpoint_enabled == TRUE)
+    if(c->breakpoint_enabled == TRUE)
         strcat(fname, " y");
     else
         strcat(fname, " n");
@@ -170,42 +217,42 @@ static void parse_breakpoint(struct queue *q){
     string_add ( s, " " );
     string_add ( s, file );
 
-    queue_append ( breakpoint_queue, s );
+    queue_append ( c->breakpoint_queue, s );
 }
 
 
-void commands_set_state(enum COMMAND_STATE state, struct queue *q){
-    cur_command_state = state;
+void commands_set_state( struct commands *c, enum COMMAND_STATE state, struct queue *q){
+    c->cur_command_state = state;
 
-    switch(cur_command_state){
+    switch(c->cur_command_state){
         case RECORD:  
-            if(string_length(breakpoint_string) > 0){
-                parse_breakpoint(q);
-                string_clear(breakpoint_string);
-                breakpoint_enabled = FALSE;
+            if(string_length(c->breakpoint_string) > 0){
+                parse_breakpoint(c, q);
+                string_clear(c->breakpoint_string);
+                c->breakpoint_enabled = FALSE;
             }
         break;
         case BREAKPOINT_TABLE_END:  
-            if(string_length(breakpoint_string) > 0)
-                parse_breakpoint(q);
+            if(string_length(c->breakpoint_string) > 0)
+                parse_breakpoint(c, q);
 
             /* At this point, annotate needs to send the breakpoints to the gui.
              * All of the valid breakpoints are stored in breakpoint_queue. */
-            tgdb_append_command ( q, TGDB_UPDATE_BREAKPOINTS, breakpoint_queue );
+            tgdb_append_command ( q, TGDB_UPDATE_BREAKPOINTS, c->breakpoint_queue );
 
-            string_clear(breakpoint_string);
-            breakpoint_enabled = FALSE;
+            string_clear(c->breakpoint_string);
+            c->breakpoint_enabled = FALSE;
 
-            breakpoint_started = FALSE;
+            c->breakpoint_started = FALSE;
             break;
         case BREAKPOINT_HEADERS: 
-            breakpoint_table = 0; 
+            c->breakpoint_table = 0; 
             break;
         case BREAKPOINT_TABLE_BEGIN: 
             
             /* The breakpoint queue should be empty at this point */
-            breakpoint_table = 1; 
-            breakpoint_started = TRUE;
+            c->breakpoint_table = 1; 
+            c->breakpoint_started = TRUE;
             break;
         case INFO_SOURCE_ABSOLUTE:
             break;
@@ -217,85 +264,84 @@ void commands_set_state(enum COMMAND_STATE state, struct queue *q){
     }
 }
 
-void commands_set_field_num(int field_num){
-   cur_field_num = field_num;
+void commands_set_field_num( struct commands *c, int field_num){
+   c->cur_field_num = field_num;
 
    /* clear buffer and start over */
-   if(breakpoint_table && cur_command_state == FIELD && cur_field_num == 5)
-      string_clear(breakpoint_string);
+   if(c->breakpoint_table && c->cur_command_state == FIELD && c->cur_field_num == 5)
+      string_clear(c->breakpoint_string);
 }
 
-enum COMMAND_STATE commands_get_state(void){
-   return cur_command_state;
+enum COMMAND_STATE commands_get_state( struct commands *c){
+   return c->cur_command_state;
 }
 
-static void commands_prepare_info_source(enum COMMAND_STATE state){
-   data_set_state(INTERNAL_COMMAND);
-   string_clear(info_source_string);
+static void commands_prepare_info_source(struct annotate_two *a2, struct commands *c, enum COMMAND_STATE state){
+   data_set_state(a2, INTERNAL_COMMAND );
+   string_clear(c->info_source_string);
    
    if ( state == INFO_SOURCE_ABSOLUTE ) {
-        commands_set_state(INFO_SOURCE_ABSOLUTE, NULL);
-        global_set_start_info_source();
+        commands_set_state(c, INFO_SOURCE_ABSOLUTE, NULL);
    } else if ( state == INFO_SOURCE_RELATIVE )
-        commands_set_state(INFO_SOURCE_RELATIVE, NULL);
+        commands_set_state(c, INFO_SOURCE_RELATIVE, NULL);
 
-   info_source_ready = 0;
+   c->info_source_ready = 0;
 }
 
-void commands_list_command_finished(struct queue *q, int success){
+void commands_list_command_finished(struct commands *c, struct queue *q, int success){
   /* The file does not exist and it can not be opened.
    * So we return that information to the gui.  */
     struct string *rej = string_init();
-    string_add ( rej, last_info_source_requested );
+    string_add ( rej, c->last_info_source_requested );
     tgdb_append_command(q, TGDB_ABSOLUTE_SOURCE_DENIED, rej);
 }
 
-void commands_send_source_absolute_source_file(struct queue *q){
+void commands_send_source_absolute_source_file(struct commands *c, struct queue *q){
    /*err_msg("Whats up(%s:%d)\r\n", info_source_buf, info_source_buf_pos);*/
-    unsigned long length = string_length(info_source_string);
+    unsigned long length = string_length(c->info_source_string);
     static char *info_ptr; 
-    info_ptr = string_get(info_source_string);
+    info_ptr = string_get(c->info_source_string);
 
    /* found */
-   if(length >= source_prefix_length && 
-      (strncmp(info_ptr, source_prefix, source_prefix_length) == 0)){
-      char *path = info_ptr + source_prefix_length;
+   if(length >= c->source_prefix_length && 
+      (strncmp(info_ptr, c->source_prefix, c->source_prefix_length) == 0)){
+      char *path = info_ptr + c->source_prefix_length;
 
       /* requesting file */
-      if(last_info_source_requested[0] != '\0') {
+      if(c->last_info_source_requested[0] != '\0') {
           struct string *accepted = string_init();
           string_add ( accepted, path );
           tgdb_append_command(q, TGDB_ABSOLUTE_SOURCE_ACCEPTED, accepted);
       } else { /* This happens only when libtgdb starts */
-            string_clear( absolute_path );
-            string_add ( absolute_path, path );
-            string_clear( line_number );
-            string_add ( line_number, "1" );
+            string_clear( c->absolute_path );
+            string_add ( c->absolute_path, path );
+            string_clear( c->line_number );
+            string_add ( c->line_number, "1" );
       }
    /* not found */
    } else {
       struct string *rej = string_init();
-      string_add ( rej, last_info_source_requested );
+      string_add ( rej, c->last_info_source_requested );
       tgdb_append_command(q, TGDB_ABSOLUTE_SOURCE_DENIED, rej);
    }
 }
 
-static void commands_process_source_line(void){
-    unsigned long length = string_length(info_sources_string), i, start = 0;
+static void commands_process_source_line(struct commands *c ){
+    unsigned long length = string_length(c->info_sources_string), i, start = 0;
     static char *info_ptr; 
     static char *nfile;
-    info_ptr = string_get(info_sources_string);
+    info_ptr = string_get(c->info_sources_string);
   
     for(i = 0 ; i < length; ++i){
         if(i > 0 && info_ptr[i - 1] == ',' && info_ptr[i] == ' '){
             nfile = calloc(sizeof(char),i - start) ;
             strncpy(nfile, info_ptr + start , i - start - 1);
             start += ((i + 1) - start); 
-            queue_append(source_files, nfile);
+            queue_append(c->source_files, nfile);
         } else if (i == length - 1 ){
             nfile = calloc(sizeof(char),i - start + 2);
             strncpy(nfile, info_ptr + start , i - start + 1);
-            queue_append(source_files, nfile);
+            queue_append(c->source_files, nfile);
         }
     }
 }
@@ -306,32 +352,32 @@ static void commands_process_source_line(void){
  * This function is capable of parsing the output of 'info source'.
  * It can get both the absolute and relative path to the source file.
  */
-static void commands_process_info_source(struct queue *q, char a){
+static void commands_process_info_source(struct commands *c, struct queue *q, char a){
     unsigned long length;
     static char *info_ptr;
 
-    if ( info_source_ready  ) /* Already found */
+    if ( c->info_source_ready  ) /* Already found */
         return;
     
-    info_ptr = string_get(info_source_string);
-    length   = string_length(info_source_string);
+    info_ptr = string_get(c->info_source_string);
+    length   = string_length(c->info_source_string);
 
     if ( a == '\r' )
         return;
 
     if(a == '\n'){ 
         /* This is the line containing the absolute path to the source file */
-        if ( commands_get_state() == INFO_SOURCE_ABSOLUTE && 
-             length >= source_prefix_length && 
-             strncmp(info_ptr, source_prefix, source_prefix_length) == 0 ) {
+        if ( commands_get_state(c) == INFO_SOURCE_ABSOLUTE && 
+             length >= c->source_prefix_length && 
+             strncmp(info_ptr, c->source_prefix, c->source_prefix_length) == 0 ) {
 
-             commands_send_source_absolute_source_file ( q );
+             commands_send_source_absolute_source_file ( c, q );
 
-            info_source_ready = 1;
+            c->info_source_ready = 1;
         } else if ( /* This is the line contatining the relative path to the source file */
-            commands_get_state() == INFO_SOURCE_RELATIVE && 
-            length >= source_relative_prefix_length && 
-            strncmp(info_ptr, source_relative_prefix, source_relative_prefix_length) == 0 ) {
+            commands_get_state(c) == INFO_SOURCE_RELATIVE && 
+            length >= c->source_relative_prefix_length && 
+            strncmp(info_ptr, c->source_relative_prefix, c->source_relative_prefix_length) == 0 ) {
 
             /* So far, INFO_SOURCE_RELATIVE is only used when a 
              * TGDB_UPDATE_FILE_POSITION is needed.
@@ -339,92 +385,70 @@ static void commands_process_info_source(struct queue *q, char a){
             {
                 struct queue *update = queue_init();
                 struct string *relative_path = string_init();
-                string_add ( relative_path, info_ptr + source_relative_prefix_length );
-                queue_append ( update, absolute_path );
+                string_add ( relative_path, info_ptr + c->source_relative_prefix_length );
+                queue_append ( update, c->absolute_path );
                 queue_append ( update, relative_path );
-                queue_append ( update, line_number );
+                queue_append ( update, c->line_number );
 
                 tgdb_append_command(q, TGDB_UPDATE_FILE_POSITION, update );
             }
 
-            info_source_ready = 1;
+            c->info_source_ready = 1;
         } else
-            string_clear(info_source_string);
+            string_clear(c->info_source_string);
     } else
-        string_addchar(info_source_string, a);
+        string_addchar(c->info_source_string, a);
 }
 
 /* process's source files */
-static void commands_process_sources(char a){
+static void commands_process_sources(struct commands *c, char a){
     static const char *sourcesReadyString = "Source files for which symbols ";
     static const int sourcesReadyStringLength = 31;
     static char *info_ptr;
-    string_addchar(info_sources_string, a);
+    string_addchar(c->info_sources_string, a);
    
     if(a == '\n'){
-        string_delchar(info_sources_string);     /* remove '\n' and null terminate */
+        string_delchar(c->info_sources_string);     /* remove '\n' and null terminate */
         /* valid lines are 
          * 1. after the first line,
          * 2. do not end in ':' 
          * 3. and are not empty 
          */
-        info_ptr = string_get(info_sources_string);
+        info_ptr = string_get(c->info_sources_string);
 
         if ( strncmp(info_ptr, sourcesReadyString, sourcesReadyStringLength) == 0 )
-            sources_ready = 1;
+            c->sources_ready = 1;
 
         /* is this a valid line */
-        if(string_length(info_sources_string) > 0 && sources_ready && info_ptr[string_length(info_sources_string) - 1] != ':')
-            commands_process_source_line(); 
+        if(string_length(c->info_sources_string) > 0 && c->sources_ready && info_ptr[string_length(c->info_sources_string) - 1] != ':')
+            commands_process_source_line(c); 
 
-        string_clear(info_sources_string);
+        string_clear(c->info_sources_string);
     }
 }
 
-/* commands_process_tab_completion:
- * --------------------------------
- *
- * c:    The character to process
- */
-static void commands_process_tab_completion(char c){
-    /* TODO: Make tab completion work with readline */
-//    static struct string *tab_completion_entry = NULL;
-//
-//    if ( tab_completion_entry == NULL )
-//        tab_completion_entry = string_init ();
-//
-    /* Append new completion to list */
-//    if ( c == '\n' && data_get_state () == INTERNAL_COMMAND ) {
-//        queue_append ( tab_completion_entries, tab_completion_entry );
-//        tab_completion_entry = string_init ();
-//    } else {
-//        string_addchar ( tab_completion_entry, c ); 
-//    }
-}
-
-
-void commands_free(void *item) {
+void commands_free(struct commands *c, void *item) {
     free((char*)item);
 }
 
-void commands_send_gui_sources(struct queue *q){
-    tgdb_append_command ( q, TGDB_UPDATE_SOURCE_FILES, source_files );
+void commands_send_gui_sources(struct commands *c, struct queue *q){
+    tgdb_append_command ( q, TGDB_UPDATE_SOURCE_FILES, c->source_files );
 }
 
-void commands_process(char a, struct queue *q){
-    if(commands_get_state() == INFO_SOURCES){
-        commands_process_sources(a);     
-    } else if(commands_get_state() == INFO_LIST){
+void commands_process(struct commands *c, char a, struct queue *q){
+    if(commands_get_state(c) == INFO_SOURCES){
+        commands_process_sources(c, a);     
+    } else if(commands_get_state(c) == INFO_LIST){
         /* do nothing with data */
-    } else if(commands_get_state() == INFO_SOURCE_ABSOLUTE 
-            ||commands_get_state() == INFO_SOURCE_RELATIVE){
-        commands_process_info_source(q, a);   
-    } else if(breakpoint_table && cur_command_state == FIELD && cur_field_num == 5){ /* the file name and line num */ 
-        string_addchar(breakpoint_string, a);
-    } else if(breakpoint_table && cur_command_state == FIELD && cur_field_num == 3 && a == 'y') {
-        breakpoint_enabled = TRUE;
-    } else if ( commands_get_state() == TAB_COMPLETE ) {
-        commands_process_tab_completion ( a );
+    } else if(commands_get_state(c) == INFO_SOURCE_ABSOLUTE 
+            ||commands_get_state(c) == INFO_SOURCE_RELATIVE){
+        commands_process_info_source(c, q, a);   
+    } else if(c->breakpoint_table && c->cur_command_state == FIELD && c->cur_field_num == 5){ /* the file name and line num */ 
+        string_addchar(c->breakpoint_string, a);
+    } else if(c->breakpoint_table && c->cur_command_state == FIELD && c->cur_field_num == 3 && a == 'y') {
+        c->breakpoint_enabled = TRUE;
+    } else if ( commands_get_state(c) == TAB_COMPLETE ) {
+        /*commands_process_tab_completion ( c, a );*/
     }
 }
 
@@ -437,8 +461,8 @@ void commands_process(char a, struct queue *q){
  *  
  *  This prepares the command 'info breakpoints' 
  */
-static void commands_prepare_info_breakpoints( void ) {
-    string_clear(breakpoint_string);
+static void commands_prepare_info_breakpoints( struct commands *c ) {
+    string_clear(c->breakpoint_string);
 }
 
 /* commands_prepare_tab_completion:
@@ -446,7 +470,7 @@ static void commands_prepare_info_breakpoints( void ) {
  *
  * This prepares the tab completion command
  */
-static void commands_prepare_tab_completion ( void ) {
+static void commands_prepare_tab_completion ( struct annotate_two *a2, struct commands *c ) {
     /* TODO: Make tab completion work with readline */
 //    if ( tab_completion_entries != NULL ) {
 //        /* TODO: Free the old entries */
@@ -454,7 +478,7 @@ static void commands_prepare_tab_completion ( void ) {
 //        
 //    tab_completion_entries = queue_init();
 //    commands_set_state ( TAB_COMPLETE, NULL );
-    data_set_state ( USER_COMMAND );
+    data_set_state ( a2, USER_COMMAND );
 }
 
 /* commands_prepare_info_sources: 
@@ -462,11 +486,11 @@ static void commands_prepare_tab_completion ( void ) {
  *
  *  This prepares the command 'info sources' by setting certain variables.
  */
-static void commands_prepare_info_sources ( void ){
-    sources_ready = 0;
-    string_clear(info_sources_string);
-    commands_set_state(INFO_SOURCES, NULL);
-    global_set_start_info_sources();
+static void commands_prepare_info_sources ( struct annotate_two *a2, struct commands *c ){
+    c->sources_ready = 0;
+    string_clear(c->info_sources_string);
+    commands_set_state(c, INFO_SOURCES, NULL);
+	global_set_start_info_sources ( a2->g );
 }
 
 /* commands_prepare_list: 
@@ -476,14 +500,14 @@ static void commands_prepare_info_sources ( void ){
  * 
  *    filename -> The name of the file to check the absolute path of.
  */
-static void commands_prepare_list ( char *filename ){
-   commands_set_state(INFO_LIST, NULL);
-   global_set_start_list();
-   info_source_ready = 0;
+static void commands_prepare_list ( struct annotate_two *a2, struct commands *c, char *filename ){
+   commands_set_state(c, INFO_LIST, NULL);
+   global_set_start_list(a2->g);
+   c->info_source_ready = 0;
 }
 
-void commands_finalize_command ( struct queue *q ) {
-    switch ( commands_get_state () ) {
+void commands_finalize_command ( struct commands *c, struct queue *q ) {
+    switch ( commands_get_state (c) ) {
         case TAB_COMPLETE:
                 /* TODO: Make tab completion work with readline */ 
 //            tgdb_complete_command ( tab_completion_entries, last_tab_completion_command ); 
@@ -491,9 +515,9 @@ void commands_finalize_command ( struct queue *q ) {
         case INFO_SOURCE_RELATIVE:
         case INFO_SOURCE_ABSOLUTE:
 
-            if ( info_source_ready == 0 ) {
+            if ( c->info_source_ready == 0 ) {
                 struct string *rej = string_init();
-                string_add ( rej, last_info_source_requested );
+                string_add ( rej, c->last_info_source_requested );
                 tgdb_append_command(q, TGDB_ABSOLUTE_SOURCE_DENIED, rej );
             }
 
@@ -502,45 +526,45 @@ void commands_finalize_command ( struct queue *q ) {
     }
 }
 
-int commands_prepare_for_command ( struct command *com ) {
+int commands_prepare_for_command ( struct annotate_two *a2, struct commands *c, struct command *com ) {
     enum annotate_commands *a_com = ( enum annotate_commands *) com->client_data;
 
     /* Set the commands state to nothing */
-    commands_set_state(VOID, NULL);
+    commands_set_state(c , VOID, NULL);
 
 	/* The list command is no longer running */
-    global_list_finished();
+    global_list_finished( a2->g);
 
-    if ( global_list_had_error () == TRUE && commands_get_state() == INFO_LIST )  {
-        global_set_list_error ( FALSE );
+    if ( global_list_had_error (a2->g) == TRUE && commands_get_state(c) == INFO_LIST )  {
+        global_set_list_error ( a2->g, FALSE );
         return -1;
     }
 
     if ( a_com == NULL ) {
-        data_set_state ( USER_COMMAND );
+        data_set_state ( a2, USER_COMMAND );
         return 0;
     }
 
     switch ( *a_com ) {
         case ANNOTATE_INFO_SOURCES:
-            commands_prepare_info_sources ();
+            commands_prepare_info_sources ( a2, c );
             break;
         case ANNOTATE_LIST:
-            commands_prepare_list ( com -> data );
+            commands_prepare_list ( a2, c, com -> data );
             break;
         case ANNOTATE_INFO_SOURCE_RELATIVE:
-            commands_prepare_info_source ( INFO_SOURCE_RELATIVE );
+            commands_prepare_info_source ( a2, c, INFO_SOURCE_RELATIVE );
             break;
         case ANNOTATE_INFO_SOURCE_ABSOLUTE:
-            commands_prepare_info_source ( INFO_SOURCE_ABSOLUTE );
+            commands_prepare_info_source ( a2, c, INFO_SOURCE_ABSOLUTE );
             break;
         case ANNOTATE_INFO_BREAKPOINTS:
-            commands_prepare_info_breakpoints ();
+            commands_prepare_info_breakpoints (c);
             break;
         case ANNOTATE_TTY:
             break;  /* Nothing to do */
         case ANNOTATE_COMPLETE:
-            commands_prepare_tab_completion ();
+            commands_prepare_tab_completion ( a2, c );
             io_debug_write_fmt("<%s\n>", com->data);
             return 0;
             break;  /* Nothing to do */
@@ -550,7 +574,7 @@ int commands_prepare_for_command ( struct command *com ) {
             break;
     };
    
-    data_set_state(INTERNAL_COMMAND);
+    data_set_state(a2, INTERNAL_COMMAND );
     io_debug_write_fmt("<%s\n>", com->data);
 
     return 0;
@@ -568,6 +592,7 @@ int commands_prepare_for_command ( struct command *com ) {
  *           NULL on error
  */
 static const char *commands_create_command ( 
+	struct commands *c,
     enum annotate_commands com,
     const char *data) {
 
@@ -598,9 +623,9 @@ static const char *commands_create_command (
                 } 
 
                 if ( temp_file_name[0] == '\0' )
-                    last_info_source_requested[0] = '\0';
+                    c->last_info_source_requested[0] = '\0';
                 else
-                    strcpy ( last_info_source_requested, temp_file_name );
+                    strcpy ( c->last_info_source_requested, temp_file_name );
 
                 strcat ( ncom, "\n" );
                 break;
@@ -631,7 +656,7 @@ static const char *commands_create_command (
             strcat ( ncom, "\n" );
 
             /* A hack to save the last tab completion command */
-            strcpy ( last_tab_completion_command, data );
+            strcpy ( c->last_tab_completion_command, data );
             break;
         case ANNOTATE_SET_PROMPT:
             ncom = strdup ( data );   
@@ -645,8 +670,8 @@ static const char *commands_create_command (
     return ncom;
 }
 
-int commands_user_ran_command ( void ) {
-    if ( commands_issue_command ( ANNOTATE_INFO_BREAKPOINTS, NULL, 0 ) == -1 ) {
+int commands_user_ran_command ( struct commands *c ) {
+    if ( commands_issue_command ( c, ANNOTATE_INFO_BREAKPOINTS, NULL, 0 ) == -1 ) {
         err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
         return -1;
     }
@@ -654,8 +679,8 @@ int commands_user_ran_command ( void ) {
     return 0;
 }
 
-int commands_issue_command ( enum annotate_commands com, const char *data, int oob) {
-    const char *ncom = commands_create_command ( com, data );
+int commands_issue_command ( struct commands *c, enum annotate_commands com, const char *data, int oob) {
+    const char *ncom = commands_create_command ( c, com, data );
     struct command *command = NULL;
     enum annotate_commands *nacom = (enum annotate_commands *)xmalloc ( sizeof ( enum annotate_commands ) );
     

@@ -22,6 +22,12 @@
 #endif /* HAVE_SYS_TYPES_H */
 
 #include "types.h"
+#include "a2-tgdb.h"
+
+struct state_machine;
+
+struct state_machine *state_machine_initialize ( void );
+void state_machine_shutdown ( struct state_machine *sm );
 
 /* a2_handle_data:
  * ---------------
@@ -32,6 +38,6 @@
  *  gui_size:   The size of the buffer gui_data.
  *  q:          If a command was generated from an annotation, its put in here.
  */
-int a2_handle_data(char *data, size_t size, char *gui_data, size_t gui_size, struct queue *q);
+int a2_handle_data ( struct annotate_two *a2, struct state_machine *sm, const char *data, const size_t size, char *gui_data, size_t gui_size, struct queue *q);
 
 #endif

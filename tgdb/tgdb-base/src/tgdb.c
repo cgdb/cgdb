@@ -31,10 +31,13 @@
 
 #include "state_machine.h"
 #include "commands.h"
-#include "globals.h"
 #include "pseudo.h" /* SLAVE_SIZE constant */
 #include "fork_util.h"
 #include "sys_util.h"
+
+static struct annotate_two *a2;
+
+static sig_atomic_t control_c = 0;/* If ^c was hit by user */
 
 /* Reading from this will read from the debugger's output */
 static int debugger_stdout = -1;
@@ -44,11 +47,14 @@ static int debugger_stdin = -1;
 
 /* Reading from this will read the stdout from the program being debugged */
 /* Writing to this will write to the stdin of the program being debugged */
-static int inferior_fd = -1;
-static int inferior_slave_fd = -1;
+//static int inferior_fd = -1;
+//static int inferior_slave_fd = -1;
 
 /* The tty name of the inferior */
-static char inferior_tty_name[SLAVE_SIZE];
+//static char inferior_tty_name[SLAVE_SIZE];
+
+static int inferior_stdout = -1;
+static int inferior_stdin  = -1;
 
 /******************************************************************************* 
  * All the queue's the clients can run commands through
@@ -100,12 +106,10 @@ extern unsigned short tgdb_partially_run_command;
 static int tgdb_deliver_command ( int fd, struct command *command );
 
 /* The client's shutdown routine. */ 
-static int (*tgdb_client_shutdown)(void);
-
-static char* (*tgdb_get_client_command)(enum tgdb_command c);
-static char* (*tgdb_client_modify_breakpoint_call)(const char *file, int line, enum tgdb_breakpoint_action b);
-
-sig_atomic_t control_c = 0; /* If ^c was hit by user */
+//static int (*tgdb_client_shutdown)(void);
+//
+//static char* (*tgdb_get_client_command)(enum tgdb_command c);
+//static char* (*tgdb_client_modify_breakpoint_call)(const char *file, int line, enum tgdb_breakpoint_action b);
 
 
 /* These are 2 very important state variables.
@@ -135,25 +139,80 @@ void command_completion_callback ( void ) {
 	HAS_USER_SENT_COMMAND = 0;
 }
 
-static unsigned short tgdb_partially_run_command = 0;
-
-static void init_annotate_two ( void ) {
-    tgdb_get_sources                    = a2_tgdb_get_sources;
-    tgdb_get_source_absolute_filename   = a2_tgdb_get_source_absolute_filename;
-    tgdb_err_msg                        = a2_tgdb_err_msg;
-    tgdb_client_shutdown                = a2_tgdb_shutdown;
-	tgdb_get_client_command             = a2_tgdb_return_client_command;
-	tgdb_client_modify_breakpoint_call  = a2_tgdb_client_modify_breakpoint;
+/* signal_catcher: Is called when a signal is sent to this process. 
+ *    It passes the signal along to gdb. Thats what the user intended.
+ */ 
+static void signal_catcher(int SIGNAL){
+    if ( SIGNAL == SIGINT ) {               /* ^c */
+        control_c = 1;
+        kill(a2_get_debugger_pid( a2 ), SIGINT);
+    } else if ( SIGNAL == SIGTERM ) { 
+        kill(a2_get_debugger_pid( a2 ), SIGTERM);
+    } else if ( SIGNAL == SIGQUIT ) {       /* ^\ */
+        kill(a2_get_debugger_pid( a2 ), SIGQUIT);
+    } else 
+        err_msg("caught unknown signal: %d", a2_get_debugger_pid( a2 ));
 }
 
-static void init_gdbmi ( void ) {
+/* tgdb_setup_signals: Sets up signal handling for the tgdb library.
+ *    As of know, only SIGINT is caught and given a signal handler function.
+ *    Return: returns 0 on success, or -1 on error.
+ */
+static int tgdb_setup_signals(void){
+    struct sigaction action;
+
+    action.sa_handler = signal_catcher;      
+    sigemptyset(&action.sa_mask);   
+    action.sa_flags = 0;
+
+    if(sigaction(SIGINT, &action, NULL) < 0)
+        err_ret("%s:%d -> sigaction failed ", __FILE__, __LINE__);
+
+    if(sigaction(SIGTERM, &action, NULL) < 0)
+        err_ret("%s:%d -> sigaction failed ", __FILE__, __LINE__);
+
+    if(sigaction(SIGQUIT, &action, NULL) < 0)
+        err_ret("%s:%d -> sigaction failed ", __FILE__, __LINE__);
+
+    return 0;
+}
+
+static unsigned short tgdb_partially_run_command = 0;
+
+int tgdb_get_sources ( void ) {
+	return a2_get_inferior_sources ( a2 );
+}
+
+int tgdb_get_source_absolute_filename(char *file) {
+	return a2_get_source_absolute_filename ( a2, file );
+}
+
+char* tgdb_err_msg(void) {
+	return NULL;
+}
+
+/* The client's shutdown routine. */ 
+static int tgdb_client_shutdown(void) {
+	return a2_shutdown ( a2 );
+}
+
+static char* tgdb_get_client_command(enum tgdb_command c) {
+	return a2_return_client_command ( a2, c );
+}
+
+static char* tgdb_client_modify_breakpoint_call(const char *file, int line, enum tgdb_breakpoint_action b) {
+	return a2_client_modify_breakpoint ( a2, file, line , b );
+}
+
+
+/*static void init_gdbmi ( void ) {
     tgdb_get_sources                    = gdbmi_tgdb_get_sources;
     tgdb_get_source_absolute_filename   = gdbmi_tgdb_get_source_absolute_filename;
     tgdb_err_msg                        = gdbmi_tgdb_err_msg;
     tgdb_client_shutdown                = gdbmi_tgdb_shutdown;
 	tgdb_get_client_command             = gdbmi_tgdb_return_client_command;
 	tgdb_client_modify_breakpoint_call  = gdbmi_tgdb_client_modify_breakpoint;
-}
+}*/
 
 /* These functions are used to determine the state of libtgdb */
 
@@ -167,7 +226,7 @@ static void init_gdbmi ( void ) {
  */
 static int tgdb_can_issue_command(void) {
     if ( IS_SUBSYSTEM_READY_FOR_NEXT_COMMAND &&
-	     a2_tgdb_is_debugger_ready() && 
+	     a2_is_client_ready( a2 ) && 
 		 (queue_size(gdb_input_queue) == 0) )
         return TRUE;
 
@@ -182,7 +241,7 @@ static int tgdb_can_issue_command(void) {
  * Returns: TRUE if can issue directly to gdb. Otherwise FALSE.
  */
 static int tgdb_has_command_to_run(void) {
-    if ( a2_tgdb_is_debugger_ready() && (
+    if ( a2_is_client_ready(a2) && (
            (queue_size(gdb_input_queue) > 0) || 
            (queue_size(raw_input_queue) > 0) || 
            (queue_size(oob_input_queue) > 0) || 
@@ -271,7 +330,12 @@ size_t tgdb_recv(char *buf, size_t n, struct queue *q){
      *
      * buf and buf_size are the data to be returned from the user.
      */
-    buf_size = a2_handle_data(local_buf, size, buf, n, q);
+	{
+		/* unused for now */
+		char *infbuf = NULL;
+		size_t infbuf_size;
+		a2_parse_io ( a2, local_buf, size, buf, &buf_size, infbuf, &infbuf_size, q );
+	}
 
 	/* 3. if ^c has been sent, clear the buffers.
      * 	  If a signal has been recieved, clear the queue and return
@@ -327,7 +391,7 @@ static char *tgdb_send(char *command, int out_type) {
         return NULL;
     }
     
-    if ( commands_user_ran_command ( ) == -1 ) {
+    if ( a2_user_ran_command ( a2 ) == -1 ) {
         err_msg("%s:%d commands_user_ran_command error", __FILE__, __LINE__);
         return NULL;
     }
@@ -379,9 +443,7 @@ int tgdb_dispatch_command ( struct command *com ) {
             if ( tgdb_can_issue_command() )
                 ret = tgdb_deliver_command ( debugger_stdin, com );
             else
-                queue_append ( oob_input_queue, com );
-            break;
-
+                queue_append ( oob_input_queue, com ); break; 
         case BUFFER_VOID:
         default:
             err_msg("%s:%d invaled com_type", __FILE__, __LINE__);
@@ -411,12 +473,14 @@ static int tgdb_deliver_command ( int fd, struct command *command ) {
         /* A readline command handled by tgdb-base */
         switch ( command->com_to_run ) {
             case COMMANDS_SET_PROMPT:
+//				fprintf ( stderr, "<TGDB: READLINE: Prompt Change (%s)>", command->data);
                 if ( rlctx_change_prompt ( rl, command->data ) == -1 ) {
                     err_msg("%s:%d rlctx_change_prompt  error", __FILE__, __LINE__);
                     return -1;
                 }
                 break;
             case COMMANDS_REDISPLAY:
+//				fprintf ( stderr, "<TGDB: READLINE: Redisplay>" );
                 if ( rlctx_redisplay ( rl ) == -1 ) {
                     err_msg("%s:%d rlctx_change_prompt  error", __FILE__, __LINE__);
                     return -1;
@@ -430,12 +494,13 @@ static int tgdb_deliver_command ( int fd, struct command *command ) {
 		IS_SUBSYSTEM_READY_FOR_NEXT_COMMAND = 0;
 
         /* A command for the debugger */
-        if ( commands_prepare_for_command ( command ) == -1 ) {
+        if ( a2_prepare_for_command ( a2, command ) == -1 ) {
 //            fprintf ( stderr, "SKIPPING COMMAND(%s)", command->data );
             return -2;
         }
     
         /* A regular command from the client */
+//		fprintf ( stderr, "<TGDB: command (%s)>", command->data );
         io_debug_write_fmt ( "<%s>", command -> data );
 
         io_writen ( fd, command -> data, strlen ( command -> data ) );
@@ -484,7 +549,7 @@ tgdb_run_command_tag:
         /* If at the misc prompt, don't run the internal tgdb commands,
          * In fact throw them out for now, since they are only 
          * 'info breakpoints' */
-        if ( globals_is_misc_prompt() == TRUE ) {
+        if ( a2_is_misc_prompt(a2) == TRUE ) {
             if ( item->com_type != BUFFER_USER_COMMAND ) {
                 tgdb_interface_free_command ( item );
                 goto tgdb_run_command_tag;
@@ -655,7 +720,7 @@ static int tgdb_completion_callback ( const char *line ) {
     struct command *ncom;
 
     /* Allow the client to generate a command for tab completion */
-    a2_tgdb_completion_callback ( line ); 
+    a2_completion_callback ( a2, line ); 
 
     /* Redisplay the prompt */
     ncom = tgdb_interface_new_command ( 
@@ -764,7 +829,6 @@ int tgdb_init (
             int argc, char **argv, 
             int *gdb, int *child, int *readline) {
 
-    int result;
     char config_dir[PATH_MAX];
 
     /* Create config directory */
@@ -777,17 +841,6 @@ int tgdb_init (
         err_msg("%s:%d tgdb_init_readline error", __FILE__, __LINE__);
         return -1; 
     }
-
-    /* Determine what debugger is valid:
-     *
-     * As of now, only the annotations protocol is valid */
-    result = a2_find_valid_debugger ( 
-                debugger, 
-                argc, argv, 
-                &debugger_stdin, gdb,
-                config_dir );
-
-    debugger_stdout = *gdb;
 
     /* Initialize the command queue's */
 
@@ -803,20 +856,31 @@ int tgdb_init (
     /* initialize the readline command queue */
     rlc_input_queue = queue_init();
 
-    if ( util_new_tty(child, &inferior_slave_fd, inferior_tty_name) == -1){
-        err_msg("%s:%d -> Could not open child tty", __FILE__, __LINE__);
-        return -1;
-    }
-    
-    inferior_fd     = *child;
+	/* Set up signal handlers */
+	tgdb_setup_signals ();
 
-    if ( result == 1 ) {
-        a2_tgdb_init ( inferior_tty_name, &command_completion_callback );
-        init_annotate_two();
+	/* create an instance and initialize an annotate-two instance */
+	if ( (a2 = a2_create_instance ( debugger, argc, argv, config_dir ) ) == NULL ) {
+        err_msg("%s:%d a2_create_instance error", __FILE__, __LINE__);
+        return -1; 
+	}
+
+	if ( a2_initialize ( a2, 
+					&debugger_stdin, &debugger_stdout, 
+					&inferior_stdin, &inferior_stdout,
+					command_completion_callback ) == -1 ) {
+        err_msg("%s:%d a2_initialize error", __FILE__, __LINE__);
+        return -1; 
+	}
+
+	*gdb = debugger_stdout;
+	*child = inferior_stdout;
+
+    if ( 1 ) {
 
         /*a2_setup_io( );*/
     } else {
-        init_gdbmi ();
+        /*init_gdbmi ();*/
         printf ( "Error: gdb does not support annotations\n" );
         return -1;
     }
@@ -824,20 +888,9 @@ int tgdb_init (
     return 0;
 }
 
-static int close_inferior_connection ( void ) {
-    /* close inferior connection */
-    xclose(inferior_fd);
-    xclose(inferior_slave_fd);
-    pty_release(inferior_tty_name);
-
-    return 0;
-}
-
 int tgdb_shutdown ( void ) {
     /* free readline */
     rlctx_close(rl);
-
-    close_inferior_connection();
 
     return tgdb_client_shutdown(); 
 }
@@ -848,7 +901,7 @@ char *tgdb_tty_send(char c){
    static char buf[4];
    memset(buf, '\0', 4); 
    
-   if(io_write_byte(inferior_fd, c) == -1){
+   if(io_write_byte(inferior_stdout, c) == -1){
       err_ret("%s:%d -> could not write byte", __FILE__, __LINE__);
       return NULL;
    }
@@ -862,7 +915,7 @@ size_t tgdb_tty_recv(char *buf, size_t n){
    ssize_t size;
 
    /* read all the data possible from the child that is ready. */
-   if( (size = io_read(inferior_fd, local_buf, n)) < 0){
+   if( (size = io_read(inferior_stdin, local_buf, n)) < 0){
       err_ret("%s:%d inferior_fd read failed", __FILE__, __LINE__);
       return -1;
    } 
@@ -874,21 +927,11 @@ size_t tgdb_tty_recv(char *buf, size_t n){
 }
 
 int tgdb_new_tty(void) {
-    close_inferior_connection();
-
-    /* Ask for a new tty */
-    if ( util_new_tty(&inferior_fd, &inferior_slave_fd, inferior_tty_name) == -1){
-        err_msg("%s:%d -> Could not open child tty", __FILE__, __LINE__);
-        return -1;
-    }
-
-    a2_set_inferior_tty ( inferior_tty_name );
-    
-    return 0;
+    return a2_open_new_tty ( a2, &inferior_stdin, &inferior_stdout );
 }
 
 char *tgdb_tty_name(void) {
-    return inferior_tty_name;
+	return a2_get_tty_name ( a2 );
 }
 
 char* tgdb_modify_breakpoint ( const char *file, int line, enum tgdb_breakpoint_action b ) {

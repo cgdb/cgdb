@@ -22,10 +22,6 @@
 #include <sys/stat.h>
 #endif
 
-#if HAVE_LIMITS_H
-#include <limits.h>
-#endif /* HAVE_LIMITS_H */
-
 #if HAVE_SIGNAL_H
 #include <signal.h>
 #endif /* HAVE_SIGNAL_H */
@@ -48,17 +44,11 @@
 #include "queue.h"
 #include "sys_util.h"
 #include "ibuf.h"
+#include "annotate_two.h"
 
-/* This is set when tgdb has initialized itself */
-static int tgdb_initialized = 0;
-int masterfd = -1;                     /* master fd of the pseudo-terminal */
-static pid_t debugger_pid;             /* pid of child process */
-extern sig_atomic_t control_c;
-command_completed command_completed_callback;
+static int a2_set_inferior_tty ( struct annotate_two *a2 ) {
 
-int a2_tgdb_completion_callback(const char *line) {
-
-    if ( commands_issue_command ( ANNOTATE_COMPLETE, line, 4 ) == -1 ) {
+    if ( commands_issue_command ( a2->c, ANNOTATE_TTY, a2->inferior_tty_name, 0 ) == -1 ) {
         err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
         return -1;
     }
@@ -66,198 +56,7 @@ int a2_tgdb_completion_callback(const char *line) {
     return 0;
 }
 
-/* tgdb_is_debugger_ready: Determines if a command can be sent directly to gdb.
- * 
- * Returns: FALSE if gdb is busy running a command or a command can not be run.
- *          TRUE  if gdb can currently recieve a command.
- */
-int a2_tgdb_is_debugger_ready(void) {
-    if ( !tgdb_initialized )
-        return FALSE;
-
-    /* If the user is at the prompt */
-    if ( data_get_state() == USER_AT_PROMPT )
-        return TRUE;
-
-    return FALSE;
-}
-
-/* signal_catcher: Is called when a signal is sent to this process. 
- *    It passes the signal along to gdb. Thats what the user intended.
- */ 
-static void signal_catcher(int SIGNAL){
-    /* signal recieved */
-    global_set_signal_recieved(TRUE);
-
-    if ( SIGNAL == SIGINT ) {               /* ^c */
-        control_c = 1;
-        kill(debugger_pid, SIGINT);
-    } else if ( SIGNAL == SIGTERM ) { 
-        kill(debugger_pid, SIGTERM);
-    } else if ( SIGNAL == SIGQUIT ) {       /* ^\ */
-        kill(debugger_pid, SIGQUIT);
-    } else 
-        err_msg("caught unknown signal: %d", debugger_pid);
-}
-
-/* tgdb_setup_signals: Sets up signal handling for the tgdb library.
- *    As of know, only SIGINT is caught and given a signal handler function.
- *    Return: returns 0 on success, or -1 on error.
- */
-static int tgdb_setup_signals(void){
-    struct sigaction action;
-
-    action.sa_handler = signal_catcher;      
-    sigemptyset(&action.sa_mask);   
-    action.sa_flags = 0;
-
-    if(sigaction(SIGINT, &action, NULL) < 0)
-        err_ret("%s:%d -> sigaction failed ", __FILE__, __LINE__);
-
-    if(sigaction(SIGTERM, &action, NULL) < 0)
-        err_ret("%s:%d -> sigaction failed ", __FILE__, __LINE__);
-
-    if(sigaction(SIGQUIT, &action, NULL) < 0)
-        err_ret("%s:%d -> sigaction failed ", __FILE__, __LINE__);
-
-    return 0;
-}
-
-/* The config directory and the init file for gdb */
-static char config_dir[PATH_MAX];
-static char a2_gdb_init_file[PATH_MAX];
-
-/* tgdb_setup_config_file: 
- * -----------------------
- *  Creates a config file for the user.
- *
- *  Pre: The directory already has read/write permissions. This should have
- *       been checked by tgdb-base.
- *
- *  Return: 1 on success or 0 on error
- */
-static int tgdb_setup_config_file ( char *dir ) {
-    FILE *fp;
-
-    strncpy ( config_dir , dir , strlen ( dir ) + 1 );
-
-    fs_util_get_path ( dir, "a2_gdb_init", a2_gdb_init_file );
-
-    if ( (fp = fopen ( a2_gdb_init_file, "w" )) ) {
-        fprintf( fp, 
-            "set annotate 2\n"
-            "set height 0\n"
-            "set prompt (tgdb) \n");
-        fclose( fp );
-    } else {
-        err_msg("%s:%d fopen error '%s'", __FILE__, __LINE__, a2_gdb_init_file);
-        return 0;
-    }
-
-    return 1;
-}
-
-int a2_find_valid_debugger ( 
-            char *debugger,
-            int argc, char **argv,
-            int *gdb_stdin, int *gdb,
-            char *config_dir) {
-
-    char a2_debug_file[PATH_MAX];
-
-    if ( !tgdb_setup_config_file( config_dir ) ) {
-        err_msg("%s:%d tgdb_init_config_file error", __FILE__, __LINE__);
-        return -1;
-    }
-
-    /* Initialize the debug file that a2_tgdb writes to */
-    fs_util_get_path ( config_dir, "a2_tgdb_debug.txt", a2_debug_file );
-    io_debug_init(a2_debug_file);
-
-    debugger_pid = invoke_debugger(debugger, argc, argv, &masterfd, gdb, 0, a2_gdb_init_file);
-
-    *gdb_stdin  = masterfd;
-
-    if ( debugger_pid == -1 )
-        return -1;
-
-    return 1;
-}
-
-int a2_set_inferior_tty ( const char *inferior_tty_name ) {
-
-    if ( commands_issue_command ( ANNOTATE_TTY, inferior_tty_name, 0 ) == -1 ) {
-        err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
-        return -1;
-    }
-
-    return 0;
-}
-
-int a2_tgdb_init( const char *inferior_tty_name, command_completed ready_for_next_command ) {
-    commands_init();
-
-    tgdb_setup_signals();
-
-    a2_set_inferior_tty ( inferior_tty_name );
-   
-    a2_tgdb_get_source_absolute_filename(NULL);
-
-    if ( commands_issue_command ( ANNOTATE_INFO_SOURCE_RELATIVE, NULL, 0 ) == -1 ) {
-        err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
-        return -1;
-    }
-
-    tgdb_initialized = 1;
-
-	command_completed_callback = ready_for_next_command;
-
-    return 0;
-}
-
-int a2_tgdb_shutdown(void){
-    close(masterfd);
-    return 0;
-}
-
-int a2_tgdb_get_source_absolute_filename(char *file){
-
-    if ( commands_issue_command ( ANNOTATE_LIST, file, 0 ) == -1 ) {
-        err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
-        return -1;
-    }
-
-    if ( commands_issue_command ( ANNOTATE_INFO_SOURCE_ABSOLUTE, file, 0 ) == -1 ) {
-        err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
-        return -1;
-    }
-
-    return 0;
-}
-
-int a2_tgdb_get_sources(void){
-    if ( commands_issue_command ( ANNOTATE_INFO_SOURCES, NULL, 0 ) == -1 ) {
-        err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
-        return -1;
-    }
-
-    return 0;
-}
-
-char *a2_tgdb_err_msg(void) {
-    return err_get();
-}
-
-int a2_tgdb_change_prompt(char *prompt) {
-    /* Must call a callback to change the prompt */
-    if ( commands_issue_command ( ANNOTATE_SET_PROMPT, prompt, 2 ) == -1 ) {
-        err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
-        return -1;
-    }
-            
-    return 0;
-}
-
+/* This is ok as static, all references will use the same data. */
 static char *a2_tgdb_commands[] = {
 	"continue",
 	"finish",
@@ -268,15 +67,258 @@ static char *a2_tgdb_commands[] = {
 	"down"
 };
 
-char *a2_tgdb_return_client_command ( enum tgdb_command c ) {
+
+static int close_inferior_connection ( struct annotate_two *a2 ) {
+	if ( a2->inferior_stdin != -1 )
+		xclose ( a2->inferior_stdin );
+
+	a2->inferior_stdin = -1;
+	a2->inferior_out   = -1;
+	
+	/* close tty connection */
+	if ( a2->inferior_slave_fd != -1 )
+		xclose ( a2->inferior_slave_fd );
+
+	a2->inferior_slave_fd = -1;
+
+	if ( a2->inferior_tty_name[0] != '\0' )
+		pty_release ( a2->inferior_tty_name );
+
+	return 0;
+}
+
+/* Here are the two functions that deal with getting tty information out
+ * of the annotate_two subsystem.
+ */
+int a2_open_new_tty ( struct annotate_two *a2, int *inferior_stdin, int *inferior_stdout ) {
+    close_inferior_connection(a2);
+
+	/* Open up the tty communication */
+	if ( util_new_tty(&(a2->inferior_stdin), &(a2->inferior_slave_fd), a2->inferior_tty_name) == -1){
+		err_msg("%s:%d -> Could not open child tty", __FILE__, __LINE__);
+		return -1;
+	}
+
+	*inferior_stdin     = a2->inferior_stdin;
+	*inferior_stdout    = a2->inferior_stdin;
+
+    a2_set_inferior_tty ( a2 );
+    
+    return 0;
+}
+
+char *a2_get_tty_name ( struct annotate_two *a2 ) {
+	return a2->inferior_tty_name;
+}
+
+/* initialize_annotate_two
+ *
+ * initializes an annotate_two subsystem and sets up all initial values.
+ */
+static struct annotate_two *initialize_annotate_two ( void ) {
+	struct annotate_two *a2 = (struct annotate_two *)
+		xmalloc ( sizeof ( struct annotate_two ) );
+
+	a2->tgdb_initialized 	= 0;
+	a2->debugger_stdin 		= -1;
+	a2->debugger_out 		= -1;
+
+	a2->inferior_stdin      = -1;
+	a2->inferior_out 	    = -1;
+	a2->inferior_slave_fd   = -1;
+	a2->inferior_tty_name[0]= '\0';
+
+	/* null terminate */
+	a2->config_dir[0] 		= '\0';
+	a2->a2_gdb_init_file[0] = '\0';
+
+	return a2;
+}
+
+/* tgdb_setup_config_file: 
+ * -----------------------
+ *  Creates a config file for the user.
+ *
+ *  Pre: The directory already has read/write permissions. This should have
+ *       been checked by tgdb-base.
+ *
+ *  Return: 1 on success or 0 on error
+ */
+static int tgdb_setup_config_file ( struct annotate_two *a2, const char *dir ) {
+    FILE *fp;
+
+    strncpy ( a2->config_dir , dir , strlen ( dir ) + 1 );
+
+    fs_util_get_path ( dir, "a2_gdb_init", a2->a2_gdb_init_file );
+
+    if ( (fp = fopen ( a2->a2_gdb_init_file, "w" )) ) {
+        fprintf( fp, 
+            "set annotate 2\n"
+            "set height 0\n"
+            "set prompt (tgdb) \n");
+        fclose( fp );
+    } else {
+        err_msg("%s:%d fopen error '%s'", __FILE__, __LINE__, a2->a2_gdb_init_file);
+        return 0;
+    }
+
+    return 1;
+}
+
+struct annotate_two* a2_create_instance ( 
+	const char *debugger, 
+	int argc, char **argv,
+	const char *config_dir ) {
+	
+	struct annotate_two *a2 = initialize_annotate_two ();
+    char a2_debug_file[PATH_MAX];
+
+    if ( !tgdb_setup_config_file( a2, config_dir ) ) {
+        err_msg("%s:%d tgdb_init_config_file error", __FILE__, __LINE__);
+        return NULL;
+    }
+
+    /* Initialize the debug file that a2_tgdb writes to */
+    fs_util_get_path ( config_dir, "a2_tgdb_debug.txt", a2_debug_file );
+    io_debug_init(a2_debug_file);
+
+    a2->debugger_pid = 
+		invoke_debugger(
+				debugger, argc, argv, 
+				&a2->debugger_stdin, &a2->debugger_out, 
+				0, a2->a2_gdb_init_file);
+
+	/* Couldn't invoke process */
+	if ( a2->debugger_pid == -1 )
+		return NULL;
+
+	return a2;
+}
+
+int a2_initialize ( 
+	struct annotate_two *a2, 
+	int *debugger_stdin, int *debugger_stdout,
+	int *inferior_stdin, int *inferior_stdout,
+	command_completed command_finished) {
+
+	*debugger_stdin 	= a2->debugger_stdin;
+	*debugger_stdout 	= a2->debugger_out;
+
+	a2->data 	= data_initialize ();
+	a2->sm 	 	= state_machine_initialize ();
+	a2->c 		= commands_initialize ();
+	a2->g 		= globals_initialize ();
+
+	a2_open_new_tty ( a2, inferior_stdin, inferior_stdout );
+
+    a2_get_source_absolute_filename(a2, NULL);
+
+    if ( commands_issue_command ( a2->c, ANNOTATE_INFO_SOURCE_RELATIVE, NULL, 0 ) == -1 ) {
+        err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
+        return -1;
+    }
+
+    a2->tgdb_initialized = 1;
+
+	a2->command_completed_callback = command_finished;
+
+    return 0;
+}
+
+/* TODO: Implement shutdown properly */
+int a2_shutdown ( struct annotate_two *a2 ) {
+    xclose(a2->debugger_stdin);
+
+	data_shutdown ( a2->data );
+	state_machine_shutdown ( a2->sm );
+	commands_shutdown ( a2->c );
+	globals_shutdown ( a2->g );
+	return 0;
+}
+
+/* TODO: Implement error messages. */
+int a2_err_msg ( struct annotate_two *a2 ) {
+	return -1;
+}
+
+int a2_is_client_ready(struct annotate_two *a2) {
+    if ( !a2->tgdb_initialized )
+        return FALSE;
+
+    /* If the user is at the prompt */
+    if ( data_get_state(a2->data) == USER_AT_PROMPT )
+        return TRUE;
+
+    return FALSE;
+}
+
+int a2_parse_io ( 
+		struct annotate_two *a2,
+		const char *input_data, const size_t input_data_size,
+		char *debugger_output, size_t *debugger_output_size,
+		char *inferior_output, size_t *inferior_output_size,
+		struct queue *q ) {
+
+	size_t size;
+
+	size = a2_handle_data ( a2, a2->sm, input_data, input_data_size,
+		debugger_output, *debugger_output_size, q );
+
+	*debugger_output_size = size;
+
+	return 0;
+}
+
+int a2_get_source_absolute_filename ( struct annotate_two *a2, const char *file ) {
+
+    if ( commands_issue_command ( a2->c, ANNOTATE_LIST, file, 0 ) == -1 ) {
+        err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
+        return -1;
+    }
+
+    if ( commands_issue_command ( a2->c, ANNOTATE_INFO_SOURCE_ABSOLUTE, file, 0 ) == -1 ) {
+        err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
+        return -1;
+    }
+
+	return 0;
+}
+
+int a2_get_inferior_sources ( struct annotate_two *a2 ) {
+    if ( commands_issue_command ( a2->c, ANNOTATE_INFO_SOURCES, NULL, 0 ) == -1 ) {
+        err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
+        return -1;
+    }
+
+	return 0;
+}
+
+int a2_change_prompt(struct annotate_two *a2, const char *prompt) {
+
+    /* Must call a callback to change the prompt */
+    if ( commands_issue_command ( a2->c, ANNOTATE_SET_PROMPT, prompt, 2 ) == -1 ) {
+        err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
+        return -1;
+    }
+            
+    return 0;
+}
+
+int a2_command_callback(struct annotate_two *a2, const char *command) {
+
+	/* Unimplemented */
+	return -1;
+}
+
+char *a2_return_client_command ( struct annotate_two *a2, enum tgdb_command c ) {
 	if ( c < TGDB_CONTINUE || c >= TGDB_ERROR )
 		return NULL;
 
 	return a2_tgdb_commands[c];
 }
 
-/* This is a real hack */
-char *a2_tgdb_client_modify_breakpoint ( const char *file, int line, enum tgdb_breakpoint_action b ) {
+
+char *a2_client_modify_breakpoint ( struct annotate_two *a2, const char *file, int line, enum tgdb_breakpoint_action b ) {
 	char *val = (char*)xmalloc ( sizeof(char)* ( strlen(file) + 128 ) );
 
 	if ( b == TGDB_BREAKPOINT_ADD ) {
@@ -287,4 +329,29 @@ char *a2_tgdb_client_modify_breakpoint ( const char *file, int line, enum tgdb_b
 		return val;
 	} else 
 		return NULL;
+}
+
+pid_t a2_get_debugger_pid ( struct annotate_two *a2 ) {
+	return a2->debugger_pid;
+}
+
+int a2_completion_callback(struct annotate_two *a2, const char *command) {
+    if ( commands_issue_command ( a2->c, ANNOTATE_COMPLETE, command, 4 ) == -1 ) {
+        err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
+        return -1;
+    }
+
+    return 0;
+}
+
+int a2_user_ran_command ( struct annotate_two *a2 ) {
+	return commands_user_ran_command ( a2->c );
+}
+
+int a2_prepare_for_command ( struct annotate_two *a2, struct command *com ) {
+	return commands_prepare_for_command ( a2, a2->c, com );
+}
+
+int a2_is_misc_prompt ( struct annotate_two *a2 ) {
+	return globals_is_misc_prompt ( a2->g );
 }

@@ -19,6 +19,9 @@
 #include "error.h"
 #include "data.h"
 #include "globals.h"
+#include "annotate_two.h"
+#include "sys_util.h"
+
 
 /* This package looks for annotations coming from gdb's output.
  * The program that is being debugged does not have its ouput pass
@@ -35,20 +38,38 @@
  * annotate unit and this unit is free of all responsibility :)
  */
 
-static char tgdb_buffer[MAXLINE];
-static size_t tgdb_size = 0;
-
 enum state {
    DATA,          /* data from debugger */
    NEW_LINE,      /* got '\n' */
    CONTROL_Z,     /* got first ^Z '\032' */
    ANNOTATION,    /* got second ^Z '\032' */
    NL_DATA        /* got a nl at the end of annotation */
-} tgdb_state = DATA;
+};
 
-int a2_handle_data(char *data, size_t size,
-                     char *gui_data, size_t gui_size, 
-                     struct queue *q){
+struct state_machine {
+	char tgdb_buffer[MAXLINE];
+	size_t tgdb_size;
+	enum state tgdb_state;
+};
+
+struct state_machine *state_machine_initialize ( void ) {
+	struct state_machine *sm = (struct state_machine * ) xmalloc ( sizeof ( struct state_machine ) );	
+
+	sm->tgdb_size 	= 0;
+	sm->tgdb_state 	= DATA;
+
+	return sm;
+}
+
+void state_machine_shutdown ( struct state_machine *sm ) {
+	free ( sm );
+	sm = NULL;
+}
+
+int a2_handle_data(
+		struct annotate_two *a2,
+		struct state_machine *sm, const char *data, const size_t size,
+        char *gui_data, size_t gui_size, struct queue *q){
    int i, counter = 0;
    
    /* track state to find next file and line number */
@@ -58,27 +79,27 @@ int a2_handle_data(char *data, size_t size,
          case '\r':
             break;
          case '\n':     
-            switch(tgdb_state){
+            switch(sm->tgdb_state){
                case DATA:        
-                  tgdb_state = NEW_LINE;
+                  sm->tgdb_state = NEW_LINE;
                   break;
                case NEW_LINE:    
-                  tgdb_state = NEW_LINE;
-                  data_process('\n', gui_data, &counter, q);    
+                  sm->tgdb_state = NEW_LINE;
+                  data_process(a2, '\n', gui_data, &counter, q);    
                   break;
                case CONTROL_Z:   
-                  tgdb_state = DATA;
-                  data_process('\n', gui_data, &counter, q);  
-                  data_process('\032', gui_data, &counter, q);    
+                  sm->tgdb_state = DATA;
+                  data_process(a2, '\n', gui_data, &counter, q);  
+                  data_process(a2, '\032', gui_data, &counter, q);    
                   break;
                case ANNOTATION:  /* Found an annotation */
-                  tgdb_state = NL_DATA;
-                  tgdb_parse_annotation(tgdb_buffer, tgdb_size, q);
-                  tgdb_size = 0;                               
-                  memset(tgdb_buffer, '\0', MAXLINE);             
+                  sm->tgdb_state = NL_DATA;
+                  tgdb_parse_annotation(a2, sm->tgdb_buffer, sm->tgdb_size, q);
+                  sm->tgdb_size = 0;                               
+                  memset(sm->tgdb_buffer, '\0', MAXLINE);             
                   break;
                case NL_DATA:     
-                  tgdb_state = NEW_LINE;
+                  sm->tgdb_state = NEW_LINE;
                   break; 
                default:                                                       
                   err_msg("%s:%d -> Bad state transition", __FILE__, __LINE__);
@@ -86,22 +107,22 @@ int a2_handle_data(char *data, size_t size,
             } /* end switch */
             break;
          case '\032':
-            switch(tgdb_state){
+            switch(sm->tgdb_state){
                case DATA:        
-                  tgdb_state = DATA;
-                  data_process('\032', gui_data, &counter, q);  
+                  sm->tgdb_state = DATA;
+                  data_process(a2, '\032', gui_data, &counter, q);  
                   break;
                case NEW_LINE:    
-                  tgdb_state = CONTROL_Z;          
+                  sm->tgdb_state = CONTROL_Z;          
                   break;
                case NL_DATA:     
-                  tgdb_state = CONTROL_Z;          
+                  sm->tgdb_state = CONTROL_Z;          
                   break;
                case CONTROL_Z:   
-                  tgdb_state = ANNOTATION;         
+                  sm->tgdb_state = ANNOTATION;         
                   break;
                case ANNOTATION:  
-                  tgdb_buffer[tgdb_size++] = data[i];    
+                  sm->tgdb_buffer[sm->tgdb_size++] = data[i];    
                   break;
                default:                                                       
                   err_msg("%s:%d -> Bad state transition", __FILE__, __LINE__);
@@ -109,27 +130,27 @@ int a2_handle_data(char *data, size_t size,
             } /* end switch */
             break;
          default:
-            switch(tgdb_state){
+            switch(sm->tgdb_state){
                case DATA:        
-                  data_process(data[i], gui_data, &counter, q);  
+                  data_process(a2, data[i], gui_data, &counter, q);  
                   break;
                case NL_DATA:     
-                  tgdb_state = DATA;
-                  data_process(data[i], gui_data, &counter, q);  
+                  sm->tgdb_state = DATA;
+                  data_process(a2, data[i], gui_data, &counter, q);  
                   break;
                case NEW_LINE:    
-                  tgdb_state = DATA;
-                  data_process('\n', gui_data, &counter, q);     
-                  data_process(data[i], gui_data, &counter, q);  
+                  sm->tgdb_state = DATA;
+                  data_process(a2, '\n', gui_data, &counter, q);     
+                  data_process(a2, data[i], gui_data, &counter, q);  
                   break;
                case CONTROL_Z:   
-                  tgdb_state = DATA;
-                  data_process('\n', gui_data, &counter, q);                 
-                  data_process('\032', gui_data, &counter, q);                 
-                  data_process(data[i], gui_data, &counter, q);                 
+                  sm->tgdb_state = DATA;
+                  data_process(a2, '\n', gui_data, &counter, q);                 
+                  data_process(a2, '\032', gui_data, &counter, q);                 
+                  data_process(a2, data[i], gui_data, &counter, q);                 
                   break;
                case ANNOTATION:  
-                  tgdb_buffer[tgdb_size++] = data[i];    
+                  sm->tgdb_buffer[sm->tgdb_size++] = data[i];    
                   break;
                default:                                                       
                   err_msg("%s:%d -> Bad state transition", __FILE__, __LINE__);

@@ -70,7 +70,7 @@ int util_new_tty(int *masterfd, int *slavefd, char *sname);
 /* tgdb_util_free_tty: Free's a tty session.
  * Return: -1 on error, 0 on success.
  */
-int util_free_tty(int *masterfd, int *slavefd, char *sname);
+int util_free_tty(int *masterfd, int *slavefd, const char *sname);
 
 /* free_memory: utility function that frees up memory.
  *
@@ -95,7 +95,7 @@ void free_memory(int argc, char *argv[]);
  *      Return: -1 on error, pid of child on success
  */
 int invoke_debugger(
-        char *path, 
+        const char *path, 
         int argc, char *argv[], 
         int *in, int *out, 
         int choice, char *filename);

@@ -59,7 +59,7 @@
 #include "sources.h"
 #include "tgdb.h"
 #include "filedlg.h"
-#include "commands.h"
+#include "cgdbrc.h"
 #include "input.h"
 #include "highlight.h"
 
@@ -1114,7 +1114,7 @@ int internal_if_input(int key) {
                      if_layout();
 
                      break;
-                case CONTROL_T:
+                case CGDB_KEY_CTRL_T:
                      if ( tgdb_new_tty() == -1 ) { 
                          /* Error */
                      } else {

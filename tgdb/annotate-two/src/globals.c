@@ -8,85 +8,79 @@
 
 #include "types.h"
 #include "globals.h"
+#include "sys_util.h"
+
+struct globals {
+	/* This determines if the char enter has been typed by the
+	 * user since the prompt annotation has been sent by gdb
+	 */
+	unsigned short info_sources_started;
+
+	 /* Lists a file */
+	unsigned short list_started;
+	unsigned short list_had_error;
+	unsigned short misc_prompt_command;
+};
+
+struct globals *globals_initialize ( void ) {
+	struct globals *g = (struct globals *)xmalloc ( sizeof ( struct globals ) );
+
+	g->info_sources_started = FALSE;
+	g->list_started 		= FALSE;
+	g->list_had_error 		= FALSE;
+	g->misc_prompt_command  = FALSE;
+
+	return g;
+}
+
+/* For info_sources_started */
+void globals_shutdown ( struct globals *g ) {
+	free ( g );
+	g = NULL;
+}
 
 /* This turns true if tgdb gets a misc prompt. This is so that we do not 
  * send commands to gdb at this point.
  */
-static unsigned short misc_prompt_command = FALSE;
-   
-int globals_is_misc_prompt(void){
-   return misc_prompt_command;
+int globals_is_misc_prompt( struct globals *g){
+   return g->misc_prompt_command;
 }
    
-void globals_set_misc_prompt_command(unsigned short set){
-   misc_prompt_command = set;
+void globals_set_misc_prompt_command( struct globals *g, unsigned short set){
+   g->misc_prompt_command = set;
 }  
 
-static unsigned short tgdb_recieved_signal = FALSE;
-
-int global_signal_recieved(void){
-   return tgdb_recieved_signal;
-}
-/* if 1, then tgdb can issue a command, 0 can not */
-void global_set_signal_recieved(unsigned short set){
-   tgdb_recieved_signal = set;
+void global_set_start_info_sources( struct globals *g){
+   g->info_sources_started = TRUE;
 }
 
-/* This determines if the char enter has been typed by the
- * user since the prompt annotation has been sent by gdb
- */
-static unsigned short info_sources_started = FALSE;
-
-void global_set_start_info_sources(void){
-   info_sources_started = TRUE;
+int global_has_info_sources_started(struct globals *g){
+   return g->info_sources_started;
 }
 
-int global_has_info_sources_started(void){
-   return info_sources_started;
+void global_reset_info_sources_started(struct globals *g){
+   g->info_sources_started = FALSE;
 }
 
-void global_reset_info_sources_started(void){
-   info_sources_started = FALSE;
+/* For list_started */
+void global_set_start_list(struct globals *g){
+   g->list_started = TRUE;
+   g->list_had_error = FALSE;
 }
 
-/* These check to see if the gui is working on getting an absolute path to
- * a source file in the debugged program.
- */
-static unsigned short info_source_started = FALSE;
-
-void global_set_start_info_source(void){
-   info_source_started = TRUE;
+int global_has_list_started(struct globals *g){
+   return g->list_started;
 }
 
-int global_has_info_source_started(void){
-   return info_source_started;
+void global_list_finished ( struct globals *g ){
+   g->list_started = FALSE;
 }
 
-void global_reset_info_source_started(void){
-   info_source_started = FALSE;
+/* For list_had_error */
+unsigned short global_list_had_error ( struct globals *g ) {
+    return g->list_had_error;
 }
 
- /* Lists a file */
-static unsigned short list_started = FALSE;
-static unsigned short list_had_error = FALSE;
-
-void global_set_start_list(void){
-   list_started = TRUE;
-   list_had_error = FALSE;
-}
-
-int global_has_list_started(void){
-   return list_started;
-}
-
-void global_list_finished ( void ){
-   list_started = FALSE;
-}
-
-unsigned short global_list_had_error ( void ) {
-    return list_had_error;
-}
-
-void global_set_list_error ( unsigned short error ) {
-    list_had_error = error;
+void global_set_list_error ( struct globals *g, unsigned short error ) {
+    g->list_had_error = error;
 }

@@ -1,3 +1,33 @@
+08/16/2003 Bob Rossi <bob@brasko.net>
+
+	* a2-tgdb.h: added interface for a2_user_ran_command,
+	a2_prepare_for_command, a2_is_misc_prompt, a2_open_new_tty,
+	a2_get_tty_name. Removed old interface.
+	* annotate.h: tgdb_parse_annotation, added struct context
+	added #include "annotate_two.h"
+	* commands.h: added struct commands context.
+	added commands_initialize,commands_shutdown, adding context to all
+	prototypes.
+	* data.h: added struct data context. Added data_initialize, data_shutdown.
+	adding context to data_set_state, data_get_state, data_process.
+	* globals.h: added struct globals context. added globals_initialize,
+	globals_shutdown. removed functions global_signal_recieved,
+	global_set_signal_recieved, global_set_start_info_source,
+	global_has_info_source_started, global_reset_info_source_started. Added
+	context to all prototypes.
+	* state_machine.h: added struct state_machine context. Added
+	state_machine_initialize, state_machine_shutdown. Added context to all
+	prototypes.
+	* a2-tgdb.c: implements changes to headers.
+	* annotate.c: ditto
+	* commands.c: ditto
+	* data.c: ditto
+	* globals.c: ditto
+	* state_machine.c: ditto
+	* tgdb.h: tgdb_get_sources, tgdb_get_source_absolute_filename and
+	tgdb_err_msg are changed from function pointer to prototype.
+	* tgdb.c: implement annotate_two's new context driven interface.
+
 version 0.3.4 (08/14/2003):
 
 08/12/2003 Bob Rossi <bob@brasko.net>

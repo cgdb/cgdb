@@ -70,7 +70,7 @@
 #include "ibuf.h"
 #include "input.h"
 #include "fs_util.h"
-#include "commands.h"
+#include "cgdbrc.h"
 #include "io.h"
 
 /* --------------- */

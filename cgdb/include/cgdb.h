@@ -50,11 +50,6 @@
 /* Keys */
 #define CGDB_BACKSPACE_KEY(c) (c == 8 || c == 127 || c == KEY_BACKSPACE)
 
-/* Control chars used */
-#define CONTROL_K 11
-#define CONTROL_T 20
-#define CONTROL_U 21
-
 #define CGDB_KEY_RESIZE KEY_MAX
 
 void cgdb_set_esc_sequence_timeout ( int msec );

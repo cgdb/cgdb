@@ -1,3 +1,9 @@
+08/16/2003 Bob Rossi <bob@brasko.net>
+	
+	* fork_util.h: invoke_debugger, added 'const' to arg path.
+	util_free_tty, added const to arg sname.
+	* fork_util.c: ditto
+
 version 0.3.4 (08/14/2003):
 
 version 0.3.3a (07/16/2003):

@@ -16,6 +16,10 @@ extern "C" {
 #endif 
 
 #include "types.h"
+#include "tgdb_interface.h"
+#include "annotate_two.h"
+
+struct data;
 
 enum internal_state {
    VOID,             /* not interesting */
@@ -27,15 +31,19 @@ enum internal_state {
    INTERNAL_COMMAND  /* This is a command issued by tgdb */
 };
 
+struct data *data_initialize ( void );
+
+void data_shutdown ( struct data *d );
+
 /* data_set_state:   Sets the state of the data package. This should usually be called
  *                   after an annotation has been read.
  */
-void data_set_state(enum internal_state state);
+void data_set_state ( struct annotate_two *a2, enum internal_state state );
 
 /* data_get_state:   Gets the state of the data package 
  * Returns:          The current state.
  */
-enum internal_state data_get_state(void);
+enum internal_state data_get_state ( struct data *d );
 
 /* data_process:  This process's every character that is outputted from gdb not 
  *                including annotations.
@@ -45,7 +53,7 @@ enum internal_state data_get_state(void);
  *             based on whatever the character a was.
  *    n     -  This is the current size of buf.
  */
-void data_process(char a, char *buf, int *n, struct queue *q);
+void data_process ( struct annotate_two *a2, char a, char *buf, int *n, struct queue *q);
 
 #ifdef __cplusplus
 }

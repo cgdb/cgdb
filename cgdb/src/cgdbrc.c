@@ -11,7 +11,7 @@
 #endif  /* HAVE_STDLIB_H */
 
 
-#include "commands.h"
+#include "cgdbrc.h"
 #include "command_lexer.h"
 #include "tgdb.h"
 #include "interface.h"
@@ -281,12 +281,12 @@ int command_start_tty( void )
 {
     /* FIXME: Find out what this is supposed to do and implement */
     return 1;
-    if ( tgdb_new_tty() == -1 ) {
-        return 1;
-    } else {
-        /* FIXME: interface does scr_free( tty_win ), tty_win = NULL, if_layout(); */
-        return 0;
-    }
+//    if ( tgdb_new_tty() == -1 ) {
+//        return 1;
+//    } else {
+//        /* FIXME: interface does scr_free( tty_win ), tty_win = NULL, if_layout(); */
+//        return 0;
+//    }
 }
 
 int command_toggle_tty( void )

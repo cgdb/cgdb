@@ -1,3 +1,13 @@
+08/16/2003 Bob Rossi <bob@brasko.net>
+	
+	* FAQ: changed tty question to reflect 2 reasons its tty's are needed.
+	* Makefile.am: cgdb_SOURCES, renamed file commands.c to cgdbrc.c
+	* Makefile.in: generated from automake, changed because of above line
+	* cgdb.c: changed #include "commands.h" to #include "cgdbrc.h"
+	* cgdb.h: removed unused CONTROL_* key defines.
+	* interface.c: changed #include "commands.h" to #include "cgdbrc.h"
+	internal_if_input, changed case CONTROL_T to CGDB_KEY_CTRL_T
+
 version 0.3.4 (08/14/2003):
 
 07/16/2003 Peter Kovacs <peter@kovax.org>
