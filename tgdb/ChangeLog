@@ -1,3 +1,8 @@
+04/02/2005 Bob Rossi <bob@brasko.net>
+	
+	* tgdb.c (tgdb_add_quit_command): Add function.
+	(tgdb_recv_debugger_data): Quit when EOF is read.
+
 03/31/2005 Bob Rossi <bob@brasko.net>
 
 	* tgdb.c (struct tgdb): Add has_sigchld_recv field.

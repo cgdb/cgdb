@@ -1,12 +1,10 @@
 Bug fixes for cgdb-0.5.1
 
-Bugs:
-
-- Fix --args command line option
-
 Closed:
 
 - Fix race condition on waitpid
+- Fix --args command line option
+- Make sure when EOF is read that CGDB dies.
 
 Bug fixes before cgdb-0.3.2 release.
 

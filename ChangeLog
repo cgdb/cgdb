@@ -1,5 +1,9 @@
 04/02/2005 Bob Rossi <bob@brasko.net>
 
+	* RELEASE_TODO: Update todo.
+
+04/02/2005 Bob Rossi <bob@brasko.net>
+
 	* NEWS: Add message about obsoleting b and f commands.
 	* README: Reformat and remove b and f commands.
 

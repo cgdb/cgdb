@@ -1093,6 +1093,30 @@ size_t tgdb_recv_readline_data ( struct tgdb *tgdb, char *buf, size_t n ) {
     return length;
 }
 
+/**
+ * TGDB is going to quit.
+ *
+ * \param tgdb
+ * The tgdb context
+ *
+ * \return
+ * 0 on success or -1 on error
+ */
+static int tgdb_add_quit_command ( struct tgdb *tgdb ) {
+	struct tgdb_debugger_exit_status *tstatus;
+
+    tstatus = (struct tgdb_debugger_exit_status *) 
+         xmalloc ( sizeof ( struct tgdb_debugger_exit_status ) );
+
+    /* Child did not exit normally */
+    tstatus->exit_status  = -1;
+    tstatus->return_value = 0;
+
+	tgdb_types_append_command ( tgdb->command_list, TGDB_QUIT, tstatus );
+
+	return 0;
+}
+
 /* 
  * This is called when GDB has finished.
  * Its job is to add the type of QUIT command that is appropriate.
@@ -1201,8 +1225,11 @@ size_t tgdb_recv_debugger_data ( struct tgdb *tgdb, char *buf, size_t n ) {
     /* 1. read all the data possible from gdb that is ready. */
     if( (size = io_read(tgdb->debugger_stdout, local_buf, n)) < 0){
         logger_write_pos ( logger, __FILE__, __LINE__, "could not read from masterfd");
-        return -1;
+        buf_size = -1;
+        tgdb_add_quit_command ( tgdb );
+        goto tgdb_finish;
     } else if ( size == 0 ) {/* EOF */ 
+        tgdb_add_quit_command ( tgdb );
         goto tgdb_finish;
     }
 

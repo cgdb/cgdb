@@ -1,3 +1,7 @@
+04/02/2005 Bob Rossi <bob@brasko.net>
+
+	* fork_util.c (invoke_debugger): Call exit() if exec failed.
+
 04/01/2005 Bob Rossi <bob@brasko.net>
 
    * logger.c (logger_set_file): print message when couldn't open file

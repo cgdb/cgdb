@@ -313,11 +313,15 @@ int invoke_debugger(
         }
 
         xclose(pin[0]);
-        if(execvp(local_argv[0], local_argv) == -1) {
-            logger_write_pos ( logger, __FILE__, __LINE__, "execvp failed");
-            free_memory(argc, local_argv);
-            return -1;
-        }
+        execvp(local_argv[0], local_argv);
+
+        /* Will get here if exec failed. This will happen when the 
+         * - "gdb" is not on the users path, or if 
+         * - user specified a different program via the -d option and it was
+         *   not able to be exec'd.
+         */
+
+        exit (0);
     }
 
     *in = pin[1];
