@@ -1,1 +1,1 @@
-noinst_HEADERS = gdbmi_tgdb.h gdbmi_parse.h
+noinst_HEADERS = gdbmi_tgdb.h gdbmi_parse.h gdbmi_init.h
