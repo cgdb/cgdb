@@ -589,6 +589,8 @@ static void if_get_command(struct sviewer *sview) {
    if_draw();
 }
 
+
+#if 0 /* removed */
 static enum Command_Type command_type(void)
 {
     int start = 0;
@@ -622,10 +624,9 @@ static enum Command_Type command_type(void)
     
     return CMD_LINE_NUMBER;
 }
+#endif
 
 static void if_run_command(struct sviewer *sview) {
-    char *set_com;        /* Pointer to the parameter to a :set command */
-    
     /* Get a command and then try to process it */
     if_get_command(sview);
 
