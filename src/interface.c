@@ -938,10 +938,10 @@ static void source_input(struct sviewer *sview, int key)
         case 'G': /* end of file */
             source_set_sel_line(sview, 10000000);
             break;
-        case 'N':
+        case 'f':
             source_next(sview);
             break;
-        case 'P':
+        case 'b':
             source_previous(sview);
             break;
         case '=':

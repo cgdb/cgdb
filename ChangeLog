@@ -4,6 +4,9 @@
    present before but it was not picked up by the new command parser.
    * Changed searching keys: the 'n' key to mean 'next forward search' 
    and the 'N' key to mean 'next reverse search'.
+   * Changed file buffer key commands: 'b' goes back a file. 'f' goes
+   forward a file.
+   * Removed the '.' command: It is useless :)
 
 02/05/2003 Peter Kovacs <peter@kovax.org>
 
