@@ -49,10 +49,6 @@ struct sviewer{
     struct list_node *list_head;       /* File list */    
     struct list_node *cur;             /* Current node we're displaying */
     WINDOW *win;                       /* Curses window */
-
-    struct list_node *queue[QUEUE_SIZE];    /* Queue of files viewed */
-    int queue_index;                        /* current position in queue */
-    int queue_top_index;                    /* top of queue */
 };
 
 struct buffer{
@@ -283,20 +279,6 @@ void source_enable_break(struct sviewer *sview, const char *path, int line);
  *   sview:  The source viewer object
  */
 void source_clear_breaks(struct sviewer *sview);
-
-/* source_next: Goto the next source file viewed.
- * ------------
- *
- *   sview:  The source viewer object
- */
-void source_next(struct sviewer *sview);
-
-/* source_previous: Goto the previous source file viewed. ( the last )
- * ----------------
- *
- *   sview:  The source viewer object
- */
-void source_previous(struct sviewer *sview);
 
 /**
  * Check's to see if the current source file has changed. If it has it loads

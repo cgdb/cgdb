@@ -1,3 +1,8 @@
+04/02/2005 Bob Rossi <bob@brasko.net>
+
+	* NEWS: Add message about obsoleting b and f commands.
+	* README: Reformat and remove b and f commands.
+
 04/01/2005 Bob Rossi <bob@brasko.net>
 
     * release-todo.txt: Update auto tool versions.

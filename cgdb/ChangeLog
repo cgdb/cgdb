@@ -1,3 +1,22 @@
+04/02/2005 Bob Rossi <bob@brasko.net>
+
+    * helptext.h: Updated the README file.
+	* sources.h (struct sviewer): Remove queue, queue_index and
+	queue_top_index fields.
+	(source_next): Remove.
+	(source_previous): Ditto.
+	* sources.c (source_queue_init): Remove.
+	(source_queue_remove): Ditto.
+	(source_queue_push): Ditto.
+	(source_queue_previous): Ditto.
+	(source_queue_next): Ditto.
+	(source_new): Remove processing for queue data.
+	(source_del): Ditto.
+	(source_set_exec_line): Ditto.
+	(source_free): Ditto.
+
+	* interface.c (source_input): Remove b and f commands.
+
 04/01/2005 Bob Rossi <bob@brasko.net>
    
    * Makefile.in: Regenerated with documented autotools version.

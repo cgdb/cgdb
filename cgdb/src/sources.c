@@ -73,95 +73,6 @@ static int verify_file_exists(const char *path) {
     return 1;
 }
 
-/* source_queue_init: Initializes the queue to be empty.
- * ------------------
- *
- *   sview:  The source viewer object
- */
-void source_queue_init(struct sviewer *sview) {
-    int i;
-    
-    for ( i = 0; i < QUEUE_SIZE; i++ )
-        sview->queue[i] = NULL;
-    sview->queue_index = 0;
-    sview->queue_top_index = 0;
-}
-
-/* source_queue_remove: Removes a specific file from the queue
- * --------------------
- *
- *   sview:  The source viewer object
- */
-void source_queue_remove(struct sviewer *sview, struct list_node *node) {
-    int i, j;
-    
-    for ( i = 0; i < sview -> queue_top_index; i++ ) {
-        if ( sview->queue[i] == node ) {    /* Found */
-            sview->queue[i] = NULL;
-            for ( j = i; j < sview -> queue_top_index; j++)
-               sview->queue[j] = sview->queue[j + 1]; 
-
-            for ( j = sview ->queue_top_index; j < QUEUE_SIZE - 1; j++)
-               sview->queue[j] = NULL; 
-            sview->queue_top_index--;
-            break;
-        }
-    }
-}
-
-/* source_queue_push: Removes a specific file from the queue
- * --------------------
- *
- *   sview:  The source viewer object
- */
-void source_queue_push(struct sviewer *sview, struct list_node *node) {
-    int i = sview -> queue_top_index, j, k;
-
-    /* If the file is already in the queue, just move it to the top */
-    for ( j = 0; j < i; j++ ) {
-        /* Found the file, swap the rest down and put it on top */
-        if ( sview->queue[j] == node ) {
-            for ( k = j; k < i; k++ )
-               sview->queue[k] = sview->queue[k + 1]; 
-
-            sview->queue[i - 1] = node;
-            return;
-        }
-    }
-
-    /* Add to the non-full queue */
-    if ( i < QUEUE_SIZE ) {
-        sview->queue[i] = node;    
-        sview->queue_index = i;
-        sview->queue_top_index++;
-        for ( j = i + 1; j < QUEUE_SIZE; j++)
-            sview->queue[j] = NULL;
-    } else if ( i == QUEUE_SIZE - 1) { 
-        for ( j = 1; j < QUEUE_SIZE - 1; j++)
-            sview->queue[j - 1] = sview->queue[j];
-        sview->queue[j] = node;
-    }
-}
-
-void source_previous(struct sviewer *sview) {
-    /* Only one file, don't switch */
-    if ( sview->queue_index < 1 )
-        return;
-
-    sview->queue_index--;
-    sview->cur = sview->queue[sview->queue_index];
-}
-
-void source_next(struct sviewer *sview) {
-    /* Check if we are at the last file viewed */
-    if ( sview->queue_index == QUEUE_SIZE - 1 || 
-         sview->queue[sview->queue_index + 1] == NULL )
-        return;
-
-    sview->queue_index++;
-    sview->cur = sview->queue[sview->queue_index];
-}
-
 /* get_relative_node:  Returns a pointer to the node that matches the 
  * ------------------  given relative path.
  
@@ -379,8 +290,6 @@ struct sviewer *source_new(int pos_r, int pos_c, int height, int width)
     rv->cur       = NULL;
     rv->list_head = NULL;
 
-    source_queue_init(rv);
-
     return rv;
 }
 
@@ -450,8 +359,6 @@ int source_del(struct sviewer *sview, const char *path)
     
     if (cur == NULL)
         return 1;      /* Node not found */
-
-    source_queue_remove(sview, cur);
 
     /* Release file buffer, if one is in memory */   
     if (cur->buf.tlines){
@@ -748,9 +655,6 @@ int source_set_exec_line(struct sviewer *sview, const char *path, int line)
     if (!sview->cur->buf.tlines && load_file(sview->cur))
         return 4;
 
-    /* Push file on queue */
-    source_queue_push(sview, sview->cur);
-
     /* Update line, if set */
     if (line--){
         /* Check bounds of line */
@@ -769,8 +673,6 @@ void source_free(struct sviewer *sview)
     /* Free all file buffers */
     while (sview->list_head != NULL)
         source_del(sview, sview->list_head->path);
-
-    source_queue_init(sview);
 
     delwin(sview->win);
 }

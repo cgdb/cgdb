@@ -1,5 +1,9 @@
 CVS
 
+   * obsolete the b and f commands. These were responsible for moving between
+   the previous and the next source file. They made CGDB unstable and I don't
+   think they were in the spirit of a vi/vim clone.
+
    * fixed an annoying bug that appeared while searching for a string. If you 
    canceled the source view regex search by hitting ESC, 2 bad things would happen.
    You would end up on the line that you cancelled at
