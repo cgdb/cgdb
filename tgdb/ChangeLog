@@ -1,3 +1,7 @@
+07/22/2003 Bob Rossi <bob@brasko.net>
+
+	* a2-tgdb.h: Updating interface for .4.0 ( comments only )
+
 07/18/2003 Bob Rossi <bob@brasko.net>
 	
 	* a2-tgdb.h: Updating interface for .4.0 ( comments only )

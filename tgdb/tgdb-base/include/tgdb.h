@@ -405,6 +405,67 @@ extern "C" {
 	 */
 	int tgdb_modify_breakpoint ( struct tgdb *tgdb, const char *file, int line, enum tgdb_breakpoint_action b );
 
+	/***************************************************************************
+	 * tgdb's signal handling
+	 **************************************************************************/
+	
+	/* Needless to say, libtgdb needs to be able to know when asynchonous events
+	 * occur. It depends on knowing when certain signals are sent by the user.
+	 * This happens when the user hits ^c or ^\.
+	 *
+	 * To deal with these issues. libtgdb provides two solutions.
+	 *  1. libtgdb can handle the signals it has interest in.
+	 *     SIGINT,SIGTERM,SIGQUIT
+	 *  2. libtgdb can recieve signal notification from the front end.
+	 *     it will only do special processing on the signals it is interested in.
+	 *
+	 *  The default value for libtgdb is too catch signals. So, if this is 
+	 *  unacceptable for the front end's environment call TGDB_CATCH_SIGNALS.
+	 */
+
+	/* tgdb_catch_signals
+	 * ------------------
+	 *
+	 *  This function tells libtgdb if it should be catching signals or not.
+	 *  This will return if tgdb was catching signals.
+	 *
+	 * tgdb
+     * ----
+     *  An instance of the tgdb library to operate on.
+	 *
+	 * catch_signals
+	 * -------------
+	 *  If non-zero, libtgdb will install signals handlers for asynchronous 
+	 *  events. If 0, libtgdb will depend on notification of signals.
+	 *
+	 * Returns
+	 * -------
+	 *   non-zero if libtgdb was previously installing custom signal handlers,
+	 *   otherwise returns 0 if libtgdb is depending on signal notification.
+	 */
+	int tgdb_catch_signals ( struct tgdb *tgdb, int catch_signals );
+
+	/* tgdb_signal_notification
+	 * ------------------------
+	 *
+	 *  The front end can use this function to notify libtgdb that an
+	 *  asynchronous event has occurred. If signal SIGNUM is relavant
+	 *  to libtgdb, the appropriate processing will be done.
+	 *
+	 * tgdb
+     * ----
+     *  An instance of the tgdb library to operate on.
+	 *
+	 * signum
+	 * ------
+	 *  The signal number SIGNUM that has occured.
+	 *
+	 * Returns
+	 * -------
+	 *   0 on success or -1 on error
+	 */
+	int tgdb_signal_notification ( struct tgdb *tgdb, int signum );
+
 #endif
 
 /* tgdb_init: This starts up gdb and returns a fd to gdb's output and to
