@@ -30,6 +30,10 @@
 #include <string.h>
 #endif /* HAVE_STRING_H */
 
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
+#endif /* HAVE_FCNTL_H */
+
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif /* HAVE_SYS_TYPES_H */
@@ -41,6 +45,10 @@
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif  /* HAVE_SYS_SELECT_H */
+
+#if HAVE_ERRNO_H
+#include <errno.h>
+#endif /* HAVE_ERRNO_H */
 
 #include "io.h"
 #include "error.h"
@@ -247,4 +255,53 @@ int io_data_ready ( int fd, int ms ) {
 	else
 		return 1;
 #endif
+}
+
+int io_getchar ( int fd, unsigned int ms ) {
+    char c;
+    int ret;
+    int flag = 0;
+
+    /* This is the timeout that readline uses, so it must be good.
+     * However, when I hit ESC and then o from the gdb window, the input lib 
+     * returns the key binding Alt-o which doesn't cause the filedlg to be 
+     * opened. This is very annoying.
+     */
+    /*timeout.tv_usec = 100000; */  /* 0.1 seconds; it's in usec */
+
+    /* This is a good value that causes Alt-o to be returned when it should
+     * be and ESC, o when it should be.
+     */
+	if ( io_data_ready ( fd, ms ) == 0 )
+        return 0;   /* Nothing to read. */
+
+    /* Set nonblocking */
+    flag = fcntl(fd, F_GETFL, 0);
+    fcntl(fd, F_SETFL, flag | O_NONBLOCK);
+
+read_again:
+
+    /* Read a char */
+    ret = read(fd, &c, 1);
+
+    if ( ret == -1 && errno == EAGAIN )
+        c = 0;  /* No data available */
+    else if ( ret == -1 && errno == EINTR )
+        goto read_again;
+    else if ( ret == -1 ) {
+        c = 0; 
+        err_msg("Errno(%d)\n", errno);
+    } else if ( ret == 0 ) {
+        c = 0; 
+        ret = -1;
+        err_msg("Read returned nothing\n"); 
+    }
+
+    /* Set to original state */
+    fcntl(fd, F_SETFL, flag);
+
+    if ( ret == -1 )
+        return -1;
+
+    return c;
 }

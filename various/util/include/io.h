@@ -88,4 +88,27 @@ void io_display_char(FILE *fd, char c);
  */
 int io_data_ready ( int fd, int ms );
 
+/**
+ * Read in 1 charachter.
+ *
+ * If no I/O is ready, then the function will wait ms milliseconds waiting 
+ * for input. After that amount of time, this function will return, with
+ * or without input.
+ *
+ * This function is non blocking if ms is 0.
+ *
+ * \param fd
+ * The descriptor to read in from.
+ *
+ * \param ms
+ * The The amount of time in milliseconds to wait for input.
+ * Pass 0, if you do not want to wait.
+ *
+ * @return
+ * -1 on error.
+ *  0 if no data is ready.
+ *  the char read.
+ */
+int io_getchar ( int fd, unsigned int ms );
+
 #endif // __IO_H__

@@ -1,3 +1,8 @@
+04/06/2004 Bob Rossi <bob@brasko.net>
+
+    * io.h: Added io_getchar.
+	* io.c: Implemented io_getchar
+
 01/30/2004 Bob Rossi <bob@brasko.net>
 
    * fork_util.c: invoke_debugger, honors the choice parameter now.
