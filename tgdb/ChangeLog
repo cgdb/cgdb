@@ -5,6 +5,8 @@
    that was typed, and sometimes it doesn't ( depending on version ).
    So, instead of counting lines, tgdb looks for 'Located in' after a 
    the 'info source' command.
+   * Fix bug with 'info sources': tgdb_get_sources was not returning 
+   all of the source files because of an allocation bug.
 
 02/26/2003 Bob Rossi <bob_rossi@cox.net>
 
