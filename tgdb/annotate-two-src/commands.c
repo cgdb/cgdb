@@ -28,8 +28,8 @@ static int breakpoint_enabled = FALSE;
 static int breakpoint_started = FALSE;
 
 /* 'info source' information */
-static int info_source_buf_pos = 0;
-static char info_source_buf[MAXLINE];
+static struct string *info_source_string;
+static int info_source_ready = 0;
 static char last_info_source_requested[MAXLINE];
 
 /* 'info sources' information */
@@ -44,6 +44,7 @@ static char *source_prefix = "Located in ";
 static int source_prefix_length = 11;
 
 void commands_init(void) {
+    info_source_string  = string_init();
     info_sources_string = string_init();
     breakpoint_string   = string_init();
 }
@@ -278,14 +279,13 @@ static int commands_run_list(char *filename, int fd){
    
    commands_set_state(INFO_LIST, NULL);
    global_set_start_list();
+   info_source_ready = 0;
    return commands_run_com(fd, local_com, 1);
 }
 
 static int commands_run_info_source(int fd){
    data_set_state(INTERNAL_COMMAND);
-   info_source_buf_pos = 0;
-   memset(info_source_buf, '\0', MAXLINE);
-   
+   string_clear(info_source_string);
    commands_set_state(INFO_SOURCE, NULL);
    global_set_start_info_source();
    return commands_run_com(fd, "info source", 1);
@@ -335,14 +335,14 @@ void commands_list_command_finished(struct Command ***com, int success){
 
 void commands_send_source_absolute_source_file(struct Command ***com){
    /*err_msg("Whats up(%s:%d)\r\n", info_source_buf, info_source_buf_pos);*/
+    unsigned long length = string_length(info_source_string);
+    static char *info_ptr; 
+    info_ptr = string_get(info_source_string);
 
    /* found */
-   if(info_source_buf_pos >= source_prefix_length && 
-      (strncmp(info_source_buf, source_prefix, source_prefix_length) == 0)){
-      char path[MAXLINE];
-      memset(path, '\0', MAXLINE);
-      strncpy(path, info_source_buf + source_prefix_length, 
-              info_source_buf_pos - source_prefix_length);
+   if(length >= source_prefix_length && 
+      (strncmp(info_ptr, source_prefix, source_prefix_length) == 0)){
+      char *path = info_ptr + source_prefix_length;
 
       /* requesting file */
       if(last_info_source_requested[0] != '\0')
@@ -387,28 +387,26 @@ static void commands_process_source_line(struct Command  ***com){
 }
 
 static void commands_process_info_source(char a){
-   static char internal_info_source_buf[MAXLINE];
-   static int  internal_info_source_buf_pos = 0;
+    unsigned long length;
+    static char *info_ptr;
 
-   if ( a == '\r' )
-      return;
+    if ( info_source_ready  ) /* Already found */
+        return;
+    
+    info_ptr = string_get(info_source_string);
+    length   = string_length(info_source_string);
 
-   if(a == '\n'){ 
-      internal_info_source_buf[internal_info_source_buf_pos] = '\0';
+    if ( a == '\r' )
+        return;
 
-      /* This is the line */
-      if ( strncmp(internal_info_source_buf, source_prefix, source_prefix_length) == 0 ) {
-         strncpy(info_source_buf, internal_info_source_buf, internal_info_source_buf_pos);
-         info_source_buf_pos = internal_info_source_buf_pos;
-      }
-
-      /* Delete the old line */
-      internal_info_source_buf_pos = 0;
-      internal_info_source_buf[0] = '\0';
-      return;
-   }
-
-   internal_info_source_buf[internal_info_source_buf_pos++] = a;
+    if(a == '\n'){ 
+        /* This is the line of interest */
+        if ( length >= source_prefix_length && strncmp(info_ptr, source_prefix, source_prefix_length) == 0 ) {
+            info_source_ready = 1;
+        } else
+            string_clear(info_source_string);
+    } else
+        string_addchar(info_source_string, a);
 }
 
 /* process's source files */
