@@ -356,7 +356,7 @@ maintainer-clean-generic clean mostlyclean distclean maintainer-clean
 
 
 dist-hook:
-	rm -rf `find $(distdir)/config -name CVS`
+	rm -rf `find $(distdir) -name CVS`
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
