@@ -2,6 +2,9 @@
 
    * clexer.l: Fixed a bug with string literals. A rule to match
    '\"' has been added.
+   * clexer.l: Fixed rule '\\\"' to generalize to all sequences of '\\.'
+   This now seems to make all character literals that begin with a \
+   work properly.
 
 07/17/2003 Bob Rossi <bob_rossi@cox.net>
 

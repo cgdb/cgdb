@@ -114,7 +114,7 @@ IDENTIFIER {L}+{T}*
 
 {D}+                    { return(TOKENIZER_LITERAL); }
 '.'                     { return(TOKENIZER_LITERAL); }
-'\\\"'                  { return(TOKENIZER_LITERAL); }
+'\\.'                   { return(TOKENIZER_LITERAL); }
 
 \n                      { return(TOKENIZER_NEWLINE); }
 \r\n                    { return(TOKENIZER_NEWLINE); }
