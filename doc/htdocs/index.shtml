@@ -34,7 +34,7 @@ Some features offered by CGDB are:<P>
 <B>News</b><BR>
 <BLOCKQUOTE>
   
-  <I>October 27, 2003</i><BR>
+  <I>October 28, 2003</i><BR>
   <BLOCKQUOTE>
   CGDB v0.4.0 was released today, see the <A Href="download.shtml">download 
   page</a> to try it out. Most of the work done in this release was done to 
@@ -184,7 +184,6 @@ Some features offered by CGDB are:<P>
 
 </blockquote>
 
-<!--
 <TABLE Width="100%">
 <TR>
   <TD Align=Right>
@@ -194,6 +193,6 @@ Some features offered by CGDB are:<P>
   </td>
 </tr>
 </table>
--->
+
 <!--#include file="footer.inc"-->
   

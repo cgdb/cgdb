@@ -1,3 +1,13 @@
+10/28/2003 Bob Rossi <bob@brasko.net>
+
+   * Add file documentation.shtml
+   * Removed file help.shtml
+   * download.shtml: Added bit about how to download from different
+   distributions and added note about what is needed to compile from source.
+   * faq.shtml: Officially add the FAQ
+   * header.inc: Changed the link from help.shtml to documentation.shtml
+   * index.shtml: Add note about new release
+
 10/10/2003 Bob Rossi <bob@brasko.net>
 
 	* The initial revision of the web site.
