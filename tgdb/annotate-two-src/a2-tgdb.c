@@ -358,67 +358,46 @@ int a2_tgdb_get_sources(void){
  *
  */
 size_t a2_tgdb_recv(char *buf, size_t n, struct queue *q){
-   char local_buf[10*n];
-   ssize_t size, buf_size;
+    char local_buf[10*n];
+    ssize_t size, buf_size;
 
-   /* make the queue empty */
-   tgdb_delete_commands(q);
+    /* make the queue empty */
+    tgdb_delete_commands(q);
 
-   /* set buf to null for debug reasons */
-   memset(buf,'\0', n);
+    /* set buf to null for debug reasons */
+    memset(buf,'\0', n);
 
-   /* 1. read all the data possible from gdb that is ready. */
-   if( (size = io_read(gdb_stdout, local_buf, n)) < 0){
-      err_ret("%s:%d -> could not read from masterfd", __FILE__, __LINE__);
-      tgdb_append_command(q, QUIT, NULL, NULL, NULL);
-      return -1;
-   } else if ( size == 0 ) {/* EOF */ 
-      buf_size = 0;
+    /* 1. read all the data possible from gdb that is ready. */
+    if( (size = io_read(gdb_stdout, local_buf, n)) < 0){
+        err_ret("%s:%d -> could not read from masterfd", __FILE__, __LINE__);
+        tgdb_append_command(q, QUIT, NULL, NULL, NULL);
+        return -1;
+    } else if ( size == 0 ) {/* EOF */ 
+        buf_size = 0;
       
-      if(tgdb_append_command(q, QUIT, NULL, NULL, NULL) == -1)
-         err_msg("%s:%d -> Could not send command", __FILE__, __LINE__);
+        if(tgdb_append_command(q, QUIT, NULL, NULL, NULL) == -1)
+            err_msg("%s:%d -> Could not send command", __FILE__, __LINE__);
       
-      goto tgdb_finish;
-   }
+        goto tgdb_finish;
+    }
 
-   local_buf[size] = '\0';
+    local_buf[size] = '\0';
 
-   /* 2. This is a hack, copies the buffer back into local buffer, 
-    * then it translates all '\n' into '\r\n'
-    */ 
-   {
-        char b[n + n], *c;
-        int i = 0;
-        strcpy(b, local_buf); /* Copy local_buf into the buffer */
-        c = b;
-        while(*c != '\0') {
-            if ( *c == '\n' ) {
-                local_buf[i++] = '\r'; 
-                local_buf[i++] = '\n'; 
-                size++;
-            } else
-                local_buf[i++] = *c;
+    /* 2. At this point local_buf has everything new from this read.
+     * Basically this function is responsible for seperating the annotations
+     * that gdb writes from the data. 
+     *
+     * buf and buf_size are the data to be returned from the user.
+     */
+    buf_size = a2_handle_data(local_buf, size, buf, n, q);
 
-            c++;
-        }
-        local_buf[i++] = '\0';
-   }
-
-   /* 3. At this point local_buf has everything new from this read.
-    * Basically this function is responsible for seperating the annotations
-    * that gdb writes from the data. 
-    *
-    * buf and buf_size are the data to be returned from the user.
-    */
-   buf_size = a2_handle_data(local_buf, size, buf, n, q);
-
-    /* 4. runs the users buffered command if any exists */
+    /* 3. runs the users buffered command if any exists */
     if ( tgdb_has_command_to_run())
         tgdb_run_command();
 
-   tgdb_finish:
+    tgdb_finish:
 
-   return buf_size;
+    return buf_size;
 }
 
 /* Sends the user typed line to gdb */
