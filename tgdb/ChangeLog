@@ -1,3 +1,10 @@
+10/13/2003 Bob Rossi <bob@brasko.net>
+
+   * TODO: Updating appropriatly, .4.0 is almost ready.
+   * commands.c: change every occurence of 'string_*' to 'ibuf_*'
+   * state_machine.c: ditto
+   * tgdb.c: ditto
+
 10/12/2003 Bob Rossi <bob@brasko.net>
 
    * TODO: Updating appropriatly, .4.0 is almost ready.

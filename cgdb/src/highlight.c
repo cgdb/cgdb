@@ -122,9 +122,9 @@ static int attributes[] = {
 static int highlight_node ( struct list_node *node ) {
 	struct tokenizer *t = tokenizer_init ();
 	int ret;
-	struct string *ibuf = string_init ();
-	string_addchar ( ibuf, HL_CHAR );
-	string_addchar ( ibuf, SYN_TEXT );
+	struct ibuf *ibuf = ibuf_init ();
+	ibuf_addchar ( ibuf, HL_CHAR );
+	ibuf_addchar ( ibuf, SYN_TEXT );
 
 	/* Initialize */
 	node->buf.length = 0;
@@ -142,61 +142,61 @@ static int highlight_node ( struct list_node *node ) {
 
 		switch ( e ) {
 			case TOKENIZER_KEYWORD:
-				string_addchar ( ibuf, HL_CHAR );
-				string_addchar ( ibuf, SYN_KEYWORD );
-				string_add ( ibuf, tokenizer_get_data ( t ) );
-				string_addchar ( ibuf, HL_CHAR );
-				string_addchar ( ibuf, SYN_TEXT );
+				ibuf_addchar ( ibuf, HL_CHAR );
+				ibuf_addchar ( ibuf, SYN_KEYWORD );
+				ibuf_add ( ibuf, tokenizer_get_data ( t ) );
+				ibuf_addchar ( ibuf, HL_CHAR );
+				ibuf_addchar ( ibuf, SYN_TEXT );
 				break;
 			case TOKENIZER_TYPE:
-				string_addchar ( ibuf, HL_CHAR );
-				string_addchar ( ibuf, SYN_TYPE );
-				string_add ( ibuf, tokenizer_get_data ( t ) );
-				string_addchar ( ibuf, HL_CHAR );
-				string_addchar ( ibuf, SYN_TEXT );
+				ibuf_addchar ( ibuf, HL_CHAR );
+				ibuf_addchar ( ibuf, SYN_TYPE );
+				ibuf_add ( ibuf, tokenizer_get_data ( t ) );
+				ibuf_addchar ( ibuf, HL_CHAR );
+				ibuf_addchar ( ibuf, SYN_TEXT );
 				break;
 			case TOKENIZER_LITERAL:
-				string_addchar ( ibuf, HL_CHAR );
-				string_addchar ( ibuf, SYN_LITERAL );
-				string_add ( ibuf, tokenizer_get_data ( t ) );
-				string_addchar ( ibuf, HL_CHAR );
-				string_addchar ( ibuf, SYN_TEXT );
+				ibuf_addchar ( ibuf, HL_CHAR );
+				ibuf_addchar ( ibuf, SYN_LITERAL );
+				ibuf_add ( ibuf, tokenizer_get_data ( t ) );
+				ibuf_addchar ( ibuf, HL_CHAR );
+				ibuf_addchar ( ibuf, SYN_TEXT );
 				break;
 			case TOKENIZER_NUMBER:
-				string_add ( ibuf, tokenizer_get_data ( t ) );
+				ibuf_add ( ibuf, tokenizer_get_data ( t ) );
 				break;
 			case TOKENIZER_COMMENT:
-				string_addchar ( ibuf, HL_CHAR );
-				string_addchar ( ibuf, SYN_COMMENT );
-				string_add ( ibuf, tokenizer_get_data ( t ) );
-				string_addchar ( ibuf, HL_CHAR );
-				string_addchar ( ibuf, SYN_TEXT );
+				ibuf_addchar ( ibuf, HL_CHAR );
+				ibuf_addchar ( ibuf, SYN_COMMENT );
+				ibuf_add ( ibuf, tokenizer_get_data ( t ) );
+				ibuf_addchar ( ibuf, HL_CHAR );
+				ibuf_addchar ( ibuf, SYN_TEXT );
 				break;
 			case TOKENIZER_DIRECTIVE:
-				string_addchar ( ibuf, HL_CHAR );
-				string_addchar ( ibuf, SYN_DIRECTIVE );
-				string_add ( ibuf, tokenizer_get_data ( t ) );
-				string_addchar ( ibuf, HL_CHAR );
-				string_addchar ( ibuf, SYN_TEXT );
+				ibuf_addchar ( ibuf, HL_CHAR );
+				ibuf_addchar ( ibuf, SYN_DIRECTIVE );
+				ibuf_add ( ibuf, tokenizer_get_data ( t ) );
+				ibuf_addchar ( ibuf, HL_CHAR );
+				ibuf_addchar ( ibuf, SYN_TEXT );
 				break;
 			case TOKENIZER_TEXT:
-				string_add ( ibuf, tokenizer_get_data ( t ) );
+				ibuf_add ( ibuf, tokenizer_get_data ( t ) );
 				break;
 			case TOKENIZER_NEWLINE:
 				node->buf.length++;
 				node->buf.tlines = realloc ( node->buf.tlines, sizeof ( char *) * node->buf.length );
-				node->buf.tlines[node->buf.length-1] = strdup ( string_get ( ibuf ) );
+				node->buf.tlines[node->buf.length-1] = strdup ( ibuf_get ( ibuf ) );
 
-				if ( string_length ( ibuf ) > node->buf.max_width )
-					node->buf.max_width = string_length ( ibuf );
+				if ( ibuf_length ( ibuf ) > node->buf.max_width )
+					node->buf.max_width = ibuf_length ( ibuf );
 
 
-				string_clear ( ibuf );
-				string_addchar ( ibuf, HL_CHAR );
-				string_addchar ( ibuf, SYN_TEXT );
+				ibuf_clear ( ibuf );
+				ibuf_addchar ( ibuf, HL_CHAR );
+				ibuf_addchar ( ibuf, SYN_TEXT );
 				break;
 			case TOKENIZER_ERROR:
-				string_add ( ibuf, tokenizer_get_data ( t ) );
+				ibuf_add ( ibuf, tokenizer_get_data ( t ) );
 				break;
 			default:
 				return -1;

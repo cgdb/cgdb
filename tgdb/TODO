@@ -11,6 +11,10 @@ Pushed off for gdb 0.5.0
 > Modify the readline library to be context driven.
 > Add new structures to types.h that are intended to work with MI
 > Write internal documentation
+> standardize the way TGDB returns paths to the front end.
+   As of know, it returns the full path with the relative path. Then
+   it returns a relative path for breakpoints and source files. The front end 
+   then needs to look up the full path from the relative path.
 	
 Work to do for cgdb-0.4.0
 
@@ -26,10 +30,6 @@ technical
 > Get in touch with 'Ronald Landheer-Cieslak' about Makefile.am patch to
   build CVS out of the source tree.
 > Change use of 'struct queue' for tgdb_get_command.
-> standardize the way TGDB returns paths to the front end.
-   As of know, it returns the full path with the relative path. Then
-   it returns a relative path for breakpoints and source files. The front end 
-   then needs to look up the full path from the relative path.
 
 Finished:
 

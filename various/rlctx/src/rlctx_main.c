@@ -67,7 +67,7 @@ extern int read_history ();
 #include "error.h"
 #include "ibuf.h"
 
-static struct string *command;
+static struct ibuf *command;
 static char rl_history_file[4096];
 
 static void rl_write_history(char *file) {
@@ -144,16 +144,16 @@ static int read_command( int fd ) {
             } else { /* Found a full command, call callback */
                 rlctx_state = DATA;
                 if ( rlctx_com == CHANGE_PROMPT ) {
-                    change_prompt(string_get(command));
-                    string_clear(command);
+                    change_prompt(ibuf_get(command));
+                    ibuf_clear(command);
                 } else if ( rlctx_com == REDISPLAY )
                     redisplay();
                 else if ( rlctx_com == READ_HISTORY ) {
-                    rl_read_history(string_get(command));
-                    string_clear(command);
+                    rl_read_history(ibuf_get(command));
+                    ibuf_clear(command);
                 } else if ( rlctx_com == WRITE_HISTORY ) {
-                    rl_write_history(string_get(command));
-                    string_clear(command);
+                    rl_write_history(ibuf_get(command));
+                    ibuf_clear(command);
                 }
 
                 fprintf(stderr, "\031");
@@ -183,7 +183,7 @@ static int read_command( int fd ) {
         if ( rlctx_com == CHANGE_PROMPT || 
              rlctx_com == READ_HISTORY ||
              rlctx_com == WRITE_HISTORY)
-            string_addchar(command, buf[i]);
+            ibuf_addchar(command, buf[i]);
     }
 
     return 0;
@@ -322,7 +322,7 @@ int rlctx_main(int fd) {
     /* Write a single byte to tell caller that this program was started */
     fprintf(stderr, "\032");
 
-    command = string_init();
+    command = ibuf_init();
 
     if ( rlctx_setup_signals() == -1 ) {
         err_ret("%s:%d rlctx_setup_signals failed ", __FILE__, __LINE__);

@@ -5,15 +5,15 @@
 #include <string.h>
 #endif /* HAVE_STRING_H */
 
-struct string {
+struct ibuf {
     char *buf;
     unsigned long cur_buf_pos;
     unsigned long cur_block_size; 
     unsigned long BLOCK_SIZE;
 };
 
-struct string *string_init(void) {
-    struct string *s = (struct string *)xmalloc(sizeof(struct string));
+struct ibuf *ibuf_init(void) {
+    struct ibuf *s = (struct ibuf *)xmalloc(sizeof(struct ibuf));
 
     s->BLOCK_SIZE       = 4096;
     s->cur_block_size   = 1;
@@ -24,7 +24,7 @@ struct string *string_init(void) {
     return s;
 }
 
-void string_free(struct string *s) {
+void ibuf_free(struct ibuf *s) {
     if ( !s )
         return;
 
@@ -33,7 +33,7 @@ void string_free(struct string *s) {
     s = NULL;
 }
 
-void string_clear(struct string *s) {
+void ibuf_clear(struct ibuf *s) {
     if ( !s )
         return;
 
@@ -42,7 +42,7 @@ void string_clear(struct string *s) {
     s->buf[s->cur_buf_pos] = '\0';
 }
 
-void string_addchar(struct string *s, char c) {
+void ibuf_addchar(struct ibuf *s, char c) {
     if ( !s )
         return; 
 
@@ -61,14 +61,14 @@ void string_addchar(struct string *s, char c) {
     s->buf[(s->cur_buf_pos)] = '\0';
 }
 
-void string_add ( struct string *s, const char *d ) {
+void ibuf_add ( struct ibuf *s, const char *d ) {
     int length = strlen ( d ), i;
 
     for ( i = 0; i < length; i++ )
-        string_addchar ( s, d[i] );
+        ibuf_addchar ( s, d[i] );
 }
 
-void string_delchar(struct string *s) {
+void ibuf_delchar(struct ibuf *s) {
     if ( !s )
         return; 
 
@@ -78,21 +78,21 @@ void string_delchar(struct string *s) {
     }
 }
 
-char *string_get(struct string *s) {
+char *ibuf_get(struct ibuf *s) {
     if ( !s )
         return NULL; 
 
     return s->buf;
 }
 
-unsigned long string_length(struct string *s) {
+unsigned long ibuf_length(struct ibuf *s) {
     if ( !s )
         return 0; 
     return s->cur_buf_pos;
 }
 
-struct string *string_dup ( struct string *s ) {
-	struct string *ns = string_init ();
-	string_add ( ns, string_get ( s ) );
+struct ibuf *ibuf_dup ( struct ibuf *s ) {
+	struct ibuf *ns = ibuf_init ();
+	ibuf_add ( ns, ibuf_get ( s ) );
 	return ns;	
 }

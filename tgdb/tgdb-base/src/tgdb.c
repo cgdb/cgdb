@@ -115,7 +115,7 @@ struct tgdb {
 	/** 
 	 * The current command the user is typing at readline 
 	 */
-	struct string *current_command;
+	struct ibuf *current_command;
 
 	/** 
 	 * This variable needs to be removed from libannotate 
@@ -470,22 +470,22 @@ static int tgdb_handle_signals ( struct tgdb *tgdb ) {
  */
 static int tgdb_send(struct tgdb *tgdb, char *command, enum buffer_command_type bct) {
     struct tgdb_client_command *ncom;
-	struct string *temp_command = string_init ();
+	struct ibuf *temp_command = ibuf_init ();
     int length = strlen ( command );
 
-	string_add ( temp_command, command );
+	ibuf_add ( temp_command, command );
 
     if ( command[length-1] != '\n' )
-		string_addchar ( temp_command, '\n' );
+		ibuf_addchar ( temp_command, '\n' );
 
     ncom = tgdb_interface_new_command ( 
-            string_get ( temp_command ), 
+            ibuf_get ( temp_command ), 
             bct, 
             COMMANDS_SHOW_USER_OUTPUT, 
             COMMANDS_VOID, 
             NULL );
 
-	string_free ( temp_command );
+	ibuf_free ( temp_command );
 	temp_command = NULL;
 
     if ( tgdb_dispatch_command ( tgdb, ncom ) == -1 ) {
@@ -702,8 +702,8 @@ tgdb_run_command_tag:
         free ( item->data ); 
     /* Send the partially typed command through readline */
     } else if ( tgdb->current_command != NULL ) {
-        int i,j = string_length(tgdb->current_command);
-        char *data = string_get(tgdb->current_command);
+        int i,j = ibuf_length(tgdb->current_command);
+        char *data = ibuf_get(tgdb->current_command);
         
         for ( i = 0; i < j; i++ ) {
             if ( rlctx_send_char(tgdb->rl, data[i]) == -1 ) {
@@ -725,12 +725,12 @@ tgdb_run_command_tag:
  *  This is called when readline says it has recieved a full line.
  */
 static int tgdb_command_callback(void *p, const char *line) {
-	struct string *command = string_init ();
+	struct ibuf *command = ibuf_init ();
 	struct tgdb *tgdb = (struct tgdb *)p;
-	string_add ( command, line );
-	string_addchar ( command, '\n' );
-    tgdb_send(tgdb, string_get ( command ), BUFFER_USER_COMMAND);
-	string_free ( command );
+	ibuf_add ( command, line );
+	ibuf_addchar ( command, '\n' );
+    tgdb_send(tgdb, ibuf_get ( command ), BUFFER_USER_COMMAND);
+	ibuf_free ( command );
 	command = NULL;
     return 0;
 }
@@ -829,9 +829,9 @@ int tgdb_send_debugger_char ( struct tgdb *tgdb, char c ) {
     /* The debugger is not ready, save the input for later */
     } else {
 		if ( tgdb->current_command == NULL )
-			tgdb->current_command = string_init ( ) ;
+			tgdb->current_command = ibuf_init ( ) ;
 
-        string_addchar ( tgdb->current_command, c );
+        ibuf_addchar ( tgdb->current_command, c );
 
         if ( c == '\n' ) {
             queue_append ( tgdb->raw_input_queue, tgdb->current_command );

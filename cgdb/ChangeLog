@@ -1,3 +1,8 @@
+10/13/2003 Bob Rossi <bob@brasko.net>
+
+   * highlight.c: Changed every occurence from 'string_*' to 'ibuf_*'
+   * tokenizer.c: ditto
+
 10/12/2003 Bob Rossi <bob@brasko.net>
 
    * cgdb.c: Adding global #define of MAXLINE ( used to be in TGDB )

@@ -23,12 +23,12 @@ struct tokenizer {
 	char **tokenizer_text;
 
     enum tokenizer_type tpacket;
-    struct string *i;
+    struct ibuf *i;
 };
 
 struct tokenizer *tokenizer_init ( void ) {
 	struct tokenizer *n = ( struct tokenizer * ) xmalloc ( sizeof ( struct tokenizer ) );
-	n->i = string_init ();
+	n->i = ibuf_init ();
 	n->lang = TOKENIZER_LANGUAGE_UNKNOWN;
 	n->tokenizer_lex = NULL;
 	n->tokenizer_in = NULL;
@@ -68,8 +68,8 @@ int tokenizer_get_token ( struct tokenizer *t ) {
 		return 0;
 
 	t->tpacket = (t->tokenizer_lex)();
-	string_clear ( t->i );
-	string_add ( t->i, ( const char * ) *(t->tokenizer_text) );
+	ibuf_clear ( t->i );
+	ibuf_add ( t->i, ( const char * ) *(t->tokenizer_text) );
 
 	if ( !(t->tpacket) ) {
 		fclose ( *(t->tokenizer_in) );
@@ -104,7 +104,7 @@ const char *tokenizer_get_printable_enum ( enum tokenizer_type e ) {
 }
 
 char *tokenizer_get_data ( struct tokenizer *t ) {
-	char *string = string_get ( t->i );
+	char *string = ibuf_get ( t->i );
 	return string;
 }
 

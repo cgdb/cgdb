@@ -45,7 +45,7 @@ struct rlctx {
     rlctx_recv_line command_callback;
     rlctx_recv_line completion_callback;
     char tty_name[SLAVE_SIZE];
-    struct string *rlctx_com;
+    struct ibuf *rlctx_com;
 
     /* Should the history be saved for this context?
      * If 1 yes, if 0 no.
@@ -121,7 +121,7 @@ struct rlctx *rlctx_init(const char *home_dir, const char *unique_id, void* p) {
         }
     }
 
-    n->rlctx_com = string_init();
+    n->rlctx_com = ibuf_init();
     n->command_callback     = NULL;
     n->completion_callback  = NULL;
 	n->callback_param       = p;
@@ -373,10 +373,10 @@ static void rlctx_parse_command(struct rlctx *rl, char *c, ssize_t size) {
             } else { /* Found a full command, call callback */
                 rlctx_state = DATA;
                 if ( rlctx_com == COMMAND_ENTERED )
-                    (rl->command_callback)(rl->callback_param, string_get(rl->rlctx_com));
+                    (rl->command_callback)(rl->callback_param, ibuf_get(rl->rlctx_com));
                 else if ( rlctx_com == TAB_COMPLETION )
-                    (rl->completion_callback)(rl->callback_param, string_get(rl->rlctx_com));
-                string_clear(rl->rlctx_com);
+                    (rl->completion_callback)(rl->callback_param, ibuf_get(rl->rlctx_com));
+                ibuf_clear(rl->rlctx_com);
             }
             /* Don't want to add \032 to command */
             continue;
@@ -399,7 +399,7 @@ static void rlctx_parse_command(struct rlctx *rl, char *c, ssize_t size) {
         if ( rlctx_state == DATA )
             c[j++] = c[i]; 
         else
-            string_addchar(rl->rlctx_com, c[i]);
+            ibuf_addchar(rl->rlctx_com, c[i]);
     }
 
     c[j] = '\0';

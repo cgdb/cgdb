@@ -1,3 +1,8 @@
+10/13/2003 Bob Rossi <bob@brasko.net>
+
+   * rlctx.c: changed all occurences of 'string_*' to 'ibuf_*'
+   * rlctx_main: ditto
+
 09/04/2003 Bob Rossi <bob@brasko.net>
 
    * rlctx.h: global rlctx_recv_line, add void* parameter for context.
