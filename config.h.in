@@ -21,11 +21,17 @@
 /* Define to 1 if you have the <errno.h> header file. */
 #undef HAVE_ERRNO_H
 
+/* Define to 1 if you have the <fcntl.h> header file. */
+#undef HAVE_FCNTL_H
+
 /* Freebsd environment */
 #undef HAVE_FREEBSD
 
 /* have getopt_long */
 #undef HAVE_GETOPT_H
+
+/* Define to 1 if you have the <grp.h> header file. */
+#undef HAVE_GRP_H
 
 /* Hp environment */
 #undef HAVE_HP
@@ -35,6 +41,9 @@
 
 /* Define to 1 if you have the `m' library (-lm). */
 #undef HAVE_LIBM
+
+/* Define to 1 if you have the <libutil.h> header file. */
+#undef HAVE_LIBUTIL_H
 
 /* Define to 1 if you have the <limits.h> header file. */
 #undef HAVE_LIMITS_H
@@ -54,8 +63,14 @@
 /* ncurses library */
 #undef HAVE_NCURSES
 
+/* Define to 1 if you have the <pty.h> header file. */
+#undef HAVE_PTY_H
+
 /* Define to 1 if you have the `putenv' function. */
 #undef HAVE_PUTENV
+
+/* Define to 1 if you have the <pwd.h> header file. */
+#undef HAVE_PWD_H
 
 /* Define to 1 if you have the `select' function. */
 #undef HAVE_SELECT
@@ -99,6 +114,9 @@
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #undef HAVE_SYS_STAT_H
 
+/* Define to 1 if you have the <sys/stropts.h> header file. */
+#undef HAVE_SYS_STROPTS_H
+
 /* Define to 1 if you have the <sys/time.h> header file. */
 #undef HAVE_SYS_TIME_H
 
@@ -113,6 +131,9 @@
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
+
+/* Define to 1 if you have the <util.h> header file. */
+#undef HAVE_UTIL_H
 
 /* Define to 1 if you have the `vprintf' function. */
 #undef HAVE_VPRINTF

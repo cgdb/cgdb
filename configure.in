@@ -48,6 +48,12 @@ dnl If the user asked for curses, ncurses is set to no. Otherwise ncurses is yes
     AC_ARG_WITH(curses,
         [  --with-curses           Use curses library: not ncurses (optional)],ncurses=no,ncurses=yes)
 
+dnl These 2 statements determine if the user wants the alternate driver program to be built
+dnl It is used to stimulate libtgdb with data. It is a simple interface to libtgdb
+    AC_ARG_WITH(driver,
+        [  --with-driver           Build the driver program to test libtgdb (optional)],BUILD_DRIVER=driver,BUILD_DRIVER=)
+    AC_SUBST([BUILD_DRIVER])
+
 dnl If the user want ncurses, Try to find it and add it to the linking library.
     if test $ncurses = yes; then
         AC_CHECK_LIB(ncurses, initscr,
@@ -114,4 +120,4 @@ AC_TYPE_SIGNAL
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(mkdir putenv select strdup strerror)
 
-AC_OUTPUT(Makefile src/Makefile)
+AC_OUTPUT(Makefile src/Makefile tgdb/Makefile tgdb/src/Makefile)

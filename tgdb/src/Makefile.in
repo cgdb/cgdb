@@ -38,7 +38,7 @@ pkgdatadir = $(datadir)/@PACKAGE@
 pkglibdir = $(libdir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
 
-top_builddir = ..
+top_builddir = ../..
 
 ACLOCAL = @ACLOCAL@
 AUTOCONF = @AUTOCONF@
@@ -66,54 +66,94 @@ PACKAGE = @PACKAGE@
 RANLIB = @RANLIB@
 VERSION = @VERSION@
 
-AM_CFLAGS = -I ../tgdb/src -Wall
-bin_PROGRAMS = cgdb
-cgdb_LDFLAGS = -L../tgdb/src
-cgdb_LDADD = -ltgdb
-cgdb_SOURCES = cgdb.c cgdb.h highlight.c highlight.h interface.c filedlg.c                interface.h scroller.c scroller.h sources.c sources.h                filedlg.h helptext.h logo.c logo.h
+AM_CFLAGS = -Wall
+noinst_LIBRARIES = libtgdb.a
+libtgdb_a_SOURCES = tgdb.c annotate.c annotate.h state_machine.c state_machine.h data.c data.h  types.c types.h error.c error.h pseudo.c pseudo.h io.c io.h terminal.c terminal.h commands.c commands.h globals.c globals.h macro.c tgdb_init.c tgdb_init.h buffer.c buffer.h util.c util.h
 
 
-# links cgdb if common is changed
-cgdb_DEPENDENCIES = ../tgdb/src
-INCLUDES = -I../tgdb/include
+EXTRA_PROGRAMS = driver
+bin_PROGRAMS = @BUILD_DRIVER@
+driver_LDFLAGS = -L.
+driver_LDADD = -ltgdb
+driver_SOURCES = driver.c
+driver_DEPENDENCIES = -ltgdb
+INCLUDES = -I../include
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
-CONFIG_HEADER = ../config.h
+CONFIG_HEADER = ../../config.h
 CONFIG_CLEAN_FILES = 
-PROGRAMS =  $(bin_PROGRAMS)
+LIBRARIES =  $(noinst_LIBRARIES)
 
 
-DEFS = @DEFS@ -I. -I$(srcdir) -I..
+DEFS = @DEFS@ -I. -I$(srcdir) -I../..
 CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
-cgdb_OBJECTS =  cgdb.o highlight.o interface.o filedlg.o scroller.o \
-sources.o logo.o
+libtgdb_a_LIBADD = 
+libtgdb_a_OBJECTS =  tgdb.o annotate.o state_machine.o data.o types.o \
+error.o pseudo.o io.o terminal.o commands.o globals.o macro.o \
+tgdb_init.o buffer.o util.o
+AR = ar
+PROGRAMS =  $(bin_PROGRAMS)
+
+driver_OBJECTS =  driver.o
 CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
-DIST_COMMON =  Makefile.am Makefile.in TODO
+DIST_COMMON =  Makefile.am Makefile.in
 
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = tar
 GZIP_ENV = --best
-DEP_FILES =  .deps/cgdb.P .deps/filedlg.P .deps/highlight.P \
-.deps/interface.P .deps/logo.P .deps/scroller.P .deps/sources.P
-SOURCES = $(cgdb_SOURCES)
-OBJECTS = $(cgdb_OBJECTS)
+DEP_FILES =  .deps/annotate.P .deps/buffer.P .deps/commands.P \
+.deps/data.P .deps/driver.P .deps/error.P .deps/globals.P .deps/io.P \
+.deps/macro.P .deps/pseudo.P .deps/state_machine.P .deps/terminal.P \
+.deps/tgdb.P .deps/tgdb_init.P .deps/types.P .deps/util.P
+SOURCES = $(libtgdb_a_SOURCES) $(driver_SOURCES)
+OBJECTS = $(libtgdb_a_OBJECTS) $(driver_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
 .SUFFIXES: .S .c .o .s
 $(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
-	cd $(top_srcdir) && $(AUTOMAKE) --gnu src/Makefile
+	cd $(top_srcdir) && $(AUTOMAKE) --gnu tgdb/src/Makefile
 
 Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status $(BUILT_SOURCES)
 	cd $(top_builddir) \
 	  && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
 
+
+mostlyclean-noinstLIBRARIES:
+
+clean-noinstLIBRARIES:
+	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
+
+distclean-noinstLIBRARIES:
+
+maintainer-clean-noinstLIBRARIES:
+
+.s.o:
+	$(COMPILE) -c $<
+
+.S.o:
+	$(COMPILE) -c $<
+
+mostlyclean-compile:
+	-rm -f *.o core *.core
+
+clean-compile:
+
+distclean-compile:
+	-rm -f *.tab.c
+
+maintainer-clean-compile:
+
+libtgdb.a: $(libtgdb_a_OBJECTS) $(libtgdb_a_DEPENDENCIES)
+	-rm -f libtgdb.a
+	$(AR) cru libtgdb.a $(libtgdb_a_OBJECTS) $(libtgdb_a_LIBADD)
+	$(RANLIB) libtgdb.a
 
 mostlyclean-binPROGRAMS:
 
@@ -140,25 +180,9 @@ uninstall-binPROGRAMS:
 	  rm -f $(DESTDIR)$(bindir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`; \
 	done
 
-.s.o:
-	$(COMPILE) -c $<
-
-.S.o:
-	$(COMPILE) -c $<
-
-mostlyclean-compile:
-	-rm -f *.o core *.core
-
-clean-compile:
-
-distclean-compile:
-	-rm -f *.tab.c
-
-maintainer-clean-compile:
-
-cgdb: $(cgdb_OBJECTS) $(cgdb_DEPENDENCIES)
-	@rm -f cgdb
-	$(LINK) $(cgdb_LDFLAGS) $(cgdb_OBJECTS) $(cgdb_LDADD) $(LIBS)
+driver: $(driver_OBJECTS) $(driver_DEPENDENCIES)
+	@rm -f driver
+	$(LINK) $(driver_LDFLAGS) $(driver_OBJECTS) $(driver_LDADD) $(LIBS)
 
 tags: TAGS
 
@@ -191,14 +215,14 @@ maintainer-clean-tags:
 
 distdir = $(top_builddir)/$(PACKAGE)-$(VERSION)/$(subdir)
 
-subdir = src
+subdir = tgdb/src
 
 distdir: $(DISTFILES)
 	here=`cd $(top_builddir) && pwd`; \
 	top_distdir=`cd $(top_distdir) && pwd`; \
 	distdir=`cd $(distdir) && pwd`; \
 	cd $(top_srcdir) \
-	  && $(AUTOMAKE) --include-deps --build-dir=$$here --srcdir-name=$(top_srcdir) --output-dir=$$top_distdir --gnu src/Makefile
+	  && $(AUTOMAKE) --include-deps --build-dir=$$here --srcdir-name=$(top_srcdir) --output-dir=$$top_distdir --gnu tgdb/src/Makefile
 	@for file in $(DISTFILES); do \
 	  d=$(srcdir); \
 	  if test -d $$d/$$file; then \
@@ -260,7 +284,7 @@ install-am: all-am
 install: install-am
 uninstall-am: uninstall-binPROGRAMS
 uninstall: uninstall-am
-all-am: Makefile $(PROGRAMS)
+all-am: Makefile $(LIBRARIES) $(PROGRAMS)
 all-redirect: all-am
 install-strip:
 	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
@@ -277,41 +301,45 @@ distclean-generic:
 	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
 
 maintainer-clean-generic:
-mostlyclean-am:  mostlyclean-binPROGRAMS mostlyclean-compile \
-		mostlyclean-tags mostlyclean-depend mostlyclean-generic
+mostlyclean-am:  mostlyclean-noinstLIBRARIES mostlyclean-compile \
+		mostlyclean-binPROGRAMS mostlyclean-tags \
+		mostlyclean-depend mostlyclean-generic
 
 mostlyclean: mostlyclean-am
 
-clean-am:  clean-binPROGRAMS clean-compile clean-tags clean-depend \
-		clean-generic mostlyclean-am
+clean-am:  clean-noinstLIBRARIES clean-compile clean-binPROGRAMS \
+		clean-tags clean-depend clean-generic mostlyclean-am
 
 clean: clean-am
 
-distclean-am:  distclean-binPROGRAMS distclean-compile distclean-tags \
-		distclean-depend distclean-generic clean-am
+distclean-am:  distclean-noinstLIBRARIES distclean-compile \
+		distclean-binPROGRAMS distclean-tags distclean-depend \
+		distclean-generic clean-am
 
 distclean: distclean-am
 
-maintainer-clean-am:  maintainer-clean-binPROGRAMS \
-		maintainer-clean-compile maintainer-clean-tags \
-		maintainer-clean-depend maintainer-clean-generic \
-		distclean-am
+maintainer-clean-am:  maintainer-clean-noinstLIBRARIES \
+		maintainer-clean-compile maintainer-clean-binPROGRAMS \
+		maintainer-clean-tags maintainer-clean-depend \
+		maintainer-clean-generic distclean-am
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
 
 maintainer-clean: maintainer-clean-am
 
-.PHONY: mostlyclean-binPROGRAMS distclean-binPROGRAMS clean-binPROGRAMS \
-maintainer-clean-binPROGRAMS uninstall-binPROGRAMS install-binPROGRAMS \
+.PHONY: mostlyclean-noinstLIBRARIES distclean-noinstLIBRARIES \
+clean-noinstLIBRARIES maintainer-clean-noinstLIBRARIES \
 mostlyclean-compile distclean-compile clean-compile \
-maintainer-clean-compile tags mostlyclean-tags distclean-tags \
-clean-tags maintainer-clean-tags distdir mostlyclean-depend \
-distclean-depend clean-depend maintainer-clean-depend info-am info \
-dvi-am dvi check check-am installcheck-am installcheck install-exec-am \
-install-exec install-data-am install-data install-am install \
-uninstall-am uninstall all-redirect all-am all installdirs \
-mostlyclean-generic distclean-generic clean-generic \
-maintainer-clean-generic clean mostlyclean distclean maintainer-clean
+maintainer-clean-compile mostlyclean-binPROGRAMS distclean-binPROGRAMS \
+clean-binPROGRAMS maintainer-clean-binPROGRAMS uninstall-binPROGRAMS \
+install-binPROGRAMS tags mostlyclean-tags distclean-tags clean-tags \
+maintainer-clean-tags distdir mostlyclean-depend distclean-depend \
+clean-depend maintainer-clean-depend info-am info dvi-am dvi check \
+check-am installcheck-am installcheck install-exec-am install-exec \
+install-data-am install-data install-am install uninstall-am uninstall \
+all-redirect all-am all installdirs mostlyclean-generic \
+distclean-generic clean-generic maintainer-clean-generic clean \
+mostlyclean distclean maintainer-clean
 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

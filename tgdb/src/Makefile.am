@@ -8,7 +8,8 @@ commands.c commands.h globals.c globals.h \
 macro.c tgdb_init.c tgdb_init.h buffer.c buffer.h \
 util.c util.h
 
-bin_PROGRAMS = driver
+EXTRA_PROGRAMS=driver
+bin_PROGRAMS = @BUILD_DRIVER@
 driver_LDFLAGS = -L.
 driver_LDADD = -ltgdb
 driver_SOURCES = driver.c
