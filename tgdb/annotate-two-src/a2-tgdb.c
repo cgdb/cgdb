@@ -76,6 +76,10 @@ static struct queue *gdb_input_queue;
  */
 static struct queue *raw_input_queue;
 
+/* the out of band input queue. 
+ * These commands should *always* be run first */
+struct queue *oob_input_queue;
+
 static sig_atomic_t control_c = 0;              /* If control_c was hit by user */
 
 /* Interface to readline capability */
@@ -130,6 +134,7 @@ static int tgdb_has_command_to_run(void) {
     if ( tgdb_is_debugger_ready() && (
            (queue_size(gdb_input_queue) > 0) || 
            (queue_size(raw_input_queue) > 0) || 
+           (queue_size(oob_input_queue) > 0) || 
            current_command != NULL )
        )
         return TRUE;
@@ -144,7 +149,8 @@ static int tgdb_has_command_to_run(void) {
  *    com         - command to run
  *    Returns: -1 on error, 0 on success.
  */
-static int tgdb_setup_buffer_command_to_run(
+int tgdb_setup_buffer_command_to_run(
+      struct queue *q,
       char *com, 
       enum buffer_command_type com_type,        /* Who is running this command */
       enum buffer_output_type out_type,         /* Where should the output go */
@@ -157,7 +163,7 @@ static int tgdb_setup_buffer_command_to_run(
         commands_run_command(masterfd, item);
         buffer_free_item(item);
     } else /* writing the command for later execution */
-        queue_append( gdb_input_queue, item );
+        queue_append( q, item );
 
     return 0;
 }
@@ -217,6 +223,9 @@ int a2_tgdb_init(char *debugger, int argc, char **argv, int *gdb, int *child, in
    /* initialize raw data typed by user */
    raw_input_queue = queue_init();
 
+   /* initialize the out of band queue */
+   oob_input_queue = queue_init();
+
    /* Initialize readline */
    if ( (rl = rlctx_init()) == NULL ) {
       err_msg("(%s:%d) rlctx_init failed", __FILE__, __LINE__);
@@ -241,8 +250,20 @@ int a2_tgdb_init(char *debugger, int argc, char **argv, int *gdb, int *child, in
 
    tgdb_setup_signals();
    
-   tgdb_setup_buffer_command_to_run(child_tty_name , BUFFER_TGDB_COMMAND, COMMANDS_HIDE_OUTPUT, COMMANDS_TTY);
+   tgdb_setup_buffer_command_to_run(
+            gdb_input_queue,
+            child_tty_name , 
+            BUFFER_TGDB_COMMAND, 
+            COMMANDS_HIDE_OUTPUT, 
+            COMMANDS_TTY);
    a2_tgdb_get_source_absolute_filename(NULL);
+   
+   tgdb_setup_buffer_command_to_run(
+            gdb_input_queue,
+            NULL , 
+            BUFFER_TGDB_COMMAND, 
+            COMMANDS_HIDE_OUTPUT, 
+            COMMANDS_INFO_SOURCE_RELATIVE);
 
    *gdb     = gdb_stdout;
    *child   = master_tty_fd;
@@ -291,9 +312,19 @@ static int tgdb_run_command(void){
     } 
 
 tgdb_run_command_tag:
-    
+
+    /* The out of band commands should always be run first */
+    if ( queue_size(oob_input_queue) > 0 ) {
+        /* These commands are always run. 
+         * However, if an assumption is made that a misc
+         * prompt can never be set while in this spot.
+         */
+        struct command *item = NULL;
+        item = queue_pop(oob_input_queue);
+        commands_run_command(masterfd, item);
+        buffer_free_item(item);
     /* If the queue is not empty, run a command */
-    if ( queue_size(gdb_input_queue) > 0 ) {
+    } else if ( queue_size(gdb_input_queue) > 0 ) {
         struct command *item = NULL;
         item = queue_pop(gdb_input_queue);
 
@@ -347,11 +378,21 @@ tgdb_run_command_tag:
 }
 
 int a2_tgdb_get_source_absolute_filename(char *file){
-   return tgdb_setup_buffer_command_to_run(file, BUFFER_TGDB_COMMAND, COMMANDS_HIDE_OUTPUT, COMMANDS_INFO_LIST);
+   return tgdb_setup_buffer_command_to_run(
+           gdb_input_queue,
+           file, 
+           BUFFER_TGDB_COMMAND, 
+           COMMANDS_HIDE_OUTPUT, 
+           COMMANDS_INFO_LIST);
 }
 
 int a2_tgdb_get_sources(void){
-   return tgdb_setup_buffer_command_to_run(NULL , BUFFER_TGDB_COMMAND, COMMANDS_HIDE_OUTPUT, COMMANDS_INFO_SOURCES);
+   return tgdb_setup_buffer_command_to_run(
+           gdb_input_queue,
+           NULL , 
+           BUFFER_TGDB_COMMAND, 
+           COMMANDS_HIDE_OUTPUT, 
+           COMMANDS_INFO_SOURCES);
 }
 
 /* tgdb_recv: returns to the caller data and commands
@@ -414,8 +455,18 @@ char *a2_tgdb_send(char *command, int out_type) {
        buf[0] = '\0';
 
    /* tgdb always requests breakpoints because of buggy gdb annotations */
-   tgdb_setup_buffer_command_to_run ( command, BUFFER_USER_COMMAND, COMMANDS_SHOW_USER_OUTPUT, COMMANDS_VOID );
-   tgdb_setup_buffer_command_to_run ( NULL, BUFFER_TGDB_COMMAND, COMMANDS_HIDE_OUTPUT, COMMANDS_INFO_BREAKPOINTS );
+   tgdb_setup_buffer_command_to_run ( 
+           gdb_input_queue,
+           command, 
+           BUFFER_USER_COMMAND, 
+           COMMANDS_SHOW_USER_OUTPUT, 
+           COMMANDS_VOID );
+   tgdb_setup_buffer_command_to_run ( 
+           gdb_input_queue,
+           NULL, 
+           BUFFER_TGDB_COMMAND, 
+           COMMANDS_HIDE_OUTPUT, 
+           COMMANDS_INFO_BREAKPOINTS );
    return buf;   
 }
 
@@ -505,6 +556,7 @@ int a2_tgdb_new_tty(void) {
 
     /* Send request to gdb */
     tgdb_setup_buffer_command_to_run(
+        gdb_input_queue,
         child_tty_name, 
         BUFFER_TGDB_COMMAND, 
         COMMANDS_HIDE_OUTPUT, 

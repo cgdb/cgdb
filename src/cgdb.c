@@ -325,6 +325,7 @@ static int user_input(void) {
 static void process_commands(struct queue *q)
 {
     static char filename[PATH_MAX];
+    static int line_num;
     static int updating_breakpts = 0;
     char *com;
     struct Command *item;
@@ -349,17 +350,14 @@ static void process_commands(struct queue *q)
             {
                 struct sviewer *sview = if_get_sview();
                 char *file = malloc(strlen(com)+1);
-                char path[PATH_MAX];
                 char enabled;
                 int line;
                 sscanf(com, "%s %c %d %s", 
                       file, &enabled, &line, file);
-                if (realpath(file,  path)){
-                    if (enabled == 'y')
-                        source_enable_break(sview, path, line);
-                    else
-                        source_disable_break(sview, path, line);
-                }
+                if (enabled == 'y')
+                    source_enable_break(sview, file, line);
+                else
+                    source_disable_break(sview, file, line);
                 break;
             }
                 
@@ -371,7 +369,12 @@ static void process_commands(struct queue *q)
 
             /* Jump to line number */
             case LINE_NUMBER_UPDATE:
-                if_show_file(filename, atoi(com));
+                line_num = atoi(com);
+                break;
+
+            case CURRENT_FILE_UPDATE:
+                if_show_file(filename, line_num);
+                source_set_relative_path(if_get_sview(), filename, com);
                 break;
                 
             /* Clearing the list of choices the user had last */

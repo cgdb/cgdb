@@ -66,7 +66,7 @@ static int handle_prompt(const char *buf, size_t n, struct queue *q){
       return 0;
    }
 
-   if(global_has_info_source_started() == TRUE){
+   if(global_has_info_source_started() == TRUE ) {
       global_reset_info_source_started();
       commands_send_source_absolute_source_file(q);
       return 0;
@@ -81,11 +81,6 @@ static int handle_post_prompt(const char *buf, size_t n, struct queue *q){
 }
 
 static int handle_breakpoints_invalid(const char *buf, size_t n, struct queue *q){
-   /*commands_set_command_to_run(BREAKPOINTS);*/
-   /* Tgdb checks for breakpoints after every command. 
-    * This is because of buggy gdb versions. gdb does not output this 
-    * annotation when it is suppossed to.
-    */
    return 0;
 }
 

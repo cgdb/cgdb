@@ -20,7 +20,8 @@ enum COMMAND_STATE {
 
    /* Related to the 'info source' command */
    INFO_LIST,
-   INFO_SOURCE
+   INFO_SOURCE_ABSOLUTE,
+   INFO_SOURCE_RELATIVE
 };
 
 /* commands_init: Initialize the commands unit */

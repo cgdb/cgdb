@@ -3,6 +3,8 @@
     * interface.c ( if_draw ): Removed a function that called refresh
     on the status bar. Also, Added a check to refresh the cgdb window
     if focus == cgdb.
+    * cgdb.c ( remove realpath ): There is no more call to realpath to 
+    determine the breakpoint.
 
 04/02/2003 Bob Rossi <bob_rossi@cox.net>
 

@@ -34,6 +34,8 @@ static void tgdb_print_item(void *item) {
             fprintf(fd, "TGDB_BREAKPOINT_END(%s)\n", com->data);            break;
         case SOURCE_FILE_UPDATE:
             fprintf(fd, "TGDB_SOURCE_FILE_UPDATE(%s)\n", com->data);        break;
+        case CURRENT_FILE_UPDATE:
+            fprintf(fd, "TGDB_CURRENT_FILE_UPDATE(%s)\n", com->data);       break;
         case LINE_NUMBER_UPDATE:
             fprintf(fd, "TGDB_LINE_NUMBER_UPDATE(%s)\n", com->data);        break;
         case SOURCES_START:

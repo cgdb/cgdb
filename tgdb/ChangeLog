@@ -1,3 +1,10 @@
+04/03/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * Made tgdb return CURRENT_FILE_UPDATE: This tells the gui the 
+    absolute and relative path to the current file. It also tells it 
+    the line number. This is enough info for the gui to understand the
+    breakpoint files without a large overhead.
+
 04/02/2003 Bob Rossi <bob_rossi@cox.net>
 
     * Changed tgdb to parse annotations in a new way: tgdb now accepts 

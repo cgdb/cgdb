@@ -46,6 +46,19 @@ static struct queue *source_files; /* The queue of current files */
 static char *source_prefix = "Located in ";
 static int source_prefix_length = 11;
 
+/* String that is output by gdb to get the relative path to a file */
+static char *source_relative_prefix = "Current source file is ";
+static int source_relative_prefix_length = 23;
+
+
+extern struct queue *oob_input_queue;
+int tgdb_setup_buffer_command_to_run(
+      struct queue *q,
+      char *com, 
+      enum buffer_command_type com_type,        /* Who is running this command */
+      enum buffer_output_type out_type,         /* Where should the output go */
+      enum buffer_command_to_run com_to_run);   /* What command to run */
+
 void commands_init(void) {
     info_source_string  = string_init();
     info_sources_string = string_init();
@@ -88,6 +101,13 @@ int commands_parse_source(const char *buf, size_t n, struct queue *q){
 
    if(tgdb_append_command(q, LINE_NUMBER_UPDATE, line, NULL, NULL) == -1)
       err_msg("%s:%d -> Could not send command", __FILE__, __LINE__);
+
+   tgdb_setup_buffer_command_to_run(
+            oob_input_queue,
+            NULL , 
+            BUFFER_TGDB_COMMAND, 
+            COMMANDS_HIDE_OUTPUT, 
+            COMMANDS_INFO_SOURCE_RELATIVE);
 
    return 0;
 }
@@ -178,6 +198,10 @@ void commands_set_state(enum COMMAND_STATE state, struct queue *q){
                 err_msg("%s:%d -> Could not send command", __FILE__, __LINE__);
             breakpoint_table = 1; 
             breakpoint_started = TRUE;
+            break;
+        case INFO_SOURCE_ABSOLUTE:
+            break;
+        case INFO_SOURCE_RELATIVE:
             break;
         case INFO_SOURCES:
             break;
@@ -278,11 +302,17 @@ static int commands_run_list(char *filename, int fd){
    return commands_run_com(fd, local_com, 1);
 }
 
-static int commands_run_info_source(int fd){
+static int commands_run_info_source(enum COMMAND_STATE state, int fd){
    data_set_state(INTERNAL_COMMAND);
    string_clear(info_source_string);
-   commands_set_state(INFO_SOURCE, NULL);
-   global_set_start_info_source();
+   
+   if ( state == INFO_SOURCE_ABSOLUTE ) {
+        commands_set_state(INFO_SOURCE_ABSOLUTE, NULL);
+        global_set_start_info_source();
+   } else if ( state == INFO_SOURCE_RELATIVE )
+        commands_set_state(INFO_SOURCE_RELATIVE, NULL);
+
+   info_source_ready = 0;
    return commands_run_com(fd, "info source", 1);
 }
 
@@ -302,7 +332,11 @@ int commands_run_command(int fd, struct command *com){
             return commands_run_info_sources(fd);                   break;
         case COMMANDS_INFO_LIST:
             return commands_run_list(com->data, fd);                break;
-        case COMMANDS_INFO_SOURCE:                                  break;
+        case COMMANDS_INFO_SOURCE_RELATIVE:                         
+            return commands_run_info_source(
+                    INFO_SOURCE_RELATIVE,
+                    fd);                                            break;
+        case COMMANDS_INFO_SOURCE_ABSOLUTE:                         break;
         case COMMANDS_INFO_BREAKPOINTS:
             return commands_run_info_breakpoints(fd);               break;
         case COMMANDS_TTY:
@@ -320,7 +354,7 @@ void commands_list_command_finished(struct queue *q, int success){
     * absolute path from gdb. It should be ok for tgdb to run this command
     * right away.  */
    if(success)
-      commands_run_info_source(masterfd);
+      commands_run_info_source(INFO_SOURCE_ABSOLUTE, masterfd);
    else
       /* The file does not exist and it can not be opened.
        * So we return that information to the gui.  */
@@ -378,7 +412,7 @@ static void commands_process_source_line(void){
     }
 }
 
-static void commands_process_info_source(char a){
+static void commands_process_info_source(struct queue *q, char a){
     unsigned long length;
     static char *info_ptr;
 
@@ -393,8 +427,19 @@ static void commands_process_info_source(char a){
 
     if(a == '\n'){ 
         /* This is the line of interest */
-        if ( length >= source_prefix_length && strncmp(info_ptr, source_prefix, source_prefix_length) == 0 ) {
+        if ( commands_get_state() == INFO_SOURCE_ABSOLUTE && 
+             length >= source_prefix_length && 
+             strncmp(info_ptr, source_prefix, source_prefix_length) == 0 ) {
             info_source_ready = 1;
+        } else if ( 
+             commands_get_state() == INFO_SOURCE_RELATIVE && 
+             length >= source_relative_prefix_length && 
+             strncmp(info_ptr, source_relative_prefix, source_relative_prefix_length) == 0 ) {
+
+             if(tgdb_append_command(q, CURRENT_FILE_UPDATE, info_ptr + source_relative_prefix_length, NULL, NULL) == -1)
+                err_msg("%s:%d -> Could not send command", __FILE__, __LINE__);
+
+             info_source_ready = 1;
         } else
             string_clear(info_source_string);
     } else
@@ -456,8 +501,9 @@ void commands_process(char a, struct queue *q){
         commands_process_sources(a);     
     } else if(commands_get_state() == INFO_LIST){
         /* do nothing with data */
-    } else if(commands_get_state() == INFO_SOURCE){
-        commands_process_info_source(a);   
+    } else if(commands_get_state() == INFO_SOURCE_ABSOLUTE 
+            ||commands_get_state() == INFO_SOURCE_RELATIVE){
+        commands_process_info_source(q, a);   
     } else if(breakpoint_table && cur_command_state == FIELD && cur_field_num == 5){ /* the file name and line num */ 
         string_addchar(breakpoint_string, a);
     } else if(breakpoint_table && cur_command_state == FIELD && cur_field_num == 3 && a == 'y')

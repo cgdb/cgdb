@@ -35,6 +35,7 @@ enum INTERFACE_COMMANDS {
    BREAKPOINT,          /* a single breakpoint */
    BREAKPOINTS_END,     /* ends a breakpoint session */
    SOURCE_FILE_UPDATE,  /* tells the gui the current source file */
+   CURRENT_FILE_UPDATE, /* tells the gui the current relative source file */
    LINE_NUMBER_UPDATE,  /* tells the gui the current line number */
    SOURCES_START,       /* marks the beggining of a list of source files */
    SOURCE_FILE,         /* a source file */
@@ -84,7 +85,8 @@ enum buffer_output_type {
 enum buffer_command_to_run {
    COMMANDS_INFO_SOURCES = 1,
    COMMANDS_INFO_LIST,
-   COMMANDS_INFO_SOURCE,
+   COMMANDS_INFO_SOURCE_ABSOLUTE,
+   COMMANDS_INFO_SOURCE_RELATIVE,
    COMMANDS_INFO_BREAKPOINTS,
    COMMANDS_TTY, 
    COMMANDS_VOID

@@ -81,8 +81,10 @@ void buffer_print_item ( void *item ) {
             fprintf(stderr, "\tCOM_TYPE: COMMANDS_INFO_SOURCES\n");             break;
         case COMMANDS_INFO_LIST:
             fprintf(stderr, "\tCOM_TYPE: COMMANDS_INFO_LIST\n");                break;
-        case COMMANDS_INFO_SOURCE:
-            fprintf(stderr, "\tCOM_TYPE: COMMANDS_INFO_SOURCE\n");              break;
+        case COMMANDS_INFO_SOURCE_RELATIVE:
+            fprintf(stderr, "\tCOM_TYPE: COMMANDS_INFO_SOURCE_RELATIVE\n");     break;
+        case COMMANDS_INFO_SOURCE_ABSOLUTE:
+            fprintf(stderr, "\tCOM_TYPE: COMMANDS_INFO_SOURCE_ABSOLUTE\n");     break;
         case COMMANDS_INFO_BREAKPOINTS:
             fprintf(stderr, "\tCOM_TYPE: COMMANDS_INFO_BREAKPOINTS\n");         break;
         case COMMANDS_TTY:
