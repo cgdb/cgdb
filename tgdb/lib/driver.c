@@ -109,8 +109,15 @@ static void stdin_input(int fd) {
         return;
     } /* end if */
 
-    for ( i = 0; i < size; i++ )
+    for ( i = 0; i < size; i++ ) {
+        /* For testing only */
+        /*if ( command[i] == '8' )  {
+            tgdb_send("next", 2);
+            continue;
+        }*/
+        
         tgdb_send_input(command[i]);
+    }
 }
 
 void main_loop(int masterfd, int childfd, int readlinefd){
@@ -183,8 +190,10 @@ int main(int argc, char **argv){
 
     tgdb_init();
 
-    if ( tgdb_start(NULL, argc-1, argv+1, &gdb_fd, &child_fd, &tgdb_rlctx) == -1 )
+    if ( tgdb_start(NULL, argc-1, argv+1, &gdb_fd, &child_fd, &tgdb_rlctx) == -1 ) {
         err_msg("%s:%d tgdb_start error\n", __FILE__, __LINE__);
+        return -1;
+    }
 
     q = queue_init();
 

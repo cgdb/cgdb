@@ -45,8 +45,6 @@ char *tgdb_util_get_config_gdb_debug_file(void){
     return filename;
 }
 
-char *tgdb_util_get_config_dir(void);
-
 int tgdb_util_set_home_dir(void) {
     char tgdb_config_dir_unix_path[MAXLINE];
     char homeDir[MAXLINE];
@@ -267,16 +265,25 @@ static int pty_free_memory(char *s, int fd, int argc, char *argv[]) {
 int invoke_pty_process(
     char *name, 
     int argc, char *argv[], 
-    char *slavename, int *masterfd) {
+    char *slavename, int *masterfd,
+    int *extra_input) {
 
     char **local_argv;  /* Local argument vector to pass to GDB */
     pid_t pid;          /* PID of child process (gdb) to be returned */
-    int i, j = 0, extra = 2;    /* 1 name, 1 NULL */
+    int i, j = 0, extra = 3;    /* 1 name, 1 NULL */
+    int pin[2] = { -1, -1 };
 
     if ( !name ) {
       err_msg("%s:%d name error", __FILE__, __LINE__);
       return -1;
     } 
+    
+    /* Create an input pipe to the child program */
+    if ( pipe(pin) == -1 ) {
+        err_msg("(%s:%d) pipe failed", __FILE__, __LINE__);
+        free_memory(argc, local_argv);
+        return -1;
+    }
         
     /* Copy the argv into the local_argv, and NULL terminate it. */
     local_argv = (char **) xmalloc((argc+extra) * sizeof(char *));
@@ -285,6 +292,13 @@ int invoke_pty_process(
     /* copy in all the data the user entered */ 
     for (i = 0; i < argc; i++)
         local_argv[j++] = xstrdup(argv[i]);
+
+    /* Add the read only pipe descriptor */
+    {
+        char num[16];
+        sprintf(num, "%d", pin[0]);
+        local_argv[j++] = xstrdup(num);
+    }
 
     local_argv[j] = NULL;
 
@@ -296,6 +310,7 @@ int invoke_pty_process(
         pty_free_memory(slavename, *masterfd, argc, local_argv);
         return -1;
     } else if ( pid == 0 ) {    /* child */
+        xclose(pin[1]);
 
         if(execvp(local_argv[0], local_argv) == -1) {
             err_msg("(%s:%d) execvp failed", __FILE__, __LINE__);
@@ -306,6 +321,9 @@ int invoke_pty_process(
 
         return -1;
     } // end if 
+
+    xclose(pin[0]);
+    *extra_input = pin[1];
 
     if ( pty_free_memory(NULL, -1, argc, local_argv) == -1 )
         return -1;

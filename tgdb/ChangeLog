@@ -1,5 +1,9 @@
 04/08/2003 Bob Rossi <bob_rossi@cox.net>
 
+    * Adding support for reading/writing of command history
+
+04/08/2003 Bob Rossi <bob_rossi@cox.net>
+
     * Adding Tab completion
     * Allowing feature to force redisplay of readline
     * Adding Change of prompt support

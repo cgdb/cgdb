@@ -258,7 +258,7 @@ int a2_tgdb_init(char *debugger, int argc, char **argv, int *gdb, int *child, in
    rlc_input_queue = queue_init();
 
    /* Initialize readline */
-   if ( (rl = rlctx_init()) == NULL ) {
+   if ( (rl = rlctx_init((const char *)tgdb_util_get_config_dir(), "tgdb")) == NULL ) {
       err_msg("(%s:%d) rlctx_init failed", __FILE__, __LINE__);
       return -1;
    }
@@ -318,6 +318,9 @@ int a2_tgdb_init(char *debugger, int argc, char **argv, int *gdb, int *child, in
 }
 
 int a2_tgdb_shutdown(void){
+    /* free readline */
+    rlctx_close(rl);
+    
    /* free up the psuedo-terminal members */
    pty_release(slavename);
    close(masterfd);
@@ -577,8 +580,11 @@ int a2_tgdb_recv_input(char *buf) {
     length = strlen(buf);
 
     for ( i = 0; i < length; i++) {
-        /* Readline finished writing its prompt */
-        if ( buf[i] == '\031' ) {
+        /* Readline finished writing its prompt 
+         * Checking for internal command is a hack. It makes sure  that
+         * commands issued the command
+         */
+        if ( data_get_state() == INTERNAL_COMMAND && buf[i] == '\031' ) {
             /* A command is finished, so we say that the libtgdb is at the 
              * prompt. This is necesarry because readline commands are
              * sharing the gdb state to determine when we can send a command

@@ -56,12 +56,14 @@ struct Command {
  * BUFFER_GUI_COMMAND:  A command given by the gui.
  * BUFFER_TGDB_COMMAND: A command given by tgdb itself.
  * BUFFER_USER_COMMAND: A command given by the user.
+ * BUFFER_READLINE_COMMAND: This is to run a command through readline.
  */
 enum buffer_command_type {
    BUFFER_VOID = 0,
    BUFFER_GUI_COMMAND,
    BUFFER_TGDB_COMMAND,
-   BUFFER_USER_COMMAND
+   BUFFER_USER_COMMAND,
+   BUFFER_READLINE_COMMAND
 };
 
 /* This type determines what the user will see when a particular gdb command
@@ -81,6 +83,9 @@ enum buffer_output_type {
  * COMMANDS_INFO_BREAKPOINTS: This will get all the current breakpoints.
  * COMMANDS_TTY:          sets the input/output of the program gdb is running
  *                        to the tty is given
+ * COMMANDS_SET_PROMPT:   This tells readline what the new prompt is.
+ * COMMANDS_REDISPLAY:    This forces readline to redisplay the current line.
+ * COMMANDS_TAB_COMPLETION: This tab completes the current line.
  */
 enum buffer_command_to_run {
    COMMANDS_INFO_SOURCES = 1,
@@ -89,6 +94,9 @@ enum buffer_command_to_run {
    COMMANDS_INFO_SOURCE_RELATIVE,
    COMMANDS_INFO_BREAKPOINTS,
    COMMANDS_TTY, 
+   COMMANDS_SET_PROMPT,
+   COMMANDS_REDISPLAY,
+   COMMANDS_TAB_COMPLETION,
    COMMANDS_VOID
 };
 

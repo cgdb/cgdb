@@ -82,12 +82,14 @@ int invoke_process(
  *   argv       - List of args to pass to new process
  *   slavename  - Output param: The name of the pty device used.
  *   masterfd   - Output parameter: File descriptor of pty
+ *   extra_input- This is an extra pipe into the process created.
  *
  * Returns: PID of GDB process on success, -1 on error
  */
 int invoke_pty_process(
     char *name, 
     int argc, char *argv[],
-    char *slavename, int *masterfd);
+    char *slavename, int *masterfd,
+    int *extra_input);
 
 #endif
