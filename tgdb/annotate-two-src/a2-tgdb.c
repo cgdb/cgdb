@@ -24,15 +24,13 @@
 
 static int tgdb_initialized = 0;
 
-/* Does gdb need the nl mapping */
-static int tgdb_need_mapping = -1;
-
 static int tgdb_setup_buffer_command_to_run(char *com, 
                enum buffer_command_type com_type,      /* Who is running this command */
                enum buffer_output_type out_type,       /* Where should the output go */
                enum buffer_command_to_run com_to_run);   /* What command to run */
 
 int masterfd = -1;                     /* master fd of the pseudo-terminal */
+int gdb_stdout = -1;
 static char slavename[SLAVE_SIZE];     /* the name of the slave psuedo-termainl */
 
 int master_tty_fd = -1, slave_tty_fd = -1;
@@ -82,23 +80,18 @@ static int tgdb_setup_signals(void){
 int a2_tgdb_init(char *debugger, int argc, char **argv, int *gdb, int *child){
    char config_file[MAXLINE];
    tgdb_init_setup_config_file();
-
    global_get_config_gdb_debug_file(config_file);
    io_debug_init(config_file);
    
-   if ( (tgdb_need_mapping = tgdb_init_does_gdb_need_mapping(debugger)) == -1) {
-      err_msg("(%s:%d) Couldn't detect mapping", __FILE__, __LINE__);
-      return -1;
-   }
-
    /* initialize users circular buffer */
    buffer_clear_string();
    head = NULL;
 
-   if( (debugger_pid = tgdb_init_forkAndExecPty(debugger, argc, argv, slavename, &masterfd, tgdb_need_mapping)) == -1){
-      err_msg("(%s:%d) Couldn't exec gdb through pty", __FILE__, __LINE__);
+   if(( debugger_pid = invoke_debugger(debugger, argc, argv, &masterfd, &gdb_stdout, 0)) == -1 ) {
+      err_msg("(%s:%d) invoke_debugger failed", __FILE__, __LINE__);
       return -1;
    }
+
    if ( tgdb_util_new_tty(&master_tty_fd, &slave_tty_fd, child_tty_name) == -1){
       err_msg("%s:%d -> Could not open child tty", __FILE__, __LINE__);
       return -1;
@@ -109,7 +102,7 @@ int a2_tgdb_init(char *debugger, int argc, char **argv, int *gdb, int *child){
    tgdb_setup_buffer_command_to_run(child_tty_name , BUFFER_TGDB_COMMAND, COMMANDS_HIDE_OUTPUT, COMMANDS_TTY);
    a2_tgdb_get_source_absolute_filename(NULL);
 
-   *gdb     = masterfd;
+   *gdb     = gdb_stdout;
    *child   = master_tty_fd;
    tgdb_initialized = 1;
 
@@ -210,7 +203,8 @@ static int tgdb_run_users_buffered_commands(void){
                if(com_to_run == COMMANDS_INFO_SOURCES)
                   return commands_run_info_sources(masterfd);
                else if(com_to_run == COMMANDS_INFO_LIST){
-                  buffered_cmd[--length] = '\0'; /* remove new line */
+                  if ( length > 0 )
+                      buffered_cmd[--length] = '\0'; /* remove new line */
                   if ( buffered_cmd[0] == 0 )
                      return commands_run_list(NULL, masterfd);
 
@@ -336,7 +330,7 @@ int a2_tgdb_get_sources(void){
  *
  */
 size_t a2_tgdb_recv(char *buf, size_t n, struct Command ***com){
-   char local_buf[n + 1];
+   char local_buf[n + n];
    ssize_t size, buf_size;
    extern int DATA_AT_PROMPT;
 
@@ -347,7 +341,7 @@ size_t a2_tgdb_recv(char *buf, size_t n, struct Command ***com){
    memset(buf,'\0', n);
 
    /* 1. read all the data possible from gdb that is ready. */
-   if( (size = io_read(masterfd, local_buf, n)) < 0){
+   if( (size = io_read(gdb_stdout, local_buf, n)) < 0){
       err_ret("%s:%d -> could not read from masterfd", __FILE__, __LINE__);
       tgdb_append_command(com, QUIT, NULL, NULL, NULL);
       return -1;
@@ -361,6 +355,31 @@ size_t a2_tgdb_recv(char *buf, size_t n, struct Command ***com){
    }
 
    local_buf[size] = '\0';
+
+//   io_debug_write_fmt("[****\n%s\n****]", local_buf);
+
+   /* This is a hack, copies the buffer back into local buffer, 
+    * then it translates all '\n' into '\r\n'
+    */ 
+   {
+        char b[n + n], *c;
+        int i = 0;
+        strcpy(b, local_buf); /* Copy local_buf into the buffer */
+        c = b;
+        while(*c != '\0') {
+            if ( *c == '\n' ) {
+                local_buf[i++] = '\r'; 
+                local_buf[i++] = '\n'; 
+                size++;
+            } else
+                local_buf[i++] = *c;
+
+            c++;
+        }
+        local_buf[i++] = '\0';
+   }
+
+//    io_debug_write_fmt("[****\n%s\n****]", local_buf);
 
    /* At this point local_buf has everything new from this read.
     * Basically this function is responsible for seperating the annotations
@@ -383,28 +402,30 @@ size_t a2_tgdb_recv(char *buf, size_t n, struct Command ***com){
    return buf_size;
 }
 
-/* Sends a character to gdb */
-char *a2_tgdb_send(char c){
+/* Sends the user typed line to gdb */
+char *a2_tgdb_send(char *line){
    static char buf[4];
    memset(buf, '\0', 4); 
+   buf[0] = line[0];
    
-   if ( tgdb_can_issue_command()) {     
-      global_user_typed_char(c);
+   io_debug_write_fmt("%s", line);
+   if (tgdb_can_issue_command()) {     
+      global_user_typed_char(line[0]);
       
       /* tgdb always requests that breakpoints be checked because of
        * buggy gdb annotations */
-      if(c == '\n')
-         tgdb_setup_buffer_command_to_run ( NULL, BUFFER_TGDB_COMMAND, COMMANDS_HIDE_OUTPUT, COMMANDS_INFO_BREAKPOINTS );
-      
-      if(io_write_byte(masterfd, c) == -1){
+      tgdb_setup_buffer_command_to_run ( NULL, BUFFER_TGDB_COMMAND, COMMANDS_HIDE_OUTPUT, COMMANDS_INFO_BREAKPOINTS );
+
+      if(io_writen(masterfd, line, strlen(line)) == -1){
          err_ret("%s:%d -> could not write byte", __FILE__, __LINE__);
          return NULL;
       }
    } else {
-      head = buffer_write_char ( head, c );
-
-      if(c == '\n')
-         tgdb_setup_buffer_command_to_run ( NULL, BUFFER_TGDB_COMMAND, COMMANDS_HIDE_OUTPUT, COMMANDS_INFO_BREAKPOINTS );
+       /* TODO: Needs to be fixed, should there still be a buffer ? */
+//      head = buffer_write_char ( head, c );
+//
+//      if(c == '\n')
+//         tgdb_setup_buffer_command_to_run ( NULL, BUFFER_TGDB_COMMAND, COMMANDS_HIDE_OUTPUT, COMMANDS_INFO_BREAKPOINTS );
    }
    
    return buf;   

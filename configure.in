@@ -9,9 +9,9 @@ dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_INSTALL
 
-AC_DISABLE_SHARED
-AC_PROG_LIBTOOL
 
+VL_LIB_READLINE
+AC_PROG_RANLIB
 AM_PROG_LEX
 
 # determine if we are running in linux, cygwin, solaris, or freebsd

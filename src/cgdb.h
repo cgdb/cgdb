@@ -51,6 +51,7 @@
 
 /* Keys */
 #define CGDB_BACKSPACE_KEY(c) (c == 8 || c == 127 || c == KEY_BACKSPACE)
+#define CGDB_ESC 27
 
 /* Control chars used */
 #define CONTROL_K 11

@@ -210,18 +210,11 @@ enum COMMAND_STATE commands_get_state(void){
 static int commands_run_server_command(int fd, char *com){
    data_prepare_run_command();
 
-   /* writes ^E^U */
-   if(data_user_has_typed() == 1)
-     io_writen(fd, "\05\025", 2);         
-    
+   io_debug_write_fmt("server %s\n", com);
    io_writen(fd, "server ", 7);
    io_writen(fd, com, strlen(com));
    io_writen(fd, "\n", 1);
 
-   /* writes ^Y */
-   if(data_user_has_typed() == 1)
-     io_writen(fd, "\031", 1);         
-   
    return 0;
 }
 
@@ -372,7 +365,7 @@ static void commands_process_info_source(char a){
       return;
    }
 
-   if(info_source_nl == 3)
+   if(info_source_nl == 2)
       info_source_buf[info_source_buf_pos++] = a;
 }
 

@@ -2,6 +2,8 @@
  * -------
  */
 #include "config.h"
+#include <readline/readline.h>
+#include <readline/history.h>
 
 /* System Includes */
 #include <curses.h>
@@ -48,6 +50,7 @@ char cgdb_help_file[MAXLINE]; /* Path to home directory with trailing slash */
 static char *my_name = NULL;  /* Name of this application (argv[0]) */
 static int gdb_fd = -1;       /* File descriptor for GDB communication */
 static int tty_fd = -1;       /* File descriptor for process being debugged */
+static int readline_fd[2] = { -1, -1 }; /* readline write to this */
 
 static char *debugger_path = NULL;  /* Path to debugger to use */
 
@@ -231,95 +234,81 @@ static int start_gdb(int argc, char *argv[]) {
     return 0;
 }
 
+static int cread(char *c, int *size, int fd ) {
+    int ret_val;
+
+    /* Get input for readline */
+    while(1) {
+        if( ( ret_val = read(fd, c, *size)) == 0)  /* EOF */
+            return -1;
+        else if ( ret_val == -1 && errno == EINTR)
+            continue;
+        else if ( ret_val == -1 ){
+            err_msg("%s:%d -> I/O error", __FILE__, __LINE__);
+            return -1;
+        } else
+            break;
+   }
+
+   *size = ret_val;
+
+   return 0;
+}
+
 static void user_input() {
     char *result;
-    int key;
+    static char buf[MAXLINE];
+    static int size;
+    static int key, i, val;
+    Focus focus = if_get_focus();
+
+    /* Send input to GDB or to the TTY */
+    if ( focus == GDB || focus == TTY) {
+        size = MAXLINE;
+        if ( cread(buf, &size, STDIN_FILENO) == -1 ) {
+            err_msg("%s:%d cread error\n", __FILE__, __LINE__);
+            return; 
+        }
+
+        /* Find out if user typed only ESC */
+        if ( (size == 1 && buf[0] == CGDB_ESC)) {
+             if_set_focus(CGDB); 
+             return;
+        }
+
+        for ( i = 0; i < size; i++) {
+           switch ( focus ) {
+               case GDB:    /* Send input to readline */
+                   if ( rl_stuff_char(buf[i]) != 1 )
+                       err_quit("%s:%d rl_stuff_char error\n", __FILE__, __LINE__);
+                   break;
+               case TTY:    /* Send input to tty */
+                    if (tgdb_tty_send(buf[i]))
+                        if_tty_print(result);
+                    else
+                        err_quit("%s: tgdb_tty_send error\n", my_name);
+                    break;
+              default: break;
+           }
+
+        }
+        
+        /* Tell readline that input is ready */
+        if ( focus == GDB )
+            rl_callback_read_char();
+
+        return;
+    }
 
     /* Grab a character from the user */
-    while ((key = getch()) != ERR){
-        /* Check for special keys */
-        switch (if_input(key)){
-            case 1:
-               /* Normal key, send it to GDB */
-               if ( CGDB_BACKSPACE_KEY(key) )
-                   key = '\b';
-
-               if ( key == KEY_DC )
-                   key = 127;
-
-               /* Normal key, send it to GDB */
-               if ((result = tgdb_send((char) key)))
-                   if_print(result);
-               else
-                   err_quit("%s: Unable to send data to GDB\n", my_name);
-
-               break;
-            case 2: /* Send to child */
-               /* Normal key, send it to GDB */
-               if ( CGDB_BACKSPACE_KEY(key) )
-                   key = '\b';
-
-               if ( key == KEY_DC )
-                   key = 127;
-
-               /* Normal key, send it to TTY */
-               if ((result = tgdb_tty_send((char) key)))
-                   if_tty_print(result);
-               else
-                   err_quit("%s: Unable to send data to GDB\n", my_name);
-               break;
-                
-            case -1:
-                err_quit("%s: Unreasonable terminal size\n", my_name);
-                break;
-            case -2:
-                cleanup();
-                exit(0);
-                break;
-                
-            /* Translate curses arrow keys to something more normal */
-            case KEY_UP:
-                tgdb_send((char)033);
-                tgdb_send((char)0133);
-                tgdb_send((char)0101);
-                break;
-            case KEY_DOWN:
-                tgdb_send((char)033);
-                tgdb_send((char)0133);
-                tgdb_send((char)0102);
-                break;
-            case KEY_LEFT:
-                tgdb_send((char)033);
-                tgdb_send((char)0133);
-                tgdb_send((char)0104);
-                break;
-            case KEY_RIGHT:
-                tgdb_send((char)033);
-                tgdb_send((char)0133);
-                tgdb_send((char)0103);
-                break;
-
-            /* Translate curses arrow keys to something more normal */
-            case KEY_UP + KEY_UP:
-                tgdb_tty_send((char)033);
-                tgdb_tty_send((char)0133);
-                tgdb_tty_send((char)0101);
-                break;
-            case KEY_DOWN + KEY_DOWN:
-                tgdb_tty_send((char)033);
-                tgdb_tty_send((char)0133);
-                tgdb_tty_send((char)0102);
-                break;
-            case KEY_LEFT + KEY_LEFT:
-                tgdb_tty_send((char)033);
-                tgdb_tty_send((char)0133);
-                tgdb_tty_send((char)0104);
-                break;
-            case KEY_RIGHT + KEY_RIGHT:
-                tgdb_tty_send((char)033);
-                tgdb_tty_send((char)0133);
-                tgdb_tty_send((char)0103);
-                break;
+    while (( key = getch()) != ERR){
+        /* Process Key */
+        if ( (val = if_input(key)) == -1 )
+            err_quit("%s: Unreasonable terminal size\n", my_name);
+        else if ( val == -2 ) {
+            cleanup();
+            exit(0);
+            break;
         }
     }
 }
@@ -462,11 +451,40 @@ static void child_input()
     if_tty_print(buf);
 }
 
+static void readline_input(void){
+    char *buf = malloc(sizeof(char)*2);
+    
+/* This reads a char at a time to avoid writing '\n'.
+ * It should be optimized to read a larger buffer and to extract the '\n'.
+ */
+    if ( read(readline_fd[0], buf, 1) != 1 ) 
+        err_quit("%s:%d read error\n", __FILE__, __LINE__);
+
+    buf[1] = 0;
+
+    if ( buf[0] == '\n' ) {
+        free(buf);
+        return;
+    }
+    
+    if_print(buf);
+}
+
+/* Hack for now, this needs to be removed and the functions below 
+ * need to be taken out */
+#include <tgdb/annotate-two-src/data.h>
+
 static void main_loop(void)
 {
     fd_set set;
-    int max = (gdb_fd > STDIN_FILENO) ? gdb_fd : STDIN_FILENO;
-    max = ((max > tty_fd) ? max : tty_fd) + 1;
+    int max;
+    
+    max = (gdb_fd > STDIN_FILENO) ? gdb_fd : STDIN_FILENO;
+    max = ((max > tty_fd) ? max : tty_fd);
+    
+    /* If tgdb is ready to accept a command */
+    if ( data_get_state() == USER_AT_PROMPT )
+        max = ((max > readline_fd[0]) ? max : readline_fd[0]);
 
     /* Main (infinite) loop:
      *   Sits and waits for input on either stdin (user input) or the
@@ -479,11 +497,15 @@ static void main_loop(void)
         /* Reset the fd_set, and watch for input from GDB or stdin */
         FD_ZERO(&set);
         FD_SET(STDIN_FILENO, &set);
+
         FD_SET(gdb_fd, &set);
         FD_SET(tty_fd, &set);
+
+        if ( data_get_state() == USER_AT_PROMPT )
+            FD_SET(readline_fd[0], &set);
     
         /* Wait for input */
-        if (select(max, &set, NULL, NULL, NULL) == -1){
+        if (select(max + 1, &set, NULL, NULL, NULL) == -1){
             if (errno == EINTR){
                 user_input();
                 continue;
@@ -501,6 +523,9 @@ static void main_loop(void)
 
         if (FD_ISSET(tty_fd, &set))
             child_input();
+
+        if (FD_ISSET(readline_fd[0], &set))
+            readline_input();
     }
 }
 
@@ -517,11 +542,55 @@ void cleanup()
     move(LINES-1, 0);
     printf("\n");
 
+    /* The order of these is important. They each must restore the terminal
+     * the way they found it. Thus, the order in which curses/readline is 
+     * started, is the reverse order in which they should be shutdown 
+     */
+
     /* Shut down interface */
     if_shutdown();
    
     /* Shut down debugger */
     tgdb_shutdown();
+
+    /* Shut down readline */
+    rl_callback_handler_remove();
+}
+
+static void tgdb_send_user_command(char *line) {
+    char buf[strlen(line) + 2];
+    add_history(line);
+    sprintf(buf, "%s\n", line);
+    tgdb_send(buf);
+    if_print("\n"); /* Clear everything typed */
+}
+
+static int init_readline(void){
+    FILE *n;
+
+    if ( pipe(readline_fd) == -1 ) {
+       err_msg("(%s:%d) pipe failed", __FILE__, __LINE__);
+       return -1;
+    }
+
+    if ( (n = fdopen(readline_fd[1], "w")) == NULL ) {
+       err_msg("(%s:%d) fdopen failed", __FILE__, __LINE__);
+       return -1;
+    }
+
+    /* Set readline's output stream */
+    rl_outstream = n;
+
+    /* Initalize gdb */
+    rl_callback_handler_install("(gdb) ", tgdb_send_user_command);
+
+    /* Set the terminal to Dumb */
+    if ( rl_reset_terminal("dumb") == -1 ) {
+        err_msg("%s:%d rl_reset_terminal\n", __FILE__, __LINE__); 
+        return -1;
+    }
+    
+    return 0;
 }
 
 int main(int argc, char *argv[]) {
@@ -530,6 +599,9 @@ int main(int argc, char *argv[]) {
     /* Set up some data */
     my_name = argv[0];
 
+    if ( init_readline() == -1 )
+        err_quit("%s:%d Unable to start readline\n", __FILE__, __LINE__); 
+    
     /* Create the home directory */
     if ( init_home_dir() == -1 )
         err_quit("%s: Unable to create home dir ~/.cgdb\n", my_name); 

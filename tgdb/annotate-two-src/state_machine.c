@@ -38,12 +38,12 @@ int a2_handle_data(char *data, size_t size,
              * the user is talking with the readline library. It is 
              * not part of a gdb annotation.
              */
-            if ( data_get_state() == USER_AT_PROMPT && 
-                 (!global_did_user_press_enter() && 
-                  !global_signal_recieved() &&
-                  !global_did_user_press_special_control_char()) &&
-                  !global_has_implicit_enter_benen_recieved())
-                goto default_;
+//            if ( data_get_state() == USER_AT_PROMPT && 
+//                 (!global_did_user_press_enter() && 
+//                  !global_signal_recieved() &&
+//                  !global_did_user_press_special_control_char()) &&
+//                  !global_has_implicit_enter_benen_recieved())
+//                goto default_;
 
              switch(tgdb_state){
                case DATA:        
@@ -82,8 +82,8 @@ int a2_handle_data(char *data, size_t size,
                 * annotation. This saves tgdb from not understanding the 
                 * output at all.
                 */
-               if ( data_get_state() == USER_AT_PROMPT )
-                   global_set_implicit_enter(1);
+//               if ( data_get_state() == USER_AT_PROMPT )
+//                   global_set_implicit_enter(1);
 
             switch(tgdb_state){
                case DATA:        

@@ -53,7 +53,6 @@ CPPFLAGS = @CPPFLAGS@
 CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
-ECHO = @ECHO@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
@@ -69,8 +68,6 @@ LEXLIB = @LEXLIB@
 LEX_OUTPUT_ROOT = @LEX_OUTPUT_ROOT@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
-LIBTOOL = @LIBTOOL@
-LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
 MAINT = @MAINT@
 MAINTAINER_MODE_FALSE = @MAINTAINER_MODE_FALSE@
@@ -125,12 +122,12 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 AM_CFLAGS = -I$(top_srcdir)/tgdb/include -I$(top_srcdir)/tgdb/annotate-two-src -I$(top_srcdir)/tgdb/gdbmi-src
 
-lib_LTLIBRARIES = libtgdb.la
+noinst_LIBRARIES = libtgdb.a
 
 # Bug or feature workaround
 tgdb_srcdir = $(top_srcdir)/tgdb
 
-libtgdb_la_SOURCES = \
+libtgdb_a_SOURCES = \
 $(tgdb_srcdir)/lib/tgdb.c \
 $(tgdb_srcdir)/lib/tgdb_util.c \
 $(tgdb_srcdir)/lib/types.c \
@@ -148,107 +145,81 @@ $(tgdb_srcdir)/annotate-two-src/globals.c \
 $(tgdb_srcdir)/annotate-two-src/tgdb_init.c \
 $(tgdb_srcdir)/annotate-two-src/buffer.c \
 $(tgdb_srcdir)/gdbmi-src/gdbmi_tgdb.c \
-$(tgdb_srcdir)/gdbmi-src/gdbmi_init.c \
 $(tgdb_srcdir)/gdbmi-src/gdbmi_parse.c
 
-
-libtgdb_la_LDFLAGS = -avoid-version
 subdir = tgdb/lib
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
-LTLIBRARIES = $(lib_LTLIBRARIES)
+LIBRARIES = $(noinst_LIBRARIES)
 
-libtgdb_la_LIBADD =
-am_libtgdb_la_OBJECTS = tgdb.lo tgdb_util.lo types.lo pseudo.lo error.lo \
-	util.lo io.lo a2-tgdb.lo annotate.lo state_machine.lo data.lo \
-	terminal.lo commands.lo globals.lo tgdb_init.lo buffer.lo \
-	gdbmi_tgdb.lo gdbmi_init.lo gdbmi_parse.lo
-libtgdb_la_OBJECTS = $(am_libtgdb_la_OBJECTS)
+libtgdb_a_AR = $(AR) cru
+libtgdb_a_LIBADD =
+am_libtgdb_a_OBJECTS = tgdb.$(OBJEXT) tgdb_util.$(OBJEXT) \
+	types.$(OBJEXT) pseudo.$(OBJEXT) error.$(OBJEXT) util.$(OBJEXT) \
+	io.$(OBJEXT) a2-tgdb.$(OBJEXT) annotate.$(OBJEXT) \
+	state_machine.$(OBJEXT) data.$(OBJEXT) terminal.$(OBJEXT) \
+	commands.$(OBJEXT) globals.$(OBJEXT) tgdb_init.$(OBJEXT) \
+	buffer.$(OBJEXT) gdbmi_tgdb.$(OBJEXT) gdbmi_parse.$(OBJEXT)
+libtgdb_a_OBJECTS = $(am_libtgdb_a_OBJECTS)
 
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
-@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/a2-tgdb.Plo ./$(DEPDIR)/annotate.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/buffer.Plo ./$(DEPDIR)/commands.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/data.Plo ./$(DEPDIR)/error.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/gdbmi_init.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/gdbmi_parse.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/gdbmi_tgdb.Plo ./$(DEPDIR)/globals.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/io.Plo ./$(DEPDIR)/pseudo.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/state_machine.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/terminal.Plo ./$(DEPDIR)/tgdb.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/tgdb_init.Plo ./$(DEPDIR)/tgdb_util.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/types.Plo ./$(DEPDIR)/util.Plo
+@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/a2-tgdb.Po ./$(DEPDIR)/annotate.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/buffer.Po ./$(DEPDIR)/commands.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/data.Po ./$(DEPDIR)/error.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/gdbmi_parse.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/gdbmi_tgdb.Po ./$(DEPDIR)/globals.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/io.Po ./$(DEPDIR)/pseudo.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/state_machine.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/terminal.Po ./$(DEPDIR)/tgdb.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/tgdb_init.Po ./$(DEPDIR)/tgdb_util.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/types.Po ./$(DEPDIR)/util.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
-LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
-	$(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
-LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES = $(libtgdb_la_SOURCES)
+LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+DIST_SOURCES = $(libtgdb_a_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in
-SOURCES = $(libtgdb_la_SOURCES)
+SOURCES = $(libtgdb_a_SOURCES)
 
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .lo .o .obj
+.SUFFIXES: .c .o .obj
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
 	cd $(top_srcdir) && \
 	  $(AUTOMAKE) --gnu  tgdb/lib/Makefile
 Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe)
-libLTLIBRARIES_INSTALL = $(INSTALL)
-install-libLTLIBRARIES: $(lib_LTLIBRARIES)
-	@$(NORMAL_INSTALL)
-	$(mkinstalldirs) $(DESTDIR)$(libdir)
-	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
-	  if test -f $$p; then \
-	    f="`echo $$p | sed -e 's|^.*/||'`"; \
-	    echo " $(LIBTOOL) --mode=install $(libLTLIBRARIES_INSTALL) $(INSTALL_STRIP_FLAG) $$p $(DESTDIR)$(libdir)/$$f"; \
-	    $(LIBTOOL) --mode=install $(libLTLIBRARIES_INSTALL) $(INSTALL_STRIP_FLAG) $$p $(DESTDIR)$(libdir)/$$f; \
-	  else :; fi; \
-	done
 
-uninstall-libLTLIBRARIES:
-	@$(NORMAL_UNINSTALL)
-	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
-	    p="`echo $$p | sed -e 's|^.*/||'`"; \
-	  echo " $(LIBTOOL) --mode=uninstall rm -f $(DESTDIR)$(libdir)/$$p"; \
-	  $(LIBTOOL) --mode=uninstall rm -f $(DESTDIR)$(libdir)/$$p; \
-	done
+AR = ar
 
-clean-libLTLIBRARIES:
-	-test -z "$(lib_LTLIBRARIES)" || rm -f $(lib_LTLIBRARIES)
-	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
-	  dir="`echo $$p | sed -e 's|/[^/]*$$||'`"; \
-	  test "$$dir" = "$$p" && dir=.; \
-	  echo "rm -f \"$${dir}/so_locations\""; \
-	  rm -f "$${dir}/so_locations"; \
-	done
-tgdb.lo: $(tgdb_srcdir)/lib/tgdb.c
-tgdb_util.lo: $(tgdb_srcdir)/lib/tgdb_util.c
-types.lo: $(tgdb_srcdir)/lib/types.c
-pseudo.lo: $(tgdb_srcdir)/lib/pseudo.c
-error.lo: $(tgdb_srcdir)/lib/error.c
-util.lo: $(tgdb_srcdir)/lib/util.c
-io.lo: $(tgdb_srcdir)/lib/io.c
-a2-tgdb.lo: $(tgdb_srcdir)/annotate-two-src/a2-tgdb.c
-annotate.lo: $(tgdb_srcdir)/annotate-two-src/annotate.c
-state_machine.lo: $(tgdb_srcdir)/annotate-two-src/state_machine.c
-data.lo: $(tgdb_srcdir)/annotate-two-src/data.c
-terminal.lo: $(tgdb_srcdir)/annotate-two-src/terminal.c
-commands.lo: $(tgdb_srcdir)/annotate-two-src/commands.c
-globals.lo: $(tgdb_srcdir)/annotate-two-src/globals.c
-tgdb_init.lo: $(tgdb_srcdir)/annotate-two-src/tgdb_init.c
-buffer.lo: $(tgdb_srcdir)/annotate-two-src/buffer.c
-gdbmi_tgdb.lo: $(tgdb_srcdir)/gdbmi-src/gdbmi_tgdb.c
-gdbmi_init.lo: $(tgdb_srcdir)/gdbmi-src/gdbmi_init.c
-gdbmi_parse.lo: $(tgdb_srcdir)/gdbmi-src/gdbmi_parse.c
-libtgdb.la: $(libtgdb_la_OBJECTS) $(libtgdb_la_DEPENDENCIES) 
-	$(LINK) -rpath $(libdir) $(libtgdb_la_LDFLAGS) $(libtgdb_la_OBJECTS) $(libtgdb_la_LIBADD) $(LIBS)
+clean-noinstLIBRARIES:
+	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
+tgdb.$(OBJEXT): $(tgdb_srcdir)/lib/tgdb.c
+tgdb_util.$(OBJEXT): $(tgdb_srcdir)/lib/tgdb_util.c
+types.$(OBJEXT): $(tgdb_srcdir)/lib/types.c
+pseudo.$(OBJEXT): $(tgdb_srcdir)/lib/pseudo.c
+error.$(OBJEXT): $(tgdb_srcdir)/lib/error.c
+util.$(OBJEXT): $(tgdb_srcdir)/lib/util.c
+io.$(OBJEXT): $(tgdb_srcdir)/lib/io.c
+a2-tgdb.$(OBJEXT): $(tgdb_srcdir)/annotate-two-src/a2-tgdb.c
+annotate.$(OBJEXT): $(tgdb_srcdir)/annotate-two-src/annotate.c
+state_machine.$(OBJEXT): $(tgdb_srcdir)/annotate-two-src/state_machine.c
+data.$(OBJEXT): $(tgdb_srcdir)/annotate-two-src/data.c
+terminal.$(OBJEXT): $(tgdb_srcdir)/annotate-two-src/terminal.c
+commands.$(OBJEXT): $(tgdb_srcdir)/annotate-two-src/commands.c
+globals.$(OBJEXT): $(tgdb_srcdir)/annotate-two-src/globals.c
+tgdb_init.$(OBJEXT): $(tgdb_srcdir)/annotate-two-src/tgdb_init.c
+buffer.$(OBJEXT): $(tgdb_srcdir)/annotate-two-src/buffer.c
+gdbmi_tgdb.$(OBJEXT): $(tgdb_srcdir)/gdbmi-src/gdbmi_tgdb.c
+gdbmi_parse.$(OBJEXT): $(tgdb_srcdir)/gdbmi-src/gdbmi_parse.c
+libtgdb.a: $(libtgdb_a_OBJECTS) $(libtgdb_a_DEPENDENCIES) 
+	-rm -f libtgdb.a
+	$(libtgdb_a_AR) libtgdb.a $(libtgdb_a_OBJECTS) $(libtgdb_a_LIBADD)
+	$(RANLIB) libtgdb.a
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT) core *.core
@@ -256,25 +227,24 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/a2-tgdb.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/annotate.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/buffer.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/commands.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/data.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/error.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdbmi_init.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdbmi_parse.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdbmi_tgdb.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/globals.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pseudo.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/state_machine.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/terminal.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tgdb.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tgdb_init.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tgdb_util.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/types.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/util.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/a2-tgdb.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/annotate.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/buffer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/commands.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/data.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/error.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdbmi_parse.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdbmi_tgdb.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/globals.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pseudo.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/state_machine.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/terminal.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tgdb.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tgdb_init.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tgdb_util.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/types.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/util.Po@am__quote@
 
 distclean-depend:
 	-rm -rf ./$(DEPDIR)
@@ -301,17 +271,6 @@ distclean-depend:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(COMPILE) -c `if test -f '$<'; then $(CYGPATH_W) '$<'; else $(CYGPATH_W) '$(srcdir)/$<'`
 
-.c.lo:
-@am__fastdepCC_TRUE@	if $(LTCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" \
-@am__fastdepCC_TRUE@	  -c -o $@ `test -f '$<' || echo '$(srcdir)/'`$<; \
-@am__fastdepCC_TRUE@	then mv "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Plo"; \
-@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; \
-@am__fastdepCC_TRUE@	fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/$*.Plo' tmpdepfile='$(DEPDIR)/$*.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ `test -f '$<' || echo '$(srcdir)/'`$<
-
 tgdb.o: $(tgdb_srcdir)/lib/tgdb.c
 @am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tgdb.o -MD -MP -MF "$(DEPDIR)/tgdb.Tpo" \
 @am__fastdepCC_TRUE@	  -c -o tgdb.o `test -f '$(tgdb_srcdir)/lib/tgdb.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/lib/tgdb.c; \
@@ -333,17 +292,6 @@ tgdb.obj: $(tgdb_srcdir)/lib/tgdb.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/tgdb.Po' tmpdepfile='$(DEPDIR)/tgdb.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tgdb.obj `if test -f '$(tgdb_srcdir)/lib/tgdb.c'; then $(CYGPATH_W) '$(tgdb_srcdir)/lib/tgdb.c'; else $(CYGPATH_W) '$(srcdir)/$(tgdb_srcdir)/lib/tgdb.c'`
-
-tgdb.lo: $(tgdb_srcdir)/lib/tgdb.c
-@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tgdb.lo -MD -MP -MF "$(DEPDIR)/tgdb.Tpo" \
-@am__fastdepCC_TRUE@	  -c -o tgdb.lo `test -f '$(tgdb_srcdir)/lib/tgdb.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/lib/tgdb.c; \
-@am__fastdepCC_TRUE@	then mv "$(DEPDIR)/tgdb.Tpo" "$(DEPDIR)/tgdb.Plo"; \
-@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/tgdb.Tpo"; exit 1; \
-@am__fastdepCC_TRUE@	fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(tgdb_srcdir)/lib/tgdb.c' object='tgdb.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/tgdb.Plo' tmpdepfile='$(DEPDIR)/tgdb.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tgdb.lo `test -f '$(tgdb_srcdir)/lib/tgdb.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/lib/tgdb.c
 
 tgdb_util.o: $(tgdb_srcdir)/lib/tgdb_util.c
 @am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tgdb_util.o -MD -MP -MF "$(DEPDIR)/tgdb_util.Tpo" \
@@ -367,17 +315,6 @@ tgdb_util.obj: $(tgdb_srcdir)/lib/tgdb_util.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tgdb_util.obj `if test -f '$(tgdb_srcdir)/lib/tgdb_util.c'; then $(CYGPATH_W) '$(tgdb_srcdir)/lib/tgdb_util.c'; else $(CYGPATH_W) '$(srcdir)/$(tgdb_srcdir)/lib/tgdb_util.c'`
 
-tgdb_util.lo: $(tgdb_srcdir)/lib/tgdb_util.c
-@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tgdb_util.lo -MD -MP -MF "$(DEPDIR)/tgdb_util.Tpo" \
-@am__fastdepCC_TRUE@	  -c -o tgdb_util.lo `test -f '$(tgdb_srcdir)/lib/tgdb_util.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/lib/tgdb_util.c; \
-@am__fastdepCC_TRUE@	then mv "$(DEPDIR)/tgdb_util.Tpo" "$(DEPDIR)/tgdb_util.Plo"; \
-@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/tgdb_util.Tpo"; exit 1; \
-@am__fastdepCC_TRUE@	fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(tgdb_srcdir)/lib/tgdb_util.c' object='tgdb_util.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/tgdb_util.Plo' tmpdepfile='$(DEPDIR)/tgdb_util.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tgdb_util.lo `test -f '$(tgdb_srcdir)/lib/tgdb_util.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/lib/tgdb_util.c
-
 types.o: $(tgdb_srcdir)/lib/types.c
 @am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT types.o -MD -MP -MF "$(DEPDIR)/types.Tpo" \
 @am__fastdepCC_TRUE@	  -c -o types.o `test -f '$(tgdb_srcdir)/lib/types.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/lib/types.c; \
@@ -399,17 +336,6 @@ types.obj: $(tgdb_srcdir)/lib/types.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/types.Po' tmpdepfile='$(DEPDIR)/types.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o types.obj `if test -f '$(tgdb_srcdir)/lib/types.c'; then $(CYGPATH_W) '$(tgdb_srcdir)/lib/types.c'; else $(CYGPATH_W) '$(srcdir)/$(tgdb_srcdir)/lib/types.c'`
-
-types.lo: $(tgdb_srcdir)/lib/types.c
-@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT types.lo -MD -MP -MF "$(DEPDIR)/types.Tpo" \
-@am__fastdepCC_TRUE@	  -c -o types.lo `test -f '$(tgdb_srcdir)/lib/types.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/lib/types.c; \
-@am__fastdepCC_TRUE@	then mv "$(DEPDIR)/types.Tpo" "$(DEPDIR)/types.Plo"; \
-@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/types.Tpo"; exit 1; \
-@am__fastdepCC_TRUE@	fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(tgdb_srcdir)/lib/types.c' object='types.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/types.Plo' tmpdepfile='$(DEPDIR)/types.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o types.lo `test -f '$(tgdb_srcdir)/lib/types.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/lib/types.c
 
 pseudo.o: $(tgdb_srcdir)/lib/pseudo.c
 @am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT pseudo.o -MD -MP -MF "$(DEPDIR)/pseudo.Tpo" \
@@ -433,17 +359,6 @@ pseudo.obj: $(tgdb_srcdir)/lib/pseudo.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o pseudo.obj `if test -f '$(tgdb_srcdir)/lib/pseudo.c'; then $(CYGPATH_W) '$(tgdb_srcdir)/lib/pseudo.c'; else $(CYGPATH_W) '$(srcdir)/$(tgdb_srcdir)/lib/pseudo.c'`
 
-pseudo.lo: $(tgdb_srcdir)/lib/pseudo.c
-@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT pseudo.lo -MD -MP -MF "$(DEPDIR)/pseudo.Tpo" \
-@am__fastdepCC_TRUE@	  -c -o pseudo.lo `test -f '$(tgdb_srcdir)/lib/pseudo.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/lib/pseudo.c; \
-@am__fastdepCC_TRUE@	then mv "$(DEPDIR)/pseudo.Tpo" "$(DEPDIR)/pseudo.Plo"; \
-@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/pseudo.Tpo"; exit 1; \
-@am__fastdepCC_TRUE@	fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(tgdb_srcdir)/lib/pseudo.c' object='pseudo.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/pseudo.Plo' tmpdepfile='$(DEPDIR)/pseudo.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o pseudo.lo `test -f '$(tgdb_srcdir)/lib/pseudo.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/lib/pseudo.c
-
 error.o: $(tgdb_srcdir)/lib/error.c
 @am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT error.o -MD -MP -MF "$(DEPDIR)/error.Tpo" \
 @am__fastdepCC_TRUE@	  -c -o error.o `test -f '$(tgdb_srcdir)/lib/error.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/lib/error.c; \
@@ -465,17 +380,6 @@ error.obj: $(tgdb_srcdir)/lib/error.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/error.Po' tmpdepfile='$(DEPDIR)/error.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o error.obj `if test -f '$(tgdb_srcdir)/lib/error.c'; then $(CYGPATH_W) '$(tgdb_srcdir)/lib/error.c'; else $(CYGPATH_W) '$(srcdir)/$(tgdb_srcdir)/lib/error.c'`
-
-error.lo: $(tgdb_srcdir)/lib/error.c
-@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT error.lo -MD -MP -MF "$(DEPDIR)/error.Tpo" \
-@am__fastdepCC_TRUE@	  -c -o error.lo `test -f '$(tgdb_srcdir)/lib/error.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/lib/error.c; \
-@am__fastdepCC_TRUE@	then mv "$(DEPDIR)/error.Tpo" "$(DEPDIR)/error.Plo"; \
-@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/error.Tpo"; exit 1; \
-@am__fastdepCC_TRUE@	fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(tgdb_srcdir)/lib/error.c' object='error.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/error.Plo' tmpdepfile='$(DEPDIR)/error.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o error.lo `test -f '$(tgdb_srcdir)/lib/error.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/lib/error.c
 
 util.o: $(tgdb_srcdir)/lib/util.c
 @am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT util.o -MD -MP -MF "$(DEPDIR)/util.Tpo" \
@@ -499,17 +403,6 @@ util.obj: $(tgdb_srcdir)/lib/util.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o util.obj `if test -f '$(tgdb_srcdir)/lib/util.c'; then $(CYGPATH_W) '$(tgdb_srcdir)/lib/util.c'; else $(CYGPATH_W) '$(srcdir)/$(tgdb_srcdir)/lib/util.c'`
 
-util.lo: $(tgdb_srcdir)/lib/util.c
-@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT util.lo -MD -MP -MF "$(DEPDIR)/util.Tpo" \
-@am__fastdepCC_TRUE@	  -c -o util.lo `test -f '$(tgdb_srcdir)/lib/util.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/lib/util.c; \
-@am__fastdepCC_TRUE@	then mv "$(DEPDIR)/util.Tpo" "$(DEPDIR)/util.Plo"; \
-@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/util.Tpo"; exit 1; \
-@am__fastdepCC_TRUE@	fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(tgdb_srcdir)/lib/util.c' object='util.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/util.Plo' tmpdepfile='$(DEPDIR)/util.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o util.lo `test -f '$(tgdb_srcdir)/lib/util.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/lib/util.c
-
 io.o: $(tgdb_srcdir)/lib/io.c
 @am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT io.o -MD -MP -MF "$(DEPDIR)/io.Tpo" \
 @am__fastdepCC_TRUE@	  -c -o io.o `test -f '$(tgdb_srcdir)/lib/io.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/lib/io.c; \
@@ -531,17 +424,6 @@ io.obj: $(tgdb_srcdir)/lib/io.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/io.Po' tmpdepfile='$(DEPDIR)/io.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o io.obj `if test -f '$(tgdb_srcdir)/lib/io.c'; then $(CYGPATH_W) '$(tgdb_srcdir)/lib/io.c'; else $(CYGPATH_W) '$(srcdir)/$(tgdb_srcdir)/lib/io.c'`
-
-io.lo: $(tgdb_srcdir)/lib/io.c
-@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT io.lo -MD -MP -MF "$(DEPDIR)/io.Tpo" \
-@am__fastdepCC_TRUE@	  -c -o io.lo `test -f '$(tgdb_srcdir)/lib/io.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/lib/io.c; \
-@am__fastdepCC_TRUE@	then mv "$(DEPDIR)/io.Tpo" "$(DEPDIR)/io.Plo"; \
-@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/io.Tpo"; exit 1; \
-@am__fastdepCC_TRUE@	fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(tgdb_srcdir)/lib/io.c' object='io.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/io.Plo' tmpdepfile='$(DEPDIR)/io.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o io.lo `test -f '$(tgdb_srcdir)/lib/io.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/lib/io.c
 
 a2-tgdb.o: $(tgdb_srcdir)/annotate-two-src/a2-tgdb.c
 @am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT a2-tgdb.o -MD -MP -MF "$(DEPDIR)/a2-tgdb.Tpo" \
@@ -565,17 +447,6 @@ a2-tgdb.obj: $(tgdb_srcdir)/annotate-two-src/a2-tgdb.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o a2-tgdb.obj `if test -f '$(tgdb_srcdir)/annotate-two-src/a2-tgdb.c'; then $(CYGPATH_W) '$(tgdb_srcdir)/annotate-two-src/a2-tgdb.c'; else $(CYGPATH_W) '$(srcdir)/$(tgdb_srcdir)/annotate-two-src/a2-tgdb.c'`
 
-a2-tgdb.lo: $(tgdb_srcdir)/annotate-two-src/a2-tgdb.c
-@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT a2-tgdb.lo -MD -MP -MF "$(DEPDIR)/a2-tgdb.Tpo" \
-@am__fastdepCC_TRUE@	  -c -o a2-tgdb.lo `test -f '$(tgdb_srcdir)/annotate-two-src/a2-tgdb.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/annotate-two-src/a2-tgdb.c; \
-@am__fastdepCC_TRUE@	then mv "$(DEPDIR)/a2-tgdb.Tpo" "$(DEPDIR)/a2-tgdb.Plo"; \
-@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/a2-tgdb.Tpo"; exit 1; \
-@am__fastdepCC_TRUE@	fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(tgdb_srcdir)/annotate-two-src/a2-tgdb.c' object='a2-tgdb.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/a2-tgdb.Plo' tmpdepfile='$(DEPDIR)/a2-tgdb.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o a2-tgdb.lo `test -f '$(tgdb_srcdir)/annotate-two-src/a2-tgdb.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/annotate-two-src/a2-tgdb.c
-
 annotate.o: $(tgdb_srcdir)/annotate-two-src/annotate.c
 @am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT annotate.o -MD -MP -MF "$(DEPDIR)/annotate.Tpo" \
 @am__fastdepCC_TRUE@	  -c -o annotate.o `test -f '$(tgdb_srcdir)/annotate-two-src/annotate.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/annotate-two-src/annotate.c; \
@@ -597,17 +468,6 @@ annotate.obj: $(tgdb_srcdir)/annotate-two-src/annotate.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/annotate.Po' tmpdepfile='$(DEPDIR)/annotate.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o annotate.obj `if test -f '$(tgdb_srcdir)/annotate-two-src/annotate.c'; then $(CYGPATH_W) '$(tgdb_srcdir)/annotate-two-src/annotate.c'; else $(CYGPATH_W) '$(srcdir)/$(tgdb_srcdir)/annotate-two-src/annotate.c'`
-
-annotate.lo: $(tgdb_srcdir)/annotate-two-src/annotate.c
-@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT annotate.lo -MD -MP -MF "$(DEPDIR)/annotate.Tpo" \
-@am__fastdepCC_TRUE@	  -c -o annotate.lo `test -f '$(tgdb_srcdir)/annotate-two-src/annotate.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/annotate-two-src/annotate.c; \
-@am__fastdepCC_TRUE@	then mv "$(DEPDIR)/annotate.Tpo" "$(DEPDIR)/annotate.Plo"; \
-@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/annotate.Tpo"; exit 1; \
-@am__fastdepCC_TRUE@	fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(tgdb_srcdir)/annotate-two-src/annotate.c' object='annotate.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/annotate.Plo' tmpdepfile='$(DEPDIR)/annotate.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o annotate.lo `test -f '$(tgdb_srcdir)/annotate-two-src/annotate.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/annotate-two-src/annotate.c
 
 state_machine.o: $(tgdb_srcdir)/annotate-two-src/state_machine.c
 @am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT state_machine.o -MD -MP -MF "$(DEPDIR)/state_machine.Tpo" \
@@ -631,17 +491,6 @@ state_machine.obj: $(tgdb_srcdir)/annotate-two-src/state_machine.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o state_machine.obj `if test -f '$(tgdb_srcdir)/annotate-two-src/state_machine.c'; then $(CYGPATH_W) '$(tgdb_srcdir)/annotate-two-src/state_machine.c'; else $(CYGPATH_W) '$(srcdir)/$(tgdb_srcdir)/annotate-two-src/state_machine.c'`
 
-state_machine.lo: $(tgdb_srcdir)/annotate-two-src/state_machine.c
-@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT state_machine.lo -MD -MP -MF "$(DEPDIR)/state_machine.Tpo" \
-@am__fastdepCC_TRUE@	  -c -o state_machine.lo `test -f '$(tgdb_srcdir)/annotate-two-src/state_machine.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/annotate-two-src/state_machine.c; \
-@am__fastdepCC_TRUE@	then mv "$(DEPDIR)/state_machine.Tpo" "$(DEPDIR)/state_machine.Plo"; \
-@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/state_machine.Tpo"; exit 1; \
-@am__fastdepCC_TRUE@	fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(tgdb_srcdir)/annotate-two-src/state_machine.c' object='state_machine.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/state_machine.Plo' tmpdepfile='$(DEPDIR)/state_machine.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o state_machine.lo `test -f '$(tgdb_srcdir)/annotate-two-src/state_machine.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/annotate-two-src/state_machine.c
-
 data.o: $(tgdb_srcdir)/annotate-two-src/data.c
 @am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT data.o -MD -MP -MF "$(DEPDIR)/data.Tpo" \
 @am__fastdepCC_TRUE@	  -c -o data.o `test -f '$(tgdb_srcdir)/annotate-two-src/data.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/annotate-two-src/data.c; \
@@ -663,17 +512,6 @@ data.obj: $(tgdb_srcdir)/annotate-two-src/data.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/data.Po' tmpdepfile='$(DEPDIR)/data.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o data.obj `if test -f '$(tgdb_srcdir)/annotate-two-src/data.c'; then $(CYGPATH_W) '$(tgdb_srcdir)/annotate-two-src/data.c'; else $(CYGPATH_W) '$(srcdir)/$(tgdb_srcdir)/annotate-two-src/data.c'`
-
-data.lo: $(tgdb_srcdir)/annotate-two-src/data.c
-@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT data.lo -MD -MP -MF "$(DEPDIR)/data.Tpo" \
-@am__fastdepCC_TRUE@	  -c -o data.lo `test -f '$(tgdb_srcdir)/annotate-two-src/data.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/annotate-two-src/data.c; \
-@am__fastdepCC_TRUE@	then mv "$(DEPDIR)/data.Tpo" "$(DEPDIR)/data.Plo"; \
-@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/data.Tpo"; exit 1; \
-@am__fastdepCC_TRUE@	fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(tgdb_srcdir)/annotate-two-src/data.c' object='data.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/data.Plo' tmpdepfile='$(DEPDIR)/data.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o data.lo `test -f '$(tgdb_srcdir)/annotate-two-src/data.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/annotate-two-src/data.c
 
 terminal.o: $(tgdb_srcdir)/annotate-two-src/terminal.c
 @am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT terminal.o -MD -MP -MF "$(DEPDIR)/terminal.Tpo" \
@@ -697,17 +535,6 @@ terminal.obj: $(tgdb_srcdir)/annotate-two-src/terminal.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o terminal.obj `if test -f '$(tgdb_srcdir)/annotate-two-src/terminal.c'; then $(CYGPATH_W) '$(tgdb_srcdir)/annotate-two-src/terminal.c'; else $(CYGPATH_W) '$(srcdir)/$(tgdb_srcdir)/annotate-two-src/terminal.c'`
 
-terminal.lo: $(tgdb_srcdir)/annotate-two-src/terminal.c
-@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT terminal.lo -MD -MP -MF "$(DEPDIR)/terminal.Tpo" \
-@am__fastdepCC_TRUE@	  -c -o terminal.lo `test -f '$(tgdb_srcdir)/annotate-two-src/terminal.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/annotate-two-src/terminal.c; \
-@am__fastdepCC_TRUE@	then mv "$(DEPDIR)/terminal.Tpo" "$(DEPDIR)/terminal.Plo"; \
-@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/terminal.Tpo"; exit 1; \
-@am__fastdepCC_TRUE@	fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(tgdb_srcdir)/annotate-two-src/terminal.c' object='terminal.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/terminal.Plo' tmpdepfile='$(DEPDIR)/terminal.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o terminal.lo `test -f '$(tgdb_srcdir)/annotate-two-src/terminal.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/annotate-two-src/terminal.c
-
 commands.o: $(tgdb_srcdir)/annotate-two-src/commands.c
 @am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT commands.o -MD -MP -MF "$(DEPDIR)/commands.Tpo" \
 @am__fastdepCC_TRUE@	  -c -o commands.o `test -f '$(tgdb_srcdir)/annotate-two-src/commands.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/annotate-two-src/commands.c; \
@@ -729,17 +556,6 @@ commands.obj: $(tgdb_srcdir)/annotate-two-src/commands.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/commands.Po' tmpdepfile='$(DEPDIR)/commands.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o commands.obj `if test -f '$(tgdb_srcdir)/annotate-two-src/commands.c'; then $(CYGPATH_W) '$(tgdb_srcdir)/annotate-two-src/commands.c'; else $(CYGPATH_W) '$(srcdir)/$(tgdb_srcdir)/annotate-two-src/commands.c'`
-
-commands.lo: $(tgdb_srcdir)/annotate-two-src/commands.c
-@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT commands.lo -MD -MP -MF "$(DEPDIR)/commands.Tpo" \
-@am__fastdepCC_TRUE@	  -c -o commands.lo `test -f '$(tgdb_srcdir)/annotate-two-src/commands.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/annotate-two-src/commands.c; \
-@am__fastdepCC_TRUE@	then mv "$(DEPDIR)/commands.Tpo" "$(DEPDIR)/commands.Plo"; \
-@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/commands.Tpo"; exit 1; \
-@am__fastdepCC_TRUE@	fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(tgdb_srcdir)/annotate-two-src/commands.c' object='commands.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/commands.Plo' tmpdepfile='$(DEPDIR)/commands.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o commands.lo `test -f '$(tgdb_srcdir)/annotate-two-src/commands.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/annotate-two-src/commands.c
 
 globals.o: $(tgdb_srcdir)/annotate-two-src/globals.c
 @am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT globals.o -MD -MP -MF "$(DEPDIR)/globals.Tpo" \
@@ -763,17 +579,6 @@ globals.obj: $(tgdb_srcdir)/annotate-two-src/globals.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o globals.obj `if test -f '$(tgdb_srcdir)/annotate-two-src/globals.c'; then $(CYGPATH_W) '$(tgdb_srcdir)/annotate-two-src/globals.c'; else $(CYGPATH_W) '$(srcdir)/$(tgdb_srcdir)/annotate-two-src/globals.c'`
 
-globals.lo: $(tgdb_srcdir)/annotate-two-src/globals.c
-@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT globals.lo -MD -MP -MF "$(DEPDIR)/globals.Tpo" \
-@am__fastdepCC_TRUE@	  -c -o globals.lo `test -f '$(tgdb_srcdir)/annotate-two-src/globals.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/annotate-two-src/globals.c; \
-@am__fastdepCC_TRUE@	then mv "$(DEPDIR)/globals.Tpo" "$(DEPDIR)/globals.Plo"; \
-@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/globals.Tpo"; exit 1; \
-@am__fastdepCC_TRUE@	fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(tgdb_srcdir)/annotate-two-src/globals.c' object='globals.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/globals.Plo' tmpdepfile='$(DEPDIR)/globals.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o globals.lo `test -f '$(tgdb_srcdir)/annotate-two-src/globals.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/annotate-two-src/globals.c
-
 tgdb_init.o: $(tgdb_srcdir)/annotate-two-src/tgdb_init.c
 @am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tgdb_init.o -MD -MP -MF "$(DEPDIR)/tgdb_init.Tpo" \
 @am__fastdepCC_TRUE@	  -c -o tgdb_init.o `test -f '$(tgdb_srcdir)/annotate-two-src/tgdb_init.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/annotate-two-src/tgdb_init.c; \
@@ -795,17 +600,6 @@ tgdb_init.obj: $(tgdb_srcdir)/annotate-two-src/tgdb_init.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/tgdb_init.Po' tmpdepfile='$(DEPDIR)/tgdb_init.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tgdb_init.obj `if test -f '$(tgdb_srcdir)/annotate-two-src/tgdb_init.c'; then $(CYGPATH_W) '$(tgdb_srcdir)/annotate-two-src/tgdb_init.c'; else $(CYGPATH_W) '$(srcdir)/$(tgdb_srcdir)/annotate-two-src/tgdb_init.c'`
-
-tgdb_init.lo: $(tgdb_srcdir)/annotate-two-src/tgdb_init.c
-@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tgdb_init.lo -MD -MP -MF "$(DEPDIR)/tgdb_init.Tpo" \
-@am__fastdepCC_TRUE@	  -c -o tgdb_init.lo `test -f '$(tgdb_srcdir)/annotate-two-src/tgdb_init.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/annotate-two-src/tgdb_init.c; \
-@am__fastdepCC_TRUE@	then mv "$(DEPDIR)/tgdb_init.Tpo" "$(DEPDIR)/tgdb_init.Plo"; \
-@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/tgdb_init.Tpo"; exit 1; \
-@am__fastdepCC_TRUE@	fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(tgdb_srcdir)/annotate-two-src/tgdb_init.c' object='tgdb_init.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/tgdb_init.Plo' tmpdepfile='$(DEPDIR)/tgdb_init.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tgdb_init.lo `test -f '$(tgdb_srcdir)/annotate-two-src/tgdb_init.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/annotate-two-src/tgdb_init.c
 
 buffer.o: $(tgdb_srcdir)/annotate-two-src/buffer.c
 @am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT buffer.o -MD -MP -MF "$(DEPDIR)/buffer.Tpo" \
@@ -829,17 +623,6 @@ buffer.obj: $(tgdb_srcdir)/annotate-two-src/buffer.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o buffer.obj `if test -f '$(tgdb_srcdir)/annotate-two-src/buffer.c'; then $(CYGPATH_W) '$(tgdb_srcdir)/annotate-two-src/buffer.c'; else $(CYGPATH_W) '$(srcdir)/$(tgdb_srcdir)/annotate-two-src/buffer.c'`
 
-buffer.lo: $(tgdb_srcdir)/annotate-two-src/buffer.c
-@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT buffer.lo -MD -MP -MF "$(DEPDIR)/buffer.Tpo" \
-@am__fastdepCC_TRUE@	  -c -o buffer.lo `test -f '$(tgdb_srcdir)/annotate-two-src/buffer.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/annotate-two-src/buffer.c; \
-@am__fastdepCC_TRUE@	then mv "$(DEPDIR)/buffer.Tpo" "$(DEPDIR)/buffer.Plo"; \
-@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/buffer.Tpo"; exit 1; \
-@am__fastdepCC_TRUE@	fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(tgdb_srcdir)/annotate-two-src/buffer.c' object='buffer.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/buffer.Plo' tmpdepfile='$(DEPDIR)/buffer.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o buffer.lo `test -f '$(tgdb_srcdir)/annotate-two-src/buffer.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/annotate-two-src/buffer.c
-
 gdbmi_tgdb.o: $(tgdb_srcdir)/gdbmi-src/gdbmi_tgdb.c
 @am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT gdbmi_tgdb.o -MD -MP -MF "$(DEPDIR)/gdbmi_tgdb.Tpo" \
 @am__fastdepCC_TRUE@	  -c -o gdbmi_tgdb.o `test -f '$(tgdb_srcdir)/gdbmi-src/gdbmi_tgdb.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/gdbmi-src/gdbmi_tgdb.c; \
@@ -862,50 +645,6 @@ gdbmi_tgdb.obj: $(tgdb_srcdir)/gdbmi-src/gdbmi_tgdb.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o gdbmi_tgdb.obj `if test -f '$(tgdb_srcdir)/gdbmi-src/gdbmi_tgdb.c'; then $(CYGPATH_W) '$(tgdb_srcdir)/gdbmi-src/gdbmi_tgdb.c'; else $(CYGPATH_W) '$(srcdir)/$(tgdb_srcdir)/gdbmi-src/gdbmi_tgdb.c'`
 
-gdbmi_tgdb.lo: $(tgdb_srcdir)/gdbmi-src/gdbmi_tgdb.c
-@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT gdbmi_tgdb.lo -MD -MP -MF "$(DEPDIR)/gdbmi_tgdb.Tpo" \
-@am__fastdepCC_TRUE@	  -c -o gdbmi_tgdb.lo `test -f '$(tgdb_srcdir)/gdbmi-src/gdbmi_tgdb.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/gdbmi-src/gdbmi_tgdb.c; \
-@am__fastdepCC_TRUE@	then mv "$(DEPDIR)/gdbmi_tgdb.Tpo" "$(DEPDIR)/gdbmi_tgdb.Plo"; \
-@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/gdbmi_tgdb.Tpo"; exit 1; \
-@am__fastdepCC_TRUE@	fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(tgdb_srcdir)/gdbmi-src/gdbmi_tgdb.c' object='gdbmi_tgdb.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/gdbmi_tgdb.Plo' tmpdepfile='$(DEPDIR)/gdbmi_tgdb.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o gdbmi_tgdb.lo `test -f '$(tgdb_srcdir)/gdbmi-src/gdbmi_tgdb.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/gdbmi-src/gdbmi_tgdb.c
-
-gdbmi_init.o: $(tgdb_srcdir)/gdbmi-src/gdbmi_init.c
-@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT gdbmi_init.o -MD -MP -MF "$(DEPDIR)/gdbmi_init.Tpo" \
-@am__fastdepCC_TRUE@	  -c -o gdbmi_init.o `test -f '$(tgdb_srcdir)/gdbmi-src/gdbmi_init.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/gdbmi-src/gdbmi_init.c; \
-@am__fastdepCC_TRUE@	then mv "$(DEPDIR)/gdbmi_init.Tpo" "$(DEPDIR)/gdbmi_init.Po"; \
-@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/gdbmi_init.Tpo"; exit 1; \
-@am__fastdepCC_TRUE@	fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(tgdb_srcdir)/gdbmi-src/gdbmi_init.c' object='gdbmi_init.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/gdbmi_init.Po' tmpdepfile='$(DEPDIR)/gdbmi_init.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o gdbmi_init.o `test -f '$(tgdb_srcdir)/gdbmi-src/gdbmi_init.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/gdbmi-src/gdbmi_init.c
-
-gdbmi_init.obj: $(tgdb_srcdir)/gdbmi-src/gdbmi_init.c
-@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT gdbmi_init.obj -MD -MP -MF "$(DEPDIR)/gdbmi_init.Tpo" \
-@am__fastdepCC_TRUE@	  -c -o gdbmi_init.obj `if test -f '$(tgdb_srcdir)/gdbmi-src/gdbmi_init.c'; then $(CYGPATH_W) '$(tgdb_srcdir)/gdbmi-src/gdbmi_init.c'; else $(CYGPATH_W) '$(srcdir)/$(tgdb_srcdir)/gdbmi-src/gdbmi_init.c'`; \
-@am__fastdepCC_TRUE@	then mv "$(DEPDIR)/gdbmi_init.Tpo" "$(DEPDIR)/gdbmi_init.Po"; \
-@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/gdbmi_init.Tpo"; exit 1; \
-@am__fastdepCC_TRUE@	fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(tgdb_srcdir)/gdbmi-src/gdbmi_init.c' object='gdbmi_init.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/gdbmi_init.Po' tmpdepfile='$(DEPDIR)/gdbmi_init.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o gdbmi_init.obj `if test -f '$(tgdb_srcdir)/gdbmi-src/gdbmi_init.c'; then $(CYGPATH_W) '$(tgdb_srcdir)/gdbmi-src/gdbmi_init.c'; else $(CYGPATH_W) '$(srcdir)/$(tgdb_srcdir)/gdbmi-src/gdbmi_init.c'`
-
-gdbmi_init.lo: $(tgdb_srcdir)/gdbmi-src/gdbmi_init.c
-@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT gdbmi_init.lo -MD -MP -MF "$(DEPDIR)/gdbmi_init.Tpo" \
-@am__fastdepCC_TRUE@	  -c -o gdbmi_init.lo `test -f '$(tgdb_srcdir)/gdbmi-src/gdbmi_init.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/gdbmi-src/gdbmi_init.c; \
-@am__fastdepCC_TRUE@	then mv "$(DEPDIR)/gdbmi_init.Tpo" "$(DEPDIR)/gdbmi_init.Plo"; \
-@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/gdbmi_init.Tpo"; exit 1; \
-@am__fastdepCC_TRUE@	fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(tgdb_srcdir)/gdbmi-src/gdbmi_init.c' object='gdbmi_init.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/gdbmi_init.Plo' tmpdepfile='$(DEPDIR)/gdbmi_init.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o gdbmi_init.lo `test -f '$(tgdb_srcdir)/gdbmi-src/gdbmi_init.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/gdbmi-src/gdbmi_init.c
-
 gdbmi_parse.o: $(tgdb_srcdir)/gdbmi-src/gdbmi_parse.c
 @am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT gdbmi_parse.o -MD -MP -MF "$(DEPDIR)/gdbmi_parse.Tpo" \
 @am__fastdepCC_TRUE@	  -c -o gdbmi_parse.o `test -f '$(tgdb_srcdir)/gdbmi-src/gdbmi_parse.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/gdbmi-src/gdbmi_parse.c; \
@@ -927,26 +666,6 @@ gdbmi_parse.obj: $(tgdb_srcdir)/gdbmi-src/gdbmi_parse.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/gdbmi_parse.Po' tmpdepfile='$(DEPDIR)/gdbmi_parse.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o gdbmi_parse.obj `if test -f '$(tgdb_srcdir)/gdbmi-src/gdbmi_parse.c'; then $(CYGPATH_W) '$(tgdb_srcdir)/gdbmi-src/gdbmi_parse.c'; else $(CYGPATH_W) '$(srcdir)/$(tgdb_srcdir)/gdbmi-src/gdbmi_parse.c'`
-
-gdbmi_parse.lo: $(tgdb_srcdir)/gdbmi-src/gdbmi_parse.c
-@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT gdbmi_parse.lo -MD -MP -MF "$(DEPDIR)/gdbmi_parse.Tpo" \
-@am__fastdepCC_TRUE@	  -c -o gdbmi_parse.lo `test -f '$(tgdb_srcdir)/gdbmi-src/gdbmi_parse.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/gdbmi-src/gdbmi_parse.c; \
-@am__fastdepCC_TRUE@	then mv "$(DEPDIR)/gdbmi_parse.Tpo" "$(DEPDIR)/gdbmi_parse.Plo"; \
-@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/gdbmi_parse.Tpo"; exit 1; \
-@am__fastdepCC_TRUE@	fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(tgdb_srcdir)/gdbmi-src/gdbmi_parse.c' object='gdbmi_parse.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/gdbmi_parse.Plo' tmpdepfile='$(DEPDIR)/gdbmi_parse.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o gdbmi_parse.lo `test -f '$(tgdb_srcdir)/gdbmi-src/gdbmi_parse.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/gdbmi-src/gdbmi_parse.c
-
-mostlyclean-libtool:
-	-rm -f *.lo
-
-clean-libtool:
-	-rm -rf .libs _libs
-
-distclean-libtool:
-	-rm -f libtool
 uninstall-info-am:
 
 ETAGS = etags
@@ -1034,10 +753,9 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(LTLIBRARIES)
+all-am: Makefile $(LIBRARIES)
 
 installdirs:
-	$(mkinstalldirs) $(DESTDIR)$(libdir)
 
 install: install-am
 install-exec: install-exec-am
@@ -1065,13 +783,12 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
-	mostlyclean-am
+clean-am: clean-generic clean-noinstLIBRARIES mostlyclean-am
 
 distclean: distclean-am
 
 distclean-am: clean-am distclean-compile distclean-depend \
-	distclean-generic distclean-libtool distclean-tags
+	distclean-generic distclean-tags
 
 dvi: dvi-am
 
@@ -1083,7 +800,7 @@ info-am:
 
 install-data-am:
 
-install-exec-am: install-libLTLIBRARIES
+install-exec-am:
 
 install-info: install-info-am
 
@@ -1097,8 +814,7 @@ maintainer-clean-am: distclean-am maintainer-clean-generic
 
 mostlyclean: mostlyclean-am
 
-mostlyclean-am: mostlyclean-compile mostlyclean-generic \
-	mostlyclean-libtool
+mostlyclean-am: mostlyclean-compile mostlyclean-generic
 
 pdf: pdf-am
 
@@ -1108,20 +824,18 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-info-am uninstall-libLTLIBRARIES
+uninstall-am: uninstall-info-am
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
-	clean-libLTLIBRARIES clean-libtool ctags distclean \
-	distclean-compile distclean-depend distclean-generic \
-	distclean-libtool distclean-tags distdir dvi dvi-am info \
-	info-am install install-am install-data install-data-am \
-	install-exec install-exec-am install-info install-info-am \
-	install-libLTLIBRARIES install-man install-strip installcheck \
+	clean-noinstLIBRARIES ctags distclean distclean-compile \
+	distclean-depend distclean-generic distclean-tags distdir dvi \
+	dvi-am info info-am install install-am install-data \
+	install-data-am install-exec install-exec-am install-info \
+	install-info-am install-man install-strip installcheck \
 	installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-info-am \
-	uninstall-libLTLIBRARIES
+	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
+	uninstall-am uninstall-info-am
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

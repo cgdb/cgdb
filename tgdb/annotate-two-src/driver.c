@@ -61,22 +61,18 @@ void mainLoop(int masterfd, int childfd){
       /* stdin -> gdb's input */
       if(STDIN_FILENO != -1 && FD_ISSET(STDIN_FILENO, &rfds)){
          char byte;
+         static char *result;
 
          if( io_read_byte(&byte, STDIN_FILENO) == -1){
             err_msg("%s:%d -> could not read byte\n", __FILE__, __LINE__);
             return;
          } /* end if */
 
-         if ( byte == '7'){
-           tgdb_get_sources();  
-         } else {
-               static char *result;
-               if( (result = tgdb_send(byte)) == NULL){
-                  err_msg("%s:%d -> file descriptor closed\n", __FILE__, __LINE__);
-                  return;
-               } else
-                     fprintf(stderr, "%s", result);
-         }
+         if( (result = tgdb_send(byte)) == NULL){
+             err_msg("%s:%d -> file descriptor closed\n", __FILE__, __LINE__);
+             return;
+         } else
+             fprintf(stderr, "%s", result);
       } /* end if */
               
       /* gdb's output -> stdout */
@@ -92,12 +88,13 @@ void mainLoop(int masterfd, int childfd){
          } /* end if */
 
          for(i = 0; i < size; ++i)
+            /*fprintf(stderr, "[%c]", buf[i]);*/
             if(write(STDOUT_FILENO, &(buf[i]), 1) != 1 ){
                err_msg("%s:%d -> could not write byte\n", __FILE__, __LINE__);
                return;
             }
 
-//         tgdb_traverse_command(stderr, &com);
+         tgdb_traverse_command(stderr, &com);
 
          { 
             size_t j;
@@ -120,6 +117,7 @@ void mainLoop(int masterfd, int childfd){
          } /* end if */
 
          for(i = 0; i < size; ++i)
+            /*fprintf(stderr, "<%c>", buf[i]);*/
             if(write(STDOUT_FILENO, &(buf[i]), 1) != 1 ){
                err_msg("%s:%d -> could not write byte\n", __FILE__, __LINE__);
                return;
@@ -131,11 +129,12 @@ void mainLoop(int masterfd, int childfd){
 int main(int argc, char **argv){
    
    int gdb_fd, child_fd;
-
+   
    if(tty_cbreak(STDIN_FILENO) < 0)
       fprintf(stderr, "tty_cbreak error\n");   
    
-   if ( tgdb_init(NULL, argc-1, argv+1, &gdb_fd, &child_fd) == -1 )
+   tgdb_init();
+   if ( tgdb_start(NULL, argc-1, argv+1, &gdb_fd, &child_fd) == -1 )
       err_msg("%s:%d -> could not init\n", __FILE__, __LINE__);
 
    mainLoop(gdb_fd, child_fd);

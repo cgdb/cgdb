@@ -37,10 +37,6 @@ int if_init(void);
  *                2 if input to tty or ...
  *                -1        : Error resizing terminal -- terminal too small
  *                -2        : Quit cgdb
- *                KEY_UP    : Send up arrow key to GDB
- *                KEY_DOWN  : Send down arrow key to GDB
- *                KEY_LEFT  : Send left arrow key to GDB
- *                KEY_RIGHT : Send right arrow key to GDB
  */
 int if_input(int key);
 
@@ -132,6 +128,12 @@ typedef enum Focus { GDB, TTY, CGDB } Focus;
  *  f: The region to focus
  */
 void if_set_focus( Focus f );
+
+/* if_get_focus: Sets the current input focus to a different window 
+ * ------------
+ *  Return: The region thats focused
+ */
+Focus if_get_focus( void );
 
 /* if_display_help: Displays the help on the screen.
  * ------------

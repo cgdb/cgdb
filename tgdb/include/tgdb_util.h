@@ -21,4 +21,20 @@ int tgdb_util_new_tty(int *masterfd, int *slavefd, char *sname);
  */
 int tgdb_util_set_home_dir(char *config_dir);
 
+/* invoke_debugger: Forks and execs the path.
+ *      path: The path to the path.
+ *      argc: The number of parameters to the path.
+ *      argv:  an array of pointers to null-terminated strings that represent 
+ *             the argument list  available  to  the new  program.
+ *             The  first argument, by convention, should point to the file 
+ *             name associated with the file being executed. The array of 
+ *             pointers must be terminated by a NULL pointer.
+ *      in:    Writing to this fd, will write to the STDIN of new program.
+ *      out:   Reading from fd, will read from the STDOUT-STDERR of new program.
+ *      choice: 0 for annotate 2, 1 for gdbmi
+ *
+ *      Return: -1 on error, pid of child on success
+ */
+int invoke_debugger(char *path, int argc, char *argv[], int *in, int *out, int choice);
+
 #endif

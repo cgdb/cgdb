@@ -9,9 +9,7 @@
 #include <signal.h>
 
 #include "gdbmi_tgdb.h"
-#include "gdbmi_init.h"
 #include "gdbmi_parse.h"
-#include "tgdb_util.h"
 #include "util.h"
 #include "pseudo.h"
 #include "error.h"

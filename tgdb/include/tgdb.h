@@ -42,13 +42,13 @@ int (*tgdb_start)(char *debugger, int argc, char **argv, int *gdb, int *child);
 
 /* tgdb_send: Sends a character to the debugger that the user typed.
  *
- *    c     - the character to send
+ *    line     - the user typed command to send
  *
  * RETURNS: NULL on error else a pointer to a NULL-terminated string
  *          that should be displayed by the GUI in the GDB pane.
  *          This string is statically allocated, so do not free it.
  */
-char *(*tgdb_send)(char c);
+char *(*tgdb_send)(char *line);
 
 /* tgdb_tty_send: Sends a character to the program being debugged by gdb.
  *

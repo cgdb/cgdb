@@ -1,3 +1,9 @@
+02/23/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * Major re-write, adding readline support: cgdb now uses the readline
+    library directly for getting input from the user.
+
+
 02/16/2003 Bob Rossi <bob_rossi@cox.net>
 
     * Changed configure file src/Makefile.am: libtgdb is now a single library.

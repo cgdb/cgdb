@@ -1,3 +1,10 @@
+02/23/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * Changed the Makefile's back to not using libtool: The new version of 
+    automake support making static libraries from files in multiple dirs.
+    * Major re-write, tgdb takes a command at a time now: libtgdb 
+    now takes a command at a time. Instead of a char.
+
 02/19/2003 Bob Rossi <bob_rossi@cox.net>
 
     * Changed commands.c to dynamically allocate memory from 'info sources':

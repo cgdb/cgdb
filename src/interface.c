@@ -589,43 +589,6 @@ static void if_get_command(struct sviewer *sview) {
    if_draw();
 }
 
-
-#if 0 /* removed */
-static enum Command_Type command_type(void)
-{
-    int start = 0;
-
-    if (cur_com_pos == 0)
-        return CMD_UNKNOWN;
-
-    /* Check for a quit command */
-    if (cur_com_pos == 1 && cur_com_line[0] == 'q')
-        return CMD_QUIT;
-
-    /* Check for a quit force (:q!) command */
-    if (cur_com_pos == 2 && strncmp(cur_com_line, "q!", 2) == 0)
-        return CMD_QUIT_FORCE;
-
-    /* Check for a set command */
-    if (cur_com_pos >= 4 && strncmp(cur_com_line, "set ", 4) == 0)
-        return CMD_SET;
-
-    /* Check for a help command */
-    if (cur_com_pos >= 4 && strncmp(cur_com_line, "help", 4) == 0)
-        return CMD_HELP;
-
-    /* Check for a line number command */
-    if ( cur_com_line[0] == '+' || cur_com_line[0] == '-' )
-        start++;
-
-    for ( ; start < cur_com_pos; start++ )
-        if (!isdigit(cur_com_line[start]))
-            return CMD_UNKNOWN;
-    
-    return CMD_LINE_NUMBER;
-}
-#endif
-
 static void if_run_command(struct sviewer *sview) {
     /* Get a command and then try to process it */
     if_get_command(sview);
@@ -641,55 +604,6 @@ static void if_run_command(struct sviewer *sview) {
     } else {
         update_status_win();
     }
-    
-#if 0
-    switch (command_type()){
-        case CMD_LINE_NUMBER:
-            /* The user entered a line number */
-            if ( cur_com_line[0] == '+' )
-                source_vscroll(sview, atoi(cur_com_line + 1));
-            else if ( cur_com_line[0] == '-' )
-                source_vscroll(sview, -atoi(cur_com_line + 1));
-            else 
-                source_set_sel_line(sview, atoi(cur_com_line));
-            if_draw();
-            break;
-
-        case CMD_QUIT:
-            /* TODO: Test to see if debugged program is running */
-            cleanup();
-            exit(0);
-            break;
-        
-        case CMD_QUIT_FORCE:
-            cleanup();
-            exit(0);
-            break;
-
-        case CMD_SET:
-            set_com = cur_com_line + 4;
-            /* Add 4 to size of string ( 'set ' ) */
-            if ( cur_com_pos == 6 && strncmp(set_com, "ic", 2) == 0 ) 
-                regex_icase = 1;
-            else if ( cur_com_pos == 8 && strncmp(set_com, "noic", 4) == 0 ) 
-                regex_icase = 0;
-            else if ( cur_com_pos == 6 && strncmp(set_com, "sc", 2) == 0 ) 
-                shortcut_option = 1;
-            else if ( cur_com_pos == 8 && strncmp(set_com, "nosc", 4) == 0 ) 
-                shortcut_option = 0;
-            else
-                goto error;
-            update_status_win();
-            break;
-        case CMD_HELP:
-            if_display_help();
-            break;
-        case CMD_UNKNOWN:
-        error:
-            if_display_message("Unknown command: ", 0, "%s", cur_com_line);
-            break;
-    }
-#endif
 }
 
 /* capture_regex: Captures a regular expression from the user.
@@ -770,10 +684,6 @@ static int capture_regex(struct sviewer *sview) {
  * Return Value:    0 if internal key was used, 
  *                  2 if input to tty,
  *                  -1        : Error resizing terminal -- terminal too small
- *                  KEY_UP    : Send up arrow key to GDB
- *                  KEY_DOWN  : Send down arrow key to GDB
- *                  KEY_LEFT  : Send left arrow key to GDB
- *                  KEY_RIGHT : Send right arrow key to GDB
  */
 static int tty_input(int key)
 {
@@ -781,12 +691,6 @@ static int tty_input(int key)
 
     /* Handle special keys */
     switch (key){
-        /* Special keys to pass back to GDB */
-        case KEY_UP:
-        case KEY_DOWN:
-        case KEY_LEFT:
-        case KEY_RIGHT:
-            return key + key;
         case KEY_PPAGE:
             scr_up(tty_win, get_tty_height()-1);
             break;
@@ -837,10 +741,6 @@ static int tty_input(int key)
  * Return Value:    0 if internal key was used, 
  *                  1 if input to gdb or ...
  *                  -1        : Error resizing terminal -- terminal too small
- *                  KEY_UP    : Send up arrow key to GDB
- *                  KEY_DOWN  : Send down arrow key to GDB
- *                  KEY_LEFT  : Send left arrow key to GDB
- *                  KEY_RIGHT : Send right arrow key to GDB
  */
 static int gdb_input(int key)
 {
@@ -848,12 +748,6 @@ static int gdb_input(int key)
 
     /* Handle special keys */
     switch (key){
-        /* Special keys to pass back to GDB */
-        case KEY_UP:
-        case KEY_DOWN:
-        case KEY_LEFT:
-        case KEY_RIGHT:
-            return key;
         case KEY_PPAGE:
             scr_up(gdb_win, get_gdb_height()-1);
             break;
@@ -1322,6 +1216,10 @@ void if_set_focus( Focus f )
     default:
         return;
     }
+}
+
+Focus if_get_focus(void) {
+    return focus;
 }
 
 void if_tty_toggle( void )
