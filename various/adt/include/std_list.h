@@ -8,7 +8,7 @@
  * The doubly linked list context.
  */
 struct std_list;
-typedef struct std_list std_list;
+typedef struct std_list *std_list;
 struct std_list_node;
 typedef struct std_list_node *std_list_iterator;
 
@@ -106,10 +106,10 @@ int std_list_insert (
  * @return
  * 0 on success, or -1 on error.
  */
-//int std_list_insert_sorted (
-//	struct std_list *list,
-//	const void *data,
-//	const STDCompareFunc func);
+int std_list_insert_sorted (
+	struct std_list *list,
+    void *data,
+	const STDCompareFunc func);
 
 /**
  * Like std_list_sort(), but the comparison function accepts a user data argument.
@@ -263,14 +263,15 @@ int std_list_foreach (
  * The iterator to get the data from.
  *
  * \param data
- * The data at the position or NULL on error
- *
+ * Pass in the address of a pointer, and the pointer will be set to point at
+ * the data for this element.  Will be set to NULL on error.
+ * 
  * @return
  * 0 on success, or -1 on error.
  */
 int std_list_get_data ( 
     std_list_iterator iter,
-    void **data	);
+    void *data	);
 
 #endif /* __STD_LIST_H__ */
 

@@ -20,6 +20,10 @@
 #ifndef __STD_TYPES_H__
 #define __STD_TYPES_H__
 
+/* Return value < 0 if a < b,
+ *              = 0 if a == b,
+ *              > 0 if a > b
+ */
 typedef int 		(*STDCompareFunc)( 
 	const void *a, 
 	const void *b);

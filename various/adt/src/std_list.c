@@ -1,5 +1,15 @@
+/* std_list.c:
+ * -----------
+ */
+
+/* Standard Includes */
+#include <string.h>
+
+/* Local Includes */
 #include "std_list.h"
 
+/* Data Structures */
+/* --------------- */
 struct std_list_node
 {
     void *data;
@@ -15,6 +25,9 @@ struct std_list
 
 	STDDestroyNotify destroy_func;
 };
+
+/* Functions */
+/* --------- */
 
 /**
  * Allocate a single std_list_node.
@@ -45,17 +58,14 @@ static struct std_list_node* std_list_node_create (void)
  * 0 on success, or -1 on error.
  */
 static int std_list_node_destroy ( 
-		struct std_list *list,
-		struct std_list_node *list_node ) {
-
-	if ( !list )
-		return -1;
+		struct std_list_node *list_node,
+        STDDestroyNotify destroy_func ) {
 
 	if ( !list_node )
 		return -1;
 
-	if ( list->destroy_func )
-		list->destroy_func ( list_node->data );
+	if ( destroy_func )
+	    destroy_func ( list_node->data );
 
 	list_node->data = NULL;
 	list_node->next = NULL;
@@ -107,6 +117,12 @@ int std_list_destroy ( struct std_list *list ) {
 	    if (!iter )
 			return -1;
 	}
+
+    /* Free the dummy node (remove won't do this) */
+    std_list_node_destroy(iter, list->destroy_func);   
+    
+    /* Free the list structure */
+    free(list); 
 	
 	return 0;
 }
@@ -179,8 +195,11 @@ int std_list_insert (
 
 int std_list_insert_sorted (
 	struct std_list *list,
-	const void *data,
+	void *data,
 	const STDCompareFunc func) {
+
+    std_list_iterator current;
+    void *current_data;
 
 	if ( !list )
 		return -1;
@@ -188,9 +207,24 @@ int std_list_insert_sorted (
 	if ( !func )
 		return -1;
 
-	/* insert sorted */
-	
-	return 0;
+    /* Seek to the corrent position to insert new item */
+    for (current  = std_list_begin(list); 
+         current != std_list_end(list);
+         current  = std_list_next(current))
+    {
+        if (std_list_get_data(current, &current_data) != 0){
+            return -2;
+        }
+
+        /* If the new data is <= data at this node, stop looping and
+         * insert the data into the list before the current. */
+        if (func(data, current_data) <= 0){
+            break;
+        }
+    }
+
+    /* Insert the item before the current iterator now. */
+    return std_list_insert(list, current, data);
 }
 
 std_list_iterator std_list_remove (
@@ -223,7 +257,7 @@ std_list_iterator std_list_remove (
 		after->prev = before;
 	}
 
-	if ( std_list_node_destroy ( list, iter ) == -1 )
+	if ( std_list_node_destroy ( iter, list->destroy_func ) == -1 )
 		return NULL;
 
 	list->length -= 1;
@@ -362,12 +396,13 @@ int std_list_sort_with_data (
 
 int std_list_get_data ( 
     std_list_iterator iter,
-    void **data	) {
+    void *data	) {
 
 	if ( !iter )
 		return -1;
 
-	*data = iter->data;
+    /* Copy the pointer */
+    memcpy(data, &iter->data, sizeof(void *));
 
 	return 0;
 }
