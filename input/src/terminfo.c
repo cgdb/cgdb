@@ -11,63 +11,64 @@
 #include <ctype.h>
 
 #define MAXLINE 4096
+#include "scroller.h"
+#include "cgdb.h"
 
-/* The data structure used at runtime to find multi-character sequences. */
-struct term_entry {
-    char *name;         /* The terminfo name of the key */
-    char *description;  /* A human readable description for debugging */
-    char *sequence;     /* The multi-char escape sequence for this key */
-} *list = NULL;
-static int list_size = 0;
+static struct scroller *top_win = NULL;
 
-/* A temporary variable used for clearing the screen after a number of 
- * writes to it. It is used for debugging the input library
- */
-static int counter = 0;
+static void if_print(struct scroller *s, const char *buf ) {
+    /* Print it to the scroller */
+    scr_add(s, buf);
+    scr_refresh(s, 1);
+    /*wrefresh(src_win->win);*/
+}
 
-/* This is the enumerated list of multi-char escape sequences that 
- * this library is interested in capturing. Append to the end to add more.
- */
-static struct istr { 
-    const char *const terminfo;
-    const char *const termcap;
-    const char *const description;
-} istrnames[] = {
-    /* Function keys */
-    { "kf1",        "k1",       "F1" },
-    { "kf2",        "k2",       "F2" },
-    { "kf3",        "k3",       "F3" },
-    { "kf4",        "k4",       "F4" },
-    { "kf5",        "k5",       "F5" },
-    { "kf6",        "k6",       "F6" },
-    { "kf7",        "k7",       "F7" },
-    { "kf8",        "k8",       "F8" },
-    { "kf9",        "k9",       "F9" },
-    { "kf10",       "k10",      "F10" },
-    { "kf11",       "k11",      "F11" },
-    { "kf12",       "k12",      "F12" },
+/* This contains all of the ESC sequences this library cares about. */
+struct tlist {
+    char *tname;
+    char *tiname;
+    char *description;
+    char *tcodes;
+    char *ticodes;
+} seqlist[] = {
+  { "@7", "kend",   "End Key",                  NULL, NULL },
+  { "kh", "khome",  "Home key",                 NULL, NULL },
+  { "kH", "kll",    "Home down",                NULL, NULL },
+  { "cr", "cr",     "Carriage return",          NULL, NULL },
+  { "dc", "dch1",   "Delete",                   NULL, NULL },
+  { "kD", "kdch1",  "Delete",                   NULL, NULL },
+  { "ic", "ich1",   "Insert",                   NULL, NULL },
+  { "kI", "kich1",  "Insert",                   NULL, NULL },
+  { "kN", "knp",    "next page",                NULL, NULL },
+  { "kP", "kpp",    "previous page",            NULL, NULL },
 
-    /* insert, delete, home, end, page up, page down */ 
-    { "kich1",      "kI",       "INSERT"},
-    { "kdch1",      "kD",       "DELETE"},
-    { "khome",      "kh",       "HOME"},
-    { "kend",       "@7",       "END"},
-    { "kpp",        "kP",       "PAGE UP"},
-    { "knp",        "kN",       "PAGE DOWN"},
+  /* For arrow keys */
+  { "kd", "kcud1",  "Down arrow key",           NULL, NULL },
+  { "kl", "kcub1",  "Left arrow key",           NULL, NULL },
+  { "kr", "kcuf1",  "Right arrow key",          NULL, NULL },
+  { "ku", "kcuu1",  "Up arrow key",             NULL, NULL },
+  { "le", "cub1",   "Move left one space",      NULL, NULL },
+  { "nd", "cuf1",   "Move right one space",     NULL, NULL },
+  { "up", "cuu1",   "Up one line",              NULL, NULL },
 
-    /* Arrow keys */
-    { "cuu1",       "ku",       "CURSOR UP"},
-    { "cuf1",       "nd",       "CURSOR RIGHT"},
-    { "cub",        "LE",       "CURSOR LEFT"},
-    { "cud",        "DO",       "CURSOR DOWN"},
-
-    /* End of list :) */
-    { NULL,         NULL,       NULL }
+  /* Function keys */
+  { "k0", "kf0",    "F0 function key",          NULL, NULL },
+  { "k1", "kf1",    "F1 function key",          NULL, NULL },
+  { "k2", "kf2",    "F2 function key",          NULL, NULL },
+  { "k3", "kf3",    "F3 function key",          NULL, NULL },
+  { "k4", "kf4",    "F4 function key",          NULL, NULL },
+  { "k5", "kf5",    "F5 function key",          NULL, NULL },
+  { "k6", "kf6",    "F6 function key",          NULL, NULL },
+  { "k7", "kf7",    "F7 function key",          NULL, NULL },
+  { "k8", "kf8",    "F8 function key",          NULL, NULL },
+  { "k9", "kf9",    "F9 function key",          NULL, NULL },
+  { "k;", "kf10",   "F10 function key",         NULL, NULL },
+  { "F1", "kf11",   "F11 function key",         NULL, NULL },
+  { "F2", "kf12",   "F12 function key",         NULL, NULL },
+  { NULL, NULL,     NULL,                       NULL, NULL }
 };
 
-/* display_message: This is purly for debugging the library. 
- *                  It writes a message to the screen.
- */
+
 void display_message(const char *fmt, ...) {
     va_list ap;
     char va_buf[MAXLINE];
@@ -81,152 +82,70 @@ void display_message(const char *fmt, ...) {
 #endif
     va_end(ap);
 
-    if ( counter > 50 ) {
-        mvprintw(counter++, 0, "Hit a key to clear and continue");
-        getch();
-        clear();
-        refresh();
-        counter = 0;
-    }
-
-    mvprintw(counter++, 0, va_buf);
-    refresh();
+    if_print(top_win, va_buf);
 }
 
-/* display_list: displays the list of accepted multi-char escape sequences.
- *               This function is used for debugging the library.
- */
-static void display_list(void) {
-    int i, j, length;
-    display_message("DISPLAYING LIST\n");
-    for ( i = 0; i < list_size; i++ ) {
-        display_message("TERMINFO:(%s) DESC(%s) CODE[", list[i].name, list[i].description );
+static void print_seq(struct tlist *item ) {
+                        
+    int i, length;
+    
+    if ( item->tcodes != NULL && item->ticodes != NULL )
+        display_message("DESCRIPTION(%s)", item->description);
 
-        length = strlen(list[i].sequence);
-        for(j = 0; j < length; j++)
-            display_message("(%c:%d)", list[i].sequence[j], list[i].sequence[j]);
+    if ( item->tcodes != NULL ) {
+        display_message("TERMCAP NAME(%s)", item->tname);
+        display_message("CODE[");
+
+        length = strlen(item->tcodes);
+        for(i = 0; i < length; i++)
+            display_message("(%d)", item->tcodes[i]);
         display_message("]\n");
-        refresh();
+    }
+
+    if ( item->ticodes != NULL ) {
+        display_message("TERMINFO NAME(%s)", item->tiname);
+        display_message("CODE[");
+
+        length = strlen(item->ticodes);
+        for(i = 0; i < length; i++)
+            display_message("(%d)", item->ticodes[i]);
+        display_message("]\n");
     }
 }
 
-/* I don't care about the format, I just want to parse it */
-static const char *parse_format(const char *s) {
-    bool done = FALSE;
-    bool allowminus = FALSE;
+struct term_entry {
+    char *name;
+    char *description;
+    char *sequence; 
+} *list = NULL;
+static int list_size = 0;
 
-    while (*s != '\0' && !done) {
-        switch (*s) {
-        case 'c':       /* FALLTHRU */
-        case 'd':       /* FALLTHRU */
-        case 'o':       /* FALLTHRU */
-        case 'x':       /* FALLTHRU */
-        case 'X':       /* FALLTHRU */
-        case 's':
-            break;
-        case '.':
-        case '#':
-        case ' ':
-            s++;
-            done = TRUE;
-            break;
-        case ':':
-            s++;
-            allowminus = TRUE;
-            break;
-        case '-':
-            if (allowminus)
-                s++;
-            else 
-                done = TRUE;
-            break;
-        default:
-            if (isdigit(((unsigned char)(*s))))
-                s++;
-            else 
-                done = TRUE;
-        }
-    }
+static void print_list_item(struct term_entry *item) {
+    int i, length;
+    display_message("TERMINFO NAME(%s)", item->name);
+    display_message("DESCRIPTION(%s)", item->description);
+    display_message("CODE[");
 
-    return s;
+    length = strlen(item->sequence);
+    for(i = 0; i < length; i++)
+        display_message("(%d)", item->sequence[i]);
+    display_message("]\n");
 }
 
-static void insertIntoList(const char *tname, const char *tdesc, char *codes);
+//static void display_item(const char * name, const char *desc, const char *codes){
+//    int i, length;
+//    display_message("TERMINFO:(%s) DESC(%s) CODE[", name, desc);
+//
+//    length = strlen(codes);
+//    for(i = 0; i < length; i++)
+//        display_message("(%d)", codes[i]);
+//    display_message("]\n");
+//}
 
-static void modifyInsertIntoList(const char *tname, 
-                                const char *tdesc, 
-                                char *codes) {
-char *cp;
-char temp[100];
-int temp_pos = 0;
-for (cp = codes; *cp!=(char)0;cp++) {
-    /* The first item in the list */
-    if (*cp == '%' && cp == codes) {
-        printw("CAN'T BELEIVE I AM HERE\n"); refresh();
-        cp++;
-        cp = (char *)parse_format(cp);
-    } else if ( *cp == '%' ) {
-
-        cp++;
-        switch (*cp) {
-        default:
-        break;
-
-        case 'd':       /* FALLTHRU */
-        case 'o':       /* FALLTHRU */
-        case 'x':       /* FALLTHRU */
-        case 'X':       /* FALLTHRU */
-        case 'c':       /* FALLTHRU */
-        case 'l':
-        case 's':
-        break;
-
-        case 'p':
-        case 'P':
-        case 'g':
-        cp++;
-        break;
-
-        case '\'':
-        cp += 2;
-        break;
-
-        case '{':
-        cp++; 
-        while (*cp >= '0' && *cp <= '9') {
-            cp++;
-        }
-        break;
-
-        case '+':
-        case '-':
-        case '*':
-        case '/':
-        case 'm':
-        case 'A':
-        case 'O':
-        case '&':
-        case '|':
-        case '^':
-        case '=':
-        case '<':
-        case '>':
-        case '!':
-        case '~':
-        case 'i':
-        break;
-        }
-        continue;
-    }
-    temp[temp_pos++] = *cp;
-}
-if (*cp != '\0')
-    cp++;
-
-    temp[temp_pos++] = '\0';
-//    printw("FOUND(%s:    :%s)\n", tname, temp);
-    refresh();
-insertIntoList( tname, tdesc, temp);
+static void display_list(void) {
+    int i;
+    for ( i = 0; i < list_size; i++ )
+        print_list_item(&list[i]);
 }
 
 /* This should input in sorted order based on codes */
@@ -275,6 +194,80 @@ finished:
     list_size++;
 }
 
+static void add_keybindings(void) {
+    insertIntoList ("Up arrow",     "Up arrow",     "\033[0A");
+    insertIntoList ("Left arrow",   "Left arrow",   "\033[0B");
+    insertIntoList ("Right arrow",  "Right arrow",  "\033[0C");
+    insertIntoList ("Down arrow",   "Down arrow",   "\033[0D");
+
+    insertIntoList ("Up arrow",     "Up arrow",     "\033[A");
+    insertIntoList ("Down arrow",   "Down arrow",   "\033[B");
+    insertIntoList ("Right arrow",  "Right arrow",  "\033[C");
+    insertIntoList ("Left arrow",   "Left arrow",   "\033[D");
+    insertIntoList ("Home",         "Home",         "\033[H");
+    insertIntoList ("End",          "End",          "\033[F");
+
+    insertIntoList ("Up arrow",     "Up arrow",     "\033OA");
+    insertIntoList ("Down arrow",   "Down arrow",   "\033OB");
+    insertIntoList ("Right arrow",  "Right arrow",  "\033OC");
+    insertIntoList ("Left arrow",   "Left arrow",   "\033OD");
+    insertIntoList ("Home",         "Home",         "\033OH");
+    insertIntoList ("End",          "End",          "\033OF");
+}
+
+/* Puts list into a searchable database */
+static void store_list(void) {
+    int size = 100, i = 0;
+
+    /* Allocate for all the entries, plus 1 for the null termination */
+    list = (struct term_entry *)malloc(sizeof(struct term_entry)*size + 1);
+
+    /* Twice to save the data */
+    for( i = 0; seqlist[i].tname != NULL; i++) {
+        if ( seqlist[i].tcodes != NULL )
+            insertIntoList(seqlist[i].tname, seqlist[i].description, seqlist[i].tcodes);
+
+        if ( seqlist[i].ticodes != NULL )
+            insertIntoList(seqlist[i].tiname, seqlist[i].description, seqlist[i].ticodes);
+    }
+}
+
+/* Prints all of the key sequences */
+static void print_list(void) {
+    int i;
+    /* strings */
+    for( i = 0; seqlist[i].tname != NULL; i++)
+        print_seq(&seqlist[i]);
+}
+
+/* Gets a single key sequence */
+static void import_keyseq(struct tlist *i) {
+    char *terminfo, *termcap;
+    /* Set up the termcap seq */ 
+    if ( (termcap = tgetstr(i->tname, NULL)) == 0 )
+        display_message("CAPNAME (%s) is not present in this TERM's termcap description\n", i->tname);
+    else if (termcap == (char*)-1 )
+        display_message("CAPNAME (%s) is not a termcap string capability\n", i->tname);
+    else
+        i->tcodes = strdup(termcap);
+
+    /* Set up the terminfo seq */ 
+    if ( (terminfo = tigetstr(i->tiname)) == 0 )
+        display_message("CAPNAME (%s) is not present in this TERM's terminfo description\n", i->tiname);
+    else if (terminfo == (char*)-1 )
+        display_message("CAPNAME (%s) is not a terminfo string capability\n", i->tiname);
+    else
+        i->ticodes = strdup(terminfo);
+}
+
+/* Binds all of the key sequences */
+static void import_keyseqs(void) {
+    int i;
+    /* strings */
+    for( i = 0; seqlist[i].tname != NULL; i++)
+        import_keyseq(&seqlist[i]);
+}
+
 /*  If block is non-zero then, it will block,
  *   if it is 0 then it will not block
  *
@@ -313,15 +306,7 @@ int raw_read(int fd, int block) {
    return c;
 }
 
-/* get_esc_sequence: Gets the next esc sequence from fd. This function assumes
- *                   that ESC has already been read from fd.
- *
- *  fd -> the file descriptor that will be read for the next char.
- *
- *  return -> 0     on EOF
- *            -1    on ERROR
- */
-int get_esc_sequence(int fd) {
+int getEscSequence(int fd) {
     int i, j = 0; 
     int possible[list_size];
     int c;
@@ -350,101 +335,53 @@ int get_esc_sequence(int fd) {
     
     display_message("NO MATCH, INPUT WAS GARBAGE\n");
     for ( i = 0 ; i < j; i++ )
-        display_message("(%c:%d)", bad_list[i], bad_list[i]);
+        display_message("(%d)", bad_list[i]);
     display_message("\n");
     
     return 0;
 }
 
-/* cgetch: Gets the next character the user pressed. It will translate ESC
- *         sequences and return a single define describing the char pressed.
- *
- *  fd -> the file descriptor that will be read for the next char.
- *
- *  return -> The last char read. Either literally the char, or a define 
- *            describing a multi character key. -1 on error.
- */
-int cgetch(int fd) {
+int tgetch(int fd) {
     char c;
 
     if ( (c = raw_read(fd, 1)) == 0 ) {
         return -1;
     } else if ( c == 27 ) {
-        return get_esc_sequence(fd);
+        return getEscSequence(fd);
     }
     
     return c;
 }
 
-/* capture_chars: internal command to test the capturing of char's. 
- *                It is basically a driver to test the functionality of the lib
- */ 
 void capture_chars(int fd) {
     char c;
-    while( ( c = cgetch(fd)) != 'q' ) {
+    while( ( c = tgetch(fd)) != 'q' ) {
         if ( c != 0 ) {
             display_message("(%c:%d)\n", c, c);
         }
     }
 }
 
-/* initialize_list: Traverses the list istrnames, and puts the 
- *                  name/desc/code into the global list.
- */
-void initialize_list(void) {
-    int i, size = 0, length, j;
-    char *code;
+static int init_curses()
+{
+    if ( putenv("ESCDELAY=0") == -1 )
+       fprintf(stderr, "(%s:%d) putenv failed\r\n", __FILE__, __LINE__);
 
-    for ( i = 0;  istrnames[i].terminfo != (char *)0;  i++ )
-        size++;
-    
-    /* Allocating memory for list */
-    list = (struct term_entry *)malloc(sizeof(struct term_entry)*size*2 + 1);
-    display_message("size(%d)\n", size);
-
-    for ( i = 0; i < size;  i++ ) {
-        if ( (code = tigetstr(istrnames[i].terminfo)) == 0 ) {
-            display_message("CAPNAME (%s) is not present in this TERM's description\n", istrnames[i].terminfo);
-            continue;
-        } else if (code == (char*)-1 ) {
-            display_message("CAPNAME (%s) is not a string capability\n", istrnames[i].terminfo);
-            continue;
-        }
-
-        display_message("TERMINFO CAPNAME:(%s) DESCRIPTION(%s) successful", istrnames[i].terminfo, istrnames[i].description );
-        length = strlen(code);
-        for(j = 0; j < length; j++)
-            display_message("(%c:%d)", code[j], code[j]);
-        display_message("]\n");
-        refresh();
-        modifyInsertIntoList(istrnames[i].terminfo, istrnames[i].description, code);
-
-        if ( (code = tgetstr(istrnames[i].termcap, NULL)) == 0 ) {
-            display_message("CAPNAME (%s) is not present in this TERM's description\n", istrnames[i].termcap);
-            continue;
-        } else if (code == (char*)-1 ) {
-            display_message("CAPNAME (%s) is not a string capability\n", istrnames[i].termcap);
-            continue;
-        }
-
-        display_message("TERMCAP CAPNAME:(%s) DESCRIPTION(%s) successful", istrnames[i].termcap, istrnames[i].description );
-        length = strlen(code);
-        for(j = 0; j < length; j++)
-            display_message("(%c:%d)", code[j], code[j]);
-        display_message("]\n");
-        refresh();
-        modifyInsertIntoList(istrnames[i].termcap, istrnames[i].description, code);
-    }
-    display_message("DONE");
-}
-
-int main(int argc, char **argv){
     setbuf(stdout, NULL);
     initscr();                       /* Start curses mode */
     noecho();                        /* Do not echo characters typed by user */
     raw();                        /* Line buffering disabled */
     refresh();                       /* Refresh the initial window once */
-    initialize_list();
+    top_win = scr_new(0, 0, 50, 80);
+    return 0;
+}
+
+int main(int argc, char **argv){
+    init_curses();
+    import_keyseqs();
+    print_list();
+    store_list();
+    add_keybindings();
     display_list();
     capture_chars(0);
     echo();
