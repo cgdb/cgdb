@@ -1,3 +1,17 @@
+version 0.4.0-1 cygwin release
+
+12/03/2003 Ronald Landheer-Cieslak <ronald@landheer.com>
+   * Makefile.in: re-generated
+   * annotate-two/Makefile.in: ditto
+   * annotate-two/src/Makefile.in: ditto
+   * gdbmi/Makefile.in: ditto
+   * gdbmi/src/Makefile.in: ditto
+   * tgdb-base/Makefile.in: ditto
+   * tgdb-base/src/Makefile.in
+   * annotate-two/src/Makefile.am: set include path relative to source tree
+   * gdbmi/src/Makefile.am: ditto
+   * tgdb-base/src/Makefile.am: set linker search path relative to build tree
+
 version 0.4.0 (10/28/2003):
 
 10/28/2003 Bob Rossi <bob@brasko.net>

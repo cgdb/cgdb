@@ -1,3 +1,11 @@
+version 0.4.0-1 cygwin release
+
+12/03/2003 Ronald Landheer-Cieslak <ronald@landheer.com>
+   * Makefile.in: regenerated
+   * src/Makefile.am: set linker flags (-L) relative to build directory
+   set include path (-I) relative to source directory
+   * src/Makefile.in: regenerated
+
 version 0.4.0 (10/28/2003):
 
 10/28/2003 Bob Rossi <bob@brasko.net>

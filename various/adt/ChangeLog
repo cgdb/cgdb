@@ -1,3 +1,11 @@
+version 0.4.0-1 cygwin release
+
+12/03/2003 Ronald Landheer-Cieslak <ronald@landheer.com>
+
+   * Makefile.in: re-generated
+   * src/Makefile.in: ditto
+   * src/Makefile.am: set include path relative to source tree
+
 version 0.4.0 (10/28/2003):
 
 10/23/2003 Bob Rossi <bob@brasko.net>

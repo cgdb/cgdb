@@ -1,7 +1,7 @@
 AM_CFLAGS = -g -Wall \
 -I$(top_srcdir)/various/util/include \
 -I$(top_srcdir)/various/adt/include \
--I../include
+-I$(srcdir)/../include
 
 # create the input library
 noinst_LIBRARIES = librlctx.a

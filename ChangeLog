@@ -1,3 +1,12 @@
+version 0.4.0-1 cygwin release
+
+12/12/2003 Ronald Landheer-Cieslak <ronald@landheer.com>
+
+   * Makefile.in: regenerated
+   * aclocal.m4: ditto
+   * configure: ditto
+   * various/Makefile.in: ditto
+
 10/28/2003 Bob Rossi <bob@brasko.net>
 
     * release-todo.txt: Update order of things

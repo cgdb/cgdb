@@ -2,7 +2,7 @@ AM_CFLAGS = -g -Wall \
 -I$(top_srcdir)/various/util/include \
 -I$(top_srcdir)/various/adt/include \
 -I$(top_srcdir)/tgdb/tgdb-base/include \
--I../include
+-I$(srcdir)/../include
 
 # create the input library
 # This depends on input

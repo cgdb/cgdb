@@ -19,12 +19,12 @@ noinst_bin_PROGRAMS = tgdb_driver
 noinst_bindir = $(top_srcdir)/progs
 
 tgdb_driver_LDFLAGS = \
--L$(top_srcdir)/tgdb/tgdb-base/src \
--L$(top_srcdir)/tgdb/annotate-two/src \
--L$(top_srcdir)/tgdb/gdbmi/src \
--L$(top_srcdir)/various/adt/src \
--L$(top_srcdir)/various/util/src \
--L$(top_srcdir)/various/rlctx/src
+-L$(top_builddir)/tgdb/tgdb-base/src \
+-L$(top_builddir)/tgdb/annotate-two/src \
+-L$(top_builddir)/tgdb/gdbmi/src \
+-L$(top_builddir)/various/adt/src \
+-L$(top_builddir)/various/util/src \
+-L$(top_builddir)/various/rlctx/src
 
 tgdb_driver_LDADD = -ltgdb -lannotate_two -lgdbmi -lrlctx -ladt -lutil
 

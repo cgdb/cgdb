@@ -1,4 +1,4 @@
-AM_CFLAGS = -g -Wall -I../include \
+AM_CFLAGS = -g -Wall -I$(srcdir)/../include \
 -I$(top_srcdir)/various/adt/include \
 -I$(top_srcdir)/various/util/include
 
@@ -17,8 +17,8 @@ noinst_bindir = $(top_srcdir)/progs
 
 # This is the input driver
 tokenizer_driver_LDFLAGS = -L. \
--L$(top_srcdir)/various/adt/src \
--L$(top_srcdir)/various/util/src
+-L$(top_builddir)/various/adt/src \
+-L$(top_builddir)/various/util/src
 tokenizer_driver_LDADD = -ltokenizer -ladt -lutil
 tokenizer_driver_SOURCES = tokenizer_driver.c
 tokenizer_driver_DEPENDENCIES = libtokenizer.a
