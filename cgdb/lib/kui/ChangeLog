@@ -8,3 +8,5 @@
 	* src/kui_driver.c: A standalone application that can test the
 	functionality of libkui.
 	* inc/kui.h: Initial specification for libkui
+	* Makefile.in: Add for people with automake
+	* src/Makefile.in: ditto
