@@ -554,31 +554,44 @@ static char *highlight_line_segment(const char *orig, int start, int end) {
 
 void hl_wprintw(WINDOW *win, const char *line, int width, int offset)
 {
-    int length;
-    enum syntax_type color = SYN_TEXT;
-    int i, j;
-    int p;
-    
-    /* Set default color to text color */
-    wattron(win, COLOR_PAIR(colors[color]));
-    wattron(win, attributes[color]);
+    int length;                        /* Length of the line passed in */
+    enum syntax_type color = SYN_TEXT; /* Color used to print current char */
+    int i;                             /* Loops through the line char by char */
+    int j;                             /* General iterator */
+    int p;                             /* Count of chars printed to screen */
+    int pad;                           /* Used to pad partial tabs */
     
     /* Jump ahead to the character at offset (process color commands too) */
     length = strlen(line);
     for (i = 0, j = 0; i < length && j < offset; i++){
         if (line[i] == HL_CHAR && i+1 < length){
-            wattroff(win, COLOR_PAIR(colors[color]));
-            wattroff(win, attributes[color]);
+            /* Even though we're not printing anything in this loop,
+             * the color attribute needs to be maintained for when we
+             * start printing in the loop below.  This way the text
+             * printed will be done in the correct color. */
             color = (int)line[++i];
-            wattron(win, COLOR_PAIR(colors[color]));
-            wattron(win, attributes[color]);
         }
-        else
+        else if (line[i] == '\t'){
+            /* Tab character, expand to size set by user */
+            j += highlight_tabstop;
+        }
+        else{
+            /* Normal character, just increment counter by one */
             j++;
+        }
     }
-        
+    pad = j - offset;
+    
+    /* Pad tab spaces if offset is less than the size of a tab */
+    for (j = 0, p = 0; j < pad && p < width; j++, p++)
+        wprintw(win, " ");    
+
+    /* Set the color appropriately */
+    wattron(win, COLOR_PAIR(colors[color]));
+    wattron(win, attributes[color]);
+    
     /* Print string 1 char at a time */
-    for (p = 0; i < length && p < width; i++){
+    for (; i < length && p < width; i++){
         if (line[i] == HL_CHAR){
             if (++i < length){
                 wattroff(win, COLOR_PAIR(colors[color]));
