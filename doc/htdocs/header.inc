@@ -32,7 +32,7 @@
     <A Href="devel.shtml">Development</a><BR>
     <A Href="screenshots.shtml">Screenshots</a><BR>
     <A Href="download.shtml">Download</a><BR>
-    <A Href="help.shtml">Help</a><BR>
+    <A Href="documentation.shtml">Documentation</a><BR>
     <A Href="contact.shtml">Contact</a><BR>
     <A Href="http://www.sourceforge.net/projects/cgdb">SourceForge Project</a><BR>
     <A Href="http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/cgdb/cgdb">CVS Browser</a><BR>

@@ -3,24 +3,61 @@
     <P><B>Frequently Asked Questions</b></p>
 
     <OL>
+      <LI><A Href="#is_CGDB">What is CGDB?</a>
+      <LI><A Href="#get_CGDB">Where can I get CGDB?</a>
+      <LI><A Href="#OS_CGDB">What OS's does CGDB compile/run on?</a>
       <LI><A Href="#features">When will feature X be added?</a>
       <LI><A Href="#distro">Will CGDB be packaged with my favorite Linux
                             distribution?</a>
       <LI><A Href="#versions">What versions of GDB are supported?</a>
       <LI><A Href="#whouses">Who uses CGDB?</a>
+      <LI><A Href="#automate_CGDB">How do I automate colon commands using the cgdbrc file?</a>
+      <LI><A Href="#keys_CGDB">Why do some keys not work properly for me in CGDB?</a>
+      <LI><A Href="#tty_CGDB">Why does CGDB not work when a tty can not be opened?</a>
     </ol>
+
+    <A Name="is_CGDB"></a>
+    <P><B>What is CGDB?</b></p>
+    <P>
+	CGDB is a curses-based interface to the GNU Debugger (GDB).
+	The goal of CGDB is to be lightweight and responsive; not encumbered with 
+	unnecessary features. The interface is designed to deliver the familiar 
+	GDB text interface, with a split screen showing the source as it executes. 
+	The UI is modeled on the classic Unix text editor, vi. Those familiar with 
+	vi should feel right at home using CGDB.
+    </P>
+
+    <A Name="get_CGDB"></a>
+    <P><B>Where can I get CGDB?</b></p>
+    <P>
+	The CGDB project is hosted on http://sourceforge.net/. You can view the 
+	project by going to http://sourceforge.net/projects/cgdb/. Alternatively, 
+	CGDB's home-page is at http://cgdb.sourceforge.net/.
+    If you would like to download CGDB, please click on the download link to
+    the left.
+    </P>
+
+    <A Name="OS_CGDB"></a>
+    <P><B>What OS's does CGDB compile/run on?</b></p>
+    <P>
+    CGDB is used daily on Linux, Solaris and Cygwin (WinNT,200,XP). 
+    It has been reported to work on AIX,FreeBSD and many more.
+    </P>
 
     <A Name="features"></a>
     <P><B>When will feature X be added?</b></p>
-    <P>Please see our current <A href="proposal.shtml">proposal</a> for the
+    <P>
+    Please see our current <A href="proposal.shtml">proposal</a> for the
     feature set that is expected to be in CGDB version 1.0.  We are hoping
     to have 1.0 ready before the start of 2004.  If you feel it is missing
     any important features, please contact us via the cgdb-devel mailing
-    list.</p>
+    list.
+    </p>
 
     <A Name="distro"></a>
     <P><B>Will CGDB be packaged with my favorite Linux distribution?</b></p>
-    <P>Currently CGDB is undergoing packaging for the Debian Linux
+    <P>
+    Currently CGDB is undergoing packaging for the Debian Linux
     distribution.  Hopefully it will be included in their system shortly.
     Mike plans on packaging it for Gentoo soon, too.  If you would like to
     see a package for a different distribution, you are welcome to make one. :)
@@ -28,19 +65,80 @@
 
     <A Name="versions"</a>
     <P><B>What versions of GDB are supported?</b></p>
-    <P>This is an area where CGDB shines -- CGDB has been tested successfully
+    <P>
+    This is an area where CGDB shines -- CGDB has been tested successfully
     on versions of GDB as old as 4.17 (Gnat's patched GDB).  It supports all
     recent releases up to the current 5.3.  We will continue to test it to
     ensure it continues to support the latest GDB.  Unlike some frontends,
-    CGDB does not require a patched GDB, or a special version of any kind.</p>
+    CGDB does not require a patched GDB, or a special version of any kind.
+    </p>
 
     <A Name="whouses"></a>
     <P><B>Who uses CGDB?</b></p>
-    <P>We're excited to see that many people are catching onto the project
+    <P>
+    We're excited to see that many people are catching onto the project
     even in its current immature state.  We've been contacted by people
     worldwide (US, France, Germany, Poland, India, China, Japan) about it!
     We hope that it can become the de facto text GDB front end, at least for
     Vim fans. :) (Emacs users can check into the TUI, which is a compile-time
-    option that can be build into GDB.)</p>
+    option that can be build into GDB.)
+    </p>
+
+    <A Name="automate_CGDB"></a>
+    <P><B>How do I automate colon commands using the cgdbrc file?</b></p>
+    <P>
+	CGDB looks at the file $HOME/.cgdb/cgdbrc. It executes each of the lines
+	in that file in order as if they were typed into the status bar. This is
+	a very useful way of automating commands.
+    </p>
+
+    <A Name="keys_CGDB"></a>
+    <P><B>Why do some keys not work properly for me in CGDB?</b></p>
+    <P>
+	CGDB is proud of its custom key input library. This is because
+	it *can* use the ESC key, without having problems understanding
+	escape sequences that are generated when certain keys are hit.
+	Some of the keys that generate escape sequences are the arrow keys,
+	page up, page down, insert, delete, home, end and all the function
+	keys.
+    </P>
+
+    <P>
+	If you have problems using any of the keys above, you should modify 
+	the value of escdelay. Please look at the README file for more 
+	information on escdelay.
+    </p>
+
+    <A Name="tty_CGDB"></a>
+    <P><B>Why does CGDB not work when a tty can not be opened?</b></p>
+    <P>
+    There are 2 problems with this. 
+    </P>
+	
+    <P>
+	a) The annotate 2 communication protocol used between CGDB and GDB is 
+	lacking. It is difficult ( at best ) to figure out which output is GDB 
+	and which output is the inferior program. It is impossible to send input 
+	to the inferior program without error.
+    </P>
+	
+    <P>
+	To solve this CGDB used the tty command to be able to allow the user to send 
+	data to the inferior program. It also can easily determine which data is 
+	from the inferior and which data is from GDB.
+    </P>
+	
+    <P>
+	b) Readline can not be used if there is no tty available.
+    </P>
+
+    <P>
+	All in all, not allowing CGDB to work when there is no tty is a bug. In
+	the future, when CGDB will work when no tty is available, there will be
+	several features that do not work.
+		1) No sending input to the inferior program. The work around is to 
+		start the program from the terminal and attach to it using GDB.
+		2) Readline will not work.
+    </P>
 
 <!--#include file="footer.inc" -->

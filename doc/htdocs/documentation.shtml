@@ -1,0 +1,44 @@
+<!--#include file="header.inc" -->
+
+    <B>Documentation</b>
+
+    <BLOCKQUOTE>
+      <P> 
+      When CGDB was originally created, it was just to get a fast, responsive 
+      GDB front end to work on some very slow SunOS's. Originally, we never
+      intended for CGDB to become the replacement front end to GDB on every
+      machine we used. However, as CGDB developed, it was clear that no other
+      front end could help us get our development tasks done in as fast a time.
+      Since we find CGDB to be so usefull, an attempt is being made to keep as
+      much information possible, organized in one place, so that CGDB user's
+      can find answers to all there questions. Below is some of the 
+      documentation that we have been beggining to gather. Enjoy!
+      </p>
+
+     <P>
+     CGDB's manual attempt's to document any feature or command that CGDB 
+     supports. The manual is currently small, as CGDB currently doesn't 
+     allow that much configuration.
+     </P>
+
+     <P>
+     Also there are some of the frequently asked questions. Or maybe they 
+     are just a bunch of questions we thought you would like to know the
+     answer to.
+     </P>
+
+      <UL>
+        <LI><A Href="http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/*checkout*/cgdb/cgdb/README?rev=HEAD&amp;content-type=text/plain">CGDB Manual</a></li>
+        <LI><A Href="faq.shtml">FAQ</a></li>
+      </ul>
+
+      <P>
+      If you have a question that hasn't been answered here, feel free to
+      join the CGDB Users mailing list 
+      (<A Href="http://sourceforge.net/mail/?group_id=72581">lists page</a>).
+      You will receive very quick responses by posting there.
+      </p>
+
+    </blockquote>
+
+<!--#include file="footer.inc" -->

@@ -1,8 +1,67 @@
 <!--#include file="header.inc" -->
 
-    <B>Download CGDB</b><P>
+    <B>Download a CGDB binary</b>
 
     <BLOCKQUOTE>
+      You may be able to get a binary of CGDB from your favorite distribution.
+      Currently, the below distribution's offer packaged binaries of CGDB.
+
+      <P><B>Debian CGDB binary</b></P>
+      <P>
+      You can install CGDB in debian using the unstable distribution.
+      </P>
+
+      <P><B>Cygwin CGDB binary</b></P>
+      <P>
+      CGDB is packaged in Cygwin. However, it is not in the default list of
+      server's that Cygwin offers. Instead you will have to add 
+      http://rlc.unsane.co.uk/ to your list of servers. Then you should be able
+      to download the latest Cygwin binary. Ronald Landheer-Cieslak maintains
+      the package and can be reached at blytkerchan at users.sourceforge.net.
+      </P>
+      <P>
+      Note that this server also contains experimental software for Cygwin
+      that should not be used as part of your normal Cygwin distribution.
+      When using this server, make sure to only use the "current" versions
+      of the packages on it.
+      </P>
+    </blockquote>
+
+
+    <B>Installing CGDB from sources</b>
+
+    <BLOCKQUOTE>
+      <P>
+	   CGDB could not have been written without the use of other libraries.
+      CGDB depends on
+      </P>
+      <OL>
+         <LI> CGDB depends on readline-development-4.2 or greater.
+         <P>
+         If you don't have this, you might get a link error that looks something
+	      like this, 'undefined symbol, rl_set_prompt'.
+         </P>
+	      <LI> CGDB depends on ncurses/curses.  
+         <P>
+         The version number is not known.
+	      I have used libncurses.so.5 successfully.
+         </P>
+	      <LI> If you decide to modify the tokenizer library or the config
+	      file module, you will need to have flex installed.
+         <P>
+         I have used flex 2.5.4 to build cgdb.
+         </P>
+	      <LI> CGDB uses autoconf/automake to build its configure scripts and 
+	      makefiles. So, if you change any of the autoconf/automake files, you 
+         will need this software installed.
+         <UL>
+            <LI> aclocal  (GNU automake)   1.7  </li>
+            <LI> autoconf (GNU Autoconf)   2.57 </li>
+            <LI> libtool  (GNU libtool)    1.4.3</li>
+            <LI> m4       (GNU m4)         1.4  </li>
+         </ul>
+      </ol>
+    
       Latest version:
       <A Href="http://66.35.250.221:80/sourceforge/cgdb/cgdb-0.3.4.tar.gz">cgdb-0.3.4.tar.gz</a> -
       <A Href="http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/*checkout*/cgdb/cgdb/cgdb/ChangeLog?rev=1.29">ChangeLog</a><P>
