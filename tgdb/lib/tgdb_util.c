@@ -17,7 +17,37 @@
 #include "types.h"
 #include "util.h"
 
-int tgdb_util_set_home_dir(char *config_dir) {
+static char global_config_dir[PATH_MAX];
+
+char *tgdb_util_get_config_dir(void){
+    return global_config_dir; 
+}
+
+char *tgdb_util_get_config_gdbinit_file(void){
+    static char filename[PATH_MAX];
+    strncpy(filename, global_config_dir, strlen(global_config_dir) + 1);
+#ifdef HAVE_CYGWIN
+    strcat( filename, "\\gdb_init");
+#else
+    strcat( filename, "/gdb_init");
+#endif
+    return filename;
+}
+
+char *tgdb_util_get_config_gdb_debug_file(void){
+    static char filename[PATH_MAX];
+    strncpy(filename, global_config_dir, strlen(global_config_dir) + 1);
+#ifdef HAVE_CYGWIN
+    strcat( filename, "\\tgdb_debug");
+#else
+    strcat( filename, "/tgdb_debug");
+#endif
+    return filename;
+}
+
+char *tgdb_util_get_config_dir(void);
+
+int tgdb_util_set_home_dir(void) {
    char buffer[MAXLINE];
    char *env = getenv("HOME"); 
    struct stat st;
@@ -53,7 +83,7 @@ int tgdb_util_set_home_dir(char *config_dir) {
             return -1;
    } 
 
-    strncpy(config_dir, buffer, strlen(buffer) + 1);
+    strncpy(global_config_dir, buffer, strlen(buffer) + 1);
 
    return 0;
 }
@@ -90,7 +120,7 @@ int invoke_debugger(char *path, int argc, char *argv[], int *in, int *out, int c
     const char * const GDB               = "gdb";
     const char * const NW                = "--nw";
     const char * const X                 = "-x";
-    const char * const F                 = "~/.tgdb/gdb_init";
+    char *F                              = tgdb_util_get_config_gdbinit_file();
     char **local_argv;
     int i, j = 0, extra = 5;
     int pin[2] = { -1, -1 }, pout[2] = { -1, -1 };

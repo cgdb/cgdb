@@ -78,9 +78,9 @@ static int tgdb_setup_signals(void){
 }
 
 int a2_tgdb_init(char *debugger, int argc, char **argv, int *gdb, int *child){
-   char config_file[MAXLINE];
+   char *config_file;
    tgdb_init_setup_config_file();
-   global_get_config_gdb_debug_file(config_file);
+   config_file = tgdb_util_get_config_gdb_debug_file();
    io_debug_init(config_file);
    
    /* initialize users circular buffer */

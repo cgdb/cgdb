@@ -88,35 +88,3 @@ int global_has_list_started(void){
 void global_reset_list_started(void){
    list_started = FALSE;
 }
-
-/* Config directory */
-static char global_config_dir[MAXLINE];
-static int global_config_dir_length = 0;
-
-void global_set_config_dir(const char *filename) {
-   global_config_dir_length = strlen(filename) + 1;
-   memset( global_config_dir, '\0', MAXLINE);
-   strncpy( global_config_dir, filename, global_config_dir_length);
-}
-
-void global_get_config_dir(char *filename) {
-   strncpy(filename, global_config_dir, global_config_dir_length);
-}
-
-void global_get_config_gdb_init_file(char *filename) {
-   strncpy(filename, global_config_dir, global_config_dir_length);
-#ifdef HAVE_CYGWIN
-   strcat( filename, "\\gdb_init");
-#else
-   strcat( filename, "/gdb_init");
-#endif
-}
-
-void global_get_config_gdb_debug_file(char *filename) {
-   strncpy(filename, global_config_dir, global_config_dir_length);
-#ifdef HAVE_CYGWIN
-   strcat( filename, "\\tgdb_debug");
-#else
-   strcat( filename, "/tgdb_debug");
-#endif
-}

@@ -8,6 +8,8 @@
     package now takes only full commands at a time.
     * Fixing gdbmi interface to work with new libtgdb interface.
     * Fixing tgdb_util to use ~/.tgdb/gdb_init as the startup file
+    * Moved config file info into lib/ instead of annotate-two-src: I figured
+    both annotate and gdbmi would need to know this information.
 
 02/23/2003 Bob Rossi <bob_rossi@cox.net>
 

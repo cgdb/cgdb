@@ -13,13 +13,25 @@
  */
 int tgdb_util_new_tty(int *masterfd, int *slavefd, char *sname);
 
-/* tgdb_util_set_home_dir: Ceate a config dir in user's home dir.
- *
- * config_dir: Returns the path to the config dir created.
- *             The buffer config_dir should probably at least be
- *             PATH_MAX long.
+/* tgdb_util_set_home_dir: Create a config dir in user's home dir.
+ * Also saves the absolute path to the user's home directory
  */
-int tgdb_util_set_home_dir(char *config_dir);
+int tgdb_util_set_home_dir(void);
+
+/* tgdb_util_get_config_dir: Returns the absolute path to the user's config dir
+ * or returns Null on error.
+ */
+char *tgdb_util_get_config_dir(void);
+
+/* tgdb_util_get_config_gdbinit_file: Returns the absolute path to the 
+ * user's gdbinit file or returns Null on error.
+ */
+char *tgdb_util_get_config_gdbinit_file(void);
+
+/* tgdb_util_get_config_gdb_debug_file: Returns the absolute path to the 
+ * user's debug file or returns Null on error.
+ */
+char *tgdb_util_get_config_gdb_debug_file(void);
 
 /* invoke_debugger: Forks and execs the path.
  *      path: The path to the path.

@@ -9,8 +9,6 @@
 int globals_is_internal_prompt(void);
 void globals_set_internal_prompt_command(unsigned short set);
 
-
-
 /* global_can_issue_command: Tells tgdb if it can issue a command to gdb.
  * Return: 1 if tgdb can issue a command, otherwise 0.
  */
@@ -42,14 +40,5 @@ void global_reset_info_source_started(void);
 void global_set_start_list(void);
 int global_has_list_started(void);
 void global_reset_list_started(void);
-
-/* Keeps track of the users home directory */
-/* The caller must present these functions with a long enough cstring to
- * contain the data. MAXLINE is guarentted to be enough.
- */
-void global_set_config_dir(const char *filename);
-void global_get_config_dir(char *filename);
-void global_get_config_gdb_init_file(char *filename);
-void global_get_config_gdb_debug_file(char *filename);
 
 #endif

@@ -62,14 +62,13 @@
  *    Return: -1 on error or 0 on success.
  */
 int tgdb_init_setup_config_file(void){
-   char gdb_init_file[MAXLINE];
+   char *gdb_init_file;
    char path[PATH_MAX];
 
-   if ( tgdb_util_set_home_dir(path) == -1 )
+   if ( tgdb_util_set_home_dir() == -1 )
       return -1;
 
-   global_set_config_dir(path);
-   global_get_config_gdb_init_file(gdb_init_file);
+   gdb_init_file = tgdb_util_get_config_gdbinit_file();
 
    if ( access( gdb_init_file, R_OK || W_OK ) == -1 ) {
       FILE *fp = fopen( gdb_init_file, "w" );
