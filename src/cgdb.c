@@ -183,13 +183,13 @@ static void parse_long_options(int *argc, char ***argv) {
  */
 
 static int init_home_dir(void) {
-   char cgdbConfigDir[MAXLINE];
-   char homeDir[MAXLINE];
-   char *env = getenv("HOME");
-   struct stat st;
+    char cgdb_config_dir_unix_path[MAXLINE];
+    char homeDir[MAXLINE];
+    char *env = getenv("HOME");
+    struct stat st;
 
 #ifdef HAVE_CYGWIN
-   char win32_path[MAXLINE];
+   char cgdb_config_dir_win_path[MAXLINE];
    char win32_homedir[MAXLINE];
    extern void cygwin_conv_to_full_win32_path(const char *path, char *win32_path);
 #endif
@@ -197,31 +197,31 @@ static int init_home_dir(void) {
    if(env == NULL)
       err_quit("%s:%d -> $HOME is not set", __FILE__, __LINE__);
 
-   sprintf( cgdbConfigDir, "%s/.cgdb", env );
+   sprintf( cgdb_config_dir_unix_path, "%s/.cgdb", env );
 
 #ifdef HAVE_CYGWIN
-   cygwin_conv_to_full_win32_path(cgdbConfigDir, win32_path);
-   strncpy( cgdbConfigDir, win32_path, strlen(win32_path));
-   cygwin_conv_to_full_win32_path(homeDir, win32_homedir);
-   strncpy( homeDir, env, strlen(env));
+   cygwin_conv_to_full_win32_path(cgdb_config_dir_unix_path, cgdb_config_dir_win_path);
+   strncpy( cgdb_config_dir_unix_path, cgdb_config_dir_win_path, strlen(cgdb_config_dir_win_path) + 1);
+   cygwin_conv_to_full_win32_path(env, win32_homedir);
+   strncpy( homeDir, win32_homedir, strlen(win32_homedir) + 1);
 #else 
-   strncpy( homeDir, env, strlen(env));
+   strncpy( homeDir, env, strlen(env) + 1);
 #endif
 
    /* Check to see if already exists, if does not exist continue */
-   if ( stat( cgdbConfigDir, &st ) == -1 && errno == ENOENT ) {
+   if ( stat( cgdb_config_dir_unix_path, &st ) == -1 && errno == ENOENT ) {
        /* Create home config directory if does not exist */
        if ( access( env, R_OK | W_OK ) == -1 )
            return -1;
 
-       if ( mkdir( cgdbConfigDir, 0755 ) == -1 )
+       if ( mkdir( cgdb_config_dir_unix_path, 0755 ) == -1 )
            return -1;
    }
 
 #ifdef HAVE_CYGWIN
-   sprintf( cgdb_home_dir, "%s\\", cgdbConfigDir );
+   sprintf( cgdb_home_dir, "%s\\", cgdb_config_dir_unix_path );
 #else
-   sprintf( cgdb_home_dir, "%s/", cgdbConfigDir );
+   sprintf( cgdb_home_dir, "%s/", cgdb_config_dir_unix_path );
 #endif
 
    return 0;

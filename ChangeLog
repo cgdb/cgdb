@@ -1,3 +1,7 @@
+04/01/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * cgdb now works on windows XP in cygwin: Fixed creation of home directory.
+
 03/29/2003 Bob Rossi <bob_rossi@cox.net>
 
     * Fixed all of cgdb's to work with autoconf: All of the files that make up

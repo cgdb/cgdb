@@ -48,42 +48,46 @@ char *tgdb_util_get_config_gdb_debug_file(void){
 char *tgdb_util_get_config_dir(void);
 
 int tgdb_util_set_home_dir(void) {
-   char buffer[MAXLINE];
-   char *env = getenv("HOME"); 
-   struct stat st;
+    char tgdb_config_dir_unix_path[MAXLINE];
+    char homeDir[MAXLINE];
+    char *env = getenv("HOME");
+    struct stat st;
 
 #ifdef HAVE_CYGWIN
-   char win32_path[MAXLINE];
+   char tgdb_config_dir_win_path[MAXLINE];
+   char win32_homedir[MAXLINE];
    extern void cygwin_conv_to_full_win32_path(const char *path, char *win32_path);
 #endif
-   
-   if(env == NULL){
-      err_msg("%s:%d -> $HOME is not set", __FILE__, __LINE__);
-      return -1;
-   } 
-   
+
+   if(env == NULL)
+      err_quit("%s:%d -> $HOME is not set", __FILE__, __LINE__);
+
+   sprintf( tgdb_config_dir_unix_path, "%s/.tgdb", env );
+
 #ifdef HAVE_CYGWIN
-   sprintf( buffer, "%s\\.tgdb", env );
+   cygwin_conv_to_full_win32_path(tgdb_config_dir_unix_path, tgdb_config_dir_win_path);
+   strncpy( tgdb_config_dir_unix_path, tgdb_config_dir_win_path, strlen(tgdb_config_dir_win_path) + 1);
+   cygwin_conv_to_full_win32_path(env, win32_homedir);
+   strncpy( homeDir, win32_homedir, strlen(win32_homedir) + 1);
+#else 
+   strncpy( homeDir, env, strlen(env) + 1);
+#endif
+
+   /* Check to see if already exists, if does not exist continue */
+   if ( stat( tgdb_config_dir_unix_path, &st ) == -1 && errno == ENOENT ) {
+       /* Create home config directory if does not exist */
+       if ( access( env, R_OK | W_OK ) == -1 )
+           return -1;
+
+       if ( mkdir( tgdb_config_dir_unix_path, 0755 ) == -1 )
+           return -1;
+   }
+
+#ifdef HAVE_CYGWIN
+   sprintf( global_config_dir, "%s\\", tgdb_config_dir_unix_path );
 #else
-   sprintf( buffer, "%s/.tgdb", env );
+   sprintf( global_config_dir, "%s/", tgdb_config_dir_unix_path );
 #endif
-
-#ifdef HAVE_CYGWIN
-   cygwin_conv_to_full_win32_path(buffer, win32_path);
-   strncpy( buffer, win32_path, strlen(win32_path));
-#endif
-
-    /* Check to see if already exists, if does not exist continue */
-    if ( stat( buffer, &st ) == -1 && errno == ENOENT) {
-        /* Create home config directory if does not exist */
-        if ( access( env, R_OK | W_OK ) == -1 )
-            return -1;
-
-        if ( mkdir( buffer, 0755 ) == -1 )
-            return -1;
-   } 
-
-    strncpy(global_config_dir, buffer, strlen(buffer) + 1);
 
    return 0;
 }
@@ -292,13 +296,6 @@ int invoke_pty_process(
         pty_free_memory(slavename, *masterfd, argc, local_argv);
         return -1;
     } else if ( pid == 0 ) {    /* child */
-        
-        /* Redirect stderr to stdout */
-        if ( dup2(STDOUT_FILENO, STDERR_FILENO) == -1 ) {
-            err_msg("(%s:%d) dup2 failed", __FILE__, __LINE__);
-            pty_free_memory(slavename, *masterfd, argc, local_argv);
-            return -1;
-        }
 
         if(execvp(local_argv[0], local_argv) == -1) {
             err_msg("(%s:%d) execvp failed", __FILE__, __LINE__);
