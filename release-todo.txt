@@ -1,31 +1,52 @@
-1.  Update both ChangeLog's to have the new release date and version.
-    The ChangeLog's lives in both cgdb and cgdb/tgdb 
-2.  change configure.in file to reflect new version number.
-    now run, autoregen.sh.
-    automake -> aclocal (GNU automake) 1.4-p4
-    autoconf -> autoconf (GNU Autoconf) 2.53
-3.  Test doing make dist then untar, ./configure && make
+Steps for releasing a new CGDB version:
+
+1.  Update both ChangeLogs to have the new release date and version.
+    The ChangeLogs live in both cgdb and cgdb/tgdb 
+    
+2.  Change configure.in file to reflect new version number.
+      * Run autoregen.sh
+    Make sure you have the appropriate versions of these installed:
+      * aclocal (GNU automake) 1.4-p4
+      * autoconf (GNU Autoconf) 2.53
+      
+3.  Test doing 'make dist' then untar, ./configure && make
     and run ./cgdb --version to check version number.
 
-4.  put a release on sourceforge.net/projects/cgdb
+4.  Put a release on sourceforge.net/projects/cgdb
     * ftp upload.sourceforge.net
-    * user=anonymous, passwd=email
-    * type bin
-    * cd incoming
-    * put the file up
-
+      * user=anonymous, passwd=email
+      * type bin
+      * cd incoming
+      * put the file up
     * go to sourceforge.net/projects/cgdb
     * go to admin, then edit/release files
 
-5.  update website cgdb.sourceforge.net, just announce a new release
-    and change download page.
+5.  Update website cgdb.sourceforge.net:
     * ssh cgdb.sourceforge.net
-    * goto /home/groups/c/cg/cgdb/htdocs
-    * download page -> download.shtml
-    *  dowload link
-    *  changelog link
-    *  put note on index page
+    * cd /home/groups/c/cg/cgdb/htdocs
+    * Modify download page -> download.shtml
+      * Download link
+      * Changelog link (point to the correct version in CVS)
+    * Optionally, put a note in the index.shtml file (News section)
     
-5.  announce the release on freshmeat
+5.  Announce the release on freshmeat
 
-6.  announce the release on cgdb-announce@lists.sourceforge.net
+6.  Announce the release on cgdb-announce@lists.sourceforge.net
+
+Subject:  CGDB (version) released
+Text of message:
+
+CGDB (version) Released
+-------------------
+
+Downloading:
+
+    Go to http://cgdb.sourceforge.net/download.shtml for download
+    link and instructions.
+
+This new version contains the following changes:
+
+    * Changelog entry 1
+    * Changelog entry 2
+      (no long descriptions, just the part before the ':')
+
