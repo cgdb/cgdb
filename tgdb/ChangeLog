@@ -1,3 +1,7 @@
+03/31/2004 Bob Rossi <bob@brasko.net>
+
+    * tgdb.c (tgdb_signal_notification): Easier to debug.
+
 03/22/2004 Bob Rossi <bob@brasko.net>
  
     * Doxyfile: Change TAGFILES line to use correct path to html.

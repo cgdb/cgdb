@@ -1221,13 +1221,20 @@ int tgdb_modify_breakpoint ( struct tgdb *tgdb, const char *file, int line, enum
 }
 
 int tgdb_signal_notification ( struct tgdb *tgdb, int signum ) {
+    pid_t pid; 
+
+    pid = tgdb_client_get_debugger_pid( tgdb->tcc );
+
+    if ( pid == -1 )
+       return -1;
+
     if ( signum == SIGINT ) {               /* ^c */
         tgdb->control_c = 1;
-        kill(tgdb_client_get_debugger_pid( tgdb->tcc ), SIGINT);
+        kill(pid, SIGINT);
     } else if ( signum == SIGTERM ) { 
-        kill(tgdb_client_get_debugger_pid( tgdb->tcc ), SIGTERM);
+        kill(pid, SIGTERM);
     } else if ( signum == SIGQUIT ) {       /* ^\ */
-        kill(tgdb_client_get_debugger_pid( tgdb->tcc ), SIGQUIT);
+        kill(pid, SIGQUIT);
     }
 
 	return 0;
