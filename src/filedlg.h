@@ -36,17 +36,17 @@ int filedlg_add_file_choice(struct filedlg *fd, const char *file_choice);
  */
 void filedlg_clear(struct filedlg *fd);
 
-/* filedlg_choose: Allows user to choose a file.
- * _______________
+/* filedlg_recv_char: Sens a character to the filedlg.
  *
- * fd: The file dialog to use.
+ *   fdlg:  The file dialog to free.
+ *   key :  The next key of input to process
+ *   file:  The file the user selected
  *
- * file: Will be returned as the file name the user picked.
- *       Should be long enough to have a path put into it.
- *
- * Return Value: Zero on success, non-zero on error.
+ *  returns -1 when aborted by user.
+ *  returns 0 when needs more input
+ *  returns 1 when done ( file is valid )
  */
-int filedlg_choose(struct filedlg *fd, char *file);
+int filedlg_recv_char(struct filedlg *fd, int key, char *file);
 
 /* filedlg_display_message: Displays a message on the filedlg window status bar.
  * ------------------------
@@ -55,5 +55,11 @@ int filedlg_choose(struct filedlg *fd, char *file);
  * message: The message to display
  */
 void filedlg_display_message(struct filedlg *fd, char *message);
+
+/* filedlg_display: Redraws the file dialog.
+ *
+ * Returns 0 on success or -1 on error
+ */
+int filedlg_display( struct filedlg *fd );
 
 #endif /* _FILEDLG_H_ */

@@ -245,7 +245,7 @@ static int filedlg_search_regex(struct filedlg *fd, const char *regex,
                   &fd->buf->sel_col_rend, opt, direction, icase);
 }
 
-static int filedlg_display( struct filedlg *fd ) {
+int filedlg_display( struct filedlg *fd ) {
     char fmt[5];
     int width, height;
     int lwidth;
@@ -450,19 +450,17 @@ static int capture_regex(struct filedlg *fd) {
 }
 
 
-int filedlg_choose(struct filedlg *fd, char *file) {
-   int key;
-   int height, width;
+int filedlg_recv_char(struct filedlg *fd, int key, char *file) {
+    int height, width;
 
-   /* Initialize size variables */
-   getmaxyx(fd->win, height, width);
+    /* Initialize size variables */
+    getmaxyx(fd->win, height, width);
 
-   filedlg_display(fd); 
+    filedlg_display(fd); 
 
-   while ( ( key = wgetch(fd->win)) != ERR ) {
-      switch ( key ) {
+    switch ( key ) {
         case 'q':
-            goto quit;
+            return -1;
         /* Vertical scrolling */
         case CGDB_KEY_DOWN:
         case 'j':
@@ -492,7 +490,7 @@ int filedlg_choose(struct filedlg *fd, char *file) {
         case '/':
         case '?':
             regex_direction = ('/' == key);
-                 
+             
             /* Capturing regular expressions */
             filedlg_search_regex_init(fd);
             capture_regex(fd);
@@ -505,16 +503,14 @@ int filedlg_choose(struct filedlg *fd, char *file) {
             break;
         /* User selected a file */
         case '\n':
+        case '\r':
             strcpy(file, fd->buf->files[fd->buf->sel_line]);
-            goto quit;
+            return 1; 
         default:
             break;
+    }
+  
+    filedlg_display(fd); 
 
-      }
-      
-      filedlg_display(fd); 
-   }
-
-quit:
-   return 0;
+    return 0;
 }

@@ -102,14 +102,6 @@ void if_clear_filedlg(void);
  */
 void if_add_filedlg_choice(const char *filename);
 
-/* if_show_filedlg: Displays the file dialog to the user.
- * ----------------
- *
- *  filename: An out parameter that is used to show the name of the file that
- *            the user wants to see.
- */
-void if_show_filedlg(char *filename);
-
 /* if_filedlg_display_message: Displays a message on the filedlg window status bar.
  * ---------------------------
  *
@@ -127,8 +119,9 @@ void if_shutdown(void);
  *  GDB: focus on the gdb i/o window
  *  TTY: focus on the debugged program i/o window
  *  CGDB: focus on source window, accepts command input.
+ *  FILE_DLG: focus on file dialog window
  */
-typedef enum Focus { GDB, TTY, CGDB } Focus;
+typedef enum Focus { GDB, TTY, CGDB, FILE_DLG } Focus;
 
 /* if_set_focus: Sets the current input focus to a different window 
  * ------------

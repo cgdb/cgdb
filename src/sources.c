@@ -146,8 +146,6 @@ void source_previous(struct sviewer *sview) {
 
     sview->queue_index--;
     sview->cur = sview->queue[sview->queue_index];
-    sview->modified = 1;
-    sview->last_focus = 0;
 }
 
 void source_next(struct sviewer *sview) {
@@ -158,7 +156,6 @@ void source_next(struct sviewer *sview) {
 
     sview->queue_index++;
     sview->cur = sview->queue[sview->queue_index];
-    sview->modified = 1;
 }
 
 /* get_node:  Returns a pointer to the node that matches the given path.
@@ -256,7 +253,6 @@ struct sviewer *source_new(int pos_r, int pos_c, int height, int width)
     rv->win       = newwin(height, width, pos_r, pos_c);
     rv->cur       = NULL;
     rv->list_head = NULL;
-    rv->modified  = 1;  /* The source win should be refreshed the first time */
 
     source_queue_init(rv);
 
@@ -366,12 +362,6 @@ int source_display(struct sviewer *sview, int focus)
     int lwidth;
     int line;
     int i;
-
-    if ( !sview -> modified && focus == sview->last_focus)
-        return 0;
-    
-    sview->last_focus = focus;
-    sview->modified = 0;
 
     /* Check that a file is loaded */
     if (sview->cur == NULL || sview->cur->buf.tlines == NULL){
@@ -519,7 +509,6 @@ void source_move(struct sviewer *sview,
     delwin(sview->win);
     sview->win = newwin(height, width, pos_r, pos_c);
     wclear(sview->win);
-    sview->modified = 1;
 }
 
 void source_vscroll(struct sviewer *sview, int offset)
@@ -530,7 +519,6 @@ void source_vscroll(struct sviewer *sview, int offset)
             sview->cur->sel_line = 0;
         if (sview->cur->sel_line >= sview->cur->buf.length)
             sview->cur->sel_line = sview->cur->buf.length - 1;
-        sview->modified = 1;
     }
 }
 
@@ -548,7 +536,6 @@ void source_hscroll(struct sviewer *sview, int offset)
             sview->cur->sel_col = max_width;
         if (sview->cur->sel_col < 0)
             sview->cur->sel_col = 0;
-        sview->modified = 1;
     }
 }
 
@@ -561,7 +548,6 @@ void source_set_sel_line(struct sviewer *sview, int line)
             sview->cur->sel_line = 0;
         if (sview->cur->sel_line >= sview->cur->buf.length)
             sview->cur->sel_line = sview->cur->buf.length - 1;
-        sview->modified = 1;
     }
 }
 
@@ -596,7 +582,6 @@ int source_set_exec_line(struct sviewer *sview, const char *path, int line)
         if (line >= sview->cur->buf.length)
             line = sview->cur->buf.length - 1;
         sview->cur->sel_line = sview->cur->exe_line = line;
-        sview->modified = 1;
     }
 
     return 0;
@@ -625,7 +610,6 @@ void source_search_regex_init(struct sviewer *sview) {
     
     /* Start searching at the beginning of the selected line */
     sview->cur->sel_rline    = sview->cur->sel_line;
-    sview->modified = 1;
 }
 
 int source_search_regex(struct sviewer *sview, 
@@ -634,7 +618,6 @@ int source_search_regex(struct sviewer *sview,
 
     if ( sview == NULL || sview->cur == NULL || regex == NULL || regex[0] == 0)
         return -1;
-    sview->modified = 1;
 
     return hl_regex(regex, 
                     (const char ** )sview->cur->buf.tlines, 
@@ -663,7 +646,6 @@ void source_disable_break(struct sviewer *sview, const char *path, int line)
     
     if (line > 0 && line <= node->buf.length)
         node->buf.breakpts[line-1] = 2;
-    sview->modified = 1;
 }
 
 void source_enable_break(struct sviewer *sview, const char *path, int line)
@@ -683,7 +665,6 @@ void source_enable_break(struct sviewer *sview, const char *path, int line)
     
     if (line > 0 && line <= node->buf.length){
         node->buf.breakpts[line-1] = 1;
-        sview->modified = 1;
     }
 }
 
@@ -693,7 +674,6 @@ void source_clear_breaks(struct sviewer *sview)
 
     for (node = sview->list_head; node != NULL; node = node->next)
         memset(node->buf.breakpts, 0, node->buf.length);
-    sview->modified = 1;
         
 }
 

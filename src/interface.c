@@ -86,14 +86,6 @@ static int tty_win_height_shift = 0;
 /* Data Structures */
 /* --------------- */
 
-#if 0 /* This is defined in interface.h now. */
-enum Focus {
-    GDB,                 /* Input goes to gdb */
-    TTY,                 /* Input goes to tty I/O window */
-    CGDB                 /* Input goes to the source window ( CGDB ) */
-};
-#endif
-
 enum Command_Type {
     CMD_LINE_NUMBER,     /* :123 line number */
     CMD_QUIT,            /* :q   command */
@@ -119,6 +111,7 @@ static enum Focus focus = CGDB;         /* Which pane is currently focused */
 static struct winsize screen_size;      /* Screen size */
 
 struct filedlg *fd;                     /* The file dialog structure */
+
 static char regex_line[MAX_LINE];       /* The regex the user enters */
 static int regex_line_pos;              /* The index into the current regex */
 static int regex_search;                /* Currently searching text ? */
@@ -383,6 +376,12 @@ void if_display_message(const char *msg, int width, const char *fmt, ...) {
  */
 void if_draw( void )
 {
+    /* Only redisplay the filedlg if it is up */
+    if ( focus == FILE_DLG ) {
+        filedlg_display(fd);
+        return;
+    }
+
     update_status_win();
 
     if ( get_src_height() != 0 && get_gdb_height() != 0 )
@@ -1048,6 +1047,23 @@ int internal_if_input(int key) {
             return tty_input(key);
         case GDB:
             return gdb_input(key);
+        case FILE_DLG: {
+            static char filedlg_file[MAX_LINE];
+            int ret = filedlg_recv_char(fd, key, filedlg_file);
+            /* The user cancelled */
+            if ( ret == -1 ) { 
+                if_set_focus(CGDB);
+                return 0;
+            /* Needs more data */
+            } else if ( ret == 0 ) {
+                return 0;
+            /* The user picked a file */
+            } else if ( ret == 1 ) {
+                tgdb_get_source_absolute_filename(filedlg_file);
+                if_set_focus(CGDB);
+                return 0;
+            }
+        }
         default:
             /* Focus is screwed up, fix it */
             fprintf(stderr, "KEYBOARD ERROR\r\n");
@@ -1126,10 +1142,6 @@ void if_add_filedlg_choice(const char *filename) {
    filedlg_add_file_choice(fd, filename);
 }
 
-void if_show_filedlg(char *filename) {
-   filedlg_choose(fd, filename);
-}
-
 void if_filedlg_display_message(char *message) {
     filedlg_display_message(fd, message);
 }
@@ -1174,6 +1186,10 @@ void if_set_focus( Focus f )
         }
         break;
     case CGDB:
+        focus = f;
+        if_draw();
+        break;
+    case FILE_DLG:
         focus = f;
         if_draw();
         break;

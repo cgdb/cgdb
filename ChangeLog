@@ -1,3 +1,13 @@
+04/02/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * Removed filedlg's main loop: filedlg's main loop is gone. It is now
+    driven from cgdb's main loop. It recieve's a char at a time.
+    * Removed call to wgetch in the process of removing filedlg's main loop
+    * Removed optimizations from sources.c and scroller.c: I added a variable
+    to determine if these objects needed to be displayed again. They are not
+    worth the effort to maintain, since sometimes the screen NEEDS to be
+    drawn again.
+
 04/01/2003 Bob Rossi <bob_rossi@cox.net>
 
     * cgdb now works on windows XP in cygwin: Fixed creation of home directory.

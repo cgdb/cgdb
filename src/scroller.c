@@ -131,8 +131,6 @@ struct scroller *scr_new(int pos_r, int pos_c, int height, int width)
     rv->buffer      = malloc(sizeof(char *));
     rv->buffer[0]   = strdup("");
     rv->length      = 1;
-    rv->modified    = 1;
-    rv->last_focus  = 0;
 
     return rv;
 }
@@ -159,7 +157,6 @@ void scr_up(struct scroller *scr, int nlines)
     int length;
     int i;
     
-    scr->modified = 1;
     /* Sanity check */
     getmaxyx(scr->win, height, width);
     if (scr->current.c > 0){
@@ -193,7 +190,6 @@ void scr_down(struct scroller *scr, int nlines)
     int length;
     int i;
 
-    scr->modified = 1;
     /* Sanity check */
     getmaxyx(scr->win, height, width);
     if (scr->current.c > 0){
@@ -223,7 +219,6 @@ void scr_down(struct scroller *scr, int nlines)
 
 void scr_home(struct scroller *scr)
 {
-    scr->modified = 1;
     scr->current.r = 0;
     scr->current.c = 0;
 }
@@ -232,7 +227,6 @@ void scr_end(struct scroller *scr)
 {
     int height, width;
 
-    scr->modified = 1;
     getmaxyx(scr->win, height, width);
     
     scr->current.r = scr->length - 1;
@@ -245,7 +239,6 @@ void scr_add(struct scroller *scr, const char *buf)
     int length;                 /* Length of the current line */ 
     char *x;                    /* Pointer to next new line character */
     
-    scr->modified = 1;
     /* Find next newline in the string */
     x        = strchr(buf, '\n');
     length   = strlen(scr->buffer[scr->length-1]);
@@ -290,7 +283,6 @@ void scr_add(struct scroller *scr, const char *buf)
 void scr_move(struct scroller *scr, 
               int pos_r, int pos_c, int height, int width)
 {
-    scr->modified = 1;
     delwin(scr->win);
     scr->win = newwin(height, width, pos_r, pos_c);
     wclear(scr->win);
@@ -305,12 +297,6 @@ void scr_refresh(struct scroller *scr, int focus)
     int width, height;                   /* Width and height of window */
     char *buffer;                        /* Current line segment to print */
 
-//    curs_set(0);
-    if ( !scr->modified && focus == scr->last_focus)
-        return;
-    scr->modified = 0;
-    scr->last_focus = focus;
-    
     /* Sanity check */
     getmaxyx(scr->win, height, width);
     

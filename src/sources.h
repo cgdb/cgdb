@@ -42,8 +42,6 @@ struct sviewer{
     struct list_node *list_head;       /* File list */    
     struct list_node *cur;             /* Current node we're displaying */
     WINDOW *win;                       /* Curses window */
-    unsigned short int modified;       /* Flag: sviewer changed since last refresh */
-    unsigned short int last_focus;     /* Flag: sviewer has focus last draw */
 
     struct list_node *queue[QUEUE_SIZE];    /* Queue of files viewed */
     int queue_index;                        /* current position in queue */

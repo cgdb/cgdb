@@ -381,8 +381,7 @@ static void process_commands(struct queue *q)
 
             /* Send the file the user picked to get the absolute path */
             case SOURCES_END:
-                if_show_filedlg(filename);
-                tgdb_get_source_absolute_filename(filename);
+                if_set_focus(FILE_DLG);
                 break;
 
             /* The user is trying to get a list of source files that make up
@@ -443,8 +442,13 @@ static int gdb_input()
 
     process_commands(commandq);
 
-    /* Display GDB output */
-    if_print(buf);
+    /* Display GDB output 
+     * The strlen check is here so that if_print does not get called
+     * when displaying the filedlg. If it does get called, then the 
+     * gdb window gets displayed when the filedlg is up
+     */
+    if ( strlen( buf ) > 0 )
+        if_print(buf);
 
     return 0;
 }

@@ -31,8 +31,6 @@ struct scroller {
         int pos;         /* Cursor position in last line */
     } current;
     WINDOW *win;         /* The scoller's own window */
-    unsigned short int modified; /* Flag: sviewer changed since last refresh */
-    unsigned short int last_focus;     /* Flag: scroller has focus last draw */
 };
 
 /* --------- */
