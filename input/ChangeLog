@@ -1,0 +1,4 @@
+03/25/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * Adding the input interface for the first time: This should help cgdb
+    read input esc sequences and still perform functions at a high level.

@@ -1,4 +1,4 @@
-SUBDIRS = tgdb src
+SUBDIRS = tgdb input src
 EXTRA_DIST = config
 
 dist-hook:

@@ -308,7 +308,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO AMTAR install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM AWK SET_MAKE MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE CPP EGREP RANLIB ac_ct_RANLIB LEX LEXLIB LEX_OUTPUT_ROOT build build_cpu build_vendor build_os host host_cpu host_vendor host_os BUILD_DRIVER LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO AMTAR install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM AWK SET_MAKE MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE CPP EGREP RANLIB ac_ct_RANLIB LEX LEXLIB LEX_OUTPUT_ROOT build build_cpu build_vendor build_os host host_cpu host_vendor host_os BUILD_DRIVER BUILD_INPUT_DRIVER LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -4153,10 +4153,11 @@ fi;
 # Check whether --with-driver or --without-driver was given.
 if test "${with_driver+set}" = set; then
   withval="$with_driver"
-  BUILD_DRIVER=driver
+  BUILD_DRIVER=driver BUILD_INPUT_DRIVER="input_driver getch_driver"
 else
-  BUILD_DRIVER=
+  BUILD_DRIVER= BUILD_INPUT_DRIVER=
 fi;
+
 
 
     if test $ncurses = yes; then
@@ -6106,7 +6107,7 @@ fi
 done
 
 
-                                                            ac_config_files="$ac_config_files Makefile src/Makefile tgdb/Makefile tgdb/annotate-two-src/Makefile tgdb/gdbmi-src/Makefile tgdb/lib/Makefile"
+                                                                                ac_config_files="$ac_config_files Makefile input/Makefile input/src/Makefile src/Makefile tgdb/Makefile tgdb/annotate-two-src/Makefile tgdb/gdbmi-src/Makefile tgdb/lib/Makefile"
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -6663,6 +6664,8 @@ do
   case "$ac_config_target" in
   # Handling of arguments.
   "Makefile" ) CONFIG_FILES="$CONFIG_FILES Makefile" ;;
+  "input/Makefile" ) CONFIG_FILES="$CONFIG_FILES input/Makefile" ;;
+  "input/src/Makefile" ) CONFIG_FILES="$CONFIG_FILES input/src/Makefile" ;;
   "src/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
   "tgdb/Makefile" ) CONFIG_FILES="$CONFIG_FILES tgdb/Makefile" ;;
   "tgdb/annotate-two-src/Makefile" ) CONFIG_FILES="$CONFIG_FILES tgdb/annotate-two-src/Makefile" ;;
@@ -6808,6 +6811,7 @@ s,@host_cpu@,$host_cpu,;t t
 s,@host_vendor@,$host_vendor,;t t
 s,@host_os@,$host_os,;t t
 s,@BUILD_DRIVER@,$BUILD_DRIVER,;t t
+s,@BUILD_INPUT_DRIVER@,$BUILD_INPUT_DRIVER,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
 s,@LTLIBOBJS@,$LTLIBOBJS,;t t
 CEOF

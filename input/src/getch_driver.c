@@ -18,6 +18,7 @@ int main(int argc, char **argv){
         key = getch();
 
         switch ( key ) {
+            case 27:            printw("ESC\n");           break;
             case KEY_UP:        printw("KEY_UP\n");        break;
             case KEY_DOWN:      printw("KEY_DOWN\n");      break;
             case KEY_LEFT:      printw("KEY_LEFT\n");      break;

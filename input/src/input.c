@@ -15,11 +15,21 @@
 #include <ctype.h>
 #include "util.h"
 #include "input.h"
+#include "error.h"
 
 #define MAXLINE 4096
 #define MAX_SEQ_LIST_SIZE 8
 
-/* This contains all of the ESC sequences this library cares about. */
+/* This contains all of the ESC sequences this unit cares about. 
+ * It contains the correct information to get esc sequences out of both
+ * termcap and terminfo.
+ *
+ * tname        - The termcap capability name
+ * tiname       - The terminfo capability name
+ * description  - Human readable description about the capability name
+ * tcodes       - The termcap esc sequence associated with tname
+ * ticodes      - The terminfo esc sequence associated with tiname
+ */
 struct tlist {
     char *tname;
     char *tiname;
@@ -63,50 +73,6 @@ struct tlist {
   { NULL, NULL,     NULL,                       NULL, NULL, CGDB_KEY_ERROR }
 };
 
-
-void display_message(const char *fmt, ...) {
-    va_list ap;
-    char va_buf[MAXLINE];
-
-    /* Get the buffer with format */
-    va_start(ap, fmt);
-#ifdef   HAVE_VSNPRINTF
-    vsnprintf(va_buf, sizeof(va_buf), fmt, ap);  /* this is safe */
-#else
-    vsprintf(va_buf, fmt, ap);             /* this is not safe */
-#endif
-    va_end(ap);
-    fprintf(stderr, "%s", va_buf);
-}
-
-//static void print_seq(struct tlist *item ) {
-//                        
-//    int i, length;
-//    
-//    if ( item->tcodes != NULL && item->ticodes != NULL )
-//        display_message("DESCRIPTION(%s)", item->description);
-//
-//    if ( item->tcodes != NULL ) {
-//        display_message("TERMCAP NAME(%s)", item->tname);
-//        display_message("CODE[");
-//
-//        length = strlen(item->tcodes);
-//        for(i = 0; i < length; i++)
-//            display_message("(%d)", item->tcodes[i]);
-//        display_message("]\n");
-//    }
-//
-//    if ( item->ticodes != NULL ) {
-//        display_message("TERMINFO NAME(%s)", item->tiname);
-//        display_message("CODE[");
-//
-//        length = strlen(item->ticodes);
-//        for(i = 0; i < length; i++)
-//            display_message("(%d)", item->ticodes[i]);
-//        display_message("]\n");
-//    }
-//}
-
 struct term_entry {
     char *name;
     char *description;
@@ -123,36 +89,9 @@ struct input {
     int bad_esc_seq_size;
 };
 
-
-//static void print_list_item(struct term_entry *item) {
-//    int i, length;
-//    display_message("TERMINFO NAME(%s)", item->name);
-//    display_message("DESCRIPTION(%s)", item->description);
-//    display_message("CODE[");
-//
-//    length = strlen(item->sequence);
-//    for(i = 0; i < length; i++)
-//        display_message("(%d)", item->sequence[i]);
-//    display_message("]\n");
-//}
-
-//static void display_item(const char * name, const char *desc, const char *codes){
-//    int i, length;
-//    display_message("TERMINFO:(%s) DESC(%s) CODE[", name, desc);
-//
-//    length = strlen(codes);
-//    for(i = 0; i < length; i++)
-//        display_message("(%d)", codes[i]);
-//    display_message("]\n");
-//}
-
-//static void display_list(void) {
-//    int i;
-//    for ( i = 0; i < list_size; i++ )
-//        print_list_item(&list[i]);
-//}
-
-/* This should input in sorted order based on codes */
+/* insertIntoList: This should input in sorted order based on codes 
+ *                 This function should be replaced with something smarter.
+ */
 static void insertIntoList(const char *tname, const char *tdesc, char *codes, enum cgdb_input_macro macro) {
     int length = strlen(codes), i;
     int entry = 0;
@@ -201,6 +140,7 @@ finished:
     list_size++;
 }
 
+/* add_keybindings: This adds special key bindings that many terminals use. */
 static void add_keybindings(void) {
     insertIntoList ("Up arrow",     "Up arrow",     "\033[0A", CGDB_KEY_UP);
     insertIntoList ("Left arrow",   "Left arrow",   "\033[0B", CGDB_KEY_LEFT);
@@ -239,14 +179,6 @@ static void store_list(void) {
     }
 }
 
-/* Prints all of the key sequences */
-//static void print_list(void) {
-//    int i;
-//    /* strings */
-//    for( i = 0; seqlist[i].tname != NULL; i++)
-//        print_seq(&seqlist[i]);
-//}
-
 /* Gets a single key sequence */
 static int import_keyseq(struct tlist *i) {
     char *terminfo, *termcap;
@@ -255,31 +187,31 @@ static int import_keyseq(struct tlist *i) {
     char *env = getenv("TERM");
 
     if ( !env ) {
-        display_message("%s:%d TERM not set error", __FILE__, __LINE__);
+        fprintf(stderr, "%s:%d TERM not set error", __FILE__, __LINE__);
         return -1;
     }
     
     if ( ( ret = tgetent(NULL, env)) == 0 ) {
-        display_message("%s:%d tgetent 'No such entry' error", __FILE__, __LINE__);
+        fprintf(stderr, "%s:%d tgetent 'No such entry' error", __FILE__, __LINE__);
         return -1;
     } else if ( ret == -1 ) {
-        display_message("%s:%d tgetent 'terminfo database could not be found' error", __FILE__, __LINE__);
+        fprintf(stderr, "%s:%d tgetent 'terminfo database could not be found' error", __FILE__, __LINE__);
         return -1;
     }
     
     /* Set up the termcap seq */ 
     if ( (termcap = tgetstr(i->tname, NULL)) == 0 )
-        display_message("CAPNAME (%s) is not present in this TERM's termcap description\n", i->tname);
+        err_msg("CAPNAME (%s) is not present in this TERM's termcap description\n", i->tname);
     else if (termcap == (char*)-1 )
-        display_message("CAPNAME (%s) is not a termcap string capability\n", i->tname);
+        err_msg("CAPNAME (%s) is not a termcap string capability\n", i->tname);
     else
         i->tcodes = strdup(termcap);
 
     /* Set up the terminfo seq */ 
     if ( (terminfo = tigetstr(i->tiname)) == 0 )
-        display_message("CAPNAME (%s) is not present in this TERM's terminfo description\n", i->tiname);
+        err_msg("CAPNAME (%s) is not present in this TERM's terminfo description\n", i->tiname);
     else if (terminfo == (char*)-1 )
-        display_message("CAPNAME (%s) is not a terminfo string capability\n", i->tiname);
+        err_msg("CAPNAME (%s) is not a terminfo string capability\n", i->tiname);
     else
         i->ticodes = strdup(terminfo);
 
@@ -348,11 +280,11 @@ read_again:
         goto read_again;
     else if ( ret == -1 ) {
         c = 0; 
-        display_message("Errno(%d)\n", errno);
+        err_msg("Errno(%d)\n", errno);
     } else if ( ret == 0 ) {
         c = 0; 
         ret = -1;
-        display_message("Read returned nothing\n"); 
+        err_msg("Read returned nothing\n"); 
     }
 
     /* Set to original state */
@@ -482,39 +414,4 @@ char *input_get_last_seq(struct input *i) {
 
 char *input_get_last_seq_name(struct input *i) {
     return i->last_entry->description;
-}
-
-int main(int argc, char **argv){
-    struct input *i;
-    /* Initalize curses */
-    initscr();
-    noecho();
-    raw();
-    refresh();
-
-    i = input_init(STDIN_FILENO);
-
-    while ( 1 ) {
-        int c = input_getkey(i);
-        if ( c == 'q' )
-            break;
-        else if ( c == 27 )
-            display_message("ESC\r\n");
-        else if ( c >= CGDB_KEY_UP && c < CGDB_KEY_ERROR ) {
-            char *buf = input_get_last_seq(i);
-            int length = strlen(buf), counter;
-            fprintf(stderr, "Found %s", input_get_last_seq_name(i));
-            fprintf(stderr, "[");
-            for(counter = 0; counter < length; counter++)
-                fprintf(stderr, "(%d)", buf[counter]);
-            fprintf(stderr, "]\r\n");
-        } else {
-            display_message("(%c:%d)\r\n", c, c);
-        }
-    }
-
-    /* Shutdown curses */
-    echo();
-    endwin();
-    return 0;
 }
