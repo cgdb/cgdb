@@ -423,6 +423,8 @@ static int gdb_input()
     size = tgdb_recv_debugger_data( tgdb, buf, GDB_MAXBUF);
     if (size == -1){
         err_msg("%s:%d tgdb_recv_debugger_data error \n", __FILE__, __LINE__);
+		free( buf );
+		buf = NULL;
         return -1;
     }
 
@@ -438,6 +440,8 @@ static int gdb_input()
     if ( strlen( buf ) > 0 )
         if_print(buf);
 
+	free( buf );
+	buf = NULL;
     return 0;
 }
 
@@ -454,12 +458,16 @@ static int child_input()
     size = tgdb_recv_inferior_data ( tgdb, buf, GDB_MAXBUF);
     if (size == -1){
         err_msg("%s:%d tgdb_recv_inferior_data error \n", __FILE__, __LINE__);
+		free( buf );
+		buf = NULL;
         return -1;
     }
     buf[size] = 0;
 
     /* Display CHILD output */
     if_tty_print(buf);
+	free( buf );
+	buf = NULL;
     return 0;
 }
 

@@ -1,3 +1,8 @@
+03/31/2004 Bob Rossi <bob@brasko.net>
+
+    * cgdb.c (gdb_input): Free buf, fixing a memory leak.
+	(child_input): Ditto
+
 03/22/2004 Bob Rossi <bob@brasko.net>
 
     * Doxyfile: Change TAGFILES line to use correct path to html.

@@ -1,4 +1,7 @@
 CVS
+   * Removed a memory leak from CGDB. When debugging applications that output
+   a lot of text, CGDB would reportedly grow well over 400MB. Thanks to the
+   sender of this patch, who decided to keep themselves anonymous.
 
    * Removed all instances of PATH_MAX and replaced with FSUTIL_PATH_MAX.
    PATH_MAX is not defined on HURD, and thus CGDB wouldn't compile in that

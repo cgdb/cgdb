@@ -1,3 +1,7 @@
+03/31/2004 Bob Rossi <bob@brasko.net>
+
+    * NEWS: A note about fixing a major memory leak in CGDB.
+	
 03/22/2004 Bob Rossi <bob@brasko.net>
 
     * Makefile.am: Add doxygen rule to build ./various,./tgdb,./cgdb
