@@ -653,7 +653,7 @@ int source_search_regex(struct sviewer *sview,
                         const char *regex, int opt,
                         int direction, int icase) {
 
-    if ( sview == NULL || sview->cur == NULL || regex == NULL || regex[0] == 0)
+    if ( sview == NULL || sview->cur == NULL || regex == NULL )
         return -1;
 
     return hl_regex(regex, 

@@ -1,3 +1,9 @@
+04/05/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * Changed CGDB_ESC_KEY to 27 for the several spots still calling wgetch
+    * Fixed bug where if you enter a regex and then hit ESC to cancel, the
+    line would never go away.
+
 04/03/2003 Bob Rossi <bob_rossi@cox.net>
 
     * interface.c ( if_draw ): Removed a function that called refresh

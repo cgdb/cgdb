@@ -406,7 +406,7 @@ static int capture_regex(struct filedlg *fd) {
           continue;
       
       /* Quit the search if the user hit escape */
-      if ( c == CGDB_KEY_ESC ) {
+      if ( c == 27 ) {
          regex_line_pos = 0;
          regex_line[regex_line_pos] = '\0';
          regex_search = 0;

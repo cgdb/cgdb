@@ -589,7 +589,7 @@ static void if_get_command(struct sviewer *sview) {
           continue;
       
       /* Quit the search if the user hit escape */
-      if ( c == CGDB_KEY_ESC ) {
+      if ( c == 27 ) {
          cur_com_pos = 0;
          cur_com_line[cur_com_pos] = '\0';
          display_command = 0;
@@ -605,7 +605,7 @@ static void if_get_command(struct sviewer *sview) {
       }
 
       /* If the user hit backspace or delete remove a char */
-      if ( CGDB_BACKSPACE_KEY(c)) {
+      if ( CGDB_BACKSPACE_KEY(c) || c == 8 || c == 127) {
          if (cur_com_pos > 0)
             --cur_com_pos;
 
@@ -673,9 +673,9 @@ static int capture_regex(struct sviewer *sview) {
           continue;
       
       /* Quit the search if the user hit escape */
-      if ( c == CGDB_KEY_ESC ) {
+      if ( c == 27 ) {
          regex_line_pos = 0;
-         regex_line[regex_line_pos] = '\0';
+         *regex_line = '\0';
          regex_search = 0;
          source_search_regex(sview, regex_line, 2, regex_direction, regex_icase);
          if_draw();
@@ -692,7 +692,7 @@ static int capture_regex(struct sviewer *sview) {
       }
 
       /* If the user hit backspace or delete remove a char */
-      if ( CGDB_BACKSPACE_KEY(c)) {
+      if ( CGDB_BACKSPACE_KEY(c) || c == 8 || c == 127) {
          if (regex_line_pos > 0)
             --regex_line_pos;
 
