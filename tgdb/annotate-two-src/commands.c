@@ -14,6 +14,7 @@
 #include "globals.h"
 #include "error.h"
 #include "util.h"
+#include "queue.h"
 
 extern int masterfd;
 static int commands = 0;
@@ -35,9 +36,7 @@ static char last_info_source_requested[MAXLINE];
 /* 'info sources' information */
 static int sources_ready = 0;
 static struct string *info_sources_string;
-
-static char *sources[MAXLINE];
-static int sources_pos = 0;
+static struct queue *source_files; /* The queue of current files */
 
 /* String that is output by gdb to get the absolute path to a file */
 static char *source_prefix = "Located in ";
@@ -47,16 +46,7 @@ void commands_init(void) {
     info_source_string  = string_init();
     info_sources_string = string_init();
     breakpoint_string   = string_init();
-}
-
-static int buf_add(char **buf, char c, int *pos, int *blocksize) {
-    if(*pos == MAXLINE*(*blocksize)){
-       *blocksize = *blocksize + 1;
-        *buf = (char *)realloc(*buf, (*blocksize)*MAXLINE);
-    }
-
-    (*buf)[(*pos)++] = c;   
-    return 0;
+    source_files        = queue_init();
 }
 
 int commands_parse_field(const char *buf, size_t n, int *field){
@@ -366,22 +356,19 @@ int commands_has_commnands_to_run(void){
 static void commands_process_source_line(struct Command  ***com){
     unsigned long length = string_length(info_sources_string), i, start = 0;
     static char *info_ptr; 
+    static char *nfile;
     info_ptr = string_get(info_sources_string);
   
     for(i = 0 ; i < length; ++i){
         if(i > 0 && info_ptr[i - 1] == ',' && info_ptr[i] == ' '){
-            sources[sources_pos] = calloc(sizeof(char),i - start) ;
-            strncpy(sources[sources_pos], info_ptr + start , i - start - 1);
-            /*tgdb_append_command(com, SOURCE_FILE, buf, NULL, NULL);  */
+            nfile = calloc(sizeof(char),i - start) ;
+            strncpy(nfile, info_ptr + start , i - start - 1);
             start += ((i + 1) - start); 
-            /*err_msg("FOUND(%s)\n", sources[sources_pos]);*/
-            sources_pos++;
+            queue_append(source_files, nfile);
         } else if (i == length - 1 ){
-            sources[sources_pos] = calloc(sizeof(char),i - start + 2);
-            strncpy(sources[sources_pos], info_ptr + start , i - start + 1);
-            /*tgdb_append_command(com, SOURCE_FILE, buf, NULL, NULL);  */
-            /*err_msg("FINAL FOUND(%s)\n", sources[sources_pos]);*/
-            sources_pos++;
+            nfile = calloc(sizeof(char),i - start + 2);
+            strncpy(nfile, info_ptr + start , i - start + 1);
+            queue_append(source_files, nfile);
         }
     }
 }
@@ -437,18 +424,27 @@ static void commands_process_sources(char a, struct Command ***com){
     }
 }
 
+/* TODO: This variable is here becuase the travere command for the queue only
+ * passes along the item to the function. It would be better if it could pass
+ * along other data 
+ */
+static struct Command ***hackCommand;
+
+void commands_send_gui_source(void *item) {
+    tgdb_append_command(hackCommand, SOURCE_FILE, (char*)item, NULL, NULL);  
+}
+
+void commands_free(void *item) {
+    free((char*)item);
+}
+
 void commands_send_gui_sources(struct Command ***com){
-   sources_pos--;
-   if(sources_pos >= 1){
-      tgdb_append_command(com, SOURCES_START, NULL, NULL, NULL);  
-
-      while(sources_pos >= 0){
-         tgdb_append_command(com, SOURCE_FILE, sources[sources_pos], NULL, NULL);  
-         --sources_pos;   
-      }
-
-      tgdb_append_command(com, SOURCES_END, NULL, NULL, NULL);  
-   }
+    hackCommand = com;
+    tgdb_append_command(com, SOURCES_START, NULL, NULL, NULL);  
+    queue_traverse_list(source_files, commands_send_gui_source);
+    tgdb_append_command(com, SOURCES_END, NULL, NULL, NULL);  
+    queue_free_list(source_files, commands_free);
+    hackCommand = NULL;
 }
 
 void commands_process(char a, struct Command ***com){
