@@ -20,6 +20,9 @@ tgdb 0.5.0
    As of know, it returns the full path with the relative path. Then
    it returns a relative path for breakpoints and source files. The front end 
    then needs to look up the full path from the relative path.
+* Fix bug in TGDB annotate 2 subsystem where it is returning 
+  TGDB_ABSOLUTE_SOURCE_DENIED 3 times when it is started with out a program 
+  to debug. Should it even return this command at all?
 	
 tdb-0.4.0
 ---------

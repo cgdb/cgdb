@@ -1,5 +1,11 @@
 10/23/2003 Bob Rossi <bob@brasko.net>
 
+   * TODO: Add a future task
+   * tgdb.c: tgdb_deliver_command, add some code to print the commands being
+   passed to the debugger.
+
+10/23/2003 Bob Rossi <bob@brasko.net>
+
    * TODO: Finished task 'standardize command queue interface'
    * a2-tgdb.h: removed include of tgdb_interface.h.
    added include of tgdb_client_command.h.

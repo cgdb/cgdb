@@ -1,5 +1,9 @@
 10/24/2003 Bob Rossi <bob@brasko.net>
 
+   * cgdb.c: process_commands, change to make sure absolute_path is not NULL :)
+
+10/24/2003 Bob Rossi <bob@brasko.net>
+
    * cgdb.c: process_commands, just check to see if absolute_path is NULL.
 
 10/13/2003 Bob Rossi <bob@brasko.net>

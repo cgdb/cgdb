@@ -398,7 +398,7 @@ static void process_commands(struct tgdb *tgdb)
 						( struct tgdb_source_file *) item->data;
                 if_show_file(NULL, 0 );
                 /* com can be NULL when tgdb orig requests main file */
-                if ( file->absolute_path == NULL )
+                if ( file->absolute_path != NULL )
                     if_display_message("No such file:", 0, " %s", file->absolute_path);
 
                 break;

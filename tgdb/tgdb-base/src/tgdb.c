@@ -697,6 +697,20 @@ static int tgdb_deliver_command (
 				fd, 
 				client_command->tgdb_client_command_data, 
 				strlen ( client_command->tgdb_client_command_data ) );
+
+        /* Uncomment this if you wish to see all of the commands, that are 
+         * passed to GDB. */
+#if 0
+        {
+            char *s = strdup ( client_command->tgdb_client_command_data );
+            int length = strlen ( s );
+            s[length-1] = '\0';
+            fprintf ( stderr, "[%s]\n", s );  
+            s[length-1] = ' ';
+            free ( s );
+            s = NULL;
+        }
+#endif
     }
 
     return 0;
