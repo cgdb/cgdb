@@ -57,23 +57,6 @@ int gdbmi_parser_parse_string (
 	gdbmi_parser_ptr parser, 
 	const char *mi_command,
     gdbmi_output_ptr *pt ) {
-
-	if ( !parser )
-		return -1;
-
-	if ( !mi_command )
-		return -1;
-
-	/* Create a new input buffer for flex. */
-	YY_BUFFER_STATE state = gdbmi__scan_string( (char*)mi_command );
-
-	/* Create a new input buffer for flex. */
-	gdbmi_parse ();
-
-	*pt = tree;
-
-	gdbmi__delete_buffer ( state );
-	
 	return -1;
 }
 

@@ -1,3 +1,9 @@
+03/30/2005 Bob Rossi <bob@brasko.net>
+
+   * gdbmi_parser.c (gdbmi_parser_parse_string): Remove implementation
+   for release. The MI parser code will be completly replaced when
+   implemented.
+
 07/14/2004 Bob Rossi <bob@brasko.net>
 
     * annotate.c (annotations): Added the 'exited' annotation.
