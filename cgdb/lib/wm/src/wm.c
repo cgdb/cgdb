@@ -10,6 +10,7 @@
 
 /* Project Includes */
 #include <std_list.h>
+#include <std_tree.h>
 
 /* Local Includes */
 #include "wm.h"
@@ -17,29 +18,6 @@
 /* --------------- */
 /* Data Structures */
 /* --------------- */
-
-/**
- * A row in the grid that is the window layout.  There are no accessor methods
- * for this type, use the members directly.
- *
- * \see wmctx
- */
-typedef struct wm_row {
-   
-   /**
-    * Pointers to the windows in this row, from left to right.  These are
-    * a subset of the windows found in the wmctx->windows list.
-    *
-    * Element type: wm_window
-    */
-   std_list windows;
-
-   /**
-    * The height of this row 
-    */
-   int height;
-
-} *wm_row;
 
 /** 
  * The Window Manager context structure.  This is passed to every method in
@@ -58,35 +36,66 @@ struct wmctx {
     std_list windows;
 
     /**
-     * Grid stores the arrangement of the windows on the screen.  It is a list
-     * of rows, each containing a list of windows that span the row. 
+     * Layout stores the arrangement of the windows on the screen.  It is a
+     * binary tree, with the following rationale:  Windows in vi are created
+     * via "split" functions.  A single window is split into two windows.
+     * This lends itself to the binary tree structure as the node can just
+     * create two children -- the original window, and the new window.
      *
-     * Element type: wm_row
+     * This leads to certain conditions.  Every node has either zero or two
+     * children, never one.  If a node has no children, it represents a window
+     * on the screen.  If a node has 2 children, it is not a displayed window,
+     * but rather a screen region which is shared by its two child windows.
+     * (Of course, either or both of these "windows" could be split as well,
+     * the parent does not care.)
+     *   
+     * Element type: tree_node
+     *
+     * \see tree_node
      */
-    std_list grid;
+    std_tree layout;
 
 };
+
+/**
+ * The tree_node structure which represents a window or a parent screen region
+ * in the 'layout' member of wmctx.
+ *
+ * \see wmctx
+ */
+typedef struct tree_node {
+
+    /**
+     * Window is a pointer to the window which this node represents.  If it
+     * is NULL, then this is a parent node which has two child windows.
+     * Note that this structure is not responsible for window allocation
+     * and deallocation, it simply refers to existing windows.  Window
+     * creation and destruction should be done through the wmctx->windows.
+     */
+    wm_window window;
+
+} *tree_node;
 
 /* ------------------------- */
 /* Local Function Prototypes */
 /* ------------------------- */
 
 /**
- * Creates a wm_row object.  Window list is initialized to an empty list,
+ * Creates a tree_node object.  Window is initialized to NULL.
  * height default to zero.
  *
- * @return Newly allocated row, or NULL on failure.
+ * @return Newly allocated node, or NULL on failure.
  */
-static wm_row wm_row_create();
+static tree_node tree_node_create();
 
 /**
- * Destroys a wm_row object.
+ * Destroys a tree_node object.
  *
- * @param row  The row to destroy, if NULL no action is performed.
+ * @param node  The node to destroy, if NULL no action is performed.
  *
  * @return Zero on success, non-zero on failure.  This method never fails.
  */
-static int wm_row_destroy(wm_row row);
+static int tree_node_destroy(tree_node node);
 
 /* --------- */
 /* Functions */
@@ -97,15 +106,14 @@ static int wm_row_destroy(wm_row row);
 wmctx wm_create(wm_widget widget)
 {
     /* Parameter bounds check */
-    assert(widget != NULL);
+    assert(widget != NULL)
 
     /* Allocate a new context and initial window */
-    wmctx context    = (wmctx)     malloc(sizeof(struct wmctx));
+    wmctx context    = (wmctx) malloc(sizeof(struct wmctx));
     wm_window window = window_create(widget);
-    wm_row    row    = wm_row_create();
+
     /* Be extra paranoid */
-    if (window == NULL || row == NULL) {
-        window_destroy(window);
+    if (window == NULL) {
         free(context);
         context = NULL;
     }
@@ -193,29 +201,21 @@ int wm_option_set(wm_option option, wm_optval value)
 /* Local Function Implementations */
 /* ------------------------------ */
 
-static wm_row wm_row_create()
+static tree_node tree_node_create()
 {
-    wm_row row = malloc(sizeof(struct wm_row));
+    tree_node node = malloc(sizeof(struct tree_node));
 
     /* Be extra paranoid */
-    if (row){
-
-        /* No destroy function passed in because we don't want to destroy
-         * windows in this list.  As mentioned above, this list is only used
-         * for layout information.  The primary window list is in the wm_ctx.
-         */
-        row->windows = std_list_create(NULL);
-        row->height  = 0;
-
+    if (node){
+        node->window = NULL;
     }
 
-    return row;
+    return node;
 }
 
-static int wm_row_destroy(wm_row row)
+static int tree_node_destroy(tree_node node)
 {
-    if (row != NULL) {
-        std_list_destroy(row->windows);
+    if (node != NULL) {
         free(row);
     }
 
@@ -223,4 +223,3 @@ static int wm_row_destroy(wm_row row)
 }
 
 #endif
-

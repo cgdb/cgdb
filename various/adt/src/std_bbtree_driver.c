@@ -27,7 +27,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-#include "std_tree.h"
+#include "std_bbtree.h"
 
 int array[10000];
 int failed = 0;
@@ -75,38 +75,38 @@ my_traverse (void* key,
   return 0;
 }
 
-int runtreetest ( struct std_tree *tree ) {
+int runtreetest ( struct std_bbtree *tree ) {
   int i, j;
   char chars[62];
 
-  tree = std_tree_new (my_compare);
+  tree = std_bbtree_new (my_compare);
   i = 0;
   for (j = 0; j < 10; j++, i++)
     {
       chars[i] = '0' + j;
-      std_tree_insert (tree, &chars[i], &chars[i]);
+      std_bbtree_insert (tree, &chars[i], &chars[i]);
     }
   for (j = 0; j < 26; j++, i++)
     {
       chars[i] = 'A' + j;
-      std_tree_insert (tree, &chars[i], &chars[i]);
+      std_bbtree_insert (tree, &chars[i], &chars[i]);
     }
   for (j = 0; j < 26; j++, i++)
     {
       chars[i] = 'a' + j;
-      std_tree_insert (tree, &chars[i], &chars[i]);
+      std_bbtree_insert (tree, &chars[i], &chars[i]);
     }
 
-  std_tree_foreach (tree, my_traverse, NULL);
+  std_bbtree_foreach (tree, my_traverse, NULL);
 
-  assert (std_tree_nnodes (tree) == (10 + 26 + 26));
+  assert (std_bbtree_nnodes (tree) == (10 + 26 + 26));
 
   for (i = 0; i < 10; i++)
-    std_tree_remove (tree, &chars[i]);
+    std_bbtree_remove (tree, &chars[i]);
 
-  std_tree_foreach (tree, my_traverse, NULL);
+  std_bbtree_foreach (tree, my_traverse, NULL);
 
-  std_tree_destroy ( tree );
+  std_bbtree_destroy ( tree );
 
   return 0;
 }
@@ -115,7 +115,7 @@ int
 main (int   argc,
       char *argv[])
 {
-  struct std_tree *tree = NULL;
+  struct std_bbtree *tree = NULL;
   int i;
 
   for ( i = 0; i < 10000; i++ )

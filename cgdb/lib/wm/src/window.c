@@ -40,5 +40,4 @@ int window_destroy(wm_window window)
 
     return 0;
 }
-
 #endif

@@ -20,114 +20,114 @@
 #include <stdlib.h>
 #include <stdio.h> /* For debug only */
 
-#include "std_tree.h"
+#include "std_bbtree.h"
 
 #define MAX(a, b)  (((a) > (b)) ? (a) : (b))
 
-struct std_treenode;
+struct std_bbtreenode;
 
-struct std_tree
+struct std_bbtree
 {
-  struct std_treenode *root;
+  struct std_bbtreenode *root;
   STDCompareDataFunc key_compare;
   STDDestroyNotify   key_destroy_func;
   STDDestroyNotify   value_destroy_func;
   void*         key_compare_data;
 };
 
-struct std_treenode
+struct std_bbtreenode
 {
   int balance;      		/* height (left) - height (right) */
-  struct std_treenode *left;   	/* left subtree */
-  struct std_treenode *right;  	/* right subtree */
+  struct std_bbtreenode *left;   	/* left subtree */
+  struct std_bbtreenode *right;  	/* right subtree */
   void* key;      		/* key for this node */
   void* value;    		/* value stored at this node */
 };
 
 
-static struct std_treenode* std_tree_node_new (
+static struct std_bbtreenode* std_bbtree_node_new (
 	void*          key,
 	void*          value);
 
-static void std_tree_node_destroy (
-	struct std_treenode        *node,
+static void std_bbtree_node_destroy (
+	struct std_bbtreenode        *node,
         STDDestroyNotify    key_destroy_func,
 	STDDestroyNotify    value_destroy_func);
 
-static struct std_treenode* std_tree_node_insert (
-	struct std_tree            *tree,
-        struct std_treenode        *node,
+static struct std_bbtreenode* std_bbtree_node_insert (
+	struct std_bbtree            *tree,
+        struct std_bbtreenode        *node,
 	void*          key,
 	void*          value,
         int          replace,
 	int         *inserted);
 
-static struct std_treenode* std_tree_node_remove (
-	struct std_tree            *tree,
-        struct std_treenode        *node,
+static struct std_bbtreenode* std_bbtree_node_remove (
+	struct std_bbtree            *tree,
+        struct std_bbtreenode        *node,
 	const void *     key,
         int          notify);
 
-static struct std_treenode* std_tree_node_balance (
-	struct std_treenode        *node);
+static struct std_bbtreenode* std_bbtree_node_balance (
+	struct std_bbtreenode        *node);
 
-static struct std_treenode* std_tree_node_remove_leftmost (
-	struct std_treenode        *node,
-	struct std_treenode       **leftmost);
+static struct std_bbtreenode* std_bbtree_node_remove_leftmost (
+	struct std_bbtreenode        *node,
+	struct std_bbtreenode       **leftmost);
 
-static struct std_treenode* std_tree_node_restore_left_balance (
-	struct std_treenode        *node,
+static struct std_bbtreenode* std_bbtree_node_restore_left_balance (
+	struct std_bbtreenode        *node,
 	int              old_balance);
 
-static struct std_treenode* std_tree_node_restore_right_balance (
-	struct std_treenode        *node,
+static struct std_bbtreenode* std_bbtree_node_restore_right_balance (
+	struct std_bbtreenode        *node,
 	int              old_balance);
 
-static struct std_treenode* std_tree_node_lookup (
-	struct std_treenode        *node,
+static struct std_bbtreenode* std_bbtree_node_lookup (
+	struct std_bbtreenode        *node,
 	STDCompareDataFunc  compare,
 	void*          comp_data,
 	const void *     key);
 
-static int std_tree_node_count (
-	struct std_treenode        *node);
+static int std_bbtree_node_count (
+	struct std_bbtreenode        *node);
 
-static int std_tree_node_pre_order (
-	struct std_treenode        *node,
+static int std_bbtree_node_pre_order (
+	struct std_bbtreenode        *node,
 	STDTraverseFunc     traverse_func,
 	void*          data);
 
-static int std_tree_node_in_order (
-	struct std_treenode        *node,
+static int std_bbtree_node_in_order (
+	struct std_bbtreenode        *node,
 	STDTraverseFunc     traverse_func,
 	void*          data);
 
-static int std_tree_node_post_order (
-	struct std_treenode        *node,
+static int std_bbtree_node_post_order (
+	struct std_bbtreenode        *node,
 	STDTraverseFunc     traverse_func,
 	void*          data);
 
-static void* std_tree_node_search (
-	struct std_treenode        *node,
+static void* std_bbtree_node_search (
+	struct std_bbtreenode        *node,
 	STDCompareFunc      search_func,
 	const void *     data);
 
-static int std_tree_node_height (struct std_treenode *node);
+static int std_bbtree_node_height (struct std_bbtreenode *node);
 
-static struct std_treenode* std_tree_node_rotate_left (
-	struct std_treenode        *node);
+static struct std_bbtreenode* std_bbtree_node_rotate_left (
+	struct std_bbtreenode        *node);
 
-static struct std_treenode* std_tree_node_rotate_right (
-	struct std_treenode *node);
+static struct std_bbtreenode* std_bbtree_node_rotate_right (
+	struct std_bbtreenode *node);
 
-static void std_tree_node_check (struct std_treenode *node);
+static void std_bbtree_node_check (struct std_bbtreenode *node);
 
-static struct std_treenode*
-std_tree_node_new (void* key, void* value) 
+static struct std_bbtreenode*
+std_bbtree_node_new (void* key, void* value) 
 {
-  struct std_treenode *node;
+  struct std_bbtreenode *node;
 
-  node = malloc ( sizeof ( struct std_treenode ) );
+  node = malloc ( sizeof ( struct std_bbtreenode ) );
 
   node->balance = 0;
   node->left = NULL;
@@ -139,16 +139,16 @@ std_tree_node_new (void* key, void* value)
 }
 
 static void
-std_tree_node_destroy (
-	struct std_treenode      *node,
+std_bbtree_node_destroy (
+	struct std_bbtreenode      *node,
 	STDDestroyNotify  key_destroy_func,
 	STDDestroyNotify  value_destroy_func)
 {
   if (node)
     {
-      std_tree_node_destroy (node->right,
+      std_bbtree_node_destroy (node->right,
 			   key_destroy_func, value_destroy_func);
-      std_tree_node_destroy (node->left,
+      std_bbtree_node_destroy (node->left,
 			   key_destroy_func, value_destroy_func);
 
       if (key_destroy_func)
@@ -166,41 +166,41 @@ std_tree_node_destroy (
    }
 }
 
-struct std_tree*
-std_tree_new (STDCompareFunc key_compare_func)
+struct std_bbtree*
+std_bbtree_new (STDCompareFunc key_compare_func)
 {
   if ( !key_compare_func )
 	  return NULL;
 
-  return std_tree_new_full ((STDCompareDataFunc) key_compare_func, NULL,
+  return std_bbtree_new_full ((STDCompareDataFunc) key_compare_func, NULL,
                           NULL, NULL);
 }
 
-struct std_tree*
-std_tree_new_with_data (
+struct std_bbtree*
+std_bbtree_new_with_data (
 	STDCompareDataFunc key_compare_func,
  	void*         key_compare_data)
 {
   if ( !key_compare_func )
 	  return NULL;
   
-  return std_tree_new_full (key_compare_func, key_compare_data, 
+  return std_bbtree_new_full (key_compare_func, key_compare_data, 
  			  NULL, NULL);
 }
 
-struct std_tree*	 
-std_tree_new_full (
+struct std_bbtree*	 
+std_bbtree_new_full (
 	STDCompareDataFunc key_compare_func,
  	void*         key_compare_data, 		 
         STDDestroyNotify   key_destroy_func,
  	STDDestroyNotify   value_destroy_func)
 {
-  struct std_tree *tree;
+  struct std_bbtree *tree;
   
   if ( !key_compare_func )
 	  return NULL;
   
-  tree = malloc ( sizeof (struct std_tree ) );
+  tree = malloc ( sizeof (struct std_bbtree ) );
   tree->root               = NULL;
   tree->key_compare        = key_compare_func;
   tree->key_destroy_func   = key_destroy_func;
@@ -211,12 +211,12 @@ std_tree_new_full (
 }
 
 int
-std_tree_destroy (struct std_tree *tree)
+std_bbtree_destroy (struct std_bbtree *tree)
 {
   if ( !tree )
 	  return -1;
 
-  std_tree_node_destroy (tree->root,
+  std_bbtree_node_destroy (tree->root,
                        tree->key_destroy_func,
  		       tree->value_destroy_func);
 
@@ -226,8 +226,8 @@ std_tree_destroy (struct std_tree *tree)
 }
 
 int
-std_tree_insert (
-	struct std_tree    *tree,
+std_bbtree_insert (
+	struct std_bbtree    *tree,
 	void*  key,
 	void*  value)
 {
@@ -237,7 +237,7 @@ std_tree_insert (
 	  return -1;
 
   inserted = 0;
-  tree->root = std_tree_node_insert (tree,
+  tree->root = std_bbtree_node_insert (tree,
                                    tree->root,
 				   key, value, 
 				   0, &inserted);
@@ -245,8 +245,8 @@ std_tree_insert (
 }
 
 int
-std_tree_replace (
-	struct std_tree    *tree,
+std_bbtree_replace (
+	struct std_bbtree    *tree,
 	void*  key,
 	void*  value)
 {
@@ -256,7 +256,7 @@ std_tree_replace (
 	  return -1;
 
   inserted = 0;
-  tree->root = std_tree_node_insert (tree,
+  tree->root = std_bbtree_node_insert (tree,
                                    tree->root,
 				   key, value, 
 				   1, &inserted);
@@ -264,60 +264,60 @@ std_tree_replace (
 }
 
 int
-std_tree_remove (
-	struct std_tree         *tree,
+std_bbtree_remove (
+	struct std_bbtree         *tree,
 	const void *  key)
 {
   if ( !tree )
 	  return -1;
 
-  tree->root = std_tree_node_remove (tree, tree->root, key, 1);
+  tree->root = std_bbtree_node_remove (tree, tree->root, key, 1);
 
   return 0;
 }
 
 int
-std_tree_steal (
-	struct std_tree         *tree,
+std_bbtree_steal (
+	struct std_bbtree         *tree,
         const void *  key)
 {
   if ( !tree )
 	  return -1;
 
-  tree->root = std_tree_node_remove (tree, tree->root, key, 0);
+  tree->root = std_bbtree_node_remove (tree, tree->root, key, 0);
 
   return 0;
 }
 
 void*
-std_tree_lookup (
-	struct std_tree         *tree,
+std_bbtree_lookup (
+	struct std_bbtree         *tree,
 	const void *  key)
 {
-  struct std_treenode *node;
+  struct std_bbtreenode *node;
 
   if ( !tree )
 	  return NULL;
 
-  node = std_tree_node_lookup (tree->root, 
+  node = std_bbtree_node_lookup (tree->root, 
                              tree->key_compare, tree->key_compare_data, key);
 
   return node ? node->value : NULL;
 }
 
 int
-std_tree_lookup_extended (
-	struct std_tree         *tree,
+std_bbtree_lookup_extended (
+	struct std_bbtree         *tree,
         const void *  lookup_key,
         void*      *orig_key,
         void*      *value)
 {
-  struct std_treenode *node;
+  struct std_bbtreenode *node;
   
   if ( !tree )
 	  return 0;
   
-  node = std_tree_node_lookup (tree->root, 
+  node = std_bbtree_node_lookup (tree->root, 
                              tree->key_compare, tree->key_compare_data, lookup_key);
 
   if (node)
@@ -333,8 +333,8 @@ std_tree_lookup_extended (
 }
 
 int
-std_tree_foreach (
-	struct std_tree         *tree,
+std_bbtree_foreach (
+	struct std_bbtree         *tree,
         STDTraverseFunc  func,
         void*       user_data)
 {
@@ -344,14 +344,14 @@ std_tree_foreach (
   if (!tree->root)
     return -1;
 
-  std_tree_node_in_order (tree->root, func, user_data);
+  std_bbtree_node_in_order (tree->root, func, user_data);
 
   return 0;
 }
 
 void*
-std_tree_search (
-	struct std_tree         *tree,
+std_bbtree_search (
+	struct std_bbtree         *tree,
 	STDCompareFunc   search_func,
 	const void *  user_data)
 {
@@ -359,39 +359,39 @@ std_tree_search (
 	  return NULL;
 
   if (tree->root)
-    return std_tree_node_search (tree->root, search_func, user_data);
+    return std_bbtree_node_search (tree->root, search_func, user_data);
   else
     return NULL;
 }
 
 int
-std_tree_height (struct std_tree *tree)
+std_bbtree_height (struct std_bbtree *tree)
 {
   if ( !tree )
 	  return 0;
 
   if (tree->root)
-    return std_tree_node_height (tree->root);
+    return std_bbtree_node_height (tree->root);
   else
     return 0;
 }
 
 int
-std_tree_nnodes (struct std_tree *tree)
+std_bbtree_nnodes (struct std_bbtree *tree)
 {
   if ( !tree )
 	  return 0;
 
   if (tree->root)
-    return std_tree_node_count (tree->root);
+    return std_bbtree_node_count (tree->root);
   else
     return 0;
 }
 
-static struct std_treenode*
-std_tree_node_insert (
-	struct std_tree     *tree,
-        struct std_treenode *node,
+static struct std_bbtreenode*
+std_bbtree_node_insert (
+	struct std_bbtree     *tree,
+        struct std_bbtreenode *node,
 	void*   key,
 	void*   value,
         int   replace,
@@ -403,7 +403,7 @@ std_tree_node_insert (
   if (!node)
     {
       *inserted = 1;
-      return std_tree_node_new (key, value);
+      return std_bbtree_node_new (key, value);
     }
 
   cmp = tree->key_compare (key, node->key, tree->key_compare_data);
@@ -438,7 +438,7 @@ std_tree_node_insert (
       if (node->left)
 	{
 	  old_balance = node->left->balance;
-	  node->left = std_tree_node_insert (tree,
+	  node->left = std_bbtree_node_insert (tree,
                                            node->left,
 					   key, value,
 					   replace, inserted);
@@ -449,7 +449,7 @@ std_tree_node_insert (
       else
 	{
 	  *inserted = 1;
-	  node->left = std_tree_node_new (key, value);
+	  node->left = std_bbtree_node_new (key, value);
 	  node->balance -= 1;
 	}
     }
@@ -458,7 +458,7 @@ std_tree_node_insert (
       if (node->right)
 	{
 	  old_balance = node->right->balance;
-	  node->right = std_tree_node_insert (tree,
+	  node->right = std_bbtree_node_insert (tree,
                                             node->right,
 					    key, value, 
 					    replace, inserted);
@@ -469,7 +469,7 @@ std_tree_node_insert (
       else
 	{
 	  *inserted = 1;
-	  node->right = std_tree_node_new (key, value);
+	  node->right = std_bbtree_node_new (key, value);
 	  node->balance += 1;
 	}
     }
@@ -477,20 +477,20 @@ std_tree_node_insert (
   if (*inserted)
     {
       if ((node->balance < -1) || (node->balance > 1))
-	node = std_tree_node_balance (node);
+	node = std_bbtree_node_balance (node);
     }
 
   return node;
 }
 
-static struct std_treenode*
-std_tree_node_remove (
-	struct std_tree         *tree,
-       	struct std_treenode     *node,
+static struct std_bbtreenode*
+std_bbtree_node_remove (
+	struct std_bbtree         *tree,
+       	struct std_bbtreenode     *node,
 	const void *  key,
         int       notify)
 {
-  struct std_treenode *new_root;
+  struct std_bbtreenode *new_root;
   int old_balance;
   int cmp;
 
@@ -500,7 +500,7 @@ std_tree_node_remove (
   cmp = tree->key_compare (key, node->key, tree->key_compare_data);
   if (cmp == 0)
     {
-      struct std_treenode *garbage;
+      struct std_bbtreenode *garbage;
 
       garbage = node;
 
@@ -511,11 +511,11 @@ std_tree_node_remove (
       else
 	{
 	  old_balance = node->right->balance;
-	  node->right = std_tree_node_remove_leftmost (node->right, &new_root);
+	  node->right = std_bbtree_node_remove_leftmost (node->right, &new_root);
 	  new_root->left = node->left;
 	  new_root->right = node->right;
 	  new_root->balance = node->balance;
-	  node = std_tree_node_restore_right_balance (new_root, old_balance);
+	  node = std_bbtree_node_restore_right_balance (new_root, old_balance);
 	}
 
       if (notify)
@@ -539,8 +539,8 @@ std_tree_node_remove (
       if (node->left)
 	{
 	  old_balance = node->left->balance;
-	  node->left = std_tree_node_remove (tree, node->left, key, notify);
-	  node = std_tree_node_restore_left_balance (node, old_balance);
+	  node->left = std_bbtree_node_remove (tree, node->left, key, notify);
+	  node = std_bbtree_node_restore_left_balance (node, old_balance);
 	}
     }
   else if (cmp > 0)
@@ -548,37 +548,37 @@ std_tree_node_remove (
       if (node->right)
 	{
 	  old_balance = node->right->balance;
-	  node->right = std_tree_node_remove (tree, node->right, key, notify);
-	  node = std_tree_node_restore_right_balance (node, old_balance);
+	  node->right = std_bbtree_node_remove (tree, node->right, key, notify);
+	  node = std_bbtree_node_restore_right_balance (node, old_balance);
 	}
     }
 
   return node;
 }
 
-static struct std_treenode*
-std_tree_node_balance (struct std_treenode *node)
+static struct std_bbtreenode*
+std_bbtree_node_balance (struct std_bbtreenode *node)
 {
   if (node->balance < -1)
     {
       if (node->left->balance > 0)
-	node->left = std_tree_node_rotate_left (node->left);
-      node = std_tree_node_rotate_right (node);
+	node->left = std_bbtree_node_rotate_left (node->left);
+      node = std_bbtree_node_rotate_right (node);
     }
   else if (node->balance > 1)
     {
       if (node->right->balance < 0)
-	node->right = std_tree_node_rotate_right (node->right);
-      node = std_tree_node_rotate_left (node);
+	node->right = std_bbtree_node_rotate_right (node->right);
+      node = std_bbtree_node_rotate_left (node);
     }
 
   return node;
 }
 
-static struct std_treenode*
-std_tree_node_remove_leftmost (
-	struct std_treenode  *node,
-	struct std_treenode **leftmost)
+static struct std_bbtreenode*
+std_bbtree_node_remove_leftmost (
+	struct std_bbtreenode  *node,
+	struct std_bbtreenode **leftmost)
 {
   int old_balance;
 
@@ -589,13 +589,13 @@ std_tree_node_remove_leftmost (
     }
 
   old_balance = node->left->balance;
-  node->left = std_tree_node_remove_leftmost (node->left, leftmost);
-  return std_tree_node_restore_left_balance (node, old_balance);
+  node->left = std_bbtree_node_remove_leftmost (node->left, leftmost);
+  return std_bbtree_node_restore_left_balance (node, old_balance);
 }
 
-static struct std_treenode*
-std_tree_node_restore_left_balance (
-	struct std_treenode *node,
+static struct std_bbtreenode*
+std_bbtree_node_restore_left_balance (
+	struct std_bbtreenode *node,
 	int       old_balance)
 {
   if (!node->left)
@@ -605,13 +605,13 @@ std_tree_node_restore_left_balance (
     node->balance += 1;
 
   if (node->balance > 1)
-    return std_tree_node_balance (node);
+    return std_bbtree_node_balance (node);
   return node;
 }
 
-static struct std_treenode*
-std_tree_node_restore_right_balance (
-	struct std_treenode *node,
+static struct std_bbtreenode*
+std_bbtree_node_restore_right_balance (
+	struct std_bbtreenode *node,
 	int       old_balance)
 {
   if (!node->right)
@@ -621,13 +621,13 @@ std_tree_node_restore_right_balance (
     node->balance -= 1;
 
   if (node->balance < -1)
-    return std_tree_node_balance (node);
+    return std_bbtree_node_balance (node);
   return node;
 }
 
-static struct std_treenode *
-std_tree_node_lookup (
-	struct std_treenode        *node,
+static struct std_bbtreenode *
+std_bbtree_node_lookup (
+	struct std_bbtreenode        *node,
 	STDCompareDataFunc  compare,
 	void*          compare_data,
 	const void *     key)
@@ -644,34 +644,34 @@ std_tree_node_lookup (
   if (cmp < 0)
     {
       if (node->left)
-	return std_tree_node_lookup (node->left, compare, compare_data, key);
+	return std_bbtree_node_lookup (node->left, compare, compare_data, key);
     }
   else if (cmp > 0)
     {
       if (node->right)
-	return std_tree_node_lookup (node->right, compare, compare_data, key);
+	return std_bbtree_node_lookup (node->right, compare, compare_data, key);
     }
 
   return NULL;
 }
 
 static int
-std_tree_node_count (struct std_treenode *node)
+std_bbtree_node_count (struct std_bbtreenode *node)
 {
   int count;
 
   count = 1;
   if (node->left)
-    count += std_tree_node_count (node->left);
+    count += std_bbtree_node_count (node->left);
   if (node->right)
-    count += std_tree_node_count (node->right);
+    count += std_bbtree_node_count (node->right);
 
   return count;
 }
 
 static int
-std_tree_node_pre_order (
-	struct std_treenode     *node,
+std_bbtree_node_pre_order (
+	struct std_bbtreenode     *node,
 	STDTraverseFunc  traverse_func,
 	void*       data)
 {
@@ -679,12 +679,12 @@ std_tree_node_pre_order (
     return 1;
   if (node->left)
     {
-      if (std_tree_node_pre_order (node->left, traverse_func, data))
+      if (std_bbtree_node_pre_order (node->left, traverse_func, data))
 	return 1;
     }
   if (node->right)
     {
-      if (std_tree_node_pre_order (node->right, traverse_func, data))
+      if (std_bbtree_node_pre_order (node->right, traverse_func, data))
 	return 1;
     }
 
@@ -692,21 +692,21 @@ std_tree_node_pre_order (
 }
 
 static int
-std_tree_node_in_order (
-	struct std_treenode     *node,
+std_bbtree_node_in_order (
+	struct std_bbtreenode     *node,
 	STDTraverseFunc  traverse_func,
 	void*       data)
 {
   if (node->left)
     {
-      if (std_tree_node_in_order (node->left, traverse_func, data))
+      if (std_bbtree_node_in_order (node->left, traverse_func, data))
 	return 1;
     }
   if ((*traverse_func) (node->key, node->value, data))
     return 1;
   if (node->right)
     {
-      if (std_tree_node_in_order (node->right, traverse_func, data))
+      if (std_bbtree_node_in_order (node->right, traverse_func, data))
 	return 1;
     }
 
@@ -714,19 +714,19 @@ std_tree_node_in_order (
 }
 
 static int
-std_tree_node_post_order (
-	struct std_treenode     *node,
+std_bbtree_node_post_order (
+	struct std_bbtreenode     *node,
 	STDTraverseFunc  traverse_func,
 	void*       data)
 {
   if (node->left)
     {
-      if (std_tree_node_post_order (node->left, traverse_func, data))
+      if (std_bbtree_node_post_order (node->left, traverse_func, data))
 	return 1;
     }
   if (node->right)
     {
-      if (std_tree_node_post_order (node->right, traverse_func, data))
+      if (std_bbtree_node_post_order (node->right, traverse_func, data))
 	return 1;
     }
   if ((*traverse_func) (node->key, node->value, data))
@@ -736,8 +736,8 @@ std_tree_node_post_order (
 }
 
 static void*
-std_tree_node_search (
-	struct std_treenode     *node,
+std_bbtree_node_search (
+	struct std_bbtreenode     *node,
 	STDCompareFunc   search_func,
 	const void *  data)
 {
@@ -761,7 +761,7 @@ std_tree_node_search (
 }
 
 static int
-std_tree_node_height (struct std_treenode *node)
+std_bbtree_node_height (struct std_bbtreenode *node)
 {
   int left_height;
   int right_height;
@@ -772,10 +772,10 @@ std_tree_node_height (struct std_treenode *node)
       right_height = 0;
 
       if (node->left)
-	left_height = std_tree_node_height (node->left);
+	left_height = std_bbtree_node_height (node->left);
 
       if (node->right)
-	right_height = std_tree_node_height (node->right);
+	right_height = std_bbtree_node_height (node->right);
 
       return MAX (left_height, right_height) + 1;
     }
@@ -783,10 +783,10 @@ std_tree_node_height (struct std_treenode *node)
   return 0;
 }
 
-static struct std_treenode*
-std_tree_node_rotate_left (struct std_treenode *node)
+static struct std_bbtreenode*
+std_bbtree_node_rotate_left (struct std_bbtreenode *node)
 {
-  struct std_treenode *right;
+  struct std_bbtreenode *right;
   int a_bal;
   int b_bal;
 
@@ -818,10 +818,10 @@ std_tree_node_rotate_left (struct std_treenode *node)
   return right;
 }
 
-static struct std_treenode*
-std_tree_node_rotate_right (struct std_treenode *node)
+static struct std_bbtreenode*
+std_bbtree_node_rotate_right (struct std_bbtreenode *node)
 {
-  struct std_treenode *left;
+  struct std_bbtreenode *left;
   int a_bal;
   int b_bal;
 
@@ -854,7 +854,7 @@ std_tree_node_rotate_right (struct std_treenode *node)
 }
 
 static void
-std_tree_node_check (struct std_treenode *node)
+std_bbtree_node_check (struct std_bbtreenode *node)
 {
   int left_height;
   int right_height;
@@ -866,19 +866,19 @@ std_tree_node_check (struct std_treenode *node)
       right_height = 0;
       
       if (node->left)
-	left_height = std_tree_node_height (node->left);
+	left_height = std_bbtree_node_height (node->left);
       if (node->right)
-	right_height = std_tree_node_height (node->right);
+	right_height = std_bbtree_node_height (node->right);
       
       balance = right_height - left_height;
       if (balance != node->balance)
 		  printf ( 
-	       "std_tree_node_check: failed: %d ( %d )\n",
+	       "std_bbtree_node_check: failed: %d ( %d )\n",
 	       balance, node->balance);
       
       if (node->left)
-	std_tree_node_check (node->left);
+	std_bbtree_node_check (node->left);
       if (node->right)
-	std_tree_node_check (node->right);
+	std_bbtree_node_check (node->right);
     }
 }
