@@ -4,4 +4,4 @@
 	Makefile.in,NEWS,README,configure.in,config/unix.exp,lib/tgdb.exp,
 	tgdb.base/Makefile.am,tgdb.base/Makefile.in,tgdb.base/_sanity.exp,
 	tgdb.base/basic.c,tgdb.base/basic.exp,tgdb.base/overloaded.cpp,
-	tgdb.base/overloaded.exp,autoregen.sh,configure
+	tgdb.base/overloaded.exp,autoregen.sh,configure,aclocal.m4,config.h.in
