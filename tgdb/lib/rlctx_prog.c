@@ -63,7 +63,10 @@ void main_loop(void){
 }
 
 static void rlctx_send_user_command(char *line) {
-    add_history(line);
+    /* Don't add the enter command */
+    if ( line && *line != '\0' )
+        add_history(line);
+
     fprintf(stderr, "\032%s\032", line);
 }
 

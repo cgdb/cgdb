@@ -1,3 +1,7 @@
+03/27/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * Stop adding the enter command to readline's history.
+
 03/26/2003 Bob Rossi <bob_rossi@cox.net>
 
     * tgdb now supports the commands feature of gdb: This was broken at
