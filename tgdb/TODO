@@ -1,3 +1,6 @@
+-- Get bison/yacc autoconf not be found to be an error
+
+
 1.0 Proposal 
 * stack window
 
