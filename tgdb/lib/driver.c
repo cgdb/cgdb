@@ -54,11 +54,8 @@ extern int read_history ();
 #include "terminal.h"
 
 static void tgdb_send_user_command(char *line) {
-    char buf[strlen(line) + 2];
-    char *ret;
     add_history(line);
-    sprintf(buf, "%s\n", line);
-    tgdb_send(buf);
+    tgdb_send(line);
 }
 
 static int readline_fd[2] = { -1, -1 }; /* readline write to this */
