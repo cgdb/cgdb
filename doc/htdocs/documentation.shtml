@@ -32,6 +32,17 @@
         <LI><A Href="faq.shtml">FAQ</a></li>
       </ul>
 
+	  <P>
+	  Some of the interfaces used in CGDB/TGDB have been documented using
+	  the wonderful doxygen tool. Feel free to see how the interfaces in
+	  CGDB/TGDB interact.
+	  </P>
+
+      <UL>
+        <LI><A Href="html-libtgdb">TGDB interfaces</a></li>
+        <LI><A Href="html-cgdbsupport">CGDB supporting libraries</a></li>
+      </ul>
+
       <P>
       If you have a question that hasn't been answered here, feel free to
       join the CGDB Users mailing list 
