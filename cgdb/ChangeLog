@@ -1,3 +1,16 @@
+06/11/2003 Bob Rossi <bob_rossi@cox.net>
+
+	* sources.h,added field covered_lines to list_node: This field is used
+	to record all the line numbers ( per file ) that gdb has directed the 
+	user to go to. This was inteded to work with actuall lines the user has
+	covered. However, if the user does up/down, then those lines get added
+	also.
+	* sources.c: Changed some calls from malloc to xmalloc. 
+	Added new option called line_coverage_option.
+	* interface.c: added call to redisplay the screen when a command is
+	recieved via the status bar.
+	* commands.c: Added new command line_coverage_option.
+
 06/04/2003 Bob Rossi <bob_rossi@cox.net>
 
     * cgdb.c: process_commands, changed interface between cgdb/tgdb.

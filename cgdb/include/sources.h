@@ -66,6 +66,8 @@ struct list_node{
     int               sel_col;         /* Current column selected in viewer */
     int               exe_line;        /* Current line executing */
 
+	int               *covered_lines;  /* All lines covered in program */
+
     int               sel_col_rbeg;    /* Current beg column matched in regex */
     int               sel_col_rend;    /* Current end column matched in regex */
     int               sel_rline;       /* Current line used by regex */

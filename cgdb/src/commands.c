@@ -26,6 +26,7 @@
 
 extern int regex_icase ;
 extern int shortcut_option ;
+extern int line_coverage_option;
 
 
 static struct variables
@@ -34,8 +35,9 @@ static struct variables
     int * variable;
 } VARIABLES[] = {
     // keep this stuff sorted! !sort
-    /* ignorecase */ { "ignorecase", "ic", &regex_icase },
-    /* shortcut   */ { "shortcut", "sc", &shortcut_option },
+    /* ignorecase */ 	{ "ignorecase", "ic", &regex_icase },
+    /* shortcut   */ 	{ "shortcut", "sc", &shortcut_option },
+    /* line coverage */ { "line_coverage", "lc", &line_coverage_option },
 };
 
 static int command_focus_cgdb( void );

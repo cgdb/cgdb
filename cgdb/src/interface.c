@@ -116,8 +116,10 @@ static char regex_line[MAX_LINE];       /* The regex the user enters */
 static int regex_line_pos;              /* The index into the current regex */
 static int regex_search;                /* Currently searching text ? */
 static int regex_direction;             /* Direction to search */
-/*static*/ int regex_icase = 0;             /* Case insensitive (0), sensitive */
-/*static*/ int shortcut_option = 0;         /* Flag: Shortcut options enabled */
+/*static*/ int regex_icase = 0;         /* Case insensitive (0), sensitive */
+/*static*/ int shortcut_option = 0;     /* Flag: Shortcut options enabled */
+		   int line_coverage_option = 0;/* If lines should be highlighted when covered */
+
 static char last_key_pressed = 0;       /* Last key user entered in cgdb mode */
 
 static char cur_com_line[MAX_LINE];     /* The line number the user entered */
@@ -645,6 +647,8 @@ static void if_run_command(struct sviewer *sview) {
     } else {
         update_status_win();
     }
+
+	if_draw();
 }
 
 /* capture_regex: Captures a regular expression from the user.

@@ -49,6 +49,7 @@
 #include "sources.h"
 #include "cgdb.h"
 #include "logo.h"
+#include "sys_util.h"
 
 /* --------------- */
 /* Local Functions */
@@ -243,13 +244,18 @@ static int load_file(struct list_node *node)
     node->orig_buf.length = node->buf.length;
     node->orig_buf.max_width = node->buf.max_width;
     node->orig_buf.breakpts = NULL; /* Don't need for regex */
-    node->orig_buf.tlines = (char **)malloc(sizeof(char *) * node->buf.length);
+    node->orig_buf.tlines = (char **)xmalloc(sizeof(char *) * node->buf.length);
 
     for ( i = 0; i < node->buf.length; i++)
-        node->orig_buf.tlines[i] = strdup(node->buf.tlines[i]);
+        node->orig_buf.tlines[i] = xstrdup(node->buf.tlines[i]);
 
     if (has_colors())
         highlight(node);
+
+	/* Initialize the coverage */
+	node->covered_lines =  (int *)xmalloc ( sizeof ( int ) * node->buf.length);
+	for ( i = 0; i < node->buf.length; i++ )
+		node->covered_lines[i] = 0;
 
     return 0;
 }
@@ -400,6 +406,7 @@ int source_display(struct sviewer *sview, int focus)
     int lwidth;
     int line;
     int i;
+	extern int line_coverage_option;
 
     /* Check that a file is loaded */
     if (sview->cur == NULL || sview->cur->buf.tlines == NULL){
@@ -477,6 +484,24 @@ int source_display(struct sviewer *sview, int focus)
                 waddch(sview->win, '>');
                 wattroff(sview->win, COLOR_PAIR(CGDB_COLOR_GREEN));
                 wattroff(sview->win, A_BOLD);
+                if ( line == sview->cur->sel_line && sview->cur->buf.cur_line != NULL )
+                    hl_wprintw(sview->win, sview->cur->buf.cur_line, width-lwidth-2, sview->cur->sel_col);
+                else
+                    hl_wprintw(sview->win, sview->cur->buf.tlines[line], width-lwidth-2, sview->cur->sel_col);
+            }
+            /* Look for covered_lines */
+            else if (line_coverage_option && sview->cur->covered_lines[line]){
+                wattron(sview->win, COLOR_PAIR(CGDB_COLOR_MAGENTA));
+                wattron(sview->win, A_BOLD);
+                wprintw(sview->win, fmt, line+1);
+                wattroff(sview->win, COLOR_PAIR(CGDB_COLOR_MAGENTA));
+                if (!focus)
+                    wattroff(sview->win, A_BOLD);
+                waddch(sview->win, VERT_LINE);
+                if (focus)
+                    wattroff(sview->win, A_BOLD);
+                waddch(sview->win, ' ');
+
                 if ( line == sview->cur->sel_line && sview->cur->buf.cur_line != NULL )
                     hl_wprintw(sview->win, sview->cur->buf.cur_line, width-lwidth-2, sview->cur->sel_col);
                 else
@@ -621,6 +646,9 @@ int source_set_exec_line(struct sviewer *sview, const char *path, int line)
             line = sview->cur->buf.length - 1;
         sview->cur->sel_line = sview->cur->exe_line = line;
     }
+
+	/* Add this line to the lines covered */
+	sview->cur->covered_lines[line] = 1;
 
     return 0;
 }
