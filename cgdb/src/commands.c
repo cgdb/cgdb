@@ -28,16 +28,31 @@ extern int regex_icase ;
 extern int shortcut_option ;
 extern int line_coverage_option;
 
-
-static struct variables
+enum ConfigType
 {
-    const char * name, *s_name;
-    int * variable;
+    CONFIG_TYPE_BOOL, /* set ic / set noic */
+    CONFIG_TYPE_INT,  /* set tabspace=8 */
+    CONFIG_TYPE_STRING,
+    CONFIG_TYPE_FUNC_VOID,
+    CONFIG_TYPE_FUNC_INT,
+    CONFIG_TYPE_FUNC_STRING,
+};
+
+static int command_set_focus( const char *value );
+static int command_set_tabspace( int tab );
+
+static struct ConfigVariable
+{
+    const char *name, *s_name;
+    enum ConfigType type;
+    void *data;
 } VARIABLES[] = {
     // keep this stuff sorted! !sort
-    /* ignorecase */ 	{ "ignorecase", "ic", &regex_icase },
-    /* line coverage */ { "line_coverage", "lc", &line_coverage_option },
-    /* shortcut   */ 	{ "shortcut", "sc", &shortcut_option },
+    /* focus      */ { "focus", "fo", CONFIG_TYPE_FUNC_STRING, command_set_focus },
+    /* ignorecase */ 	{ "ignorecase", "ic", CONFIG_TYPE_BOOL, &regex_icase },
+    /* line_coverage */ { "line_coverage", "lc", CONFIG_TYPE_BOOL, &line_coverage_option },
+    /* shortcut   */ 	{ "shortcut", "sc", CONFIG_TYPE_BOOL, &shortcut_option },
+    /* tabspace   */    { "tabspace", "ts", CONFIG_TYPE_FUNC_INT, command_set_tabspace },
 };
 
 static int command_focus_cgdb( void );
@@ -95,18 +110,39 @@ action_t get_command( const char *cmd )
     return NULL;
 }
 
-int * get_variable( const char *variable ) 
+struct ConfigVariable* get_variable( const char *variable ) 
 {
     /* FIXME: replace with binary search */
     int i;
     for ( i = 0; i < (sizeof( VARIABLES )/sizeof( VARIABLES[0])); ++i ) {
         if ( strcmp( variable, VARIABLES[i].name ) == 0 ||
              strcmp( variable, VARIABLES[i].s_name ) == 0 ) {
-            return VARIABLES[i].variable;
+            return &VARIABLES[i];
         }
     }
 
     return NULL;
+}
+
+int command_set_focus( const char *value )
+{
+    if( strcasecmp( value, "cgdb" ) == 0 ) {
+        command_focus_cgdb();
+    } else if (strcasecmp( value, "gdb" ) == 0 ) {
+        command_focus_gdb();
+    } else if( strcasecmp( value, "tty" ) == 0 ) {
+        command_focus_tty();
+    } else {
+        return 1;
+    }
+
+    return 0;
+}
+
+int command_set_tabspace( int value )
+{
+    fprintf( stderr, "Unimplemented.\n" );
+    return 1;
 }
 
 int command_focus_cgdb( void )
@@ -205,25 +241,112 @@ int command_toggle_tty( void )
 
 int command_parse_set( void )
 {
+    /* commands could look like the following:
+     * set ignorecase
+     * set noignorecase
+     * set focus=gdb
+     * set tabspace=8
+     */
+
     int rv = 1;
-    int val = 1;
+    int boolean = 1;
     const char * value = NULL;
     
     switch ( (rv = yylex()) ) {
     case IDENTIFIER: {
         const char *token = get_token();
         int length = strlen( token );
-        int *variable = NULL;
+        struct ConfigVariable *variable = NULL;
+
         if ( length > 2 && token[0] == 'n' && token[1] == 'o' ) {
             value = token + 2;
-            val = 0;
+            boolean = 0;
         } else {
             value = token;
         }
 
         if ( (variable = get_variable( value )) != NULL ) {
             rv = 0;
-            *variable = val;
+            if( boolean == 0 &&
+                variable->type != CONFIG_TYPE_BOOL ) {
+                /* this is an error, you cant' do:
+                 * set notabspace 
+                 */
+                rv = 1;
+            }
+
+            switch( variable->type ) {
+            case CONFIG_TYPE_BOOL:
+                *(int*)(variable->data) = boolean;
+                break;
+            case CONFIG_TYPE_INT: {
+                if( yylex() == '=' &&
+                    yylex() == NUMBER ) {
+                    int data = strtol( get_token(), NULL, 10 );
+                    *(int*)(variable->data) = data;
+                } else {
+                    rv = 1;
+                }
+            } break;
+            case CONFIG_TYPE_STRING: {
+                if( yylex() == '=' &&
+                   (rv = yylex(), rv == STRING || rv == IDENTIFIER) ) {
+                    /* BAM! comma operator */
+                    char * data = (char*)get_token();
+                    if( rv == STRING ) {
+                        /* get rid of quotes */
+                        data = data + 1;
+                        data[ strlen( data ) - 1 ] = '\0';
+                    } 
+                    if( variable->data ) 
+                    { free( variable->data ); }
+                    (char *)variable->data = strdup( data );
+                } else {
+                    rv = 1;
+                }
+            } break;
+            case CONFIG_TYPE_FUNC_VOID: {
+                int(*functor)( void ) = (int(*)(void))variable->data;
+                if( functor )
+                { rv = functor(); }
+                else 
+                { rv = 1; }
+            } break;
+            case CONFIG_TYPE_FUNC_INT: {
+                int (*functor)( int ) = (int(*)(int))variable->data;
+                if( yylex() == '=' &&
+                    yylex() == NUMBER ) {
+                    int data = strtol( get_token(), NULL, 10 );
+                    if( functor )
+                    { rv = functor( data ); }
+                    else
+                    { rv = 1; }
+                } else {
+                    rv = 1;
+                }
+            } break;
+            case CONFIG_TYPE_FUNC_STRING: {
+                int (*functor)( const char* ) = (int(*)(const char*))variable->data;
+                if( yylex() == '=' &&
+                   (rv = yylex(), rv == STRING || rv == IDENTIFIER) ) {
+                    /* BAM! comma operator */
+                    char * data = (char*)get_token();
+                    if( rv == STRING ) {
+                        /* get rid of quotes */
+                        data = data + 1;
+                        data[ strlen( data ) - 1 ] = '\0';
+                    } 
+                    if( functor )
+                    { rv = functor(data); }
+                    else
+                    { rv = 1; }
+                } else 
+                { rv = 1; }
+            } break;
+            default: 
+                rv = 1;
+                break;
+            }
         }
     } break;
     default:
@@ -289,3 +412,19 @@ bail:
     return rv;
 }
 
+int command_parse_file( FILE *fp )
+{
+    char buffer[4096];
+    extern int yylinenumber;
+
+    while( fgets( buffer, sizeof(buffer), fp ) )
+    {
+       if( command_parse_string( buffer ) )
+       {
+           fprintf( stderr, "Error parsing line %d: %s\n", yylinenumber, buffer );
+           return 1;
+       }
+    }
+
+    return 0;
+}

@@ -70,6 +70,7 @@
 #include "ibuf.h"
 #include "input.h"
 #include "fs_util.h"
+#include "commands.h"
 
 /* --------------- */
 /* Local Variables */
@@ -647,6 +648,17 @@ int main(int argc, char *argv[]) {
     /* Initialize the pipe that is used for resize */
     if( init_resize_pipe() == -1 )
         err_quit("%s: init_resize_pipe error\n", my_name); 
+
+    {
+        char config_file[ PATH_MAX ];
+        FILE *config;
+        fs_util_get_path( cgdb_home_dir, "cgdbrc", config_file );
+        config = fopen( config_file, "r" );
+        if( config ) { 
+            command_parse_file( config );
+            fclose( config );
+        }
+    }
 
     /* Enter main loop */
     main_loop();
