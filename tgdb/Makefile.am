@@ -1,2 +1,2 @@
-SUBDIRS = annotate-two-src
+SUBDIRS = src annotate-two-src
 EXTRA_DIST = include

@@ -15,7 +15,9 @@ extern "C" {
 #include "terminal.h"
 #include "macro.h"
 
-/* tgdb_init: This starts up gdb and returns a fd to gdb's output and to
+int tgdb_init(void);
+
+/* tgdb_start: This starts up gdb and returns a fd to gdb's output and to
  *            the childs output. Both fd's should only be used by the library. 
  *            They are only returned so that the gui programmer can do some 
  *            sort of I/O multiplexing with them. This is the first call in the 
@@ -33,13 +35,7 @@ extern "C" {
  *
  * RETURNS: 0 on success or -1 on error
  */
-int tgdb_init(char *debugger, int argc, char **argv, int *gdb, int *child);
-
-/*  tgdb_kill: Sends the signal signo to the debugger
- *      
- * RETURNS: 0 on success or -1 on error
- */
-int tgdb_kill(int signo);
+int tgdb_start(char *debugger, int argc, char **argv, int *gdb, int *child);
 
 /* tgdb_send: Sends a character to the debugger that the user typed.
  *
