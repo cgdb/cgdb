@@ -1,3 +1,8 @@
+06/14/2004 Bob Rossi <bob@brasko.net>
+
+    * cgdb.c (parse_long_options): add NULL entry to long_options to fix crash 
+	in getopt_long
+
 version 0.4.2 (05/10/2004):
 version 0.4.1 (04/26/2004):
 

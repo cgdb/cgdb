@@ -136,15 +136,21 @@ static void parse_long_options(int *argc, char ***argv) {
 #ifdef HAVE_GETOPT_H
     static struct option long_options[] = {
         { "version", 0, 0, 0 },
-        { "help", 0, 0, 0 }
+        { "help", 0, 0, 0 },
+		{ 0, 0, 0, 0 }
     };
-
-    opterr = 0;
-    while ((c = getopt_long(*argc, *argv, args, long_options, &option_index)) != EOF) {
-#else
-    opterr = 0;
-    while ((c = getopt(*argc, *argv, args)) != EOF) {
 #endif
+
+	while ( 1 ) {
+    	opterr = 0;
+#ifdef HAVE_GETOPT_H
+        c = getopt_long(*argc, *argv, args, long_options, &option_index);
+#else
+        c = getopt(*argc, *argv, args);
+#endif
+   		if ( c == -1 )
+			break;
+
         switch (c) {
             case 0:
                 switch ( option_index ) {

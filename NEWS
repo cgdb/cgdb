@@ -1,5 +1,9 @@
 CVS
 
+    Fix crash in CGDB when parsing command line parameters. I think this crash 
+	showed up when I starting compiling CGDB with 3.3 instead of 2.95. It would
+	crash when trying to pass the --pid argument to GDB through CGDB.
+
 cgdb-0.4.2 (05/10/2004)
 
     * CGDB now compiles again on AIX 4.3.  Fixed Makefile.am in various/util/src
