@@ -126,8 +126,36 @@ noinst_LIBRARIES = libadt.a
 libadt_a_SOURCES = \
 ibuf.c \
 queue.c \
-tgdb_list.c
+tgdb_list.c \
+std_hash.c \
+std_list.c \
+std_tree.c
 
+
+# Installs the driver programs into progs directory
+noinst_bin_PROGRAMS = std_hash_driver std_list_driver std_tree_driver
+noinst_bindir = $(top_srcdir)/progs
+
+# This is the input driver
+std_hash_driver_LDFLAGS = -L.
+std_hash_driver_LDADD = -ladt
+std_hash_driver_SOURCES = std_hash_driver.c
+std_hash_driver_DEPENDENCIES = ../../adt/src
+std_hash_driver_CFLAGS = $(AM_CFLAGS)
+
+# This is the input driver
+std_list_driver_LDFLAGS = -L.
+std_list_driver_LDADD = -ladt
+std_list_driver_SOURCES = std_list_driver.c
+std_list_driver_DEPENDENCIES = ../../adt/src
+std_list_driver_CFLAGS = $(AM_CFLAGS)
+
+# This is the input driver
+std_tree_driver_LDFLAGS = -L.
+std_tree_driver_LDADD = -ladt
+std_tree_driver_SOURCES = std_tree_driver.c
+std_tree_driver_DEPENDENCIES = ../../adt/src
+std_tree_driver_CFLAGS = $(AM_CFLAGS)
 subdir = various/adt/src
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
@@ -136,21 +164,39 @@ LIBRARIES = $(noinst_LIBRARIES)
 
 libadt_a_AR = $(AR) cru
 libadt_a_LIBADD =
-am_libadt_a_OBJECTS = ibuf.$(OBJEXT) queue.$(OBJEXT) tgdb_list.$(OBJEXT)
+am_libadt_a_OBJECTS = ibuf.$(OBJEXT) queue.$(OBJEXT) tgdb_list.$(OBJEXT) \
+	std_hash.$(OBJEXT) std_list.$(OBJEXT) std_tree.$(OBJEXT)
 libadt_a_OBJECTS = $(am_libadt_a_OBJECTS)
+noinst_bin_PROGRAMS = std_hash_driver$(EXEEXT) std_list_driver$(EXEEXT) \
+	std_tree_driver$(EXEEXT)
+PROGRAMS = $(noinst_bin_PROGRAMS)
+
+am_std_hash_driver_OBJECTS = std_hash_driver-std_hash_driver.$(OBJEXT)
+std_hash_driver_OBJECTS = $(am_std_hash_driver_OBJECTS)
+am_std_list_driver_OBJECTS = std_list_driver-std_list_driver.$(OBJEXT)
+std_list_driver_OBJECTS = $(am_std_list_driver_OBJECTS)
+am_std_tree_driver_OBJECTS = std_tree_driver-std_tree_driver.$(OBJEXT)
+std_tree_driver_OBJECTS = $(am_std_tree_driver_OBJECTS)
 
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
 @AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/ibuf.Po ./$(DEPDIR)/queue.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/std_hash.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/std_hash_driver-std_hash_driver.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/std_list.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/std_list_driver-std_list_driver.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/std_tree.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/std_tree_driver-std_tree_driver.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/tgdb_list.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES = $(libadt_a_SOURCES)
+DIST_SOURCES = $(libadt_a_SOURCES) $(std_hash_driver_SOURCES) \
+	$(std_list_driver_SOURCES) $(std_tree_driver_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in
-SOURCES = $(libadt_a_SOURCES)
+SOURCES = $(libadt_a_SOURCES) $(std_hash_driver_SOURCES) $(std_list_driver_SOURCES) $(std_tree_driver_SOURCES)
 
 all: all-am
 
@@ -170,6 +216,42 @@ libadt.a: $(libadt_a_OBJECTS) $(libadt_a_DEPENDENCIES)
 	-rm -f libadt.a
 	$(libadt_a_AR) libadt.a $(libadt_a_OBJECTS) $(libadt_a_LIBADD)
 	$(RANLIB) libadt.a
+noinst_binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
+install-noinst_binPROGRAMS: $(noinst_bin_PROGRAMS)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(noinst_bindir)
+	@list='$(noinst_bin_PROGRAMS)'; for p in $$list; do \
+	  p1=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
+	  if test -f $$p \
+	  ; then \
+	    f=`echo "$$p1" | sed 's,^.*/,,;$(transform);s/$$/$(EXEEXT)/'`; \
+	   echo " $(INSTALL_PROGRAM_ENV) $(noinst_binPROGRAMS_INSTALL) $$p $(DESTDIR)$(noinst_bindir)/$$f"; \
+	   $(INSTALL_PROGRAM_ENV) $(noinst_binPROGRAMS_INSTALL) $$p $(DESTDIR)$(noinst_bindir)/$$f || exit 1; \
+	  else :; fi; \
+	done
+
+uninstall-noinst_binPROGRAMS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(noinst_bin_PROGRAMS)'; for p in $$list; do \
+	  f=`echo "$$p" | sed 's,^.*/,,;s/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/'`; \
+	  echo " rm -f $(DESTDIR)$(noinst_bindir)/$$f"; \
+	  rm -f $(DESTDIR)$(noinst_bindir)/$$f; \
+	done
+
+clean-noinst_binPROGRAMS:
+	-test -z "$(noinst_bin_PROGRAMS)" || rm -f $(noinst_bin_PROGRAMS)
+std_hash_driver-std_hash_driver.$(OBJEXT): std_hash_driver.c
+std_hash_driver$(EXEEXT): $(std_hash_driver_OBJECTS) $(std_hash_driver_DEPENDENCIES) 
+	@rm -f std_hash_driver$(EXEEXT)
+	$(LINK) $(std_hash_driver_LDFLAGS) $(std_hash_driver_OBJECTS) $(std_hash_driver_LDADD) $(LIBS)
+std_list_driver-std_list_driver.$(OBJEXT): std_list_driver.c
+std_list_driver$(EXEEXT): $(std_list_driver_OBJECTS) $(std_list_driver_DEPENDENCIES) 
+	@rm -f std_list_driver$(EXEEXT)
+	$(LINK) $(std_list_driver_LDFLAGS) $(std_list_driver_OBJECTS) $(std_list_driver_LDADD) $(LIBS)
+std_tree_driver-std_tree_driver.$(OBJEXT): std_tree_driver.c
+std_tree_driver$(EXEEXT): $(std_tree_driver_OBJECTS) $(std_tree_driver_DEPENDENCIES) 
+	@rm -f std_tree_driver$(EXEEXT)
+	$(LINK) $(std_tree_driver_LDFLAGS) $(std_tree_driver_OBJECTS) $(std_tree_driver_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT) core *.core
@@ -179,6 +261,12 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ibuf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/queue.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/std_hash.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/std_hash_driver-std_hash_driver.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/std_list.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/std_list_driver-std_list_driver.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/std_tree.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/std_tree_driver-std_tree_driver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tgdb_list.Po@am__quote@
 
 distclean-depend:
@@ -205,6 +293,72 @@ distclean-depend:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(COMPILE) -c `if test -f '$<'; then $(CYGPATH_W) '$<'; else $(CYGPATH_W) '$(srcdir)/$<'`
+
+std_hash_driver-std_hash_driver.o: std_hash_driver.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(std_hash_driver_CFLAGS) $(CFLAGS) -MT std_hash_driver-std_hash_driver.o -MD -MP -MF "$(DEPDIR)/std_hash_driver-std_hash_driver.Tpo" \
+@am__fastdepCC_TRUE@	  -c -o std_hash_driver-std_hash_driver.o `test -f 'std_hash_driver.c' || echo '$(srcdir)/'`std_hash_driver.c; \
+@am__fastdepCC_TRUE@	then mv "$(DEPDIR)/std_hash_driver-std_hash_driver.Tpo" "$(DEPDIR)/std_hash_driver-std_hash_driver.Po"; \
+@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/std_hash_driver-std_hash_driver.Tpo"; exit 1; \
+@am__fastdepCC_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='std_hash_driver.c' object='std_hash_driver-std_hash_driver.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/std_hash_driver-std_hash_driver.Po' tmpdepfile='$(DEPDIR)/std_hash_driver-std_hash_driver.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(std_hash_driver_CFLAGS) $(CFLAGS) -c -o std_hash_driver-std_hash_driver.o `test -f 'std_hash_driver.c' || echo '$(srcdir)/'`std_hash_driver.c
+
+std_hash_driver-std_hash_driver.obj: std_hash_driver.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(std_hash_driver_CFLAGS) $(CFLAGS) -MT std_hash_driver-std_hash_driver.obj -MD -MP -MF "$(DEPDIR)/std_hash_driver-std_hash_driver.Tpo" \
+@am__fastdepCC_TRUE@	  -c -o std_hash_driver-std_hash_driver.obj `if test -f 'std_hash_driver.c'; then $(CYGPATH_W) 'std_hash_driver.c'; else $(CYGPATH_W) '$(srcdir)/std_hash_driver.c'`; \
+@am__fastdepCC_TRUE@	then mv "$(DEPDIR)/std_hash_driver-std_hash_driver.Tpo" "$(DEPDIR)/std_hash_driver-std_hash_driver.Po"; \
+@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/std_hash_driver-std_hash_driver.Tpo"; exit 1; \
+@am__fastdepCC_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='std_hash_driver.c' object='std_hash_driver-std_hash_driver.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/std_hash_driver-std_hash_driver.Po' tmpdepfile='$(DEPDIR)/std_hash_driver-std_hash_driver.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(std_hash_driver_CFLAGS) $(CFLAGS) -c -o std_hash_driver-std_hash_driver.obj `if test -f 'std_hash_driver.c'; then $(CYGPATH_W) 'std_hash_driver.c'; else $(CYGPATH_W) '$(srcdir)/std_hash_driver.c'`
+
+std_list_driver-std_list_driver.o: std_list_driver.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(std_list_driver_CFLAGS) $(CFLAGS) -MT std_list_driver-std_list_driver.o -MD -MP -MF "$(DEPDIR)/std_list_driver-std_list_driver.Tpo" \
+@am__fastdepCC_TRUE@	  -c -o std_list_driver-std_list_driver.o `test -f 'std_list_driver.c' || echo '$(srcdir)/'`std_list_driver.c; \
+@am__fastdepCC_TRUE@	then mv "$(DEPDIR)/std_list_driver-std_list_driver.Tpo" "$(DEPDIR)/std_list_driver-std_list_driver.Po"; \
+@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/std_list_driver-std_list_driver.Tpo"; exit 1; \
+@am__fastdepCC_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='std_list_driver.c' object='std_list_driver-std_list_driver.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/std_list_driver-std_list_driver.Po' tmpdepfile='$(DEPDIR)/std_list_driver-std_list_driver.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(std_list_driver_CFLAGS) $(CFLAGS) -c -o std_list_driver-std_list_driver.o `test -f 'std_list_driver.c' || echo '$(srcdir)/'`std_list_driver.c
+
+std_list_driver-std_list_driver.obj: std_list_driver.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(std_list_driver_CFLAGS) $(CFLAGS) -MT std_list_driver-std_list_driver.obj -MD -MP -MF "$(DEPDIR)/std_list_driver-std_list_driver.Tpo" \
+@am__fastdepCC_TRUE@	  -c -o std_list_driver-std_list_driver.obj `if test -f 'std_list_driver.c'; then $(CYGPATH_W) 'std_list_driver.c'; else $(CYGPATH_W) '$(srcdir)/std_list_driver.c'`; \
+@am__fastdepCC_TRUE@	then mv "$(DEPDIR)/std_list_driver-std_list_driver.Tpo" "$(DEPDIR)/std_list_driver-std_list_driver.Po"; \
+@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/std_list_driver-std_list_driver.Tpo"; exit 1; \
+@am__fastdepCC_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='std_list_driver.c' object='std_list_driver-std_list_driver.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/std_list_driver-std_list_driver.Po' tmpdepfile='$(DEPDIR)/std_list_driver-std_list_driver.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(std_list_driver_CFLAGS) $(CFLAGS) -c -o std_list_driver-std_list_driver.obj `if test -f 'std_list_driver.c'; then $(CYGPATH_W) 'std_list_driver.c'; else $(CYGPATH_W) '$(srcdir)/std_list_driver.c'`
+
+std_tree_driver-std_tree_driver.o: std_tree_driver.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(std_tree_driver_CFLAGS) $(CFLAGS) -MT std_tree_driver-std_tree_driver.o -MD -MP -MF "$(DEPDIR)/std_tree_driver-std_tree_driver.Tpo" \
+@am__fastdepCC_TRUE@	  -c -o std_tree_driver-std_tree_driver.o `test -f 'std_tree_driver.c' || echo '$(srcdir)/'`std_tree_driver.c; \
+@am__fastdepCC_TRUE@	then mv "$(DEPDIR)/std_tree_driver-std_tree_driver.Tpo" "$(DEPDIR)/std_tree_driver-std_tree_driver.Po"; \
+@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/std_tree_driver-std_tree_driver.Tpo"; exit 1; \
+@am__fastdepCC_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='std_tree_driver.c' object='std_tree_driver-std_tree_driver.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/std_tree_driver-std_tree_driver.Po' tmpdepfile='$(DEPDIR)/std_tree_driver-std_tree_driver.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(std_tree_driver_CFLAGS) $(CFLAGS) -c -o std_tree_driver-std_tree_driver.o `test -f 'std_tree_driver.c' || echo '$(srcdir)/'`std_tree_driver.c
+
+std_tree_driver-std_tree_driver.obj: std_tree_driver.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(std_tree_driver_CFLAGS) $(CFLAGS) -MT std_tree_driver-std_tree_driver.obj -MD -MP -MF "$(DEPDIR)/std_tree_driver-std_tree_driver.Tpo" \
+@am__fastdepCC_TRUE@	  -c -o std_tree_driver-std_tree_driver.obj `if test -f 'std_tree_driver.c'; then $(CYGPATH_W) 'std_tree_driver.c'; else $(CYGPATH_W) '$(srcdir)/std_tree_driver.c'`; \
+@am__fastdepCC_TRUE@	then mv "$(DEPDIR)/std_tree_driver-std_tree_driver.Tpo" "$(DEPDIR)/std_tree_driver-std_tree_driver.Po"; \
+@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/std_tree_driver-std_tree_driver.Tpo"; exit 1; \
+@am__fastdepCC_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='std_tree_driver.c' object='std_tree_driver-std_tree_driver.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/std_tree_driver-std_tree_driver.Po' tmpdepfile='$(DEPDIR)/std_tree_driver-std_tree_driver.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(std_tree_driver_CFLAGS) $(CFLAGS) -c -o std_tree_driver-std_tree_driver.obj `if test -f 'std_tree_driver.c'; then $(CYGPATH_W) 'std_tree_driver.c'; else $(CYGPATH_W) '$(srcdir)/std_tree_driver.c'`
 uninstall-info-am:
 
 ETAGS = etags
@@ -292,9 +446,10 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(LIBRARIES)
+all-am: Makefile $(LIBRARIES) $(PROGRAMS)
 
 installdirs:
+	$(mkinstalldirs) $(DESTDIR)$(noinst_bindir)
 
 install: install-am
 install-exec: install-exec-am
@@ -322,7 +477,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-noinstLIBRARIES mostlyclean-am
+clean-am: clean-generic clean-noinstLIBRARIES clean-noinst_binPROGRAMS \
+	mostlyclean-am
 
 distclean: distclean-am
 
@@ -337,7 +493,7 @@ info: info-am
 
 info-am:
 
-install-data-am:
+install-data-am: install-noinst_binPROGRAMS
 
 install-exec-am:
 
@@ -363,18 +519,19 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-info-am
+uninstall-am: uninstall-info-am uninstall-noinst_binPROGRAMS
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
-	clean-noinstLIBRARIES ctags distclean distclean-compile \
-	distclean-depend distclean-generic distclean-tags distdir dvi \
-	dvi-am info info-am install install-am install-data \
-	install-data-am install-exec install-exec-am install-info \
-	install-info-am install-man install-strip installcheck \
+	clean-noinstLIBRARIES clean-noinst_binPROGRAMS ctags distclean \
+	distclean-compile distclean-depend distclean-generic \
+	distclean-tags distdir dvi dvi-am info info-am install \
+	install-am install-data install-data-am install-exec \
+	install-exec-am install-info install-info-am install-man \
+	install-noinst_binPROGRAMS install-strip installcheck \
 	installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
-	uninstall-am uninstall-info-am
+	uninstall-am uninstall-info-am uninstall-noinst_binPROGRAMS
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

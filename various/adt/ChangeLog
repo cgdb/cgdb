@@ -1,3 +1,19 @@
+03/16/2004 Bob Rossi <bob@brasko.net>
+
+    * src/Makefile.am: Add tgdb_list.c, std_hash.c, std_tree.c to libadt.
+	Build std_hash_driver,std_list_driver and std_tree_driver to test them.
+	* src/Makefile.in: Auto generated for people without auto tools.
+	* std_types.h: Ditto
+	* std_hash.h: Added
+	* std_hash.c: Ditto
+	* std_hash_driver.c: Ditto
+	* std_list.h: Ditto
+	* std_list.c: Ditto
+	* std_list_driver.c: Ditto
+	* std_tree.h: Ditto
+	* std_tree.c: Ditto
+	* std_tree_driver.c: Ditto
+
 01/08/2004 Bob Rossi <bob@brasko.net>
 
    * Makefile.in: regenerated with documented autotools version
