@@ -233,7 +233,8 @@ static void filedlg_search_regex_init(struct filedlg *fd) {
 
 static int filedlg_search_regex(struct filedlg *fd, const char *regex,
                                 int opt, int direction, int icase) {
-   if ( fd == NULL || fd->buf == NULL )
+   if ( fd == NULL    || fd->buf == NULL || 
+        regex == NULL || strlen(regex) == 0)
       return -1;
 
    return hl_regex(regex, 

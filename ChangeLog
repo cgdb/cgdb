@@ -1,3 +1,10 @@
+10/09/2003 Mike Mueller <mmueller@cs.uri.edu>
+
+    * NEWS: Fixed 'next search' bug where it jumps to the top of the buffer
+            when there was no previous search expression.  Also made searches
+            wrap around the top/bottom of file.  Hope this is what everyone
+            else wants, because I sure do.
+
 09/28/2003 Bob Rossi <bob@brasko.net>
 
     * NEWS: TGDB now returns TGDB_ABSOLUTE_SOURCE_DENIED when file is not

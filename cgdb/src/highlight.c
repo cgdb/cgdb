@@ -435,47 +435,73 @@ int hl_regex(const char *regex, const char **hl_lines, const char **tlines,
 
     /* Forward search */
     if ( direction ) {
+        int start = *sel_rline;
+        int end   = length;
         offset = *sel_col_rend;
-        for ( i = *sel_rline; i < length; i++){
-            local_cur_line = (char *)tlines[i];
-            
-            /* Add the position of the current line's last match */
-            if ( i == *sel_rline ) 
-                local_cur_line += offset;
-
-            /* Found a match */
-            if ( ( result = regexec(&t, local_cur_line, 1, pmatch, 0)) == 0 ) {
-                success = 1;
-                break;
-            }
-        }
-    } else { /* Reverse search */
-        int j, pos;
-        offset = *sel_col_rbeg;
-
-        /* Try each line */
-        for ( i = *sel_rline; i >= 0; i--){
-            local_cur_line = (char *)tlines[i];
-            pos = strlen(local_cur_line) - 1;
-            
-            if ( i == *sel_rline )
-                pos = offset - 1; 
-
-            /* Try each line, char by char starting from the end */
-            for ( j = pos; j >= 0; j-- ) {
-                if ( ( result = regexec(&t, local_cur_line + j, 1, pmatch, 0)) == 0 ) {
-                    if ( i == *sel_rline && pmatch[0].rm_so > pos - j)
-                        continue;
-                    /* Found a match */
+        while(!success){
+            for ( i = start; i < end; i++){
+                local_cur_line = (char *)tlines[i];
+                
+                /* Add the position of the current line's last match */
+                if ( i == *sel_rline ) 
+                    local_cur_line += offset;
+    
+                /* Found a match */
+                if ( ( result = regexec(&t, local_cur_line, 1, pmatch, 0)) == 0 ) {
                     success = 1;
-                    offset = j;
                     break;
                 }
             }
 
-            if ( success )
-               break;
+            if (success || start == 0){
+                break;
+            }
+            else{
+                end = start;
+                start = 0;
+            }
         }
+
+    } else { /* Reverse search */
+        int j, pos;
+        int start = *sel_rline;
+        int end   = 0;
+        offset = *sel_col_rbeg;
+
+        /* Try each line */
+        while(!success){
+            for ( i = start; i >= end; i--){
+                local_cur_line = (char *)tlines[i];
+                pos = strlen(local_cur_line) - 1;
+                
+                if ( i == *sel_rline )
+                    pos = offset - 1; 
+    
+                /* Try each line, char by char starting from the end */
+                for ( j = pos; j >= 0; j-- ) {
+                    if ( ( result = regexec(&t, local_cur_line + j, 1, pmatch, 0)) == 0 ) {
+                        if ( i == *sel_rline && pmatch[0].rm_so > pos - j)
+                            continue;
+                        /* Found a match */
+                        success = 1;
+                        offset = j;
+                        break;
+                    }
+                }
+    
+                if ( success )
+                break;
+            }
+            
+            if (success || start == length - 1){
+                break;
+            }
+            else{
+                end = start;
+                start = length - 1;
+            }
+        }
+       
     }
 
     if ( success ) {
