@@ -665,7 +665,7 @@ char *a2_tgdb_err_msg(void) {
 
 int a2_tgdb_change_prompt(char *prompt) {
     tgdb_setup_buffer_command_to_run(
-        gdb_input_queue,
+        rlc_input_queue,
         prompt,
         BUFFER_READLINE_COMMAND,
         COMMANDS_SHOW_USER_OUTPUT,
