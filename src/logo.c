@@ -9,6 +9,7 @@
 /* System Includes */
 #include <curses.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 /* Local Includes */
