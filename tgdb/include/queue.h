@@ -2,7 +2,6 @@
 #define __QUEUE_H__
 
 #include <sys/types.h>
-#include "types.h"
 
 struct node {
    void *data;
