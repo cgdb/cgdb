@@ -256,6 +256,7 @@ static int commands_run_tty(char *tty, int fd){
 
 static int commands_run_tab_completion(char *com, int fd){
    char line[MAXLINE];
+   data_set_state(INTERNAL_COMMAND);
    strcpy(line, "complete ");
    strcat(line, com);
    return commands_run_com(fd, line, 1);
