@@ -101,6 +101,8 @@ int gdbmi_parser_parse_string (
  *
  * \param parse_failed
  * 1 if the parser failed to parse the command, otherwise 0
+ * If there was an error, it was written to the global logger.
+ * Also, pt is invalid if there is an error, it should not be displayed or freed
  *
  * \return
  * 0 on succes, or -1 on error.
@@ -110,21 +112,6 @@ int gdbmi_parser_parse_file (
 	const char *mi_command_file,
     gdbmi_output_ptr *pt,
     int *parse_failed );
-
-/**
- * Get the last error in text format.
- *
- * \param parser
- * The gdbmi_parser context to operate on.
- *
- * \param parser_error
- * The last error that the parser discovered.
- * NULL if there was no error.
- *
- * \return
- * 0 on succes, or -1 on error.
- */
-int gdbmi_parser_get_error ( gdbmi_parser_ptr parser, char **parser_error );
 
 /*@}*/
 

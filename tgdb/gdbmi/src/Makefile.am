@@ -10,7 +10,6 @@ noinst_LIBRARIES = libgdbmi.a
 
 libgdbmi_a_SOURCES = \
 gdbmi_parser.c \
-gdbmi_parse.c \
 gdbmi_tgdb.c \
 gdbmi_grammar.y \
 gdbmi_lexer.l \

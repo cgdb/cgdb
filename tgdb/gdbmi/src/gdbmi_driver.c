@@ -16,7 +16,6 @@ int main ( int argc, char **argv ) {
 	gdbmi_parser_ptr parser_ptr;
 	gdbmi_output_ptr output_ptr;
 	int result, parse_failed;
-	char *parse_error;
 
 	if ( argc != 2 )
 		usage( argv[0] );	
@@ -42,21 +41,21 @@ int main ( int argc, char **argv ) {
 	}
 
 	if ( parse_failed ) {
-		result = gdbmi_parser_get_error ( parser_ptr, &parse_error );
-
 		if ( result == -1 ) {
 			logger_write_pos ( logger, __FILE__, __LINE__, "gdbmi_parser_get_error error");
 			return -1;
 		}
-
-		logger_write_pos ( logger, __FILE__, __LINE__, "%s", parse_error );
 	} else {
 		print_gdbmi_output ( output_ptr );
 	}
 
-	if ( destroy_gdbmi_output ( output_ptr ) == -1 ) {
-		logger_write_pos ( logger, __FILE__, __LINE__, "free failed" );
-		return -1;
+	if ( parse_failed ) {
+		output_ptr = NULL;
+	} else {
+		if ( destroy_gdbmi_output ( output_ptr ) == -1 ) {
+			logger_write_pos ( logger, __FILE__, __LINE__, "free failed" );
+			return -1;
+		}
 	}
 
 	logger_destroy ( logger );

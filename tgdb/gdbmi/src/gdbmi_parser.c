@@ -122,10 +122,6 @@ int gdbmi_parser_parse_file (
 	return 0;
 }
 
-int gdbmi_parser_get_error ( gdbmi_parser_ptr parser, char **parser_error ) {
-	return -1;
-}
-
 #if 0
 int instrument_lexer ( void ) {
 	//enum gdbmi_lexer_pattern pattern;

@@ -406,6 +406,7 @@ struct tgdb* tgdb_initialize (
 	tgdb->tcc = tgdb_client_create_context ( 
 			debugger, argc, argv, config_dir,
 			TGDB_CLIENT_DEBUGGER_GNU_GDB,
+//			TGDB_CLIENT_PROTOCOL_GNU_GDB_GDBMI,
 			TGDB_CLIENT_PROTOCOL_GNU_GDB_ANNOTATE_TWO,
 		    logger	);
 

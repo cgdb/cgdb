@@ -112,10 +112,8 @@ output: opt_oob_record_list opt_result_record OPEN_PAREN variable CLOSED_PAREN N
 	$$->oob_record = $1;
 	$$->result_record = $2;
 
-	if ( strcmp ( "gdb", $4 ) != 0 ) {
-		gdbmi_error ( "Syntax error" );
-		logger_write_pos ( logger, __FILE__, __LINE__, "Expected 'gdb'" );
-	} 
+	if ( strcmp ( "gdb", $4 ) != 0 )
+		gdbmi_error ( "Syntax error, expected 'gdb'" );
 
 	free ( $4 );
 } ;
@@ -200,17 +198,14 @@ result_class: STRING_LITERAL {
 		$$ = GDBMI_ERROR;
 	else if ( strcmp ( "exit", gdbmi_text ) == 0 )
 		$$ = GDBMI_EXIT;
-	else {
-		gdbmi_error ( "Syntax error" );
-		logger_write_pos ( logger, __FILE__, __LINE__, "Expected 'done|running|connected|error|exit'" );
-	}
+	else
+		gdbmi_error ( "Syntax error, expected 'done|running|connected|error|exit" );
 };
 
 async_class: STRING_LITERAL {
-	if ( strcmp ( "stopped", gdbmi_text ) != 0 ) {
-		gdbmi_error ( "Syntax error" );
-		logger_write_pos ( logger, __FILE__, __LINE__, "Expected 'stopped'" );
-	}
+	if ( strcmp ( "stopped", gdbmi_text ) != 0 )
+		gdbmi_error ( "Syntax error, expected 'stopped'" );
+
 	$$ = GDBMI_STOPPED;
 };
 

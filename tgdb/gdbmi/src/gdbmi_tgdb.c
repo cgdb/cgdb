@@ -105,9 +105,9 @@ struct tgdb_gdbmi {
 	struct tgdb_list *client_command_list;
 
 	/**
-	 * This data structure represents all of the lines that make up one
-	 * output command from GDB.
+	 * This is the current output command from GDB.
 	 */
+	struct ibuf *tgdb_cur_output_command;
 };
 
 //static int gdbmi_set_inferior_tty ( void *ctx ) {
@@ -272,6 +272,8 @@ void* gdbmi_create_context (
 	if ( gdbmi->debugger_pid == -1 )
 		return NULL;
 
+	gdbmi->tgdb_cur_output_command = ibuf_init ();
+
 	return gdbmi;
 }
 
@@ -305,6 +307,10 @@ int gdbmi_initialize (
 int gdbmi_shutdown ( void *ctx ) {
 	struct tgdb_gdbmi *gdbmi = (struct tgdb_gdbmi *)ctx;
     xclose(gdbmi->debugger_stdin);
+
+	ibuf_free ( gdbmi->tgdb_cur_output_command );
+	gdbmi->tgdb_cur_output_command = NULL;
+
 	return 0;
 }
 
@@ -317,33 +323,150 @@ int gdbmi_is_client_ready(void *ctx) {
     return TRUE;
 }
 
+enum newlinestyle {
+	GDBMI_NL,
+	GDBMI_CR_NL,
+	GDBMI_CR
+};
+
+/**
+ * Checks to see if ibuf ends with the string ending.
+ *
+ * \param ibuf
+ * The string to check the ending of
+ *
+ * \param style
+ * represents what kind of newline is associated with this command.
+ *
+ * \param success
+ * 1 if ibuf ends with ending, otherwise 0
+ *
+ * \return
+ * 0 on success, or -1 on error
+ */
+static int ends_with_gdbmi_prompt ( struct ibuf *ibuf, enum newlinestyle style, int *success ) {
+	char *ibuf_string;
+	int length;
+	
+	if ( !ibuf )
+		return -1;
+
+	if ( !success )
+		return -1;
+
+	*success = 0;
+
+	length = ibuf_length ( ibuf );
+
+	/* If the string is not long enough, don't try */
+	if ( style == GDBMI_CR_NL && length < 8 )
+		return 0;
+	else if ( length < 7 )
+		return 0;
+
+	ibuf_string = ibuf_get ( ibuf );
+
+	/* Match the char's backwards, go to the end */
+	ibuf_string = ibuf_string + length - 1;
+
+	if ( style == GDBMI_CR_NL ) 
+		ibuf_string -= 2;
+	else
+		ibuf_string--;
+
+	/* Check for the prompt */
+	if ( 
+		*(ibuf_string) == ' ' &&
+		*(ibuf_string-1) == ')' &&
+		*(ibuf_string-2) == 'b' &&
+		*(ibuf_string-3) == 'd' &&
+		*(ibuf_string-4) == 'g' &&
+		*(ibuf_string-5) == '(' )
+		*success = 1;
+	
+	/* Look at newline */
+	return 0;
+
+}
+
+/**
+ * Determine's what kind of newline the string ends in.
+ *
+ */
+static int gdbmi_get_newline_style ( struct ibuf *ibuf, enum newlinestyle *style ) {
+	char *buf;
+	int length;
+
+	if ( !ibuf )
+		return -1;
+
+	if ( !style )
+		return -1;
+
+	buf = ibuf_get ( ibuf );
+	length = ibuf_length ( ibuf );
+
+	/* Check to see if an entire command has been reached. */
+	if ( buf[length-1] == '\r' ) {
+		*style = GDBMI_CR;
+	} else if ( buf[length-1] == '\n' ) {
+		if ( length > 1 && buf[length-2] == '\r' )
+			*style = GDBMI_CR_NL;
+		else
+			*style = GDBMI_NL;
+	}
+
+	return 0;
+}
+
+/* 
+ * 1. Align the 'input' data into null-terminated strings that
+ *    end in a newline.
+ * 2. Check to see if a command has been fully recieved.
+ *    2a. If it has, go to step 3
+ *    2b. If it hasn't, return from the function
+ * 3. parse the command.
+ * 4. traverse the parse tree to populate the tgdb_list with
+ *    commands the user/front end is looking for.
+ */
 int gdbmi_parse_io ( 
 		void *ctx,
 		const char *input_data, const size_t input_data_size,
 		char *debugger_output, size_t *debugger_output_size,
 		char *inferior_output, size_t *inferior_output_size,
 		struct tgdb_list *list ) {
-//	struct tgdb_gdbmi *gdbmi = (struct tgdb_gdbmi *)ctx;
-//	int val;
+	struct tgdb_gdbmi *gdbmi = (struct tgdb_gdbmi *)ctx;
+	int found_command = 0;
+	enum newlinestyle style;
 
-//	val = gdbmi_handle_data ( gdbmi, gdbmi->sm, input_data, input_data_size,
-//		debugger_output, debugger_output_size, list );
+	ibuf_add ( gdbmi->tgdb_cur_output_command, input_data );
 
-//	strncpy ( debugger_output, input_data, input_data_size );
-//	*debugger_output_size = input_data_size;
-//
-//
-//	/* \n(gdb) is the end of a record */
-//	if ( input_data_size > 7 &&
-//		 (strcmp ( &debugger_output[input_data_size-8], tmp_prompt) == 0 ) )
-//		return 1;
+	if ( input_data[input_data_size-1] == '\r' || 
+	     input_data[input_data_size-1] == '\n' ) {
+		if ( gdbmi_get_newline_style ( gdbmi->tgdb_cur_output_command, &style ) == -1 ) {
+			logger_write_pos ( logger, __FILE__, __LINE__, "gdbmi_get_newline_stlye error" );
+			return -1;
+		}
 
 
-	/* The MI parser is capable of recieving one command of output and parsing it
-	 * into a parse tree. the command is always a set of new lines.
-	 */
+		if ( ends_with_gdbmi_prompt ( gdbmi->tgdb_cur_output_command, style, &found_command ) == -1 ) {
+			logger_write_pos ( logger, __FILE__, __LINE__, "ends_with_gdbmi_prompt error" );
+			return -1;
+		}
+	}
 
-	
+	if ( found_command ) {
+//		gdbmi_walk_command ( gdbmi->tgdb_cur_output_command );
+		ibuf_clear ( gdbmi->tgdb_cur_output_command );
+	}
+
+	/* Return nothing for now */
+	*debugger_output_size = 0;
+	*inferior_output_size = 0;
+
+	if ( found_command )
+		return 1;
+
 	return 0;
 }
 

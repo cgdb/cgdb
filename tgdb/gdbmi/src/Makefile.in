@@ -133,7 +133,6 @@ noinst_LIBRARIES = libgdbmi.a
 
 libgdbmi_a_SOURCES = \
 gdbmi_parser.c \
-gdbmi_parse.c \
 gdbmi_tgdb.c \
 gdbmi_grammar.y \
 gdbmi_lexer.l \
@@ -170,9 +169,9 @@ LIBRARIES = $(noinst_LIBRARIES)
 
 libgdbmi_a_AR = $(AR) cru
 libgdbmi_a_LIBADD =
-am_libgdbmi_a_OBJECTS = gdbmi_parser.$(OBJEXT) gdbmi_parse.$(OBJEXT) \
-	gdbmi_tgdb.$(OBJEXT) gdbmi_grammar.$(OBJEXT) \
-	gdbmi_lexer.$(OBJEXT) gdbmi_pt.$(OBJEXT)
+am_libgdbmi_a_OBJECTS = gdbmi_parser.$(OBJEXT) gdbmi_tgdb.$(OBJEXT) \
+	gdbmi_grammar.$(OBJEXT) gdbmi_lexer.$(OBJEXT) \
+	gdbmi_pt.$(OBJEXT)
 libgdbmi_a_OBJECTS = $(am_libgdbmi_a_OBJECTS)
 noinst_bin_PROGRAMS = gdbmi_driver$(EXEEXT)
 PROGRAMS = $(noinst_bin_PROGRAMS)
@@ -188,7 +187,6 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/gdbmi_driver.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/gdbmi_grammar.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/gdbmi_lexer.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/gdbmi_parse.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/gdbmi_parser.Po ./$(DEPDIR)/gdbmi_pt.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/gdbmi_tgdb.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
@@ -257,7 +255,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdbmi_driver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdbmi_grammar.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdbmi_lexer.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdbmi_parse.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdbmi_parser.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdbmi_pt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdbmi_tgdb.Po@am__quote@
