@@ -1,3 +1,10 @@
+06/14/2003 Peter Kovacs <peter@kovax.org>
+
+    * commands.c: Added support for parsing set foo=bar type variables.  Added
+    support for parsing configuration files (somewhat incomplete at this
+    point).
+    * cgdb.c: Added support for parsing ~/.cgdb/cgdbrc configuration file.
+
 06/14/2003 Bob Rossi <bob_rossi@cox.net>
 
 	* commands.c: Implemented tab_stop feature. Changed tabspace to tabstop.
