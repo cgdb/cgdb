@@ -32,6 +32,7 @@ extern int regex_icase ;
 extern int shortcut_option ;
 extern int line_coverage_option;
 extern int highlight_tabstop;
+extern int config_wrapscan;
 
 enum ConfigType
 {
@@ -67,7 +68,8 @@ static struct ConfigVariable
     /* syntax */      		{ "syntax", "syn", CONFIG_TYPE_FUNC_STRING, command_set_syntax_type }, 
     /* tabstop   */     	{ "tabstop", "ts", CONFIG_TYPE_INT, &highlight_tabstop },
     /* winminheight */  	{ "winminheight", "wmh", CONFIG_TYPE_FUNC_INT, &command_set_winminheight },
-    /* winsplit */      	{ "winsplit", "ws", CONFIG_TYPE_FUNC_STRING, command_set_winsplit }, 
+    /* winsplit */      	{ "winsplit", "winsplit", CONFIG_TYPE_FUNC_STRING, command_set_winsplit }, 
+    /* wrapscan */          { "wrapscan", "ws", CONFIG_TYPE_BOOL, &config_wrapscan },
 };
 
 static int command_focus_cgdb( void );

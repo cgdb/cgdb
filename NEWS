@@ -1,3 +1,8 @@
+   * Added 'wrapscan' option (abbreviated 'ws').  Note that this means that
+   'ws' no longer means winsplit, since this isn't the standard vi meaning.
+   Fixed bug where 'n' jumps to the top of file when no search was previously
+   done.
+
    * Fixed bug in TGDB. It would not return TGDB_ABSOLUTE_SOURCE_DENIED if 
    TGDB called 'info source' and there was no line that returned the absolute
    source path.

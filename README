@@ -79,7 +79,6 @@ Quick Reference
     :set winsplit   -> Set the split point between source and gdb window
                        (especially useful as an init setting in cgdbrc)
                        values={top_full, top_big, even, bottom_big, bottom_full}
-                       (:set ws)
     :set winminheight -> The minimal height of a window. Windows will never 
                        become smaller than this value.
                        (:set wmh)
@@ -101,6 +100,8 @@ Quick Reference
                        that it sends to GDB. If it is off, CGDB will not show
                        the commands that it gives to GDB. The default is off.
                        (:set stc)
+    :set wrapscan   -> Searches wrap around the end of file.
+                       (:set ws)
 
 2. At gdb and tty window
 ------------------------

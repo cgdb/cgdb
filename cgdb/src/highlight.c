@@ -44,6 +44,7 @@
 #include "sys_util.h"
 
 int highlight_tabstop = 8;
+extern int config_wrapscan;
 
 /* ----------- */
 /* Definitions */
@@ -453,7 +454,7 @@ int hl_regex(const char *regex, const char **hl_lines, const char **tlines,
                 }
             }
 
-            if (success || start == 0){
+            if (success || start == 0 || !config_wrapscan){
                 break;
             }
             else{
@@ -490,10 +491,10 @@ int hl_regex(const char *regex, const char **hl_lines, const char **tlines,
                 }
     
                 if ( success )
-                break;
+                    break;
             }
             
-            if (success || start == length - 1){
+            if (success || start == length - 1 || !config_wrapscan){
                 break;
             }
             else{
