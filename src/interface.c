@@ -585,11 +585,11 @@ static void if_get_command(struct sviewer *sview) {
    if_draw();
 
    while ( ( c = wgetch(sview->win) ) != ERR ) {
-      if ( cur_com_pos == (MAX_LINE - 1) && !(c == 27 || c == 8 || c == 127 ))
+      if ( cur_com_pos == (MAX_LINE - 1) && !(c == CGDB_KEY_ESC || c == 8 || c == 127 ))
           continue;
       
       /* Quit the search if the user hit escape */
-      if ( c == 27 ) {
+      if ( c == CGDB_KEY_ESC ) {
          cur_com_pos = 0;
          cur_com_line[cur_com_pos] = '\0';
          display_command = 0;
@@ -669,11 +669,11 @@ static int capture_regex(struct sviewer *sview) {
    if_draw();
 
    while ( ( c = wgetch(sview->win) ) != ERR ) {
-      if ( regex_line_pos == (MAX_LINE - 1) && !(c == 27 || c == 8 || c == 127 ))
+      if ( regex_line_pos == (MAX_LINE - 1) && !(c == CGDB_KEY_ESC || c == 8 || c == 127 ))
           continue;
       
       /* Quit the search if the user hit escape */
-      if ( c == 27 ) {
+      if ( c == CGDB_KEY_ESC ) {
          regex_line_pos = 0;
          regex_line[regex_line_pos] = '\0';
          regex_search = 0;
@@ -955,11 +955,11 @@ int if_init(void)
 
 int internal_if_input(int key) {
     /* The ESC Key, puts the debugger into command mode */
-    if ( focus != CGDB && key == 27) {
+    if ( focus != CGDB && key == CGDB_KEY_ESC) {
        focus = CGDB;
        if_draw();
        return 0;
-    } else if ( key == 27 )
+    } else if ( key == CGDB_KEY_ESC )
         return 0;
 
     /* Check for global keystrokes */

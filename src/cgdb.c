@@ -259,11 +259,17 @@ static int create_help_file(void) {
    return 0;
 }
 
+/* start_gdb: Starts up libtgdb
+ *  Returns:  -1 on error, 0 on success
+ */
 static int start_gdb(int argc, char *argv[]) {
-    tgdb_init();
+    if ( tgdb_init() == -1 ) {
+        err_msg("%s:%d tgdb_init error\n", __FILE__, __LINE__);
+        return -1;
+    }
 
     if ( tgdb_start(debugger_path, argc, argv, &gdb_fd, &tty_fd, &tgdb_readline_fd) == -1 )
-        return 1;
+        return -1;
 
     return 0;
 }
@@ -292,7 +298,7 @@ static int user_input(void) {
     switch ( ( val = if_input(key)) ) {
         case 1:
         case 2:
-            if ( key >= CGDB_KEY_UP && key < CGDB_KEY_ERROR ) {
+            if ( key >= CGDB_KEY_ESC && key < CGDB_KEY_ERROR ) {
                     char *seqbuf = input_get_last_seq(input);
 
                     if ( seqbuf == NULL ) {
@@ -595,6 +601,7 @@ int main(int argc, char *argv[]) {
     int c;
     read(0, &c, 1);
 #endif
+
     parse_long_options(&argc, &argv);
 
     /* Set up some data */
@@ -608,7 +615,7 @@ int main(int argc, char *argv[]) {
         err_quit("%s: Unable to create help file\n", my_name); 
 
     /* Start GDB */
-    if (start_gdb(argc, argv))
+    if (start_gdb(argc, argv) == -1)
         err_quit("%s: Unable to invoke GDB\n", my_name); 
 
     commandq = queue_init();

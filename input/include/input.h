@@ -2,7 +2,8 @@
 #define __INPUT_H__
 
 enum cgdb_input_macro {
-    CGDB_KEY_UP = 10000,
+    CGDB_KEY_ESC = 10000,
+    CGDB_KEY_UP,
     CGDB_KEY_DOWN,
     CGDB_KEY_LEFT,
     CGDB_KEY_RIGHT,

@@ -126,6 +126,18 @@ struct term_entry {
 } *list = NULL;
 static int list_size = 0;
 
+/* This variable is a total hack. It is here because this input unit
+ * needs to look at the next char to see if we found an esc sequence.
+ * Sometimes an esc seq is a subset of another esc seq.
+ * So if this variable is set, it will read this before the next 'read'
+ * is called.
+ *
+ * TODO: This makes the input library not work when different descriptors
+ * are being used. However multiple instances of this unit can be used 
+ * with the same input source.
+ */
+static int input_extra_char = -1;
+
 struct input {
     int stdinfd;
     struct term_entry *last_entry;
@@ -187,6 +199,8 @@ finished:
 
 /* add_keybindings: This adds special key bindings that many terminals use. */
 static void add_keybindings(void) {
+    insertIntoList ("ESC",          "ESC",          "\033",     CGDB_KEY_ESC);
+
     insertIntoList ("Up arrow",     "Up arrow",     "\033[0A", CGDB_KEY_UP);
     insertIntoList ("Left arrow",   "Left arrow",   "\033[0B", CGDB_KEY_LEFT);
     insertIntoList ("Right arrow",  "Right arrow",  "\033[0C", CGDB_KEY_RIGHT);
@@ -235,87 +249,87 @@ static void add_keybindings(void) {
     insertIntoList ("Alt-Z",        "Alt-Z",        "\033z", CGDB_KEY_ALT_Z);
 
     /* Alt Shift bindings */
-//    insertIntoList ("Alt-Shift-A",  "Alt-Shift-A",  "\033A", CGDB_KEY_ALT_SHIFT_A);
-//    insertIntoList ("Alt-Shift-B",  "Alt-Shift-B",  "\033B", CGDB_KEY_ALT_SHIFT_B);
-//    insertIntoList ("Alt-Shift-C",  "Alt-Shift-C",  "\033C", CGDB_KEY_ALT_SHIFT_C);
-//    insertIntoList ("Alt-Shift-D",  "Alt-Shift-D",  "\033D", CGDB_KEY_ALT_SHIFT_D);
-//    insertIntoList ("Alt-Shift-E",  "Alt-Shift-E",  "\033E", CGDB_KEY_ALT_SHIFT_E);
-//    insertIntoList ("Alt-Shift-F",  "Alt-Shift-F",  "\033F", CGDB_KEY_ALT_SHIFT_F);
-//    insertIntoList ("Alt-Shift-G",  "Alt-Shift-G",  "\033G", CGDB_KEY_ALT_SHIFT_G);
-//    insertIntoList ("Alt-Shift-H",  "Alt-Shift-H",  "\033H", CGDB_KEY_ALT_SHIFT_H);
-//    insertIntoList ("Alt-Shift-I",  "Alt-Shift-I",  "\033I", CGDB_KEY_ALT_SHIFT_I);
-//    insertIntoList ("Alt-Shift-J",  "Alt-Shift-J",  "\033J", CGDB_KEY_ALT_SHIFT_J);
-//    insertIntoList ("Alt-Shift-K",  "Alt-Shift-K",  "\033K", CGDB_KEY_ALT_SHIFT_K);
-//    insertIntoList ("Alt-Shift-L",  "Alt-Shift-L",  "\033L", CGDB_KEY_ALT_SHIFT_L);
-//    insertIntoList ("Alt-Shift-M",  "Alt-Shift-M",  "\033M", CGDB_KEY_ALT_SHIFT_M);
-//    insertIntoList ("Alt-Shift-N",  "Alt-Shift-N",  "\033N", CGDB_KEY_ALT_SHIFT_N);
-//    insertIntoList ("Alt-Shift-O",  "Alt-Shift-O",  "\033O", CGDB_KEY_ALT_SHIFT_O);
-//    insertIntoList ("Alt-Shift-P",  "Alt-Shift-P",  "\033P", CGDB_KEY_ALT_SHIFT_P);
-//    insertIntoList ("Alt-Shift-Q",  "Alt-Shift-Q",  "\033Q", CGDB_KEY_ALT_SHIFT_Q);
-//    insertIntoList ("Alt-Shift-R",  "Alt-Shift-R",  "\033R", CGDB_KEY_ALT_SHIFT_R);
-//    insertIntoList ("Alt-Shift-S",  "Alt-Shift-S",  "\033S", CGDB_KEY_ALT_SHIFT_S);
-//    insertIntoList ("Alt-Shift-T",  "Alt-Shift-T",  "\033T", CGDB_KEY_ALT_SHIFT_T);
-//    insertIntoList ("Alt-Shift-U",  "Alt-Shift-U",  "\033U", CGDB_KEY_ALT_SHIFT_U);
-//    insertIntoList ("Alt-Shift-V",  "Alt-Shift-V",  "\033V", CGDB_KEY_ALT_SHIFT_V);
-//    insertIntoList ("Alt-Shift-W",  "Alt-Shift-W",  "\033W", CGDB_KEY_ALT_SHIFT_W);
-//    insertIntoList ("Alt-Shift-X",  "Alt-Shift-X",  "\033X", CGDB_KEY_ALT_SHIFT_X);
-//    insertIntoList ("Alt-Shift-Y",  "Alt-Shift-Y",  "\033Y", CGDB_KEY_ALT_SHIFT_Y);
-//    insertIntoList ("Alt-Shift-Z",  "Alt-Shift-Z",  "\033Z", CGDB_KEY_ALT_SHIFT_Z);
+    insertIntoList ("Alt-Shift-A",  "Alt-Shift-A",  "\033A", CGDB_KEY_ALT_SHIFT_A);
+    insertIntoList ("Alt-Shift-B",  "Alt-Shift-B",  "\033B", CGDB_KEY_ALT_SHIFT_B);
+    insertIntoList ("Alt-Shift-C",  "Alt-Shift-C",  "\033C", CGDB_KEY_ALT_SHIFT_C);
+    insertIntoList ("Alt-Shift-D",  "Alt-Shift-D",  "\033D", CGDB_KEY_ALT_SHIFT_D);
+    insertIntoList ("Alt-Shift-E",  "Alt-Shift-E",  "\033E", CGDB_KEY_ALT_SHIFT_E);
+    insertIntoList ("Alt-Shift-F",  "Alt-Shift-F",  "\033F", CGDB_KEY_ALT_SHIFT_F);
+    insertIntoList ("Alt-Shift-G",  "Alt-Shift-G",  "\033G", CGDB_KEY_ALT_SHIFT_G);
+    insertIntoList ("Alt-Shift-H",  "Alt-Shift-H",  "\033H", CGDB_KEY_ALT_SHIFT_H);
+    insertIntoList ("Alt-Shift-I",  "Alt-Shift-I",  "\033I", CGDB_KEY_ALT_SHIFT_I);
+    insertIntoList ("Alt-Shift-J",  "Alt-Shift-J",  "\033J", CGDB_KEY_ALT_SHIFT_J);
+    insertIntoList ("Alt-Shift-K",  "Alt-Shift-K",  "\033K", CGDB_KEY_ALT_SHIFT_K);
+    insertIntoList ("Alt-Shift-L",  "Alt-Shift-L",  "\033L", CGDB_KEY_ALT_SHIFT_L);
+    insertIntoList ("Alt-Shift-M",  "Alt-Shift-M",  "\033M", CGDB_KEY_ALT_SHIFT_M);
+    insertIntoList ("Alt-Shift-N",  "Alt-Shift-N",  "\033N", CGDB_KEY_ALT_SHIFT_N);
+    insertIntoList ("Alt-Shift-O",  "Alt-Shift-O",  "\033O", CGDB_KEY_ALT_SHIFT_O);
+    insertIntoList ("Alt-Shift-P",  "Alt-Shift-P",  "\033P", CGDB_KEY_ALT_SHIFT_P);
+    insertIntoList ("Alt-Shift-Q",  "Alt-Shift-Q",  "\033Q", CGDB_KEY_ALT_SHIFT_Q);
+    insertIntoList ("Alt-Shift-R",  "Alt-Shift-R",  "\033R", CGDB_KEY_ALT_SHIFT_R);
+    insertIntoList ("Alt-Shift-S",  "Alt-Shift-S",  "\033S", CGDB_KEY_ALT_SHIFT_S);
+    insertIntoList ("Alt-Shift-T",  "Alt-Shift-T",  "\033T", CGDB_KEY_ALT_SHIFT_T);
+    insertIntoList ("Alt-Shift-U",  "Alt-Shift-U",  "\033U", CGDB_KEY_ALT_SHIFT_U);
+    insertIntoList ("Alt-Shift-V",  "Alt-Shift-V",  "\033V", CGDB_KEY_ALT_SHIFT_V);
+    insertIntoList ("Alt-Shift-W",  "Alt-Shift-W",  "\033W", CGDB_KEY_ALT_SHIFT_W);
+    insertIntoList ("Alt-Shift-X",  "Alt-Shift-X",  "\033X", CGDB_KEY_ALT_SHIFT_X);
+    insertIntoList ("Alt-Shift-Y",  "Alt-Shift-Y",  "\033Y", CGDB_KEY_ALT_SHIFT_Y);
+    insertIntoList ("Alt-Shift-Z",  "Alt-Shift-Z",  "\033Z", CGDB_KEY_ALT_SHIFT_Z);
 
     /* Alt Numbers */
-//    insertIntoList ("Alt-1",        "Alt-1",        "\0331", CGDB_KEY_ALT_1);
-//    insertIntoList ("Alt-2",        "Alt-2",        "\0332", CGDB_KEY_ALT_2);
-//    insertIntoList ("Alt-3",        "Alt-3",        "\0333", CGDB_KEY_ALT_3);
-//    insertIntoList ("Alt-4",        "Alt-4",        "\0334", CGDB_KEY_ALT_4);
-//    insertIntoList ("Alt-5",        "Alt-5",        "\0335", CGDB_KEY_ALT_5);
-//    insertIntoList ("Alt-6",        "Alt-6",        "\0336", CGDB_KEY_ALT_6);
-//    insertIntoList ("Alt-7",        "Alt-7",        "\0337", CGDB_KEY_ALT_7);
-//    insertIntoList ("Alt-8",        "Alt-8",        "\0338", CGDB_KEY_ALT_8);
-//    insertIntoList ("Alt-9",        "Alt-9",        "\0339", CGDB_KEY_ALT_9);
-//    insertIntoList ("Alt-0",        "Alt-0",        "\0330", CGDB_KEY_ALT_0);
-//
-//    /* Alt Shifted Numbers */
-//    insertIntoList ("Alt-Shift-1",  "Alt-Shift-1",  "\033!", CGDB_KEY_ALT_SHIFT_1);
-//    insertIntoList ("Alt-Shift-2",  "Alt-Shift-2",  "\033@", CGDB_KEY_ALT_SHIFT_2);
-//    insertIntoList ("Alt-Shift-3",  "Alt-Shift-3",  "\033#", CGDB_KEY_ALT_SHIFT_3);
-//    insertIntoList ("Alt-Shift-4",  "Alt-Shift-4",  "\033$", CGDB_KEY_ALT_SHIFT_4);
-//    insertIntoList ("Alt-Shift-5",  "Alt-Shift-5",  "\033%", CGDB_KEY_ALT_SHIFT_5);
-//    insertIntoList ("Alt-Shift-6",  "Alt-Shift-6",  "\033^", CGDB_KEY_ALT_SHIFT_6);
-//    insertIntoList ("Alt-Shift-7",  "Alt-Shift-7",  "\033&", CGDB_KEY_ALT_SHIFT_7);
-//    insertIntoList ("Alt-Shift-8",  "Alt-Shift-8",  "\033*", CGDB_KEY_ALT_SHIFT_8);
-//    insertIntoList ("Alt-Shift-9",  "Alt-Shift-9",  "\033(", CGDB_KEY_ALT_SHIFT_9);
-//    insertIntoList ("Alt-Shift-0",  "Alt-Shift-0",  "\033)", CGDB_KEY_ALT_SHIFT_0);
+    insertIntoList ("Alt-1",        "Alt-1",        "\0331", CGDB_KEY_ALT_1);
+    insertIntoList ("Alt-2",        "Alt-2",        "\0332", CGDB_KEY_ALT_2);
+    insertIntoList ("Alt-3",        "Alt-3",        "\0333", CGDB_KEY_ALT_3);
+    insertIntoList ("Alt-4",        "Alt-4",        "\0334", CGDB_KEY_ALT_4);
+    insertIntoList ("Alt-5",        "Alt-5",        "\0335", CGDB_KEY_ALT_5);
+    insertIntoList ("Alt-6",        "Alt-6",        "\0336", CGDB_KEY_ALT_6);
+    insertIntoList ("Alt-7",        "Alt-7",        "\0337", CGDB_KEY_ALT_7);
+    insertIntoList ("Alt-8",        "Alt-8",        "\0338", CGDB_KEY_ALT_8);
+    insertIntoList ("Alt-9",        "Alt-9",        "\0339", CGDB_KEY_ALT_9);
+    insertIntoList ("Alt-0",        "Alt-0",        "\0330", CGDB_KEY_ALT_0);
+
+    /* Alt Shifted Numbers */
+    insertIntoList ("Alt-Shift-1",  "Alt-Shift-1",  "\033!", CGDB_KEY_ALT_SHIFT_1);
+    insertIntoList ("Alt-Shift-2",  "Alt-Shift-2",  "\033@", CGDB_KEY_ALT_SHIFT_2);
+    insertIntoList ("Alt-Shift-3",  "Alt-Shift-3",  "\033#", CGDB_KEY_ALT_SHIFT_3);
+    insertIntoList ("Alt-Shift-4",  "Alt-Shift-4",  "\033$", CGDB_KEY_ALT_SHIFT_4);
+    insertIntoList ("Alt-Shift-5",  "Alt-Shift-5",  "\033%", CGDB_KEY_ALT_SHIFT_5);
+    insertIntoList ("Alt-Shift-6",  "Alt-Shift-6",  "\033^", CGDB_KEY_ALT_SHIFT_6);
+    insertIntoList ("Alt-Shift-7",  "Alt-Shift-7",  "\033&", CGDB_KEY_ALT_SHIFT_7);
+    insertIntoList ("Alt-Shift-8",  "Alt-Shift-8",  "\033*", CGDB_KEY_ALT_SHIFT_8);
+    insertIntoList ("Alt-Shift-9",  "Alt-Shift-9",  "\033(", CGDB_KEY_ALT_SHIFT_9);
+    insertIntoList ("Alt-Shift-0",  "Alt-Shift-0",  "\033)", CGDB_KEY_ALT_SHIFT_0);
 
     /* Alt Special */
-//    insertIntoList ("Alt--",        "Alt--",        "\033-", CGDB_KEY_ALT_MINUS);
-//    insertIntoList ("Alt-=",        "Alt-=",        "\033=", CGDB_KEY_ALT_EQUAL);
-//    insertIntoList ("Alt-[",        "Alt-[",        "\033[", CGDB_KEY_ALT_LEFT_BRACKET);
-//    insertIntoList ("Alt-]",        "Alt-]",        "\033]", CGDB_KEY_ALT_LEFT_BRACKET);
-//    insertIntoList ("Alt-\\",       "Alt-\\",       "\033\\",CGDB_KEY_ALT_BACKSLASH);
-//    insertIntoList ("Alt-;",        "Alt-;",        "\033;", CGDB_KEY_ALT_SEMICOLON);
-//    insertIntoList ("Alt-'",        "Alt-'",        "\033'", CGDB_KEY_ALT_APOSTROPHE);
-//    insertIntoList ("Alt-,",        "Alt-,",        "\033,", CGDB_KEY_ALT_COMMA);
-//    insertIntoList ("Alt-.",        "Alt-.",        "\033.", CGDB_KEY_ALT_PERIOD);
-//    insertIntoList ("Alt-/",        "Alt-/",        "\033/", CGDB_KEY_ALT_DIVIDE);
-//    insertIntoList ("Alt-`",        "Alt-`",        "\033`", CGDB_KEY_ALT_ACCENT_MARK);
-//
-//    /* Alt Shifte Special */
-//    insertIntoList ("Alt-Shift-_",  "Alt-Shift-_",  "\033_", CGDB_KEY_ALT_SHIFT_UNDERSCORE);
-//    insertIntoList ("Alt-Shift-+",  "Alt-Shift-+",  "\033+", CGDB_KEY_ALT_SHIFT_PLUS);
-//    insertIntoList ("Alt-Shift-{",  "Alt-Shift-{",  "\033{", CGDB_KEY_ALT_SHIFT_LEFT_CURLY_BRACKET);
-//    insertIntoList ("Alt-Shift-}",  "Alt-Shift-}",  "\033}", CGDB_KEY_ALT_SHIFT_RIGHT_CURLY_BRACKET);
-//    insertIntoList ("Alt-Shift-|",  "Alt-Shift-|",  "\033|", CGDB_KEY_ALT_SHIFT_PIPE);
-//    insertIntoList ("Alt-Shift-:",  "Alt-Shift-:",  "\033:", CGDB_KEY_ALT_SHIFT_COLON);
-//    insertIntoList ("Alt-Shift-\"", "Alt-Shift-\"", "\033\"",CGDB_KEY_ALT_SHIFT_QUOTE);
-//    insertIntoList ("Alt-Shift-<",  "Alt-Shift-<",  "\033<", CGDB_KEY_ALT_SHIFT_LESS_THAN);
-//    insertIntoList ("Alt-Shift->",  "Alt-Shift->",  "\033>", CGDB_KEY_ALT_SHIFT_GREATER_THAN);
-//    insertIntoList ("Alt-Shift-?",  "Alt-Shift-?",  "\033?", CGDB_KEY_ALT_SHIFT_QUESTION_MARK);
-//    insertIntoList ("Alt-Shift-~",  "Alt-Shift-~",  "\033~", CGDB_KEY_ALT_SHIFT_TILDA);
+    insertIntoList ("Alt--",        "Alt--",        "\033-", CGDB_KEY_ALT_MINUS);
+    insertIntoList ("Alt-=",        "Alt-=",        "\033=", CGDB_KEY_ALT_EQUAL);
+    insertIntoList ("Alt-[",        "Alt-[",        "\033[", CGDB_KEY_ALT_LEFT_BRACKET);
+    insertIntoList ("Alt-]",        "Alt-]",        "\033]", CGDB_KEY_ALT_LEFT_BRACKET);
+    insertIntoList ("Alt-\\",       "Alt-\\",       "\033\\",CGDB_KEY_ALT_BACKSLASH);
+    insertIntoList ("Alt-;",        "Alt-;",        "\033;", CGDB_KEY_ALT_SEMICOLON);
+    insertIntoList ("Alt-'",        "Alt-'",        "\033'", CGDB_KEY_ALT_APOSTROPHE);
+    insertIntoList ("Alt-,",        "Alt-,",        "\033,", CGDB_KEY_ALT_COMMA);
+    insertIntoList ("Alt-.",        "Alt-.",        "\033.", CGDB_KEY_ALT_PERIOD);
+    insertIntoList ("Alt-/",        "Alt-/",        "\033/", CGDB_KEY_ALT_DIVIDE);
+    insertIntoList ("Alt-`",        "Alt-`",        "\033`", CGDB_KEY_ALT_ACCENT_MARK);
+
+    /* Alt Shifte Special */
+    insertIntoList ("Alt-Shift-_",  "Alt-Shift-_",  "\033_", CGDB_KEY_ALT_SHIFT_UNDERSCORE);
+    insertIntoList ("Alt-Shift-+",  "Alt-Shift-+",  "\033+", CGDB_KEY_ALT_SHIFT_PLUS);
+    insertIntoList ("Alt-Shift-{",  "Alt-Shift-{",  "\033{", CGDB_KEY_ALT_SHIFT_LEFT_CURLY_BRACKET);
+    insertIntoList ("Alt-Shift-}",  "Alt-Shift-}",  "\033}", CGDB_KEY_ALT_SHIFT_RIGHT_CURLY_BRACKET);
+    insertIntoList ("Alt-Shift-|",  "Alt-Shift-|",  "\033|", CGDB_KEY_ALT_SHIFT_PIPE);
+    insertIntoList ("Alt-Shift-:",  "Alt-Shift-:",  "\033:", CGDB_KEY_ALT_SHIFT_COLON);
+    insertIntoList ("Alt-Shift-\"", "Alt-Shift-\"", "\033\"",CGDB_KEY_ALT_SHIFT_QUOTE);
+    insertIntoList ("Alt-Shift-<",  "Alt-Shift-<",  "\033<", CGDB_KEY_ALT_SHIFT_LESS_THAN);
+    insertIntoList ("Alt-Shift->",  "Alt-Shift->",  "\033>", CGDB_KEY_ALT_SHIFT_GREATER_THAN);
+    insertIntoList ("Alt-Shift-?",  "Alt-Shift-?",  "\033?", CGDB_KEY_ALT_SHIFT_QUESTION_MARK);
+    insertIntoList ("Alt-Shift-~",  "Alt-Shift-~",  "\033~", CGDB_KEY_ALT_SHIFT_TILDA);
 }
 
 /* Puts list into a searchable database */
 static void store_list(void) {
-    int size = 100, i = 0;
+    int size = 256, i = 0;
 
     /* Allocate for all the entries, plus 1 for the null termination */
     list = (struct term_entry *)malloc(sizeof(struct term_entry)*size + 1);
@@ -379,14 +393,11 @@ static void import_keyseqs(void) {
 
 /*  input_read: Will read the next char from fd.
  *
- *  block - If non-zero then it will block with no data available, 
- *          If 0 then it will not block if no data is available.
- *
  * Returns:     -1 on error 
  *              0 if no data is ready
  *              or the char read.
  */
-int input_read(int fd, int block) {
+int input_read(int fd) {
     char c;
     int ret;
     int flag = 0;
@@ -402,23 +413,28 @@ int input_read(int fd, int block) {
     FD_SET (fd, &readfds);
     FD_SET (fd, &exceptfds);
     
-    /* Only do select if we are blocking */
-    if ( !block ) {
-        timeout.tv_sec = 0;
-        timeout.tv_usec = 100000;   /* 0.1 seconds; it's in usec */
+    timeout.tv_sec = 0;
+    /* This is the timeout that readline uses, so it must be good.
+     * However, when I hit ESC and then o from the gdb window, the input lib 
+     * returns the key binding Alt-o which doesn't cause the filedlg to be 
+     * opened. This is very annoying.
+     */
+    /*timeout.tv_usec = 100000; */  /* 0.1 seconds; it's in usec */
 
-        ret = select (fd + 1, &readfds, (fd_set *)NULL, &exceptfds, &timeout);
+    /* This is a good value that causes Alt-o to be returned when it should
+     * be and ESC, o when it should be.
+     */
+    timeout.tv_usec =   1000;   
 
-        if (ret <= 0)
-            return 0;   /* Nothing to read. */
-    }
+    ret = select (fd + 1, &readfds, (fd_set *)NULL, &exceptfds, &timeout);
+
+    if (ret <= 0)
+        return 0;   /* Nothing to read. */
 #endif
 
     /* Set nonblocking */
-    if ( !block ) {
-        flag = fcntl(fd, F_GETFL, 0);
-        fcntl(fd, F_SETFL, flag | O_NONBLOCK);
-    }
+    flag = fcntl(fd, F_GETFL, 0);
+    fcntl(fd, F_SETFL, flag | O_NONBLOCK);
 
 read_again:
 
@@ -439,8 +455,7 @@ read_again:
     }
 
     /* Set to original state */
-    if ( !block )
-        fcntl(fd, F_SETFL, flag);
+    fcntl(fd, F_SETFL, flag);
 
     if ( ret == -1 )
         return -1;
@@ -451,47 +466,73 @@ read_again:
 /* input_get_seq:
  *
  * Returns: -1 on error
- *          -2 if no data was ready
  *          -3 if bad sequence was found
  *          > 0 if macro was found and returned.
  */
 static int input_get_seq(struct input *input) {
-    int i, j = 0; 
+    int i, j = 0, cur_pos = -1; 
     int possible[list_size];
     int c;
     int still_possible;
-
-    if ( (c = input_read(input->stdinfd, 0)) == 0 )
-        return -2;   /* No data ready (Got esc key) */
 
     /* Initalize all possible esq sequences to be a possible match */
     for ( i = 0; i < list_size; i++ )
         possible[i] = 1;
 
-    do {
+    while ( 1 ) {
+        /* There is no longer a possible match */
         still_possible = 0;
-        input->bad_esc_seq[j++] = c;
+        
+        /* non-blocking character read */ 
+        if ( input_extra_char == -1 )
+            c = input_read(input->stdinfd);
+        else {
+            c = input_extra_char;
+            input_extra_char = -1;
+        }
+
+        if ( c == -1 )
+            return -1;
+        else if ( c == 0 )    /* No data ready, finish up */
+            break;
+
         for ( i = 0; i < list_size; i++) { /* for each mapping */
             if ( possible[i] && list[i].sequence[j] == c ) {
-                if ( j + 1== strlen(list[i].sequence) ) {/* Found match */
-                    /* Save last sequence found */
-                    input->last_entry = &list[i];
-                    return input->last_entry->macro;
-                }
+                if ( j + 1 == strlen(list[i].sequence) ) 
+                    cur_pos = i;
+
+                /* There is still at least 1 match */
                 still_possible = 1;
             } else
                 possible[i] = 0;
         }
+        
+        /* Save every character read in buffer */
+        input->bad_esc_seq[j++] = c;
 
+        /* This forces the algorithm to stop after a macro is found */
         if ( !still_possible )
             break;
+    }
 
-        c = input_read(input->stdinfd, 0);
+    /* At this point, all esc sequences have failed to match.
+     * There is at least 1 extra character read to prove this.
+     * At most, all of the characters read do not make an esc 
+     * sequence. The input lib knows if a seq was made because
+     * cur_pos will not be -1.
+     */
+    if ( cur_pos != -1 ) {
+        /* This is the esc sequence */
+        input->last_entry = &list[cur_pos];
 
-        /* Bad escape sequence */
-        if ( c == 0 )
-            break;
-    } while ( c != -1 ); /* No data ready and no match ( return everything ) */
+        /* Save the extra char read to show there are no more esc seq 
+         * only if there was data returned */
+        if ( c != 0 )
+            input_extra_char = c;
+        
+        /* Return the new macro */
+        return input->last_entry->macro;
+    }
     
     /* Assertion: The sequence did not match anything of interest */
     input->bad_esc_seq_size = j - 1;
@@ -508,33 +549,23 @@ static int input_get_seq(struct input *input) {
  * Returns -1 on error, or key pressed, or macro for esc sequence.
  */
 static int input_getch(struct input *i) {
-    char c;
+    int result;
 
     /* Write out the bad esc sequence read in previously */
     if ( i->bad_esc_seq_counter != -1 ) {
-        if ( i->bad_esc_seq[i->bad_esc_seq_counter] == i->bad_esc_seq_size )
+        if (i->bad_esc_seq_counter >= i->bad_esc_seq_size )
             i->bad_esc_seq_counter = -1;
         else
             return i->bad_esc_seq[(i->bad_esc_seq_counter)++];
     }
 
-    /* We use a blocking read here because we know at least one byte is ready.
-     * the input library knows this because it is only called when select was 
-     * triggered 
-     */
-    if ( (c = input_read(i->stdinfd, 1)) <= 0 ) {
-        return -1;                                  /* On error */
-    } else if ( c == 27 ) {
-        int result;
-        if ( ( result = input_get_seq(i)) == -1 )    /* On macro Esc sequence */
-            return -1;
-        else if ( result == -2 )
-            return c;  /* Found only the esc key */
-        else if ( result > 0 && i->bad_esc_seq_counter == -1)
-            return i->last_entry->macro;
-    }
-    
-    return c;                                       /* On regular key */
+    /* Look for macro Esc sequence */
+    if ( ( result = input_get_seq(i)) == -1 )   /* On error */
+        return -1;
+    else if ( result > CGDB_KEY_ESC )           /* Return the macro */
+        return i->last_entry->macro;
+    else
+        return result;                          /* Regular key */
 }
 
 struct input *input_init(int stdinfd) {
@@ -545,12 +576,9 @@ struct input *input_init(int stdinfd) {
     i->bad_esc_seq_counter = -1;
 
     import_keyseqs();
-    /*print_list();*/
 
     store_list();
     add_keybindings();
-
-    /*display_list();*/
 
     return i;
 }

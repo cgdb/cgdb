@@ -1,3 +1,10 @@
+03/30/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * Fixed input.c to work when some esc sequences are subsets of others:
+    The input unit now reads the next char to see if the current esc seq
+    is a subset of a longer esc seq. The unit always returns the longest
+    esc sequence.
+
 03/29/2003 Bob Rossi <bob_rossi@cox.net>
 
     * Fixed all files to work with autoconf: All of the files that make up

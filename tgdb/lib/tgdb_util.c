@@ -306,6 +306,8 @@ int invoke_pty_process(
             pty_free_memory(slavename, *masterfd, argc, local_argv);
             return -1;
         }
+
+        return -1;
     } // end if 
 
     if ( pty_free_memory(NULL, -1, argc, local_argv) == -1 )
