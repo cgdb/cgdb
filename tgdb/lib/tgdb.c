@@ -17,7 +17,6 @@ int tgdb_init(void) {
         tgdb_get_source_absolute_filename   = a2_tgdb_get_source_absolute_filename;
         tgdb_err_msg                        = a2_tgdb_err_msg;
         tgdb_shutdown                       = a2_tgdb_shutdown;
-        tgdb_get_prompt                     = a2_tgdb_get_prompt;
     } else {
         tgdb_start                          = gdbmi_tgdb_init;
         tgdb_send                           = gdbmi_tgdb_send;
@@ -32,7 +31,6 @@ int tgdb_init(void) {
         tgdb_get_source_absolute_filename   = gdbmi_tgdb_get_source_absolute_filename;
         tgdb_err_msg                        = gdbmi_tgdb_err_msg;
         tgdb_shutdown                       = gdbmi_tgdb_shutdown;
-        tgdb_get_prompt                     = gdbmi_tgdb_get_prompt;
     }
     return 0;
 }

@@ -100,6 +100,31 @@ int tgdb_util_new_tty(int *masterfd, int *slavefd, char *sname) {
    return 0;
 }
 
+int tgdb_util_free_tty(int *masterfd, int *slavefd, char *sname) {
+
+   xclose(*masterfd);
+   xclose(*slavefd);
+
+   if ( pty_release(sname) == -1 ) {
+      err_msg("%s:%d pty_release error", __FILE__, __LINE__);
+      return -1;   
+   }
+   
+   return 0;
+}
+
+int tgdb_util_pty_free_process(int *masterfd, char *sname) {
+
+   xclose(*masterfd);
+
+   if ( pty_release(sname) == -1 ) {
+      err_msg("%s:%d pty_release error", __FILE__, __LINE__);
+      return -1;   
+   }
+   
+   return 0;
+}
+
 /* free_memory: utility function that frees up memory.
  *
  * argc:    The number of items in argv
@@ -160,6 +185,9 @@ int invoke_debugger(char *path, int argc, char *argv[], int *in, int *out, int c
         return -1;
     } else if ( pid == 0 ) {    /* child */
 
+        xclose(pin[1]);
+        xclose(pout[0]);
+
         /* If this is not called, when user types ^c SIGINT gets sent to gdb */
         setsid();
         
@@ -198,5 +226,90 @@ int invoke_debugger(char *path, int argc, char *argv[], int *in, int *out, int c
     *out = pout[0];
     xclose(pout[1]);
     free_memory(argc, local_argv);
+    return pid;
+}
+
+/* free_memory: utility function that frees up memory.
+ *
+ * s:       if NULL, left alone, otherwise pty_release is called on it
+ * fd:      if -1, left alone, otherwise close is called on it
+ * argc:    The number of items in argv
+ * argv:    free is called on each of these
+ *
+ * Returns -1 if any call fails, otherwise 0
+ */
+static int pty_free_memory(char *s, int fd, int argc, char *argv[]) {
+    int error = 0, i;
+
+    if ( s && pty_release(s) == -1) {
+        err_msg("(%s:%d) pty_release failed", __FILE__, __LINE__);
+        error = -1;
+    }
+
+    if ( fd != -1 && close(fd) == -1) {
+        err_msg("(%s:%d) close failed", __FILE__, __LINE__);
+        error = -1;
+    }
+
+    /* Free the local list */
+    for (i = 0; i < argc; i++)
+        free(argv[i]);
+   
+    free(argv);
+
+    return error;
+}
+   
+int invoke_pty_process(
+    char *name, 
+    int argc, char *argv[], 
+    char *slavename, int *masterfd) {
+
+    char **local_argv;  /* Local argument vector to pass to GDB */
+    pid_t pid;          /* PID of child process (gdb) to be returned */
+    int i, j = 0, extra = 2;    /* 1 name, 1 NULL */
+
+    if ( !name ) {
+      err_msg("%s:%d name error", __FILE__, __LINE__);
+      return -1;
+    } 
+        
+    /* Copy the argv into the local_argv, and NULL terminate it. */
+    local_argv = (char **) xmalloc((argc+extra) * sizeof(char *));
+    local_argv[j++] = xstrdup(name);
+   
+    /* copy in all the data the user entered */ 
+    for (i = 0; i < argc; i++)
+        local_argv[j++] = xstrdup(argv[i]);
+
+    local_argv[j] = NULL;
+
+    /* Fork into two processes with a shared pty pipe */
+    pid = pty_fork(masterfd, slavename, SLAVE_SIZE, NULL, NULL);
+   
+    if ( pid == -1 ) {          /* error, free memory and return  */
+        err_msg("(%s:%d) pty_fork failed", __FILE__, __LINE__);
+        pty_free_memory(slavename, *masterfd, argc, local_argv);
+        return -1;
+    } else if ( pid == 0 ) {    /* child */
+        
+        /* Redirect stderr to stdout */
+        if ( dup2(STDOUT_FILENO, STDERR_FILENO) == -1 ) {
+            err_msg("(%s:%d) dup2 failed", __FILE__, __LINE__);
+            pty_free_memory(slavename, *masterfd, argc, local_argv);
+            return -1;
+        }
+
+        if(execvp(local_argv[0], local_argv) == -1) {
+            err_msg("(%s:%d) execvp failed", __FILE__, __LINE__);
+            err_msg("(%s:%d) %s is not in path", __FILE__, __LINE__, name);
+            pty_free_memory(slavename, *masterfd, argc, local_argv);
+            return -1;
+        }
+    } // end if 
+
+    if ( pty_free_memory(NULL, -1, argc, local_argv) == -1 )
+        return -1;
+
     return pid;
 }

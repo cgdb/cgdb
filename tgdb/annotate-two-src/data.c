@@ -16,7 +16,7 @@ static enum internal_state data_state = VOID;
 static char gdb_prompt[GDB_PROMPT_SIZE];
 static int gdb_prompt_size = 0;
 
-int DATA_AT_PROMPT = 0; 
+int COMMAND_TYPED_AT_PROMPT = 0; 
 
 /* Used to determine if the car ret is from readline */
 static enum CAR_RET_STATE {
@@ -50,7 +50,7 @@ void data_set_state(enum internal_state state){
          break;
       case USER_AT_PROMPT:    
          commands_set_state(VOID, NULL);
-         DATA_AT_PROMPT = 1;
+         COMMAND_TYPED_AT_PROMPT = 0;
          global_set_signal_recieved(FALSE);
 
          break;
@@ -65,21 +65,24 @@ void data_set_state(enum internal_state state){
 }
 
 void data_process(char a, char *buf, int *n, struct queue *q){
-   switch(data_state){
-      case VOID:              buf[(*n)++] = a;                    break;
-      case AT_PROMPT:         gdb_prompt[gdb_prompt_size++] = a;  break;
-      case USER_AT_PROMPT:    break;
-      case GUI_COMMAND:
-      case INTERNAL_COMMAND:
-         if(data_state == INTERNAL_COMMAND)
-            commands_process(a, q);
-         else if(data_state == GUI_COMMAND)
+    switch(data_state){
+        case VOID:    buf[(*n)++] = a;   break;
+        case AT_PROMPT:         
+            gdb_prompt[gdb_prompt_size++] = a;  
             buf[(*n)++] = a;
+            break;
+        case USER_AT_PROMPT:    break;
+        case GUI_COMMAND:
+        case INTERNAL_COMMAND:
+            if(data_state == INTERNAL_COMMAND)
+                commands_process(a, q);
+            else if(data_state == GUI_COMMAND)
+                buf[(*n)++] = a;
       
-         break; /* do nothing */
-     case USER_COMMAND: break;
-     case POST_PROMPT:  break;
-   } /* end switch */
+            break; /* do nothing */
+        case USER_COMMAND: break;
+        case POST_PROMPT:  break;
+    } /* end switch */
 }
 
 char *data_get_prompt(void) {

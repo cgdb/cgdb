@@ -36,6 +36,8 @@ int main(int argc, char **argv){
    int j = 4;
    char temp[SIZE];
 
+   long_func();
+
    fprintf(stderr, "HAHAAHA\n");
    fprintf(stderr, "AHAAHA\n");
    fprintf(stderr, "HAAHA\n");
@@ -44,7 +46,10 @@ int main(int argc, char **argv){
    fprintf(stderr, "HA\n");
    fprintf(stderr, "A\n");
 
-   long_func();
+   for ( i = 0; i < 100; i++)
+       fprintf(stderr, "Yo\n");
+
+   /*long_func();*/
 
    short_func();
    short_func();

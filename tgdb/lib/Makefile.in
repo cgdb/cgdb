@@ -136,6 +136,7 @@ $(tgdb_srcdir)/lib/error.c \
 $(tgdb_srcdir)/lib/util.c \
 $(tgdb_srcdir)/lib/io.c \
 $(tgdb_srcdir)/lib/queue.c \
+$(tgdb_srcdir)/lib/rlctx.c \
 $(tgdb_srcdir)/annotate-two-src/a2-tgdb.c \
 $(tgdb_srcdir)/annotate-two-src/annotate.c \
 $(tgdb_srcdir)/annotate-two-src/state_machine.c \
@@ -150,11 +151,17 @@ $(tgdb_srcdir)/gdbmi-src/gdbmi_parse.c
 
 
 EXTRA_PROGRAMS = driver
-bin_PROGRAMS = @BUILD_DRIVER@
+bin_PROGRAMS = @BUILD_DRIVER@ rlctx_prog
 driver_LDFLAGS = -L.
 driver_LDADD = -ltgdb
 driver_SOURCES = driver.c
 driver_DEPENDENCIES = -ltgdb
+
+# This program provides tgdb with a readline interface
+rlctx_prog_LDFLAGS = -L.
+rlctx_prog_LDADD = -ltgdb
+rlctx_prog_SOURCES = rlctx_prog.c
+rlctx_prog_DEPENDENCIES = -ltgdb
 subdir = tgdb/lib
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
@@ -165,18 +172,20 @@ libtgdb_a_AR = $(AR) cru
 libtgdb_a_LIBADD =
 am_libtgdb_a_OBJECTS = tgdb.$(OBJEXT) tgdb_util.$(OBJEXT) \
 	types.$(OBJEXT) pseudo.$(OBJEXT) error.$(OBJEXT) util.$(OBJEXT) \
-	io.$(OBJEXT) queue.$(OBJEXT) a2-tgdb.$(OBJEXT) \
+	io.$(OBJEXT) queue.$(OBJEXT) rlctx.$(OBJEXT) a2-tgdb.$(OBJEXT) \
 	annotate.$(OBJEXT) state_machine.$(OBJEXT) data.$(OBJEXT) \
 	terminal.$(OBJEXT) commands.$(OBJEXT) globals.$(OBJEXT) \
 	tgdb_init.$(OBJEXT) buffer.$(OBJEXT) gdbmi_tgdb.$(OBJEXT) \
 	gdbmi_parse.$(OBJEXT)
 libtgdb_a_OBJECTS = $(am_libtgdb_a_OBJECTS)
 EXTRA_PROGRAMS = driver$(EXEEXT)
-bin_PROGRAMS = @BUILD_DRIVER@
+bin_PROGRAMS = @BUILD_DRIVER@ rlctx_prog$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 
 am_driver_OBJECTS = driver.$(OBJEXT)
 driver_OBJECTS = $(am_driver_OBJECTS)
+am_rlctx_prog_OBJECTS = rlctx_prog.$(OBJEXT)
+rlctx_prog_OBJECTS = $(am_rlctx_prog_OBJECTS)
 
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
@@ -187,7 +196,9 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/error.Po ./$(DEPDIR)/gdbmi_parse.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/gdbmi_tgdb.Po ./$(DEPDIR)/globals.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/io.Po ./$(DEPDIR)/pseudo.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/queue.Po ./$(DEPDIR)/state_machine.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/queue.Po ./$(DEPDIR)/rlctx.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/rlctx_prog.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/state_machine.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/terminal.Po ./$(DEPDIR)/tgdb.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/tgdb_init.Po ./$(DEPDIR)/tgdb_util.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/types.Po ./$(DEPDIR)/util.Po
@@ -195,9 +206,10 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES = $(libtgdb_a_SOURCES) $(driver_SOURCES)
+DIST_SOURCES = $(libtgdb_a_SOURCES) $(driver_SOURCES) \
+	$(rlctx_prog_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in
-SOURCES = $(libtgdb_a_SOURCES) $(driver_SOURCES)
+SOURCES = $(libtgdb_a_SOURCES) $(driver_SOURCES) $(rlctx_prog_SOURCES)
 
 all: all-am
 
@@ -221,6 +233,7 @@ error.$(OBJEXT): $(tgdb_srcdir)/lib/error.c
 util.$(OBJEXT): $(tgdb_srcdir)/lib/util.c
 io.$(OBJEXT): $(tgdb_srcdir)/lib/io.c
 queue.$(OBJEXT): $(tgdb_srcdir)/lib/queue.c
+rlctx.$(OBJEXT): $(tgdb_srcdir)/lib/rlctx.c
 a2-tgdb.$(OBJEXT): $(tgdb_srcdir)/annotate-two-src/a2-tgdb.c
 annotate.$(OBJEXT): $(tgdb_srcdir)/annotate-two-src/annotate.c
 state_machine.$(OBJEXT): $(tgdb_srcdir)/annotate-two-src/state_machine.c
@@ -263,6 +276,9 @@ clean-binPROGRAMS:
 driver$(EXEEXT): $(driver_OBJECTS) $(driver_DEPENDENCIES) 
 	@rm -f driver$(EXEEXT)
 	$(LINK) $(driver_LDFLAGS) $(driver_OBJECTS) $(driver_LDADD) $(LIBS)
+rlctx_prog$(EXEEXT): $(rlctx_prog_OBJECTS) $(rlctx_prog_DEPENDENCIES) 
+	@rm -f rlctx_prog$(EXEEXT)
+	$(LINK) $(rlctx_prog_LDFLAGS) $(rlctx_prog_OBJECTS) $(rlctx_prog_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT) core *.core
@@ -283,6 +299,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pseudo.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/queue.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rlctx.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rlctx_prog.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/state_machine.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/terminal.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tgdb.Po@am__quote@
@@ -491,6 +509,28 @@ queue.obj: $(tgdb_srcdir)/lib/queue.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/queue.Po' tmpdepfile='$(DEPDIR)/queue.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o queue.obj `if test -f '$(tgdb_srcdir)/lib/queue.c'; then $(CYGPATH_W) '$(tgdb_srcdir)/lib/queue.c'; else $(CYGPATH_W) '$(srcdir)/$(tgdb_srcdir)/lib/queue.c'`
+
+rlctx.o: $(tgdb_srcdir)/lib/rlctx.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT rlctx.o -MD -MP -MF "$(DEPDIR)/rlctx.Tpo" \
+@am__fastdepCC_TRUE@	  -c -o rlctx.o `test -f '$(tgdb_srcdir)/lib/rlctx.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/lib/rlctx.c; \
+@am__fastdepCC_TRUE@	then mv "$(DEPDIR)/rlctx.Tpo" "$(DEPDIR)/rlctx.Po"; \
+@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/rlctx.Tpo"; exit 1; \
+@am__fastdepCC_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(tgdb_srcdir)/lib/rlctx.c' object='rlctx.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/rlctx.Po' tmpdepfile='$(DEPDIR)/rlctx.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o rlctx.o `test -f '$(tgdb_srcdir)/lib/rlctx.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/lib/rlctx.c
+
+rlctx.obj: $(tgdb_srcdir)/lib/rlctx.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT rlctx.obj -MD -MP -MF "$(DEPDIR)/rlctx.Tpo" \
+@am__fastdepCC_TRUE@	  -c -o rlctx.obj `if test -f '$(tgdb_srcdir)/lib/rlctx.c'; then $(CYGPATH_W) '$(tgdb_srcdir)/lib/rlctx.c'; else $(CYGPATH_W) '$(srcdir)/$(tgdb_srcdir)/lib/rlctx.c'`; \
+@am__fastdepCC_TRUE@	then mv "$(DEPDIR)/rlctx.Tpo" "$(DEPDIR)/rlctx.Po"; \
+@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/rlctx.Tpo"; exit 1; \
+@am__fastdepCC_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(tgdb_srcdir)/lib/rlctx.c' object='rlctx.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/rlctx.Po' tmpdepfile='$(DEPDIR)/rlctx.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o rlctx.obj `if test -f '$(tgdb_srcdir)/lib/rlctx.c'; then $(CYGPATH_W) '$(tgdb_srcdir)/lib/rlctx.c'; else $(CYGPATH_W) '$(srcdir)/$(tgdb_srcdir)/lib/rlctx.c'`
 
 a2-tgdb.o: $(tgdb_srcdir)/annotate-two-src/a2-tgdb.c
 @am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT a2-tgdb.o -MD -MP -MF "$(DEPDIR)/a2-tgdb.Tpo" \

@@ -14,6 +14,7 @@ $(tgdb_srcdir)/lib/error.c \
 $(tgdb_srcdir)/lib/util.c \
 $(tgdb_srcdir)/lib/io.c \
 $(tgdb_srcdir)/lib/queue.c \
+$(tgdb_srcdir)/lib/rlctx.c \
 $(tgdb_srcdir)/annotate-two-src/a2-tgdb.c \
 $(tgdb_srcdir)/annotate-two-src/annotate.c \
 $(tgdb_srcdir)/annotate-two-src/state_machine.c \
@@ -27,8 +28,14 @@ $(tgdb_srcdir)/gdbmi-src/gdbmi_tgdb.c \
 $(tgdb_srcdir)/gdbmi-src/gdbmi_parse.c
 
 EXTRA_PROGRAMS=driver
-bin_PROGRAMS = @BUILD_DRIVER@
+bin_PROGRAMS = @BUILD_DRIVER@ rlctx_prog
 driver_LDFLAGS = -L.
 driver_LDADD = -ltgdb
 driver_SOURCES = driver.c
 driver_DEPENDENCIES = -ltgdb
+
+# This program provides tgdb with a readline interface
+rlctx_prog_LDFLAGS = -L.
+rlctx_prog_LDADD = -ltgdb
+rlctx_prog_SOURCES = rlctx_prog.c
+rlctx_prog_DEPENDENCIES = -ltgdb

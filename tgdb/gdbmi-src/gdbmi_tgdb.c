@@ -147,7 +147,3 @@ char *gdbmi_tgdb_tty_name(void) {
 char *gdbmi_tgdb_err_msg(void) {
    return (char *)0;
 }
-
-char *gdbmi_tgdb_get_prompt(void) {
-    return (char *)0;
-}

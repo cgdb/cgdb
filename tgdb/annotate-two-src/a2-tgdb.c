@@ -22,12 +22,14 @@
 #include "buffer.h"
 #include "queue.h"
 #include "util.h"
+#include "rlctx.h"
 
+/* This is set when tgdb has initialized itself */
 static int tgdb_initialized = 0;
 
+
 int masterfd = -1;                     /* master fd of the pseudo-terminal */
-int gdb_stdout = -1;
-static int readline_fd[2] = { -1, -1 };
+int gdb_stdout = -1; 
 static char slavename[SLAVE_SIZE];     /* the name of the slave psuedo-termainl */
 
 int master_tty_fd = -1, slave_tty_fd = -1;
@@ -35,33 +37,82 @@ static char child_tty_name[SLAVE_SIZE];  /* the name of the slave psuedo-termain
 
 static pid_t debugger_pid;             /* pid of child process */
 
-/*static struct buffer users_commands;   users commands buffered */
+/* gdb_input_queue: The commands that need to be run through gdb. 
+ * Examples are 'b main', 'run', ...
+ * All commands in this queue will be run in order.
+ */
 static struct queue *gdb_input_queue;
+
+/* raw_input_queue: This is the data that the user typed to form a command.
+ * This data must be sent through readline to get the actual command.
+ * The data will be passed through readline and then readline will send to 
+ * tgdb a command to run.
+ */
+static struct queue *raw_input_queue;
+
 static sig_atomic_t control_c = 0;              /* If control_c was hit by user */
 
-/* The current user command */
-static char user_cur_command[MAXLINE];
-static int user_cur_command_pos = 0;
+/* Interface to readline capability */
+static struct rlctx *rl;
 
-/* tgdb_can_issue_command:
- * This is used to see if gdb can currently issue a comand directly to gdb or
- * if it should put it in the buffer.
+/* This is the current command */
+static struct string *current_command = NULL;
+
+/* a2_tgdb_command_callback: This is called when readline determines a command
+ *                           has been typed. 
+ *
+ *      line - The command the user typed without the '\n'.
+ */
+static int a2_tgdb_command_callback(const char *line) {
+    a2_tgdb_send((char *)line, 0);
+}
+
+/* tgdb_is_debugger_ready: Determines if a command can be sent directly to gdb.
+ * 
+ * Returns: FALSE if gdb is busy running a command or a command can not be run.
+ *          TRUE  if gdb can currently recieve a command.
+ */
+static int tgdb_is_debugger_ready(void) {
+    if ( !tgdb_initialized )
+        return FALSE;
+
+    /* If the user is at the misc prompt */
+    if ( globals_is_misc_prompt() == TRUE )
+        return TRUE;
+
+    /* If the user is at the prompt and the raw queue is empty */
+    if ( data_get_state() == USER_AT_PROMPT )
+        return TRUE;
+
+    return FALSE;
+}
+
+/* tgdb_can_issue_command: Determines if tgdb should send data to gdb or put
+ *                         it in a buffer. This is when the debugger is ready
+ *                         and there are no commands to run.
  *
  * Returns: TRUE if can issue directly to gdb. Otherwise FALSE.
  */
 static int tgdb_can_issue_command(void) {
-   if ( !tgdb_initialized )
-      return FALSE;
+    if ( tgdb_is_debugger_ready() && queue_size(gdb_input_queue) == 0 )
+        return TRUE;
 
-   /* If the user is at the misc prompt */
-   if ( globals_is_misc_prompt() == TRUE )
-      return TRUE;
-   
-   /* If the user is at the prompt and the queue is empty */
-   if ( data_get_state() == USER_AT_PROMPT && queue_size(gdb_input_queue) == 0)
-      return TRUE;
-      
-   return FALSE;
+    return FALSE;
+}
+
+/* tgdb_can_run_command: Determines if tgdb has commands it needs to run.
+ *
+ * Returns: TRUE if can issue directly to gdb. Otherwise FALSE.
+ */
+static int tgdb_has_command_to_run(void) {
+    if ( tgdb_is_debugger_ready() && (
+           (queue_size(gdb_input_queue) > 0) || 
+           (queue_size(raw_input_queue) > 0) || 
+           current_command != NULL )
+       )
+        return TRUE;
+
+    return FALSE;
 }
 
 /* tgdb_setup_buffer_command_to_run: This sets up a command to run.
@@ -138,8 +189,23 @@ int a2_tgdb_init(char *debugger, int argc, char **argv, int *gdb, int *child, in
    io_debug_init(config_file);
    commands_init();
    
-   /* initialize users circular buffer */
+   /* initialize users buffer */
    gdb_input_queue = queue_init();
+
+   /* initialize raw data typed by user */
+   raw_input_queue = queue_init();
+
+   /* Initialize readline */
+   if ( (rl = rlctx_init()) == NULL ) {
+      err_msg("(%s:%d) rlctx_init failed", __FILE__, __LINE__);
+      return -1;
+   }
+
+   /* Register callback for each command recieved at readline */
+   if ( rlctx_register_callback(rl, &a2_tgdb_command_callback) == -1 ) {
+      err_msg("(%s:%d) rlctx_register_callback failed", __FILE__, __LINE__);
+      return -1;
+   }
 
    if(( debugger_pid = invoke_debugger(debugger, argc, argv, &masterfd, &gdb_stdout, 0)) == -1 ) {
       err_msg("(%s:%d) invoke_debugger failed", __FILE__, __LINE__);
@@ -159,16 +225,13 @@ int a2_tgdb_init(char *debugger, int argc, char **argv, int *gdb, int *child, in
    *gdb     = gdb_stdout;
    *child   = master_tty_fd;
 
-   /* Set up the readline pipe */
-   if ( pipe(readline_fd) == -1 ) {
-      err_msg("(%s:%d) pipe failed", __FILE__, __LINE__);
+   /* Let the GUI check this for reading, 
+    * if it finds data, it should call tgdb_recv_input */
+   if ( (*readline = rlctx_get_fd(rl)) == -1 ) {
+      err_msg("%s:%d rlctx_get_fd error", __FILE__, __LINE__);
       return -1;
    }
 
-   /* Let the GUI check this for reading, 
-    * if it finds data, it should call tgdb_recv_input */
-   *readline    = readline_fd[0];
-   
    tgdb_initialized = 1;
 
    return 0;
@@ -193,9 +256,6 @@ int a2_tgdb_shutdown(void){
  *          2 if the queue was cleared because of ^c
  */
 static int tgdb_run_command(void){
-    extern int DATA_AT_PROMPT;
-    struct command *item = NULL;
-
     /* TODO: Put signal blocking code here so that ^c is not pressed while 
      * checking for it */
 
@@ -208,14 +268,42 @@ static int tgdb_run_command(void){
         return 2;
     } 
     
-    /* If the queue is empty, return */
-    if ( queue_size(gdb_input_queue) == 0 )
-       return 2;
-   
-    DATA_AT_PROMPT = 0;
-    item = queue_pop(gdb_input_queue);
-    commands_run_command(masterfd, item);
-    buffer_free_item(item);
+    /* If the queue is not empty, run a command */
+    if ( queue_size(gdb_input_queue) > 0 ) {
+        struct command *item = NULL;
+        item = queue_pop(gdb_input_queue);
+        commands_run_command(masterfd, item);
+        buffer_free_item(item);
+    
+    /* If the user has typed a command, send it through readline */
+    } else if ( queue_size(raw_input_queue) > 0 ) { 
+        struct string *item = queue_pop(raw_input_queue);
+        char *data = string_get(item);
+        int i, j = string_length(item);
+    
+        for ( i = 0; i < j; i++ ) {
+            if ( rlctx_send_char(rl, data[i]) == -1 ) {
+                err_msg("(%s:%d) rlctx_send_char failed", __FILE__, __LINE__);
+                return -1;
+            }
+        }
+
+        string_free(item);
+    /* Send the partially typed command through readline */
+    } else if ( current_command != NULL ) {
+        int i,j = string_length(current_command);
+        char *data = string_get(current_command);
+        
+        for ( i = 0; i < j; i++ ) {
+            if ( rlctx_send_char(rl, data[i]) == -1 ) {
+                err_msg("(%s:%d) rlctx_send_char failed", __FILE__, __LINE__);
+                return -1;
+            }
+        }
+
+        current_command = NULL;
+    }
+
     return 0;
 }
 
@@ -233,7 +321,6 @@ int a2_tgdb_get_sources(void){
 size_t a2_tgdb_recv(char *buf, size_t n, struct queue *q){
    char local_buf[10*n];
    ssize_t size, buf_size;
-   extern int DATA_AT_PROMPT;
 
    /* make the queue empty */
    tgdb_delete_commands(q);
@@ -286,31 +373,9 @@ size_t a2_tgdb_recv(char *buf, size_t n, struct queue *q){
     */
    buf_size = a2_handle_data(local_buf, size, buf, n, q);
 
-   /* 4. runs the users buffered command if any exists */
-   if(  data_get_state() == USER_AT_PROMPT && 
-       DATA_AT_PROMPT) { /* Only one command at a time */
-       int result = tgdb_run_command();
-
-        /* There are no more command to run,
-         * Display the data the user's unfinished command if
-         * the current command is done outputting */
-       if ( result == 2 && user_cur_command_pos > 0 ) {
-           char temp[MAXLINE * 5];
-           user_cur_command[user_cur_command_pos] = '\0';
-           temp[0] = '\0';
-
-           if ( buf_size > 0 )
-               strcat(temp, buf);
-
-              strcat(temp, user_cur_command);
-
-              /* copy back */
-              strcpy(buf, temp);
-              buf_size += (user_cur_command_pos + 1);
-              user_cur_command_pos = 0;
-              user_cur_command[0] = '\0';
-       }
-   }
+    /* 4. runs the users buffered command if any exists */
+    if ( tgdb_has_command_to_run())
+        tgdb_run_command();
 
    tgdb_finish:
 
@@ -320,7 +385,16 @@ size_t a2_tgdb_recv(char *buf, size_t n, struct queue *q){
 /* Sends the user typed line to gdb */
 char *a2_tgdb_send(char *command, int out_type) {
    static char buf[MAXLINE];
-   
+
+   /* The gui's commands do not get returned. So a newline needs to be 
+    * returned so that its output is correct.
+    */
+   if ( out_type == 2 ) {
+        buf[0] = '\n';
+        buf[1] = '\0';
+   } else
+       buf[0] = '\0';
+
    /* tgdb always requests breakpoints because of buggy gdb annotations */
    tgdb_setup_buffer_command_to_run ( command, BUFFER_USER_COMMAND, COMMANDS_SHOW_USER_OUTPUT, COMMANDS_VOID );
    tgdb_setup_buffer_command_to_run ( NULL, BUFFER_TGDB_COMMAND, COMMANDS_HIDE_OUTPUT, COMMANDS_INFO_BREAKPOINTS );
@@ -328,34 +402,31 @@ char *a2_tgdb_send(char *command, int out_type) {
 }
 
 int a2_tgdb_send_input(char c) {
-    /* If tgdb is in a state to issue a command, then this data can be
-     * returned right away */
-    if( tgdb_can_issue_command() == TRUE ) {
-       if(io_write_byte(readline_fd[1], c) == -1){
-          err_ret("%s:%d -> io_write_byte error", __FILE__, __LINE__);
-          return -1;
-       }
-    } else {
-        /* At this point, tgdb is busy, and has more output to display before
-         * this data, lets save the command. to be displayed.
-         *
-         * Start buffering the data to show it later, either
-         * 1. Will show a unfinished chunk of data
-         *      This happens when the user types data, but not a full command, 
-         *      and then gdb finishes what it is doing. This unfinished
-         *      command must be returned.
-         *
-         * 2. Will display the completed command before data is processed.
-         *      This happens when the user typed a whole command ( and '\n' )
-         *      while gdb was busy.
-         */
-         user_cur_command[user_cur_command_pos++] = c;
-         
-         if ( c == '\n' || c == '\r') {
-             user_cur_command_pos = 0;
-             user_cur_command[0] = '\0';
+    extern int COMMAND_TYPED_AT_PROMPT;
+    if ( current_command == NULL )
+        current_command = string_init();
 
-         }
+    /* tgdb is not busy, send the data to readline write away */
+    if( tgdb_can_issue_command() == TRUE && !COMMAND_TYPED_AT_PROMPT) {
+        /* A command has been recieved for this prompt, don't allow another */
+        if ( c == '\n' )
+            COMMAND_TYPED_AT_PROMPT = 1;
+
+        if ( rlctx_send_char(rl, c) == -1 ) {
+            err_ret("%s:%d rlctx_send_char error", __FILE__, __LINE__);
+            return -1;
+        }
+    } else {
+    /* tgdb is busy, save the data in a queue to run through readline later */
+
+        /* Add to the current command */
+        string_addchar(current_command, c);
+
+        /* Another command is completed, save it in the queue */
+        if ( c == '\n' ) {
+            queue_append(raw_input_queue, current_command);
+            current_command = NULL;
+        } 
     }
 
     return 0;
@@ -364,10 +435,10 @@ int a2_tgdb_send_input(char c) {
 int a2_tgdb_recv_input(char *buf) {
     /* This should return everything in it, the first try */
     ssize_t size;
-    
-    if ( ( size = io_read(readline_fd[0], buf, MAXLINE)) < 0 ) {
-      err_ret("%s:%d -> io_read error", __FILE__, __LINE__);
-      return -1;
+
+    if ( rlctx_recv(rl, buf, MAXLINE) == -1 ) {
+        err_ret("%s:%d -> io_read error", __FILE__, __LINE__);
+        return -1;
     } 
 
     return 0;
@@ -425,8 +496,4 @@ char *a2_tgdb_tty_name(void) {
 
 char *a2_tgdb_err_msg(void) {
    return err_get();
-}
-
-char *a2_tgdb_get_prompt(void) {
-    data_get_prompt();
 }

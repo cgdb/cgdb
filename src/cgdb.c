@@ -5,32 +5,6 @@
 /* This include must stay above readline, some readline's don't include it */
 #include <stdio.h> 
 
-#ifdef HAVE_LIBREADLINE
-#  if defined(HAVE_READLINE_READLINE_H)
-#    include <readline/readline.h>
-#  elif defined(HAVE_READLINE_H)
-#    include <readline.h>
-#  else /* !defined(HAVE_READLINE_H) */
-extern char *readline ();
-#  endif /* !defined(HAVE_READLINE_H) */
-char *cmdline = NULL;
-#else /* !defined(HAVE_READLINE_READLINE_H) */
- /* no readline */
-#endif /* HAVE_LIBREADLINE */
-
-#ifdef HAVE_READLINE_HISTORY
-#  if defined(HAVE_READLINE_HISTORY_H)
-#    include <readline/history.h>
-#  elif defined(HAVE_HISTORY_H)
-#    include <history.h>
-#  else /* !defined(HAVE_HISTORY_H) */
-extern void add_history ();
-extern int write_history ();
-extern int read_history ();
-#  endif /* defined(HAVE_READLINE_HISTORY_H) */
- /* no history */
-#endif /* HAVE_READLINE_HISTORY */
-
 /* System Includes */
 #include <curses.h>
 #ifdef HAVE_SYS_SELECT_H
@@ -76,10 +50,7 @@ char cgdb_help_file[MAXLINE]; /* Path to home directory with trailing slash */
 static char *my_name = NULL;  /* Name of this application (argv[0]) */
 static int gdb_fd = -1;       /* File descriptor for GDB communication */
 static int tty_fd = -1;       /* File descriptor for process being debugged */
-static int readline_infd[2] = { -1, -1 }; /* readline ouput */
-static int readline_master = -1, readline_slave = -1; /* readline tty input */
-static char readline_slavename[SLAVE_SIZE];  /* name of readline pty */
-static int tgdb_readline_fd = -1;       /* tgdb returns the 'at prompt' data */
+static int tgdb_readline_fd = -1; /* tgdb returns the 'at prompt' data */
 
 static char *debugger_path = NULL;  /* Path to debugger to use */
 struct queue *commandq;
@@ -308,10 +279,12 @@ static void user_input() {
         for ( i = 0; i < size; i++) {
            switch ( focus ) {
                case GDB:    /* Send input to readline */
-                   if ( write( readline_master, &buf[i], 1) != 1 ) {
-                     err_quit("%s:%d write error\n", __FILE__, __LINE__);
-                     return;
-                   }
+                   /* tgdb_send_input expects termination of commands to be 
+                    * '\n' not '\r'. */
+                   if ( buf[i] == '\r' )
+                       tgdb_send_input('\n');
+                    else
+                       tgdb_send_input(buf[i]);
                    break;
                case TTY:    /* Send input to tty */
                     tgdb_tty_send(buf[i]);
@@ -333,11 +306,6 @@ static void user_input() {
             break;
         }
     }
-}
-
-static void readline_stdin(void) {
-   /* If this is called in the loop, then ESC sequences don't work */
-   rl_callback_read_char();
 }
 
 static void process_commands(struct queue *q)
@@ -477,23 +445,14 @@ static void child_input()
     if_tty_print(buf);
 }
 
-/* This is the output of readline, it should be displayed in the gdb window 
- * if the gdb is ready to accept a command */
-static void readline_input(int fd){
+static int tgdb_readline_input(void){
     char buf[MAXLINE];
-    ssize_t size, i;
-    
-    if ( ( size = read( fd, &buf, MAXLINE)) == 0 ) 
-        err_quit("%s:%d read error\n", __FILE__, __LINE__);
-
-    for ( i = 0; i < size; i++ )
-       tgdb_send_input(buf[i]);
-}
-
-static void tgdb_readline_input(void){
-    char buf[MAXLINE];
-    tgdb_recv_input(buf);
+    if ( tgdb_recv_input(buf) == -1 ) {
+        err_msg("%s:%d tgdb_recv_input error\n", __FILE__, __LINE__);
+        return -1;
+    }
     if_print(buf);
+    return 0;
 }
 
 static void main_loop(void) {
@@ -502,9 +461,7 @@ static void main_loop(void) {
     
     max = (gdb_fd > STDIN_FILENO) ? gdb_fd : STDIN_FILENO;
     max = (max > tty_fd) ? max : tty_fd;
-    max = (max > readline_infd[0]) ? max : readline_infd[0];
     max = (max > tgdb_readline_fd) ? max : tgdb_readline_fd;
-    max = (max > readline_slave) ? max : readline_slave;
 
     /* Main (infinite) loop:
      *   Sits and waits for input on either stdin (user input) or the
@@ -520,9 +477,7 @@ static void main_loop(void) {
         FD_SET(STDIN_FILENO, &set);
         FD_SET(gdb_fd, &set);
         FD_SET(tty_fd, &set);
-        FD_SET(readline_infd[0], &set);
         FD_SET(tgdb_readline_fd, &set);
-        FD_SET(readline_slave, &set);
     
         /* Wait for input */
         if (select(max + 1, &set, NULL, NULL, NULL) == -1){
@@ -534,29 +489,24 @@ static void main_loop(void) {
                 err_dump("%s: select failed: %s\n", my_name, strerror(errno));
         }
 
-        /* readline output -> tgdb input */
-        if (FD_ISSET(readline_infd[0], &set))
-            readline_input(readline_infd[0]);
-
         /* Input received:  Handle it */
         if (FD_ISSET(STDIN_FILENO, &set))
             user_input();
 
         /* gdb's output -> terminal out ( triggered from readline input ) */
         if (FD_ISSET(tgdb_readline_fd, &set))
-            tgdb_readline_input();
+            if ( tgdb_readline_input() == -1 )
+                return;
 
-        /* Readline stdin */
-        if(FD_ISSET(readline_slave, &set))
-            readline_stdin();
-            
+        /* child's ouptut -> stdout */
+        if (FD_ISSET(tty_fd, &set)) {
+            child_input();
+            continue;
+        }
+
         /* gdb's output -> stdout */
         if (FD_ISSET(gdb_fd, &set))
             gdb_input();
-
-        /* child's ouptut -> stdout */
-        if (FD_ISSET(tty_fd, &set))
-            child_input();
     }
 }
 
@@ -583,58 +533,6 @@ void cleanup()
    
     /* Shut down debugger */
     tgdb_shutdown();
-
-    /* Shut down readline */
-    rl_callback_handler_remove();
-}
-
-static void tgdb_send_user_command(char *line) {
-    add_history(line);
-    if_print("\n");
-    tgdb_send(line, 1);
-}
-
-static int init_readline(void){
-    FILE *out, *in;
-
-    /* Don't let readline install signal handler's */
-    rl_catch_signals = 0;
-    rl_catch_sigwinch = 0;
-
-    if ( pipe(readline_infd) == -1 ) {
-       err_msg("(%s:%d) pipe failed", __FILE__, __LINE__);
-       return -1;
-    }
-
-    /* Open a new pty */
-    if ( tgdb_util_new_tty(&readline_master, &readline_slave, readline_slavename) == -1 ) {
-       err_msg("(%s:%d) tgdb_util_new_tty failed", __FILE__, __LINE__);
-       return -1;
-    }
-
-    if ( (out = fdopen(readline_infd[1], "w")) == NULL ) {
-       err_msg("(%s:%d) fdopen failed", __FILE__, __LINE__);
-       return -1;
-    }
-
-    if ( (in = fdopen(readline_slave, "r")) == NULL ) {
-       err_msg("(%s:%d) fdopen failed", __FILE__, __LINE__);
-       return -1;
-    }
-
-    /* Set readline's output stream */
-    rl_instream = in;
-    rl_outstream = out;
-
-    /* Initalize gdb */
-    rl_callback_handler_install(tgdb_get_prompt(), tgdb_send_user_command);
-
-    if ( rl_reset_terminal("dumb") == -1 ) {
-        err_msg("%s:%d rl_reset_terminal\n", __FILE__, __LINE__);
-        return -1;
-    }
-
-    return 0;
 }
 
 int main(int argc, char *argv[]) {
@@ -658,9 +556,6 @@ int main(int argc, char *argv[]) {
     /* Start GDB */
     if (start_gdb(argc, argv))
         err_quit("%s: Unable to invoke GDB\n", my_name); 
-
-    if ( init_readline() == -1 )
-        err_quit("%s:%d Unable to start readline\n", __FILE__, __LINE__); 
 
     commandq = queue_init();
 

@@ -1,3 +1,10 @@
+03/23/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * Fixed interface to tgdb to allow the new readline support: This fixes
+    the bug where alt-D did not work, and the ^r ( reverse search ) bug would
+    cause cgdb to block. It also fixes the existing bug in cgdb, it did not
+    print the output of tgdb_send.
+
 03/06/2003 Mike Mueller <mmueller@cs.uri.edu>
 
     * White terminal fix: Fixed cgdb to automatically paint the entire

@@ -203,6 +203,7 @@ static int commands_run_com(int fd, char *com, int type){
       length = strlen(com);
 
    data_prepare_run_command();
+   io_debug_write_fmt("<%s\n>", com);
 
    if ( type )
       io_writen(fd, "server ", 7);

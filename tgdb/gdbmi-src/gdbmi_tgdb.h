@@ -18,6 +18,5 @@ size_t gdbmi_tgdb_tty_recv(char *buf, size_t n);
 int gdbmi_tgdb_new_tty(void);
 char *gdbmi_tgdb_tty_name(void);
 char *gdbmi_tgdb_err_msg(void);
-char *gdbmi_tgdb_get_prompt(void);
 
 #endif /* __GDBMI_TGDB_H__ */
