@@ -251,8 +251,15 @@ static void store_list(void) {
 static int import_keyseq(struct tlist *i) {
     char *terminfo, *termcap;
     int ret;
+
+    char *env = getenv("TERM");
+
+    if ( !env ) {
+        display_message("%s:%d TERM not set error", __FILE__, __LINE__);
+        return -1;
+    }
     
-    if ( ( ret = tgetent(NULL, "xterm")) == 0 ) {
+    if ( ( ret = tgetent(NULL, env)) == 0 ) {
         display_message("%s:%d tgetent 'No such entry' error", __FILE__, __LINE__);
         return -1;
     } else if ( ret == -1 ) {
