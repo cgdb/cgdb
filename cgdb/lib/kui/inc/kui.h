@@ -1,7 +1,8 @@
 #ifndef __KUI_H__
 #define __KUI_H__
 
-#include "input.h"
+//#include "input.h"
+#include "std_list.h"
 
 /*! 
  * \file
@@ -11,6 +12,218 @@
  * This interface is intended to be the abstraction layer between an
  * application wanting key input from a user and the user themselves.
  */
+
+/******************************************************************************/
+/**
+ * @name Creating and Destroying a kui_map.
+ * These functions are for createing and destroying a kui map.
+ *
+ * A kui map is basically a key value pair. As far as the map is concerned both
+ * the key and the value are of type 'char*'. This is because, the user needs to
+ * type the map in at the keyboard. This may seem obvious at first, but things 
+ * like ESCAPE and HOME have to be typed in also.
+ */
+/******************************************************************************/
+
+//@{
+
+struct kui_map;
+
+/**
+ * Create a kui map.
+ *
+ * \param key_data
+ * The map's key data
+ *
+ * \param key_size
+ * The size of the map's key data
+ *
+ * \param value_data
+ * The map's value data
+ *
+ * \param value_size
+ * The size of the map's value data
+ *
+ * @return
+ * A new instance on success, or NULL on error. 
+ */
+struct kui_map *kui_map_create (
+		const char *key_data, 
+		const int key_size,
+		const char *value_data,
+		const int value_size );
+
+/**
+ * Destroy a kui map.
+ *
+ * \param map
+ * The map to destroy.
+ *
+ * @return
+ * 0 on success, -1 on error
+ */
+int kui_map_destroy ( struct kui_map *map );
+
+//@}
+
+/******************************************************************************/
+/**
+ * @name General operations on a kui map.
+ * These function's are the basic functions used to operate on a kui map context
+ */
+/******************************************************************************/
+
+//@{
+
+/**
+ * Get's the maps key.
+ *
+ * \param map
+ * A map
+ *
+ * \param key
+ * Get's the key as a null terminated string.
+ * The key should not be modified upon return. Also, it is invalid if the map
+ * is destroyed.
+ *
+ * @return
+ * 0 on success, -1 on error
+ */
+int kui_map_get_key ( struct kui_map *map, char **key );
+
+/**
+ * Get's the maps value.
+ *
+ * \param map
+ * A map
+ *
+ * \param value
+ * Get's the value as a null terminated string.
+ * The value should not be modified upon return. Also, it is invalid if the map
+ * is destroyed.
+ *
+ * @return
+ * 0 on success, -1 on error
+ */
+int kui_map_get_value ( struct kui_map *map, char **value );
+
+//@}
+
+/******************************************************************************/
+/**
+ * @name Creating and Destroying a kui_map_set.
+ * These functions are for createing and destroying a kui map set.
+ *
+ * A kui map set is simply a grouping of maps that the client associated 
+ * together. At this level, a map is defined as a key/value pair. The key and 
+ * the value are simply character arrays.
+ *
+ * A Kui map set is an easy way to swap out what the application wishes
+ * to have libkui look for when the user is typing input. For instance,
+ * if the application wants libkui to look for certain sequences when the 
+ * user is doing task A, and look for other sequences the user is doing task
+ * B, the application coud simply create 2 kui map sets and swap them 
+ * out using TODO.
+ */
+/******************************************************************************/
+
+//@{
+
+struct kui_map_set;
+
+/**
+ * Create a kui map set.
+ *
+ * @return
+ * A new instance on success, or NULL on error. 
+ */
+struct kui_map_set *kui_ms_create ( void );
+
+/**
+ * Destroys a kui map set.
+ *
+ * \param kui_ms
+ * The kui map set to destroy.
+ *
+ * @return
+ * 0 on success or -1 on error
+ */
+int kui_ms_destroy ( struct kui_map_set *kui_ms );
+
+//@}
+
+/******************************************************************************/
+/**
+ * @name General operations on a kui map context.
+ * These function's are the basic functions used to operate on a kui map context
+ */
+/******************************************************************************/
+
+//@{
+
+/**
+ * Add a map to the map set.
+ *
+ * \param kui_ms
+ * The kui map set to add to.
+ *
+ * \param key_data
+ * The map's key data
+ *
+ * \param key_size
+ * The size of the map's key data
+ *
+ * \param value_data
+ * The map's value data
+ *
+ * \param value_size
+ * The size of the map's value data
+ *
+ * @return
+ * 0 on success, or -1 on error
+ */ 
+int kui_ms_register_map ( 
+		struct kui_map_set *kui_ss,
+		const char *key_data, 
+		const int key_size,
+		const char *value_data,
+		const int value_size );
+
+/**
+ * Remove a map from the map set.
+ *
+ * \param kui_ms
+ * The kui map set to add to.
+ *
+ * \param key_data
+ * The map's key data
+ *
+ * \param key_size
+ * The size of the map's key data
+ *
+ * @return
+ * 0 on success, or -1 on error
+ */
+int kui_ms_deregister_map (
+		struct kui_map_set *kui_ms,
+		const char *key_data,
+	    const int size	);
+
+/**
+ * Get's a list of kui_map's. This way, someone can iterate through
+ * the list.
+ *
+ * \param kui_ms
+ * A kui map set.
+ *
+ * @return
+ * The list of maps, or NULL on error.
+ * If there are no maps, of course the empty list will be returned.
+ */
+std_list kui_ms_get_maps ( struct kui_map_set *kui_ms );
+
+//@}
+
 
 /******************************************************************************/
 /**
@@ -54,98 +267,6 @@ int kui_destroy ( struct kuictx *kctx );
 
 /******************************************************************************/
 /**
- * @name Creating and Destroying a kui_sequence_set.
- * These functions are for createing and destroying a kui sequence set.
- *
- * A Kui sequence set is an easy way to swap out what the application wishes
- * to have libkui look for when the user is typing input. For instance,
- * if the application wants libkui to look for certain sequences when the 
- * user is doing task A, and look for other sequences the user is doing task
- * B, the application coud simply create 2 kui_sequence sets and swap them 
- * out using kui_set_current_sequence_set.
- *
- * The application can ask the kui_sequence_set to register a particular 
- * byte/multibyte sequence. When it does, if the kui_sequence_set allows the 
- * operation, then this kui sequence set uses the new sequence when calling
- * getkey.
- */
-/******************************************************************************/
-
-//@{
-
-struct kui_sequence_set;
-
-/**
- * Create a kui sequence set.
- *
- * @return
- * A new instance on success, or NULL on error. 
- */
-struct kui_sequence_set *kui_ss_create ( void );
-
-/**
- * Destroys a kui sequence set.
- *
- * \param kui_ss
- * The kui sequence set to destroy.
- *
- * @return
- * 0 on success or -1 on error
- */
-int kui_ss_destroy ( struct kui_sequence_set *kui_ss );
-
-/**
- * Add a sequence to the sequence set.
- *
- * \param kui_ss
- * The kui sequence set to add to.
- *
- * \param sequence
- * The sequence of bytes that should be read in.
- *
- * \param size
- * The size of sequence
- *
- * \param data
- * The substitution text associated with the sequence.
- *
- * \param data_size
- * The size of data
- *
- * @return
- * 0 on success, or -1 on error
- */ 
-int kui_ss_register_sequence ( 
-		struct kui_sequence_set *kui_ss,
-		const int sequence[], 
-		const int size,
-		const int data[],
-		const int data_size );
-
-/**
- * Remove a sequence from the sequence set.
- *
- * \param kui_ss
- * The kui sequence set to add to.
- *
- * \param sequence
- * The sequence of bytes that should be read in.
- *
- * \param size
- * The size of sequence
- *
- * @return
- * 0 on success, or -1 on error
- */
-int kui_ss_deregister_sequence (
-		struct kui_sequence_set *kui_ss,
-		const int sequence[],
-	    const int size	);
-
-//@}
-
-/******************************************************************************/
-/**
  * @name General operations on a kui context.
  * These function's are the basic functions used to operate on a kui context
  */
@@ -154,35 +275,32 @@ int kui_ss_deregister_sequence (
 //@{
 
 /**
- * Get's the current sequence set for the kui context.
+ * Get's the current map set for the kui context.
  *
  * \param kctx
  * The kui context to get the sequence set of
  *
  * @return
- * A new instance on success, or NULL on error. 
- *
- * TODO: Change the parameter to be a std_list.
+ * The list of map sets, or NULL on error.
+ * If there are no map sets, of course the empty list will be returned.
  */
-struct kui_sequence_set *kui_get_sequence_set ( struct kuictx *kctx );
+std_list kui_get_map_sets ( struct kuictx *kctx );
 
 /**
- * Set's the current kui context to use the kui_ss set.
+ * Add's a kui map set to the kui context.
  *
  * \param kctx
- * The kui context to set the sequence set of
+ * The kui context to add the map set of
  *
- * \param kui_ss
- * The new kui sequence set to use.
+ * \param kui_ms
+ * The new kui map set to use.
  *
  * @return
  * 0 on success, or -1 on error.
- *
- * TODO: Change the parameter to be a std_list.
  */
-int kui_set_sequence_set ( 
+int kui_add_map_set ( 
 		struct kuictx *kctx, 
-		struct kui_sequence_set *kui_ss );
+		struct kui_map_set *kui_ms );
 
 /**
  * Get's the next key for the application to process.

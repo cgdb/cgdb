@@ -1,5 +1,9 @@
 03/22/2004 Bob Rossi <bob@brasko.net>
  
+    * Doxyfile: Change TAGFILES line to use correct path to html.
+
+03/22/2004 Bob Rossi <bob@brasko.net>
+ 
     * Doxyfile: Generates a tag via GENERATE_TAGFILE, and uses the tag
 	file generated from various, using TAGFILES
 

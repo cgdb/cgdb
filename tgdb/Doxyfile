@@ -152,7 +152,7 @@ SKIP_FUNCTION_MACROS   = YES
 #---------------------------------------------------------------------------
 # Configuration::addtions related to external references   
 #---------------------------------------------------------------------------
-TAGFILES               = ../various/various.tag=../doc/htdocs/html-various
+TAGFILES               = ../various/various.tag=../html-various
 GENERATE_TAGFILE       = libtgdb.tag
 ALLEXTERNALS           = NO
 EXTERNAL_GROUPS        = YES

@@ -1,3 +1,10 @@
+03/22/2004 Bob Rossi <bob@brasko.net>
+
+	* inc/kui.h: still designing interface.
+	* src/kui.c: changing implementation to match interface.
+	* src/Makefile.am: Use std_list and do not use libinput.
+	* src/Makefile.in: Update for people without auto tools.
+
 03/12/2004 Bob Rossi <bob@brasko.net>
 
     * inc/kui.h: reduce complexity of interface.

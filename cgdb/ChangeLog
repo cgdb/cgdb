@@ -1,5 +1,9 @@
 03/22/2004 Bob Rossi <bob@brasko.net>
 
+    * Doxyfile: Change TAGFILES line to use correct path to html.
+
+03/22/2004 Bob Rossi <bob@brasko.net>
+
     * lib/Doxyfile: Moved to ./cgdb/Doxyfile
     * Doxyfile: New file moved from ./cgdb/lib/Doxyfile
 
