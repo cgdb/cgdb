@@ -1,3 +1,9 @@
+03/25/2004 Bob Rossi <bob@brasko.net>
+
+    * std_types.h (STDDestroyNotify): Changed return value from void to int.
+	* std_hash.c: udpate function for change above
+	* std_list_driver.c: Ditto
+
 03/22/2004 Bob Rossi <bob@brasko.net>
 
     * std_list.h: Fully doxygenized.

@@ -7,10 +7,11 @@ int printType ( void *data, void *user_data ) {
 	return 1;
 }
 
-void destroy (void *data) {
+int destroy (void *data) {
 	int *a = (int*)data;
 	free ( a );
 	a = NULL;
+	return 0;
 }
 
 /* Used for the sorted list test */

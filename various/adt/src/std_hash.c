@@ -112,9 +112,10 @@ static struct ghashnode*	std_hash_node_new		  (void*	   key,
 static void		std_hash_node_destroy	  (struct ghashnode	  *hash_node,
                                                    STDDestroyNotify  key_destroy_func,
                                                    STDDestroyNotify  value_destroy_func);
-static void		std_hash_nodes_destroy	  (struct ghashnode	  *hash_node,
-						  STDDestroyNotify   key_destroy_func,
-						  STDDestroyNotify   value_destroy_func);
+static int
+std_hash_nodes_destroy (struct ghashnode *hash_node,
+		      STDFreeFunc  key_destroy_func,
+		      STDFreeFunc  value_destroy_func);
 static unsigned int std_hash_table_foreach_remove_or_steal (struct std_hashtable     *hash_table,
                                                    STDHRFunc	   func,
                                                    void*	   user_data,
@@ -723,7 +724,7 @@ std_hash_node_destroy (struct ghashnode      *hash_node,
   free (hash_node);
 }
 
-static void
+static int
 std_hash_nodes_destroy (struct ghashnode *hash_node,
 		      STDFreeFunc  key_destroy_func,
 		      STDFreeFunc  value_destroy_func)
@@ -740,6 +741,8 @@ std_hash_nodes_destroy (struct ghashnode *hash_node,
       free (hash_node);
       hash_node = next;
     }  
+
+  return 0;
 }
 
 unsigned int std_direct_hash ( const void *v ) {

@@ -39,13 +39,13 @@ typedef int     	(*STDCompareDataFunc) (
 
 typedef unsigned int (*STDHashFunc) (const void*key);
 typedef int          (*STDEqualFunc)(const void*a, const void*b);
-typedef void         (*STDDestroyNotify) (void *data);
+typedef int         (*STDDestroyNotify) (void *data);
 typedef void         (*STDHFunc) (
 	void * key,
         void * value,
         void * user_data);
 
-typedef void (*STDFreeFunc) (void * data);
+typedef int (*STDFreeFunc) (void * data);
 
 #endif /* __STD_TYPES_H__ */
 
