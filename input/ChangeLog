@@ -4,6 +4,7 @@
     * Commenting out most alt, shift-alt key bindings: These new key bindings 
     are breaking the input library. They are getting confused with other
     longer key mappings that have the alt-key mappings as a subset.
+    * Removed printf's from input.c: Now it writes to err_msg
 
 03/26/2003 Bob Rossi <bob_rossi@cox.net>
 

@@ -293,15 +293,15 @@ static int import_keyseq(struct tlist *i) {
     char *env = getenv("TERM");
 
     if ( !env ) {
-        fprintf(stderr, "%s:%d TERM not set error", __FILE__, __LINE__);
+        err_msg("%s:%d TERM not set error", __FILE__, __LINE__);
         return -1;
     }
     
     if ( ( ret = tgetent(NULL, env)) == 0 ) {
-        fprintf(stderr, "%s:%d tgetent 'No such entry' error", __FILE__, __LINE__);
+        err_msg("%s:%d tgetent 'No such entry' error", __FILE__, __LINE__);
         return -1;
     } else if ( ret == -1 ) {
-        fprintf(stderr, "%s:%d tgetent 'terminfo database could not be found' error", __FILE__, __LINE__);
+        err_msg("%s:%d tgetent 'terminfo database could not be found' error", __FILE__, __LINE__);
         return -1;
     }
     
