@@ -1,3 +1,10 @@
+02/19/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * Changed commands.c to dynamically allocate memory from 'info sources':
+    When the user wants a list of sources, libtgdb should now be able to
+    handle as many source files as the program is made up of. There used to be
+    a MAXLINE limit to the number of char's that 'info sources' could output.
+
 02/16/2003 Bob Rossi <bob_rossi@cox.net>
 
     * Reorganized libtgdb completly. Only 1 library is created now

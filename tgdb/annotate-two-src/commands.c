@@ -28,18 +28,30 @@ static int breakpoint_table = 0;
 static int breakpoint_enabled = FALSE;
 static int breakpoint_started = FALSE;
 
-/* 'info sources' information */
-static int sources_nl = 0;
-static char sources_buf[4*MAXLINE];
-static int sources_buf_pos = 0;
-static char *sources[MAXLINE];
-static int sources_pos = 0;
-
 /* 'info source' information */
 static int info_source_nl = 0;
 static int info_source_buf_pos = 0;
 static char info_source_buf[MAXLINE];
 static char last_info_source_requested[MAXLINE];
+
+/* 'info sources' information */
+static int sources_nl = 0;
+static char *sources_buf;
+static int sources_buf_block_size = 0;
+static int sources_buf_pos = 0;
+
+static char *sources[MAXLINE];
+static int sources_pos = 0;
+
+static int buf_add(char **buf, char c, int *pos, int *blocksize) {
+    if(*pos == MAXLINE*(*blocksize)){
+        *buf = (char *)realloc(*buf, (++(*blocksize))*MAXLINE);
+        memset(*buf + MAX_LINE, '\0', ((*blocksize) - 1)*MAXLINE);
+    }
+
+    (*buf)[(*pos)++] = c;   
+    return 0;
+}
 
 int commands_parse_field(const char *buf, size_t n, int *field){
    if(sscanf(buf, "field %d", field) != 1)
@@ -241,7 +253,14 @@ int commands_run_tty(char *tty, int fd){
 int commands_run_info_sources(int fd){
    sources_nl = 0;
    sources_buf_pos = 0; 
-   memset(sources_buf, '\0', MAXLINE);
+
+   if(sources_buf != NULL){
+      free(sources_buf);
+      sources_buf = NULL;
+      sources_buf_block_size = 0;
+      sources_buf_pos = 0;
+   }
+
    commands_set_state(INFO_SOURCES, NULL);
    global_set_start_info_sources();
    return commands_run_command(fd, "info sources", COMMANDS_HIDE_OUTPUT);
@@ -359,7 +378,8 @@ static void commands_process_info_source(char a){
 
 /* process's source files */
 static void commands_process_sources(char a, struct Command ***com){
-   sources_buf[sources_buf_pos++] = a;
+//   sources_buf[sources_buf_pos++] = a;
+   buf_add(&sources_buf, a, &sources_buf_pos, &sources_buf_block_size);
    
    if(a == '\n'){
       sources_buf[--sources_buf_pos] = '\0'; /* remove '\r' and null terminate */
@@ -377,7 +397,7 @@ static void commands_process_sources(char a, struct Command ***com){
       
       sources_nl += 1;
       sources_buf_pos = 0;
-      memset(sources_buf, '\0', MAXLINE);
+      memset(sources_buf, '\0', sources_buf_block_size*MAX_LINE);
    }
 }
 
