@@ -12,62 +12,62 @@
 
 #define MAXLINE 4096
 
-enum term_entry_type {
-    FLAG = 0,
-    NUM,
-    STR
-};
-
+/* The data structure used at runtime to find multi-character sequences. */
 struct term_entry {
-    enum term_entry_type type;
-    char *name;
-    char *description;
-    char *sequence; 
+    char *name;         /* The terminfo name of the key */
+    char *description;  /* A human readable description for debugging */
+    char *sequence;     /* The multi-char escape sequence for this key */
 } *list = NULL;
 static int list_size = 0;
 
+/* A temporary variable used for clearing the screen after a number of 
+ * writes to it. It is used for debugging the input library
+ */
 static int counter = 0;
 
-#if 0
-const char *const*istrnames = strnames;
-const char *const*istrcodes = strcodes;
-const char *const*istrfnames = strfnames;
-#else
-
-struct istr { 
-    const char *const istrname;
+/* This is the enumerated list of multi-char escape sequences that 
+ * this library is interested in capturing. Append to the end to add more.
+ */
+static struct istr { 
+    const char *const terminfo;
+    const char *const termcap;
     const char *const description;
 } istrnames[] = {
-    { "kf1", "F1" },
-    { "kf2", "F2" },
-    { "kf3", "F3" },
-    { "kf4", "F4" },
-    { "kf5", "F5" },
-    { "kf6", "F6" },
-    { "kf7", "F7" },
-    { "kf8", "F8" },
-    { "kf9", "F9" },
-    { "kf10", "F10" },
-    { "kf11", "F11" },
-    { "kf12", "F12" },
-    { "kich1", "INSERT"},
-    { "kdch1", "DELETE"},
-    { "khome", "HOME"},
-    { "kend", "END"},
-    { "kpp", "PAGE UP"},
-    { "knp", "PAGE DOWN"},
+    /* Function keys */
+    { "kf1",        "k1",       "F1" },
+    { "kf2",        "k2",       "F2" },
+    { "kf3",        "k3",       "F3" },
+    { "kf4",        "k4",       "F4" },
+    { "kf5",        "k5",       "F5" },
+    { "kf6",        "k6",       "F6" },
+    { "kf7",        "k7",       "F7" },
+    { "kf8",        "k8",       "F8" },
+    { "kf9",        "k9",       "F9" },
+    { "kf10",       "k10",      "F10" },
+    { "kf11",       "k11",      "F11" },
+    { "kf12",       "k12",      "F12" },
+
+    /* insert, delete, home, end, page up, page down */ 
+    { "kich1",      "kI",       "INSERT"},
+    { "kdch1",      "kD",       "DELETE"},
+    { "khome",      "kh",       "HOME"},
+    { "kend",       "@7",       "END"},
+    { "kpp",        "kP",       "PAGE UP"},
+    { "knp",        "kN",       "PAGE DOWN"},
 
     /* Arrow keys */
-    { "cuu1", "CURSOR UP"},
-    { "cuf1", "CURSOR RIGHT"},
-    { "cub", "CURSOR LEFT"},
-    { "cud", "CURSOR DOWN"},
+    { "cuu1",       "ku",       "CURSOR UP"},
+    { "cuf1",       "nd",       "CURSOR RIGHT"},
+    { "cub",        "LE",       "CURSOR LEFT"},
+    { "cud",        "DO",       "CURSOR DOWN"},
 
-    { NULL, NULL }
+    /* End of list :) */
+    { NULL,         NULL,       NULL }
 };
 
-#endif
-
+/* display_message: This is purly for debugging the library. 
+ *                  It writes a message to the screen.
+ */
 void display_message(const char *fmt, ...) {
     va_list ap;
     char va_buf[MAXLINE];
@@ -82,6 +82,8 @@ void display_message(const char *fmt, ...) {
     va_end(ap);
 
     if ( counter > 50 ) {
+        mvprintw(counter++, 0, "Hit a key to clear and continue");
+        getch();
         clear();
         refresh();
         counter = 0;
@@ -91,64 +93,9 @@ void display_message(const char *fmt, ...) {
     refresh();
 }
 
-#if 0
-static void print_single_flag(const char *terminfoname, const char *termcapname, const char *description) {
-    int terminfo;
-    if ( (terminfo = tigetflag(terminfoname)) == 0 ) {
-        //display_message("CAPNAME (%s) is not present in this TERM's description\n", terminfoname);
-        return;
-    } else if (terminfo == -1 ) {
-        //display_message("CAPNAME (%s) is not a boolean capability\n", terminfoname);
-        return;
-    }
-
-    display_message("TERMINFO:(%s) TERMCAP(%s) DESC(%s) CODE(%d)\n", terminfoname, termcapname,description, terminfo );
-}
-
-static void print_single_num(const char *terminfoname, const char *termcapname, const char *description) {
-    int terminfo;
-    if ( (terminfo = tigetnum(terminfoname)) == -1 ) {
-        //display_message("CAPNAME (%s) is not present in this TERM's description\n", terminfoname);
-        return;
-    } else if (terminfo == -2 ) {
-        //display_message("CAPNAME (%s) is not a number capability\n", terminfoname);
-        return;
-    }
-
-    display_message("TERMINFO:(%s) TERMCAP(%s) DESC(%s) CODE(%d)\n", terminfoname, termcapname,description, terminfo );
-}
-
-static void print_single_str(const char *terminfoname, const char *termcapname, const char *description) {
-    int i, length;
-    char *terminfo;
-    if ( (terminfo = tigetstr(terminfoname)) == 0 ) {
-        //display_message("CAPNAME (%s) is not present in this TERM's description\n", terminfoname);
-        return;
-    } else if (terminfo == (char*)-1 ) {
-        //display_message("CAPNAME (%s) is not a string capability\n", terminfoname);
-        return;
-    }
-
-    display_message("TERMINFO:(%s) TERMCAP(%s) DESC(%s) CODE[", terminfoname, termcapname,description );
-
-    length = strlen(terminfo);
-    for(i = 0; i < length; i++)
-        display_message("(%d)", terminfo[i]);
-    display_message("]\n");
-}
-
-static void display_item(const char * name, const char *desc, const char *codes){
-    int i, length;
-    display_message("TERMINFO:(%s) DESC(%s) CODE[", name, desc);
-
-    length = strlen(codes);
-    for(i = 0; i < length; i++)
-        display_message("(%d)", codes[i]);
-    display_message("]\n");
-}
-
-#endif
-
+/* display_list: displays the list of accepted multi-char escape sequences.
+ *               This function is used for debugging the library.
+ */
 static void display_list(void) {
     int i, j, length;
     display_message("DISPLAYING LIST\n");
@@ -157,70 +104,59 @@ static void display_list(void) {
 
         length = strlen(list[i].sequence);
         for(j = 0; j < length; j++)
-            display_message("(%d)", list[i].sequence[j]);
+            display_message("(%c:%d)", list[i].sequence[j], list[i].sequence[j]);
         display_message("]\n");
         refresh();
     }
 }
 
 /* I don't care about the format, I just want to parse it */
-static const char *parse_format(const char *s, char *format, int *len) {
+static const char *parse_format(const char *s) {
     bool done = FALSE;
     bool allowminus = FALSE;
-    bool err = FALSE;
-    int value = 0;
 
-    *len = 0;
-    *format++ = '%';
     while (*s != '\0' && !done) {
-    switch (*s) {
-    case 'c':       /* FALLTHRU */
-    case 'd':       /* FALLTHRU */
-    case 'o':       /* FALLTHRU */
-    case 'x':       /* FALLTHRU */
-    case 'X':       /* FALLTHRU */
-    case 's':
-        break;
-    case '.':
-        s++;
-        break;
-    case '#':
-        s++;
-        break;
-    case ' ':
-        s++;
-        break;
-    case ':':
-        s++;
-        allowminus = TRUE;
-        break;
-    case '-':
-        if (allowminus)
+        switch (*s) {
+        case 'c':       /* FALLTHRU */
+        case 'd':       /* FALLTHRU */
+        case 'o':       /* FALLTHRU */
+        case 'x':       /* FALLTHRU */
+        case 'X':       /* FALLTHRU */
+        case 's':
+            break;
+        case '.':
+        case '#':
+        case ' ':
             s++;
-        break;
-    default:
-        if (isdigit(((unsigned char)(*s)))) {
-        value = (value * 10) + (*s - '0');
-        if (value > 10000)
-            err = TRUE;
-        s++;
-        } 
+            done = TRUE;
+            break;
+        case ':':
+            s++;
+            allowminus = TRUE;
+            break;
+        case '-':
+            if (allowminus)
+                s++;
+            else 
+                done = TRUE;
+            break;
+        default:
+            if (isdigit(((unsigned char)(*s))))
+                s++;
+            else 
+                done = TRUE;
+        }
     }
-    }
-    printw("JUST LEFT PARSE_FORMAT\n");
 
     return s;
 }
 
-static void insertIntoList(enum term_entry_type t, const char *tname, const char *tdesc, char *codes);
+static void insertIntoList(const char *tname, const char *tdesc, char *codes);
 
-static void modifyInsertIntoList(enum term_entry_type t, 
-                                const char *tname, 
+static void modifyInsertIntoList(const char *tname, 
                                 const char *tdesc, 
                                 char *codes) {
 char *cp;
-static char *format;
-int len;
 char temp[100];
 int temp_pos = 0;
 for (cp = codes; *cp!=(char)0;cp++) {
@@ -228,7 +164,7 @@ for (cp = codes; *cp!=(char)0;cp++) {
     if (*cp == '%' && cp == codes) {
         printw("CAN'T BELEIVE I AM HERE\n"); refresh();
         cp++;
-        cp = (char *)parse_format(cp, format, &len);
+        cp = (char *)parse_format(cp);
     } else if ( *cp == '%' ) {
 
         cp++;
@@ -290,11 +226,11 @@ if (*cp != '\0')
     temp[temp_pos++] = '\0';
 //    printw("FOUND(%s:    :%s)\n", tname, temp);
     refresh();
-insertIntoList( t, tname, tdesc, temp);
+insertIntoList( tname, tdesc, temp);
 }
 
 /* This should input in sorted order based on codes */
-static void insertIntoList(enum term_entry_type t, const char *tname, const char *tdesc, char *codes) {
+static void insertIntoList(const char *tname, const char *tdesc, char *codes) {
     int length = strlen(codes), i;
     int entry = 0;
 
@@ -320,14 +256,12 @@ finished:
     if ( entry < list_size) {
         int t = list_size;
         for ( i = 0; i < list_size - entry; i++ ) {
-            list[t].type = list[t - 1].type;
             list[t].name = list[t - 1].name;
             list[t].description = list[t - 1].description;
             list[t].sequence = list[t - 1].sequence;
             t--;
         }
     }
-    list[entry].type = t;
 
     list[entry].name = (char*)malloc(sizeof(char)*((length = strlen(tname) + 1)));
     strncpy(list[entry].name, tname, length);
@@ -340,45 +274,6 @@ finished:
     
     list_size++;
 }
-
-#if 0
-
-static void store_list(void) {
-    int size = 0, i = 0;
-    char *str;
-
-    /* Once to get the size */
-    for( i = 0; istrnames[i] != NULL; i++)
-        if ( tigetstr(istrnames[i]) > 0 )
-            size++;
-
-    /* Allocate for all the entries, plus 1 for the null termination */
-      list = (struct term_entry *)malloc(sizeof(struct term_entry)*size + 1);
-      display_message("SIZE(%d)\n", SIZE);
-    size = 0;
-
-    /* Twice to save the data */
-    for( i = 0; istrnames[i] != NULL; i++)
-        if ( ( str = tigetstr(istrnames[i])) > 0 )
-            modifyInsertIntoList(STR, istrnames[i], istrfnames[i], str);
-}
-
-static void print_list(void) {
-    int i;
-
-    /* strings */
-    for( i = 0; istrnames[i] != NULL; i++)
-        print_single_str(istrnames[i], istrcodes[i], istrfnames[i]);
-
-    /* numbers */
-    for( i = 0; numnames[i] != NULL; i++)
-        print_single_num(numnames[i], numcodes[i], numfnames[i]);
-    
-    /* flags */
-    for( i = 0; boolnames[i] != NULL; i++)
-        print_single_flag(boolnames[i], boolcodes[i], boolfnames[i]);
-}
-#endif
 
 /*  If block is non-zero then, it will block,
  *   if it is 0 then it will not block
@@ -418,7 +313,15 @@ int raw_read(int fd, int block) {
    return c;
 }
 
-int getEscSequence(int fd) {
+/* get_esc_sequence: Gets the next esc sequence from fd. This function assumes
+ *                   that ESC has already been read from fd.
+ *
+ *  fd -> the file descriptor that will be read for the next char.
+ *
+ *  return -> 0     on EOF
+ *            -1    on ERROR
+ */
+int get_esc_sequence(int fd) {
     int i, j = 0; 
     int possible[list_size];
     int c;
@@ -447,56 +350,90 @@ int getEscSequence(int fd) {
     
     display_message("NO MATCH, INPUT WAS GARBAGE\n");
     for ( i = 0 ; i < j; i++ )
-        display_message("(%d)", bad_list[i]);
+        display_message("(%c:%d)", bad_list[i], bad_list[i]);
     display_message("\n");
     
     return 0;
 }
 
-int tgetch(int fd) {
+/* cgetch: Gets the next character the user pressed. It will translate ESC
+ *         sequences and return a single define describing the char pressed.
+ *
+ *  fd -> the file descriptor that will be read for the next char.
+ *
+ *  return -> The last char read. Either literally the char, or a define 
+ *            describing a multi character key. -1 on error.
+ */
+int cgetch(int fd) {
     char c;
 
     if ( (c = raw_read(fd, 1)) == 0 ) {
         return -1;
     } else if ( c == 27 ) {
-        return getEscSequence(fd);
+        return get_esc_sequence(fd);
     }
     
     return c;
 }
 
+/* capture_chars: internal command to test the capturing of char's. 
+ *                It is basically a driver to test the functionality of the lib
+ */ 
 void capture_chars(int fd) {
     char c;
-    while( ( c = tgetch(fd)) != 'q' ) {
+    while( ( c = cgetch(fd)) != 'q' ) {
         if ( c != 0 ) {
             display_message("(%c:%d)\n", c, c);
         }
     }
 }
 
-
+/* initialize_list: Traverses the list istrnames, and puts the 
+ *                  name/desc/code into the global list.
+ */
 void initialize_list(void) {
-    int i, size = 0;
+    int i, size = 0, length, j;
     char *code;
 
-    for ( i = 0;  istrnames[i].istrname != (char *)0;  i++ )
+    for ( i = 0;  istrnames[i].terminfo != (char *)0;  i++ )
         size++;
     
     /* Allocating memory for list */
-    list = (struct term_entry *)malloc(sizeof(struct term_entry)*size + 1);
+    list = (struct term_entry *)malloc(sizeof(struct term_entry)*size*2 + 1);
     display_message("size(%d)\n", size);
 
-    for ( i = 0; istrnames[i].istrname != (char *)0;  i++ ) {
-        if ( (code = tigetstr(istrnames[i].istrname)) == 0 ) {
-            display_message("CAPNAME (%s) is not present in this TERM's description\n", istrnames[i].istrname);
-            return;
+    for ( i = 0; i < size;  i++ ) {
+        if ( (code = tigetstr(istrnames[i].terminfo)) == 0 ) {
+            display_message("CAPNAME (%s) is not present in this TERM's description\n", istrnames[i].terminfo);
+            continue;
         } else if (code == (char*)-1 ) {
-            display_message("CAPNAME (%s) is not a string capability\n", istrnames[i].istrname);
-            return;
+            display_message("CAPNAME (%s) is not a string capability\n", istrnames[i].terminfo);
+            continue;
         }
 
-        display_message("TERMINFO CAPNAME:(%s) DESCRIPTION(%s) successful", istrnames[i].istrname, istrnames[i].description );
-        modifyInsertIntoList(STR, istrnames[i].istrname, istrnames[i].description, code);
+        display_message("TERMINFO CAPNAME:(%s) DESCRIPTION(%s) successful", istrnames[i].terminfo, istrnames[i].description );
+        length = strlen(code);
+        for(j = 0; j < length; j++)
+            display_message("(%c:%d)", code[j], code[j]);
+        display_message("]\n");
+        refresh();
+        modifyInsertIntoList(istrnames[i].terminfo, istrnames[i].description, code);
+
+        if ( (code = tgetstr(istrnames[i].termcap, NULL)) == 0 ) {
+            display_message("CAPNAME (%s) is not present in this TERM's description\n", istrnames[i].termcap);
+            continue;
+        } else if (code == (char*)-1 ) {
+            display_message("CAPNAME (%s) is not a string capability\n", istrnames[i].termcap);
+            continue;
+        }
+
+        display_message("TERMCAP CAPNAME:(%s) DESCRIPTION(%s) successful", istrnames[i].termcap, istrnames[i].description );
+        length = strlen(code);
+        for(j = 0; j < length; j++)
+            display_message("(%c:%d)", code[j], code[j]);
+        display_message("]\n");
+        refresh();
+        modifyInsertIntoList(istrnames[i].termcap, istrnames[i].description, code);
     }
     display_message("DONE");
 }
