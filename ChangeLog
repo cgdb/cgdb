@@ -1,3 +1,8 @@
+03/31/2005 Bob Rossi <bob@brasko.net>
+
+	* NEWS: Change :source_reload to :edit
+	* README (Colon commands): Change :source_reload to :edit
+
 03/30/2005 Bob Rossi <bob@brasko.net>
 
 	* NEWS: Fixed memory error's found due to valgrind.

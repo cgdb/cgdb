@@ -249,7 +249,7 @@ static int release_file_buffer ( struct buffer *buf ) {
 	buf->length = 0;
 	buf->cur_line = NULL;	
 	buf->max_width = 0;
-	free ( buf->breakpts );
+    free ( buf->breakpts );
 	buf->breakpts = NULL;
 
 	return 0; 
@@ -303,6 +303,8 @@ static int load_file(struct list_node *node)
 	 */
 	node->orig_buf.length = 0;
 	node->orig_buf.tlines = NULL;
+    node->orig_buf.breakpts  = NULL;
+    node->orig_buf.cur_line  = NULL;
 	node->orig_buf.max_width = 0;
 
 	/* Stat the file to get the timestamp */

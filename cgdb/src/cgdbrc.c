@@ -99,8 +99,9 @@ static struct commands
     action_t action;
 } COMMANDS[] = {
     // keep this stuff sorted, you can use !sort in vi
-	/* source_reload*/{ "source_reload", command_source_reload },
     /* continue    */ { "continue",    command_do_continue },
+    /* edit        */ { "e",           command_source_reload },
+    /* edit        */ { "edit",        command_source_reload },
     /* finish      */ { "finish",      command_do_finish },
     /* help        */ { "help",        command_do_help },
     /* insert      */ { "insert",      command_focus_gdb },
