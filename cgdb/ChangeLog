@@ -1,3 +1,10 @@
+09/09/2003 Bob Rossi <bob@brasko.net>
+
+   * cgdbrc.c: command_do_continue, command_do_finish, command_do_next,
+   command_do_run, command_do_step, update call to tgdb_run_debugger_command
+   to handle new return value properly.
+   * interface.c: source_input, internal_if_input, ditto
+
 09/03/2003 Bob Rossi <bob@brasko.net>
 
    * cgdb.c: process_commands, TGDB_SOURCES_DENIED case, changed comment.

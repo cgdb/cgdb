@@ -991,7 +991,7 @@ static void source_input(struct sviewer *sview, int key)
 				else
 					t = TGDB_BREAKPOINT_ADD;
 				
-				if_print ( tgdb_modify_breakpoint ( tgdb, path, line + 1, t ) );
+				tgdb_modify_breakpoint ( tgdb, path, line + 1, t );
                 free(command);
             }
             break;
@@ -1002,14 +1002,14 @@ static void source_input(struct sviewer *sview, int key)
     /* Some extended features that are set by :set sc */
     if ( shortcut_option ) {
         switch ( key ) {
-            case 'r': if_print(tgdb_run_debugger_command (tgdb, TGDB_RUN)); 	break;
-            case 'n': if_print(tgdb_run_debugger_command (tgdb, TGDB_NEXT));  	break;
-            case 's': if_print(tgdb_run_debugger_command (tgdb, TGDB_STEP));  	break;
-            case 'c': if_print(tgdb_run_debugger_command (tgdb, TGDB_CONTINUE));break;
-            case 'f': if_print(tgdb_run_debugger_command (tgdb, TGDB_FINISH));  break;
-            case 'u': if_print(tgdb_run_debugger_command (tgdb, TGDB_UP));      break;
-            case 'd': if_print(tgdb_run_debugger_command (tgdb, TGDB_DOWN));    break;
-            default:                                    break;
+            case 'r': tgdb_run_debugger_command (tgdb, TGDB_RUN); 		break;
+            case 'n': tgdb_run_debugger_command (tgdb, TGDB_NEXT);  	break;
+            case 's': tgdb_run_debugger_command (tgdb, TGDB_STEP);  	break;
+            case 'c': tgdb_run_debugger_command (tgdb, TGDB_CONTINUE);	break;
+            case 'f': tgdb_run_debugger_command (tgdb, TGDB_FINISH);  	break;
+            case 'u': tgdb_run_debugger_command (tgdb, TGDB_UP);      	break;
+            case 'd': tgdb_run_debugger_command (tgdb, TGDB_DOWN);    	break;
+            default:                                    				break;
         }
     }
 
@@ -1151,23 +1151,23 @@ int internal_if_input(int key) {
                      return 0;
                 case CGDB_KEY_F5:
                     /* Issue GDB run command */
-                    if_print(tgdb_run_debugger_command ( tgdb, TGDB_RUN));
+                    tgdb_run_debugger_command ( tgdb, TGDB_RUN);
                     return 0;
                 case CGDB_KEY_F6:
                     /* Issue GDB continue command */
-                    if_print(tgdb_run_debugger_command (tgdb, TGDB_CONTINUE));
+                    tgdb_run_debugger_command (tgdb, TGDB_CONTINUE);
                     return 0;
                 case CGDB_KEY_F7:
                     /* Issue GDB finish command */
-                    if_print(tgdb_run_debugger_command (tgdb, TGDB_FINISH));
+                    tgdb_run_debugger_command (tgdb, TGDB_FINISH);
                     return 0;
                 case CGDB_KEY_F8:
                     /* Issue GDB next command */
-                    if_print(tgdb_run_debugger_command (tgdb, TGDB_NEXT));
+                    tgdb_run_debugger_command (tgdb, TGDB_NEXT);
                     return 0;
                 case CGDB_KEY_F10:
                     /* Issue GDB step command */
-                    if_print(tgdb_run_debugger_command (tgdb, TGDB_STEP));
+                    tgdb_run_debugger_command (tgdb, TGDB_STEP);
                     return 0;
             }
             source_input(src_win, key);

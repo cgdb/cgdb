@@ -1,3 +1,10 @@
+   * Fixed bug in TGDB. TGDB used to return a newline for the front end to
+   print when a GUI command was issued. This made sure the output of the
+   command happened on a different line than the prompt. If the user ran 
+   many commands in a row through CGDB, you would see an extra new line
+   appear. Now TGDB returns a new line when the command is actually given
+   to GDB, not when the command is issued.
+   
    * Fixed bug in TGDB. TGDB would not return the correct file:line if the
    user ran a command file through gdb on init and the file instructed gdb
    to set a breakpoint and run. CGDB would display line 1 of the correct 

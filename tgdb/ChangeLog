@@ -1,3 +1,20 @@
+09/09/2003 Bob Rossi <bob@brasko.net>
+
+   * tgdb.h: tgdb_run_debugger_command, tgdb_modify_breakpoint, both of the
+   return values of these 2 functions are changed front char* to an int.
+   * driver.c: change testing routine.
+   * tgdb.c: global tgdb structure, add last_gui_command
+   initialize_tgdb_context, initialize new component last_gui_command
+   tgdb_send, update comments and return value. Change third parameter from
+   'int out_type' to 'enum buffer_command_type bct'. Removed internals of
+   function related to char* return value.
+   tgdb_deliver_command, set last_gui_command if command is a GUI command
+   tgdb_command_callback, update call to tgdb_send to new prototype
+   tgdb_recv_debugger_data, add code for last_gui_command.
+   tgdb_run_debugger_command, tgdb_modify_breakpoint, update to match new
+   prototype.
+   * TODO: Finished a job, moving it to finished.
+
 09/08/2003 Bob Rossi <bob@brasko.net>
 
    * TODO: Update what I think needs to be done next.

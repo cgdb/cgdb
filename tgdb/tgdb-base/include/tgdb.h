@@ -369,10 +369,9 @@ int tgdb_get_absolute_path ( struct tgdb *tgdb, const char *file );
  *
  * Returns
  * -------
- *  TODO: Returning a char* is a hack. It should eventually return an integer.
- *   0 on success or -1 on error
+ *  0 on success or -1 on error
  */
-char *tgdb_run_debugger_command ( struct tgdb *tgdb, enum tgdb_command c );
+int tgdb_run_debugger_command ( struct tgdb *tgdb, enum tgdb_command c );
 
 /* tgdb_set_breakpoint_file_line
  * -----------------------------
@@ -397,12 +396,9 @@ char *tgdb_run_debugger_command ( struct tgdb *tgdb, enum tgdb_command c );
  *
  * Returns
  * -------
- *   string to print.
- *   TODO: The above return value is a hack. It should just return an integer
- *   for pass or fail.
  *   0 on success or -1 on error
  */
-char *tgdb_modify_breakpoint ( struct tgdb *tgdb, const char *file, int line, enum tgdb_breakpoint_action b );
+int tgdb_modify_breakpoint ( struct tgdb *tgdb, const char *file, int line, enum tgdb_breakpoint_action b );
 
 /***************************************************************************
  * tgdb's signal handling

@@ -223,13 +223,17 @@ int command_focus_tty( void )
 
 int command_do_continue( void )
 {
-    if_print(tgdb_run_debugger_command ( tgdb, TGDB_CONTINUE ));
+    if ( tgdb_run_debugger_command ( tgdb, TGDB_CONTINUE ) == -1 ) 
+		return -1;
+
     return 0;
 }
 
 int command_do_finish( void )
 {
-    if_print(tgdb_run_debugger_command ( tgdb, TGDB_FINISH ));
+    if ( tgdb_run_debugger_command ( tgdb, TGDB_FINISH ) == -1 )
+		return -1;
+
     return 0;
 }
 
@@ -241,7 +245,9 @@ int command_do_help( void )
 
 int command_do_next( void )
 {
-    if_print(tgdb_run_debugger_command  ( tgdb, TGDB_NEXT ));
+    if ( tgdb_run_debugger_command  ( tgdb, TGDB_NEXT ) == -1 )
+		return -1;
+
     return 0;
 }
 
@@ -263,13 +269,17 @@ int command_do_quit_force( void )
 int command_do_run( void )
 {
     /* FIXME: see if there are any other arguments to pass to the run command */
-    if_print(tgdb_run_debugger_command  ( tgdb, TGDB_RUN ));
+    if ( tgdb_run_debugger_command  ( tgdb, TGDB_RUN ) == -1 )
+		return -1;
+
     return 0;
 }
 
 int command_do_step( void )
 {
-    if_print(tgdb_run_debugger_command  ( tgdb, TGDB_STEP ));
+    if ( tgdb_run_debugger_command  ( tgdb, TGDB_STEP ) == -1 )
+		return -1;
+
     return 0;
 }
 

@@ -146,22 +146,19 @@ static void stdin_input(int fd) {
 
     for ( i = 0; i < size; i++ ) {
         /* For testing only */
-//        if ( command[i] == '8' )  {
-////            tgdb_end("break driver.c:21", 2);
-//            tgdb_get_sources( );
-//            continue;
-//        } 
-//        if ( command[i] == '9' )  {
-////            tgdb_end("break driver.c:21", 2);
-//            tgdb_get_source_absolute_filename ( "/home/bob/cvs/cgdb/tgdb/tgdb-base/src/test.c" );
-//            continue;
-//        } 
-//        
-//        if ( command[i] == '0' )  {
-////            tgdb_end("break driver.c:21", 2);
-//            tgdb_get_source_absolute_filename ( "afjldkafsd.h" );
-//            continue;
-//        } 
+        /*if ( command[i] == '8' )  {
+			tgdb_modify_breakpoint ( tgdb, "test.c", 21, TGDB_BREAKPOINT_ADD );
+            continue;
+        } 
+        if ( command[i] == '9' )  {
+			tgdb_modify_breakpoint ( tgdb, "test.c", 21, TGDB_BREAKPOINT_DELETE );
+            continue;
+        } 
+        
+        if ( command[i] == '0' )  {
+			tgdb_get_sources ();
+            continue;
+        } */
         tgdb_send_debugger_char ( tgdb, command[i]);
     }
 }

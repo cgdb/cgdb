@@ -127,6 +127,16 @@ struct tgdb {
 	int HAS_USER_SENT_COMMAND;
 
 	sig_atomic_t control_c; /* If ^c was hit by user */
+
+	/*
+	 * This is the last GUI command that has been run.
+	 * It is used to display to the client the GUI commands.
+	 *
+	 * It will either be NULL when it is not set or it should be
+	 * the last GUI command run. If it is non-NULL it should be from the heap.
+	 * As anyone is allowed to call xfree on it.
+	 */
+	char *last_gui_command;
 };
 
 /* Temporary prototypes */
@@ -177,6 +187,8 @@ struct tgdb *initialize_tgdb_context ( void ) {
 
 	tgdb->IS_SUBSYSTEM_READY_FOR_NEXT_COMMAND = 1;
 	tgdb->HAS_USER_SENT_COMMAND = 0;
+
+	tgdb->last_gui_command = NULL;
 	
 	return tgdb;
 }
@@ -392,13 +404,24 @@ static int tgdb_handle_signals ( struct tgdb *tgdb ) {
  * This is the main_loop stuff for tgdb-base
  ******************************************************************************/
 
-/* tgdb_send:
- * ----------
+/* 
+ * Sends a command to the debugger.
  *
- * tgdb_send - sends a commands from the gui to the debugger.
+ * \param tgdb
+ *  An instance of the tgdb library to operate on.
+ *
+ * \param command
+ *  This is the command that should be sent to the debugger.
+ *
+ * \param bct
+ *  This tells tgdb_send who is sending the command. Currently, if readline 
+ *  gets a command from the user, it calls this function. Also, this function
+ *  gets called usually when the GUI tries to run a command.
+ *
+ * @return
+ *  0 on success, or -1 on error.
  */
-static char *tgdb_send(struct tgdb *tgdb, char *command, int out_type) {
-    static char buf[MAXLINE];
+static int tgdb_send(struct tgdb *tgdb, char *command, enum buffer_command_type bct) {
     struct command *ncom;
     static char temp_command[MAXLINE];
     int temp_length = strlen ( command );
@@ -408,35 +431,26 @@ static char *tgdb_send(struct tgdb *tgdb, char *command, int out_type) {
     if ( temp_command[temp_length-1] != '\n' )
         strcat ( temp_command, "\n" );
 
-    /* The gui's commands do not get returned. So a newline needs to be 
-     * returned so that its output is correct.
-     */
-    if ( out_type == 2 ) {
-        buf[0] = '\n';
-        buf[1] = '\0';
-    } else
-        buf[0] = '\0';
-
     ncom = tgdb_interface_new_command ( 
             temp_command, 
-            BUFFER_GUI_COMMAND, 
+            bct, 
             COMMANDS_SHOW_USER_OUTPUT, 
             COMMANDS_VOID, 
             NULL );
 
     if ( tgdb_dispatch_command ( tgdb, ncom ) == -1 ) {
         err_msg("%s:%d tgdb_dispatch_command error", __FILE__, __LINE__);
-        return NULL;
+        return -1;
     }
     
     if ( a2_user_ran_command ( tgdb->a2, tgdb->command_container ) == -1 ) {
         err_msg("%s:%d commands_user_ran_command error", __FILE__, __LINE__);
-        return NULL;
+        return -1;
     }
 
 	tgdb_process_command_container ( tgdb );
 
-    return buf;   
+	return 0;
 }
 
 /* tgdb_dispatch_command:
@@ -526,6 +540,15 @@ static int tgdb_deliver_command ( struct tgdb *tgdb, int fd, struct command *com
         }
     } else {
 		tgdb->IS_SUBSYSTEM_READY_FOR_NEXT_COMMAND = 0;
+		
+		/* Here is where the command is actually given to the debugger.
+		 * Before this is done, if the command is a GUI command, we save it,
+		 * so that later, it can be printed to the client. Its for debugging
+		 * purposes only, or for people who want to know the commands there
+		 * debugger is being given.
+		 */
+		if ( command->com_type == BUFFER_GUI_COMMAND ) 
+		   tgdb->last_gui_command = xstrdup ( command->data );
 
         /* A command for the debugger */
         if ( a2_prepare_for_command ( tgdb->a2, command ) == -1 ) {
@@ -655,7 +678,7 @@ static int tgdb_command_callback(void *p, const char *line) {
     static char command[MAXLINE];
 	struct tgdb *tgdb = (struct tgdb *)p;
     sprintf ( command, "%s\n", line );
-    tgdb_send(tgdb, command, 0);
+    tgdb_send(tgdb, command, BUFFER_USER_COMMAND);
     return 0;
 }
 
@@ -848,6 +871,22 @@ size_t tgdb_recv_debugger_data ( struct tgdb *tgdb, char *buf, size_t n, struct 
     /* make the queue empty */
     tgdb_delete_commands(q);
 
+	/* TODO: This is kind of a hack.
+	 * Since I know that I didn't do a read yet, the next select loop will
+	 * get me back here. This probably shouldn't return, however, I have to
+	 * re-write a lot of this function. Also, I think this function should
+	 * return a malloc'd string, not a static buffer.
+	 *
+	 * Currently, I see it as a bigger hack to try to just append this to the
+	 * beggining of buf.
+	 */
+	if ( tgdb->last_gui_command != NULL ) {
+		strcpy ( buf, "\n" );
+		free ( tgdb->last_gui_command );
+		tgdb->last_gui_command = NULL;
+		return 1;
+	}
+
     /* set buf to null for debug reasons */
     memset(buf,'\0', n);
 
@@ -935,22 +974,24 @@ int tgdb_get_absolute_path ( struct tgdb *tgdb, const char *file ) {
 	return ret;
 }
 
-char *tgdb_run_debugger_command ( struct tgdb *tgdb, enum tgdb_command c ) {
- 	return tgdb_send ( tgdb, tgdb_get_client_command (tgdb, c), 2 );
+int tgdb_run_debugger_command ( struct tgdb *tgdb, enum tgdb_command c ) {
+ 	return tgdb_send ( tgdb, tgdb_get_client_command (tgdb, c), BUFFER_GUI_COMMAND );
 }
 
-char* tgdb_modify_breakpoint ( struct tgdb *tgdb, const char *file, int line, enum tgdb_breakpoint_action b ) {
+int tgdb_modify_breakpoint ( struct tgdb *tgdb, const char *file, int line, enum tgdb_breakpoint_action b ) {
 	char *val = tgdb_client_modify_breakpoint_call ( tgdb, file, line, b );
 
 	if ( val == NULL )
-		return NULL;
+		return -1;
 
-	if ( tgdb_send ( tgdb, val, 2 ) == NULL )
-		return NULL;
+	if ( tgdb_send ( tgdb, val, BUFFER_GUI_COMMAND ) == -1 ) {
+        err_msg("%s:%d tgdb_send error", __FILE__, __LINE__);
+		return -1;
+	}
 
 	free ( val );
 
-	return "\n";
+	return 0;
 }
 
 int tgdb_signal_notification ( struct tgdb *tgdb, int signum ) {

@@ -1,3 +1,8 @@
+09/09/2003 Bob Rossi <bob@brasko.net>
+
+	* NEWS: Fixed TGDB bug. TGDB will not return an extra newline when the
+	user runs commands many through the GUI fast.
+
 08/27/2003 Bob Rossi <bob@brasko.net>
 
 	* NEWS: Fixed TGDB bug. TGDB will now return the correct line number
