@@ -9,7 +9,7 @@ o Make ws option receive a percent, so we can make it any size.
   this way. I would be silly if someone needed 35% ...
   However, making it take a percent does not solve the whole problem.
   The user needs to start at one of these offsets. How should this be done?
-o Make -/+ go to either full screen or 1 line off, on odd or even size.
+o Make -/+ go to either full screen or 2 lines off, on odd or even size.
 
 Closed:
 
