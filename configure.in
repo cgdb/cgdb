@@ -1,0 +1,115 @@
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT(src)
+AC_CONFIG_AUX_DIR(config)
+AM_CONFIG_HEADER(config.h)
+AM_INIT_AUTOMAKE(cgdb, 0.2.2)
+
+dnl Checks for programs.
+AC_PROG_CC
+AC_PROG_INSTALL
+
+# determine if we are running in linux, cygwin, solaris, or freebsd
+   AC_CANONICAL_HOST
+
+   case $host in
+     *-*-linux*)
+       SYSTEM=LINUX
+       AC_DEFINE(HAVE_LINUX, 1,  Linux environment)
+       ;;
+     *-*-cygwin*)
+       SYSTEM=CYGWIN
+       AC_DEFINE(HAVE_CYGWIN, 1,  Cygwin environment)
+       ;;
+     *-*-solaris*)
+       SYSTEM=SOLARIS
+       AC_DEFINE(HAVE_SOLARIS, 1,  Solaris environment)
+       ;;
+     *-*-freebsd*)
+       SYSTEM=FREEBSD
+       AC_DEFINE(HAVE_FREEBSD, 1,  Freebsd environment)
+       ;;
+     *-*-hp*)
+       SYSTEM=HP
+       AC_DEFINE(HAVE_HP, 1,  Hp environment)
+       ;;
+     *)
+       SYSTEM=UNKNOWN
+       ;;
+   esac
+
+dnl Determines if the user asked to build user curses, the default is ncurses.
+dnl If the user asked for curses, ncurses is set to no. Otherwise ncurses is yes.
+    AC_ARG_WITH(ncurses-prefix,
+        [  --with-ncurses-prefix=DIR  Prefix where ncurses is installed (optional)],LDFLAGS="-L$withval/lib $LDFLAGS" CFLAGS="-I$withval/include $CFLAGS")
+
+    AC_ARG_WITH(curses-prefix,
+        [  --with-curses-prefix=DIR   Prefix where curses is installed (optional)],LDFLAGS="-L$withval/lib $LDFLAGS" CFLAGS="-I$withval/include $CFLAGS")
+    
+    AC_ARG_WITH(curses,
+        [  --with-curses           Use curses library: not ncurses (optional)],ncurses=no,ncurses=yes)
+
+dnl If the user want ncurses, Try to find it and add it to the linking library.
+    if test $ncurses = yes; then
+        AC_CHECK_LIB(ncurses, initscr,
+            [AC_DEFINE(HAVE_NCURSES, 1, ncurses library)],
+            AC_MSG_ERROR([cgdb needs ncurses/curses to build. ncurses is strongly recommended.
+    If your system does not have ncurses get it!
+    If that is not an option try 'configure --with-curses.'
+    You can try --with-ncurses-prefix=/foo/ncurses to tell configure where ncurses is.]))
+        LIBS="-lncurses  $LIBS"
+    fi
+
+dnl If the user want curses, Warn them that cgdb does not run perfect against it.
+    if test $ncurses = no; then
+        AC_MSG_WARN([ *****************************************************
+                     cgdb may not run properly when linked against curses!
+                     *****************************************************])
+        AC_CHECK_LIB(curses, initscr,
+            [AC_DEFINE(HAVE_CURSES, 1, curses library)],
+            AC_MSG_ERROR([cgdb needs ncurses/curses to build. ncurses is strongly recommended.
+    If your system does not have ncurses get it!
+    You can try --with-curses-prefix=/foo/curses to tell configure where curses is.]))
+        LIBS="-lcurses  $LIBS"
+    fi
+
+dnl Checking for log10 function in math - I would like to remove this
+AC_CHECK_LIB(m, log10)
+
+dnl Checks for header files.
+AC_HEADER_STDC
+AC_HEADER_SYS_WAIT
+
+dnl determine if terminal headers are available for cgdb
+AC_CHECK_HEADERS(termios.h sys/select.h)
+
+dnl determine other headers for cgdb, Error if they do not exist
+AC_CHECK_HEADERS(errno.h signal.h \
+stdarg.h stdio.h stdlib.h string.h sys/ioctl.h \
+sys/stat.h sys/time.h sys/types.h unistd.h,,AC_MSG_ERROR)
+
+dnl determine headers for cgdb
+AC_CHECK_HEADERS(ctype.h curses.h limits.h math.h)
+
+dnl Check for getopt.h, If this is here then getopt_long can be used.
+AC_CHECK_HEADER(getopt.h, AC_DEFINE(HAVE_GETOPT_H, 1, have getopt_long))
+
+dnl determine if /dev/ptmx is available for pseudo terminals
+AC_CHECK_FILE([/dev/ptmx], AC_DEFINE(HAVE_DEV_PTMX, 1, have /dev/ptmx))
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+AC_C_CONST
+AC_TYPE_UID_T
+AC_TYPE_MODE_T
+AC_TYPE_PID_T
+AC_TYPE_SIZE_T
+
+dnl Checks for library functions.
+AC_PROG_RANLIB
+AC_PROG_GCC_TRADITIONAL
+AC_FUNC_SETPGRP
+AC_TYPE_SIGNAL
+AC_FUNC_VPRINTF
+AC_CHECK_FUNCS(mkdir putenv select strdup strerror)
+
+AC_CONFIG_SUBDIRS(tgdb)
+AC_OUTPUT(Makefile src/Makefile)

@@ -1,0 +1,115 @@
+Quick Reference 
+---------------
+
+    A user interface has not yet been completed. Many of these commands 
+    may be changed.
+
+1. At Source Window
+-------------------
+    i           -> Puts the user into gdb mode
+    t           -> Puts the user into tty mode
+    T           -> Opens a window to give input to the debugged program
+    Control-T   -> Opens a new tty for the debugged program
+    up arrow    -> up a line.
+    j           -> up a line.
+    down arrow  -> down a line.
+    k           -> down a line.
+    left arrow  -> left a line.
+    h           -> left a line.
+    right arrow -> right a line.
+    l           -> right a line.
+    page up     -> up a page
+    shift j     -> up a page
+    page down   -> down a page
+    shift k     -> down a page
+    gg          -> top of file
+    G           -> bottom of file
+    /           -> search
+    ?           -> reverse search
+    .           -> repeat a search ( forward or reverse )
+    o           -> open the file dialog
+    spacebar    -> Sets a breakpoint at the current line number
+    P           -> View the previous source file
+    N           -> View the next source file
+
+    Shortcut Commands
+    ------------------
+    NOTE: use ':set sc' and ':set nosc' to enable or disable
+    n           -> next
+    s           -> step
+    u           -> up
+    d           -> down
+    f           -> finish
+    r           -> run
+    c           -> continue
+
+    Colon commands
+    --------------
+    NOTE: all options are off by default
+    :help       -> Opens the help dialog
+    :set ic     -> Sets searching case insensitive
+    :set noic   -> Sets searching case sensitive
+    :set sc     -> Enables shortcut commands typed in source window
+    :set nosc   -> Disables shortcut commands typed in source window
+    :q          -> Quit cgdb
+    :q!         -> Quit cgdb, even if debugged program is currently running
+
+    Initial macro work ( only one macro works,  need to generalize )
+    ------------------
+
+    m           -> macro start
+    S           -> macro save
+    M           -> macro run
+
+2. At gdb and tty window
+------------------------
+    ESC         -> Back to source window
+    page up     -> up a page
+    page down   -> down a page
+    F11         -> home
+    F12         -> end
+
+Using CGDB:
+-----------
+
+The CGDB user interface consists of two windows.  The "source window" is
+on top, the "GDB window" is on bottom.  The interface has two modes, 
+depending on which window is focused.  "CGDB mode" is when the source 
+window is focused, "GDB mode" is when the GDB window is focused.
+
+When CGDB is invoked, the interface is in GDB mode.  A '*' at the right of
+the status bar indicates that input will be passed to GDB.  To change the
+focus to the source window, hit ESC.  The interface is now in CGDB mode.
+
+To switch back into GDB mode, press 'i'.  This syntax is based on the
+popular Unix text-editor, vi.
+
+Passing Input to Programs:
+--------------------------
+
+This is similar to getting in and out of gdb mode. The tty window is not 
+visible by default. This is because it is only needed if the user wishes 
+to send data to the program being debugged. To display the tty window, 
+hit 'T' while in cgdb mode. After hitting 'T' you will notice that there is
+another window in the middle of the 'source window' and the 'gdb window'. 
+This is called the 'tty window'. You will also see a new status bar called
+the tty status bar. There will be a '*' on the tty status bar after the 'T' 
+was hit. This is because when the window is opened with the 'T' command, 
+cgdb automaticaly puts the user into 'tty mode'. To get out of this window
+hit 'ESC'. This will put you back into cgdb mode. To make the tty window
+appear and disappear hit the 'T' key while in cgdb mode. It is a toggle.
+
+Once the tty window is already open, the user can then hit 't' in cgdb mode
+to get into tty mode. The user can then hit 'ESC' in tty mode to get back
+into cgdb mode.
+
+When the tty window is open, all data that comes from the program, goes there.
+Any data typed into the tty window will ONLY go to the program being debugged.
+It will not go to gdb. When the tty window is closed, all output from the
+debugged program will go to the 'gdb window' AND to the 'tty window' ( for 
+viewing later when the tty window is opened ) . 
+
+If the user wishes to get a new tty for the program being debugged then they
+can type 'Control T'. This will delete all the buffered data waiting to be
+read into the deugged program. This might be useful when you rerun or start 
+a new program.

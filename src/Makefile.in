@@ -1,6 +1,6 @@
-# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
+# Makefile.in generated automatically by automake 1.4-p4 from Makefile.am
 
-# Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -65,17 +65,16 @@ PACKAGE = @PACKAGE@
 RANLIB = @RANLIB@
 VERSION = @VERSION@
 
-AM_CFLAGS = -I ../tgdb -Wall
+AM_CFLAGS = -I ../tgdb/src -Wall
 bin_PROGRAMS = cgdb
-cgdb_LDFLAGS = -L../tgdb
+cgdb_LDFLAGS = -L../tgdb/src
 cgdb_LDADD = -ltgdb
-cgdb_SOURCES = cgdb.c cgdb.h highlight.c highlight.h interface.c filedlg.c \
-               interface.h scroller.c scroller.h sources.c sources.h \
-               filedlg.h helptext.h logo.c logo.h
+cgdb_SOURCES = cgdb.c cgdb.h highlight.c highlight.h interface.c filedlg.c                interface.h scroller.c scroller.h sources.c sources.h                filedlg.h helptext.h logo.c logo.h
 
 
 # links cgdb if common is changed
-cgdb_DEPENDENCIES = ../tgdb
+cgdb_DEPENDENCIES = ../tgdb/src
+INCLUDES = -I../tgdb/include
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = ../config.h
 CONFIG_CLEAN_FILES = 
@@ -97,7 +96,7 @@ DIST_COMMON =  Makefile.am Makefile.in TODO
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = gtar
+TAR = tar
 GZIP_ENV = --best
 DEP_FILES =  .deps/cgdb.P .deps/filedlg.P .deps/highlight.P \
 .deps/interface.P .deps/logo.P .deps/scroller.P .deps/sources.P
@@ -108,7 +107,7 @@ all: all-redirect
 .SUFFIXES:
 .SUFFIXES: .S .c .o .s
 $(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
-	cd $(top_srcdir) && $(AUTOMAKE) --gnu tgdb-curses/Makefile
+	cd $(top_srcdir) && $(AUTOMAKE) --gnu src/Makefile
 
 Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status $(BUILT_SOURCES)
 	cd $(top_builddir) \
@@ -191,14 +190,14 @@ maintainer-clean-tags:
 
 distdir = $(top_builddir)/$(PACKAGE)-$(VERSION)/$(subdir)
 
-subdir = tgdb-curses
+subdir = src
 
 distdir: $(DISTFILES)
 	here=`cd $(top_builddir) && pwd`; \
 	top_distdir=`cd $(top_distdir) && pwd`; \
 	distdir=`cd $(distdir) && pwd`; \
 	cd $(top_srcdir) \
-	  && $(AUTOMAKE) --include-deps --build-dir=$$here --srcdir-name=$(top_srcdir) --output-dir=$$top_distdir --gnu tgdb-curses/Makefile
+	  && $(AUTOMAKE) --include-deps --build-dir=$$here --srcdir-name=$(top_srcdir) --output-dir=$$top_distdir --gnu src/Makefile
 	@for file in $(DISTFILES); do \
 	  d=$(srcdir); \
 	  if test -d $$d/$$file; then \

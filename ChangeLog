@@ -1,0 +1,173 @@
+
+01/25/2003
+    * cgdb, removed h key, it is depricated: :help should be used instead.
+
+    * cgdb, removed ^k, it is depricated: :q and :q! should be used instead.
+
+01/24/2003
+    * cgdb, Added quit command: Added :q and :q! commands.
+
+    * cgdb, Fixed 'current line' discrepancy: Using the :123 line format, the
+    'G', and the 'gg' commands, actually altered the current executing line
+    pointer in the interface.  Fixed this so that the user-selected line is
+    changed, but the current executing line remains unchanged.
+
+    * cgdb, Changed arrow in source window: Changed the - (dash) to an ACS_LTEE
+    character.  If this causes problems on some systems, I'll remove it.
+
+    * cgdb, Changed GDB window tabs: Modified the GDB output window's tab 
+    behavior to resemble a standard terminal.  This means tab stops every 
+    8 characters, instead of just translating tabs to a fixed amount of spaces.
+
+    * cgdb, Added logo: Added a few ASCII art logos to cgdb.  
+version 0.2.2 (01/23/2003):
+
+01/23/2003
+    * Changed cgdb's file dialog: cgdb's file dialog now does not display all
+    the files in strcmp order. It puts regular files first, then relative
+    files ( files that start with '.' ) and then absolute files.
+
+01/22/2003
+    * Changed cgdb's current line color: cgdb now displays the current line
+    as bright white, not red ( that's already ment a breakpoint )
+
+01/22/2003
+    * Changed tgdb, not halting when doing multiple line tab completion: 
+    Fix tgdb when interfacing with readline, if readline returns a '\r' then 
+    tgdb puts the prompt back otherwise, if readline issues a '\n' by doing 
+    tab completion that spans multiple lines then tgdb does not put the prompt
+    back. Also, once any implicit '\n' is recieved then libtgdb will be 
+    ready to accept annotations.
+
+version 0.2.1 (01/19/2003):
+
+01/18/2003
+    * Changed tgdb, control char input: Telling libtgdb which control 
+    chars the user can type that make it ok to start looking for an 
+    annotation even though the user did not type '\n'.
+
+01/18/2003
+    * Changed tgdb, interface of the io unit: Changed interface of 
+    I/O package. I initially made the functions return the char's they
+    read and wrote and made '\0' be the error condition. However, it is
+    of course possible to read the char '\0'. So, now the functions return
+    an int with the error condition and take the char as a parameter.
+
+01/18/2003
+    * Changed tgdb key input bug: If the user entered ^l, ^j, ^m ...,
+    tgdb would not understand that the '\r' was from the annotation
+    because the user never hit the '\n' key. This is now fixed by having
+    the state_machine automatically say the user hit enter if readline
+    returns a '\n' when the user is in USER_AT_PROMPT mode.
+
+01/18/2003
+    * Changed the configure scripts for select.h: Changed the configure
+    script to not fail if select.h isn't on the host.
+
+01/18/2003
+    * Changed the configure scripts: Changed configure to only build
+    cgdb with ncurses unless the user types --with-curses. And then
+    it will try to build with curses. The reason is that cgdb does
+    not work that well with curses on all systems.
+
+01/16/2003
+    * Changed tgdb to not ignore \r's when a signal is caught: tgdb
+    was ignoring carriage returns when a signal was caught while the
+    user was interfacing with gdb. This would make it miss annotations.
+
+version 0.2 (01/13/2003):
+
+01/08/2003
+    * Changed cgdb to traverse previously viewed source files: The user
+    can traverse through the source files that have been viewed.
+
+01/05/2003
+    * Changed tgdb to allow the gui to pick the debugger: They user can
+    specify which debugger they want to use. "gdb" is given by default.
+
+    * Changed cgdb to have some command line support: cgdb now has 
+    command line support to print help, version and allow the user 
+    to pick which debugger cgdb should use.
+
+01/04/2003
+    * Changed cgdb to support colon commands: When the user types
+    a colon (:) from the source window they can enter a command. If the 
+    command is garbage, then No such command: ... is displayed. Otherwise,
+    the command is processed. Currently the only two commands are
+    ':set ic' and ':set noic'.
+
+12/28/2002
+    * Changed cgdb, added file helptext.h which contains the help file:
+    The file helptext.h now contains an array which is the help file that
+    gets displayed when the user hits the 'h' key in the source window.
+    This will eventually be the manual.
+
+    * Changed tgdb and cgdb to have support for one macro: To test out
+    the macro support I have added the ability to run one macro.
+
+    * Fixed bug in tgdb in unfilled buffer in buffer.c: When a buffer
+    was not filled and it was returned, it was not null terminated.
+
+12/28/2002
+    * Changed cgdb, can print long messages to status bar now: added 
+    if_display_message to interface. This allows printing of lines that are 
+    longer than the terminal is wide.
+
+12/27/2002
+    * Changed tgdb to return an error SOURCES_DENIED when tgdb_get_sources:
+    When the client tries to get a list of sources. The error SOURCES_DENIED
+    is returned to indicate that the debugger (gdb) gave an error. This 
+    usually happens when the program was not compiled with debug.
+
+    * Changed tgdb to return the filename that was denied when 
+    ABSOLUTE_SOURCE_DENIED is returned: When the clients requests the absolute
+    filename of a file through tgdb_get_source_absolute_filename and gdb says
+    the file does not exist, then the client gets that notification along 
+    with the name of the file. Previously they would just have gotten the
+    notification.
+
+    * Changed cgdb to have a help dialog: When the user hits 'h' a help 
+    dialog appears. cgdb looks in $HOME/.cgdb/help.txt for the file. 
+    However, as of know the file is not being created. Copying a file
+    there manually does the trick. This will be changed when I can 
+    determine what the correct method of copying the file should be.
+    ( make install, creating the file in the c code, ... )
+
+12/23/2002
+    * Changed tgdb to return errors through tgdb_err_msg: This function is
+    now responsible for returning errors to the client. If a particular 
+    function in libtgdb fails, then this function must be called to get
+    the error. However, the other tgdb functions still need to be modified
+    to return the new error code ( -1 ) to allow the client to know that
+    tgdb_err_msg needs to be called.
+
+12/22/2002
+    * Changed tgdb to add tgdb_tty_name: This function gets the name of the
+    pseudo Terminal that tgdb uses to communicate with the debugged program.
+
+    * Changed cgdb to handle input to the debugged program via a pty:
+    This is a major change. It allows the debugged program to recieve input
+    through gdb's tty command. This seperates gdb's input and the debugged
+    program's input. It is the initial "tty-window" release.
+
+12/21/2002
+    * Changed status bar info: Either shows the current file name, or it shows
+    the search, reverse search or line search. Full line.
+
+version 0.1.1 (12/19/2002):
+
+12/19/2002
+    * Fixed Resize window event: The resizing of the cgdb application was not
+    occuring when the focus was on the gdb window.
+
+    * Fixed regex color highlighting bug in the source window: When searching
+    with the regex in the source window, the color that was matched was 
+    incorrect. Fixed the algorithm and made it more efficient.
+
+    * Fixed sources so they compile on AIX 4.3: Got cgdb to compile and run
+    on AIX 4.3. It doesn't run perfect yet ( the curses is out of wack,
+    displaying order , color ... ) but it compiles and runs.
+
+    * Fixed bug in processing ada breakpoint exception output from gdb: If the
+    user set a breakpoint on an exception in ada, the tgdb library would not
+    be able to parse the output from gdb's command 'info breakpoints'.
