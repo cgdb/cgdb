@@ -1,3 +1,6 @@
+#include <string.h>
+#include <stdlib.h>
+
 #include "commands.h"
 #include "command_lexer.h"
 #include "tgdb.h"
