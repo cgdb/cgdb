@@ -8,11 +8,16 @@ L           [a-zA-Z_]
  */
 
 #include <string.h>
-#include "configuration.h"
+#include "command_lexer.h"
 
 int yylinenumber = 1;
 
 static void count( void );
+
+const char * get_token( void )
+{
+    return yytext;
+}
 
 
 %}
@@ -22,13 +27,12 @@ static void count( void );
 #[^\n]*                                                    { count(); /* ignore comments */ }
 "unset"                                                    { count(); return UNSET; }
 "set"                                                      { count(); return SET; }
-"bind"                                                     { count(); return BIND; }
-"macro"                                                    { count(); return MACRO; }
+"bind"                                                     { count(); return BIND; } 
+"macro"                                                    { count(); return MACRO; } 
 
 (yes|YES|Yes|Y|y|no|NO|No|n|N)                             { count(); return BOOLEAN; }
 ((<({L}|{D}|[^>])*>)|({L}({L}|{D})*))\!?                   { count(); return IDENTIFIER; }
 {D}+                                                       { count(); return NUMBER; }
-(([cCmM]-)?{L})+                                           { count(); return KEY; }
 \"(\\.|[^\\"])*\"                                          { count(); return STRING; }
 
 "="                                                        { count(); return '='; }

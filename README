@@ -47,13 +47,29 @@ Quick Reference
     Colon commands
     --------------
     NOTE: all options are off by default
-    :help       -> Opens the help dialog
-    :set ic     -> Sets searching case insensitive
-    :set noic   -> Sets searching case sensitive
-    :set sc     -> Enables shortcut commands typed in source window
-    :set nosc   -> Disables shortcut commands typed in source window
-    :q          -> Quit cgdb
-    :q!         -> Quit cgdb, even if debugged program is running
+    :continue    -> send a continue command to gdb
+    :finish      -> send a finish command to gdb
+    :help        -> Opens the help dialog
+    :insert      -> move focus to the gdb window
+    :macro_run   -> run the saved macro
+    :macro_save  -> finish save the currently started macro.
+    :macro_start -> start saving commands to a macro
+    :next        -> send a next command to gdb
+    :quit        -> Quit cgdb (may be abbreviated as :q)
+    :quit!       -> Quit cgdb, even if debugged program is running (abbreviated
+                    as :q!)
+
+    The following variables change the behavior of some aspect of cgdb.  Many
+    of these commands may be abbreviated in some way, and all boolean commands
+    my be negated by appending 'no' to the front.  For example: 
+        :set ignorecase
+    turns on case-insensitive searching; while
+        :set noignorecase
+    turns on case-sensitive searching.
+
+    :set ignorecase -> Sets searching case insensitive (:set ic)
+    :set shortcut   -> Enables shortcut commands typed in source window 
+                       (:set sc)
 
     Initial macro work ( only one macro works,  need to generalize )
     ------------------
@@ -97,7 +113,7 @@ there is another window in the middle of the 'source window' and the
 'gdb window'.  This is called the 'tty window'. You will also see a new
 status bar called the tty status bar. There will be a '*' on the tty
 status bar after the 'T' was hit. This is because when the window is
-opened with the 'T' command, cgdb automaticaly puts the user into 'tty
+opened with the 'T' command, cgdb automatically puts the user into 'tty
 mode'. To get out of this window hit 'ESC'. This will put you back into
 command mode. To make the tty window appear and disappear hit the 'T'
 key while in command mode. It is a toggle.
@@ -114,5 +130,5 @@ the 'tty window' ( for viewing later when the tty window is opened ) .
 
 If the user wishes to get a new tty for the program being debugged then
 they can type 'Control T'. This will delete all the buffered data
-waiting to be read into the deugged program. This might be useful when
+waiting to be read into the debugged program. This might be useful when
 you rerun or start a new program.

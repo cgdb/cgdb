@@ -26,12 +26,11 @@
 #include "sources.h"
 #include "tgdb.h"
 #include "filedlg.h"
+#include "commands.h"
 
 /* ----------- */
 /* Prototypes  */
 /* ----------- */
-
-static void if_display_help(void);
 
 /* ----------- */
 /* Definitions */
@@ -59,11 +58,13 @@ static int tty_win_height_shift = 0;
 /* Data Structures */
 /* --------------- */
 
+#if 0 /* This is defined in interface.h now. */
 enum Focus {
     GDB,                 /* Input goes to gdb */
     TTY,                 /* Input goes to tty I/O window */
     CGDB                 /* Input goes to the source window ( CGDB ) */
 };
+#endif
 
 enum Command_Type {
     CMD_LINE_NUMBER,     /* :123 line number */
@@ -94,8 +95,8 @@ static char regex_line[MAX_LINE];       /* The regex the user enters */
 static int regex_line_pos;              /* The index into the current regex */
 static int regex_search;                /* Currently searching text ? */
 static int regex_direction;             /* Direction to search */
-static int regex_icase = 0;             /* Case insensitive (0), sensitive */
-static int shortcut_option = 0;         /* Flag: Shortcut options enabled */
+/*static*/ int regex_icase = 0;             /* Case insensitive (0), sensitive */
+/*static*/ int shortcut_option = 0;         /* Flag: Shortcut options enabled */
 static char last_key_pressed = 0;       /* Last key user entered in cgdb mode */
 
 static char cur_com_line[MAX_LINE];     /* The line number the user entered */
@@ -634,6 +635,13 @@ static void if_run_command(struct sviewer *sview) {
         return;
     }
 
+    if ( command_parse_string( cur_com_line ) ) {
+        if_display_message("Unknown command: ", 0, "%s", cur_com_line);
+    } else {
+        update_status_win();
+    }
+    
+#if 0
     switch (command_type()){
         case CMD_LINE_NUMBER:
             /* The user entered a line number */
@@ -680,6 +688,7 @@ static void if_run_command(struct sviewer *sview) {
             if_display_message("Unknown command: ", 0, "%s", cur_com_line);
             break;
     }
+#endif
 }
 
 /* capture_regex: Captures a regular expression from the user.
@@ -1239,10 +1248,7 @@ void if_show_file(char *path, int line)
        if_draw();
 }
 
-/* if_display_help: Displays the help.
- * ----------------
- */ 
-static void if_display_help(void) {
+void if_display_help(void) {
     extern char cgdb_help_file[MAXLINE];
     int ret_val = 0;
     if (cgdb_help_file[0] && 
@@ -1298,4 +1304,44 @@ void if_shutdown(void)
 
     if (src_win != NULL)
         source_free(src_win);
+}
+
+void if_set_focus( Focus f )
+{
+    switch ( f ) {
+    case GDB:
+        focus = f;
+        if_draw();
+        break;
+    case TTY:
+        if ( tty_win_on ) {
+            focus = f;
+            if_draw();
+        }
+        break;
+    case CGDB:
+        focus = f;
+        if_draw();
+        break;
+    default:
+        return;
+    }
+}
+
+void if_tty_toggle( void )
+{
+    tty_win_on = !tty_win_on;
+    if ( tty_win_on ) {
+        if_set_focus( CGDB );
+    } else {
+        if_set_focus( TTY );
+    }
+
+    if_layout();
+}
+
+void if_search_next( void )
+{
+    source_search_regex(src_win, regex_line, 2, regex_direction, regex_icase);
+    if_draw();
 }

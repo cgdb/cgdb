@@ -30,8 +30,6 @@ Current To Do List (in no particular order)
      when the user hits ^E. It opens the current file in the source
      windows, or does nothing.
 
-   o Fix resizing issues. Is cgdb resizing?
-
    o Investigate removing log10 function calls from sources.c.
 
 ------
@@ -82,3 +80,6 @@ Done (moved from To Do List)
 
    o Allow user to open source files for perusal/breakpoint setting
      (Popup window with a list of files)
+
+   o Fix resizing issues. Is cgdb resizing?
+

@@ -61,6 +61,7 @@ host_alias = @host_alias@
 host_triplet = @host@
 BUILD_DRIVER = @BUILD_DRIVER@
 CC = @CC@
+LEX = @LEX@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 PACKAGE = @PACKAGE@
@@ -71,7 +72,7 @@ AM_CFLAGS = -I ../tgdb/src -Wall
 bin_PROGRAMS = cgdb
 cgdb_LDFLAGS = -L../tgdb/src
 cgdb_LDADD = -ltgdb
-cgdb_SOURCES = cgdb.c cgdb.h highlight.c highlight.h interface.c filedlg.c                interface.h scroller.c scroller.h sources.c sources.h                filedlg.h helptext.h logo.c logo.h
+cgdb_SOURCES = cgdb.c cgdb.h highlight.c highlight.h interface.c filedlg.c                interface.h scroller.c scroller.h sources.c sources.h                filedlg.h helptext.h logo.c logo.h command_lexer.l commands.c
 
 
 # links cgdb if common is changed
@@ -88,26 +89,29 @@ CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 cgdb_OBJECTS =  cgdb.o highlight.o interface.o filedlg.o scroller.o \
-sources.o logo.o
+sources.o logo.o command_lexer.o commands.o
+LEX_OUTPUT_ROOT = @LEX_OUTPUT_ROOT@
+LEXLIB = @LEXLIB@
 CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
-DIST_COMMON =  Makefile.am Makefile.in TODO
+DIST_COMMON =  Makefile.am Makefile.in TODO command_lexer.c
 
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = tar
 GZIP_ENV = --best
-DEP_FILES =  .deps/cgdb.P .deps/filedlg.P .deps/highlight.P \
-.deps/interface.P .deps/logo.P .deps/scroller.P .deps/sources.P
+DEP_FILES =  .deps/cgdb.P .deps/command_lexer.P .deps/commands.P \
+.deps/filedlg.P .deps/highlight.P .deps/interface.P .deps/logo.P \
+.deps/scroller.P .deps/sources.P
 SOURCES = $(cgdb_SOURCES)
 OBJECTS = $(cgdb_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
-.SUFFIXES: .S .c .o .s
+.SUFFIXES: .S .c .l .o .s
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
 	cd $(top_srcdir) && $(AUTOMAKE) --gnu src/Makefile
 
@@ -160,6 +164,8 @@ maintainer-clean-compile:
 cgdb: $(cgdb_OBJECTS) $(cgdb_DEPENDENCIES)
 	@rm -f cgdb
 	$(LINK) $(cgdb_LDFLAGS) $(cgdb_OBJECTS) $(cgdb_LDADD) $(LIBS)
+.l.c:
+	$(LEX) $(AM_LFLAGS) $(LFLAGS) $< && mv $(LEX_OUTPUT_ROOT).c $@
 
 tags: TAGS
 
@@ -278,6 +284,7 @@ distclean-generic:
 	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
 
 maintainer-clean-generic:
+	-test -z "command_lexerl" || rm -f command_lexerl
 mostlyclean-am:  mostlyclean-binPROGRAMS mostlyclean-compile \
 		mostlyclean-tags mostlyclean-depend mostlyclean-generic
 

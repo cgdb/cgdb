@@ -119,5 +119,34 @@ void if_filedlg_display_message(char *message);
  */
 void if_shutdown(void);
 
+/* enum Focus: An enumeration representing a focus state. 
+ * ------------
+ *  GDB: focus on the gdb i/o window
+ *  TTY: focus on the debugged program i/o window
+ *  CGDB: focus on source window, accepts command input.
+ */
+typedef enum Focus { GDB, TTY, CGDB } Focus;
+
+/* if_set_focus: Sets the current input focus to a different window 
+ * ------------
+ *  f: The region to focus
+ */
+void if_set_focus( Focus f );
+
+/* if_display_help: Displays the help on the screen.
+ * ------------
+ */
+void if_display_help(void);
+
+/* if_search_next: finds the next match in a given direction.
+ * ------------
+ */
+void if_search_next( void );
+
+/* if_tty_toggle: 
+ * ------------
+ */
+void if_tty_toggle( void );
+
 #endif
 

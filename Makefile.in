@@ -61,6 +61,7 @@ host_alias = @host_alias@
 host_triplet = @host@
 BUILD_DRIVER = @BUILD_DRIVER@
 CC = @CC@
+LEX = @LEX@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 PACKAGE = @PACKAGE@
