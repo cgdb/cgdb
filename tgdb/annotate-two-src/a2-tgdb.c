@@ -76,10 +76,6 @@ static int tgdb_is_debugger_ready(void) {
     if ( !tgdb_initialized )
         return FALSE;
 
-    /* If the user is at the misc prompt */
-    if ( globals_is_misc_prompt() == TRUE )
-        return TRUE;
-
     /* If the user is at the prompt and the raw queue is empty */
     if ( data_get_state() == USER_AT_PROMPT )
         return TRUE;
@@ -128,16 +124,16 @@ static int tgdb_setup_buffer_command_to_run(
       enum buffer_output_type out_type,         /* Where should the output go */
       enum buffer_command_to_run com_to_run){   /* What command to run */
 
-   struct command *item = buffer_new_item(com, com_type, out_type, com_to_run);
+    struct command *item = buffer_new_item(com, com_type, out_type, com_to_run);
    
-   /*fprintf(stderr, "SIZE_OF_BUFFER(%d)\n", buffer_size(head));*/
-   if(tgdb_can_issue_command()) {
-      commands_run_command(masterfd, item);
-      buffer_free_item(item);
-   } else /* writing the command for later execution */
-      queue_append( gdb_input_queue, item );
+    /*fprintf(stderr, "SIZE_OF_BUFFER(%d)\n", buffer_size(head));*/
+    if(tgdb_can_issue_command()) {
+        commands_run_command(masterfd, item);
+        buffer_free_item(item);
+    } else /* writing the command for later execution */
+        queue_append( gdb_input_queue, item );
 
-   return 0;
+    return 0;
 }
 
 /* signal_catcher: Is called when a signal is sent to this process. 
@@ -267,11 +263,28 @@ static int tgdb_run_command(void){
         control_c = 0;
         return 2;
     } 
+
+tgdb_run_command_tag:
     
     /* If the queue is not empty, run a command */
     if ( queue_size(gdb_input_queue) > 0 ) {
         struct command *item = NULL;
         item = queue_pop(gdb_input_queue);
+
+        /* TODO: The comment and code below is in only one of 2 spots.
+         * It also belongs at tgdb_setup_buffer_command_to_run.
+         */
+
+        /* If at the misc prompt, don't run the internal tgdb commands,
+         * In fact throw them out for now, since they are only 
+         * 'info breakpoints' */
+        if ( globals_is_misc_prompt() == TRUE ) {
+            if ( item->com_type != BUFFER_USER_COMMAND ) {
+                buffer_free_item(item);
+                goto tgdb_run_command_tag;
+            }
+        }
+
         commands_run_command(masterfd, item);
         buffer_free_item(item);
     
@@ -280,7 +293,7 @@ static int tgdb_run_command(void){
         struct string *item = queue_pop(raw_input_queue);
         char *data = string_get(item);
         int i, j = string_length(item);
-    
+
         for ( i = 0; i < j; i++ ) {
             if ( rlctx_send_char(rl, data[i]) == -1 ) {
                 err_msg("(%s:%d) rlctx_send_char failed", __FILE__, __LINE__);
@@ -396,7 +409,7 @@ char *a2_tgdb_send(char *command, int out_type) {
        buf[0] = '\0';
 
    /* tgdb always requests breakpoints because of buggy gdb annotations */
-   tgdb_setup_buffer_command_to_run ( command, BUFFER_USER_COMMAND, COMMANDS_SHOW_USER_OUTPUT, COMMANDS_VOID );
+   tgdb_setup_buffer_command_to_run ( command, BUFFER_GUI_COMMAND, COMMANDS_SHOW_USER_OUTPUT, COMMANDS_VOID );
    tgdb_setup_buffer_command_to_run ( NULL, BUFFER_TGDB_COMMAND, COMMANDS_HIDE_OUTPUT, COMMANDS_INFO_BREAKPOINTS );
    return buf;   
 }
@@ -474,19 +487,24 @@ size_t a2_tgdb_tty_recv(char *buf, size_t n){
 }
 
 int a2_tgdb_new_tty(void) {
-   /* Free old child information */
-   close(master_tty_fd);
-   close(slave_tty_fd);
-   pty_release(child_tty_name);
+    /* Free old child information */
+    close(master_tty_fd);
+    close(slave_tty_fd);
+    pty_release(child_tty_name);
 
-   /* Ask for a new tty */
-   if ( tgdb_util_new_tty(&master_tty_fd, &slave_tty_fd, child_tty_name) == -1){
-      err_msg("%s:%d -> Could not open child tty", __FILE__, __LINE__);
-      return -1;
-   }
+    /* Ask for a new tty */
+    if ( tgdb_util_new_tty(&master_tty_fd, &slave_tty_fd, child_tty_name) == -1){
+        err_msg("%s:%d -> Could not open child tty", __FILE__, __LINE__);
+        return -1;
+    }
 
-   /* Send request to gdb */
-   tgdb_setup_buffer_command_to_run(child_tty_name , BUFFER_TGDB_COMMAND, COMMANDS_HIDE_OUTPUT, COMMANDS_TTY);
+    /* Send request to gdb */
+    tgdb_setup_buffer_command_to_run(
+        child_tty_name, 
+        BUFFER_TGDB_COMMAND, 
+        COMMANDS_HIDE_OUTPUT, 
+        COMMANDS_TTY);
+
    return 0;
 }
 

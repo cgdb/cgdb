@@ -22,8 +22,6 @@ enum state {
    NL_DATA        /* got a nl at the end of annotation */
 } tgdb_state = DATA;
 
-int misc_pre_prompt = 0;
-
 int a2_handle_data(char *data, size_t size,
                      char *gui_data, size_t gui_size, 
                      struct queue *q){
@@ -111,15 +109,6 @@ int a2_handle_data(char *data, size_t size,
                   tgdb_parse_annotation(tgdb_buffer, tgdb_size, q);
                   tgdb_size = 0;                               
                   memset(tgdb_buffer, '\0', MAXLINE);             
-                                 
-                  /* This is a hack to make sure there is a newline
-                   * after each misc_pre_prompt.
-                   */
-                  if(misc_pre_prompt == 1){
-                     misc_pre_prompt = 0;
-                     if(gui_data[counter - 1] != '\n')
-                        gui_data[counter++] = '\n';
-                  }
                   break;
                default:                                                       
                   err_msg("%s:%d -> Bad state transition", __FILE__, __LINE__);

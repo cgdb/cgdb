@@ -1,6 +1,10 @@
 03/27/2003 Bob Rossi <bob_rossi@cox.net>
 
     * Stop adding the enter command to readline's history.
+    * A better solution for the misc_prompt commands are under way: This
+    allows the user to enter a command during a misc prompt. Tgdb also
+    traverses all of the buffered commands, running all commands that the user
+    typed and skipping internal commands ( tgdb and gui ).
 
 03/26/2003 Bob Rossi <bob_rossi@cox.net>
 

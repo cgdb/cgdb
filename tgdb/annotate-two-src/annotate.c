@@ -16,15 +16,12 @@ static int handle_source(const char *buf,  size_t n, struct queue *q){
 }
 
 static int handle_misc_pre_prompt(const char *buf, size_t n, struct queue *q){
-   extern int misc_pre_prompt;
-   
    /* If tgdb is sending a command, then continue past it */
    if(data_get_state() == INTERNAL_COMMAND){
       if(io_write_byte(masterfd, '\n') == -1)
          err_msg("%s:%d -> Could not send command", __FILE__, __LINE__);
    } else {
       data_set_state(AT_PROMPT);
-      misc_pre_prompt = 1;
    }
 
    return 0;
@@ -32,11 +29,13 @@ static int handle_misc_pre_prompt(const char *buf, size_t n, struct queue *q){
 
 static int handle_misc_prompt(const char *buf, size_t n, struct queue *q){
    globals_set_misc_prompt_command(TRUE);
+   data_set_state(USER_AT_PROMPT);
    return 0;
 }
 
 static int handle_misc_post_prompt(const char *buf, size_t n, struct queue *q){
    globals_set_misc_prompt_command(FALSE);
+   data_set_state(POST_PROMPT);
 
    return 0;
 }
@@ -187,17 +186,17 @@ static struct annotation {
   {
       "pre-commands",
       12,
-      handle_pre_prompt 
+      handle_misc_pre_prompt 
   },
   {
       "commands",
       8,
-      handle_prompt
+      handle_misc_prompt
   },
   {
       "post-commands",
       13,
-      handle_post_prompt
+      handle_misc_post_prompt
   },
   {
       "pre-overload-choice",
