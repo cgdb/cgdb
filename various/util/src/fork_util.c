@@ -235,9 +235,10 @@ int invoke_debugger(
     const char * const GDB               = "gdb";
     const char * const NW                = "--nw";
     const char * const X                 = "-x";
+    const char * const ANNOTATE_TWO      = "--annotate=2";
     char *F                              = filename;
     char **local_argv;
-    int i, j = 0, extra = 5;
+    int i, j = 0, extra = 6;
     int pin[2] = { -1, -1 }, pout[2] = { -1, -1 };
 
     /* Copy the argv into the local_argv, and NULL terminate it.
@@ -253,6 +254,7 @@ int invoke_debugger(
         local_argv[j++] = xstrdup(argv[i]);
 
     /* add the init file that the user did not type */    
+    local_argv[j++] = xstrdup(ANNOTATE_TWO);
     local_argv[j++] = xstrdup(NW);
     local_argv[j++] = xstrdup(X);
     local_argv[j++] = xstrdup(F);

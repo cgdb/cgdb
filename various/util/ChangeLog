@@ -1,3 +1,7 @@
+08/27/2003 Bob Rossi <bob@brasko.net>
+
+   * fork_util.c: invoke_debugger, adding --annotate=2 when invoking GDB.
+
 08/16/2003 Bob Rossi <bob@brasko.net>
 	
 	* fork_util.h: invoke_debugger, added 'const' to arg path.

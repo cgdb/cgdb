@@ -14,6 +14,7 @@
 #include "types.h"
 #include "error.h"
 #include "sys_util.h"
+#include "ibuf.h"
 
 static void tgdb_print_item(void *item) {
     struct Command *com = (struct Command *)item;
@@ -28,6 +29,29 @@ static void tgdb_print_item(void *item) {
         case TGDB_UPDATE_BREAKPOINTS:
            break;
         case TGDB_UPDATE_FILE_POSITION:
+           {
+                struct queue *q = ( struct queue * ) com->data;
+                struct string *absolute_name;
+                struct string *relative_name;
+                struct string *line_number;
+
+                absolute_name = queue_pop ( q );
+                relative_name = queue_pop ( q );
+                line_number   = queue_pop ( q );
+
+                fprintf ( stderr, 
+                  "TGDB_UPDATE_FILE_POSITION ABSOLUTE(%s)RELATIVE(%s)LINE(%s)\n",
+                  string_get ( absolute_name ), 
+                  string_get ( relative_name ), 
+                  string_get ( line_number ));
+                                    
+
+                string_clear ( absolute_name );
+                string_clear ( relative_name );
+                string_clear ( line_number );
+                break;
+ 
+           }
            break;
         case TGDB_UPDATE_SOURCE_FILES:
             {
