@@ -12,14 +12,14 @@ AM_CFLAGS = -g -Wall \
 bin_PROGRAMS = cgdb
 
 cgdb_LDFLAGS = \
--L$(top_srcdir)/various/util/src \
--L$(top_srcdir)/various/adt/src \
--L$(top_srcdir)/various/input/src \
--L$(top_srcdir)/various/rlctx/src \
--L$(top_srcdir)/tgdb/tgdb-base/src \
--L$(top_srcdir)/tgdb/annotate-two/src \
--L$(top_srcdir)/cgdb/tokenizer/src \
--L$(top_srcdir)/tgdb/gdbmi/src
+-L$(top_builddir)/various/util/src \
+-L$(top_builddir)/various/adt/src \
+-L$(top_builddir)/various/input/src \
+-L$(top_builddir)/various/rlctx/src \
+-L$(top_builddir)/tgdb/tgdb-base/src \
+-L$(top_builddir)/tgdb/annotate-two/src \
+-L$(top_builddir)/cgdb/tokenizer/src \
+-L$(top_builddir)/tgdb/gdbmi/src
 
 cgdb_LDADD = -ltgdb -lannotate_two -lgdbmi -ltokenizer -lrlctx -linput -ladt -lutil
 
