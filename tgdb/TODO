@@ -1,0 +1,15 @@
+A lot of work to do for cgdb-0.4.0
+
+1. Rename driver to annotate_driver
+2. Get configure to only build cgdb and rlctx_prog and build the driver
+   programs on request.
+3. Integrate gdbmi into libtgdb and make gdbmi_driver
+4. Add a dejagnu testsuite to the annotate_driver and gdbmi_driver
+5. Create a better interface to the front ends
+6. Rework tgdb to be able to support multiple types of debugging (annotate,mi)
+   This involves making a better interface to running commands through the
+   debbuger and through readline.
+7. Reorganize tgdb to have a separate low level lib for ADT's and for
+   util calls like xmalloc. This is so all programs can use it without
+   linking to libtgdb.
+8. Move rlctx_prog to another directory
