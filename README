@@ -147,3 +147,15 @@ If the user wishes to get a new tty for the program being debugged then
 they can type 'Control T'. This will delete all the buffered data
 waiting to be read into the debugged program. This might be useful when
 you rerun or start a new program.
+
+Automating Commands in CGDB:
+----------------------------
+
+There may be several features that you find usefull in CGDB. CGDB is capable
+of automating any of these commands through the use of the config file called
+cgdbrc. It looks in $HOME/.cgdb/cgdbrc for the file. If it exists, CGDB
+executes each line in the file in order. It is as if the user typed in all the
+commands into the status bar after the tui was initialized.
+
+Eventually this file will be used to create macros and high level key 
+bindings. Until then, it is a very usefull way to automate simple commands.

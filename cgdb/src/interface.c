@@ -1337,7 +1337,10 @@ void if_set_winsplit( WIN_SPLIT_TYPE new_split )
 }
 
 void if_highlight_sviewer ( enum tokenizer_language_support l ) {
-	src_win->cur->language = l;
-	highlight ( src_win->cur );
-	if_draw ();
+	/* src_win->cur is NULL when reading cgdbrc */
+	if ( src_win->cur ) {
+		src_win->cur->language = l;
+		highlight ( src_win->cur );
+		if_draw ();
+	}
 }
