@@ -1,3 +1,8 @@
+Bug fixes for cgdb-0.5.2
+
+- Make DESTDIR work in Makefile for installing CGDB
+    http://sourceforge.net/mailarchive/forum.php?thread_id=6966700&forum_id=26100
+
 Bug fixes for cgdb-0.5.1
 
 Closed:
