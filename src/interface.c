@@ -456,6 +456,7 @@ static int if_resize()
         endwin();
         LINES = screen_size.ws_row;
         COLS  = screen_size.ws_col;
+        refresh();
         source_hscroll(src_win, 0);
 #endif
         return if_layout();
@@ -1026,6 +1027,23 @@ static void source_input(struct sviewer *sview, int key)
     if_draw();
 }
 
+/* Sets up the signal handler for SIGWINCH
+ * Returns -1 on error. Or 0 on success */
+static int set_up_signal(void) {
+   struct sigaction action;
+
+   action.sa_handler = signal_handler;      
+   sigemptyset(&action.sa_mask);   
+   action.sa_flags = 0;
+
+   if(sigaction(SIGWINCH, &action, NULL) < 0) {
+      err_ret("%s:%d -> sigaction failed ", __FILE__, __LINE__);
+      return -1;
+   }
+
+   return 0;
+}
+
 /* ----------------- */
 /* Exposed Functions */
 /* ----------------- */
@@ -1036,7 +1054,8 @@ int if_init(void)
     if (init_curses())
         return 1;
 
-    if (signal(SIGWINCH, signal_handler) == SIG_ERR)
+    /* Set up the signal handler to catch SIGWINCH */
+    if ( set_up_signal() == -1 )
         return 2;
 
     if (ioctl(fileno(stdout), TIOCGWINSZ, &screen_size) == -1){

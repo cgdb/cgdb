@@ -19,7 +19,6 @@
 #endif
 #include <sys/stat.h>
 #include <sys/wait.h>
-#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
