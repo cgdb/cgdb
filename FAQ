@@ -1,0 +1,41 @@
+							Section I General Information
+
+1. What is cgdb?
+	cgdb is a curses interface to the GNU debugger.
+
+2. Where can I get cgdb?
+	The cgdb project is hosted on http://sourceforge.net/. You can view the 
+	project by going to http://sourceforge.net/projects/cgdb/. Alternativly, 
+	cgdb's homepage is at http://cgdb.sourceforge.net/.
+
+3. What OS does cgdb work on?
+	cgdb is used daily on
+		Linux 2.4.18
+		Cygwin 1.3.22 (NT,2000,XP)
+		Solaris 5.7,5.8,5.9
+
+	it has been reported to work on 
+	 	AIX
+		FreeBSD
+
+
+	If you have ported or just got cgdb to compile on another OS,
+	please let us know.
+
+							Section II Installing cgdb
+
+1. How do I install cgdb?
+	For now, cgdb can only be installed by compiling it from sources.
+
+							Section III Problems
+
+1. Why do some keys not work properly for me in cgdb?
+	cgdb is proud of its custom key input library. This is because
+	it *can* use the ESC key, without having problems understanding
+	escape sequences that are generated when certain keys are hit.
+	Some of the keys that generate escape sequences are the arrow keys,
+	page up, page down, insert, delete, home, end and all the function
+	keys.
+
+	If you have problems using any of the keys above, you should modify 
+	the value of ..
