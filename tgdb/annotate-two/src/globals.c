@@ -10,15 +10,31 @@
 #include "globals.h"
 #include "sys_util.h"
 
+/**
+ * The globals context.
+ * This store various amounts of global data for the annotate_two context.
+ */
 struct globals {
-	/* This determines if the char enter has been typed by the
+
+	/** 
+	 * This determines if the char enter has been typed by the
 	 * user since the prompt annotation has been sent by gdb
 	 */
 	unsigned short info_sources_started;
 
-	 /* Lists a file */
+	/** 
+	 * Has the 'list' command been started.
+	 */
 	unsigned short list_started;
+
+	/**
+	 * Did the list have an error?
+	 */
 	unsigned short list_had_error;
+
+	/**
+	 * Is a misc prompt command be run.
+	 */
 	unsigned short misc_prompt_command;
 };
 

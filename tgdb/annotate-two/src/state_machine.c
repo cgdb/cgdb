@@ -46,9 +46,24 @@ enum state {
    NL_DATA        /* got a nl at the end of annotation */
 };
 
+/**
+ * The data needed to parse the output of GDB.
+ */
 struct state_machine {
+
+	/**
+	 * Annotations will be stored here.
+	 */
 	char tgdb_buffer[MAXLINE];
+
+	/**
+	 * The size of the annotation above.
+	 */
 	size_t tgdb_size;
+
+	/**
+	 * The state of the annotation parser ( current context ).
+	 */
 	enum state tgdb_state;
 };
 

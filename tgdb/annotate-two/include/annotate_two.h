@@ -13,55 +13,105 @@
 
 #define TTY_NAME_SIZE 64
 
+/**
+ * This is the main context for the annotate two subsytem.
+ */
 struct annotate_two {
-	/* This is set when tgdb has initialized itself */
+
+	/** 
+	 * This is set when this context has initialized itself
+	 */
 	int tgdb_initialized;
 
-	int debugger_stdin;  /* writing to this will write to the stdin of the debugger */
-	int debugger_out;    /* Reading from reads the stdout/stderr of the debugger */
+	/** 
+	 * writing to this will write to the stdin of the debugger
+	 */
+	int debugger_stdin; 
 
-	int inferior_stdin;  /* writing to this will write to the stdin of the inferior */
-	int inferior_out;    /* Reading from reads the stdout/stderr of the inferior */
-	int inferior_slave_fd; /* Only kept around so it can be closed properly */
+	/**
+     * Reading from reads the stdout/stderr of the debugger
+	 */
+	int debugger_out;
+	
+	/**
+     * writing to this will write to the stdin of the inferior
+	 */
+	int inferior_stdin;  
 
-	pid_t debugger_pid;             /* pid of child process */
+	/**
+	 * Reading from reads the stdout/stderr of the inferior
+	 */
+	int inferior_out;
+
+	/**
+	 * Only kept around so it can be closed properly
+	 */
+	int inferior_slave_fd;
+
+	/** 
+	 * pid of child process.
+	 */
+	pid_t debugger_pid;
+
+	/**
+	 * ???
+	 */
 	int command_finished;
 	
-	/* The config directory and the init file for gdb */
+	/** 
+	 * The config directory that this context can write too.
+	 */
 	char config_dir[PATH_MAX];
+
+	/**
+	 * The init file for the debugger.
+	 */
 	char a2_gdb_init_file[PATH_MAX];
 
-	/* This represents the data subsystem */
+	/** 
+	 * This represents the data subsystem
+	 */
 	struct data *data;
 
-	/* This module is used for parsing the output of gdb for annotate 2 
+	/** 
+	 * This module is used for parsing the output of gdb for annotate 2 
 	 * It is used to determine what is a gdb output and what is annotations
 	 */
 	struct state_machine *sm;
 
-	/* This module is used for parsing the commands output of gdb */
+	/**
+	 * This module is used for parsing the commands output of gdb
+	 */
 	struct commands *c;
 
-	/* This module is used for keeping shared global data */
+	/** 
+	 * This module is used for keeping shared global data
+	 */
 	struct globals *g;
 
+	/**
+	 * The name of the inferior tty.
+	 */
 	char inferior_tty_name[TTY_NAME_SIZE];
 
-	/* TODO: 
+	/** 
+	 * TODO
 	 * This is a temporary solution. I think.
 	 * If the subsystem appends commands to this queue, they will
 	 * be returned to libtgdb for execution.
 	 */
 	struct queue *command_container;
 
-	/* This is to determine if the first annotation prompt has been reached
+	/** 
+	 * This is to determine if the first annotation prompt has been reached
 	 * yet. If it hasn't been reached, this should be zero. Otherwise one.
 	 * Its used with the variable below to determine if the annotate 
 	 * subsystem needs to probe gdb for the initial file to display.
 	 */
 	int first_prompt_reached;
 	
-	/* This is used to show if the source annotation has been recieved yet.
+	/** 
+	 * This is used to show if the source annotation has been recieved yet.
 	 * It is set to 0 if it hasn't, otherwise 1.
 	 */
 	int source_already_received;

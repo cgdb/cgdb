@@ -181,10 +181,26 @@ static int NOT_SUPPORTED(struct annotate_two *a2, const char *buf, size_t n, str
    return 0;
 }
 
+/**
+ * The main annotation data structure.
+ * It represents all of the supported annotataions that can be parsed.
+ */
 static struct annotation {
-   const char *data;
-   size_t size;
-   int (*f)(struct annotate_two *a2, const char *buf, size_t n, struct queue *q);
+
+	/**
+	 * The name of the annotation.
+	 */
+    const char *data;
+
+	/**
+	 * The size of the annotation.
+	 */
+    size_t size;
+
+	/**
+	 * The function to call when the annotation is found.
+	 */
+    int (*f)(struct annotate_two *a2, const char *buf, size_t n, struct queue *q);
 } annotations[] = {
   {
       "source",

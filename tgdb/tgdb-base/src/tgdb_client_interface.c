@@ -8,14 +8,21 @@
 #include "sys_util.h"
 #include "error.h"
 
-/*
+/**
  * This is a list of all of the client interfaces that TGDB supports.
  */
 static struct tgdb_client_debugger_interfaces {
+
+	/**
+	 * This represents the type of debugger to support.
+	 */
 	enum tgdb_client_supported_debuggers debugger;
+
+	/**
+	 * This represents the type of protocol to support.
+	 */
 	enum tgdb_client_supported_protocols protocol;
 
-	/* Functions necessary to implement a client */
 	void *(*tgdb_client_create_context) ( 
 			const char *debugger_path, 
 			int argc, char **argv,
@@ -223,24 +230,30 @@ static struct tgdb_client_debugger_interfaces {
 };
 
 /**
- *
  * This is a context that abstracts the lower level interface from TGDB.
  * By doing this, all of the lower levels can communicate here, and TGDB
  * just makes sure that it calls the functions in this header.
- *
- * \field debugger
- *     The current debugger being used.
- *
- * \field protocol
- *     The current protocol begin used.
- *
- * \field tgdb_debugger_context
- *     The current client debugger being used.
  */
 struct tgdb_client_context {
+
+	/**
+ 	 * The current debugger being used.
+	 */
 	enum tgdb_client_supported_debuggers debugger;
+
+	/**
+     * The current protocol begin used.
+	 */
 	enum tgdb_client_supported_protocols protocol;
+
+	/**
+     * The current client debugger being used.
+	 */
 	void *tgdb_debugger_context;
+
+	/**
+	 * A client interface. All of the functions that implement the client.
+	 */
 	struct tgdb_client_debugger_interfaces *tgdb_client_interface;
 };
 

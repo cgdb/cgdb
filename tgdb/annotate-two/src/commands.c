@@ -26,44 +26,134 @@
 #include "tgdb_list.h"
 #include "annotate_two.h"
 
+/**
+ * This structure represents most of the I/O parsing state of the 
+ * annotate_two subsytem.
+ */
 struct commands {
+
+	/**
+	 * The current absolute path the debugger is at in the inferior.
+	 */
 	struct string *absolute_path;
+
+	/**
+	 * The current line number the debugger is at in the inferior.
+	 */
 	struct string *line_number;
 
+	/**
+	 * The state of the command context.
+	 */
 	enum COMMAND_STATE cur_command_state;
-	int cur_field_num;
-   int field_5_newline_hit;
 
-	/* breakpoint information */
+	/**
+	 * This is related to parsing the breakpoint annotations.
+	 * It keeps track of the current field we are in.
+	 */
+	int cur_field_num;
+
+	/**
+	 * This is a flag to let us know when the 5th field has been hit.
+	 */
+    int field_5_newline_hit;
+
+	/** breakpoint information */
+	//@{
+
+	/**
+	 * A list of breakpoints already parsed.
+	 */
 	struct tgdb_list *breakpoint_list;
+
+	/**
+	 * The current breakpoint being parsed.
+	 */
 	struct string *breakpoint_string;
+
+	/**
+	 * ???
+	 */
 	int breakpoint_table;
+
+	/**
+	 * If the current breakpoint is enabled
+	 */
 	int breakpoint_enabled;
+
+	/**
+	 * ???
+	 */
 	int breakpoint_started;
 
-	/* 'info source' information */
+	//@}
+	
+	/** 'info source' information */
+
+	//@{
+
+	/** 
+	 * The current info source line being parsed 
+	 */
 	struct string *info_source_string;
+
+	/** 
+	 * Finished parsing the line being looked for.
+	 */
 	int info_source_ready;
+
+	/**
+	 * The name of the file requested to have 'info source' run on.
+	 */
 	char last_info_source_requested[MAXLINE];
 
-	/* 'info sources' information */
+	//@}
+	
+	/** 'info sources' information */
+	//@{
+
+	/** 
+	 * ??? Finished parsing the data being looked for.
+	 */
 	int sources_ready;
+
+	/**
+	 * All of the sources.
+	 */
 	struct string *info_sources_string;
+
+	/**
+	 * All of the source, parsed in put in a list, 1 at a time.
+	 */
 	struct tgdb_list *inferior_source_files;
 
-	/* String that is output by gdb to get the absolute path to a file */
+	//@}
+
+	/** 
+	 * The absolute path prefix output by GDB when 'info source' is given
+	 */
 	const char *source_prefix;
+
+	/** 
+	 * The length of the line above.
+	 */
 	int source_prefix_length;
 
-	/* String that is output by gdb to get the relative path to a file */
+	/** 
+	 * The relative path prefix output by GDB when 'info source' is given
+	 */
 	const char *source_relative_prefix;
+
+	/** 
+	 * The length of the line above.
+	 */
 	int source_relative_prefix_length;
 
-	/* This is used to store all of the entries that are possible to
+	/** 
+	 * This is used to store all of the entries that are possible to
 	 * tab complete. It should be blasted each time the completion
 	 * is run, populated, and then parsed.
 	 */
-	//static struct queue *tab_completion_entries = NULL;
 	char last_tab_completion_command[MAXLINE];
 };
 

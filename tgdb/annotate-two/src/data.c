@@ -18,13 +18,34 @@
 #include "a2-tgdb.h"
 #include "sys_util.h"
 
-
+/**
+ * The info stored for each data context.
+ */
 struct data {
+	/**
+	 * The maximum size of the prompt.
+	 */
 	#define GDB_PROMPT_SIZE 1024
+
+	/**
+	 * the state of the data context
+	 */
 	enum internal_state data_state;	
+
+	/**
+	 * The debugger's prompt.
+	 */
 	char gdb_prompt[GDB_PROMPT_SIZE];
-	char gdb_prompt_last[GDB_PROMPT_SIZE];
+
+	/**
+	 * The size of gdb_prompt.
+	 */
 	int gdb_prompt_size;
+
+	/**
+	 * What the debugger's prompt was before.
+	 */
+	char gdb_prompt_last[GDB_PROMPT_SIZE];
 };
 
 struct data *data_initialize ( void ) {

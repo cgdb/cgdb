@@ -44,100 +44,114 @@
 #include "fork_util.h"
 #include "sys_util.h"
 
+/**
+ * The TGDB context data structure.
+ */
 struct tgdb {
+
+	/**
+	 * A client context to abstract the debugger.
+	 */
 	struct tgdb_client_context *tcc;
 
-
-	/* Reading from this will read from the debugger's output */
+	/** 
+	 * Reading from this will read from the debugger's output
+	 */
 	int debugger_stdout;
 
-	/* Writing to this will write to the debugger's stdin */
+	/** 
+	 * Writing to this will write to the debugger's stdin
+	 */
 	int debugger_stdin;
 
-	/* Reading from this will read the stdout from the program being debugged */
+	/** 
+	 * Reading from this will read the stdout from the program being debugged
+	 */
 	int inferior_stdout;
-	/* Writing to this will write to the stdin of the program being debugged */
+
+	/** 
+	 * Writing to this will write to the stdin of the program being debugged 
+	 */
 	int inferior_stdin;
 
 	/***************************************************************************
 	 * All the queue's the clients can run commands through
 	 **************************************************************************/
 
-	/* 
-	 * 	gdb_input_queue
-	 *
-	 *  The commands that need to be run through gdb. 
-	 *  Examples are 'b main', 'run', ...
+	/**
+	 * The commands that need to be run through gdb. 
+	 * Examples are 'b main', 'run', ...
 	 */
 	struct queue *gdb_input_queue;
 
-	/* 
-	 * raw_input_queue: 
-	 *
-	 *  This is the data that the user typed to form a command.
-	 *  This data must be sent through readline to get the actual command.
-	 *  The data will be passed through readline and then readline will send to 
-	 *  tgdb a command to run.
+	/**
+	 * This is the data that the user typed to form a command.
+	 * This data must be sent through readline to get the actual command.
+	 * The data will be passed through readline and then readline will send to 
+	 * tgdb a command to run.
 	 */
 	struct queue *raw_input_queue;
 
-	/* 
-	 * oob_input_queue:
-	 *
-	 *  The out of band input queue. 
-	 *  These commands should *always* be run first */
+	/** 
+	 * The out of band input queue. 
+	 * These commands should *always* be run first */
 	struct queue *oob_input_queue;
 
-	/* 
-	 * rlc_input_queue:
-	 *
-	 *  This sends commands to the readline program.
+	/**
+	 * This sends commands to the readline program.
 	 */
 	struct queue *rlc_input_queue;
 
-	/*
-	 * command_container
-	 *
+	/**
 	 * This is used to recieve commands from the lower level subsystem.
 	 */
 	struct queue *command_container;
 
-	/* Interface to readline capability */
+	/** 
+	 * Interface to readline context
+	 */
 	struct rlctx *rl;
 
-	/* The current command the user is typing at readline */
+	/** 
+	 * The current command the user is typing at readline 
+	 */
 	struct string *current_command;
 
-	/* This variable needs to be removed from libannotate 
+	/** 
+	 * This variable needs to be removed from libannotate 
 	 * I don't really know if its usefull anymore.
 	 */
 	unsigned short tgdb_partially_run_command;
 
-	/* These are 2 very important state variables.
-	 *
-	 * IS_SUBSYSTEM_READY_FOR_NEXT_COMMAND
-	 * -----------------------------------
-	 *  If set to 1, libtgdb thinks the lower level subsystem is capable of 
-	 *  recieving another command. It needs this so that it doesn't send 2
-	 *  commands to the lower level before it can say it can't recieve a command.
-	 *  At some point, maybe this can be removed?
-	 *  When its set to 0, libtgdb thinks it can not send the lower level another
-	 *  command.
-	 *
-	 * HAS_USER_SENT_COMMAND
-	 * ---------------------
-	 *  This is set to 1 if the user types a full command, followed by the newline.
-	 *  This is used so that all commands, until that command is finished by the 
-	 *  lower level subsystem, are queued. That way, only 1 command is sent at a 
-	 *  time. If it is 0, then the data typed by the user goes directly to the 
-	 *  readline context, it is not queued.
+	/** 
+	 * These are 2 very important state variables.
+	 */
+	 
+	/**
+	 * If set to 1, libtgdb thinks the lower level subsystem is capable of 
+	 * recieving another command. It needs this so that it doesn't send 2
+	 * commands to the lower level before it can say it can't recieve a command.
+	 * At some point, maybe this can be removed?
+	 * When its set to 0, libtgdb thinks it can not send the lower level another
+	 * command.
 	 */
 	int IS_SUBSYSTEM_READY_FOR_NEXT_COMMAND;
+
+	/** 
+	 * This is set to 1 if the user types a full command, followed by the newline.
+	 * This is used so that all commands, until that command is finished by the 
+	 * lower level subsystem, are queued. That way, only 1 command is sent at a 
+	 * time. If it is 0, then the data typed by the user goes directly to the 
+	 * readline context, it is not queued.
+	 */
 	int HAS_USER_SENT_COMMAND;
 
-	sig_atomic_t control_c; /* If ^c was hit by user */
+	/**
+	 * If ^c was hit by user
+	 */
+	sig_atomic_t control_c; 
 
-	/*
+	/**
 	 * This is the last GUI command that has been run.
 	 * It is used to display to the client the GUI commands.
 	 *
@@ -147,7 +161,7 @@ struct tgdb {
 	 */
 	char *last_gui_command;
 
-	/*
+	/**
 	 * This is a TGDB option.
 	 * It determines if the user wants to see the commands the GUI is running.
 	 * 
@@ -156,7 +170,7 @@ struct tgdb {
 	 */
 	int show_gui_commands;
 
-	/* 
+	/**
 	 * This is the queue of commands TGDB has currently made to give to the 
 	 * front end.
 	 */
