@@ -366,7 +366,7 @@ size_t a2_tgdb_recv(char *buf, size_t n, struct Command ***com){
     * Basically this function is responsible for seperating the annotations
     * that gdb writes from the data. 
     */
-   buf_size = tgdb_handle_data(local_buf, size, buf, n, com);
+   buf_size = a2_handle_data(local_buf, size, buf, n, com);
 
    /* 3. runs the users buffered command if any exists */
    if( global_can_issue_command() == TRUE && 

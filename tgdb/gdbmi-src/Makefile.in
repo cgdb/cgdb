@@ -72,8 +72,8 @@ AM_CFLAGS = -Wall
 INCLUDES = -I../include
 
 noinst_LIBRARIES = libgdbmi.a
-libgdbmi_a_SOURCES = gdbmi_tgdb.c gdbmi_init.c
-EXTRA_DIST = gdbmi_tgdb.h
+libgdbmi_a_SOURCES = gdbmi_tgdb.c gdbmi_init.c gdbmi_parse.c
+EXTRA_DIST = gdbmi_tgdb.h gdbmi_parse.h
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = ../../config.h
 CONFIG_CLEAN_FILES = 
@@ -85,7 +85,7 @@ CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 libgdbmi_a_LIBADD = 
-libgdbmi_a_OBJECTS =  gdbmi_tgdb.o gdbmi_init.o
+libgdbmi_a_OBJECTS =  gdbmi_tgdb.o gdbmi_init.o gdbmi_parse.o
 AR = ar
 CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -98,7 +98,7 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = tar
 GZIP_ENV = --best
-DEP_FILES =  .deps/gdbmi_init.P .deps/gdbmi_tgdb.P
+DEP_FILES =  .deps/gdbmi_init.P .deps/gdbmi_parse.P .deps/gdbmi_tgdb.P
 SOURCES = $(libgdbmi_a_SOURCES)
 OBJECTS = $(libgdbmi_a_OBJECTS)
 
