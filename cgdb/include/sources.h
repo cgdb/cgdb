@@ -23,6 +23,8 @@
 #include <curses.h>
 #endif /* HAVE_CURSES_H */
 
+#include "tokenizer.h"
+
 /* ----------- */
 /* Definitions */
 /* ----------- */
@@ -71,6 +73,8 @@ struct list_node{
     int               sel_col_rbeg;    /* Current beg column matched in regex */
     int               sel_col_rend;    /* Current end column matched in regex */
     int               sel_rline;       /* Current line used by regex */
+
+	enum tokenizer_language_support language; /* The language type of this file */
 
     struct list_node *next;            /* Pointer to next link in list */
 };

@@ -78,6 +78,10 @@ Quick Reference
                        (especially useful as an init setting in cgdbrc)
                        values={top_full, top_big, even, bottom_big, bottom_full}
                        (:set ws)
+    :set tabstop    -> Number of spaces that a <Tab> in the file counts for.
+    :set syntax     -> Sets the current highlighting mode of the current file.
+                       values={c,ada,off}
+                       (:set syn)
 
 2. At gdb and tty window
 ------------------------

@@ -3,6 +3,10 @@
 #include <limits.h>
 #include <stdio.h>
 
+/* Some default file extensions */
+char *c_extensions[] = { ".c", ".C", ".cc", ".cpp", ".cxx", ".h", ".hpp" };
+char *ada_extensions[] = { ".adb", ".ads", ".ada",".ADB", ".ADS", ".ADA" };
+
 extern int c_lex ( void );
 extern FILE *c_in;
 extern char *c_text;
@@ -24,15 +28,17 @@ struct tokenizer {
 struct tokenizer *tokenizer_init ( void ) {
 	struct tokenizer *n = ( struct tokenizer * ) xmalloc ( sizeof ( struct tokenizer ) );
 	n->i = string_init ();
+	n->lang = TOKENIZER_LANGUAGE_UNKNOWN;
+	n->tokenizer_lex = NULL;
+	n->tokenizer_in = NULL;
+	n->tokenizer_text = NULL;
 	return n;
 }
 
 int tokenizer_set_file ( struct tokenizer *t, const char *file, enum tokenizer_language_support l ) {
 
-	if ( l < TOKENIZER_ENUM_START_POS || l >= TOKENIZER_LANGUAGE_ERROR ) {
-        fprintf ( stderr, "%s:%d invalid tokenizer_language_support enum", __FILE__, __LINE__ );
-        return -1;
-	}
+	if ( l < TOKENIZER_ENUM_START_POS || l >= TOKENIZER_LANGUAGE_UNKNOWN )
+        return 0;
 	
 	t->lang=l;
 
@@ -57,7 +63,9 @@ int tokenizer_set_file ( struct tokenizer *t, const char *file, enum tokenizer_l
 }
 
 int tokenizer_get_token ( struct tokenizer *t ) {
-		
+	if ( t == NULL || t->tokenizer_lex == NULL )
+		return 0;
+
 	t->tpacket = (t->tokenizer_lex)();
 	string_clear ( t->i );
 	string_add ( t->i, ( const char * ) *(t->tokenizer_text) );
@@ -97,4 +105,23 @@ const char *tokenizer_get_printable_enum ( enum tokenizer_type e ) {
 char *tokenizer_get_data ( struct tokenizer *t ) {
 	char *string = string_get ( t->i );
 	return string;
+}
+
+enum tokenizer_language_support tokenizer_get_default_file_type ( 
+			const char *file_extension ) {
+	enum tokenizer_language_support l = TOKENIZER_LANGUAGE_UNKNOWN;
+	int i;
+
+	if ( !file_extension )
+        return TOKENIZER_LANGUAGE_UNKNOWN;
+
+    for (i = 0; i < sizeof(c_extensions) / sizeof(char *); i++)
+        if (strcmp(file_extension, c_extensions[i]) == 0)
+            l = TOKENIZER_LANGUAGE_C;
+
+    for (i = 0; i < sizeof(ada_extensions) / sizeof(char *); i++)
+        if (strcmp(file_extension, ada_extensions[i]) == 0)
+            l = TOKENIZER_LANGUAGE_ADA;
+
+    return l;
 }

@@ -61,6 +61,7 @@
 #include "filedlg.h"
 #include "commands.h"
 #include "input.h"
+#include "highlight.h"
 
 /* ----------- */
 /* Prototypes  */
@@ -1333,4 +1334,10 @@ void if_set_winsplit( WIN_SPLIT_TYPE new_split )
    cur_win_split = new_split;
    window_height_shift = (int)((HEIGHT/2) * (cur_win_split / 2.0)); 
    if_layout();
+}
+
+void if_highlight_sviewer ( enum tokenizer_language_support l ) {
+	src_win->cur->language = l;
+	highlight ( src_win->cur );
+	if_draw ();
 }

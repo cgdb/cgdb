@@ -1,3 +1,16 @@
+06/19/2003 Bob Rossi <bob_rossi@cox.net>
+
+	* interface.h: Added if_highlight_viewer
+	* sources.h: Added a language to each list_node.
+	* commands.c: Added new command 'syntax' to highlight the current
+	file to a certain language.
+	* highlight.c: changed highlight, to not find out the file_type,
+	that job is done by the tokenizer now.
+	* interface.c: Added if_highlight_sviewer
+	* sources.c: load_file Set the default language of the new file
+	* tokenizer.h: add tokenizer_get_default_file_type
+	* tokenizer.c: implemented tokenizer_get_default_file_type
+
 06/17/2003 Bob Rossi <bob_rossi@cox.net>
 
 	* sources.c: Make sure orig_buf is valid.

@@ -16,6 +16,7 @@
 #include "tgdb.h"
 #include "interface.h"
 #include "error.h"
+#include "tokenizer.h"
 
 /**
  * The general idea is that the configuration will read in the users ~/.cgdbrc
@@ -42,6 +43,7 @@ enum ConfigType
 static int command_set_focus( const char *value );
 static int command_set_tabstop( int tab );
 static int command_set_winsplit( const char *value );
+static int command_set_syntax_type( const char *value );
 
 static struct ConfigVariable
 {
@@ -54,6 +56,7 @@ static struct ConfigVariable
     /* ignorecase */ 	{ "ignorecase", "ic", CONFIG_TYPE_BOOL, &regex_icase },
     /* line_coverage */ { "line_coverage", "lc", CONFIG_TYPE_BOOL, &line_coverage_option },
     /* shortcut   */ 	{ "shortcut", "sc", CONFIG_TYPE_BOOL, &shortcut_option },
+    /* syntax */      	{ "syntax", "syn", CONFIG_TYPE_FUNC_STRING, command_set_syntax_type }, 
     /* tabstop   */     { "tabstop", "ts", CONFIG_TYPE_FUNC_INT, command_set_tabstop },
     /* winsplit */      { "winsplit", "ws", CONFIG_TYPE_FUNC_STRING, command_set_winsplit }, 
 };
@@ -163,6 +166,21 @@ int command_set_winsplit( const char *value )
    } // end if
 
    return 0;
+}
+
+int command_set_syntax_type ( const char *value )
+{
+	enum tokenizer_language_support l = TOKENIZER_LANGUAGE_UNKNOWN;
+	if( strcasecmp( value, "c" ) == 0 )
+		l = TOKENIZER_LANGUAGE_C;
+   	else if( strcasecmp( value, "ada" ) == 0 )
+		l = TOKENIZER_LANGUAGE_ADA;
+   	else if( strcasecmp( value, "off" ) == 0 )
+		l = TOKENIZER_LANGUAGE_UNKNOWN;
+
+	if_highlight_sviewer ( l );
+
+   	return 0;
 }
 
 int command_focus_cgdb( void )

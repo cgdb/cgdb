@@ -243,11 +243,15 @@ static int load_file(struct list_node *node)
 	}
 
 	fclose(file);
+
+	node->language = tokenizer_get_default_file_type ( strrchr(node->path, '.') );
     
 	/* Add the highlighted lines */
 	if (has_colors())
         highlight(node);
 	else {
+		/* Just copy the lines from the original buffer if no highlighting 
+		 * is possible */
 		int i;
 		node->buf.length = node->orig_buf.length;
 		node->buf.max_width = node->orig_buf.max_width;

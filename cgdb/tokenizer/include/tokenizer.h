@@ -22,7 +22,7 @@ enum tokenizer_type {
 enum tokenizer_language_support {
 	TOKENIZER_LANGUAGE_C = TOKENIZER_ENUM_START_POS,
 	TOKENIZER_LANGUAGE_ADA,
-	TOKENIZER_LANGUAGE_ERROR
+	TOKENIZER_LANGUAGE_UNKNOWN
 };
 
 /* tokenizer_init
@@ -100,5 +100,16 @@ const char *tokenizer_get_printable_enum ( enum tokenizer_type e );
  *  Returns: The token data. This is from the heap. The user must free it.
  */
 char *tokenizer_get_data ( struct tokenizer *t );
+
+/* tokenizer_get_default_file_type
+ *
+ * This will return the type of file the tokenizer thinks the
+ * extension FILE_EXTENSION belongs too.
+ * 
+ *  t:      The tokenizer object to work on
+ *  e: 		The file extension the tokenizer will use to determine filetype.
+ */
+enum tokenizer_language_support tokenizer_get_default_file_type ( 
+			const char *file_extension );
 
 #endif /* __TOKENIZER_H__ */

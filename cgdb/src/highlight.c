@@ -40,6 +40,8 @@
 #include "cgdb.h"
 #include "tokenizer.h"
 #include "error.h"
+#include "interface.h"
+#include "sys_util.h"
 
 int highlight_tabstop = 8;
 
@@ -117,11 +119,7 @@ static int attributes[] = {
 /* Local Variables */
 /* --------------- */
 
-static char *c_extensions[] = { ".c", ".C", ".cc", ".cpp", ".cxx", ".h", ".hpp" };
-static char *ada_extensions[] = { ".adb", ".ads", ".ada", 
-                                  ".ADB", ".ADS", ".ADA" };
-
-static int highlight_node ( struct list_node *node, enum tokenizer_language_support l ) {
+static int highlight_node ( struct list_node *node ) {
 	struct tokenizer *t = tokenizer_init ();
 	int ret;
 	struct string *ibuf = string_init ();
@@ -133,7 +131,7 @@ static int highlight_node ( struct list_node *node, enum tokenizer_language_supp
 	node->buf.tlines = NULL;
 	node->buf.max_width = 0;
 
-	if ( tokenizer_set_file ( t, node->path, l ) == -1 ) {
+	if ( tokenizer_set_file ( t, node->path, node->language ) == -1 ) {
         if_print_message ("%s:%d tokenizer_set_file error", __FILE__, __LINE__);
         return -1; 
     }
@@ -217,22 +215,17 @@ static int highlight_node ( struct list_node *node, enum tokenizer_language_supp
 
 void highlight(struct list_node *node)
 {
-    char *extension = strrchr(node->path, '.');
-	enum tokenizer_language_support l = TOKENIZER_LANGUAGE_ERROR;
-    int i;
-
-    if ( !extension )
-        return;
-
-    for (i = 0; i < sizeof(c_extensions) / sizeof(char *); i++)
-        if (strcmp(extension, c_extensions[i]) == 0)
-			l = TOKENIZER_LANGUAGE_C;
-
-    for (i = 0; i < sizeof(ada_extensions) / sizeof(char *); i++)
-        if (strcmp(extension, ada_extensions[i]) == 0)
-			l = TOKENIZER_LANGUAGE_ADA;
-	
-	highlight_node ( node, l );
+	if ( node->language == TOKENIZER_LANGUAGE_UNKNOWN ) {
+		/* Just copy the lines from the original buffer if no highlighting 
+		 * is possible */
+		int i;
+		node->buf.length = node->orig_buf.length;
+		node->buf.max_width = node->orig_buf.max_width;
+		node->buf.tlines = xmalloc ( sizeof ( char * ) * node->orig_buf.length );
+		for ( i = 0; i < node->orig_buf.length; i++ )
+			node->buf.tlines[i] = xstrdup ( node->orig_buf.tlines[i] );
+	} else
+		highlight_node ( node );
 }
 
 /* highlight_line_segment: Creates a new line that is hightlighted.

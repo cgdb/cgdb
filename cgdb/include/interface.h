@@ -178,5 +178,15 @@ void if_tty_toggle( void );
   */
 void if_set_winsplit( WIN_SPLIT_TYPE newSplit );
 
+/* if_highlight_sviewer:
+ * ---------------------
+ *
+ *  Highlights the current node of the source viewer to be the
+ *  new language type.
+ *
+ *  l 	The new langugage type to highlight.
+ */
+void if_highlight_sviewer ( enum tokenizer_language_support l );
+
 #endif
 
