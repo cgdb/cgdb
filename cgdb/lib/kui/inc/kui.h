@@ -12,8 +12,13 @@
  * application wanting key input from a user and the user themselves.
  */
 
+struct kuictx;
+
+/******************************************************************************/
 /**
- * A "Key User Interface" Context
+ * @name Createing and Destroying a kui context.
+ * These functions are for createing and destroying a 
+ * "Key User Interface" Context
  *
  * This is capable of reading in any type of multibyte sequence and 
  * abstracting the details from any higher level. Of course it is also
@@ -33,13 +38,6 @@
  * codes. Please do not confuse the term multibyte sequence with something
  * related to the TERM environment variable or termcap/terminfo.
  * All of those details are handled at a lower level (libinput).
- */
-struct kuictx;
-
-/******************************************************************************/
-/**
- * @name Createing and Destroying a kui context.
- * These functions are for createing and destroying a Key User Interface context
  */
 /******************************************************************************/
 
@@ -73,12 +71,7 @@ int kui_destroy ( struct kuictx *kctx );
 /**
  * @name Createing and Destroying a kui_sequence_set.
  * These functions are for createing and destroying a kui sequence set.
- */
-/******************************************************************************/
-
-//@{
-
-/**
+ *
  * A Kui sequence set is an easy way to swap out what the application wishes
  * to have libkui look for when the user is typeing input. For instance,
  * if the application wants libkui to look for certain sequences when the 
@@ -91,6 +84,10 @@ int kui_destroy ( struct kuictx *kctx );
  * operation, then the application will recieve a key the relates to the 
  * particular sequence requested.
  */
+/******************************************************************************/
+
+//@{
+
 struct kui_sequence_set;
 typedef int kui_sequence_key;
 

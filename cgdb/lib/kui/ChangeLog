@@ -1,5 +1,9 @@
 03/02/2004 Bob Rossi <bob@brasko.net>
 
+    * inc/kui.h: move comments around
+
+03/02/2004 Bob Rossi <bob@brasko.net>
+
     * src/kui.c: I shouldn't have commented out the struct's data
 	members. It didn't compile.
 
