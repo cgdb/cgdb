@@ -188,6 +188,84 @@ static void add_keybindings(void) {
     insertIntoList ("Alt-X",        "Alt-X",        "\033x", CGDB_KEY_ALT_X);
     insertIntoList ("Alt-Y",        "Alt-Y",        "\033y", CGDB_KEY_ALT_Y);
     insertIntoList ("Alt-Z",        "Alt-Z",        "\033z", CGDB_KEY_ALT_Z);
+
+    /* Alt Shift bindings */
+    insertIntoList ("Alt-Shift-A",  "Alt-Shift-A",  "\033A", CGDB_KEY_ALT_SHIFT_A);
+    insertIntoList ("Alt-Shift-B",  "Alt-Shift-B",  "\033B", CGDB_KEY_ALT_SHIFT_B);
+    insertIntoList ("Alt-Shift-C",  "Alt-Shift-C",  "\033C", CGDB_KEY_ALT_SHIFT_C);
+    insertIntoList ("Alt-Shift-D",  "Alt-Shift-D",  "\033D", CGDB_KEY_ALT_SHIFT_D);
+    insertIntoList ("Alt-Shift-E",  "Alt-Shift-E",  "\033E", CGDB_KEY_ALT_SHIFT_E);
+    insertIntoList ("Alt-Shift-F",  "Alt-Shift-F",  "\033F", CGDB_KEY_ALT_SHIFT_F);
+    insertIntoList ("Alt-Shift-G",  "Alt-Shift-G",  "\033G", CGDB_KEY_ALT_SHIFT_G);
+    insertIntoList ("Alt-Shift-H",  "Alt-Shift-H",  "\033H", CGDB_KEY_ALT_SHIFT_H);
+    insertIntoList ("Alt-Shift-I",  "Alt-Shift-I",  "\033I", CGDB_KEY_ALT_SHIFT_I);
+    insertIntoList ("Alt-Shift-J",  "Alt-Shift-J",  "\033J", CGDB_KEY_ALT_SHIFT_J);
+    insertIntoList ("Alt-Shift-K",  "Alt-Shift-K",  "\033K", CGDB_KEY_ALT_SHIFT_K);
+    insertIntoList ("Alt-Shift-L",  "Alt-Shift-L",  "\033L", CGDB_KEY_ALT_SHIFT_L);
+    insertIntoList ("Alt-Shift-M",  "Alt-Shift-M",  "\033M", CGDB_KEY_ALT_SHIFT_M);
+    insertIntoList ("Alt-Shift-N",  "Alt-Shift-N",  "\033N", CGDB_KEY_ALT_SHIFT_N);
+    insertIntoList ("Alt-Shift-O",  "Alt-Shift-O",  "\033O", CGDB_KEY_ALT_SHIFT_O);
+    insertIntoList ("Alt-Shift-P",  "Alt-Shift-P",  "\033P", CGDB_KEY_ALT_SHIFT_P);
+    insertIntoList ("Alt-Shift-Q",  "Alt-Shift-Q",  "\033Q", CGDB_KEY_ALT_SHIFT_Q);
+    insertIntoList ("Alt-Shift-R",  "Alt-Shift-R",  "\033R", CGDB_KEY_ALT_SHIFT_R);
+    insertIntoList ("Alt-Shift-S",  "Alt-Shift-S",  "\033S", CGDB_KEY_ALT_SHIFT_S);
+    insertIntoList ("Alt-Shift-T",  "Alt-Shift-T",  "\033T", CGDB_KEY_ALT_SHIFT_T);
+    insertIntoList ("Alt-Shift-U",  "Alt-Shift-U",  "\033U", CGDB_KEY_ALT_SHIFT_U);
+    insertIntoList ("Alt-Shift-V",  "Alt-Shift-V",  "\033V", CGDB_KEY_ALT_SHIFT_V);
+    insertIntoList ("Alt-Shift-W",  "Alt-Shift-W",  "\033W", CGDB_KEY_ALT_SHIFT_W);
+    insertIntoList ("Alt-Shift-X",  "Alt-Shift-X",  "\033X", CGDB_KEY_ALT_SHIFT_X);
+    insertIntoList ("Alt-Shift-Y",  "Alt-Shift-Y",  "\033Y", CGDB_KEY_ALT_SHIFT_Y);
+    insertIntoList ("Alt-Shift-Z",  "Alt-Shift-Z",  "\033Z", CGDB_KEY_ALT_SHIFT_Z);
+
+    /* Alt Numbers */
+    insertIntoList ("Alt-1",        "Alt-1",        "\0331", CGDB_KEY_ALT_1);
+    insertIntoList ("Alt-2",        "Alt-2",        "\0332", CGDB_KEY_ALT_2);
+    insertIntoList ("Alt-3",        "Alt-3",        "\0333", CGDB_KEY_ALT_3);
+    insertIntoList ("Alt-4",        "Alt-4",        "\0334", CGDB_KEY_ALT_4);
+    insertIntoList ("Alt-5",        "Alt-5",        "\0335", CGDB_KEY_ALT_5);
+    insertIntoList ("Alt-6",        "Alt-6",        "\0336", CGDB_KEY_ALT_6);
+    insertIntoList ("Alt-7",        "Alt-7",        "\0337", CGDB_KEY_ALT_7);
+    insertIntoList ("Alt-8",        "Alt-8",        "\0338", CGDB_KEY_ALT_8);
+    insertIntoList ("Alt-9",        "Alt-9",        "\0339", CGDB_KEY_ALT_9);
+    insertIntoList ("Alt-0",        "Alt-0",        "\0330", CGDB_KEY_ALT_0);
+
+    /* Alt Shifted Numbers */
+    insertIntoList ("Alt-Shift-1",  "Alt-Shift-1",  "\033!", CGDB_KEY_ALT_SHIFT_1);
+    insertIntoList ("Alt-Shift-2",  "Alt-Shift-2",  "\033@", CGDB_KEY_ALT_SHIFT_2);
+    insertIntoList ("Alt-Shift-3",  "Alt-Shift-3",  "\033#", CGDB_KEY_ALT_SHIFT_3);
+    insertIntoList ("Alt-Shift-4",  "Alt-Shift-4",  "\033$", CGDB_KEY_ALT_SHIFT_4);
+    insertIntoList ("Alt-Shift-5",  "Alt-Shift-5",  "\033%", CGDB_KEY_ALT_SHIFT_5);
+    insertIntoList ("Alt-Shift-6",  "Alt-Shift-6",  "\033^", CGDB_KEY_ALT_SHIFT_6);
+    insertIntoList ("Alt-Shift-7",  "Alt-Shift-7",  "\033&", CGDB_KEY_ALT_SHIFT_7);
+    insertIntoList ("Alt-Shift-8",  "Alt-Shift-8",  "\033*", CGDB_KEY_ALT_SHIFT_8);
+    insertIntoList ("Alt-Shift-9",  "Alt-Shift-9",  "\033(", CGDB_KEY_ALT_SHIFT_9);
+    insertIntoList ("Alt-Shift-0",  "Alt-Shift-0",  "\033)", CGDB_KEY_ALT_SHIFT_0);
+
+    /* Alt Special */
+    insertIntoList ("Alt--",        "Alt--",        "\033-", CGDB_KEY_ALT_MINUS);
+    insertIntoList ("Alt-=",        "Alt-=",        "\033=", CGDB_KEY_ALT_EQUAL);
+    insertIntoList ("Alt-[",        "Alt-[",        "\033[", CGDB_KEY_ALT_LEFT_BRACKET);
+    insertIntoList ("Alt-]",        "Alt-]",        "\033]", CGDB_KEY_ALT_LEFT_BRACKET);
+    insertIntoList ("Alt-\\",       "Alt-\\",       "\033\\",CGDB_KEY_ALT_BACKSLASH);
+    insertIntoList ("Alt-;",        "Alt-;",        "\033;", CGDB_KEY_ALT_SEMICOLON);
+    insertIntoList ("Alt-'",        "Alt-'",        "\033'", CGDB_KEY_ALT_APOSTROPHE);
+    insertIntoList ("Alt-,",        "Alt-,",        "\033,", CGDB_KEY_ALT_COMMA);
+    insertIntoList ("Alt-.",        "Alt-.",        "\033.", CGDB_KEY_ALT_PERIOD);
+    insertIntoList ("Alt-/",        "Alt-/",        "\033/", CGDB_KEY_ALT_DIVIDE);
+    insertIntoList ("Alt-`",        "Alt-`",        "\033`", CGDB_KEY_ALT_ACCENT_MARK);
+
+    /* Alt Shifte Special */
+    insertIntoList ("Alt-Shift-_",  "Alt-Shift-_",  "\033_", CGDB_KEY_ALT_SHIFT_UNDERSCORE);
+    insertIntoList ("Alt-Shift-+",  "Alt-Shift-+",  "\033+", CGDB_KEY_ALT_SHIFT_PLUS);
+    insertIntoList ("Alt-Shift-{",  "Alt-Shift-{",  "\033{", CGDB_KEY_ALT_SHIFT_LEFT_CURLY_BRACKET);
+    insertIntoList ("Alt-Shift-}",  "Alt-Shift-}",  "\033}", CGDB_KEY_ALT_SHIFT_RIGHT_CURLY_BRACKET);
+    insertIntoList ("Alt-Shift-|",  "Alt-Shift-|",  "\033|", CGDB_KEY_ALT_SHIFT_PIPE);
+    insertIntoList ("Alt-Shift-:",  "Alt-Shift-:",  "\033:", CGDB_KEY_ALT_SHIFT_COLON);
+    insertIntoList ("Alt-Shift-\"", "Alt-Shift-\"", "\033\"",CGDB_KEY_ALT_SHIFT_QUOTE);
+    insertIntoList ("Alt-Shift-<",  "Alt-Shift-<",  "\033<", CGDB_KEY_ALT_SHIFT_LESS_THAN);
+    insertIntoList ("Alt-Shift->",  "Alt-Shift->",  "\033>", CGDB_KEY_ALT_SHIFT_GREATER_THAN);
+    insertIntoList ("Alt-Shift-?",  "Alt-Shift-?",  "\033?", CGDB_KEY_ALT_SHIFT_QUESTION_MARK);
+    insertIntoList ("Alt-Shift-~",  "Alt-Shift-~",  "\033~", CGDB_KEY_ALT_SHIFT_TILDA);
 }
 
 /* Puts list into a searchable database */
