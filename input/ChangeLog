@@ -1,6 +1,9 @@
 03/27/2003 Bob Rossi <bob_rossi@cox.net>
 
     * Adding an initial list of key alt and alt-shift key bindings
+    * Commenting out most alt, shift-alt key bindings: These new key bindings 
+    are breaking the input library. They are getting confused with other
+    longer key mappings that have the alt-key mappings as a subset.
 
 03/26/2003 Bob Rossi <bob_rossi@cox.net>
 
