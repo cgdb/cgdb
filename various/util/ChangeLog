@@ -1,3 +1,5 @@
+version 0.4.1 (04/26/2004):
+
 04/06/2004 Bob Rossi <bob@brasko.net>
 
     * io.h: Added io_getchar.

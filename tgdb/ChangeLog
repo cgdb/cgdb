@@ -1,3 +1,5 @@
+version 0.4.1 (04/26/2004):
+
 03/31/2004 Bob Rossi <bob@brasko.net>
 
     * tgdb.c (tgdb_signal_notification): Easier to debug.

@@ -1,3 +1,5 @@
+version 0.4.1 (04/26/2004):
+
 01/29/2004 Bob Rossi <bob@brasko.net>
 
    * rlctx.c: Changed PATH_MAX to FSUTIL_PATH_MAX and #include <limits.h> to

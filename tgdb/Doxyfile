@@ -4,7 +4,7 @@
 # General configuration options
 #---------------------------------------------------------------------------
 PROJECT_NAME           = libtgdb
-PROJECT_NUMBER         = 0.4.0
+PROJECT_NUMBER         =
 OUTPUT_DIRECTORY       = ../doc/htdocs
 OUTPUT_LANGUAGE        = English
 EXTRACT_ALL            = NO

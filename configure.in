@@ -3,7 +3,7 @@ AC_PREREQ(2.5)
 AC_INIT(cgdb)
 AC_CONFIG_AUX_DIR(config)
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(cgdb, 0.4.0)
+AM_INIT_AUTOMAKE(cgdb, 0.4.1)
 AM_MAINTAINER_MODE
 
 dnl Checks for programs.

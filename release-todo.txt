@@ -14,9 +14,6 @@ Steps for releasing a new CGDB version:
       * libtool ( GNU libtool ) 1.4.3
       * m4      ( GNU m4 )     1.4
 
-	Also, change tgdb/Doxyfile and cgdb/Doxyfile to have the correct
-	version number. You want to change the PROJECT_NUMBER line.
-      
 4.  Test doing 'make dist' then untar, ./configure && make
     and run ./cgdb --version to check version number.
 
