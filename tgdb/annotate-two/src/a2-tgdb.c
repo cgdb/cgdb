@@ -53,7 +53,6 @@
 static int tgdb_initialized = 0;
 int masterfd = -1;                     /* master fd of the pseudo-terminal */
 static pid_t debugger_pid;             /* pid of child process */
-unsigned short tgdb_partially_run_command = 0;
 extern sig_atomic_t control_c;
 command_completed command_completed_callback;
 

@@ -1,4 +1,11 @@
 08/01/2003 Bob Rossi <bob@brasko.net>
+
+	* a2-tgdb.c: remove global tgdb_partially_run_command.
+	* tgdb.c: tgdb_partially_run_command, changed 'externed' global to static 
+	global.
+	tgdb_send_input, make sure tgdb_partially_run_command is set correctly.
+
+08/01/2003 Bob Rossi <bob@brasko.net>
 	
 	* a2-tgdb.h: removed a2_command_typed_at_prompt interace function.
 	added parameter ready_for_next_command to function a2_tgdb_init.

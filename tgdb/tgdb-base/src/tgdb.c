@@ -91,7 +91,9 @@ static struct rlctx *rl; /* Readline context */
 static struct string *current_command = NULL;
 static struct queue *raw_input_queue;
 
-/* This variable needs to be removed from libannotate */
+/* This variable needs to be removed from libannotate 
+ * I don't really know if its usefull anymore.
+ */
 extern unsigned short tgdb_partially_run_command;
     
 /* Temporary prototypes */
@@ -129,6 +131,8 @@ void command_completion_callback ( void ) {
 	IS_SUBSYSTEM_READY_FOR_NEXT_COMMAND = 1;
 	HAS_USER_SENT_COMMAND = 0;
 }
+
+static unsigned short tgdb_partially_run_command = 0;
 
 static void init_annotate_two ( void ) {
     tgdb_get_sources                    = a2_tgdb_get_sources;
@@ -195,10 +199,6 @@ static int tgdb_has_command_to_run(void) {
  * Returns 1 if ready, or 0 if not ready
  */
 int is_ready ( void ) {
-    /* tgdb is not busy, send the data to readline write away */
-//    if( tgdb_can_issue_command() == TRUE )
-//        return 1;
-
 	if ( tgdb_can_issue_command() &&
 		(!HAS_USER_SENT_COMMAND)  &&
 		current_command == NULL )
@@ -718,8 +718,11 @@ int tgdb_send_input ( char c ) {
     /* The debugger is ready for input. Send it */
     if ( is_ready() ) {
 
-		if ( c == '\n' )
+		if ( c == '\n' ) {
 			HAS_USER_SENT_COMMAND = 1;
+			tgdb_partially_run_command = 0;
+		} else
+			tgdb_partially_run_command = 1;
 
         return tgdb_rl_send ( c );
 
