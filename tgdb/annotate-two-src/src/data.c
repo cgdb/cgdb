@@ -15,6 +15,7 @@
 #include "globals.h"
 #include "io.h"
 #include "error.h"
+#include "a2-tgdb.h"
 
 static int car_ret_counter = 0;
 static int server_counter = 8;

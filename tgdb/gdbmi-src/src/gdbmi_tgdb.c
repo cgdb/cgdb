@@ -10,7 +10,9 @@
 
 #include "gdbmi_tgdb.h"
 #include "gdbmi_parse.h"
-#include "util.h"
+#include "sys_util.h"
+#include "fork_util.h"
+#include "fs_util.h"
 #include "pseudo.h"
 #include "error.h"
 #include "io.h"
@@ -23,12 +25,12 @@ static int master_tty_fd = -1, slave_tty_fd = -1;
 static char child_tty_name[SLAVE_SIZE];  /* the name of the slave psuedo-termainl */
 
 int gdbmi_tgdb_init(char *debugger, int argc, char **argv, int *gdb, int *child, int *readline){
-    if(( gdb_pid = invoke_debugger(debugger, argc, argv, &gdb_stdin, &gdb_stdout)) == -1 ) {
+    if(( gdb_pid = invoke_debugger(debugger, argc, argv, &gdb_stdin, &gdb_stdout, 1)) == -1 ) {
         err_msg("(%s:%d) invoke_debugger failed", __FILE__, __LINE__);
         return -1;
     }
 
-   if ( tgdb_util_new_tty(&master_tty_fd, &slave_tty_fd, child_tty_name) == -1){
+   if ( util_new_tty(&master_tty_fd, &slave_tty_fd, child_tty_name) == -1){
       err_msg("%s:%d tgdb_util_new_tty error", __FILE__, __LINE__);
       return -1;
    }

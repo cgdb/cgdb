@@ -46,8 +46,8 @@
 #include "globals.h"
 #include "terminal.h"
 #include "config.h"
-#include "util.h"
-#include "tgdb_util.h"
+#include "sys_util.h"
+#include "fs_util.h"
 
 #if 0
         char cur = '\0', prev = '\0', prev2 = '\0';
@@ -92,7 +92,6 @@
  */
 int tgdb_init_setup_config_file(void){
    char *gdb_init_file;
-   char path[PATH_MAX];
 
    if ( tgdb_util_set_home_dir() == -1 )
       return -1;

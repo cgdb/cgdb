@@ -17,8 +17,11 @@
 #include "types.h"
 #include "globals.h"
 #include "error.h"
-#include "util.h"
+#include "sys_util.h"
 #include "queue.h"
+#include "ibuf.h"
+#include "a2-tgdb.h"
+#include "rlctx.h"
 
 extern int masterfd;
 static int commands = 0;

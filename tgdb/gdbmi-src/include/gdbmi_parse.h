@@ -11,6 +11,6 @@
 
 #include "types.h"
 
-int gdbmi_parse(char *data, size_t size, char *gui_data, size_t gui_size, struct Command ***com);
+int gdbmi_parse(char *data, size_t size, char *gui_data, size_t gui_size, struct queue *q);
 
 #endif /* __GDBMI_PARSE_H__ */

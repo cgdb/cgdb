@@ -13,7 +13,7 @@
 #include "buffer.h"
 #include "types.h"
 #include "error.h"
-#include "util.h"
+#include "sys_util.h"
 
 void buffer_free_item( void *item ) {
    struct command *com;

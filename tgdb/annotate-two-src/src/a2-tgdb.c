@@ -35,7 +35,8 @@
 #endif /* HAVE_ERRNO_H */
 
 #include "a2-tgdb.h"
-#include "tgdb_util.h"
+#include "fork_util.h"
+#include "fs_util.h"
 #include "pseudo.h"
 #include "error.h"
 #include "io.h"
@@ -47,8 +48,9 @@
 #include "types.h"
 #include "buffer.h"
 #include "queue.h"
-#include "util.h"
+#include "sys_util.h"
 #include "rlctx.h"
+#include "ibuf.h"
 
 /* This is set when tgdb has initialized itself */
 static int tgdb_initialized = 0;
@@ -101,6 +103,7 @@ static unsigned short tgdb_partially_run_command = 0;
  */
 static int a2_tgdb_command_callback(const char *line) {
     a2_tgdb_send((char *)line, 0);
+    return 0;
 }
 
 /* a2_tgdb_completion_callback: This is called when readline determines a command
@@ -122,6 +125,7 @@ static int a2_tgdb_completion_callback(const char *line) {
         BUFFER_READLINE_COMMAND,
         COMMANDS_SHOW_USER_OUTPUT,
         COMMANDS_REDISPLAY);        
+    return 0;
 }
 
 /* tgdb_is_debugger_ready: Determines if a command can be sent directly to gdb.
@@ -280,7 +284,7 @@ int a2_tgdb_init(char *debugger, int argc, char **argv, int *gdb, int *child, in
       return -1;
    }
 
-   if ( tgdb_util_new_tty(&master_tty_fd, &slave_tty_fd, child_tty_name) == -1){
+   if ( util_new_tty(&master_tty_fd, &slave_tty_fd, child_tty_name) == -1){
       err_msg("%s:%d -> Could not open child tty", __FILE__, __LINE__);
       return -1;
    }
@@ -639,7 +643,7 @@ int a2_tgdb_new_tty(void) {
     pty_release(child_tty_name);
 
     /* Ask for a new tty */
-    if ( tgdb_util_new_tty(&master_tty_fd, &slave_tty_fd, child_tty_name) == -1){
+    if ( util_new_tty(&master_tty_fd, &slave_tty_fd, child_tty_name) == -1){
         err_msg("%s:%d -> Could not open child tty", __FILE__, __LINE__);
         return -1;
     }
