@@ -1,3 +1,10 @@
+03/06/2003 Mike Mueller <mmueller@cs.uri.edu>
+
+    * White terminal fix: Fixed cgdb to automatically paint the entire
+    window black when opened, so the screen isn't messy on white backgrounds.
+    * Fixed search repeats: Modified 'n' key behavior so that it does nothing
+    when pressed if no search was previously specified.
+
 03/06/2003 Bob Rossi <bob_rossi@cox.net>
 
     * Updated cgdb to work with the new Command interface. tgdb now returns a
@@ -8,7 +15,7 @@
     * Readline has been cleanly added with a pty: Now, cgdb opens a pty,
     tells readline that that is its stdin, it also creates an ordinary pipe to
     read from readline's ouput.
-   * Made readline not install any signal handler's
+    * Made readline not install any signal handler's
 
 02/26/2003 Bob Rossi <bob_rossi@cox.net>
 
