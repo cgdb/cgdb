@@ -34,6 +34,14 @@ Some features offered by CGDB are:<P>
 <B>News</b><BR>
 <BLOCKQUOTE>
 
+  <I>April 2, 2005</i><BR>
+  <BLOCKQUOTE>
+  CGDB v0.5.1 was released today, see the <A Href="download.shtml">download 
+  page</a> to try it out. This contains many important bug fixes, and it is 
+  recommended that you upgrade to the newest version. There have been several 
+  fixed bugs that will prevent CGDB from crashing.
+  </blockquote>
+
   <I>Nov 29, 2004</i><BR>
   <BLOCKQUOTE>
   Yes, yes, yes, I know. There has not been a release of CGDB in a long time. 

@@ -24,7 +24,9 @@ Steps for releasing a new CGDB version:
       * cd incoming
       * put the file up
     * go to sourceforge.net/projects/cgdb
-    * go to admin, then edit/release files
+    * go to admin, then "file releases"
+    * Click "Add release"
+    * New release name (ie. cgdb-0.5.1)
 	* you should be able to put whats new in the NEWS file into the
 	  release notes.
 	* Copy new README file into readme.txt
