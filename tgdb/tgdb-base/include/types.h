@@ -43,8 +43,6 @@ extern "C" {
  *      This is a struct tgdb_list
  *          It containes a 'struct string' for each filename. The filename is
  *          represented with a relative path.
- *      
- *          The client should call string_free on this.
  *
  *  TGDB_UPDATE_FILE_POSITION:
  *  --------------------------
@@ -52,12 +50,7 @@ extern "C" {
  *      This tells the gui what filename/line number the debugger is on.
  *      It gets generated whenever it changes.
  *
- *      This is a struct queue. 
- *          First string is the absolute path
- *          Second string is the relative path
- *          Third int is the line number
- *
- *          The client should call string_clear on these when finished.
+ *		This is a 'struct tgdb_file_position'
  *
  *  TGDB_UPDATE_SOURCE_FILES:
  *  -------------------------
@@ -209,6 +202,24 @@ struct tgdb_breakpoint {
    struct string *funcname;
    int line;
    int enabled;
+};
+
+/* 
+ * This structure currently represents a file position.
+ *
+ * absolute_path
+ *     The absolute path to the file.
+ *
+ * relative_path
+ *     The relative path to the file.
+ *
+ * line_number
+ *     The line number in the file.
+ */
+struct tgdb_file_position {
+	struct string *absolute_path;
+	struct string *relative_path;
+	int line_number;
 };
 
 #ifdef __cplusplus

@@ -46,4 +46,12 @@ char *string_get(struct string *s);
 /* string_length: Returns the length of string s */
 unsigned long string_length(struct string *s);
 
+/*
+ * This will return a valid string that is equal to s.
+ *
+ * Returns
+ *    New string on success, NULL on error.
+ */
+struct string *string_dup ( struct string *s );
+
 #endif /* HAVE_CONFIG_H */

@@ -429,14 +429,17 @@ static void commands_process_info_source(struct commands *c, struct queue *q, ch
              * TGDB_UPDATE_FILE_POSITION is needed.
              */
             {
-                struct queue *update = queue_init();
-                struct string *relative_path = string_init();
-                string_add ( relative_path, info_ptr + c->source_relative_prefix_length );
-                queue_append ( update, c->absolute_path );
-                queue_append ( update, relative_path );
-                queue_append ( update, c->line_number );
+				/* This section allocates a new structure to add into the queue 
+				 * All of its members will need to be freed later.
+				 */
+				struct tgdb_file_position *tfp = (struct tgdb_file_position *)
+					xmalloc ( sizeof ( struct tgdb_file_position ) );
+				tfp->absolute_path = string_dup ( c->absolute_path );
+				tfp->relative_path = string_init ();
+				string_add ( tfp->relative_path, info_ptr + c->source_relative_prefix_length );
+				tfp->line_number   = atoi ( string_get ( c->line_number ) );
 
-                tgdb_append_command(q, TGDB_UPDATE_FILE_POSITION, update );
+                tgdb_append_command(q, TGDB_UPDATE_FILE_POSITION, tfp );
             }
 
             c->info_source_ready = 1;

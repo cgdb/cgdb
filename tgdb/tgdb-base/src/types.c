@@ -58,27 +58,15 @@ static void tgdb_print_item(void *item) {
 		}
         case TGDB_UPDATE_FILE_POSITION:
            {
-                struct queue *q = ( struct queue * ) com->data;
-                struct string *absolute_name;
-                struct string *relative_name;
-                struct string *line_number;
-
-                absolute_name = queue_pop ( q );
-                relative_name = queue_pop ( q );
-                line_number   = queue_pop ( q );
+				struct tgdb_file_position *tfp = (struct tgdb_file_position *)com->data;
 
                 fprintf ( stderr, 
-                  "TGDB_UPDATE_FILE_POSITION ABSOLUTE(%s)RELATIVE(%s)LINE(%s)\n",
-                  string_get ( absolute_name ), 
-                  string_get ( relative_name ), 
-                  string_get ( line_number ));
+                  "TGDB_UPDATE_FILE_POSITION ABSOLUTE(%s)RELATIVE(%s)LINE(%d)\n",
+                  string_get ( tfp->absolute_path ), 
+                  string_get ( tfp->relative_path ), 
+                  tfp->line_number);
                                     
-
-                string_clear ( absolute_name );
-                string_clear ( relative_name );
-                string_clear ( line_number );
                 break;
- 
            }
            break;
         case TGDB_UPDATE_SOURCE_FILES:
@@ -175,6 +163,19 @@ void tgdb_delete_command(void *item){
            	break;
 		}
         case TGDB_UPDATE_FILE_POSITION:
+		{
+			struct tgdb_file_position *tfp = (struct tgdb_file_position *)com->data;
+
+			string_free ( tfp->absolute_path ), 
+			tfp->absolute_path = NULL;
+			string_free ( tfp->relative_path ), 
+			tfp->relative_path = NULL;
+
+			free ( tfp );
+			tfp = NULL;
+
+			break;
+		}
         case TGDB_UPDATE_SOURCE_FILES:
         case TGDB_SOURCES_DENIED:
         case TGDB_ABSOLUTE_SOURCE_ACCEPTED:

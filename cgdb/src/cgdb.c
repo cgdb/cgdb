@@ -338,27 +338,19 @@ static void process_commands(struct tgdb *tgdb)
             /* This means a source file or line number changed */
             case TGDB_UPDATE_FILE_POSITION:
             {
-                struct queue *q = ( struct queue * ) item->data;
-                struct string *absolute_name;
-                struct string *relative_name;
-                struct string *line_number;
+				struct tgdb_file_position *tfp;
 
-                absolute_name = queue_pop ( q );
-                relative_name = queue_pop ( q );
-                line_number   = queue_pop ( q );
+				tfp = (struct tgdb_file_position *) item->data;
 
                 if_show_file ( 
-                    string_get (absolute_name), 
-                    atoi ( string_get (line_number)));
+                    string_get (tfp->absolute_path), 
+                    tfp->line_number);
 
                 source_set_relative_path ( 
                     if_get_sview(), 
-                    string_get ( absolute_name ), 
-                    string_get ( relative_name ) );
+                    string_get ( tfp->absolute_path ), 
+                    string_get ( tfp->relative_path ) );
 
-                string_clear ( absolute_name );
-                string_clear ( relative_name );
-                string_clear ( line_number );
                 break;
             }
                 

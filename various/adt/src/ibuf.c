@@ -90,3 +90,9 @@ unsigned long string_length(struct string *s) {
         return 0; 
     return s->cur_buf_pos;
 }
+
+struct string *string_dup ( struct string *s ) {
+	struct string *ns = string_init ();
+	string_add ( ns, string_get ( s ) );
+	return ns;	
+}

@@ -1,5 +1,9 @@
 09/25/2003 Bob Rossi <bob@brasko.net>
 
+   * cgdb.c: process_commands, implement new TGDB_UPDATE_FILE_POSITION
+
+09/25/2003 Bob Rossi <bob@brasko.net>
+
    * cgdb.c: Add new #include of "tgdb_list.h"
    process_commands, implement new TGDB_UPDATE_BREAKPOINTS case.
 

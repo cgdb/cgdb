@@ -1,5 +1,14 @@
 09/25/2003 Bob Rossi <bob@brasko.net>
 
+   * commands.c: commands_process_info_source
+   * types.h: change comment for TGDB_UPDATE_BREAKPOINTS and 
+   TGDB_UPDATE_FILE_POSITION.
+   Add 'struct tgdb_file_position' and comment.
+   * types.c: tgdb_print_item, implement TGDB_UPDATE_FILE_POSITION case.
+   tgdb_delete_command, implement TGDB_UPDATE_FILE_POSITION case.
+
+09/25/2003 Bob Rossi <bob@brasko.net>
+
    * commands.c: Add new #include "tgdb_list.h"
    'struct commands' changed member 'struct queue
    *breakpoint_queue' to 'struct tgdb_list *breakpoint_list'.

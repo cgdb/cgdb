@@ -1,3 +1,8 @@
+09/25/2003 Bob Rossi <bob@brasko.net>
+
+   * ibuf.h: Add new function 'string_dup' and comment
+   * ibuf.c: Implement new function.
+
 09/24/2003 Bob Rossi <bob@brasko.net>
 
    * tgdb_list.h: Add 'struct tgdb_list_node' forward reference.
