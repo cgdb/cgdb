@@ -897,7 +897,7 @@ static void source_input(struct sviewer *sview, int key)
                 int   line;
                 char *command;
 
-                if (!sview || !sview->cur || !sview->cur->path || !line)
+                if (!sview || !sview->cur || !sview->cur->path)
                     return;
 
                 line = sview->cur->sel_line;
