@@ -1,6 +1,11 @@
 CVS
 
-cgdb-0.4.0 (04/26/2004)
+cgdb-0.4.2 (05/10/2004)
+
+    * CGDB now compiles again on AIX 4.3.  Fixed Makefile.am in various/util/src
+	to not have a space between the -L and the path.
+
+cgdb-0.4.1 (04/26/2004)
 
    * Removed a memory leak from CGDB. When debugging applications that output
    a lot of text, CGDB would reportedly grow well over 400MB. Thanks to the
