@@ -1,5 +1,9 @@
 CVS
 
+   * Removed all instances of PATH_MAX and replaced with FSUTIL_PATH_MAX.
+   PATH_MAX is not defined on HURD, and thus CGDB wouldn't compile in that
+   environment.
+
    * Fixed TGDB bug. Tab completion was broken during cgdb-0.4.0 release.
 
 cgdb-0.4.0 (10/28/2003)

@@ -1,6 +1,10 @@
+01/09/2004 Bob Rossi <bob@brasko.net>
+
+   * NEWS: Updated to say CGDB now compiles on the HURD 
+
 01/08/2004 Bob Rossi <bob@brasko.net>
 
-    * Makefile.in: regenerated with documented autotools version
+   * Makefile.in: regenerated with documented autotools version
 	* aclocal.m4: ditto
 	* configure: ditto
 	* various/Makefile.in: ditto
