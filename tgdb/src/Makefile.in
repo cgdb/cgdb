@@ -69,9 +69,9 @@ RANLIB = @RANLIB@
 VERSION = @VERSION@
 
 AM_CFLAGS = -Wall
+INCLUDES = -I ../include -I ../annotate-two-src -I ../gdb-mi-src
 noinst_LIBRARIES = libcommon.a
 libcommon_a_SOURCES = tgdb.c
-INCLUDES = -I../include -I../annotate-two-src -I../gdb-mi-src
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = ../../config.h
 CONFIG_CLEAN_FILES = 
