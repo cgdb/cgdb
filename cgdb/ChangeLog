@@ -1,3 +1,7 @@
+10/24/2003 Bob Rossi <bob@brasko.net>
+
+   * cgdb.c: process_commands, just check to see if absolute_path is NULL.
+
 10/13/2003 Bob Rossi <bob@brasko.net>
 
    * cgdb.c: process_commands, no longer call tgdb_types_free_command.
