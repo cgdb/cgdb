@@ -174,7 +174,7 @@ int rlctx_send_char(struct rlctx *rl, char c) {
      * is not run then libtgdb does not function properly.
      */
     if ( c == '\n' )
-        c == '\r';
+        c = '\r';
 
     return rlctx_send_char_internal(rl->mfd, c);
 }
