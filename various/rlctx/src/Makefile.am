@@ -10,7 +10,7 @@ librlctx_a_DEPENDENCIES = ../../util/src ../../adt/src
 
 # Installs the driver programs into progs directory
 noinst_bin_PROGRAMS = rlctx_driver
-noinst_bindir = $(top_srcdir)/progs
+noinst_bindir = $(top_builddir)/progs
 
 # This is the input driver
 rlctx_driver_LDFLAGS = -L. -L../../util/src -L../../rlctx/src -L../../adt/src

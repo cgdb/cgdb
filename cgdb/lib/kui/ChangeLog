@@ -1,3 +1,7 @@
+07/14/2004 Bob Rossi <bob@brasko.net>
+
+    * src/Makefile.am (noinst_bindir): changed top_srcdir to top_builddir
+
 06/29/2004 Bob Rossi <bob@brasko.net>
 
 	* inc/kui.h (kui_get_raw_data): add new function

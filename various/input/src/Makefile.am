@@ -8,7 +8,7 @@ libinput_a_DEPENDENCIES = ../../util/src
 
 # Installs the driver programs into progs directory
 noinst_bin_PROGRAMS = input_driver getch_driver
-noinst_bindir = $(top_srcdir)/progs
+noinst_bindir = $(top_builddir)/progs
 
 # This is the input driver
 input_driver_LDFLAGS = -L. -L../../util/src

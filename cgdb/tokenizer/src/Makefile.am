@@ -13,7 +13,7 @@ $(top_srcdir)/various/util/src
 
 # Installs the driver programs into progs directory
 noinst_bin_PROGRAMS = tokenizer_driver
-noinst_bindir = $(top_srcdir)/progs
+noinst_bindir = $(top_builddir)/progs
 
 # This is the input driver
 tokenizer_driver_LDFLAGS = -L. \

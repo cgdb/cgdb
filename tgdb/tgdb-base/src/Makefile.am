@@ -16,7 +16,7 @@ tgdb_client_command.c \
 tgdb_client_interface.c
 
 noinst_bin_PROGRAMS = tgdb_driver
-noinst_bindir = $(top_srcdir)/progs
+noinst_bindir = $(top_builddir)/progs
 
 tgdb_driver_LDFLAGS = \
 -L$(top_builddir)/tgdb/tgdb-base/src \

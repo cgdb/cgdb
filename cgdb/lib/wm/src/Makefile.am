@@ -6,7 +6,7 @@ libwm_a_SOURCES = wm.c window.c
 
 # Installs the driver programs into progs directory
 noinst_bin_PROGRAMS = wm_driver
-noinst_bindir = $(top_srcdir)/progs
+noinst_bindir = $(top_builddir)/progs
 
 # This is the wm driver
 wm_driver_LDFLAGS = -L. -L../../../../various/adt/src

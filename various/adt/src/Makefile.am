@@ -12,7 +12,7 @@ std_tree.c
 
 # Installs the driver programs into progs directory
 noinst_bin_PROGRAMS = std_hash_driver std_list_driver std_tree_driver
-noinst_bindir = $(top_srcdir)/progs
+noinst_bindir = $(top_builddir)/progs
 
 # This is the input driver
 std_hash_driver_LDFLAGS = -L.

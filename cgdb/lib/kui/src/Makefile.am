@@ -8,7 +8,7 @@ libkui_a_DEPENDENCIES = ../../../../various/util/src/libutil.a
 
 # Installs the driver programs into progs directory
 noinst_bin_PROGRAMS = kui_driver
-noinst_bindir = $(top_srcdir)/progs
+noinst_bindir = $(top_builddir)/progs
 
 # This is the kui driver
 kui_driver_LDFLAGS = -L. -L../../../../various/util/src -L../../../../various/adt/src
