@@ -34,7 +34,6 @@ const char *const*istrcodes = strcodes;
 const char *const*istrfnames = strfnames;
 #else
 
-#define SIZE 23
 struct istr { 
     const char *const istrname;
     const char *const description;
@@ -477,14 +476,17 @@ void capture_chars(int fd) {
 
 
 void initialize_list(void) {
-    int i;
+    int i, size = 0;
     char *code;
+
+    for ( i = 0;  istrnames[i].istrname != (char *)0;  i++ )
+        size++;
     
     /* Allocating memory for list */
-    list = (struct term_entry *)malloc(sizeof(struct term_entry)*SIZE + 1);
-    display_message("SIZE(%d)\n", SIZE);
+    list = (struct term_entry *)malloc(sizeof(struct term_entry)*size + 1);
+    display_message("size(%d)\n", size);
 
-    for ( i = 0; i < SIZE && istrnames[i].istrname != (char *)0;  i++ ) {
+    for ( i = 0; istrnames[i].istrname != (char *)0;  i++ ) {
         if ( (code = tigetstr(istrnames[i].istrname)) == 0 ) {
             display_message("CAPNAME (%s) is not present in this TERM's description\n", istrnames[i].istrname);
             return;
