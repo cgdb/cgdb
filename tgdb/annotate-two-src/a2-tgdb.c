@@ -46,7 +46,6 @@ static sig_atomic_t control_c = 0;              /* If control_c was hit by user 
 
 static char user_cur_command[MAXLINE];
 static int user_cur_command_pos = 0;
-static int user_new_line = 0;
 
 /* signal_catcher: Is called when a signal is sent to this process. 
  *    It passes the signal along to gdb. Thats what the user intended.
@@ -151,7 +150,7 @@ static int tgdb_run_users_buffered_commands(char *buf, int *buf_size){
    sigset_t newmask, oldmask, pendmask;
    sigemptyset(&newmask);
    sigaddset(&newmask, SIGINT);
-   
+
    /* Block SIGINT and save current signal mask */
    if(sigprocmask(SIG_BLOCK, &newmask, &oldmask) < 0)
       err_msg("%s:%d -> SIG_BLOCK error", __FILE__, __LINE__);
@@ -169,6 +168,7 @@ static int tgdb_run_users_buffered_commands(char *buf, int *buf_size){
 
          head = buffer_remove_and_increment ( head, buffer_free_command );
          buf_ret_val = 1;
+
       } else {
           return -2;
       }
@@ -207,7 +207,7 @@ static int tgdb_run_users_buffered_commands(char *buf, int *buf_size){
          switch(com_type){
             case BUFFER_GUI_COMMAND:
                /* Gui commands only care about where the output goes. */
-               return commands_run_command(masterfd, buffered_cmd, out_type);
+               return commands_run_command(masterfd, buffered_cmd, com_type);
             case BUFFER_TGDB_COMMAND:
                /* tgdb is running a command */
                if(com_to_run == COMMANDS_INFO_SOURCES)
@@ -227,11 +227,7 @@ static int tgdb_run_users_buffered_commands(char *buf, int *buf_size){
                   err_msg("%s:%d -> could not run tgdb command(%s)", __FILE__, __LINE__, buffered_cmd);
                break;
             case BUFFER_USER_COMMAND:
-               /* write command to user, before command to gdb */
-               strcat(buf, data_get_prompt());
-               strcat(buf, buffered_cmd);
-               *buf_size = *buf_size + strlen(data_get_prompt()) + length;
-
+               
                /* running user command */
                if(io_writen(masterfd, buffered_cmd, length) != length)
                   err_msg("%s:%d -> could not write messge(%s)", __FILE__, __LINE__, buffered_cmd);
@@ -285,8 +281,10 @@ static int tgdb_setup_buffer_command_to_run(char *com,
                enum buffer_output_type out_type,       /* Where should the output go */
                enum buffer_command_to_run com_to_run){   /* What command to run */
    struct command *command;
+
+   /*fprintf(stderr, "SIZE_OF_BUFFER(%d)\n", buffer_size(head));*/
     
-   if(global_can_issue_command()  == TRUE && tgdb_can_issue_command()){
+   if(global_can_issue_command() == TRUE && tgdb_can_issue_command()){
       /* set up commands to run from tgdb */
       if(com_type == BUFFER_TGDB_COMMAND && com_to_run == COMMANDS_INFO_SOURCES)
          return commands_run_info_sources(masterfd);
@@ -296,10 +294,17 @@ static int tgdb_setup_buffer_command_to_run(char *com,
          return commands_run_info_breakpoints(masterfd);
       else if(com_type == BUFFER_TGDB_COMMAND && com_to_run == COMMANDS_TTY)
          return commands_run_tty(com, masterfd);
-      else /* running another command (from gui) */
-         return commands_run_command(masterfd, com, out_type);
+      else if(com_type == BUFFER_GUI_COMMAND) 
+         return commands_run_command(masterfd, com, com_type);
+      else if( com_type == BUFFER_USER_COMMAND )
+         return commands_run_command(masterfd, com, com_type);
+      else {
+         err_msg("%s:%d Unknown command type", __FILE__, __LINE__);
+         return -1;
+      }
    }else{ /* writing the command for later execution */
       
+      /* Append the command to the end of the queue */
       command = ( struct command * ) xmalloc ( sizeof (struct command) );
       if ( com != NULL ) {
          command->data = ( char * ) xmalloc ( sizeof (char *) * ( strlen ( com ) + 1 ));
@@ -312,21 +317,18 @@ static int tgdb_setup_buffer_command_to_run(char *com,
       command->com_to_run = com_to_run;
       
       head = buffer_write_command_and_append( head, command );
-      return 0;
    }
 
    return 0;
 }
 
 int a2_tgdb_run_command(char *com){
-   int val = 0;
-   val = tgdb_setup_buffer_command_to_run(com, BUFFER_GUI_COMMAND, COMMANDS_SHOW_USER_OUTPUT, COMMANDS_VOID);
-
   /* tgdb always requests that breakpoints be checked because of
    * buggy gdb annotations */
+  tgdb_setup_buffer_command_to_run(com, BUFFER_USER_COMMAND, COMMANDS_SHOW_USER_OUTPUT, COMMANDS_VOID);
   tgdb_setup_buffer_command_to_run ( NULL, BUFFER_TGDB_COMMAND, COMMANDS_HIDE_OUTPUT, COMMANDS_INFO_BREAKPOINTS );
  
-  return val;
+  return 0;
 }
 
 int a2_tgdb_get_source_absolute_filename(char *file){
@@ -406,28 +408,20 @@ size_t a2_tgdb_recv(char *buf, size_t n, struct Command ***com){
          * Display the data the user's unfinished command if
          * the current command is done outputting */
        if ( result == -2 && user_cur_command_pos > 0 ) {
-           char temp[MAXLINE];
-//           char buf2[100];
-//           sprintf(buf2, "%d:%s", user_cur_command_pos, user_cur_command);
-//           strcat(buf, buf2);
-//           buf_size += strlen(buf2);
+           char temp[MAXLINE * 5];
            user_cur_command[user_cur_command_pos] = '\0';
-//           if ( user_new_line )
-//               strcpy(temp, "\n");
-//           else
-               temp[0] = '\0';
+           temp[0] = '\0';
 
            if ( buf_size > 0 )
                strcat(temp, buf);
 
-           strcat(temp, user_cur_command);
+              strcat(temp, user_cur_command);
 
-           /* copy back */
-           strcpy(buf, temp);
-           buf_size += (user_cur_command_pos + 1);
-           user_cur_command_pos = 0;
-           user_new_line = 0;
-           user_cur_command[0] = '\0';
+              /* copy back */
+              strcpy(buf, temp);
+              buf_size += (user_cur_command_pos + 1);
+              user_cur_command_pos = 0;
+              user_cur_command[0] = '\0';
        }
    }
 
@@ -443,22 +437,11 @@ size_t a2_tgdb_recv(char *buf, size_t n, struct Command ***com){
 char *a2_tgdb_send(char *line){
    static char buf[MAXLINE];
    
-   if (tgdb_can_issue_command()) {     
-      /*io_debug_write_fmt("%s", line);*/
-      /* tgdb always requests that breakpoints be checked because of
-       * buggy gdb annotations */
-      tgdb_setup_buffer_command_to_run ( NULL, BUFFER_TGDB_COMMAND, COMMANDS_HIDE_OUTPUT, COMMANDS_INFO_BREAKPOINTS );
-
-      if(io_writen(masterfd, line, strlen(line)) == -1){
-         err_ret("%s:%d -> could not write byte", __FILE__, __LINE__);
-         return NULL;
-      }
-   } else {
-      /* TODO: Needs to be fixed */
-      head = buffer_write_line ( head, line );
-      tgdb_setup_buffer_command_to_run ( NULL, BUFFER_TGDB_COMMAND, COMMANDS_HIDE_OUTPUT, COMMANDS_INFO_BREAKPOINTS );
-   }
-   
+   /*io_debug_write_fmt("%s", line);*/
+   /* tgdb always requests that breakpoints be checked because of
+    * buggy gdb annotations */
+   tgdb_setup_buffer_command_to_run ( line, BUFFER_USER_COMMAND, COMMANDS_SHOW_USER_OUTPUT, COMMANDS_VOID );
+   tgdb_setup_buffer_command_to_run ( NULL, BUFFER_TGDB_COMMAND, COMMANDS_HIDE_OUTPUT, COMMANDS_INFO_BREAKPOINTS );
    return buf;   
 }
 
@@ -484,23 +467,13 @@ int a2_tgdb_send_input(char c) {
      *      This happens when the user typed a whole command ( and '\n' )
      *      while gdb was busy.
      */
-//        internal_user_cur_command[internal_user_cur_command_pos++] = c;
-//        
-//        if ( c == '\n' ) {
-//            strncpy(user_cur_command, internal_user_cur_command, internal_user_cur_command_pos);
-//            user_cur_command_pos = internal_user_cur_command_pos;
-//            
-//            internal_user_cur_command_pos = 0;
-//            internal_user_cur_command[0] = '\0';
-//        }
-        //
-        user_cur_command[user_cur_command_pos++] = c;
-        
-        if ( c == '\n' || c == '\r') {
-            user_new_line = 1;
-            user_cur_command_pos = 0;
-            user_cur_command[0] = '\0';
-        }
+     user_cur_command[user_cur_command_pos++] = c;
+     
+     if ( c == '\n' || c == '\r') {
+         user_cur_command_pos = 0;
+         user_cur_command[0] = '\0';
+
+     }
     }
 
     return 0;
@@ -515,12 +488,6 @@ int a2_tgdb_recv_input(char *buf) {
       return -1;
     } 
 
-//    {
-//        int i;
-//    for ( i = 0; i < size; i++)
-//        fprintf(stderr, "<%c>", buf[i]);
-//    }
-    
     return 0;
 }
 

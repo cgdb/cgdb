@@ -1,3 +1,7 @@
+03/02/2003 Bob Rossi <bob_rossi@cox.net>
+
+   * readline buffer commands working
+
 02/27/2003 Bob Rossi <bob_rossi@cox.net>
 
    * Fix parse bug, looking for 'Located in': when tgdb switch to starting

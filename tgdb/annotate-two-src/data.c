@@ -60,6 +60,7 @@ void data_set_state(enum internal_state state){
             break;
       case GUI_COMMAND:    break;
       case INTERNAL_COMMAND: break;
+      case USER_COMMAND: break;
    } /* end switch */
 }
 
@@ -76,6 +77,7 @@ void data_process(char a, char *buf, int *n, struct Command ***com){
             buf[(*n)++] = a;
       
          break; /* do nothing */
+     case USER_COMMAND: break;
      case POST_PROMPT:  break;
    } /* end switch */
 }

@@ -12,6 +12,7 @@ enum internal_state {
    AT_PROMPT,        /* the prompt is being displayed */
    USER_AT_PROMPT,   /* the user is typing at prompt */
    POST_PROMPT,      /* the user is done at the prompt */
+   USER_COMMAND,     /* this is a command issued by the user */
    GUI_COMMAND,      /* this is a command issued to gdb by tgdb (not the user) */
    INTERNAL_COMMAND  /* This is a command issued by tgdb */
 };

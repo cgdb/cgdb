@@ -34,6 +34,11 @@ struct node *buffer_remove_and_increment(struct node *head, buffer_free_func fun
  */
 void buffer_free_list(struct node *item, buffer_free_func func);
 
+/* buffers_size:
+ * Returns the size of the list, -1 on error
+ */
+int buffer_size(struct node *head);
+
 
 /******************************************************************************
  * Currently this list is only used for keeping the user's commands. 

@@ -78,6 +78,21 @@ void buffer_free_list(struct node *item, buffer_free_func func) {
    prev = NULL; 
 }
 
+int buffer_size(struct node *head) {
+   struct node *cur = head;
+   int size = 0;
+
+   if ( cur == NULL )
+      return -1;
+
+   while ( cur != NULL ) {
+      cur = cur -> next;
+      size += 1; 
+   }
+
+   return size;
+}
+
 struct node *buffer_write_command_and_append ( struct node *n, struct command *com ) {
    struct node *new_node = ( struct node * ) xmalloc ( sizeof ( struct node ) );
 

@@ -55,7 +55,11 @@ extern int read_history ();
 
 static void tgdb_send_user_command(char *line) {
     add_history(line);
-    tgdb_send(line);
+    fprintf(stderr, "\n");
+    if ( strlen(line) > 0 )
+       tgdb_send(line);
+    else
+       tgdb_send("\n");
 }
 
 static int readline_fd[2] = { -1, -1 }; /* readline write to this */

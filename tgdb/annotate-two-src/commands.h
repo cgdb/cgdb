@@ -56,7 +56,7 @@ void commands_set_field_num(int field_num);
 enum COMMAND_STATE commands_get_state(void);
 
 /* runs a simple command, output goes to user  */
-int commands_run_command(int fd, char *com, enum buffer_output_type out);
+int commands_run_command(int fd, char *com, enum buffer_command_type com_type);
 
 /* commands_process: This function recieves the output from gdb when gdb
  *                   is running a command on behalf of this package.

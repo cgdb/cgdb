@@ -219,17 +219,31 @@ static int commands_run_server_command(int fd, char *com){
    return 0;
 }
 
-int commands_run_command(int fd, char *com, enum buffer_output_type out){
-   if(out == COMMANDS_SHOW_USER_OUTPUT)
-      data_set_state(GUI_COMMAND);
-   else if(out == COMMANDS_HIDE_OUTPUT)
+static int commands_run_user_command(int fd, char *com){
+   data_prepare_run_command();
+
+   io_writen(fd, com, strlen(com));
+   io_writen(fd, "\n", 1);
+
+   return 0;
+}
+
+int commands_run_command(int fd, char *com, enum buffer_command_type com_type){
+   if(com_type == BUFFER_TGDB_COMMAND ) 
       data_set_state(INTERNAL_COMMAND);
-   
-   return commands_run_server_command(fd, com);
+   else if ( com_type == BUFFER_GUI_COMMAND )
+      data_set_state(GUI_COMMAND);
+   else if ( com_type == BUFFER_USER_COMMAND )
+      data_set_state(USER_COMMAND);
+
+   if ( com_type == BUFFER_USER_COMMAND )
+      return commands_run_user_command(fd, com);
+   else
+      return commands_run_server_command(fd, com);
 }
 
 int commands_run_info_breakpoints( int fd ) {
-   return commands_run_command(fd, "info breakpoints", COMMANDS_HIDE_OUTPUT);
+   return commands_run_command(fd, "info breakpoints", BUFFER_TGDB_COMMAND);
 }
 
 int commands_run_tty(char *tty, int fd){
@@ -237,7 +251,7 @@ int commands_run_tty(char *tty, int fd){
    memset(line, '\0', MAXLINE);
    strcat(line, "tty ");
    strcat(line, tty);
-   return commands_run_command(fd, line, COMMANDS_HIDE_OUTPUT);
+   return commands_run_command(fd, line, BUFFER_TGDB_COMMAND);
 }
 
 /* commands_run_info_sources: runs 'info sources'.
@@ -257,7 +271,7 @@ int commands_run_info_sources(int fd){
 
    commands_set_state(INFO_SOURCES, NULL);
    global_set_start_info_sources();
-   return commands_run_command(fd, "info sources", COMMANDS_HIDE_OUTPUT);
+   return commands_run_command(fd, "info sources", BUFFER_TGDB_COMMAND);
 }
 
 int commands_run_list(char *filename, int fd){
@@ -277,7 +291,7 @@ int commands_run_list(char *filename, int fd){
    
    commands_set_state(INFO_LIST, NULL);
    global_set_start_list();
-   return commands_run_command(fd, local_com, COMMANDS_HIDE_OUTPUT);
+   return commands_run_command(fd, local_com, BUFFER_TGDB_COMMAND);
 }
 
 static int commands_run_info_source(int fd){
@@ -286,7 +300,7 @@ static int commands_run_info_source(int fd){
    
    commands_set_state(INFO_SOURCE, NULL);
    global_set_start_info_source();
-   return commands_run_command(fd, "info source", COMMANDS_HIDE_OUTPUT);
+   return commands_run_command(fd, "info source", BUFFER_TGDB_COMMAND);
 }
 
 void commands_list_command_finished(struct Command ***com, int success){
