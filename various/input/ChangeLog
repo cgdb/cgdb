@@ -1,0 +1,38 @@
+version 0.3.0 (04/11/2003):
+
+04/01/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * Automatically building getch_driver and input_driver: This is done
+    because 'make' seems to be failing to build the programs correctly
+    when they are extra's. Its probably a configure problem that needs to
+    be solved.
+
+03/30/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * Fixed input.c to work when some esc sequences are subsets of others:
+    The input unit now reads the next char to see if the current esc seq
+    is a subset of a longer esc seq. The unit always returns the longest
+    esc sequence.
+
+03/29/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * Fixed all files to work with autoconf: All of the files that make up
+    the input lib now test to see if a header is available before it is 
+    included.
+
+03/27/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * Adding an initial list of key alt and alt-shift key bindings
+    * Commenting out most alt, shift-alt key bindings: These new key bindings 
+    are breaking the input library. They are getting confused with other
+    longer key mappings that have the alt-key mappings as a subset.
+    * Removed printf's from input.c: Now it writes to err_msg
+
+03/26/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * Adding the Alt-A through Alt-Z key bindings
+
+03/25/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * Adding the input interface for the first time: This should help cgdb
+    read input esc sequences and still perform functions at a high level.
