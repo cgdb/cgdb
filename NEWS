@@ -1,3 +1,8 @@
+cgdb-0.3.3a
+
+	* Fixed bug in the file dialog window. It would not accept the enter
+	key, so the user could never select a file.
+
 cgdb-0.3.3
 
 	* Fixed tab bug, where tab spaces were being displayed incorrectly in 

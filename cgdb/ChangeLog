@@ -1,3 +1,5 @@
+version 0.3.3a (07/16/2003):
+
 07/15/2003 Bob Rossi <bob@brasko.net>
 
 	* filedlg.c: filedlg_recv_char would not recoginize CGDB_KEY_CTRL_M
