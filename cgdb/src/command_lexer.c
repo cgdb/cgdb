@@ -432,17 +432,13 @@ char *yytext;
 #include <string.h>
 #include "command_lexer.h"
 
-int yylinenumber = 1;
-
-static void count( void );
-
 const char * get_token( void )
 {
     return yytext;
 }
 
 
-#line 446 "lex.yy.c"
+#line 442 "command_lexer.c"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -604,10 +600,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
 
-#line 25 "command_lexer.l"
+#line 21 "command_lexer.l"
 
 
-#line 611 "lex.yy.c"
+#line 607 "command_lexer.c"
 
 	if ( yy_init )
 		{
@@ -692,80 +688,80 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 27 "command_lexer.l"
+#line 23 "command_lexer.l"
 { /* ignore comments */ }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 28 "command_lexer.l"
+#line 24 "command_lexer.l"
 { return UNSET; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 29 "command_lexer.l"
+#line 25 "command_lexer.l"
 { return SET; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 30 "command_lexer.l"
+#line 26 "command_lexer.l"
 { return BIND; } 
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 31 "command_lexer.l"
+#line 27 "command_lexer.l"
 { return MACRO; } 
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 33 "command_lexer.l"
+#line 29 "command_lexer.l"
 { return BOOLEAN; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 34 "command_lexer.l"
+#line 30 "command_lexer.l"
 { return IDENTIFIER; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 35 "command_lexer.l"
+#line 31 "command_lexer.l"
 { return NUMBER; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 36 "command_lexer.l"
+#line 32 "command_lexer.l"
 { return STRING; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 38 "command_lexer.l"
+#line 34 "command_lexer.l"
 { return '='; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 39 "command_lexer.l"
+#line 35 "command_lexer.l"
 { return ';'; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 42 "command_lexer.l"
+#line 38 "command_lexer.l"
 { return EOL; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 43 "command_lexer.l"
+#line 39 "command_lexer.l"
 { /* ignore white-space */ }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 44 "command_lexer.l"
+#line 40 "command_lexer.l"
 { /* ignore bad-characters */ }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 46 "command_lexer.l"
+#line 42 "command_lexer.l"
 ECHO;
 	YY_BREAK
-#line 769 "lex.yy.c"
+#line 765 "command_lexer.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1655,7 +1651,7 @@ int main()
 	return 0;
 	}
 #endif
-#line 46 "command_lexer.l"
+#line 42 "command_lexer.l"
 
 
 int yywrap( void )

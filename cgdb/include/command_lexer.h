@@ -12,6 +12,7 @@
  *  IDENTIFIER: a valid identifier (letter followed by letters or numbers)
  *  COMMAND: a recognized command (for future expansion)
  *  STRING: a quoted-string.
+ *  EOL: end of line
  */
 enum TOKENS {
     SET = 255,
@@ -23,6 +24,7 @@ enum TOKENS {
     IDENTIFIER,
     COMMAND,
     STRING,
+	EOL
 };
 
 /* yylex: retreive the next token from the current scan buffer

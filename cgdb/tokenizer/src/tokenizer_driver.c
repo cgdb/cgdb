@@ -11,7 +11,7 @@ static void usage ( void ) {
 int main ( int argc, char **argv ) {
 	struct tokenizer *t = tokenizer_init ();
 	int ret;
-	enum tokenizer_language_support l;
+	enum tokenizer_language_support l = TOKENIZER_LANGUAGE_UNKNOWN;
 	
 	if ( argc != 3 )
 		usage();	

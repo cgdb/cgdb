@@ -10,10 +10,6 @@ L           [a-zA-Z_]
 #include <string.h>
 #include "command_lexer.h"
 
-int yylinenumber = 1;
-
-static void count( void );
-
 const char * get_token( void )
 {
     return yytext;
