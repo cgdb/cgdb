@@ -1,3 +1,7 @@
+02/16/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * Reorganized libtgdb completly. Only 1 library is created now
+
 02/12/2003 Bob Rossi <bob_rossi@cox.net>
 
     * Reorganized tgdb to be able to interface with gdb in multiple ways:
