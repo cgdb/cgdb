@@ -630,6 +630,8 @@ void source_vscroll(struct sviewer *sview, int offset)
             sview->cur->sel_line = 0;
         if (sview->cur->sel_line >= sview->cur->buf.length)
             sview->cur->sel_line = sview->cur->buf.length - 1;
+
+        sview->cur->sel_rline = sview->cur->sel_line;
     }
 }
 
@@ -659,6 +661,8 @@ void source_set_sel_line(struct sviewer *sview, int line)
             sview->cur->sel_line = 0;
         if (sview->cur->sel_line >= sview->cur->buf.length)
             sview->cur->sel_line = sview->cur->buf.length - 1;
+
+        sview->cur->sel_rline = sview->cur->sel_line;
     }
 }
 

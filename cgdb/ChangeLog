@@ -1,3 +1,8 @@
+09/23/2003 Bob Rossi <bob@brasko.net>
+
+   * sources.c: source_vscroll, source_set_sel_line, sets sel_rline 
+   to be equal to sel_line
+
 09/21/2003 Bob Rossi <bob@brasko.net>
 
    * cgdb.c: global commandq variable removed.

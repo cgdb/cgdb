@@ -1,3 +1,7 @@
+   * Fixed CGDB bug. When searching for text, CGDB would search for the next
+   occurence of the string from where it last found an occurence, rather than
+   where the users cursor is.
+   
    * Fixed crash in TGDB. It would try to parse watchpoints.
    It will no longer do this.
    
