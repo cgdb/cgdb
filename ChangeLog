@@ -2,9 +2,8 @@
    
    * Added the command to goto a line in the source window: This options was
    present before but it was not picked up by the new command parser.
-   * Changed the 'n' key to mean 'next forward search' and the 'N' key to 
-   mean 'next reverse search': This is not exactly like vi because if your 
-   searching in reverse, 'N' will still keep you searching in reverse.
+   * Changed searching keys: the 'n' key to mean 'next forward search' 
+   and the 'N' key to mean 'next reverse search'.
 
 02/05/2003 Peter Kovacs <peter@kovax.org>
 

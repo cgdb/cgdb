@@ -1139,11 +1139,11 @@ int internal_if_input(int key) {
                     capture_regex(src_win);
                     return 0;
                 case 'n':
-                     source_search_regex(src_win, regex_line, 2, 1, regex_icase);
+                     source_search_regex(src_win, regex_line, 2, regex_direction, regex_icase);
                      if_draw();
                      break;
                 case 'N':
-                     source_search_regex(src_win, regex_line, 2, 0, regex_icase);
+                     source_search_regex(src_win, regex_line, 2, !regex_direction, regex_icase);
                      if_draw();
                      break;
                 case 'T':
