@@ -1,3 +1,7 @@
+03/30/2005 Bob Rossi <bob@brasko.net>
+
+	* NEWS: Fixed memory error's found due to valgrind.
+
 03/28/2005 Bob Rossi <bob@brasko.net>
 
 	* NEWS: Fixed a bug in the C/C++ tokenizer to highlight source code.

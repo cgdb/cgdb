@@ -1,3 +1,14 @@
+03/30/2005 Bob Rossi <bob@brasko.net>
+
+	* sources.h (list_node): Remove covered_lines field.
+	* cgdbrc.c (global): Remove line_coverage_option
+	(VARIABLES): Removed line_coverage field
+	* interface.c (global): Remove line_coverage_option
+	* sources.c (load_file): Fixed memory runtime error and code related to
+	line_coverage_option
+	(source_display): Remove extern to line_coverage_option and related code
+	(source_set_exec_line): Remove code related to line_coverage_option
+
 11/05/2004 Bob Rossi <bob@brasko.net>
 
    * sources.h: Add #include of time.h

@@ -1,4 +1,6 @@
 CVS
+   * Several memory runtime fixes found thanks to valgrind. This could potentially
+   fix crash's that I just never ran into.
     
    * Fix a bug in the c/c++ syntax highlighter. If a file had a dos file format
    and the C++ style comment // was used, then the file displayed would be 

@@ -129,7 +129,6 @@ static int regex_search;                /* Currently searching text ? */
 static int regex_direction;             /* Direction to search */
 /*static*/ int regex_icase = 0;         /* Case insensitive (0), sensitive */
 /*static*/ int shortcut_option = 0;     /* Flag: Shortcut options enabled */
-		   int line_coverage_option = 0;/* If lines should be highlighted when covered */
            int config_wrapscan = 1;     /* Wrap around searching */
 
 static char last_key_pressed = 0;       /* Last key user entered in cgdb mode */

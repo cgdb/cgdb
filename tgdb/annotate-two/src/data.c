@@ -53,6 +53,8 @@ struct data *data_initialize ( void ) {
 
 	d->data_state 		= VOID;
 	d->gdb_prompt_size 	= 0;
+    d->gdb_prompt[0]    = 0;
+    d->gdb_prompt_last[0] = 0;
 
 	return d;
 }

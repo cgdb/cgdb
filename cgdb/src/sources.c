@@ -314,10 +314,13 @@ static int load_file(struct list_node *node)
 
 	while (!feof(file)){
 		if (fgets(line, MAX_LINE, file)){
-			if (line[strlen(line)-1] == '\n')
-				line[strlen(line)-1] = 0;
-			if (line[strlen(line)-1] == '\r')
-				line[strlen(line)-1] = 0;
+            int length = strlen ( line );
+            if ( length > 0 ) {
+                if (line[length-1] == '\n')
+                    line[length-1] = 0;
+                if (line[length-1] == '\r')
+                    line[length-1] = 0;
+            }
 			if (strlen(line) > node->orig_buf.max_width)
 				node->orig_buf.max_width = strlen(line);
 
@@ -351,11 +354,6 @@ static int load_file(struct list_node *node)
     node->buf.breakpts = malloc(sizeof(char) * node->buf.length);
     for (i = 0; i < node->buf.length; i++)
        node->buf.breakpts[i] = 0;
-
-	/* Initialize the coverage */
-	node->covered_lines =  (int *)xmalloc ( sizeof ( int ) * node->buf.length);
-	for ( i = 0; i < node->buf.length; i++ )
-		node->covered_lines[i] = 0;
 
     return 0;
 }
@@ -507,7 +505,6 @@ int source_display(struct sviewer *sview, int focus)
     int lwidth;
     int line;
     int i;
-	extern int line_coverage_option;
 
     /* Check that a file is loaded */
     if (sview->cur == NULL || sview->cur->buf.tlines == NULL){
@@ -585,32 +582,6 @@ int source_display(struct sviewer *sview, int focus)
                 waddch(sview->win, '>');
                 wattroff(sview->win, COLOR_PAIR(CGDB_COLOR_GREEN));
                 wattroff(sview->win, A_BOLD);
-				/* I know this is rediculous, it needs to be reimplemented */
-				if ( sources_syntax_on ) {
-					if ( line == sview->cur->sel_line && sview->cur->buf.cur_line != NULL )
-						hl_wprintw(sview->win, sview->cur->buf.cur_line, width-lwidth-2, sview->cur->sel_col);
-					else
-						hl_wprintw(sview->win, sview->cur->buf.tlines[line], width-lwidth-2, sview->cur->sel_col);
-				} else {
-					if ( line == sview->cur->sel_line && sview->cur->buf.cur_line != NULL )
-						hl_wprintw(sview->win, sview->cur->orig_buf.cur_line, width-lwidth-2, sview->cur->sel_col);
-					else
-						hl_wprintw(sview->win, sview->cur->orig_buf.tlines[line], width-lwidth-2, sview->cur->sel_col);
-				}
-            }
-            /* Look for covered_lines */
-            else if (line_coverage_option && sview->cur->covered_lines[line]){
-                wattron(sview->win, COLOR_PAIR(CGDB_COLOR_MAGENTA));
-                wattron(sview->win, A_BOLD);
-                wprintw(sview->win, fmt, line+1);
-                wattroff(sview->win, COLOR_PAIR(CGDB_COLOR_MAGENTA));
-                if (!focus)
-                    wattroff(sview->win, A_BOLD);
-                waddch(sview->win, VERT_LINE);
-                if (focus)
-                    wattroff(sview->win, A_BOLD);
-                waddch(sview->win, ' ');
-
 				/* I know this is rediculous, it needs to be reimplemented */
 				if ( sources_syntax_on ) {
 					if ( line == sview->cur->sel_line && sview->cur->buf.cur_line != NULL )
@@ -784,9 +755,6 @@ int source_set_exec_line(struct sviewer *sview, const char *path, int line)
             line = sview->cur->buf.length - 1;
         sview->cur->sel_line = sview->cur->exe_line = line;
     }
-
-	/* Add this line to the lines covered */
-	sview->cur->covered_lines[line] = 1;
 
     return 0;
 }

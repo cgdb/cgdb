@@ -222,10 +222,10 @@ int commands_parse_source(
 		const char *buf, size_t n, 
 		struct tgdb_list *list){
     int i = 0;
-    char copy[n];
+    char copy[n+1];
     char *cur = copy + n;
 	struct ibuf *file = ibuf_init (), *line = ibuf_init ();
-    strncpy(copy, buf, n); /* modify local copy */
+    strncpy(copy, buf, n+1); /* modify local copy */
    
     while(cur != copy && i <= 3){
         if(*cur == ':'){

@@ -1,5 +1,10 @@
 03/30/2005 Bob Rossi <bob@brasko.net>
 
+	* commands.c (command_parse_source): Fix runtime memory error.
+	* data.c (data_initialize): Init all fields, fix runtime memory error.
+
+03/30/2005 Bob Rossi <bob@brasko.net>
+
    * gdbmi_parser.c (gdbmi_parser_parse_string): Remove implementation
    for release. The MI parser code will be completly replaced when
    implemented.

@@ -30,7 +30,6 @@ extern struct tgdb *tgdb;
 extern int auto_source_reload;
 extern int regex_icase ;
 extern int shortcut_option ;
-extern int line_coverage_option;
 extern int highlight_tabstop;
 extern int config_wrapscan;
 
@@ -63,7 +62,6 @@ static struct ConfigVariable
     /* escdelay   */ 		{ "escdelay", "escdelay", CONFIG_TYPE_FUNC_INT, command_set_esc_sequence_timeout },
     /* focus      */ 		{ "focus", "fo", CONFIG_TYPE_FUNC_STRING, command_set_focus },
     /* ignorecase */ 		{ "ignorecase", "ic", CONFIG_TYPE_BOOL, &regex_icase },
-    /* line_coverage */ 	{ "line_coverage", "lc", CONFIG_TYPE_BOOL, &line_coverage_option },
     /* shortcut   */ 		{ "shortcut", "sc", CONFIG_TYPE_BOOL, &shortcut_option },
 	/* showtgdbcommands */ 	{ "showtgdbcommands", "stc", CONFIG_TYPE_FUNC_BOOL, &command_set_stc },
     /* syntax */      		{ "syntax", "syn", CONFIG_TYPE_FUNC_STRING, command_set_syntax_type }, 
