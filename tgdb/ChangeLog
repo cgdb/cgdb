@@ -1,3 +1,9 @@
+09/28/2003 Bob Rossi <bob@brasko.net>
+
+   * annotate.c: handle_prompt, move call to commands_finalize_command to
+   before the point where data_set_state is called. ( setting the state of
+   commands to nothing ).
+
 09/27/2003 Bob Rossi <bob@brasko.net>
 
    * commands.c: commands_list_command_finished,

@@ -1,3 +1,7 @@
+   * Fixed bug in TGDB. It would not return TGDB_ABSOLUTE_SOURCE_DENIED if 
+   TGDB called 'info source' and there was no line that returned the absolute
+   source path.
+   
    * Fixed bug in TGDB. TGDB would not query GDB for breakpoints on startup.
    However, the user can set breakpoints in there .gdbinit. TGDB now gets all
    breakpoints on startup. This fixes a bug in CGDB. The breakpoint will now

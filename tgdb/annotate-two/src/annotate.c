@@ -58,6 +58,13 @@ static int handle_pre_prompt(struct annotate_two *a2, const char *buf, size_t n,
 }
 
 static int handle_prompt(struct annotate_two *a2, const char *buf, size_t n, struct queue *q){
+   /* This return TGDB_ABSOLUTE_SOURCE_DENIED if there was no absolute path
+	* given when 'info source' was run.
+	* It tells the gui that the source is not available.
+	*/
+   commands_finalize_command ( a2->c, q );
+   
+   /* All done. */
    data_set_state(a2, USER_AT_PROMPT );
 
    /* 'info sources' is done, return the sources to the gui */
@@ -67,8 +74,6 @@ static int handle_prompt(struct annotate_two *a2, const char *buf, size_t n, str
       return 0;
    } 
 
-   commands_finalize_command ( a2->c, q );
-   
    return 0;
 }
 
