@@ -1,3 +1,8 @@
+01/08/2004 Bob Rossi <bob@brasko.net>
+
+   * Makefile.in: regenerated with documented autotools version
+   * src/Makefile.in: ditto
+
 version 0.4.0-1 cygwin release
 
 12/03/2003 Ronald Landheer-Cieslak <ronald@landheer.com>
