@@ -1,5 +1,17 @@
 09/27/2003 Bob Rossi <bob@brasko.net>
 
+   * commands.c: commands_list_command_finished,
+   commands_send_source_absolute_source_file, commands_finalize_command, use
+   new 'struct tgdb_source_file' structure for TGDB_ABSOLUTE_SOURCE_DENIED.
+   commands_send_source_absolute_source_file, use new 'struct
+   tgdb_source_file' for TGDB_ABSOLUTE_SOURCE_ACCEPTED.
+   * types.h: Change comments. Add tgdb_source_file structure.
+   * types.c: tgdb_print_command, TGDB_ABSOLUTE_SOURCE_ACCEPTED,
+   TGDB_ABSOLUTE_SOURCE_DENIED, update to use 'struct tgdb_source_file'
+   tgdb_delete_command, ditto
+
+09/27/2003 Bob Rossi <bob@brasko.net>
+
    * commands.c: commands_process_info_source, populate new 'struct
    tgdb_file_position.
    * types.h: struct tgdb_file_position, changed members absolute_path and

@@ -86,16 +86,18 @@ static void tgdb_print_item(void *item) {
            	break;
         case TGDB_ABSOLUTE_SOURCE_ACCEPTED:
 			{
-				struct string *s = ( struct string * ) com->data;
-				char *file = string_get ( s );
-				fprintf( fd, "TGDB_ABSOLUTE_SOURCE_ACCEPTED(%s)\n", file );
+				struct tgdb_source_file *file = 
+						(struct tgdb_source_file *) com->data;
+				fprintf( fd, "TGDB_ABSOLUTE_SOURCE_ACCEPTED(%s)\n", 
+						file->absolute_path );
 				break;
 			}
         case TGDB_ABSOLUTE_SOURCE_DENIED:
 			{
-				struct string *s = ( struct string * ) com->data;
-				char *file = string_get ( s );
-				fprintf( fd, "TGDB_ABSOLUTE_SOURCE_DENIED(%s)\n", file );
+				struct tgdb_source_file *file = 
+						(struct tgdb_source_file *) com->data;
+				fprintf( fd, "TGDB_ABSOLUTE_SOURCE_DENIED(%s)\n", 
+						file->absolute_path );
 				break;
 			}
         case TGDB_DISPLAY_UPDATE:
@@ -172,10 +174,13 @@ void tgdb_delete_command(void *item){
         case TGDB_ABSOLUTE_SOURCE_ACCEPTED:
         case TGDB_ABSOLUTE_SOURCE_DENIED:
 		{
-		   struct string *s = ( struct string * ) com->data;
-		   string_free ( s );
-		   s = NULL;
-		   break;
+			struct tgdb_source_file *file = 
+					(struct tgdb_source_file *) com->data;
+			free ( file->absolute_path );
+			file->absolute_path = NULL;
+			free ( file );
+			file = NULL;
+		   	break;
 		}
         case TGDB_DISPLAY_UPDATE:
 			/* Nothing to do */

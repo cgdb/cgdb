@@ -1,5 +1,11 @@
 09/27/2003 Bob Rossi <bob@brasko.net>
 
+   * cgdb.c: remove #include 'ibuf.h'
+   process_commands, TGDB_ABSOLUTE_SOURCE_ACCEPTED,
+   TGDB_ABSOLUTE_SOURCED_DENIED, change to use tgdb_source_file.
+
+09/27/2003 Bob Rossi <bob@brasko.net>
+
    * cgdb.c: process_commands, TGDB_UDPATE_FILE_POSITION, remove use of
    'struct string', TGDB now returns 'char*'
 

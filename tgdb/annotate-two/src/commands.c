@@ -335,9 +335,10 @@ static void commands_prepare_info_source(struct annotate_two *a2, struct command
 void commands_list_command_finished(struct commands *c, struct queue *q, int success){
   /* The file does not exist and it can not be opened.
    * So we return that information to the gui.  */
-    struct string *rej = string_init();
-    string_add ( rej, c->last_info_source_requested );
-    tgdb_append_command(q, TGDB_ABSOLUTE_SOURCE_DENIED, rej);
+	struct tgdb_source_file *rejected = (struct tgdb_source_file *)
+	  xmalloc ( sizeof ( struct tgdb_source_file ) );
+	rejected->absolute_path = strdup ( c->last_info_source_requested );
+    tgdb_append_command(q, TGDB_ABSOLUTE_SOURCE_DENIED, rejected);
 }
 
 void commands_send_source_absolute_source_file(struct commands *c, struct queue *q){
@@ -353,9 +354,10 @@ void commands_send_source_absolute_source_file(struct commands *c, struct queue 
 
       /* requesting file */
       if(c->last_info_source_requested[0] != '\0') {
-          struct string *accepted = string_init();
-          string_add ( accepted, path );
-          tgdb_append_command(q, TGDB_ABSOLUTE_SOURCE_ACCEPTED, accepted);
+		  struct tgdb_source_file *tsf = (struct tgdb_source_file *)
+			  xmalloc ( sizeof ( struct tgdb_source_file ) );
+		  tsf->absolute_path = strdup ( path );
+          tgdb_append_command(q, TGDB_ABSOLUTE_SOURCE_ACCEPTED, tsf);
       } else { /* This happens only when libtgdb starts */
             string_clear( c->absolute_path );
             string_add ( c->absolute_path, path );
@@ -364,9 +366,10 @@ void commands_send_source_absolute_source_file(struct commands *c, struct queue 
       }
    /* not found */
    } else {
-      struct string *rej = string_init();
-      string_add ( rej, c->last_info_source_requested );
-      tgdb_append_command(q, TGDB_ABSOLUTE_SOURCE_DENIED, rej);
+	  struct tgdb_source_file *rejected = (struct tgdb_source_file *)
+		  xmalloc ( sizeof ( struct tgdb_source_file ) );
+	  rejected->absolute_path = strdup ( c->last_info_source_requested );
+      tgdb_append_command(q, TGDB_ABSOLUTE_SOURCE_DENIED, rejected);
    }
 }
 
@@ -570,9 +573,10 @@ void commands_finalize_command ( struct commands *c, struct queue *q ) {
         case INFO_SOURCE_ABSOLUTE:
 
             if ( c->info_source_ready == 0 ) {
-                struct string *rej = string_init();
-                string_add ( rej, c->last_info_source_requested );
-                tgdb_append_command(q, TGDB_ABSOLUTE_SOURCE_DENIED, rej );
+				struct tgdb_source_file *rejected = (struct tgdb_source_file *)
+				  xmalloc ( sizeof ( struct tgdb_source_file ) );
+				rejected->absolute_path = strdup ( c->last_info_source_requested );
+                tgdb_append_command(q, TGDB_ABSOLUTE_SOURCE_DENIED, rejected );
             }
 
             break;

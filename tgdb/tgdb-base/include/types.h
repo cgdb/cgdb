@@ -84,7 +84,7 @@ extern "C" {
  *      This is a response to the function call tgdb_get_source_absolute_filename.
  *      It returns the absolute path to the relative path asked for.
  *
- *      This is a struct string representing the absolute filename.
+ *      This is a struct tgdb_source_file representing the absolute filename.
  *
  *  TGDB_ABSOLUTE_SOURCE_DENIED
  *  ---------------------------
@@ -93,7 +93,7 @@ extern "C" {
  *      It happens when gdb failed to know what the absolute path to the relative
  *      path asked for was.
  *
- *      This is a struct string representing the absolute filename.
+ *      This is a struct tgdb_source_file representing the absolute filename.
  *
  *  TGDB_DISPLAY_UPDATE
  *  -------------------
@@ -234,6 +234,16 @@ struct tgdb_file_position {
 	char *absolute_path;
 	char *relative_path;
 	int line_number;
+};
+
+/* 
+ * This is used to return a path to the front end.
+ *
+ * path
+ *    The absolute path to the file of interest.
+ */
+struct tgdb_source_file {
+	char *absolute_path;
 };
 
 #ifdef __cplusplus

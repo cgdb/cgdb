@@ -66,7 +66,6 @@
 #include "sources.h"
 #include "tgdb.h"
 #include "helptext.h"
-#include "ibuf.h"
 #include "input.h"
 #include "fs_util.h"
 #include "cgdbrc.h"
@@ -385,22 +384,22 @@ static void process_commands(struct tgdb *tgdb)
             /* This is the absolute path to the last file the user requested */
             case TGDB_ABSOLUTE_SOURCE_ACCEPTED:
              {
-                struct string *s = ( struct string *)item->data;
-                char *file = string_get ( s );
-                if_show_file( file, 1);
-                source_set_relative_path(if_get_sview(), file, last_relative_file);
+				struct tgdb_source_file *file = 
+						( struct tgdb_source_file *) item->data;
+                if_show_file( file->absolute_path, 1);
+                source_set_relative_path(if_get_sview(), file->absolute_path, last_relative_file);
                 break;
              }
 
             /* The source file requested does not exist */
             case TGDB_ABSOLUTE_SOURCE_DENIED:
              {
-                struct string *s = ( struct string *)item->data;
-                char *file = string_get ( s );
+				struct tgdb_source_file *file = 
+						( struct tgdb_source_file *) item->data;
                 if_show_file(NULL, 0 );
                 /* com can be NULL when tgdb orig requests main file */
-                if ( file[0] )
-                    if_display_message("No such file:", 0, " %s", file);
+                if ( file->absolute_path[0] )
+                    if_display_message("No such file:", 0, " %s", file->absolute_path);
 
                 break;
              }
