@@ -1,5 +1,10 @@
 10/05/2003 Bob Rossi <bob@brasko.net>
 
+   * TODO: Update list of things to do for .4.0
+   * Makefile.am: Add EXTRA_DIST rule, to make sure testsuite gets included.
+
+10/05/2003 Bob Rossi <bob@brasko.net>
+
    * TODO: Update things done.
    * tgdb_types.h: enum INTERFACE_COMMANDS, remove TGDB_QUIT_ABNORMAL and
    TGDB_QUIT_NORMAL to make 1 command TGDB_QUIT.

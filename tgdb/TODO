@@ -10,9 +10,13 @@ Pushed off for gdb 0.5.0
 	
 Work to do for cgdb-0.4.0
 
-> Get testsuite to install with automake
+Non-technical
 > Work on webpage for cgdb/tgdb
 > Comment all headers to be complient with doxygen
+
+technical
+> Get in touch with 'Ronald Landheer-Cieslak' about Makefile.am patch to
+  build CVS out of the source tree.
 > Change use of 'struct queue' for tgdb_get_command.
 > standardize the way TGDB returns paths to the front end.
    As of know, it returns the full path with the relative path. Then
@@ -21,6 +25,7 @@ Work to do for cgdb-0.4.0
 
 Finished:
 
+* Get testsuite to install with automake
 * Add the return value of gdb when returning with TGDB_QUIT_NORMAL
 * Make 1 quit command. Returning a structure defining how GDB was killed.
 * Fix tgdb to call the lower level subsystems in an independent way.
