@@ -1,3 +1,7 @@
+03/06/2004 Bob Rossi <bob@brasko.net>
+
+    * cgdb.c (version_info): change Copyright info. Changed date.
+
 03/02/2004 Bob Rossi <bob@brasko.net>
 
     * lib/Doxyfile: Changing name of output file. 
