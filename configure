@@ -3669,7 +3669,9 @@ fi
 echo "$as_me:$LINENO: result: $vl_cv_lib_readline" >&5
 echo "${ECHO_T}$vl_cv_lib_readline" >&6
 
+  have_readline=no
   if test "$vl_cv_lib_readline" != "no"; then
+    have_readline=yes
 
 cat >>confdefs.h <<\_ACEOF
 #define HAVE_LIBREADLINE 1
@@ -4023,6 +4025,15 @@ done
     fi
   fi
 
+    if test $have_readline = no; then
+        { { echo "$as_me:$LINENO: error:  *****************************************************
+                     cgdb requires a readline compatible library to link!
+                     *****************************************************" >&5
+echo "$as_me: error:  *****************************************************
+                     cgdb requires a readline compatible library to link!
+                     *****************************************************" >&2;}
+   { (exit 1); exit 1; }; }
+    fi
 
 # determine if we are running in linux, cygwin, solaris, or freebsd
    # Make sure we can run config.sub.

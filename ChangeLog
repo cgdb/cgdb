@@ -1,6 +1,7 @@
 04/01/2003 Bob Rossi <bob_rossi@cox.net>
 
     * cgdb now works on windows XP in cygwin: Fixed creation of home directory.
+    * Try to make configure fail if readline is not installed on system.
 
 03/29/2003 Bob Rossi <bob_rossi@cox.net>
 

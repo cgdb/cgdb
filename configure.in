@@ -12,8 +12,13 @@ AC_PROG_INSTALL
 AC_PROG_RANLIB
 AM_PROG_LEX
 
-dnl Here we need to quit if there is no readline available
 VL_LIB_READLINE
+dnl Here we need to quit if there is no readline available
+    if test $have_readline = no; then
+        AC_MSG_ERROR([ *****************************************************
+                     cgdb requires a readline compatible library to link!
+                     *****************************************************])
+    fi
 
 # determine if we are running in linux, cygwin, solaris, or freebsd
    AC_CANONICAL_HOST
