@@ -3,8 +3,10 @@ Steps for releasing a new CGDB version:
 1.  Update all ChangeLogs to have the new release date and version.
     The ChangeLogs live in many places currently.
     find . -name ChangeLog
+
+2.  Update the NEWS file to have the new release date and version.
     
-2.  Change configure.in file to reflect new version number.
+3.  Change configure.in file to reflect new version number.
       * Run autoregen.sh
     Make sure you have the appropriate versions of these installed:
       * aclocal (GNU automake) 1.7
@@ -15,14 +17,14 @@ Steps for releasing a new CGDB version:
 	Also, change tgdb/Doxyfile and cgdb/Doxyfile to have the correct
 	version number. You want to change the PROJECT_NUMBER line.
       
-3.  Test doing 'make dist' then untar, ./configure && make
+4.  Test doing 'make dist' then untar, ./configure && make
     and run ./cgdb --version to check version number.
 
-4.  Create a cvs tag for the tree to be able to get back to the 
+5.  Create a cvs tag for the tree to be able to get back to the 
     version number. If the version is cgdb-0.3.3, name the tag
 	cgdb-0_3_3 .
 
-5.  Put a release on sourceforge.net/projects/cgdb
+6.  Put a release on sourceforge.net/projects/cgdb
     * ftp upload.sourceforge.net
       * user=anonymous, passwd=email
       * type bin
@@ -34,9 +36,9 @@ Steps for releasing a new CGDB version:
 	  release notes.
 	* Copy new README file into readme.txt
 
-6.  Download and test the new version from sourceforge.
+7.  Download and test the new version from sourceforge.
 
-7.  Update website cgdb.sourceforge.net:
+8.  Update website cgdb.sourceforge.net:
     * ssh cgdb.sourceforge.net
     * cd /home/groups/c/cg/cgdb/htdocs
     * Modify download page -> download.shtml
@@ -44,11 +46,11 @@ Steps for releasing a new CGDB version:
       * Changelog link (point to the correct version in CVS)
     * Optionally, put a note in the index.shtml file (News section)
 
-8.  Test website by looking at it and attempting to download file.
+9.  Test website by looking at it and attempting to download file.
     
-9.  Announce the release on freshmeat
+10.  Announce the release on freshmeat
 
-10.  Announce the release on cgdb-announce@lists.sourceforge.net
+11.  Announce the release on cgdb-announce@lists.sourceforge.net
 
 Subject:  CGDB (version) released
 Text of message:

@@ -1,3 +1,5 @@
+version 0.4.0 (10/28/2003):
+
 10/28/2003 Bob Rossi <bob@brasko.net>
 
    * tokenizer/src/Makefile.in: ran autoregen.sh

@@ -1,3 +1,5 @@
+version 0.4.0 (10/28/2003):
+
 10/13/2003 Bob Rossi <bob@brasko.net>
 
    * rlctx.c: changed all occurences of 'string_*' to 'ibuf_*'

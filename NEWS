@@ -1,3 +1,5 @@
+cgdb-0.4.0 (10/28/2003)
+   
    * Added 'wrapscan' option (abbreviated 'ws').  Note that this means that
    'ws' no longer means winsplit, since this isn't the standard vi meaning.
    Fixed bug where 'n' jumps to the top of file when no search was previously

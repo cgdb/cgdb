@@ -1,3 +1,9 @@
+version 0.4.0 (10/28/2003):
+
+10/28/2003 Mike Mueller <mmueller@cs.uri.edu>
+
+    * NEWS: Add new release date and version.
+
 10/15/2003 Mike Mueller <mmueller@cs.uri.edu>
 
     * NEWS: Adding :set wrapscan (ws) option.
