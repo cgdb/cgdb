@@ -20,9 +20,11 @@ Quick Reference
     right arrow -> right a line.
     l           -> right a line.
     page up     -> up a page
-    shift j     -> up a page
+    ^b          -> up a page
+    ^u          -> up 1/2 a page
     page down   -> down a page
-    shift k     -> down a page
+	^f          -> down a page
+	^d          -> down 1/2 a page
     gg          -> top of file
     G           -> bottom of file
     /           -> search

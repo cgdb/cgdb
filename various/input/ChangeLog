@@ -1,3 +1,8 @@
+07/14/2003 Bob Rossi <bob_rossi@brasko.net>
+
+	* input.h: added CGDB_KEY_CTRL_* to cgdb_input_macro
+	* input.c: added CGDB_KEY_CTRL_* to add_keybindings
+
 version 0.3.2 (06/25/2003):
 
 06/23/2003 Bob Rossi <bob_rossi@cox.net>

@@ -222,6 +222,34 @@ static void add_keybindings(void) {
     insertIntoList ("Home",         "Home",         "\033OH", CGDB_KEY_HOME);
     insertIntoList ("End",          "End",          "\033OF", CGDB_KEY_END);
 
+	/* Ctrl bindings */
+    insertIntoList ("Ctrl-A",        "Ctrl-A",        "\001", CGDB_KEY_CTRL_A);
+    insertIntoList ("Ctrl-B",        "Ctrl-B",        "\002", CGDB_KEY_CTRL_B);
+    insertIntoList ("Ctrl-C",        "Ctrl-C",        "\003", CGDB_KEY_CTRL_C);
+    insertIntoList ("Ctrl-D",        "Ctrl-D",        "\004", CGDB_KEY_CTRL_D);
+    insertIntoList ("Ctrl-E",        "Ctrl-E",        "\005", CGDB_KEY_CTRL_E);
+    insertIntoList ("Ctrl-F",        "Ctrl-F",        "\006", CGDB_KEY_CTRL_F);
+    insertIntoList ("Ctrl-G",        "Ctrl-G",        "\007", CGDB_KEY_CTRL_G);
+    insertIntoList ("Ctrl-H",        "Ctrl-H",        "\010", CGDB_KEY_CTRL_H);
+    insertIntoList ("Ctrl-I",        "Ctrl-I",        "\011", CGDB_KEY_CTRL_I);
+    insertIntoList ("Ctrl-J",        "Ctrl-J",        "\012", CGDB_KEY_CTRL_J);
+    insertIntoList ("Ctrl-K",        "Ctrl-K",        "\013", CGDB_KEY_CTRL_K);
+    insertIntoList ("Ctrl-L",        "Ctrl-L",        "\014", CGDB_KEY_CTRL_L);
+    insertIntoList ("Ctrl-M",        "Ctrl-M",        "\015", CGDB_KEY_CTRL_M);
+    insertIntoList ("Ctrl-N",        "Ctrl-N",        "\016", CGDB_KEY_CTRL_N);
+    insertIntoList ("Ctrl-O",        "Ctrl-O",        "\017", CGDB_KEY_CTRL_O);
+    insertIntoList ("Ctrl-P",        "Ctrl-P",        "\020", CGDB_KEY_CTRL_P);
+    insertIntoList ("Ctrl-Q",        "Ctrl-Q",        "\021", CGDB_KEY_CTRL_Q);
+    insertIntoList ("Ctrl-R",        "Ctrl-R",        "\022", CGDB_KEY_CTRL_R);
+    insertIntoList ("Ctrl-S",        "Ctrl-S",        "\023", CGDB_KEY_CTRL_S);
+    insertIntoList ("Ctrl-T",        "Ctrl-T",        "\024", CGDB_KEY_CTRL_T);
+    insertIntoList ("Ctrl-U",        "Ctrl-U",        "\025", CGDB_KEY_CTRL_U);
+    insertIntoList ("Ctrl-V",        "Ctrl-V",        "\026", CGDB_KEY_CTRL_V);
+    insertIntoList ("Ctrl-W",        "Ctrl-W",        "\027", CGDB_KEY_CTRL_W);
+    insertIntoList ("Ctrl-X",        "Ctrl-X",        "\030", CGDB_KEY_CTRL_X);
+    insertIntoList ("Ctrl-Y",        "Ctrl-Y",        "\031", CGDB_KEY_CTRL_Y);
+    insertIntoList ("Ctrl-Z",        "Ctrl-Z",        "\032", CGDB_KEY_CTRL_Z);
+
     /* Alt bindings */
     insertIntoList ("Alt-A",        "Alt-A",        "\033a", CGDB_KEY_ALT_A);
     insertIntoList ("Alt-B",        "Alt-B",        "\033b", CGDB_KEY_ALT_B);

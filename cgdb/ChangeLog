@@ -1,3 +1,7 @@
+07/14/2003 Bob Rossi <bob@brasko.net>
+
+	* interface.c: Added pgup pgdn to source_input
+
 07/02/2003 Bob Rossi <bob@brasko.net>
 
 	* commands.c: Remove all calls tgdb_send to tgdb_run_client_command.

@@ -909,12 +909,18 @@ static void source_input(struct sviewer *sview, int key)
         case 'l':
             source_hscroll(sview, 1);
             break;
+		case CGDB_KEY_CTRL_U: 	/* VI-style 1/2 page up */
+            source_vscroll(sview, -(get_src_height()/2));
+			break;
         case CGDB_KEY_PPAGE:
-        case 'K':
+		case CGDB_KEY_CTRL_B:	/* VI-style page up */
             source_vscroll(sview, -(get_src_height() - 1));
             break;
+		case CGDB_KEY_CTRL_D: 	/* VI-style 1/2 page down */
+            source_vscroll(sview, (get_src_height()/2) );
+			break;
         case CGDB_KEY_NPAGE:
-        case 'J':
+		case CGDB_KEY_CTRL_F:	/* VI-style page down */
             source_vscroll(sview, get_src_height() - 1);
             break;
         case 'g': /* beggining of file */

@@ -1,3 +1,7 @@
+07/14/2003 Bob Rossi <bob@brasko.net>
+
+	* README: Removed old pgup,pgdn commands. Added vi style pgup,pgdn.
+
 06/25/2003 Bob Rossi <bob_rossi@cox.net>
 
     * Changed version number to 0.3.2-cvs for cvs development
