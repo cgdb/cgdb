@@ -125,7 +125,8 @@ noinst_LIBRARIES = libadt.a
 
 libadt_a_SOURCES = \
 ibuf.c \
-queue.c
+queue.c \
+tgdb_list.c
 
 subdir = various/adt/src
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
@@ -135,13 +136,14 @@ LIBRARIES = $(noinst_LIBRARIES)
 
 libadt_a_AR = $(AR) cru
 libadt_a_LIBADD =
-am_libadt_a_OBJECTS = ibuf.$(OBJEXT) queue.$(OBJEXT)
+am_libadt_a_OBJECTS = ibuf.$(OBJEXT) queue.$(OBJEXT) tgdb_list.$(OBJEXT)
 libadt_a_OBJECTS = $(am_libadt_a_OBJECTS)
 
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
-@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/ibuf.Po ./$(DEPDIR)/queue.Po
+@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/ibuf.Po ./$(DEPDIR)/queue.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/tgdb_list.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
@@ -177,6 +179,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ibuf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/queue.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tgdb_list.Po@am__quote@
 
 distclean-depend:
 	-rm -rf ./$(DEPDIR)

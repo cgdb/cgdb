@@ -4,4 +4,5 @@ noinst_LIBRARIES = libadt.a
 
 libadt_a_SOURCES = \
 ibuf.c \
-queue.c
+queue.c \
+tgdb_list.c

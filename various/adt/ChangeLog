@@ -1,3 +1,8 @@
+09/23/2003 Bob Rossi <bob@brasko.net>
+
+   * tgdb_list.h: Add new doubly linked list interface
+   * tgdb_list.c: Add new doubly linked list implementation
+
 09/17/2003 Bob Rossi <bob@brasko.net>
 
    * queue.h: Removed queue_iterator_init,queue_iterator_free,
