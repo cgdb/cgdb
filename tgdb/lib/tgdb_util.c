@@ -159,6 +159,10 @@ int invoke_debugger(char *path, int argc, char *argv[], int *in, int *out, int c
         err_msg("(%s:%d) fork failed", __FILE__, __LINE__);
         return -1;
     } else if ( pid == 0 ) {    /* child */
+
+        /* If this is not called, when user types ^c SIGINT gets sent to gdb */
+        setsid();
+        
         /* Make the stdout and stderr go to this pipe */
         if ( (dup2(pout[1], STDOUT_FILENO)) == -1) {
             err_msg("(%s:%d) dup failed", __FILE__, __LINE__);

@@ -105,7 +105,7 @@ gdbmi_recv_finish:
    return buf_size;
 }
 
-char *gdbmi_tgdb_send(char *c){
+char *gdbmi_tgdb_send(char *command, int out_type) {
     static char buf[4];
 //    memset(buf, '\0', 4); 
 //    buf[0] = c;

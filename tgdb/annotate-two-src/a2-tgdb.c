@@ -56,12 +56,12 @@ static void signal_catcher(int SIGNAL){
 
    control_c = 1;
 
-   if ( SIGNAL == SIGINT ) {
-      if ( io_write_byte( masterfd, 3) == -1)
-         err_msg("could not write byte: %c", (char) 3);
-
-   } else 
-      err_msg("caught unknown signal: %d", debugger_pid);
+    if ( SIGNAL == SIGINT ) {               /* ^c */
+        kill(debugger_pid, SIGINT);
+    } else if ( SIGNAL == SIGTERM ) {       /* ^\ */
+        kill(debugger_pid, SIGTERM);
+    } else 
+        err_msg("caught unknown signal: %d", debugger_pid);
 }
 
 /* tgdb_setup_signals: Sets up signal handling for the tgdb library.
@@ -76,6 +76,9 @@ static int tgdb_setup_signals(void){
    action.sa_flags = 0;
 
    if(sigaction(SIGINT, &action, NULL) < 0)
+      err_ret("%s:%d -> sigaction failed ", __FILE__, __LINE__);
+
+   if(sigaction(SIGTERM, &action, NULL) < 0)
       err_ret("%s:%d -> sigaction failed ", __FILE__, __LINE__);
 
    return 0;
@@ -147,13 +150,13 @@ static int tgdb_run_users_buffered_commands(char *buf, int *buf_size){
    enum buffer_command_to_run com_to_run = COMMANDS_VOID;
 
    /* Check to see if a ^C has been entered since users last command was run */
-   sigset_t newmask, oldmask, pendmask;
-   sigemptyset(&newmask);
-   sigaddset(&newmask, SIGINT);
+//   sigset_t newmask, oldmask, pendmask;
+//   sigemptyset(&newmask);
+//   sigaddset(&newmask, SIGINT);
 
    /* Block SIGINT and save current signal mask */
-   if(sigprocmask(SIG_BLOCK, &newmask, &oldmask) < 0)
-      err_msg("%s:%d -> SIG_BLOCK error", __FILE__, __LINE__);
+//   if(sigprocmask(SIG_BLOCK, &newmask, &oldmask) < 0)
+//      err_msg("%s:%d -> SIG_BLOCK error", __FILE__, __LINE__);
 
    if(!control_c) { /* only check for data if signal has not been recieved */
       if ( head != NULL ) {
@@ -174,26 +177,26 @@ static int tgdb_run_users_buffered_commands(char *buf, int *buf_size){
       }
    }
 
-   if(sigpending(&pendmask) < 0)
-      err_msg("%s:%d -> sigpending error", __FILE__, __LINE__);
+//   if(sigpending(&pendmask) < 0)
+//      err_msg("%s:%d -> sigpending error", __FILE__, __LINE__);
 
    /* The SIGINT signal has been called since the last command was run,
     * Reset buffer and signal flag.
     */
-   if(sigismember(&pendmask, SIGINT) || control_c){
-      buffer_clear_string();
-      control_c = 0;
-      recv_sig = 1;
-      head = NULL;
-   }
+//   if(sigismember(&pendmask, SIGINT) || control_c){
+//      buffer_clear_string();
+//      control_c = 0;
+//      recv_sig = 1;
+//      head = NULL;
+//   }
 
    /* Reset signal mask which unblocks SIGINT */
-   if(sigprocmask(SIG_SETMASK, &oldmask, NULL) < 0)
-      err_msg("%s:%d -> SIG_BLOCK error", __FILE__, __LINE__);
+//   if(sigprocmask(SIG_SETMASK, &oldmask, NULL) < 0)
+//      err_msg("%s:%d -> SIG_BLOCK error", __FILE__, __LINE__);
 
    /* Recieved a signal, data is not needed */
-   if(recv_sig)
-      return 0;
+//   if(recv_sig)
+//      return 0;
 
    /* A SIGINT has not been recieved yet, continue on as normal 
     * If a SIGINT is recieved between now and when the command is passed to gdb
@@ -231,6 +234,7 @@ static int tgdb_run_users_buffered_commands(char *buf, int *buf_size){
                /* running user command */
                if(io_writen(masterfd, buffered_cmd, length) != length)
                   err_msg("%s:%d -> could not write messge(%s)", __FILE__, __LINE__, buffered_cmd);
+               return commands_run_command(masterfd, buffered_cmd, com_type);
                break;
             default:
                err_msg("%s:%d -> could not run command(%s)", __FILE__, __LINE__, buffered_cmd);
@@ -252,8 +256,7 @@ static int tgdb_run_users_buffered_commands(char *buf, int *buf_size){
  * Returns: TRUE if can issue directly to gdb. Otherwise FALSE.
  */
 static int tgdb_can_issue_command(void) {
-   if ( 
-      tgdb_initialized && 
+   if ( tgdb_initialized && 
       /* The user is at the prompt */
       data_get_state() == USER_AT_PROMPT && 
       /* This line boiles down to:
@@ -320,15 +323,6 @@ static int tgdb_setup_buffer_command_to_run(char *com,
    }
 
    return 0;
-}
-
-int a2_tgdb_run_command(char *com){
-  /* tgdb always requests that breakpoints be checked because of
-   * buggy gdb annotations */
-  tgdb_setup_buffer_command_to_run(com, BUFFER_USER_COMMAND, COMMANDS_SHOW_USER_OUTPUT, COMMANDS_VOID);
-  tgdb_setup_buffer_command_to_run ( NULL, BUFFER_TGDB_COMMAND, COMMANDS_HIDE_OUTPUT, COMMANDS_INFO_BREAKPOINTS );
- 
-  return 0;
 }
 
 int a2_tgdb_get_source_absolute_filename(char *file){
@@ -434,13 +428,11 @@ size_t a2_tgdb_recv(char *buf, size_t n, struct Command ***com){
 }
 
 /* Sends the user typed line to gdb */
-char *a2_tgdb_send(char *line){
+char *a2_tgdb_send(char *command, int out_type) {
    static char buf[MAXLINE];
    
-   /*io_debug_write_fmt("%s", line);*/
-   /* tgdb always requests that breakpoints be checked because of
-    * buggy gdb annotations */
-   tgdb_setup_buffer_command_to_run ( line, BUFFER_USER_COMMAND, COMMANDS_SHOW_USER_OUTPUT, COMMANDS_VOID );
+   /* tgdb always requests breakpoints because of buggy gdb annotations */
+   tgdb_setup_buffer_command_to_run ( command, BUFFER_USER_COMMAND, COMMANDS_SHOW_USER_OUTPUT, COMMANDS_VOID );
    tgdb_setup_buffer_command_to_run ( NULL, BUFFER_TGDB_COMMAND, COMMANDS_HIDE_OUTPUT, COMMANDS_INFO_BREAKPOINTS );
    return buf;   
 }

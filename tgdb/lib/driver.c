@@ -56,10 +56,7 @@ extern int read_history ();
 static void tgdb_send_user_command(char *line) {
     add_history(line);
     fprintf(stderr, "\n");
-    if ( strlen(line) > 0 )
-       tgdb_send(line);
-    else
-       tgdb_send("\n");
+    tgdb_send(line, 1);
 }
 
 static int readline_fd[2] = { -1, -1 }; /* readline write to this */
@@ -142,10 +139,10 @@ static int gdb_input(void) {
     } /* end if */
 
     for(i = 0; i < size; ++i)
-    if(write(STDOUT_FILENO, &(buf[i]), 1) != 1 ){
-       err_msg("%s:%d -> could not write byte\n", __FILE__, __LINE__);
-       return;
-    }
+        if(write(STDOUT_FILENO, &(buf[i]), 1) != 1 ){
+           err_msg("%s:%d -> could not write byte\n", __FILE__, __LINE__);
+           return;
+        }
 
     /*tgdb_traverse_command(stderr, &com);*/
 
@@ -186,16 +183,21 @@ static void stdin_input(int fd) {
     /*tgdb_get_sources();*/
 
     if( ( size = io_read(STDIN_FILENO, &command, MAXLINE)) < 0 ){
-    err_msg("%s:%d -> could not read byte\n", __FILE__, __LINE__);
-    return;
+        err_msg("%s:%d -> could not read byte\n", __FILE__, __LINE__);
+        return;
     } /* end if */
 
     for ( i = 0; i < size; i++ ) {
+        /* If ^d has been recieved, send it right away */
+        if ( command[i] == 4 ){ 
+            tgdb_send_input((char)4);
+            continue;
+        }
+
         if (write(masterfd, &command[i], 1) != 1 ) {
             err_quit("%s:%d write error\n", __FILE__, __LINE__);
             return;
         }
-
     }
 }
 

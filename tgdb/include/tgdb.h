@@ -43,15 +43,19 @@ int tgdb_init(void);
 int (*tgdb_start)(char *debugger, int argc, char **argv, 
                     int *gdb, int *child, int *readline);
 
-/* tgdb_send: Sends a character to the debugger that the user typed.
+/* tgdb_send: Sends a command to the debugger
  *
- *    line     - the user typed command to send
+ *    command  - the user typed command to send
+ *               If line is null, then the '\n' command is assummed.
+ *               The command should not have a '\n' at the end.
+ *    out_type - if 1, the command will be shown before the output.
+ *               if 2, the command will not be shown, just output.
  *
  * RETURNS: NULL on error else a pointer to a NULL-terminated string
- *          that should be displayed by the GUI in the GDB pane.
+ *          that should be displayed to the user.
  *          This string is statically allocated, so do not free it.
  */
-char *(*tgdb_send)(char *line);
+char *(*tgdb_send)(char *command, int out_type);
 
 /* tgdb_send_input: GUI should send every char the user is typing to gdb
  *
@@ -122,11 +126,6 @@ int (*tgdb_new_tty)(void);
  * It returns a string that is at most SLAVE_SIZE characters long.
  */
 char *(*tgdb_tty_name)(void);
-
-/* tgdb_run_command: Runs a command.
- * Returns: 0 on success, otherwise -1.
- */
-int (*tgdb_run_command)(char *com);
 
 /* tgdb_get_sources: Gets a list of source files that make up the program
  * being debugged.

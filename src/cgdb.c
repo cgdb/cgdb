@@ -590,10 +590,7 @@ void cleanup()
 static void tgdb_send_user_command(char *line) {
     add_history(line);
     if_print("\n");
-    if ( strlen(line) > 0 )
-       tgdb_send(line);
-    else
-       tgdb_send("\n");
+    tgdb_send(line, 1);
 }
 
 static int init_readline(void){

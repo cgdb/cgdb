@@ -911,7 +911,7 @@ static void source_input(struct sviewer *sview, int key)
                 sprintf(command, "%s %s:%d", 
                         sview->cur->buf.breakpts[line] ? "clear" : "break",
                         path, line+1);
-                tgdb_run_command(command);
+                tgdb_send(command, 2);
                 free(command);
             }
             break;
@@ -922,13 +922,13 @@ static void source_input(struct sviewer *sview, int key)
     /* Some extended features that are set by :set sc */
     if ( shortcut_option ) {
         switch ( key ) {
-            case 'r': tgdb_run_command("run");      break;
-            case 'n': tgdb_run_command("next");     break;
-            case 's': tgdb_run_command("step");     break;
-            case 'c': tgdb_run_command("continue"); break;
-            case 'f': tgdb_run_command("finish");   break;
-            case 'u': tgdb_run_command("up");       break;
-            case 'd': tgdb_run_command("down");     break;
+            case 'r': tgdb_send("run", 2);      break;
+            case 'n': tgdb_send("next", 2);     break;
+            case 's': tgdb_send("step", 2);     break;
+            case 'c': tgdb_send("continue", 2); break;
+            case 'f': tgdb_send("finish", 2);   break;
+            case 'u': tgdb_send("up", 2);       break;
+            case 'd': tgdb_send("down", 2);     break;
             default:                                break;
         }
     }
@@ -1063,23 +1063,23 @@ int internal_if_input(int key) {
                      return 0;
                 case KEY_F(5):
                     /* Issue GDB run command */
-                    tgdb_run_command("run");
+                    tgdb_send("run", 2);
                     return 0;
                 case KEY_F(6):
                     /* Issue GDB continue command */
-                    tgdb_run_command("continue");
+                    tgdb_send("continue", 2);
                     return 0;
                 case KEY_F(7):
                     /* Issue GDB finish command */
-                    tgdb_run_command("finish");
+                    tgdb_send("finish", 2);
                     return 0;
                 case KEY_F(8):
                     /* Issue GDB next command */
-                    tgdb_run_command("next");
+                    tgdb_send("next", 2);
                     return 0;
                 case KEY_F(10):
                     /* Issue GDB step command */
-                    tgdb_run_command("step");
+                    tgdb_send("step", 2);
                     return 0;
             }
             source_input(src_win, key);

@@ -117,13 +117,13 @@ int command_focus_tty( void )
 
 int command_do_continue( void )
 {
-    tgdb_run_command( "continue" );
+    tgdb_send( "continue", 2 );
     return 0;
 }
 
 int command_do_finish( void )
 {
-    tgdb_run_command( "finish" );
+    tgdb_send( "finish", 2 );
     return 0;
 }
 
@@ -135,7 +135,7 @@ int command_do_help( void )
 
 int command_do_next( void )
 {
-    tgdb_run_command( "next" );
+    tgdb_send( "next", 2 );
     return 0;
 }
 
@@ -157,13 +157,13 @@ int command_do_quit_force( void )
 int command_do_run( void )
 {
     /* FIXME: see if there are any other arguments to pass to the run command */
-    tgdb_run_command( "run" );
+    tgdb_send( "run", 2 );
     return 0;
 }
 
 int command_do_step( void )
 {
-    tgdb_run_command( "step" );
+    tgdb_send( "step", 2 );
     return 0;
 }
 
