@@ -1,7 +1,7 @@
 Steps for releasing a new CGDB version:
 
 1.  Update both ChangeLogs to have the new release date and version.
-    The ChangeLogs live in both cgdb and cgdb/tgdb 
+    The ChangeLogs live in both cgdb, cgdb/tgdb and cgdb/input
     
 2.  Change configure.in file to reflect new version number.
       * Run autoregen.sh
@@ -23,7 +23,9 @@ Steps for releasing a new CGDB version:
     * go to sourceforge.net/projects/cgdb
     * go to admin, then edit/release files
 
-5.  Update website cgdb.sourceforge.net:
+5.  Download and test the new version from sourceforge.
+
+6.  Update website cgdb.sourceforge.net:
     * ssh cgdb.sourceforge.net
     * cd /home/groups/c/cg/cgdb/htdocs
     * Modify download page -> download.shtml
@@ -31,9 +33,9 @@ Steps for releasing a new CGDB version:
       * Changelog link (point to the correct version in CVS)
     * Optionally, put a note in the index.shtml file (News section)
     
-5.  Announce the release on freshmeat
+7.  Announce the release on freshmeat
 
-6.  Announce the release on cgdb-announce@lists.sourceforge.net
+8.  Announce the release on cgdb-announce@lists.sourceforge.net
 
 Subject:  CGDB (version) released
 Text of message:

@@ -107,7 +107,7 @@ static int tty_win_on = 0;              /* Flag: tty window being shown */
 static struct sviewer  *src_win = NULL; /* The source viewer window */
 static WINDOW *status_win = NULL;       /* The status line */
 static WINDOW *tty_status_win = NULL;   /* The tty status line */
-static enum Focus focus = CGDB;         /* Which pane is currently focused */
+static enum Focus focus = GDB;          /* Which pane is currently focused */
 static struct winsize screen_size;      /* Screen size */
 
 struct filedlg *fd;                     /* The file dialog structure */
