@@ -357,7 +357,7 @@ extern "C" {
 	 *  -------
 	 *   0 on success or -1 on error
 	 */
-	int tgdb_get_absolute_path ( const char *file );
+	int tgdb_get_absolute_path ( struct tgdb *tgdb, const char *file );
 
 	/* tgdb_run_debugger_command
 	 * -------------------------
