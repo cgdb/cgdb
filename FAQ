@@ -10,8 +10,8 @@
 
 2. Where can I get cgdb?
 	The cgdb project is hosted on http://sourceforge.net/. You can view the 
-	project by going to http://sourceforge.net/projects/cgdb/. Alternativly, 
-	cgdb's homepage is at http://cgdb.sourceforge.net/.
+	project by going to http://sourceforge.net/projects/cgdb/. Alternatively, 
+	cgdb's home-page is at http://cgdb.sourceforge.net/.
 
 3. What OS does cgdb work on?
 	cgdb is used daily on
@@ -61,3 +61,11 @@
 	If you have problems using any of the keys above, you should modify 
 	the value of escdelay. Please look at the README file for more 
 	information on escdelay.
+
+
+							Section IV Using cgdb
+
+1. How do I automate colon commands using the cgdbrc file?
+	cgdb looks at the file $HOME/.cgdb/cgdbrc. It executes each of the lines
+	in that file in order as if they were typed into the status bar. This is
+	a very useful way of automating commands.
