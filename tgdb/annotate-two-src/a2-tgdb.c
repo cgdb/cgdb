@@ -20,6 +20,7 @@
 #include "tgdb_init.h"
 #include "types.h"
 #include "buffer.h"
+#include "queue.h"
 #include "util.h"
 
 static int tgdb_initialized = 0;
@@ -40,7 +41,7 @@ static char child_tty_name[SLAVE_SIZE];  /* the name of the slave psuedo-termain
 static pid_t debugger_pid;             /* pid of child process */
 
 /*static struct buffer users_commands;   users commands buffered */
-static struct node *head;
+static struct node *head = NULL;
 static sig_atomic_t control_c = 0;              /* If control_c was hit by user */
 
 
@@ -92,7 +93,6 @@ int a2_tgdb_init(char *debugger, int argc, char **argv, int *gdb, int *child, in
    io_debug_init(config_file);
    
    /* initialize users circular buffer */
-   buffer_clear_string();
    head = NULL;
 
    if(( debugger_pid = invoke_debugger(debugger, argc, argv, &masterfd, &gdb_stdout, 0)) == -1 ) {
@@ -149,54 +149,31 @@ static int tgdb_run_users_buffered_commands(char *buf, int *buf_size){
    enum buffer_output_type out_type  = COMMANDS_SHOW_USER_OUTPUT;
    enum buffer_command_to_run com_to_run = COMMANDS_VOID;
 
-   /* Check to see if a ^C has been entered since users last command was run */
-//   sigset_t newmask, oldmask, pendmask;
-//   sigemptyset(&newmask);
-//   sigaddset(&newmask, SIGINT);
-
-   /* Block SIGINT and save current signal mask */
-//   if(sigprocmask(SIG_BLOCK, &newmask, &oldmask) < 0)
-//      err_msg("%s:%d -> SIG_BLOCK error", __FILE__, __LINE__);
+   /* TODO: Put signal blocking code here so that ^c is not pressed while 
+    * checking for it */
 
    if(!control_c) { /* only check for data if signal has not been recieved */
-      if ( head != NULL ) {
-         if ( ( (struct command *) head->data)->data != NULL ) 
-            strcpy(buffered_cmd, ((struct command *)head->data)->data);
+      if ( queue_size(head) > 0 ) {
+          struct command *item; 
+
+          head = queue_pop(head, (void **)&item);
+
+         if ( item->data != NULL ) 
+            strcpy(buffered_cmd, item->data);
          else
             buffered_cmd[0] = 0;
 
-         com_type = ((struct command *) head->data)->com_type;
-         out_type = ((struct command *) head->data)->out_type;
-         com_to_run = ((struct command *) head->data)->com_to_run;
+         com_type   = item->com_type;
+         out_type   = item->out_type;
+         com_to_run = item->com_to_run;
 
-         head = buffer_remove_and_increment ( head, buffer_free_command );
+         buffer_free_command(item);
          buf_ret_val = 1;
 
       } else {
           return -2;
       }
    }
-
-//   if(sigpending(&pendmask) < 0)
-//      err_msg("%s:%d -> sigpending error", __FILE__, __LINE__);
-
-   /* The SIGINT signal has been called since the last command was run,
-    * Reset buffer and signal flag.
-    */
-//   if(sigismember(&pendmask, SIGINT) || control_c){
-//      buffer_clear_string();
-//      control_c = 0;
-//      recv_sig = 1;
-//      head = NULL;
-//   }
-
-   /* Reset signal mask which unblocks SIGINT */
-//   if(sigprocmask(SIG_SETMASK, &oldmask, NULL) < 0)
-//      err_msg("%s:%d -> SIG_BLOCK error", __FILE__, __LINE__);
-
-   /* Recieved a signal, data is not needed */
-//   if(recv_sig)
-//      return 0;
 
    /* A SIGINT has not been recieved yet, continue on as normal 
     * If a SIGINT is recieved between now and when the command is passed to gdb
@@ -262,8 +239,7 @@ static int tgdb_can_issue_command(void) {
       /* This line boiles down to:
        * If the buffered list is empty or the user is at the misc prompt 
        */
-      ( (head == NULL && buffer_is_empty()== TRUE) || 
-         global_can_issue_command() == FALSE))
+      ( queue_size(head) == 0 || global_can_issue_command() == FALSE))
       return TRUE;
    else 
       return FALSE;
@@ -319,7 +295,7 @@ static int tgdb_setup_buffer_command_to_run(char *com,
       command->out_type   = out_type;
       command->com_to_run = com_to_run;
       
-      head = buffer_write_command_and_append( head, command );
+      head = queue_append( head, command );
    }
 
    return 0;
@@ -446,26 +422,26 @@ int a2_tgdb_send_input(char c) {
           return -1;
        }
     } else {
-    /* At this point, tgdb is busy, and has more output to display before
-     * this data, lets save the command. to be displayed.
-     *
-     * Start buffering the data to show it later, either
-     * 1. Will show a unfinished chunk of data
-     *      This happens when the user types data, but not a full command, 
-     *      and then gdb finishes what it is doing. This unfinished
-     *      command must be returned.
-     *
-     * 2. Will display the completed command before data is processed.
-     *      This happens when the user typed a whole command ( and '\n' )
-     *      while gdb was busy.
-     */
-     user_cur_command[user_cur_command_pos++] = c;
-     
-     if ( c == '\n' || c == '\r') {
-         user_cur_command_pos = 0;
-         user_cur_command[0] = '\0';
+        /* At this point, tgdb is busy, and has more output to display before
+         * this data, lets save the command. to be displayed.
+         *
+         * Start buffering the data to show it later, either
+         * 1. Will show a unfinished chunk of data
+         *      This happens when the user types data, but not a full command, 
+         *      and then gdb finishes what it is doing. This unfinished
+         *      command must be returned.
+         *
+         * 2. Will display the completed command before data is processed.
+         *      This happens when the user typed a whole command ( and '\n' )
+         *      while gdb was busy.
+         */
+         user_cur_command[user_cur_command_pos++] = c;
+         
+         if ( c == '\n' || c == '\r') {
+             user_cur_command_pos = 0;
+             user_cur_command[0] = '\0';
 
-     }
+         }
     }
 
     return 0;

@@ -17,134 +17,58 @@ void buffer_free_command( void *item ) {
    com = NULL;
 }
 
-struct node *buffer_append(struct node *head, struct node *new_node) {
-   struct node *prev = NULL;
-   struct node *cur = head;
-
-   if ( cur == NULL ) {
-      cur = new_node;
-      cur->next = NULL;
-      return cur;
-   }
-
-   while ( cur != NULL ) {
-      prev = cur;
-      cur = cur -> next;
-   }
-
-   cur = new_node;
-   prev->next = cur;
-
-   return head;
-}
-
-struct node *buffer_remove_and_increment(struct node *head, buffer_free_func func) {
-   struct node *prev = NULL;
-   struct node *cur = head;
-   
-   if ( cur == NULL ) 
-      return NULL;
-
-   if ( cur -> next != NULL ) {
-      prev = cur;
-      cur = cur -> next;
-      func ( prev->data );
-      free ( prev );
-      prev = NULL;
-      return cur;
-   } else {
-      free ( cur );
-      cur = NULL;
-      return NULL;
-   }
-}
-
-void buffer_free_list(struct node *item, buffer_free_func func) {
-   struct node *prev, *cur = item;
-   
-   if ( cur == NULL )
-      return;
-
-   while ( cur != NULL ) {
-      prev = cur;
-      cur = cur->next;
-      func ( prev->data );
-      free ( prev );
-      prev = NULL; 
-   }
-
-   func ( cur->data );
-   free ( cur );
-   prev = NULL; 
-}
-
-int buffer_size(struct node *head) {
-   struct node *cur = head;
-   int size = 0;
-
-   if ( cur == NULL )
-      return -1;
-
-   while ( cur != NULL ) {
-      cur = cur -> next;
-      size += 1; 
-   }
-
-   return size;
-}
-
-struct node *buffer_write_command_and_append ( struct node *n, struct command *com ) {
-   struct node *new_node = ( struct node * ) xmalloc ( sizeof ( struct node ) );
-
-   if ( new_node == NULL )
-      return NULL;;
-
-   new_node->data = ( void * ) com;
-   new_node->next = NULL;
-
-   return buffer_append ( n, new_node );
-}
-
-static char user_command[MAXLINE];
-static int user_command_length = 0;
-
-int buffer_is_empty(void) {
-   if ( user_command_length == 0 )
-      return TRUE;
-   else
-      return FALSE;
-}
-
-struct node *buffer_write_line ( struct node *com, const char *c ) {
-
-  struct node *temp = NULL;
-  struct command *ncom = ( struct command *) xmalloc (sizeof(struct command));
-  int length = strlen(c);
-  ncom->data = xmalloc ( sizeof( char) * ( length + 1) );
-  strncpy ( ncom->data, c, length + 1);
-  ncom->com_type = BUFFER_USER_COMMAND;
-  ncom->out_type = COMMANDS_SHOW_USER_OUTPUT;
-  ncom->com_to_run  = COMMANDS_VOID;
-  temp = buffer_write_command_and_append( com,  ncom);
-
-  return temp;
-}
-
-void buffer_clear_string ( void ) {
-   memset ( user_command, '\0', MAXLINE );
-   user_command_length = 0;
-}
-
 void buffer_print ( struct node *head ) {
-   struct node *cur = head;
-   struct command *com;
+    struct node *cur = head;
+    struct command *com;
 
-   while ( cur != NULL ) {
-      com = (struct command *) cur->data;
-      err_msg("DATA(%s), BUF_COM_TYPE(%d), BUF_OUTPUT_TYPE(%d), COM_TO_RUN(%d)\n", 
-               com->data, com->com_type, com->out_type, com->com_to_run);
-      cur = cur->next;
-   }
+    fprintf(stderr, "BUFFER_SIZE(%d)\n", queue_size(head));
+    while ( cur != NULL ) {
+        com = (struct command *) cur->data;
+        fprintf(stderr, "ITEM:\n");
+        fprintf(stderr, "\tDATA(%s)\n", com->data);
 
-   err_msg("NULL\n");
+        switch(com->com_type) {
+            case BUFFER_VOID:
+                fprintf(stderr, "\tBUF_TYPE: BUFFER_VOID\n");           break;
+            case BUFFER_GUI_COMMAND:
+                fprintf(stderr, "\tBUF_TYPE: BUFFER_GUI_COMMAND\n");    break;
+            case BUFFER_TGDB_COMMAND:
+                fprintf(stderr, "\tBUF_TYPE: BUFFER_TGDB_COMMAND\n");   break;
+            case BUFFER_USER_COMMAND:
+                fprintf(stderr, "\tBUF_TYPE: BUFFER_USER_COMMAND\n");   break;
+            default:
+                fprintf(stderr, "\tBUF_TYPE: ERROR\n");                 break;
+        }
+
+        switch(com->out_type) {
+            case COMMANDS_SHOW_USER_OUTPUT:
+                fprintf(stderr, "\tOUT_TYPE: COMMANDS_SHOW_USER_OUTPUT\n"); break;
+            case COMMANDS_HIDE_OUTPUT:
+                fprintf(stderr, "\tOUT_TYPE: COMMANDS_HIDE_OUTPUT\n");      break;
+            default:
+                fprintf(stderr, "\tOUT_TYPE: ERROR\n");                     break;
+        }
+
+        switch(com->com_to_run) {
+            case COMMANDS_INFO_SOURCES:
+                fprintf(stderr, "\tCOM_TYPE: COMMANDS_INFO_SOURCES\n");             break;
+            case COMMANDS_INFO_LIST:
+                fprintf(stderr, "\tCOM_TYPE: COMMANDS_INFO_LIST\n");                break;
+            case COMMANDS_INFO_SOURCE:
+                fprintf(stderr, "\tCOM_TYPE: COMMANDS_INFO_SOURCE\n");              break;
+            case COMMANDS_INFO_BREAKPOINTS:
+                fprintf(stderr, "\tCOM_TYPE: COMMANDS_INFO_BREAKPOINTS\n");         break;
+            case COMMANDS_TTY:
+                fprintf(stderr, "\tCOM_TYPE: COMMANDS_INFO_TTY\n");                 break;
+            case COMMANDS_VOID:
+                fprintf(stderr, "\tCOM_TYPE: COMMANDS_INFO_VOID\n");                break;
+
+            default:
+                fprintf(stderr, "\tCOM_TYPE: ERROR\n");                             break;
+        }
+
+        cur = cur->next;
+    }
+
+    fprintf(stderr, "NULL\n");
 }

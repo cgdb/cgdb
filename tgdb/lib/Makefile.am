@@ -13,6 +13,7 @@ $(tgdb_srcdir)/lib/pseudo.c \
 $(tgdb_srcdir)/lib/error.c \
 $(tgdb_srcdir)/lib/util.c \
 $(tgdb_srcdir)/lib/io.c \
+$(tgdb_srcdir)/lib/queue.c \
 $(tgdb_srcdir)/annotate-two-src/a2-tgdb.c \
 $(tgdb_srcdir)/annotate-two-src/annotate.c \
 $(tgdb_srcdir)/annotate-two-src/state_machine.c \

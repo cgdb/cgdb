@@ -135,6 +135,7 @@ $(tgdb_srcdir)/lib/pseudo.c \
 $(tgdb_srcdir)/lib/error.c \
 $(tgdb_srcdir)/lib/util.c \
 $(tgdb_srcdir)/lib/io.c \
+$(tgdb_srcdir)/lib/queue.c \
 $(tgdb_srcdir)/annotate-two-src/a2-tgdb.c \
 $(tgdb_srcdir)/annotate-two-src/annotate.c \
 $(tgdb_srcdir)/annotate-two-src/state_machine.c \
@@ -164,10 +165,11 @@ libtgdb_a_AR = $(AR) cru
 libtgdb_a_LIBADD =
 am_libtgdb_a_OBJECTS = tgdb.$(OBJEXT) tgdb_util.$(OBJEXT) \
 	types.$(OBJEXT) pseudo.$(OBJEXT) error.$(OBJEXT) util.$(OBJEXT) \
-	io.$(OBJEXT) a2-tgdb.$(OBJEXT) annotate.$(OBJEXT) \
-	state_machine.$(OBJEXT) data.$(OBJEXT) terminal.$(OBJEXT) \
-	commands.$(OBJEXT) globals.$(OBJEXT) tgdb_init.$(OBJEXT) \
-	buffer.$(OBJEXT) gdbmi_tgdb.$(OBJEXT) gdbmi_parse.$(OBJEXT)
+	io.$(OBJEXT) queue.$(OBJEXT) a2-tgdb.$(OBJEXT) \
+	annotate.$(OBJEXT) state_machine.$(OBJEXT) data.$(OBJEXT) \
+	terminal.$(OBJEXT) commands.$(OBJEXT) globals.$(OBJEXT) \
+	tgdb_init.$(OBJEXT) buffer.$(OBJEXT) gdbmi_tgdb.$(OBJEXT) \
+	gdbmi_parse.$(OBJEXT)
 libtgdb_a_OBJECTS = $(am_libtgdb_a_OBJECTS)
 EXTRA_PROGRAMS = driver$(EXEEXT)
 bin_PROGRAMS = @BUILD_DRIVER@
@@ -185,7 +187,7 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/error.Po ./$(DEPDIR)/gdbmi_parse.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/gdbmi_tgdb.Po ./$(DEPDIR)/globals.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/io.Po ./$(DEPDIR)/pseudo.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/state_machine.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/queue.Po ./$(DEPDIR)/state_machine.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/terminal.Po ./$(DEPDIR)/tgdb.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/tgdb_init.Po ./$(DEPDIR)/tgdb_util.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/types.Po ./$(DEPDIR)/util.Po
@@ -218,6 +220,7 @@ pseudo.$(OBJEXT): $(tgdb_srcdir)/lib/pseudo.c
 error.$(OBJEXT): $(tgdb_srcdir)/lib/error.c
 util.$(OBJEXT): $(tgdb_srcdir)/lib/util.c
 io.$(OBJEXT): $(tgdb_srcdir)/lib/io.c
+queue.$(OBJEXT): $(tgdb_srcdir)/lib/queue.c
 a2-tgdb.$(OBJEXT): $(tgdb_srcdir)/annotate-two-src/a2-tgdb.c
 annotate.$(OBJEXT): $(tgdb_srcdir)/annotate-two-src/annotate.c
 state_machine.$(OBJEXT): $(tgdb_srcdir)/annotate-two-src/state_machine.c
@@ -279,6 +282,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/globals.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pseudo.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/queue.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/state_machine.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/terminal.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tgdb.Po@am__quote@
@@ -465,6 +469,28 @@ io.obj: $(tgdb_srcdir)/lib/io.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/io.Po' tmpdepfile='$(DEPDIR)/io.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o io.obj `if test -f '$(tgdb_srcdir)/lib/io.c'; then $(CYGPATH_W) '$(tgdb_srcdir)/lib/io.c'; else $(CYGPATH_W) '$(srcdir)/$(tgdb_srcdir)/lib/io.c'`
+
+queue.o: $(tgdb_srcdir)/lib/queue.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT queue.o -MD -MP -MF "$(DEPDIR)/queue.Tpo" \
+@am__fastdepCC_TRUE@	  -c -o queue.o `test -f '$(tgdb_srcdir)/lib/queue.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/lib/queue.c; \
+@am__fastdepCC_TRUE@	then mv "$(DEPDIR)/queue.Tpo" "$(DEPDIR)/queue.Po"; \
+@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/queue.Tpo"; exit 1; \
+@am__fastdepCC_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(tgdb_srcdir)/lib/queue.c' object='queue.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/queue.Po' tmpdepfile='$(DEPDIR)/queue.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o queue.o `test -f '$(tgdb_srcdir)/lib/queue.c' || echo '$(srcdir)/'`$(tgdb_srcdir)/lib/queue.c
+
+queue.obj: $(tgdb_srcdir)/lib/queue.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT queue.obj -MD -MP -MF "$(DEPDIR)/queue.Tpo" \
+@am__fastdepCC_TRUE@	  -c -o queue.obj `if test -f '$(tgdb_srcdir)/lib/queue.c'; then $(CYGPATH_W) '$(tgdb_srcdir)/lib/queue.c'; else $(CYGPATH_W) '$(srcdir)/$(tgdb_srcdir)/lib/queue.c'`; \
+@am__fastdepCC_TRUE@	then mv "$(DEPDIR)/queue.Tpo" "$(DEPDIR)/queue.Po"; \
+@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/queue.Tpo"; exit 1; \
+@am__fastdepCC_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(tgdb_srcdir)/lib/queue.c' object='queue.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/queue.Po' tmpdepfile='$(DEPDIR)/queue.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o queue.obj `if test -f '$(tgdb_srcdir)/lib/queue.c'; then $(CYGPATH_W) '$(tgdb_srcdir)/lib/queue.c'; else $(CYGPATH_W) '$(srcdir)/$(tgdb_srcdir)/lib/queue.c'`
 
 a2-tgdb.o: $(tgdb_srcdir)/annotate-two-src/a2-tgdb.c
 @am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT a2-tgdb.o -MD -MP -MF "$(DEPDIR)/a2-tgdb.Tpo" \

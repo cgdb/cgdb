@@ -1,3 +1,8 @@
+03/03/2003 Bob Rossi <bob_rossi@cox.net>
+
+   * Added a queue unit to the project: It will contain all of the commands
+   ready to go to gdb.
+
 03/02/2003 Bob Rossi <bob_rossi@cox.net>
 
    * readline buffer commands working
