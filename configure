@@ -4026,10 +4026,10 @@ done
   fi
 
     if test $have_readline = no; then
-        { { echo "$as_me:$LINENO: error:  *****************************************************
+        { { echo "$as_me:$LINENO: error:    *****************************************************
                      cgdb requires a readline compatible library to link!
                      *****************************************************" >&5
-echo "$as_me: error:  *****************************************************
+echo "$as_me: error:    *****************************************************
                      cgdb requires a readline compatible library to link!
                      *****************************************************" >&2;}
    { (exit 1); exit 1; }; }
