@@ -1,3 +1,8 @@
+Bug fixes for cgdb-0.5.1
+
+- Fix race condition on waitpid
+- Fix --args command line option
+
 Bug fixes before cgdb-0.3.2 release.
 
 Bugs:

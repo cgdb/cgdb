@@ -1,5 +1,9 @@
 03/31/2005 Bob Rossi <bob@brasko.net>
 
+	* cgdb.c (version_info): Update copyright
+
+03/31/2005 Bob Rossi <bob@brasko.net>
+
     * helptext.h: Updated the README file.
 	* sources.c (auto_source_reload): Change default to be off.
 
