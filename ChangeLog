@@ -2,6 +2,7 @@
 
     * Fixed interface between cgdb and tgdb: cgdb gets the prompt from 
     tgdb now instead of guessing its '(gdb) '
+    * Fixed readline include problem. stdio.h must be included first
 
 02/23/2003 Bob Rossi <bob_rossi@cox.net>
 
