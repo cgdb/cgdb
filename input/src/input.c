@@ -1,9 +1,13 @@
+#include "config.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <curses.h>
 #include <term.h>
 #include <string.h>
 #include <sys/types.h>
+#include <sys/select.h>
+#include <sys/time.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
@@ -297,6 +301,29 @@ int input_read(int fd, int block) {
     int ret;
     int flag;
 
+#if defined(HAVE_SELECT)
+    fd_set readfds, exceptfds;
+    struct timeval timeout;
+#endif
+
+#if defined(HAVE_SELECT)
+    FD_ZERO(&readfds);
+    FD_ZERO (&exceptfds);
+    FD_SET (fd, &readfds);
+    FD_SET (fd, &exceptfds);
+    
+    /* Only do select if we are blocking */
+    if ( !block ) {
+        timeout.tv_sec = 0;
+        timeout.tv_usec = 100000;   /* 0.1 seconds; it's in usec */
+
+        ret = select (fd + 1, &readfds, (fd_set *)NULL, &exceptfds, &timeout);
+
+        if (ret <= 0)
+            return 0;   /* Nothing to read. */
+    }
+#endif
+
     /* Set nonblocking */
     if ( !block ) {
         flag = fcntl(fd, F_GETFL, 0);
@@ -342,8 +369,9 @@ static int input_get_seq(struct input *input) {
     int i, j = 0; 
     int possible[list_size];
     int c;
+    int still_possible;
 
-    if ( (c = input_read(input->stdinfd, 0)) == -1 )
+    if ( (c = input_read(input->stdinfd, 0)) == 0 )
         return -2;   /* No data ready (Got esc key) */
 
     /* Initalize all possible esq sequences to be a possible match */
@@ -351,6 +379,7 @@ static int input_get_seq(struct input *input) {
         possible[i] = 1;
 
     do {
+        still_possible = 0;
         input->bad_esc_seq[j++] = c;
         for ( i = 0; i < list_size; i++) { /* for each mapping */
             if ( possible[i] && list[i].sequence[j] == c ) {
@@ -359,10 +388,20 @@ static int input_get_seq(struct input *input) {
                     input->last_entry = &list[i];
                     return input->last_entry->macro;
                 }
+                still_possible = 1;
             } else
                 possible[i] = 0;
         }
-    } while ( (c = input_read(0, 0)) != -1 ); /* No data ready and no match ( return everything ) */
+
+        if ( !still_possible )
+            break;
+
+        c = input_read(input->stdinfd, 0);
+
+        /* Bad escape sequence */
+        if ( c == 0 )
+            break;
+    } while ( c != -1 ); /* No data ready and no match ( return everything ) */
     
     /* Assertion: The sequence did not match anything of interest */
     input->bad_esc_seq_size = j - 1;
@@ -401,7 +440,7 @@ static int input_getch(struct input *i) {
             return -1;
         else if ( result == -2 )
             return c;  /* Found only the esc key */
-        else if ( result > 0 )
+        else if ( result > 0 && i->bad_esc_seq_counter == -1)
             return i->last_entry->macro;
     }
     
