@@ -114,7 +114,7 @@ static int handle_error_begin(const char *buf, size_t n, struct queue *q){
     * annotate error ( usually meaning that gdb can not find the symbols
     * for the debugged program ) then send a denied response. */
    if ( commands_get_state() == INFO_SOURCES ) {
-        tgdb_append_command(q, SOURCES_DENIED, NULL, NULL, NULL);
+        tgdb_append_command(q, TGDB_SOURCES_DENIED, NULL );
         return 0;
    }
 

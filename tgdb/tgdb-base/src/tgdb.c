@@ -191,13 +191,12 @@ size_t tgdb_recv(char *buf, size_t n, struct queue *q){
     /* 1. read all the data possible from gdb that is ready. */
     if( (size = io_read(debugger_stdout, local_buf, n)) < 0){
         err_ret("%s:%d -> could not read from masterfd", __FILE__, __LINE__);
-        tgdb_append_command(q, QUIT, NULL, NULL, NULL);
+        tgdb_append_command(q, TGDB_QUIT, NULL );
         return -1;
     } else if ( size == 0 ) {/* EOF */ 
         buf_size = 0;
       
-        if(tgdb_append_command(q, QUIT, NULL, NULL, NULL) == -1)
-            err_msg("%s:%d -> Could not send command", __FILE__, __LINE__);
+        tgdb_append_command(q, TGDB_QUIT, NULL );
       
         goto tgdb_finish;
     }

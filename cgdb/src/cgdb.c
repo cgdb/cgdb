@@ -67,6 +67,7 @@
 #include "tgdb.h"
 #include "helptext.h"
 #include "queue.h"
+#include "ibuf.h"
 #include "input.h"
 #include "fs_util.h"
 
@@ -292,97 +293,126 @@ static int user_input(void) {
 
 static void process_commands(struct queue *q)
 {
-    static char filename[PATH_MAX];
-    static int line_num;
-    static int updating_breakpts = 0;
-    char *com;
     struct Command *item;
 
     while ( queue_size(q) > 0 ) {
         item = queue_pop(q);
-        com = item->data;
+        
         switch (item -> header){
-            case BREAKPOINTS_BEGIN:
-                if (!updating_breakpts){
-                    updating_breakpts = 1;
-                    source_clear_breaks(if_get_sview());
-                }
-                break;
-                
-            case BREAKPOINTS_END:
-                updating_breakpts = 0;
-                if_show_file(NULL, 0);
-                break;
-                
-            case BREAKPOINT:
+            /* This updates all the breakpoints */
+            case TGDB_UPDATE_BREAKPOINTS:
             {
                 struct sviewer *sview = if_get_sview();
-                char *file = malloc(strlen(com)+1);
+                char *file; 
                 char enabled;
                 int line;
-                sscanf(com, "%s %c %d %s", 
-                      file, &enabled, &line, file);
-                if (enabled == 'y')
-                    source_enable_break(sview, file, line);
-                else
-                    source_disable_break(sview, file, line);
+                struct queue *q = (struct queue *) item->data;
+                struct string *s;
+
+                source_clear_breaks(if_get_sview());
+
+                while ( queue_size ( q ) > 0 ) {
+                    s = queue_pop( q );
+                    file = malloc(strlen(string_get ( s ))+1);
+
+                    sscanf(string_get ( s ), "%s %c %d %s", file, &enabled, &line, file);
+                    if (enabled == 'y')
+                        source_enable_break(sview, file, line);
+                    else
+                        source_disable_break(sview, file, line);
+
+                    string_free ( s );
+                    s = NULL;
+                }
+
+                if_show_file(NULL, 0);
+                break;
+            }
+
+            /* This means a source file or line number changed */
+            case TGDB_UPDATE_FILE_POSITION:
+            {
+                struct queue *q = ( struct queue * ) item->data;
+                struct string *absolute_name;
+                struct string *relative_name;
+                struct string *line_number;
+
+                absolute_name = queue_pop ( q );
+                relative_name = queue_pop ( q );
+                line_number   = queue_pop ( q );
+
+                if_show_file ( 
+                    string_get (absolute_name), 
+                    atoi ( string_get (line_number)));
+
+                source_set_relative_path ( 
+                    if_get_sview(), 
+                    string_get ( absolute_name ), 
+                    string_get ( relative_name ) );
+
+                string_clear ( absolute_name );
+                string_clear ( relative_name );
+                string_clear ( line_number );
                 break;
             }
                 
-            /* Show a particular file */
-            case SOURCE_FILE_UPDATE:
-                strncpy(filename, com, PATH_MAX-1);
-                filename[PATH_MAX-1] = 0; 
-                break;
+            /* This is a list of all the source files */
+            case TGDB_UPDATE_SOURCE_FILES:
+            {
+                struct queue *q = (struct queue *) item->data;
+                char *s;
 
-            /* Jump to line number */
-            case LINE_NUMBER_UPDATE:
-                line_num = atoi(com);
-                break;
-
-            case CURRENT_FILE_UPDATE:
-                if_show_file(filename, line_num);
-                source_set_relative_path(if_get_sview(), filename, com);
-                break;
-                
-            /* Clearing the list of choices the user had last */
-            case SOURCES_START:
                 if_clear_filedlg();
-                break;
 
-            /* Send the file the user picked to get the absolute path */
-            case SOURCES_END:
+                while ( queue_size ( q ) > 0 ) {
+                    s = queue_pop( q );
+
+                    if_add_filedlg_choice( s );
+
+                    free ( s );
+                    s = NULL;
+                }
+
                 if_set_focus(FILE_DLG);
                 break;
-
+            }
+                
             /* The user is trying to get a list of source files that make up
              * the debugged program but libtgdb is claiming that gdb knows
              * none. */
-            case SOURCES_DENIED:
+            case TGDB_SOURCES_DENIED:
                 if_display_message("Error:", 0,  
                        " No sources available! Was program compiled with debug?");
                 break;
 
-            /* Add the file to the user's choice */
-            case SOURCE_FILE:
-                if_add_filedlg_choice(com);
-                break;
-
             /* This is the absolute path to the last file the user requested */
-            case ABSOLUTE_SOURCE_ACCEPTED:
-                if_show_file(com, 1);
-                source_set_relative_path(if_get_sview(), com, last_relative_file);
+            case TGDB_ABSOLUTE_SOURCE_ACCEPTED:
+             {
+                struct string *s = ( struct string *)item->data;
+                char *file = string_get ( s );
+                if_show_file( file, 1);
+                source_set_relative_path(if_get_sview(), file, last_relative_file);
+                string_free ( s );
+                s = NULL;
                 break;
+             }
 
             /* The source file requested does not exist */
-            case ABSOLUTE_SOURCE_DENIED:
+            case TGDB_ABSOLUTE_SOURCE_DENIED:
+             {
+                struct string *s = ( struct string *)item->data;
+                char *file = string_get ( s );
                 if_show_file(NULL, 0 );
                 /* com can be NULL when tgdb orig requests main file */
-                if ( com[0] )
-                    if_display_message("No such file:", 0, " %s", com);
-                break;
+                if ( file[0] )
+                    if_display_message("No such file:", 0, " %s", file);
 
-            case QUIT:
+                string_free ( s );
+                s = NULL;
+                break;
+             }
+
+            case TGDB_QUIT:
                 cleanup();            
                 exit(0);
                 break;

@@ -17,9 +17,9 @@
 #include "error.h"
 #include "io.h"
 
-static int gdb_stdin = 0;   /* Writing to this writes to gdb's stdin */
+//static int gdb_stdin = 0;   /* Writing to this writes to gdb's stdin */
 static int gdb_stdout = 0;  /* Reading from this read's from gdb's stdout && stderr */
-static pid_t gdb_pid = 0;
+//static pid_t gdb_pid = 0;
 
 static int master_tty_fd = -1, slave_tty_fd = -1;
 static char child_tty_name[SLAVE_SIZE];  /* the name of the slave psuedo-termainl */
@@ -76,13 +76,12 @@ size_t gdbmi_tgdb_recv(char *buf, size_t n, struct queue *q){
    /* 1. read all the data possible from gdb that is ready. */
    if( (size = io_read(gdb_stdout, local_buf, n)) < 0){
       err_ret("%s:%d io_read error", __FILE__, __LINE__);
-      tgdb_append_command(q, QUIT, NULL, NULL, NULL);
+      tgdb_append_command(q, TGDB_QUIT, NULL );
       return -1;
    } else if ( size == 0 ) {/* EOF */ 
       buf_size = 0;
       
-      if(tgdb_append_command(q, QUIT, NULL, NULL, NULL) == -1)
-         err_msg("%s:%d tgdb_append_command error", __FILE__, __LINE__);
+      tgdb_append_command(q, TGDB_QUIT, NULL);
       
       goto gdbmi_recv_finish;
    }

@@ -57,6 +57,13 @@ void string_addchar(struct string *s, char c) {
     s->buf[(s->cur_buf_pos)] = '\0';
 }
 
+void string_add ( struct string *s, const char *d ) {
+    int length = strlen ( d ), i;
+
+    for ( i = 0; i < length; i++ )
+        string_addchar ( s, d[i] );
+}
+
 void string_delchar(struct string *s) {
     if ( !s )
         return; 

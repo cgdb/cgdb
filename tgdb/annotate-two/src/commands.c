@@ -23,12 +23,15 @@
 #include "a2-tgdb.h"
 #include "rlctx.h"
 
-extern int masterfd;
+static struct string *absolute_path;
+static struct string *line_number;
+
 
 static enum COMMAND_STATE cur_command_state = VOID_COMMAND;
 static int cur_field_num = 0;
 
 /* breakpoint information */
+struct queue *breakpoint_queue;
 struct string *breakpoint_string;
 static int breakpoint_table = 0;
 static int breakpoint_enabled = FALSE;
@@ -59,13 +62,16 @@ static void commands_prepare_info_source(enum COMMAND_STATE state);
  * tab complete. It should be blasted each time the completion
  * is run, populated, and then parsed.
  */
-static struct queue *tab_completion_entries = NULL;
+//static struct queue *tab_completion_entries = NULL;
 static char last_tab_completion_command[MAXLINE];
 
 void commands_init(void) {
+    absolute_path       = string_init();
+    line_number         = string_init();
     info_source_string  = string_init();
     info_sources_string = string_init();
     breakpoint_string   = string_init();
+    breakpoint_queue    = queue_init();
     source_files        = queue_init();
 }
 
@@ -99,13 +105,17 @@ int commands_parse_source(const char *buf, size_t n, struct queue *q){
     if(sscanf(copy, "source %s", file) != 1)
         err_msg("%s:%d -> Could not get file name", __FILE__, __LINE__);
    
-    if(tgdb_append_command(q, SOURCE_FILE_UPDATE, file, NULL, NULL) == -1)
-        err_msg("%s:%d -> Could not send command", __FILE__, __LINE__);
+//    if(tgdb_append_command(q, SOURCE_FILE_UPDATE, file, NULL, NULL) == -1)
+//        err_msg("%s:%d -> Could not send command", __FILE__, __LINE__);
+//
+//    if(tgdb_append_command(q, LINE_NUMBER_UPDATE, line, NULL, NULL) == -1)
+//        err_msg("%s:%d -> Could not send command", __FILE__, __LINE__);
+    string_clear( absolute_path );
+    string_add ( absolute_path, file );
+    string_clear( line_number );
+    string_add ( line_number, line );
 
-    if(tgdb_append_command(q, LINE_NUMBER_UPDATE, line, NULL, NULL) == -1)
-        err_msg("%s:%d -> Could not send command", __FILE__, __LINE__);
-
-    /* set up the info_source command */
+    /* set up the info_source command to get the relative path */
     if ( commands_issue_command ( ANNOTATE_INFO_SOURCE_RELATIVE, NULL, 1 ) == -1 ) {
         err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
         return -1;
@@ -120,6 +130,7 @@ static void parse_breakpoint(struct queue *q){
     char *cur = copy + size, *fcur;
     char fname[MAXLINE + 2], file[MAXLINE], line[MAXLINE];
     static char *info_ptr; 
+    struct string *s;
 
     memset(fname, '\0', MAXLINE + 2);
     memset(file, '\0', MAXLINE);
@@ -156,8 +167,18 @@ static void parse_breakpoint(struct queue *q){
     else
         strcat(fname, " n");
 
-    if(tgdb_append_command(q, BREAKPOINT, fname, line, file) == -1)
-        err_msg("%s:%d -> Could not send command", __FILE__, __LINE__);
+    s = string_init ();
+
+    string_add ( s, fname );
+    string_add ( s, " " );
+    string_add ( s, line );
+    string_add ( s, " " );
+    string_add ( s, file );
+
+    queue_append ( breakpoint_queue, s );
+
+//    if(tgdb_append_command(q, BREAKPOINT, ) == -1)
+//        err_msg("%s:%d -> Could not send command", __FILE__, __LINE__);
 }
 
 
@@ -176,19 +197,24 @@ void commands_set_state(enum COMMAND_STATE state, struct queue *q){
             if(string_length(breakpoint_string) > 0)
                 parse_breakpoint(q);
 
-            if(tgdb_append_command(q, BREAKPOINTS_END, NULL, NULL, NULL) == -1)
-                err_msg("%s:%d -> Could not send command", __FILE__, __LINE__);
+//            if(tgdb_append_command(q, BREAKPOINTS_END, NULL, NULL, NULL) == -1)
+//                err_msg("%s:%d -> Could not send command", __FILE__, __LINE__);
+
+            /* At this point, annotate needs to send the breakpoints to the gui.
+             * All of the valid breakpoints are stored in breakpoint_queue. */
+            tgdb_append_command ( q, TGDB_UPDATE_BREAKPOINTS, breakpoint_queue );
 
             string_clear(breakpoint_string);
             breakpoint_enabled = FALSE;
 
-            if(breakpoint_started == FALSE){
-                if(tgdb_append_command(q, BREAKPOINTS_BEGIN, NULL, NULL, NULL) == -1)
-                    err_msg("%s:%d -> Could not send command", __FILE__, __LINE__);
-            
-                if(tgdb_append_command(q, BREAKPOINTS_END, NULL, NULL, NULL) == -1)
-                    err_msg("%s:%d -> Could not send command", __FILE__, __LINE__);
-            }
+            /* Whats the point of this? */
+//            if(breakpoint_started == FALSE){
+//                if(tgdb_append_command(q, BREAKPOINTS_BEGIN, NULL, NULL, NULL) == -1)
+//                    err_msg("%s:%d -> Could not send command", __FILE__, __LINE__);
+//            
+//                if(tgdb_append_command(q, BREAKPOINTS_END, NULL, NULL, NULL) == -1)
+//                    err_msg("%s:%d -> Could not send command", __FILE__, __LINE__);
+//            }
 
             breakpoint_started = FALSE;
             break;
@@ -196,8 +222,10 @@ void commands_set_state(enum COMMAND_STATE state, struct queue *q){
             breakpoint_table = 0; 
             break;
         case BREAKPOINT_TABLE_BEGIN: 
-            if(tgdb_append_command(q, BREAKPOINTS_BEGIN, NULL, NULL, NULL) == -1)
-                err_msg("%s:%d -> Could not send command", __FILE__, __LINE__);
+//            if(tgdb_append_command(q, BREAKPOINTS_BEGIN, NULL, NULL, NULL) == -1)
+//                err_msg("%s:%d -> Could not send command", __FILE__, __LINE__);
+
+            /* The breakpoint queue should be empty at this point */
             breakpoint_table = 1; 
             breakpoint_started = TRUE;
             break;
@@ -239,7 +267,9 @@ static void commands_prepare_info_source(enum COMMAND_STATE state){
 void commands_list_command_finished(struct queue *q, int success){
   /* The file does not exist and it can not be opened.
    * So we return that information to the gui.  */
-  tgdb_append_command(q, ABSOLUTE_SOURCE_DENIED, last_info_source_requested, NULL, NULL);
+    struct string *rej = string_init();
+    string_add ( rej, last_info_source_requested );
+    tgdb_append_command(q, TGDB_ABSOLUTE_SOURCE_DENIED, rej);
 }
 
 void commands_send_source_absolute_source_file(struct queue *q){
@@ -255,15 +285,22 @@ void commands_send_source_absolute_source_file(struct queue *q){
 
       /* requesting file */
       if(last_info_source_requested[0] != '\0') {
-         tgdb_append_command(q, ABSOLUTE_SOURCE_ACCEPTED, path, NULL, NULL);
+          struct string *accepted = string_init();
+          string_add ( accepted, path );
+          tgdb_append_command(q, TGDB_ABSOLUTE_SOURCE_ACCEPTED, accepted);
       } else { /* This happens only when libtgdb starts */
-         tgdb_append_command(q, SOURCE_FILE_UPDATE, path, NULL, NULL);
-         tgdb_append_command(q, LINE_NUMBER_UPDATE, "1", NULL, NULL);
+//         tgdb_append_command(q, SOURCE_FILE_UPDATE, path, NULL, NULL);
+//         tgdb_append_command(q, LINE_NUMBER_UPDATE, "1", NULL, NULL);
+            string_clear( absolute_path );
+            string_add ( absolute_path, path );
+            string_clear( line_number );
+            string_add ( line_number, "1" );
       }
    /* not found */
    } else {
-      tgdb_append_command(q, ABSOLUTE_SOURCE_DENIED, 
-              last_info_source_requested, NULL, NULL);
+      struct string *rej = string_init();
+      string_add ( rej, last_info_source_requested );
+      tgdb_append_command(q, TGDB_ABSOLUTE_SOURCE_DENIED, rej);
    }
 }
 
@@ -316,14 +353,25 @@ static void commands_process_info_source(struct queue *q, char a){
 
             info_source_ready = 1;
         } else if ( /* This is the line contatining the relative path to the source file */
-             commands_get_state() == INFO_SOURCE_RELATIVE && 
-             length >= source_relative_prefix_length && 
-             strncmp(info_ptr, source_relative_prefix, source_relative_prefix_length) == 0 ) {
+            commands_get_state() == INFO_SOURCE_RELATIVE && 
+            length >= source_relative_prefix_length && 
+            strncmp(info_ptr, source_relative_prefix, source_relative_prefix_length) == 0 ) {
 
-             if(tgdb_append_command(q, CURRENT_FILE_UPDATE, info_ptr + source_relative_prefix_length, NULL, NULL) == -1)
-                err_msg("%s:%d -> Could not send command", __FILE__, __LINE__);
+            /* So far, INFO_SOURCE_RELATIVE is only used when a 
+             * TGDB_UPDATE_FILE_POSITION is needed.
+             */
+            {
+                struct queue *update = queue_init();
+                struct string *relative_path = string_init();
+                string_add ( relative_path, info_ptr + source_relative_prefix_length );
+                queue_append ( update, absolute_path );
+                queue_append ( update, relative_path );
+                queue_append ( update, line_number );
 
-             info_source_ready = 1;
+                tgdb_append_command(q, TGDB_UPDATE_FILE_POSITION, update );
+            }
+
+            info_source_ready = 1;
         } else
             string_clear(info_source_string);
     } else
@@ -378,27 +426,13 @@ static void commands_process_tab_completion(char c){
 //    }
 }
 
-/* TODO: This variable is here becuase the travere command for the queue only
- * passes along the item to the function. It would be better if it could pass
- * along other data 
- */
-static struct queue *hackq;
-
-void commands_send_gui_source(void *item) {
-    tgdb_append_command(hackq, SOURCE_FILE, (char*)item, NULL, NULL);  
-}
 
 void commands_free(void *item) {
     free((char*)item);
 }
 
 void commands_send_gui_sources(struct queue *q){
-    hackq = q;
-    tgdb_append_command(q, SOURCES_START, NULL, NULL, NULL);  
-    queue_traverse_list(source_files, commands_send_gui_source);
-    tgdb_append_command(q, SOURCES_END, NULL, NULL, NULL);  
-    queue_free_list(source_files, commands_free);
-    hackq = NULL;
+    tgdb_append_command ( q, TGDB_UPDATE_SOURCE_FILES, source_files );
 }
 
 void commands_process(char a, struct queue *q){
@@ -481,8 +515,11 @@ void commands_finalize_command ( struct queue *q ) {
         case INFO_SOURCE_RELATIVE:
         case INFO_SOURCE_ABSOLUTE:
 
-            if ( info_source_ready == 0 )
-                tgdb_append_command(q, ABSOLUTE_SOURCE_DENIED, last_info_source_requested, NULL, NULL);
+            if ( info_source_ready == 0 ) {
+                struct string *rej = string_init();
+                string_add ( rej, last_info_source_requested );
+                tgdb_append_command(q, TGDB_ABSOLUTE_SOURCE_DENIED, rej );
+            }
 
             break;
         default: break;

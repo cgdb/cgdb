@@ -147,17 +147,25 @@ int tgdb_new_tty(void);
  */
 char *tgdb_tty_name(void);
 
-/* tgdb_get_sources: Gets a list of source files that make up the program
- * being debugged.
+/* tgdb_get_sources: 
+ * -----------------
  *
- *    This function triggers tgdb to discover all of the source files that is 
- *    in the program being debugged. It returns these files by way of the com
- *    structure in tgdb_recv. The first header will be SOURCES_START. 
- *    Every struct with a header SOURCE_FILE will be a valid source file.
- *    That will continue until a SOURCES_END is returned.
+ *  Gets a list of source files that make up the program being debugged.
+ *  If the function succeeds the gui will get back TGDB_UPDATE_SOURCE_FILES
+ *  containing a list of all the source files. Otherwise the gui will get
+ *  back TGDB_SOURCES_DENIED.
  */
 int (*tgdb_get_sources)(void);
 
+/* tgdb_get_source_absolute_filename:
+ * ----------------------------------
+ *
+ * This function will return the absolute path to the file file.
+ * file must be a valid relative path. 
+ *
+ * If this functions succeeds TGDB_ABSOLUTE_SOURCE_ACCEPTED will be returned.
+ * Otherwise, TGDB_ABSOLUTE_SOURCE_DENIED gets returned.
+ */
 int (*tgdb_get_source_absolute_filename)(char *file);
 
 /* tgdb_err_msg: Returns an error message from the last library call that

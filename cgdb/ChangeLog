@@ -1,3 +1,8 @@
+06/04/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * cgdb.c: process_commands, changed interface between cgdb/tgdb.
+    tgdb now sends atomic commands. self contained.
+
 06/01/2003 Bob Rossi <bob_rossi@cox.net>
     
     * cgdb.c: init_home_dir now uses fs_util interface instead of

@@ -71,7 +71,7 @@ static int gdb_input(void) {
 
     while ( queue_size(q) > 0 ) {
         item = queue_pop(q);
-        if(item->header == QUIT)
+        if(item->header == TGDB_QUIT)
            return -1;
 
         tgdb_delete_command(item);

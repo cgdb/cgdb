@@ -46,10 +46,10 @@ static int tgdb_command_callback(const char *line) {
     return 0;
 }
 
-static int tgdb_change_prompt ( const char *prompt ) {
+/*static int tgdb_change_prompt ( const char *prompt ) {
     fprintf ( stderr, "CHANGE_PROMPT(%s)\n", prompt );
     return 0;
-}
+}*/
 
 static int tgdb_completion_callback ( const char *line ) {
     fprintf ( stderr, "TAB_COMPLETION(%s)\n", line );
