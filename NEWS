@@ -1,3 +1,8 @@
+   * Fixed bug in TGDB. It was not properly parsing the breakpoint information
+   out of GDB. When using C++, GDB would output data that TGDB did not expect.
+   TGDB can now parse the data properly. The result is that CGDB now displays
+   all of the breakpoints in the source window. It used to not display them all.
+
 cgdb-0.3.4
 
    * Fixed bug in cgdb. If the user hit 'o' in cgdb, then got out of the 
