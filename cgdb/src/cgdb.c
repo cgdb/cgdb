@@ -72,6 +72,7 @@
 #include "fs_util.h"
 #include "cgdbrc.h"
 #include "io.h"
+#include "tgdb_list.h"
 
 /* --------------- */
 /* Local Variables */
@@ -307,13 +308,17 @@ static void process_commands(struct tgdb *tgdb)
             {
                 struct sviewer *sview = if_get_sview();
                 char *file; 
-                struct queue *q = (struct queue *) item->data;
-                struct tgdb_breakpoint *tb;
+				struct tgdb_list *list = (struct tgdb_list *)item->data;
+				tgdb_list_iterator *iterator;
+				struct tgdb_breakpoint *tb;
 
                 source_clear_breaks(if_get_sview());
 
-                while ( queue_size ( q ) > 0 ) {
-                    tb = queue_pop( q );
+				iterator = tgdb_list_get_first ( list );
+
+            	while ( iterator ) {
+					/* For each breakpoint */
+                	tb = (struct tgdb_breakpoint *)tgdb_list_get_item ( iterator );
 
                     file = malloc(string_length ( tb->file )+1);
                     strcpy ( file, string_get ( tb->file ) );
@@ -323,13 +328,7 @@ static void process_commands(struct tgdb *tgdb)
                     else
                         source_disable_break(sview, file, tb->line);
 
-                    /* free the memory. This should be done by libtgdb eventually */
-                    string_free ( tb->file );
-                    tb->file = NULL;
-                    string_free ( tb->funcname );
-                    tb->funcname = NULL;
-                    free ( tb );
-                    tb = NULL;
+					iterator = tgdb_list_next ( iterator );
                 }
 
                 if_show_file(NULL, 0);

@@ -1090,3 +1090,7 @@ int tgdb_set_verbose_gui_command_output ( struct tgdb *tgdb, int value ) {
 	
 	return 0;
 }
+
+void tgdb_traverse_commands ( struct tgdb *tgdb ) {
+	tgdb_traverse_command_queue ( tgdb->q );
+}

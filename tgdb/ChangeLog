@@ -1,3 +1,24 @@
+09/25/2003 Bob Rossi <bob@brasko.net>
+
+   * commands.c: Add new #include "tgdb_list.h"
+   'struct commands' changed member 'struct queue
+   *breakpoint_queue' to 'struct tgdb_list *breakpoint_list'.
+   commands_initialize, initialize changed member variable.
+   parse_breakpoint, append the data to the new list ( instead of old one )
+   commands_set_state, append new list into tgdb queue.
+   * types.h: Changed comment in TGDB_UPDATE_BREAKPOINTS
+   Changed function prototype name tgdb_traverse_command to
+   tgdb_traverse_command_queue.
+   * driver.c: gdb_input, changed commented out call to tgdb_traverse_command
+   to take tgdb instance rather than a queue.
+   * tgdb.c: Add tgdb_traverse_commands implementation
+   * types.c: Add new #include "tgdb_list.h"
+   tgdb_print_item, uncomment fd object.
+   tgdb_print_item, implement TGDB_UPDATE_BREAKPOINTS case.
+   Add tgdb_breakpoint_free function which free's a breakpoint.
+   tgdb_delete_command, implement TGDB_UPDATE_BREAKPOINTS case.
+   Change name of tgdb_traverse_command to tgdb_traverse_command_queue
+
 09/24/2003 Bob Rossi <bob@brasko.net>
 
    * a2-tgdb.c: a2_initialize, add call to check for breakpoints on start up.

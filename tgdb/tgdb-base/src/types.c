@@ -15,10 +15,11 @@
 #include "error.h"
 #include "sys_util.h"
 #include "ibuf.h"
+#include "tgdb_list.h"
 
 static void tgdb_print_item(void *item) {
     struct tgdb_command *com = (struct tgdb_command *)item;
-//    FILE *fd = stderr;
+    FILE *fd = stderr;
 
     if ( !com ) {
         err_msg("%s:%d ERROR: ITEM IS NULL", __FILE__, __LINE__);
@@ -27,7 +28,34 @@ static void tgdb_print_item(void *item) {
 
     switch ( com->header ) {
         case TGDB_UPDATE_BREAKPOINTS:
-           break;
+		{
+			struct tgdb_list *list = (struct tgdb_list *)com->data;
+			tgdb_list_iterator *iterator;
+			struct tgdb_breakpoint *tb;
+
+			fprintf ( fd, "Breakpoint start\n" );
+
+			iterator = tgdb_list_get_first ( list );
+
+			while ( iterator ) {
+				tb = (struct tgdb_breakpoint *)tgdb_list_get_item ( iterator );
+
+				if ( tb == NULL )
+					err_msg("%s:%d breakpoint is NULL", __FILE__, __LINE__);
+
+				fprintf ( fd, 
+					"\tFILE(%s) FUNCNAME(%s) LINE(%d) ENABLED(%d)\n",
+					string_get ( tb->file ), 
+					string_get ( tb->funcname ), 
+					tb->line, 
+					tb->enabled );
+				
+				iterator = tgdb_list_next ( iterator );
+			}
+
+			fprintf ( fd, "Breakpoint end\n" );
+           	break;
+		}
         case TGDB_UPDATE_FILE_POSITION:
            {
                 struct queue *q = ( struct queue * ) com->data;
@@ -117,11 +145,45 @@ static void tgdb_print_item(void *item) {
 //    }
 }
 
+int tgdb_breakpoint_free ( void *data ) {
+	struct tgdb_breakpoint *tb;
+	tb = (struct tgdb_breakpoint *)data;
+
+	/* Free the structure */
+	string_free ( tb->file );
+	tb->file = NULL;
+	string_free ( tb->funcname );
+	tb->funcname = NULL;
+	free ( tb );
+	tb = NULL;
+	return 0;
+}
+
 void tgdb_delete_command(void *item){
     struct tgdb_command *com = (struct tgdb_command*) item;
 
     if ( !com ) {
         return;
+    }
+
+    switch ( com->header ) {
+        case TGDB_UPDATE_BREAKPOINTS:
+		{
+			struct tgdb_list *list = (struct tgdb_list *)com->data;
+
+			tgdb_list_free ( list, tgdb_breakpoint_free );
+           	break;
+		}
+        case TGDB_UPDATE_FILE_POSITION:
+        case TGDB_UPDATE_SOURCE_FILES:
+        case TGDB_SOURCES_DENIED:
+        case TGDB_ABSOLUTE_SOURCE_ACCEPTED:
+        case TGDB_ABSOLUTE_SOURCE_DENIED:
+        case TGDB_DISPLAY_UPDATE:
+        case TGDB_QUIT_ABNORMAL:
+		case TGDB_QUIT_NORMAL:
+        default:
+            break;
     }
   
     free(com);
@@ -144,6 +206,6 @@ void tgdb_append_command(
     /*err_msg("UPDATE(%s)", command);*/
 }
 
-void tgdb_traverse_command(struct queue *q) {
+void tgdb_traverse_command_queue(struct queue *q) {
     queue_traverse_list(q, tgdb_print_item);
 }

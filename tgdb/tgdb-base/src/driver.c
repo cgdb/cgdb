@@ -102,7 +102,7 @@ static int gdb_input(void) {
            return -1;
         }
 
-    /*tgdb_traverse_command(q);*/
+    /* tgdb_traverse_commands ( tgdb );*/
 
     while ( (item = tgdb_get_command(tgdb)) != NULL ) {
 

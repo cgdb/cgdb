@@ -40,7 +40,7 @@ extern "C" {
  *
  *      All breakpoints that are set.
  *
- *      This is a struct queue. 
+ *      This is a struct tgdb_list
  *          It containes a 'struct string' for each filename. The filename is
  *          represented with a relative path.
  *      
@@ -149,7 +149,7 @@ void tgdb_append_command(
 /* tgdb_traverse_command: Traverses com and outputs data to fd. 
  *    This is mainly used for debugging information.
  */
-void tgdb_traverse_command(struct queue *q);
+void tgdb_traverse_command_queue (struct queue *q);
 
 /* tgdb_command
  * ------------

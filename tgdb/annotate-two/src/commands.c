@@ -23,6 +23,7 @@
 #include "a2-tgdb.h"
 #include "rlctx.h"
 #include "queue.h"
+#include "tgdb_list.h"
 #include "annotate_two.h"
 
 struct commands {
@@ -34,7 +35,7 @@ struct commands {
    int field_5_newline_hit;
 
 	/* breakpoint information */
-	struct queue *breakpoint_queue;
+	struct tgdb_list *breakpoint_list;
 	struct string *breakpoint_string;
 	int breakpoint_table;
 	int breakpoint_enabled;
@@ -77,7 +78,7 @@ struct commands *commands_initialize(void) {
 	c->cur_field_num 		   = 0;
    c->field_5_newline_hit  = 0;
 
-    c->breakpoint_queue    	= queue_init();
+    c->breakpoint_list    	= tgdb_list_init();
     c->breakpoint_string   	= string_init();
 	c->breakpoint_table    	= 0;
 	c->breakpoint_enabled   = FALSE;
@@ -260,7 +261,7 @@ static void parse_breakpoint(struct commands *c, struct queue *q){
     else
         tb->enabled = 0;
 
-    queue_append ( c->breakpoint_queue, tb );
+    tgdb_list_append ( c->breakpoint_list, tb );
 }
 
 
@@ -281,7 +282,7 @@ void commands_set_state( struct commands *c, enum COMMAND_STATE state, struct qu
 
             /* At this point, annotate needs to send the breakpoints to the gui.
              * All of the valid breakpoints are stored in breakpoint_queue. */
-            tgdb_append_command ( q, TGDB_UPDATE_BREAKPOINTS, c->breakpoint_queue );
+            tgdb_append_command ( q, TGDB_UPDATE_BREAKPOINTS, c->breakpoint_list );
 
             string_clear(c->breakpoint_string);
             c->breakpoint_enabled = FALSE;
