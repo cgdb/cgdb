@@ -1,5 +1,5 @@
-#ifndef __A2_TGDB_H__
-#define __A2_TGDB_H__
+#ifndef __GDBMI_TGDB_H__
+#define __GDBMI_TGDB_H__
 
 #include <sys/types.h>
 #include "types.h"
@@ -17,4 +17,4 @@ int gdbmi_tgdb_new_tty(void);
 char *gdbmi_tgdb_tty_name(void);
 char *gdbmi_tgdb_err_msg(void);
 
-#endif /* __A2_TGDB_H__ */
+#endif /* __GDBMI_TGDB_H__ */

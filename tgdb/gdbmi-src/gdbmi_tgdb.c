@@ -104,11 +104,18 @@ gdbmi_recv_finish:
    if(tgdb_end_command(com) == -1)
       err_msg("%s:%d -> could not terminate commands", __FILE__, __LINE__);
 
-   return 0;
+   return buf_size;
 }
 
 char *gdbmi_tgdb_send(char c){
-    return (char*)0;
+    static char buf[4];
+    memset(buf, '\0', 4); 
+    buf[0] = c;
+    if(io_write_byte(gdb_stdin, c) == -1){
+        err_ret("%s:%d io_write_byte error", __FILE__, __LINE__);
+        return NULL;
+    }
+    return buf;   
 }
 
 char *gdbmi_tgdb_tty_send(char c){
