@@ -3,6 +3,8 @@
 
 #include "kui.h"
 
+/* enum cgdb_key {{{ */
+
 /**
  * The high level keys.
  *
@@ -214,6 +216,8 @@ enum cgdb_key {
      
     CGDB_KEY_ERROR
 };
+
+/* }}} */
 
 /**
  * A new kui_map_set get's created each time this function is returned.

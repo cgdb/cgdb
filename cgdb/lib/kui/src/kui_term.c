@@ -33,51 +33,46 @@ extern char *tgoto();
  *
  * tname        - The termcap capability name
  * tiname       - The terminfo capability name
- * description  - Human readable description about the capability name
- * tcodes       - The termcap esc sequence associated with tname
- * ticodes      - The terminfo esc sequence associated with tiname
+ * cgdb_key_code- Human readable description about the capability name
  */
 struct tlist {
     char *tname;
     char *tiname;
-    char *description;
-    char *tcodes;
-    char *ticodes;
-    enum cgdb_key macro;
+    char *cgdb_key_code;
 } seqlist[] = {
-  { "@7", "kend",   "<End>",       NULL, NULL, CGDB_KEY_END },
-  { "kh", "khome",  "<Home>",      NULL, NULL, CGDB_KEY_HOME },
-  { "kH", "kll",    "<Home>",      NULL, NULL, CGDB_KEY_HOME },
-  { "dc", "dch1",   "<Del>",       NULL, NULL, CGDB_KEY_DC },
-  { "kD", "kdch1",  "<Del>",       NULL, NULL, CGDB_KEY_DC },
-  { "ic", "ich1",   "<Insert>",    NULL, NULL, CGDB_KEY_IC },
-  { "kI", "kich1",  "<Insert>",    NULL, NULL, CGDB_KEY_IC },
-  { "kN", "knp",    "<PageDown>",  NULL, NULL, CGDB_KEY_NPAGE },
-  { "kP", "kpp",    "<PageUp>",    NULL, NULL, CGDB_KEY_PPAGE },
+  { "@7", "kend",   "<End>" },
+  { "kh", "khome",  "<Home>" },
+  { "kH", "kll",    "<Home>" },
+  { "dc", "dch1",   "<Del>" },
+  { "kD", "kdch1",  "<Del>" },
+  { "ic", "ich1",   "<Insert>" },
+  { "kI", "kich1",  "<Insert>" },
+  { "kN", "knp",    "<PageDown>" },
+  { "kP", "kpp",    "<PageUp>" },
 
   /* For arrow keys */
-  { "kd", "kcud1",  "<Down>",      NULL, NULL, CGDB_KEY_DOWN },
-  { "kl", "kcub1",  "<Left>",      NULL, NULL, CGDB_KEY_LEFT },
-  { "kr", "kcuf1",  "<Right>",     NULL, NULL, CGDB_KEY_RIGHT },
-  { "ku", "kcuu1",  "<Up>",        NULL, NULL, CGDB_KEY_UP },
-  { "le", "cub1",   "<Left>",      NULL, NULL, CGDB_KEY_LEFT },
-  { "nd", "cuf1",   "<Right>",     NULL, NULL, CGDB_KEY_RIGHT },
-  { "up", "cuu1",   "<Up>",        NULL, NULL, CGDB_KEY_UP },
+  { "kd", "kcud1",  "<Down>" },
+  { "kl", "kcub1",  "<Left>" },
+  { "kr", "kcuf1",  "<Right>" },
+  { "ku", "kcuu1",  "<Up>" },
+  { "le", "cub1",   "<Left>" },
+  { "nd", "cuf1",   "<Right>" },
+  { "up", "cuu1",   "<Up>" },
 
   /* Function keys */
-  { "k1", "kf1",    "<F1>",        NULL, NULL, CGDB_KEY_F1 },
-  { "k2", "kf2",    "<F2>",        NULL, NULL, CGDB_KEY_F2 },
-  { "k3", "kf3",    "<F3>",        NULL, NULL, CGDB_KEY_F3 },
-  { "k4", "kf4",    "<F4>",        NULL, NULL, CGDB_KEY_F4 },
-  { "k5", "kf5",    "<F5>",        NULL, NULL, CGDB_KEY_F5 },
-  { "k6", "kf6",    "<F6>",        NULL, NULL, CGDB_KEY_F6 },
-  { "k7", "kf7",    "<F7>",        NULL, NULL, CGDB_KEY_F7 },
-  { "k8", "kf8",    "<F8>",        NULL, NULL, CGDB_KEY_F8 },
-  { "k9", "kf9",    "<F9>",        NULL, NULL, CGDB_KEY_F9 },
-  { "k;", "kf10",   "<F10>",       NULL, NULL, CGDB_KEY_F10 },
-  { "F1", "kf11",   "<F11>",       NULL, NULL, CGDB_KEY_F11 },
-  { "F2", "kf12",   "<F12>",       NULL, NULL, CGDB_KEY_F12 },
-  { NULL, NULL,     NULL,          NULL, NULL, CGDB_KEY_ERROR }
+  { "k1", "kf1",    "<F1>" },
+  { "k2", "kf2",    "<F2>" },
+  { "k3", "kf3",    "<F3>" },
+  { "k4", "kf4",    "<F4>" },
+  { "k5", "kf5",    "<F5>" },
+  { "k6", "kf6",    "<F6>" },
+  { "k7", "kf7",    "<F7>" },
+  { "k8", "kf8",    "<F8>" },
+  { "k9", "kf9",    "<F9>" },
+  { "k;", "kf10",   "<F10>" },
+  { "F1", "kf11",   "<F11>" },
+  { "F2", "kf12",   "<F12>" },
+  { NULL, NULL,     NULL }
 };
 
 /** 
@@ -88,8 +83,8 @@ struct tlist {
  */
 static int add_keybindings( struct kui_map_set *map ) {
 	/* Testing */
-	if ( kui_ms_register_map ( map, "ab", "xyz" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "abcdf", "never_reached" ) == -1 ) return -1;
+//	if ( kui_ms_register_map ( map, "ab", "<ESC>xyz" ) == -1 ) return -1;
+//	if ( kui_ms_register_map ( map, "abcdf", "never_reached" ) == -1 ) return -1;
 	
 	if ( kui_ms_register_map ( map, "\033", "<Esc>" ) == -1 ) return -1;
 
@@ -252,7 +247,7 @@ static int add_keybindings( struct kui_map_set *map ) {
 }
 
 /* Gets a single key sequence */
-static int import_keyseq(struct tlist *i) {
+static int import_keyseq(struct tlist *i, struct kui_map_set *map) {
     char *terminfo, *termcap;
     int ret;
 
@@ -272,20 +267,24 @@ static int import_keyseq(struct tlist *i) {
     }
     
     /* Set up the termcap seq */ 
-    if ( (termcap = tgetstr(i->tname, NULL)) == 0 )
-        fprintf ( stderr, "CAPNAME (%s) is not present in this TERM's termcap description\n", i->tname);
-    else if (termcap == (char*)-1 )
+    if ( (termcap = tgetstr(i->tname, NULL)) == 0 ) {
+        /*fprintf ( stderr, "CAPNAME (%s) is not present in this TERM's termcap description\n", i->tname);*/
+	} else if (termcap == (char*)-1 )
         fprintf ( stderr, "CAPNAME (%s) is not a termcap string capability\n", i->tname);
-    else
-        i->tcodes = strdup(termcap);
+    else {
+		if ( kui_ms_register_map ( map, termcap, i->cgdb_key_code ) == -1 ) 
+			return -1;
+	}
 
     /* Set up the terminfo seq */ 
-    if ( (terminfo = tigetstr(i->tiname)) == 0 )
-        fprintf ( stderr, "CAPNAME (%s) is not present in this TERM's terminfo description\n", i->tiname);
-    else if (terminfo == (char*)-1 )
+    if ( (terminfo = tigetstr(i->tiname)) == 0 ) {
+        /* fprintf ( stderr, "CAPNAME (%s) is not present in this TERM's terminfo description\n", i->tiname);*/
+	} else if (terminfo == (char*)-1 )
         fprintf ( stderr, "CAPNAME (%s) is not a terminfo string capability\n", i->tiname);
-    else
-        i->ticodes = strdup(terminfo);
+    else {
+		if ( kui_ms_register_map ( map, terminfo, i->cgdb_key_code ) == -1 ) 
+			return -1;
+	}
 
     return 0;
 }
@@ -296,49 +295,25 @@ static int import_keyseq(struct tlist *i) {
  * @return
  * 0 on success, or -1 on error
  */
-static int import_keyseqs(void) {
+static int import_keyseqs(struct kui_map_set *map) {
     int i;
 
     for( i = 0; seqlist[i].tname != NULL; i++)
-        import_keyseq(&seqlist[i]);
+        import_keyseq(&seqlist[i], map);
 
 	return 0;
 }
 
 struct kui_map_set *kui_term_get_terminal_mappings ( void ) {
 	struct kui_map_set *map;
-    int i;
-	int value;
-
-	if ( import_keyseqs () == -1 )
-		return  NULL;
 
 	map = kui_ms_create ();
 
+	if ( import_keyseqs ( map ) == -1 )
+		return  NULL;
+
 	if ( !map )
 		return NULL;
-
-	/* Loop through the seqlist */
-    for( i = 0; seqlist[i].tname != NULL; i++) {
-		if ( seqlist[i].tcodes != NULL ){
-			value = kui_ms_register_map ( map, seqlist[i].tcodes, seqlist[i].description );
-
-			if ( value == -1 ) {
-				/* TODO: Free map and return */
-				return NULL;
-			}
-		}
-
-		if ( seqlist[i].ticodes != NULL ) {
-
-			value = kui_ms_register_map ( map, seqlist[i].ticodes, seqlist[i].description );
-
-			if ( value == -1 ) {
-				/* TODO: Free map and return */
-				return NULL;
-			}
-		}
-	}
 
 	/* Add all the extra's */
 	if ( add_keybindings ( map ) == -1 ) {
@@ -1247,6 +1222,9 @@ int kui_term_string_to_cgdb_key_array (
 	local_cgdb_key_array[cgdb_key_array_pos++] = 0;
 	
 	*cgdb_key_array = local_cgdb_key_array;
+
+	free ( macro );
+	macro = NULL;
 
 	return 0;
 }

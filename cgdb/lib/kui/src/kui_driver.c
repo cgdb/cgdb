@@ -39,14 +39,6 @@
 #include <stdlib.h>
 #endif /* HAVE_STDLIB_H */
 
-/* term.h prototypes */
-extern int tgetent();
-extern int tgetflag();
-extern int tgetnum();
-extern char *tgetstr();
-extern int tputs();
-extern char *tgoto();
-
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif  /* HAVE_UNISTD_H */
@@ -54,9 +46,7 @@ extern char *tgoto();
 #include "kui.h"
 #include "kui_term.h"
 
-struct kui_map_set *terminal_map;
-
-void main_loop(struct kuictx *i) {
+void main_loop(struct kui_manager *i) {
     int    max;
     fd_set rfds;
     int result;
@@ -77,10 +67,10 @@ void main_loop(struct kuictx *i) {
 
         if(FD_ISSET(STDIN_FILENO, &rfds)) {
 			while ( 1 ) {
-				int c = kui_getkey(i);
+				int c = kui_manager_getkey(i);
 
 				if ( c == -1 ) {
-					fprintf ( stderr, "kui_getkey failed\n" );
+					fprintf ( stderr, "kui_manager_getkey failed\n" );
 					return;
 				}
 
@@ -91,14 +81,14 @@ void main_loop(struct kuictx *i) {
 					if ( kui_term_is_cgdb_key ( c ) ) {
 						char *val;	
 
-						val = kui_term_get_string_from_cgdb_key ( c );
+						val = (char*)kui_term_get_string_from_cgdb_key ( c );
 
 						fprintf ( stderr, "%s\r\n", val );
 					} else
 						fprintf(stderr, "%c\r\n", c);
 				}
 
-				if ( kui_cangetkey ( i ) == 1 )
+				if ( kui_manager_cangetkey ( i ) == 1 )
 					continue;
 				else
 					break;
@@ -107,67 +97,49 @@ void main_loop(struct kuictx *i) {
     }
 }
 
-static void usage ( void ) {
-	fprintf ( stderr, "kui_driver\r\n" );
-}
+static int create_mappings ( struct kui_manager *kuim ) {
 
-static int create_terminal_mappings ( struct kuictx *i ) {
-	std_list list;
-    std_list_iterator current;
-    void *current_data;
-	struct kui_map *map;
-	char *key, *value;
-	int j, length;
-	
-	/* Create the terminal kui map */
-	terminal_map = kui_term_get_terminal_mappings ();
-
-	if ( !terminal_map )
+	struct kui_map_set *map;
+	map = kui_ms_create ();
+	if ( !map )
 		return -1;
 
-	
-	list = kui_ms_get_maps ( terminal_map );
-
-	if ( !list )
+	if ( kui_ms_register_map ( map, "abc", "xyz" ) == -1 ) {
+		/* TODO: Free map and return */
 		return -1;
-
-    for (current  = std_list_begin(list); 
-         current != std_list_end(list);
-         current  = std_list_next(current)) {
-
-        if (std_list_get_data(current, &current_data) != 0)
-            return -1;
-
-		map = ( struct kui_map *)current_data;
-
-		if ( kui_map_get_value ( map, &value ) == -1 )
-			return -1;
-
-		if ( kui_map_get_key ( map, &key ) == -1 )
-			return -1;
-
-		length = strlen ( key );
-
-		fprintf ( stderr, "MAP->" ); 
-
-		fprintf ( stderr, "KEY[");
-		for ( j = 0; j < length; ++j )
-			fprintf ( stderr, "(%d)", (int)key[j]);
-	    fprintf ( stderr, "]" );
-		
-		fprintf ( stderr, "VALUE(%s)", value );
-
-		if ( kui_map_print_cgdb_key_array ( map ) == -1 )
-			return -1;
-
 	}
 
-	if ( kui_add_map_set ( i, terminal_map ) == -1 )
+	if ( kui_ms_register_map ( map, "xyzd", "<F4>" ) == -1 ) {
+		/* TODO: Free map and return */
+		return -1;
+	}
+
+	if ( kui_ms_register_map ( map, "xyzd", "<F4>" ) == -1 ) {
+		/* TODO: Free map and return */
+		return -1;
+	}
+
+	if ( kui_ms_register_map ( map, "a<F1>", "xyz" ) == -1 ) {
+		/* TODO: Free map and return */
+		return -1;
+	}
+
+	if ( kui_ms_register_map ( map, "a<F1><F1>", "xxx" ) == -1 ) {
+		/* TODO: Free map and return */
+		return -1;
+	}
+
+	if ( kui_ms_register_map ( map, "a<F1><F1>", "xxx" ) == -1 ) {
+		/* TODO: Free map and return */
+		return -1;
+	}
+
+	if ( kui_manager_add_map_set ( kuim, map ) == -1 )
 		return -1;
 
 	return 0;
-}
 
+}
 
 int main(int argc, char **argv){
 
@@ -188,20 +160,20 @@ int main(int argc, char **argv){
 
 	
 #if 1
-    struct kuictx *i;
+    struct kui_manager *i;
     /* Initalize curses */
     initscr();
     noecho();
     raw();
     refresh();
-	usage ();
 
-    i = kui_create ( STDIN_FILENO );
+    i = kui_manager_create ( STDIN_FILENO );
 
-	if ( create_terminal_mappings ( i ) == -1 )
-		fprintf ( stderr, "terminal mappings failed\r\n" );
+	create_mappings ( i );
 
     main_loop(i);
+
+	kui_manager_destroy ( i );
 
     /* Shutdown curses */
     echo();

@@ -1,0 +1,89 @@
+{
+   </lib/libncurses.so.5.3>
+   Memcheck:Leak
+   fun:malloc
+   fun:_nc_doalloc
+   fun:_nc_tparm_analyze
+   obj:/lib/libncurses.so.5.3
+}
+{
+   </lib/libncurses.so.5.3>
+   Memcheck:Leak
+   fun:malloc
+   fun:_nc_home_terminfo
+   fun:_nc_read_entry
+   obj:/lib/libncurses.so.5.3
+}
+{
+   </lib/libncurses.so.5.3>
+   Memcheck:Leak
+   fun:calloc
+   obj:/lib/libncurses.so.5.3
+   fun:_nc_read_file_entry
+   obj:/lib/libncurses.so.5.3
+}
+{
+   </lib/libncurses.so.5.3>
+   Memcheck:Leak
+   fun:realloc
+   fun:_nc_doalloc
+   obj:/lib/libncurses.so.5.3
+   fun:tparm
+}
+{
+   </lib/libncurses.so.5.3>
+   Memcheck:Leak
+   fun:calloc
+   fun:setupterm
+   fun:newterm
+   fun:initscr
+}
+{
+   </lib/libncurses.so.5.3>
+   Memcheck:Leak
+   fun:calloc
+   fun:_nc_makenew
+   fun:newwin
+   fun:_nc_setupscreen
+}
+{
+   </lib/libncurses.so.5.3>
+   Memcheck:Leak
+   fun:malloc
+   obj:/lib/libncurses.so.5.3
+   fun:_nc_read_file_entry
+   obj:/lib/libncurses.so.5.3
+}
+{
+   </lib/libncurses.so.5.3>
+   Memcheck:Leak
+   fun:calloc
+   fun:_nc_setupscreen
+   fun:newterm
+   fun:initscr
+}
+{
+   </lib/libncurses.so.5.3>
+   Memcheck:Leak
+   fun:malloc
+   fun:_nc_set_buffer
+   fun:_nc_setupscreen
+   fun:newterm
+}
+{
+   </lib/libncurses.so.5.3>
+   Memcheck:Leak
+   fun:calloc
+   fun:newwin
+   fun:_nc_setupscreen
+   fun:newterm
+}
+{
+   </lib/libncurses.so.5.3>
+   Memcheck:Leak
+   fun:malloc
+   fun:strdup
+   obj:/lib/libncurses.so.5.3
+   fun:tgetent
+}
+

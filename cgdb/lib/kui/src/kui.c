@@ -1,3 +1,5 @@
+/* includes {{{ */
+
 #include <string.h> /* strdup */
 #include <unistd.h>
 #include <fcntl.h>
@@ -7,6 +9,10 @@
 #include "sys_util.h"
 #include "io.h"
 #include "kui_term.h"
+
+/* }}} */
+
+/* struct kui_map {{{ */
 
 /**
  * A kui map structure.
@@ -48,41 +54,42 @@ struct kui_map *kui_map_create (
 
 	struct kui_map *map;
 	char *key, *value;
+	
 
+	/* Validify parameters */
 	if ( !key_data || !value_data )
+		return NULL;
+
+	map = (struct kui_map *)malloc ( sizeof ( struct kui_map ) );
+	if ( !map )
 		return NULL;
 
 	key = strdup ( key_data );
 
-	if ( !key )
+	if ( !key ) {
+		kui_map_destroy ( map );
 		return NULL;
+	}
 	
 	value = strdup ( value_data );
 
 	if ( !value ) {
-		free ( key );
-		key = NULL;
-		return NULL;
-	}
-
-	map = (struct kui_map *)malloc ( sizeof ( struct kui_map ) );
-
-	if ( !map ) {
-		free ( key );
-		key = NULL;
-		free ( value );
-		value = NULL;
+		kui_map_destroy ( map );
 		return NULL;
 	}
 
 	map->original_key = key;
 	map->original_value = value;
 
-	if ( kui_term_string_to_cgdb_key_array ( map->original_key, &map->literal_key ) == -1 )
+	if ( kui_term_string_to_cgdb_key_array ( map->original_key, &map->literal_key ) == -1 ) {
+		kui_map_destroy ( map );
 		return NULL;
+	}
 
-	if ( kui_term_string_to_cgdb_key_array ( map->original_value, &map->literal_value ) == -1 )
+	if ( kui_term_string_to_cgdb_key_array ( map->original_value, &map->literal_value ) == -1 ){
+		kui_map_destroy ( map );
 		return NULL;
+	}
 	
 	return map;
 }
@@ -92,11 +99,25 @@ int kui_map_destroy ( struct kui_map *map ) {
 	if ( !map)
 		return -1;
 
-	free ( map->original_key );
-	map->original_key = NULL;
+	if ( map->original_key ) {
+		free ( map->original_key );
+		map->original_key = NULL;
+	}
 
-	free ( map->original_value );
-	map->original_value = NULL;
+	if ( map->original_value ) {
+		free ( map->original_value );
+		map->original_value = NULL;
+	}
+
+	if ( map->literal_key ) {
+		free ( map->literal_key );
+		map->literal_key = NULL;
+	}
+
+	if ( map->literal_value ) {
+		free ( map->literal_value );
+		map->literal_value = NULL;
+	}
 
 	free (map);
 	map = NULL;
@@ -160,6 +181,10 @@ int kui_map_print_cgdb_key_array ( struct kui_map *map ) {
 
 }
 
+/* }}} */
+
+/* struct kui_map_set {{{ */
+
 /* Kui map set */
 
 enum kui_map_state {
@@ -222,8 +247,7 @@ struct kui_map_set *kui_ms_create ( void ) {
 	map->map_list = std_list_create ( kui_map_destroy_callback );
 
 	if ( !map->map_list ) {
-		free ( map );
-		map = NULL;
+		kui_ms_destroy ( map );
 		return NULL;
 	}
 
@@ -234,10 +258,12 @@ int kui_ms_destroy ( struct kui_map_set *kui_ms ) {
 	if ( !kui_ms )
 		return -1;
 
-	if ( std_list_destroy ( kui_ms->map_list ) == -1 )
-		return -1;
+	if ( kui_ms->map_list ) {
+		if ( std_list_destroy ( kui_ms->map_list ) == -1 )
+			return -1;
 
-	kui_ms->map_list = NULL;
+		kui_ms->map_list = NULL;
+	}
 
 	free (kui_ms);
 	kui_ms = NULL;
@@ -642,6 +668,10 @@ static int kui_ms_update_state (
 	return 0;
 }
 
+/* }}} */
+
+/* struct kuictx {{{ */
+
 /**
  * A Key User Interface context.
  */
@@ -659,21 +689,36 @@ struct kuictx {
 	std_list buffer;
 
 	/**
+	 * The callback function used to get data read in.
+	 */
+	kui_getkey_callback callback;
+	
+	/**
+	 * Milliseconds to block on a read.
+	 */
+	int ms;
+
+	/**
+	 * state data
+	 */
+	void *state_data;
+
+	/**
 	 * The file descriptor to read from.
 	 */
 	int fd;
 };
 
 static int kui_ms_destroy_callback ( void *param ) {
-	std_list list = (std_list)param;
+	struct kui_map_set *kui_ms = (struct kui_map_set *)param;
 
-	if ( !list )
+	if ( !kui_ms )
 		return -1;
 
-	if ( std_list_destroy ( list ) == -1 )
+	if ( kui_ms_destroy ( kui_ms ) == -1 )
 		return -1;
 
-	list = NULL;
+	kui_ms = NULL;
 
 	return 0;
 }
@@ -690,7 +735,11 @@ static int kui_ms_destroy_int_callback ( void *param ) {
 	return 0;
 }
 
-struct kuictx *kui_create(int stdinfd) {
+struct kuictx *kui_create(
+		int stdinfd, 
+		kui_getkey_callback callback,
+		int ms,
+	    void *state_data	) {
 	struct kuictx *kctx; 
 	
 	kctx = (struct kuictx *)malloc(sizeof(struct kuictx));
@@ -698,18 +747,24 @@ struct kuictx *kui_create(int stdinfd) {
 	if ( !kctx )
 		return NULL;
 
+	kctx->callback = callback;
+	kctx->state_data = state_data;
 	kctx->kui_map_set_list = std_list_create ( kui_ms_destroy_callback );
+	kctx->ms = ms;
 
 	if ( !kctx->kui_map_set_list ) {
-		/* Free the kctx */
-		free ( kctx );
-		kctx = NULL;
+		kui_destroy ( kctx );
 		return NULL;
 	}
 
 	kctx->fd = stdinfd;
 
 	kctx->buffer = std_list_create ( kui_ms_destroy_int_callback );
+
+	if ( !kctx->buffer ) {
+		kui_destroy ( kctx );
+		return NULL;
+	}
 
 	return kctx;
 }
@@ -720,8 +775,17 @@ int kui_destroy ( struct kuictx *kctx ) {
 	if ( !kctx )
 		return -1;
 
-	if ( std_list_destroy ( kctx->kui_map_set_list ) == -1 )
-		ret = -1;
+	if ( kctx->kui_map_set_list ) {
+		if ( std_list_destroy ( kctx->kui_map_set_list ) == -1 )
+			ret = -1;
+		kctx->kui_map_set_list = NULL;
+	}
+
+	if ( kctx->buffer ) {
+		if ( std_list_destroy ( kctx->buffer ) == -1 )
+			ret = -1;
+		kctx->buffer = NULL;
+	}
 
 	free (kctx);
 	kctx = NULL;
@@ -794,7 +858,7 @@ static int kui_findchar ( struct kuictx *kctx ) {
 		
 	} else {
 		/* otherwise, look to read in a char */
-		key = io_getchar ( kctx->fd, 1000 );
+		key = kctx->callback ( kctx->fd, kctx->ms, kctx->state_data );
 	}
 
 	return key;
@@ -1258,3 +1322,144 @@ int kui_cangetkey ( struct kuictx *kctx ) {
 
 	return 0;
 }
+
+/* }}} */
+
+/* struct kui_manager {{{ */
+
+struct kui_manager {
+	struct kuictx *terminal_keys;
+	struct kuictx *normal_keys;
+};
+
+static int create_terminal_mappings ( struct kuictx *i ) {
+	struct kui_map_set *terminal_map;
+	
+	/* Create the terminal kui map */
+	terminal_map = kui_term_get_terminal_mappings ();
+
+	if ( !terminal_map )
+		return -1;
+	
+	if ( kui_add_map_set ( i, terminal_map ) == -1 )
+		return -1;
+
+	return 0;
+}
+
+int char_callback ( 
+		const int fd, 
+		const unsigned int ms,
+		const void *obj ) {
+
+	return io_getchar ( fd, ms );
+}
+
+int kui_callback (
+		const int fd, 
+		const unsigned int ms,
+		const void *obj ) {
+
+	struct kuictx *kctx = (struct kuictx *)obj;
+	int result;
+
+	result = kui_cangetkey ( kctx );
+
+	if ( result == -1 )
+		return -1;
+
+	if ( result == 1 )
+		return kui_getkey ( kctx );
+
+	if ( result == 0 ) {
+		if ( io_data_ready ( kctx->fd, ms ) == 1 )
+			return kui_getkey ( kctx );	
+	}
+
+	return 0;
+}
+
+struct kui_manager *kui_manager_create(int stdinfd ) {
+	struct kui_manager *man;
+
+	man = ( struct kui_manager* )malloc ( sizeof ( struct kui_manager ) );
+
+	if ( !man )
+		return NULL;
+
+	man->terminal_keys = kui_create ( stdinfd, char_callback, 40, NULL );
+
+	if ( !man->terminal_keys ) {
+		kui_manager_destroy ( man );
+		return NULL;
+	}
+
+	if ( create_terminal_mappings ( man->terminal_keys ) == -1 ) {
+		kui_manager_destroy ( man );
+		return NULL;
+	}
+
+
+	man->normal_keys = kui_create ( -1, kui_callback, 1000, man->terminal_keys );
+
+	if ( !man->normal_keys ) {
+		kui_manager_destroy ( man );
+		return NULL;
+	}
+
+	return man;
+}
+
+int kui_manager_destroy ( struct kui_manager *kuim ) {
+	int ret = 0;
+
+	if ( !kuim )
+		return 0;
+
+	if ( kui_destroy ( kuim->terminal_keys ) == -1 )
+		ret = -1;
+
+	if ( kui_destroy ( kuim->normal_keys ) == -1 )
+		ret = -1;
+
+	free ( kuim );
+	kuim = NULL;
+
+	return ret;
+}
+
+
+std_list kui_manager_get_map_sets ( struct kui_manager *kuim ) {
+	if ( !kuim )
+		return NULL;
+
+	return kui_get_map_sets ( kuim->normal_keys );
+}
+
+int kui_manager_add_map_set ( 
+		struct kui_manager *kuim, 
+		struct kui_map_set *kui_ms ) {
+
+	if ( !kuim )
+		return -1;
+
+	return kui_add_map_set ( kuim->normal_keys, kui_ms );
+}
+
+int kui_manager_cangetkey ( struct kui_manager *kuim ) {
+
+	if ( !kuim )
+		return -1;
+
+	return kui_cangetkey ( kuim->normal_keys );
+}
+
+int kui_manager_getkey ( struct kui_manager *kuim ) {
+	if ( !kuim )
+		return -1;
+
+	return kui_getkey ( kuim->normal_keys );
+
+}
+
+/* }}} */
