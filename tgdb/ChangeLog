@@ -1,3 +1,7 @@
+06/12/2003 Bob Rossi <bob_rossi@cox.net>
+
+	* types.h: Removed comment
+
 06/04/2003 Bob Rossi <bob_rossi@cox.net>
 
     * changed interface for tgdb: It now returns atomic commands.

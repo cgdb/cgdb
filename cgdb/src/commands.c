@@ -36,8 +36,8 @@ static struct variables
 } VARIABLES[] = {
     // keep this stuff sorted! !sort
     /* ignorecase */ 	{ "ignorecase", "ic", &regex_icase },
-    /* shortcut   */ 	{ "shortcut", "sc", &shortcut_option },
     /* line coverage */ { "line_coverage", "lc", &line_coverage_option },
+    /* shortcut   */ 	{ "shortcut", "sc", &shortcut_option },
 };
 
 static int command_focus_cgdb( void );

@@ -28,23 +28,6 @@ extern "C" {
 
 #include "queue.h"
 
-//enum INTERFACE_COMMANDS {
-//   BREAKPOINTS_BEGIN,   /* starts a breakpoint session */
-//   BREAKPOINT,          /* a single breakpoint */
-//   BREAKPOINTS_END,     /* ends a breakpoint session */
-//   SOURCE_FILE_UPDATE,  /* tells the gui the current source file */
-//   CURRENT_FILE_UPDATE, /* tells the gui the current relative source file */
-//   LINE_NUMBER_UPDATE,  /* tells the gui the current line number */
-//   SOURCES_START,       /* marks the beggining of a list of source files */
-//   SOURCE_FILE,         /* a source file */
-//   SOURCES_END,         /* marks the end of a list of source files */
-//   SOURCES_DENIED,      /* program not compiled with debug ( annotate error ) */
-//   ABSOLUTE_SOURCE_ACCEPTED, /* Returns the absolute path of the file requested */
-//   ABSOLUTE_SOURCE_DENIED,  /* gdb could not find the source file */
-//   DISPLAY_UPDATE,      /* Updates the value of a variable */
-//   QUIT
-//};
-
 /* INTERFACE_COMMANDS:
  * -------------------
  *
