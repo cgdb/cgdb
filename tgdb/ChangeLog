@@ -1,3 +1,7 @@
+03/06/2003 Bob Rossi <bob_rossi@cox.net>
+
+   * Changed the command interface to be a queue
+
 03/04/2003 Bob Rossi <bob_rossi@cox.net>
    
    * Perfected the queue unit :)

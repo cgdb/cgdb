@@ -41,12 +41,12 @@ int commands_parse_field(const char *buf, size_t n, int *field);
  * buf -> The 'source' annotation recieved from gdb.
  * n   -> The size of the annotation.
  */
-int commands_parse_source(const char *buf, size_t n, struct Command ***com);
+int commands_parse_source(const char *buf, size_t n, struct queue *q);
 
 /* command_set_state: Sets the state of the command package. This should usually be called
  *                      after an annotation has been read.
  */
-void commands_set_state(enum COMMAND_STATE state, struct Command ***com);
+void commands_set_state(enum COMMAND_STATE state, struct queue *q);
 
 /* commands_set_field_num: This is used for breakpoint annotations.
  *             field_num is the field that the breakpoint annotation is on.
@@ -67,27 +67,27 @@ int commands_run_command(int fd, struct command *com);
  *    a     -> the character recieved from gdb.
  *    com   -> commands to give back to gdb.
  */
-void commands_process(char a, struct Command ***com);
+void commands_process(char a, struct queue *q);
 
 /* commands_list_command_finished: Returns to the gui the absolute path of
  *                                  the filename requested.
  *
  *  if success is 0 then the list failed, otherwise it worked.
  */
-void commands_list_command_finished(struct Command ***com, int success);
+void commands_list_command_finished(struct queue *q, int success);
 
 /* commands_send_gui_sources: This gives the gui all of the sources that were
  *                            just read from gdb through an 'info sources' prompt.
  *
  *    com   -> commands to give back to gdb.
  */
-void commands_send_gui_sources(struct Command ***com);
+void commands_send_gui_sources(struct queue *q);
 
 /* commands_send_source_absolute_source_file: This will send to the gui the 
  *             absolute path to the file being requested. Otherwise the gui
  *             will be notified that the file is not valid.
  */
-void commands_send_source_absolute_source_file(struct Command ***com);
+void commands_send_source_absolute_source_file(struct queue *q);
 
 /* The 3 functions below are for tgdb only.
  * These functions are responsible for keeping tgdb up to date with gdb.

@@ -61,20 +61,20 @@ void *queue_pop(struct queue *q) {
 void queue_free_list(struct queue *q, item_func func) {
     struct node *prev, *cur = q->head;
    
-    if ( cur == NULL )
+    if ( cur == NULL || (!func))
         return;
 
     while ( cur != NULL ) {
         prev = cur;
         cur = cur->next;
-        if ( func )
-            func ( prev->data );
-        
+        /* Remove the previous node */
+        func ( prev->data );
         free ( prev );
         prev = NULL; 
     }
 
     q->size = 0;
+    q->head = NULL;
 }
 
 void queue_traverse_list(struct queue *q, item_func func) {

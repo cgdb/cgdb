@@ -93,7 +93,7 @@ char *(*tgdb_tty_send)(char c);
  *          before the calling this function again. The first time
  *          the user can call this function without worrying.
  */
-size_t (*tgdb_recv)(char *buf, size_t n, struct Command ***com); 
+size_t (*tgdb_recv)(char *buf, size_t n, struct queue *q); 
 
 /* tgdb_tty_recv: 
  * 

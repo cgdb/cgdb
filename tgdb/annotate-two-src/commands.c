@@ -57,7 +57,7 @@ int commands_parse_field(const char *buf, size_t n, int *field){
 }
 
 /* source filename:line:character:middle:addr */
-int commands_parse_source(const char *buf, size_t n, struct Command ***com){
+int commands_parse_source(const char *buf, size_t n, struct queue *q){
    int i = 0;
    char copy[n];
    char *cur = copy + n;
@@ -79,18 +79,18 @@ int commands_parse_source(const char *buf, size_t n, struct Command ***com){
    if(sscanf(copy, "source %s", file) != 1)
       err_msg("%s:%d -> Could not get file name", __FILE__, __LINE__);
    
-   if(tgdb_append_command(com, SOURCE_FILE_UPDATE, file, NULL, NULL) == -1)
+   if(tgdb_append_command(q, SOURCE_FILE_UPDATE, file, NULL, NULL) == -1)
       err_msg("%s:%d -> Could not send command", __FILE__, __LINE__);
 
-   if(tgdb_append_command(com, LINE_NUMBER_UPDATE, line, NULL, NULL) == -1)
+   if(tgdb_append_command(q, LINE_NUMBER_UPDATE, line, NULL, NULL) == -1)
       err_msg("%s:%d -> Could not send command", __FILE__, __LINE__);
 
    return 0;
 }
 
-static void parse_breakpoint(struct Command ***com){
+static void parse_breakpoint(struct queue *q){
     unsigned long size = string_length(breakpoint_string);
-    char copy[size];
+    char copy[size + 1];
     char *cur = copy + size, *fcur;
     char fname[MAXLINE + 2], file[MAXLINE], line[MAXLINE];
     static char *info_ptr; 
@@ -130,37 +130,37 @@ static void parse_breakpoint(struct Command ***com){
     else
         strcat(fname, " n");
 
-    if(tgdb_append_command(com, BREAKPOINT, fname, line, file) == -1)
+    if(tgdb_append_command(q, BREAKPOINT, fname, line, file) == -1)
         err_msg("%s:%d -> Could not send command", __FILE__, __LINE__);
 }
 
 
-void commands_set_state(enum COMMAND_STATE state, struct Command ***com){
+void commands_set_state(enum COMMAND_STATE state, struct queue *q){
     cur_command_state = state;
 
     switch(cur_command_state){
         case RECORD:  
             if(string_length(breakpoint_string) > 0){
-                parse_breakpoint(com);
+                parse_breakpoint(q);
                 string_clear(breakpoint_string);
                 breakpoint_enabled = FALSE;
             }
         break;
         case BREAKPOINT_TABLE_END:  
             if(string_length(breakpoint_string) > 0)
-                parse_breakpoint(com);
+                parse_breakpoint(q);
 
-            if(tgdb_append_command(com, BREAKPOINTS_END, NULL, NULL, NULL) == -1)
+            if(tgdb_append_command(q, BREAKPOINTS_END, NULL, NULL, NULL) == -1)
                 err_msg("%s:%d -> Could not send command", __FILE__, __LINE__);
 
             string_clear(breakpoint_string);
             breakpoint_enabled = FALSE;
 
             if(breakpoint_started == FALSE){
-                if(tgdb_append_command(com, BREAKPOINTS_BEGIN, NULL, NULL, NULL) == -1)
+                if(tgdb_append_command(q, BREAKPOINTS_BEGIN, NULL, NULL, NULL) == -1)
                     err_msg("%s:%d -> Could not send command", __FILE__, __LINE__);
             
-                if(tgdb_append_command(com, BREAKPOINTS_END, NULL, NULL, NULL) == -1)
+                if(tgdb_append_command(q, BREAKPOINTS_END, NULL, NULL, NULL) == -1)
                     err_msg("%s:%d -> Could not send command", __FILE__, __LINE__);
             }
 
@@ -170,7 +170,7 @@ void commands_set_state(enum COMMAND_STATE state, struct Command ***com){
             breakpoint_table = 0; 
             break;
         case BREAKPOINT_TABLE_BEGIN: 
-            if(tgdb_append_command(com, BREAKPOINTS_BEGIN, NULL, NULL, NULL) == -1)
+            if(tgdb_append_command(q, BREAKPOINTS_BEGIN, NULL, NULL, NULL) == -1)
                 err_msg("%s:%d -> Could not send command", __FILE__, __LINE__);
             breakpoint_table = 1; 
             breakpoint_started = TRUE;
@@ -310,7 +310,7 @@ int commands_run_command(int fd, struct command *com){
 }
 
 
-void commands_list_command_finished(struct Command ***com, int success){
+void commands_list_command_finished(struct queue *q, int success){
    /* The file was accepted, lets see if we can get the 
     * absolute path from gdb. It should be ok for tgdb to run this command
     * right away.  */
@@ -319,11 +319,11 @@ void commands_list_command_finished(struct Command ***com, int success){
    else
       /* The file does not exist and it can not be opened.
        * So we return that information to the gui.  */
-      tgdb_append_command(com, ABSOLUTE_SOURCE_DENIED, 
+      tgdb_append_command(q, ABSOLUTE_SOURCE_DENIED, 
               last_info_source_requested, NULL, NULL);
 }
 
-void commands_send_source_absolute_source_file(struct Command ***com){
+void commands_send_source_absolute_source_file(struct queue *q){
    /*err_msg("Whats up(%s:%d)\r\n", info_source_buf, info_source_buf_pos);*/
     unsigned long length = string_length(info_source_string);
     static char *info_ptr; 
@@ -336,14 +336,14 @@ void commands_send_source_absolute_source_file(struct Command ***com){
 
       /* requesting file */
       if(last_info_source_requested[0] != '\0')
-         tgdb_append_command(com, ABSOLUTE_SOURCE_ACCEPTED, path, NULL, NULL);
+         tgdb_append_command(q, ABSOLUTE_SOURCE_ACCEPTED, path, NULL, NULL);
       else {
-         tgdb_append_command(com, SOURCE_FILE_UPDATE, path, NULL, NULL);
-         tgdb_append_command(com, LINE_NUMBER_UPDATE, "1", NULL, NULL);
+         tgdb_append_command(q, SOURCE_FILE_UPDATE, path, NULL, NULL);
+         tgdb_append_command(q, LINE_NUMBER_UPDATE, "1", NULL, NULL);
       }
    /* not found */
    } else {
-      tgdb_append_command(com, ABSOLUTE_SOURCE_DENIED, 
+      tgdb_append_command(q, ABSOLUTE_SOURCE_DENIED, 
               last_info_source_requested, NULL, NULL);
    }
 }
@@ -353,7 +353,7 @@ int commands_has_commnands_to_run(void){
    return (commands == 0)? 0: 1;
 }
 
-static void commands_process_source_line(struct Command  ***com){
+static void commands_process_source_line(void){
     unsigned long length = string_length(info_sources_string), i, start = 0;
     static char *info_ptr; 
     static char *nfile;
@@ -397,7 +397,7 @@ static void commands_process_info_source(char a){
 }
 
 /* process's source files */
-static void commands_process_sources(char a, struct Command ***com){
+static void commands_process_sources(char a){
     static const char *sourcesReadyString = "Source files for which symbols ";
     static const int sourcesReadyStringLength = 31;
     static char *info_ptr;
@@ -418,7 +418,7 @@ static void commands_process_sources(char a, struct Command ***com){
 
         /* is this a valid line */
         if(string_length(info_sources_string) > 0 && sources_ready && info_ptr[string_length(info_sources_string) - 1] != ':')
-            commands_process_source_line(com); 
+            commands_process_source_line(); 
 
         string_clear(info_sources_string);
     }
@@ -428,28 +428,28 @@ static void commands_process_sources(char a, struct Command ***com){
  * passes along the item to the function. It would be better if it could pass
  * along other data 
  */
-static struct Command ***hackCommand;
+static struct queue *hackq;
 
 void commands_send_gui_source(void *item) {
-    tgdb_append_command(hackCommand, SOURCE_FILE, (char*)item, NULL, NULL);  
+    tgdb_append_command(hackq, SOURCE_FILE, (char*)item, NULL, NULL);  
 }
 
 void commands_free(void *item) {
     free((char*)item);
 }
 
-void commands_send_gui_sources(struct Command ***com){
-    hackCommand = com;
-    tgdb_append_command(com, SOURCES_START, NULL, NULL, NULL);  
+void commands_send_gui_sources(struct queue *q){
+    hackq = q;
+    tgdb_append_command(q, SOURCES_START, NULL, NULL, NULL);  
     queue_traverse_list(source_files, commands_send_gui_source);
-    tgdb_append_command(com, SOURCES_END, NULL, NULL, NULL);  
+    tgdb_append_command(q, SOURCES_END, NULL, NULL, NULL);  
     queue_free_list(source_files, commands_free);
-    hackCommand = NULL;
+    hackq = NULL;
 }
 
-void commands_process(char a, struct Command ***com){
+void commands_process(char a, struct queue *q){
     if(commands_get_state() == INFO_SOURCES){
-        commands_process_sources(a, com);     
+        commands_process_sources(a);     
     } else if(commands_get_state() == INFO_LIST){
         /* do nothing with data */
     } else if(commands_get_state() == INFO_SOURCE){

@@ -1,3 +1,8 @@
+03/06/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * Updated cgdb to work with the new Command interface. tgdb now returns a
+    nice queue instead of a triple pointer 'struct Command *'
+
 03/02/2003 Bob Rossi <bob_rossi@cox.net>
 
     * Readline has been cleanly added with a pty: Now, cgdb opens a pty,

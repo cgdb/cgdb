@@ -10,97 +10,90 @@
 #include "error.h"
 #include "util.h"
 
-static const int COMSIZE = 16;
-static size_t command_size = 0;
-static size_t command_cur_size = 0;
+static void tgdb_print_item(void *item) {
+    size_t j;
+    struct Command *com = (struct Command *)item;
+    FILE *fd = stderr;
 
-void tgdb_traverse_command(FILE *fd, struct Command ***com){
-   size_t j;
+    if ( !com ) {
+        err_msg("%s:%d ERROR: ITEM IS NULL", __FILE__, __LINE__);
+        return;
+    }
 
-   for(j = 0; com != NULL && (*com) != NULL && (*com)[j] != NULL; ++j){
-      if((*com)[j]->header == BREAKPOINTS_BEGIN)
-         fprintf(fd, "TGDB_BREAKPOINTS_BEGIN(%s)\n", (*com)[j]->data);
-      else if((*com)[j]->header == BREAKPOINT)
-         fprintf(fd, "TGDB_BREAKPOINT(%s)\n", (*com)[j]->data);
-      else if((*com)[j]->header == BREAKPOINTS_END)
-         fprintf(fd, "TGDB_BREAKPOINT_END(%s)\n", (*com)[j]->data);
-      else if((*com)[j]->header == SOURCE_FILE_UPDATE)
-         fprintf(fd, "TGDB_SOURCE_FILE_UPDATE(%s)\n", (*com)[j]->data);
-      else if((*com)[j]->header == LINE_NUMBER_UPDATE)
-         fprintf(fd, "TGDB_LINE_NUMBER_UPDATE(%s)\n", (*com)[j]->data);
-      else if((*com)[j]->header == SOURCES_START)
-         fprintf(fd, "TGDB_SOURCES_START(%s)\n", (*com)[j]->data);
-      else if((*com)[j]->header == SOURCE_FILE)
-         fprintf(fd, "TGDB_SOURCE_FILE(%s)\n", (*com)[j]->data);
-      else if((*com)[j]->header == SOURCES_END)
-         fprintf(fd, "TGDB_SOURCES_END(%s)\n", (*com)[j]->data);
-      else if((*com)[j]->header == SOURCES_DENIED)
-         fprintf(fd, "TGDB_SOURCES_DENIED(%s)\n", (*com)[j]->data);
-      else if((*com)[j]->header == ABSOLUTE_SOURCE_ACCEPTED)
-         fprintf(fd, "TGDB_ABSOLUTE_SOURCE_ACCEPTED(%s)\n", (*com)[j]->data);
-      else if((*com)[j]->header == ABSOLUTE_SOURCE_DENIED)
-         fprintf(fd, "TGDB_ABSOLUTE_SOURCE_DENIED(%s)\n", (*com)[j]->data);
-      else if((*com)[j]->header == QUIT)
-         fprintf(fd, "TGDB_QUIT(%s)\n", (*com)[j]->data);
-      else
-         fprintf(fd, "TGDB_UNKNOWN %s\n", (*com)[j] -> data);
-   }
+    switch(com->header) {
+        case BREAKPOINTS_BEGIN:
+            fprintf(fd, "TGDB_BREAKPOINTS_BEGIN(%s)\n", com->data);         break;
+        case BREAKPOINT:
+            fprintf(fd, "TGDB_BREAKPOINT(%s)\n", com->data);                break;
+        case BREAKPOINTS_END:
+            fprintf(fd, "TGDB_BREAKPOINT_END(%s)\n", com->data);            break;
+        case SOURCE_FILE_UPDATE:
+            fprintf(fd, "TGDB_SOURCE_FILE_UPDATE(%s)\n", com->data);        break;
+        case LINE_NUMBER_UPDATE:
+            fprintf(fd, "TGDB_LINE_NUMBER_UPDATE(%s)\n", com->data);        break;
+        case SOURCES_START:
+            fprintf(fd, "TGDB_SOURCES_START(%s)\n", com->data);             break;
+        case SOURCE_FILE:
+            fprintf(fd, "TGDB_SOURCE_FILE(%s)\n", com->data);               break;
+        case SOURCES_END:
+            fprintf(fd, "TGDB_SOURCES_END(%s)\n", com->data);               break;
+        case SOURCES_DENIED:
+            fprintf(fd, "TGDB_SOURCES_DENIED(%s)\n", com->data);            break;
+        case ABSOLUTE_SOURCE_ACCEPTED:
+            fprintf(fd, "TGDB_ABSOLUTE_SOURCE_ACCEPTED(%s)\n", com->data);  break;
+        case ABSOLUTE_SOURCE_DENIED:
+            fprintf(fd, "TGDB_ABSOLUTE_SOURCE_DENIED(%s)\n", com->data);    break;
+        case QUIT:
+            fprintf(fd, "TGDB_QUIT(%s)\n", com->data);                      break;
+        default:
+            fprintf(fd, "%s:%d ERROR TGDB_UNKNOWN\n", __FILE__, __LINE__);  break;
+    }
 }
 
-void tgdb_delete_command(struct Command ***com){
-   int i;
+void tgdb_delete_command(void *item){
+    struct Command *com = (struct Command*) item;
+
+    if ( !com ) {
+        return;
+    }
   
-   for(i = 0; i < command_cur_size && (com != NULL) && (*com != NULL) && (*com)[i] != NULL; ++i)
-      free((*com)[i]);
-
-   free(*com);
-   com = NULL;
-
-   command_size = 0;
-   command_cur_size = 0;
+    free(com);
+    com = NULL;
 }
 
-int tgdb_append_command(struct Command ***com, enum INTERFACE_COMMANDS new_header, 
+void tgdb_delete_commands(struct queue *q) {
+    queue_free_list(q, tgdb_delete_command);
+}
+
+int tgdb_append_command(struct queue *q, 
+                        enum INTERFACE_COMMANDS new_header, 
                         char *buf, char *buf2, char *buf3){
-   char command[MAXLINE];
+    char command[MAXLINE];
+    struct Command *item = (struct Command *)xmalloc(sizeof(struct Command));
+    item->data[0] = '\0';
 
-   while(command_cur_size >= command_size)
-      *com = realloc(*com, (command_size += COMSIZE)*(sizeof(struct Command *)));
+    if(buf != NULL)
+        strcat(item->data, buf);
 
-   command[0] = '\0';
+    if(buf2 != NULL){
+        strcat(item->data, " ");
+        strcat(item->data, buf2);
+    }
+
+    if(buf3 != NULL){
+        strcat(item->data, " ");
+        strcat(item->data, buf3);
+    }
    
-   if(buf != NULL)
-      strcat(command, buf);
+    item->header = new_header;
 
-   if(buf2 != NULL){
-      strcat(command, " ");
-      strcat(command, buf2);
-   }
+    queue_append(q, item);
+    /*err_msg("UPDATE(%s)", command);*/
 
-   if(buf3 != NULL){
-      strcat(command, " ");
-      strcat(command, buf3);
-   }
-
-   (*com)[command_cur_size] = xmalloc(sizeof(struct Command));
-
-   (*com)[command_cur_size]->header = new_header;
-   strcpy(((*com)[command_cur_size++])->data, command);
-
-   /*err_msg("UPDATE(%s)", command);*/
-   
-   return 0;
+    return 0;
 }
 
-int tgdb_end_command(struct Command ***com){
-
-   while(command_cur_size >= command_size)
-      *com = realloc(*com, (command_size += COMSIZE)*(sizeof(struct Command *)));
-
-   if(com != NULL && ((*com) != NULL))
-      (*com)[command_cur_size] = NULL;
-
-   /*tgdb_traverse_command(com);*/
-      
-   return 0;
+void tgdb_traverse_command(struct queue *q) {
+    queue_traverse_list(q, tgdb_print_item);
 }
+

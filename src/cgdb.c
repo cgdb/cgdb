@@ -64,6 +64,7 @@ extern int read_history ();
 #include "sources.h"
 #include "tgdb.h"
 #include "helptext.h"
+#include "queue.h"
 
 /* --------------- */
 /* Local Variables */
@@ -81,6 +82,7 @@ static char readline_slavename[SLAVE_SIZE];  /* name of readline pty */
 static int tgdb_readline_fd = -1;       /* tgdb returns the 'at prompt' data */
 
 static char *debugger_path = NULL;  /* Path to debugger to use */
+struct queue *commandq;
 
 /* ------------------------ */
 /* Initialization functions */
@@ -338,16 +340,17 @@ static void readline_stdin(void) {
    rl_callback_read_char();
 }
 
-static void process_commands(struct Command ***commands)
+static void process_commands(struct queue *q)
 {
     static char filename[PATH_MAX];
     static int updating_breakpts = 0;
     char *com;
-    int i;
+    struct Command *item;
 
-    for (i = 0; *commands != NULL && (*commands)[i] != NULL; i++){
-        com = (*commands)[i]->data;
-        switch ((*commands)[i] -> header){
+    while ( queue_size(q) > 0 ) {
+        item = queue_pop(q);
+        com = item->data;
+        switch (item -> header){
             case BREAKPOINTS_BEGIN:
                 if (!updating_breakpts){
                     updating_breakpts = 1;
@@ -434,26 +437,24 @@ static void process_commands(struct Command ***commands)
             default:
                 break;
         }
+        tgdb_delete_command(item);
     }
-
-    tgdb_delete_command(commands);
 }
 
 static void gdb_input()
 {
     char *buf = malloc(GDB_MAXBUF+1);
-    struct Command **commands;
     int size;
 
     /* Read from GDB */
-    size = tgdb_recv(buf, GDB_MAXBUF, &commands);
+    size = tgdb_recv(buf, GDB_MAXBUF, commandq);
     if (size == -1){
         err_quit("%s: Error while reading from GDB\n", my_name);
         return;
     }
     buf[size] = 0;
 
-    process_commands(&commands);
+    process_commands(commandq);
 
     /* Display GDB output */
     if_print(buf);
@@ -660,6 +661,8 @@ int main(int argc, char *argv[]) {
 
     if ( init_readline() == -1 )
         err_quit("%s:%d Unable to start readline\n", __FILE__, __LINE__); 
+
+    commandq = queue_init();
 
     /* Initialize the display */
     switch (if_init()){

@@ -18,6 +18,7 @@ extern "C" {
 
 #include <sys/types.h>
 #include <stdio.h>
+#include "queue.h"
 
 enum INTERFACE_COMMANDS {
    BREAKPOINTS_BEGIN,   /* starts a breakpoint session */
@@ -89,11 +90,13 @@ struct command {
    enum buffer_command_to_run com_to_run;
 };
 
+void tgdb_delete_command(void *item);
+
 /* tgdb_delete_command: Free's the memory from command com.
  *    
  *    NOTE: This functions MUST be called after tgdb_recv is called.  
  */
-void tgdb_delete_command(struct Command ***com);
+void tgdb_delete_commands(struct queue *q);
 
 /* tgdb_append_command: This appends a new command onto the com structure.
  *
@@ -103,20 +106,14 @@ void tgdb_delete_command(struct Command ***com);
  *
  * Return: currently only returns 0 for success.
  */
-int tgdb_append_command(struct Command ***com, enum INTERFACE_COMMANDS new_header, 
+int tgdb_append_command(struct queue *q, 
+                        enum INTERFACE_COMMANDS new_header, 
                         char *buf, char *buf2, char *buf3);
 
 /* tgdb_traverse_command: Traverses com and outputs data to fd. 
  *    This is mainly used for debugging information.
  */
-void tgdb_traverse_command(FILE *fd, struct Command ***com);
-
-/* tgdb_end_command: This terminates the com structure.
- *    It must be called on com before it is returned to the user.
- *    
- * Return: currently only returns 0 for success.
- */
-int tgdb_end_command(struct Command ***com);
+void tgdb_traverse_command(struct queue *q);
 
 #ifdef __cplusplus
 }

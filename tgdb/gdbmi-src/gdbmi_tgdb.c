@@ -63,12 +63,10 @@ int gdbmi_tgdb_get_sources(void){
    return 0;
 }
 
-size_t gdbmi_tgdb_recv(char *buf, size_t n, struct Command ***com){
+size_t gdbmi_tgdb_recv(char *buf, size_t n, struct queue *q){
    char local_buf[n + 1];
    ssize_t size, buf_size;
 
-   /* init com to NULL */
-   *com = NULL;
 
    /* set buf to null for debug reasons */
    memset(buf,'\0', n);
@@ -76,12 +74,12 @@ size_t gdbmi_tgdb_recv(char *buf, size_t n, struct Command ***com){
    /* 1. read all the data possible from gdb that is ready. */
    if( (size = io_read(gdb_stdout, local_buf, n)) < 0){
       err_ret("%s:%d io_read error", __FILE__, __LINE__);
-      tgdb_append_command(com, QUIT, NULL, NULL, NULL);
+      tgdb_append_command(q, QUIT, NULL, NULL, NULL);
       return -1;
    } else if ( size == 0 ) {/* EOF */ 
       buf_size = 0;
       
-      if(tgdb_append_command(com, QUIT, NULL, NULL, NULL) == -1)
+      if(tgdb_append_command(q, QUIT, NULL, NULL, NULL) == -1)
          err_msg("%s:%d tgdb_append_command error", __FILE__, __LINE__);
       
       goto gdbmi_recv_finish;
@@ -92,15 +90,12 @@ size_t gdbmi_tgdb_recv(char *buf, size_t n, struct Command ***com){
    /* 2. At this point local_buf has everything new from this read.
     * Now, the data must be parsed.
     */
-   buf_size = gdbmi_parse(local_buf, size, buf, n, com);
+   buf_size = gdbmi_parse(local_buf, size, buf, n, q);
 
    /* 3. Run the users command */
    /* tgdb_run_users_buffered_commands(); */
 
 gdbmi_recv_finish:
-
-   if(tgdb_end_command(com) == -1)
-      err_msg("%s:%d -> could not terminate commands", __FILE__, __LINE__);
 
    return buf_size;
 }

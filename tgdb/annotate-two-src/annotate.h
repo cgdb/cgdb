@@ -4,6 +4,6 @@
 #include <sys/types.h>
 #include "types.h"
 
-int tgdb_parse_annotation(char *data, size_t size, struct Command ***com);
+int tgdb_parse_annotation(char *data, size_t size, struct queue *q);
 
 #endif

@@ -53,6 +53,8 @@ extern int read_history ();
 #include "io.h"
 #include "terminal.h"
 
+struct queue *q;
+
 static void tgdb_send_user_command(char *line) {
     add_history(line);
     fprintf(stderr, "\n");
@@ -129,11 +131,11 @@ static void readline_input(int fd){
 
 static int gdb_input(void) {
     char buf[MAXLINE];
-    struct Command **com;
     size_t size;
     size_t i;
+    struct Command *item;
 
-    if( (size = tgdb_recv(buf, MAXLINE, &com)) == -1){
+    if( (size = tgdb_recv(buf, MAXLINE, q)) == -1){
     err_msg("%s:%d -> file descriptor closed\n", __FILE__, __LINE__);
     return;
     } /* end if */
@@ -144,16 +146,17 @@ static int gdb_input(void) {
            return;
         }
 
-    /*tgdb_traverse_command(stderr, &com);*/
+    /*tgdb_traverse_command(q);*/
 
-    { 
-    size_t j;
-    for(j = 0; com != NULL && com[j] != NULL ; ++j)
-       if((*com)[j].header == QUIT)
+    while ( queue_size(q) > 0 ) {
+        item = queue_pop(q);
+        if(item->header == QUIT)
            return -1;
-    } 
 
-    tgdb_delete_command(&com);
+        tgdb_delete_command(item);
+    }
+
+
     return 0;
 }
 
@@ -274,7 +277,7 @@ void mainLoop(int masterfd, int childfd, int readlinefd){
 int main(int argc, char **argv){
    
    int gdb_fd, child_fd, tgdb_readline_fd;
-#if 0
+#if 1
    int c;
    read(0, &c ,1);
 #endif
@@ -285,6 +288,8 @@ int main(int argc, char **argv){
    tgdb_init();
    if ( tgdb_start(NULL, argc-1, argv+1, &gdb_fd, &child_fd, &tgdb_readline_fd) == -1 )
       err_msg("%s:%d tgdb_start error\n", __FILE__, __LINE__);
+
+   q = queue_init();
 
    init_readline();
 

@@ -64,7 +64,7 @@ void data_set_state(enum internal_state state){
    } /* end switch */
 }
 
-void data_process(char a, char *buf, int *n, struct Command ***com){
+void data_process(char a, char *buf, int *n, struct queue *q){
    switch(data_state){
       case VOID:              buf[(*n)++] = a;                    break;
       case AT_PROMPT:         gdb_prompt[gdb_prompt_size++] = a;  break;
@@ -72,7 +72,7 @@ void data_process(char a, char *buf, int *n, struct Command ***com){
       case GUI_COMMAND:
       case INTERNAL_COMMAND:
          if(data_state == INTERNAL_COMMAND)
-            commands_process(a, com);
+            commands_process(a, q);
          else if(data_state == GUI_COMMAND)
             buf[(*n)++] = a;
       

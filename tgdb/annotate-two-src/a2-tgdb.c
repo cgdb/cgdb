@@ -43,6 +43,25 @@ static sig_atomic_t control_c = 0;              /* If control_c was hit by user 
 static char user_cur_command[MAXLINE];
 static int user_cur_command_pos = 0;
 
+/* tgdb_can_issue_command:
+ * This is used to see if gdb can currently issue a comand directly to gdb or
+ * if it should put it in the buffer.
+ *
+ * Returns: TRUE if can issue directly to gdb. Otherwise FALSE.
+ */
+static int tgdb_can_issue_command(void) {
+   if ( tgdb_initialized && 
+      /* The user is at the prompt */
+      data_get_state() == USER_AT_PROMPT && 
+      /* This line boiles down to:
+       * If the buffered list is empty or the user is at the misc prompt 
+       */
+      ( queue_size(gdb_input_queue) == 0 || global_can_issue_command() == FALSE))
+      return TRUE;
+   else 
+      return FALSE;
+}
+
 /* tgdb_setup_buffer_command_to_run: This sets up a command to run.
  *    It runs it right away if no other commands are being run. 
  *    Otherwise, it puts it in the queue and will run it in turn.
@@ -198,25 +217,6 @@ static int tgdb_run_command(void){
     return 0;
 }
 
-/* tgdb_can_issue_command:
- * This is used to see if gdb can currently issue a comand directly to gdb or
- * if it should put it in the buffer.
- *
- * Returns: TRUE if can issue directly to gdb. Otherwise FALSE.
- */
-static int tgdb_can_issue_command(void) {
-   if ( tgdb_initialized && 
-      /* The user is at the prompt */
-      data_get_state() == USER_AT_PROMPT && 
-      /* This line boiles down to:
-       * If the buffered list is empty or the user is at the misc prompt 
-       */
-      ( queue_size(gdb_input_queue) == 0 || global_can_issue_command() == FALSE))
-      return TRUE;
-   else 
-      return FALSE;
-}
-
 int a2_tgdb_get_source_absolute_filename(char *file){
    return tgdb_setup_buffer_command_to_run(file, BUFFER_TGDB_COMMAND, COMMANDS_HIDE_OUTPUT, COMMANDS_INFO_LIST);
 }
@@ -228,13 +228,13 @@ int a2_tgdb_get_sources(void){
 /* tgdb_recv: returns to the caller data and commands
  *
  */
-size_t a2_tgdb_recv(char *buf, size_t n, struct Command ***com){
+size_t a2_tgdb_recv(char *buf, size_t n, struct queue *q){
    char local_buf[10*n];
    ssize_t size, buf_size;
    extern int DATA_AT_PROMPT;
 
-   /* init com to NULL */
-   *com = NULL;
+   /* make the queue empty */
+   tgdb_delete_commands(q);
 
    /* set buf to null for debug reasons */
    memset(buf,'\0', n);
@@ -242,12 +242,12 @@ size_t a2_tgdb_recv(char *buf, size_t n, struct Command ***com){
    /* 1. read all the data possible from gdb that is ready. */
    if( (size = io_read(gdb_stdout, local_buf, n)) < 0){
       err_ret("%s:%d -> could not read from masterfd", __FILE__, __LINE__);
-      tgdb_append_command(com, QUIT, NULL, NULL, NULL);
+      tgdb_append_command(q, QUIT, NULL, NULL, NULL);
       return -1;
    } else if ( size == 0 ) {/* EOF */ 
       buf_size = 0;
       
-      if(tgdb_append_command(com, QUIT, NULL, NULL, NULL) == -1)
+      if(tgdb_append_command(q, QUIT, NULL, NULL, NULL) == -1)
          err_msg("%s:%d -> Could not send command", __FILE__, __LINE__);
       
       goto tgdb_finish;
@@ -282,7 +282,7 @@ size_t a2_tgdb_recv(char *buf, size_t n, struct Command ***com){
     *
     * buf and buf_size are the data to be returned from the user.
     */
-   buf_size = a2_handle_data(local_buf, size, buf, n, com);
+   buf_size = a2_handle_data(local_buf, size, buf, n, q);
 
    /* 4. runs the users buffered command if any exists */
    if( global_can_issue_command() == TRUE && 
@@ -312,9 +312,6 @@ size_t a2_tgdb_recv(char *buf, size_t n, struct Command ***com){
    }
 
    tgdb_finish:
-
-   if(tgdb_end_command(com) == -1)
-      err_msg("%s:%d -> could not terminate commands", __FILE__, __LINE__);
 
    return buf_size;
 }

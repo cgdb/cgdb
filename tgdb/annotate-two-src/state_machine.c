@@ -26,7 +26,7 @@ int misc_pre_prompt = 0;
 
 int a2_handle_data(char *data, size_t size,
                      char *gui_data, size_t gui_size, 
-                     struct Command ***com){
+                     struct queue *q){
    int i, counter = 0;
    
    /* track state to find next file and line number */
@@ -50,18 +50,18 @@ int a2_handle_data(char *data, size_t size,
                   tgdb_state = CAR_RET;                          
                   break;
                case CAR_RET:  
-                  data_process('\r', gui_data, &counter, com);      
+                  data_process('\r', gui_data, &counter, q);      
                   break;
                case NEW_LINE:    
                   tgdb_state = CAR_RET;
-                  data_process('\r', gui_data, &counter, com);
-                  data_process('\n', gui_data, &counter, com);      
+                  data_process('\r', gui_data, &counter, q);
+                  data_process('\n', gui_data, &counter, q);      
                   break;
                case CONTROL_Z:   
                   tgdb_state = CAR_RET;
-                  data_process('\r', gui_data, &counter, com);
-                  data_process('\n', gui_data, &counter, com);  
-                  data_process('\032', gui_data, &counter, com);    
+                  data_process('\r', gui_data, &counter, q);
+                  data_process('\n', gui_data, &counter, q);  
+                  data_process('\032', gui_data, &counter, q);    
                   break;
                case ANNOTATION:  
                   tgdb_buffer[tgdb_size++] = data[i];          
@@ -87,7 +87,7 @@ int a2_handle_data(char *data, size_t size,
 
             switch(tgdb_state){
                case DATA:        
-                  data_process('\n', gui_data, &counter, com);
+                  data_process('\n', gui_data, &counter, q);
                   break;
                case CAR_RET:
                   tgdb_state = NEW_LINE;
@@ -97,18 +97,18 @@ int a2_handle_data(char *data, size_t size,
                   break; 
                case NEW_LINE:    
                   tgdb_state = DATA;
-                  data_process('\r', gui_data, &counter, com);
-                  data_process('\n', gui_data, &counter, com);    
+                  data_process('\r', gui_data, &counter, q);
+                  data_process('\n', gui_data, &counter, q);    
                   break;
                case CONTROL_Z:   
                   tgdb_state = DATA;
-                  data_process('\r', gui_data, &counter, com);  
-                  data_process('\n', gui_data, &counter, com);  
-                  data_process('\032', gui_data, &counter, com);    
+                  data_process('\r', gui_data, &counter, q);  
+                  data_process('\n', gui_data, &counter, q);  
+                  data_process('\032', gui_data, &counter, q);    
                   break;
                case ANNOTATION:  /* Found an annotation */
                   tgdb_state = NL_DATA;
-                  tgdb_parse_annotation(tgdb_buffer, tgdb_size, com);
+                  tgdb_parse_annotation(tgdb_buffer, tgdb_size, q);
                   tgdb_size = 0;                               
                   memset(tgdb_buffer, '\0', MAXLINE);             
                                  
@@ -130,12 +130,12 @@ int a2_handle_data(char *data, size_t size,
             switch(tgdb_state){
                case DATA:        
                   tgdb_state = DATA;
-                  data_process('\032', gui_data, &counter, com);  
+                  data_process('\032', gui_data, &counter, q);  
                   break;
                case CAR_RET:
                   tgdb_state = DATA;
-                  data_process('\r', gui_data, &counter, com);  
-                  data_process('\032', gui_data, &counter, com);  
+                  data_process('\r', gui_data, &counter, q);  
+                  data_process('\032', gui_data, &counter, q);  
                   break;
                case NEW_LINE:    
                   tgdb_state = CONTROL_Z;          
@@ -158,29 +158,29 @@ int a2_handle_data(char *data, size_t size,
          default_:
             switch(tgdb_state){
                case DATA:        
-                  data_process(data[i], gui_data, &counter, com);  
+                  data_process(data[i], gui_data, &counter, q);  
                   break;
                case NL_DATA:     
                   tgdb_state = DATA;
-                  data_process(data[i], gui_data, &counter, com);  
+                  data_process(data[i], gui_data, &counter, q);  
                   break;
                case CAR_RET:
                   tgdb_state = DATA;
-                  data_process('\r', gui_data, &counter, com);     
-                  data_process(data[i], gui_data, &counter, com);  
+                  data_process('\r', gui_data, &counter, q);     
+                  data_process(data[i], gui_data, &counter, q);  
                   break;
                case NEW_LINE:    
                   tgdb_state = DATA;
-                  data_process('\r', gui_data, &counter, com);     
-                  data_process('\n', gui_data, &counter, com);     
-                  data_process(data[i], gui_data, &counter, com);  
+                  data_process('\r', gui_data, &counter, q);     
+                  data_process('\n', gui_data, &counter, q);     
+                  data_process(data[i], gui_data, &counter, q);  
                   break;
                case CONTROL_Z:   
                   tgdb_state = DATA;
-                  data_process('\r', gui_data, &counter, com);     
-                  data_process('\n', gui_data, &counter, com);                 
-                  data_process('\032', gui_data, &counter, com);                 
-                  data_process(data[i], gui_data, &counter, com);                 
+                  data_process('\r', gui_data, &counter, q);     
+                  data_process('\n', gui_data, &counter, q);                 
+                  data_process('\032', gui_data, &counter, q);                 
+                  data_process(data[i], gui_data, &counter, q);                 
                   break;
                case ANNOTATION:  
                   tgdb_buffer[tgdb_size++] = data[i];    

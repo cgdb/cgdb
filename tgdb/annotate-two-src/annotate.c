@@ -11,11 +11,11 @@
 
 extern int masterfd;
 
-int handle_source(const char *buf,  size_t n, struct Command ***com){
-   return commands_parse_source(buf, n, com);
+static int handle_source(const char *buf,  size_t n, struct queue *q){
+   return commands_parse_source(buf, n, q);
 }
 
-int handle_misc_pre_prompt(const char *buf, size_t n, struct Command ***com){
+static int handle_misc_pre_prompt(const char *buf, size_t n, struct queue *q){
    extern int misc_pre_prompt;
    
    if(data_get_state() == INTERNAL_COMMAND){
@@ -32,7 +32,7 @@ int handle_misc_pre_prompt(const char *buf, size_t n, struct Command ***com){
    return 0;
 }
 
-int handle_misc_prompt(const char *buf, size_t n, struct Command ***com){
+static int handle_misc_prompt(const char *buf, size_t n, struct queue *q){
    /* If not at a prompt (from height being to small) while tgdb or the
     * gui is running an internal command.
     */
@@ -42,7 +42,7 @@ int handle_misc_prompt(const char *buf, size_t n, struct Command ***com){
    return 0;
 }
 
-int handle_misc_post_prompt(const char *buf, size_t n, struct Command ***com){
+static int handle_misc_post_prompt(const char *buf, size_t n, struct queue *q){
    if(globals_is_internal_prompt() == TRUE){
       globals_set_internal_prompt_command(FALSE);
    } else {
@@ -53,43 +53,43 @@ int handle_misc_post_prompt(const char *buf, size_t n, struct Command ***com){
    return 0;
 }
 
-int handle_pre_prompt(const char *buf, size_t n, struct Command ***com){
+static int handle_pre_prompt(const char *buf, size_t n, struct queue *q){
    data_set_state(AT_PROMPT);
    
    return 0;
 }
 
-int handle_prompt(const char *buf, size_t n, struct Command ***com){
+static int handle_prompt(const char *buf, size_t n, struct queue *q){
    data_set_state(USER_AT_PROMPT);
 
    /* 'info sources' is done, return the sources to the gui */
    if(global_has_info_sources_started() == TRUE){
       global_reset_info_sources_started();
-      commands_send_gui_sources(com);
+      commands_send_gui_sources(q);
       return 0;
    } 
 
    if(global_has_list_started() == TRUE){
       global_reset_list_started();
-      commands_list_command_finished(com, 1);
+      commands_list_command_finished(q, 1);
       return 0;
    }
 
    if(global_has_info_source_started() == TRUE){
       global_reset_info_source_started();
-      commands_send_source_absolute_source_file(com);
+      commands_send_source_absolute_source_file(q);
       return 0;
    }
    
    return 0;
 }
 
-int handle_post_prompt(const char *buf, size_t n, struct Command ***com){
+static int handle_post_prompt(const char *buf, size_t n, struct queue *q){
    data_set_state(POST_PROMPT);
    return 0;
 }
 
-int handle_breakpoints_invalid(const char *buf, size_t n, struct Command ***com){
+static int handle_breakpoints_invalid(const char *buf, size_t n, struct queue *q){
    /*commands_set_command_to_run(BREAKPOINTS);*/
    /* Tgdb checks for breakpoints after every command. 
     * This is because of buggy gdb versions. gdb does not output this 
@@ -98,54 +98,54 @@ int handle_breakpoints_invalid(const char *buf, size_t n, struct Command ***com)
    return 0;
 }
 
-int handle_breakpoints_headers(const char *buf, size_t n, struct Command ***com){
-   commands_set_state(BREAKPOINT_HEADERS, com);
+static int handle_breakpoints_headers(const char *buf, size_t n, struct queue *q){
+   commands_set_state(BREAKPOINT_HEADERS, q);
    return 0;
 }
 
-int handle_breakpoints_table(const char *buf, size_t n, struct Command ***com){
-   commands_set_state(BREAKPOINT_TABLE_BEGIN, com);
+static int handle_breakpoints_table(const char *buf, size_t n, struct queue *q){
+   commands_set_state(BREAKPOINT_TABLE_BEGIN, q);
    return 0;
 }
 
-int handle_breakpoints_table_end(const char *buf, size_t n, struct Command ***com){
-   commands_set_state(BREAKPOINT_TABLE_END, com);
+static int handle_breakpoints_table_end(const char *buf, size_t n, struct queue *q){
+   commands_set_state(BREAKPOINT_TABLE_END, q);
    return 0;
 }
 
-int handle_field(const char *buf, size_t n, struct Command ***com){
+static int handle_field(const char *buf, size_t n, struct queue *q){
    int i = -1;
    
    commands_parse_field(buf, n, &i);
    commands_set_field_num(i);
-   commands_set_state(FIELD, com);
+   commands_set_state(FIELD, q);
 
    return 0;
 }
 
-int handle_record(const char *buf, size_t n, struct Command ***com){
-   commands_set_state(RECORD, com);
+static int handle_record(const char *buf, size_t n, struct queue *q){
+   commands_set_state(RECORD, q);
    return 0;
 }
 
-int handle_error(const char *buf, size_t n, struct Command ***com){
+static int handle_error(const char *buf, size_t n, struct queue *q){
    data_set_state(POST_PROMPT);  /* TEMPORARY */
    return 0;
 }
 
-int handle_error_begin(const char *buf, size_t n, struct Command ***com){
+static int handle_error_begin(const char *buf, size_t n, struct queue *q){
    /* If the user listed the files ( info sources ) and there is an 
     * annotate error ( usually meaning that gdb can not find the symbols
     * for the debugged program ) then send a denied response. */
    if ( commands_get_state() == INFO_SOURCES ) {
-        tgdb_append_command(com, SOURCES_DENIED, NULL, NULL, NULL);
+        tgdb_append_command(q, SOURCES_DENIED, NULL, NULL, NULL);
         return 0;
    }
 
    /* if the user tried to list a file that does not exist */
    if(global_has_list_started() == TRUE){
       global_reset_list_started();
-      commands_list_command_finished(com, 0);
+      commands_list_command_finished(q, 0);
       return 0;
    }
 
@@ -153,43 +153,43 @@ int handle_error_begin(const char *buf, size_t n, struct Command ***com){
    return 0;
 }
 
-int handle_quit(const char *buf, size_t n, struct Command ***com){
+static int handle_quit(const char *buf, size_t n, struct queue *q){
    data_set_state(POST_PROMPT);  /* TEMPORARY */
    return 0;
 }
 
-int handle_display_begin(const char *buf, size_t n, struct Command ***com){
+static int handle_display_begin(const char *buf, size_t n, struct queue *q){
    return 0;
 }
 
-int handle_display_number_end(const char *buf, size_t n, struct Command ***com){
+static int handle_display_number_end(const char *buf, size_t n, struct queue *q){
    return 0;
 }
 
-int handle_display_format(const char *buf, size_t n, struct Command ***com){
+static int handle_display_format(const char *buf, size_t n, struct queue *q){
    return 0;
 }
 
-int handle_display_expression(const char *buf, size_t n, struct Command ***com){
+static int handle_display_expression(const char *buf, size_t n, struct queue *q){
    return 0;
 }
 
-int handle_display_expression_end(const char *buf, size_t n, struct Command ***com){
+static int handle_display_expression_end(const char *buf, size_t n, struct queue *q){
    return 0;
 }
 
-int handle_display_value(const char *buf, size_t n, struct Command ***com){
+static int handle_display_value(const char *buf, size_t n, struct queue *q){
    return 0;
 }
 
-int NOT_SUPPORTED(const char *buf, size_t n, struct Command ***com){
+static int NOT_SUPPORTED(const char *buf, size_t n, struct queue *q){
    return 0;
 }
 
-struct annotation {
+static struct annotation {
    const char *data;
    size_t size;
-   int (*f)(const char *buf, size_t n, struct Command ***com);
+   int (*f)(const char *buf, size_t n, struct queue *q);
 } annotations[] = {
   {
       "source",
@@ -418,12 +418,12 @@ struct annotation {
   }
 };
 
-int tgdb_parse_annotation(char *data, size_t size, struct Command ***com){
+int tgdb_parse_annotation(char *data, size_t size, struct queue *q){
    int i;
    for(i = 0; annotations[i].data != NULL; ++i){
       if(strncmp(data, annotations[i].data, annotations[i].size) == 0){
          if(annotations[i].f){
-            if(annotations[i].f(data, size, com) == -1){
+            if(annotations[i].f(data, size, q) == -1){
                err_msg("%s:%d -> parsing annotation failed\n", __FILE__, __LINE__);
             } else 
                break; /* only match one annotation */

@@ -9,7 +9,7 @@ int gdbmi_tgdb_shutdown(void);
 int gdbmi_tgdb_run_command(char *com);
 int gdbmi_tgdb_get_source_absolute_filename(char *file);
 int gdbmi_tgdb_get_sources(void);
-size_t gdbmi_tgdb_recv(char *buf, size_t n, struct Command ***com);
+size_t gdbmi_tgdb_recv(char *buf, size_t n, struct queue *q);
 char *gdbmi_tgdb_send(char *command, int out_type);
 int gdbmi_tgdb_send_input(char c);
 int gdbmi_tgdb_recv_input(char *buf);

@@ -35,7 +35,7 @@ enum internal_state data_get_state(void);
  *             based on whatever the character a was.
  *    n     -  This is the current size of buf.
  */
-void data_process(char a, char *buf, int *n, struct Command ***com);
+void data_process(char a, char *buf, int *n, struct queue *q);
 
 /* This must be called before any command is written to gdb.  */
 void data_prepare_run_command(void);
