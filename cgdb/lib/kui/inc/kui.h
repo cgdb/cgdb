@@ -154,8 +154,9 @@ int kui_ms_destroy ( struct kui_map_set *kui_ms );
 
 /******************************************************************************/
 /**
- * @name General operations on a kui map context.
- * These function's are the basic functions used to operate on a kui map context
+ * @name General operations on a kui map set context.
+ * These function's are the basic functions used to operate on a kui map 
+ * set context
  */
 /******************************************************************************/
 
