@@ -448,6 +448,7 @@ static int if_resize()
 #ifdef HAVE_NCURSES
         if (screen_size.ws_row != LINES || screen_size.ws_col != COLS){
             resizeterm(screen_size.ws_row, screen_size.ws_col);
+            refresh();
             return if_layout();
         }
 #else
