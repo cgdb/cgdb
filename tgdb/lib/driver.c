@@ -125,8 +125,8 @@ static int gdb_input(void) {
        return;
     }
 
-//    tgdb_traverse_command(stderr, &com);
-//
+    tgdb_traverse_command(stderr, &com);
+
     { 
     size_t j;
     for(j = 0; com != NULL && com[j] != NULL ; ++j)
@@ -234,6 +234,10 @@ void mainLoop(int masterfd, int childfd, int readlinefd){
 int main(int argc, char **argv){
    
    int gdb_fd, child_fd, tgdb_readline_fd;
+#if 0
+   int c;
+   read(0, &c ,1);
+#endif
 
    tgdb_init();
    if ( tgdb_start(NULL, argc-1, argv+1, &gdb_fd, &child_fd, &tgdb_readline_fd) == -1 )

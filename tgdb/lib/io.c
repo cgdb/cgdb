@@ -15,8 +15,8 @@
 static FILE *dfd = NULL;
 static int debug_on = 0;
 
-static const char *debug_begin = "";
-static const char *debug_end   = "";
+static const char *debug_begin = "<";
+static const char *debug_end   = ">";
 
 static void process_error(void) {
    if(errno == EINTR)

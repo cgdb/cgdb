@@ -430,8 +430,8 @@ char *a2_tgdb_send(char *line){
    static char buf[MAXLINE];
    memset(buf, '\0', MAXLINE); 
    
-   io_debug_write_fmt("%s", line);
    if (tgdb_can_issue_command()) {     
+      /*io_debug_write_fmt("%s", line);*/
       /* tgdb always requests that breakpoints be checked because of
        * buggy gdb annotations */
       tgdb_setup_buffer_command_to_run ( NULL, BUFFER_TGDB_COMMAND, COMMANDS_HIDE_OUTPUT, COMMANDS_INFO_BREAKPOINTS );

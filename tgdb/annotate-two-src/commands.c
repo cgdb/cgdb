@@ -209,7 +209,6 @@ enum COMMAND_STATE commands_get_state(void){
 static int commands_run_server_command(int fd, char *com){
    data_prepare_run_command();
 
-   io_debug_write_fmt("server %s\n", com);
    io_writen(fd, "server ", 7);
    io_writen(fd, com, strlen(com));
    io_writen(fd, "\n", 1);
