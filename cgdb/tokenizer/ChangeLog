@@ -1,3 +1,11 @@
 06/17/2003 Bob Rossi <bob_rossi@cox.net>
+   
+   * clexer.l: returns TOKENIZER_LITERAL for numbers.
+   * adalexer.l: returns TOKENIZER_LITERAL for numbers.
+   * adalexer.l: Added case-insensitive option.
+   * tokenizer_driver.c: print data to stdout instead of stderr.
+
+
+06/17/2003 Bob Rossi <bob_rossi@cox.net>
 
     * Added tokenzier support via flex.

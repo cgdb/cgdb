@@ -4,7 +4,7 @@
 
 static void usage ( void ) {
 
-	fprintf ( stderr, "tokenizer_driver <file> <c|ada>\n" );
+	printf ( "tokenizer_driver <file> <c|ada>\n" );
 	exit ( -1 );
 }
 
@@ -25,22 +25,22 @@ int main ( int argc, char **argv ) {
 
 	
 	if ( tokenizer_set_file ( t, argv[1], l ) == -1 ) {
-		fprintf ( stderr, "%s:%d tokenizer_set_file error\n", __FILE__, __LINE__ );
+		printf ( "%s:%d tokenizer_set_file error\n", __FILE__, __LINE__ );
 		return -1;
 	}
 
 	while ( ( ret = tokenizer_get_token ( t )) > 0 ) {
 		enum tokenizer_type e = tokenizer_get_packet_type ( t );
-		fprintf ( stderr, "Token:\n" );
-		fprintf ( stderr, "\tNumber: %d\n", e );
-		fprintf ( stderr, "\tType: %s\n", tokenizer_get_printable_enum ( e ) );
-		fprintf ( stderr, "\tData: %s\n", tokenizer_get_data ( t ) );
+		printf ( "Token:\n" );
+		printf ( "\tNumber: %d\n", e );
+		printf ( "\tType: %s\n", tokenizer_get_printable_enum ( e ) );
+		printf ( "\tData: %s\n", tokenizer_get_data ( t ) );
 	}
 
 	if ( ret == 0 )
-		fprintf ( stderr, "finished!\n" );
+		printf ( "finished!\n" );
 	else if ( ret == -1 )
-		fprintf ( stderr, "Error!\n" );
+		printf ( "Error!\n" );
 	
 	return 0;
 }

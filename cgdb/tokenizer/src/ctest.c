@@ -12,16 +12,15 @@
 
 #include <stdio.h>
 
-#include "tokenizer.h"
-
 #define TEST 1
 
 int main ( int argc, char **argv ) {
 
-	if ( tokenizer_set_file ( "cfile.c" ) == -1 ) {
-		fprintf ( stderr, "%s:%d tokenizer_set_file error\n", __FILE__, __LINE__ );
-		return -1;
-	}
+   if ( argc == 1 )
+      return -1;
+   else
+      return 0;
+
 	
 	return 0;
 }

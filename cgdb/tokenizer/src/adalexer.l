@@ -1,5 +1,6 @@
 %option prefix="ada_"
 %option outfile="lex.yy.c"
+%option case-insensitive
 
 D                       [0-9]
 L                       [a-zA-Z_]
@@ -101,6 +102,7 @@ L                       [a-zA-Z_]
  
 --([^\r\n\f\v])*        { return(TOKENIZER_COMMENT); }
 L?\"(\\.|[^\\"])*\"     { return(TOKENIZER_LITERAL); }
+{D}+						{ return(TOKENIZER_LITERAL); }
 
 \n						{ return(TOKENIZER_NEWLINE); }
 \r\n 					{ return(TOKENIZER_NEWLINE); }
