@@ -71,8 +71,17 @@ static void tgdb_list_insert (
 	if ( !new_node || !list)
 		return;
 
+	/* Special case, insert into tail with list size 1 */
+	if ( before == NULL && after == NULL && list->size == 1 ) {
+		new_node->next = NULL;
+		new_node->prev = list->head;
+
+		list->head->next = new_node;
+
+		list->tail = new_node;
+
 	/* Inserting first item into list */
-	if ( before == NULL && after == NULL ) {
+	} else if ( before == NULL && after == NULL ) {
 		list->head = new_node;
 		new_node->next = NULL;
 		new_node->prev = NULL;
@@ -85,15 +94,6 @@ static void tgdb_list_insert (
 		list->head->prev = new_node;
 
 		list->head = new_node;
-
-	/* Special case, insert into tail with list size 1 */
-	} else if ( after == NULL && list->size == 1 ) {
-		new_node->next = NULL;
-		new_node->prev = list->head;
-
-		list->head->next = new_node;
-
-		list->tail = new_node;
 
 	/* Insert at end of list */
 	} else if ( after == NULL ) {
@@ -137,7 +137,6 @@ static void tgdb_list_delete (
 	/* Deleting from an empty list */
 	if ( tgdb_list_size ( list ) == 0) {
 
-		free ( node->data );
 		node->next = NULL;
 		node->prev = NULL;
 		node       = NULL;
@@ -148,7 +147,6 @@ static void tgdb_list_delete (
 	/* Deleting last element in the list */
 	} else if ( tgdb_list_size ( list ) == 1 ) {
 		/* Only the head is populated, free it */
-		free ( node->data );
 		node->next = NULL;
 		node->prev = NULL;
 		node       = NULL;
@@ -161,7 +159,6 @@ static void tgdb_list_delete (
 		node->next->prev = NULL;
 		list->head = node->next;
 
-		free ( node->data );
 		node->next = NULL;
 		node->prev = NULL;
 		node       = NULL;
@@ -176,7 +173,6 @@ static void tgdb_list_delete (
 		node->prev->next = NULL;
 		list->tail = node->prev;
 
-		free ( node->data );
 		node->next = NULL;
 		node->prev = NULL;
 		node       = NULL;
@@ -186,7 +182,6 @@ static void tgdb_list_delete (
 		node->prev->next = node->next;
 		node->next->prev = node->prev;
 
-		free ( node->data );
 		node->next = NULL;
 		node->prev = NULL;
 		node       = NULL;
@@ -310,8 +305,10 @@ int tgdb_list_get_last ( struct tgdb_list *tlist, struct tgdb_list_iterator *i )
 
 int tgdb_list_next ( struct tgdb_list_iterator *i ) {
 	if ( i ) {
-		i->node = i->node->next;
-		return 1;
+		if ( i->node->next != NULL ) {
+			i->node = i->node->next;
+			return 1;
+		}
 	}
 
 	return 0;
@@ -319,8 +316,10 @@ int tgdb_list_next ( struct tgdb_list_iterator *i ) {
 
 int tgdb_list_previous ( struct tgdb_list_iterator *i ) {
 	if ( i ) {
-		i->node = i->node->prev;
-		return 1;
+		if ( i->node->prev != NULL ) {
+			i->node = i->node->prev;
+			return 1;
+		}
 	}
 
 	return 0;

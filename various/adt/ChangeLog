@@ -1,10 +1,13 @@
 09/29/2003 Bob Rossi <bob@brasko.net>
 
+   * tgdb_list.c: tgdb_list_insert, move special case to top of cases.
+   tgdb_list_delete, remove call to free user's data.
+
+09/29/2003 Bob Rossi <bob@brasko.net>
+
    * tgdb_list.h: Added tgdb_list_iterator_init, tgdb_list_iterator_free
    * tgdb_list.c: ditto
    tgdb_list_foreach, tgdb_list_free, changed to use new iterator
-
-
 
 09/29/2003 Bob Rossi <bob@brasko.net>
 
