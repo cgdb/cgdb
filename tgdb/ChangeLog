@@ -1,3 +1,7 @@
+07/03/2003 Bob Rossi <bob@brasko.net>
+	
+	* tgdb.h: Updating interface for .4.0
+
 07/02/2003 Bob Rossi <bob@brasko.net>
 	
 	* tgdb.h: Prototyped interface for .4.0
