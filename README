@@ -33,6 +33,12 @@ Quick Reference
     spacebar    -> Sets a breakpoint at the current line number
     b           -> View the previous source file
     f           -> View the next source file
+    -           -> Shrink source window 1 line
+    =           -> Grow source window 1 line
+    _           -> Shrink source window 25%
+                   (or, shrink tty window 1 line, if visible)
+    +           -> Grow source window 25% 
+                   (or, grow tty window 1 line, if visible)
 
     Shortcut Commands
     ------------------
@@ -68,6 +74,10 @@ Quick Reference
     :set ignorecase -> Sets searching case insensitive (:set ic)
     :set shortcut   -> Enables shortcut commands typed in source window 
                        (:set sc)
+    :set winsplit   -> Set the split point between source and gdb window
+                       (especially useful as an init setting in cgdbrc)
+                       values={top_full, top_big, even, bottom_big, bottom_full}
+                       (:set ws)
 
 2. At gdb and tty window
 ------------------------

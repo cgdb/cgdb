@@ -1,3 +1,13 @@
+06/17/2003 Ben Schomp <ben@benschomp.com>
+
+    * changed source window shrink and grow functions:
+    '-' shrinks source window 1 line
+    '=' grows source window 1 line
+    '_' shrinks source window 25%, or if tty window is visible
+        shrinks tty window 1 line
+    '+' grows source window 25%, or if tty window is visible,
+        grows tty window 1 line
+
 04/28/2003 Bob Rossi <bob_rossi@cox.net>
 
     * Changed version number to 0.3.1-cvs for cvs development

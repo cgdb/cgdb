@@ -71,7 +71,7 @@
 /* ----------- */
 
 /* The offset that determines allows gdb/sources window to grow or shrink */
-static int window_height_shift = 0;
+static int window_height_shift;
 
 /* This is for the tty I/O window */
 static const int TTY_WIN_DEFAULT_HEIGHT = 4;
@@ -81,6 +81,13 @@ static int tty_win_height_shift = 0;
 /* Height and width of the terminal */
 #define HEIGHT      (screen_size.ws_row)
 #define WIDTH       (screen_size.ws_col)
+
+/* Max and Min values for window_height_shift */
+#define MAX_WINDOW_HEIGHT_SHIFT (HEIGHT/2 - ((tty_win_on)?TTY_WIN_OFFSET + 1:0) - 3)
+#define MIN_WINDOW_HEIGHT_SHIFT (-(HEIGHT/2 - ((HEIGHT+1)%2) - 1))
+
+/* Current window split state */
+WIN_SPLIT_TYPE cur_win_split = WIN_SPLIT_EVEN;
 
 /* --------------- */
 /* Data Structures */
@@ -187,7 +194,7 @@ static int get_src_col(void) {
 }
 
 static int get_src_height(void) {
-    return ((int)(((screen_size.ws_row+0.5)/2) - window_height_shift));
+    return ((int)(((screen_size.ws_row+0.5)/2) + window_height_shift));
 }
 
 static int get_src_width(void) {
@@ -260,7 +267,7 @@ static int get_gdb_col(void) {
 }
 
 static int get_gdb_height(void) {
-    int window_size = ((screen_size.ws_row/2) + window_height_shift - 1);
+    int window_size = ((screen_size.ws_row/2) - window_height_shift - 1);
     int odd_screen_size = (screen_size.ws_row%2);
 
     if ( tty_win_on ) 
@@ -401,7 +408,7 @@ void if_draw( void )
     if ( get_gdb_height() > 0 )
         scr_refresh(gdb_win, focus == GDB);
 
-    /* This check is here so that the curses goes to the 
+    /* This check is here so that the cursor goes to the 
      * cgdb window. The cursor would stay in the gdb window 
      * on cygwin */
     if ( focus == CGDB ) 
@@ -422,10 +429,10 @@ static int if_layout()
     /* Make sure that the windows offset is within its bounds: 
      * This checks the window offset.
      * */
-    if ( window_height_shift >= HEIGHT/2 )
-       window_height_shift = HEIGHT/2;
-    else if ( window_height_shift <=  -(HEIGHT/2 - ((HEIGHT+1)%2)))
-       window_height_shift = -(HEIGHT/2 - ((HEIGHT+1)%2));
+    if ( window_height_shift >= MAX_WINDOW_HEIGHT_SHIFT )
+       window_height_shift = MAX_WINDOW_HEIGHT_SHIFT;
+    else if ( window_height_shift <= MIN_WINDOW_HEIGHT_SHIFT )
+       window_height_shift = MIN_WINDOW_HEIGHT_SHIFT;
 
     /* Initialize the GDB I/O window */
     if (gdb_win == NULL){
@@ -507,59 +514,138 @@ int if_resize_term(void) {
     return 0;
 }
 
-/* increase_low_win: Makes gdb source window larger and source window smaller 
- * -----------------
- */ 
-static void increase_low_win(void){
+
+/*
+ * increase_win_height: Increase size of source or tty window
+ * ____________________
+ *
+ * Param jump_or_tty - if 0, increase source window by 1
+ *                     if 1, if tty window is visible, increase it by 1
+ *                           else jump source window to next biggest quarter 
+ *
+ */
+static void increase_win_height( int jump_or_tty ) {
+   int height = (HEIGHT/2) - ((tty_win_on)?TTY_WIN_OFFSET + 1:0);
+   int old_window_height_shift = window_height_shift;
+   int old_tty_win_height_shift = tty_win_height_shift;
+
+   if( jump_or_tty ) {
+      // user input: '+' 
+      if ( tty_win_on ) {
+         // tty window is visible
+         height = get_gdb_height() + get_tty_height();
+
+         if ( tty_win_height_shift + TTY_WIN_DEFAULT_HEIGHT < height - 2) {
+            // increase tty window size by 1
+            tty_win_height_shift++;
+         }
+      } else {
+         // no tty window
+         if( cur_win_split == WIN_SPLIT_FREE ) {
+            // cur position is not on mark, find nearest mark
+            cur_win_split = (int)(2 * window_height_shift) / height;
+
+            // handle rounding on either side of mid-way mark
+            if( window_height_shift > 0 ) {
+               cur_win_split++;
+            }
+         } else {
+            // increase to next mark
+            cur_win_split++;
+         }
+
+         // check split bounds
+         if( cur_win_split > WIN_SPLIT_TOP_FULL ) {
+            cur_win_split = WIN_SPLIT_TOP_FULL;
+         }
+
+         // set window height to specified quarter mark
+         window_height_shift = (int)(height * (cur_win_split / 2.0));
+      }
+   } else {
+      // user input: '='
+      cur_win_split = WIN_SPLIT_FREE;  // cur split is not on a mark
+      window_height_shift++;           // increase src window size by 1
+
+   }
+
+   // check bounds of window_height_shift
+   if ( window_height_shift >= MAX_WINDOW_HEIGHT_SHIFT )
+      window_height_shift = MAX_WINDOW_HEIGHT_SHIFT;
+   else if ( window_height_shift <= MIN_WINDOW_HEIGHT_SHIFT )
+      window_height_shift = MIN_WINDOW_HEIGHT_SHIFT;
+
+   // reduce flicker by avoiding unnecessary redraws
+   if( window_height_shift != old_window_height_shift || 
+       tty_win_height_shift != old_tty_win_height_shift ) {
+      if_layout();
+   }
+
+}
+
+/*
+ * decrease_win_height: Decrease size of source or tty window
+ * ____________________
+ *
+ * Param jump_or_tty - if 0, decrease source window by 1
+ *                     if 1, if tty window is visible, decrease it by 1
+ *                           else jump source window to next smallest quarter 
+ *
+ */
+static void decrease_win_height( int jump_or_tty ) {
    int height = HEIGHT/2;
+   int old_window_height_shift = window_height_shift;
+   int old_tty_win_height_shift = tty_win_height_shift;
 
-   if ( window_height_shift < height) {
-      window_height_shift++;
+   if( jump_or_tty ) {
+      // user input: '_'
+      if( tty_win_on ) {
+         // tty window is visible
+         if ( tty_win_height_shift > -(TTY_WIN_DEFAULT_HEIGHT - 2) ) {
+            // decrease tty window size by 1
+            tty_win_height_shift--;
+         }
+      } else { 
+         // no tty window
+         if( cur_win_split == WIN_SPLIT_FREE ) {
+            // cur position is not on mark, find nearest mark
+            cur_win_split = (int)(2 * window_height_shift) / height;
+
+            // handle rounding on either side of mid-way mark
+            if( window_height_shift < 0 ) {
+               cur_win_split--;
+            }
+         } else {
+            // decrease to next mark
+            cur_win_split--;
+         }
+
+         // check split bounds
+         if( cur_win_split < WIN_SPLIT_BOTTOM_FULL ) {
+            cur_win_split = WIN_SPLIT_BOTTOM_FULL;
+         }
+
+         // set window height to specified quarter mark
+         window_height_shift = (int)(height * (cur_win_split / 2.0));
+      }
+   } else {
+      // user input: '-'
+      cur_win_split = WIN_SPLIT_FREE;  // cur split is not on a mark
+      window_height_shift--;           // decrease src window size by 1
+
+   }
+
+   // check bounds of window_height_shift
+   if ( window_height_shift >= MAX_WINDOW_HEIGHT_SHIFT )
+      window_height_shift = MAX_WINDOW_HEIGHT_SHIFT;
+   else if ( window_height_shift <= MIN_WINDOW_HEIGHT_SHIFT )
+      window_height_shift = MIN_WINDOW_HEIGHT_SHIFT;
+
+   // reduce flicker by avoiding unnecessary redraws
+   if( window_height_shift != old_window_height_shift || 
+       tty_win_height_shift != old_tty_win_height_shift ) {
       if_layout();
    }
-}
-
-/* decrease_low_win: Makes gdb source window smaller and source window larger 
- * -----------------
- */ 
-static void decrease_low_win(void){
-    int height = (HEIGHT/2) - ((tty_win_on)?TTY_WIN_OFFSET + 1:0);
-    int odd_height = ((HEIGHT + 1)%2);
-    
-    if ( window_height_shift > -(height - odd_height)) {
-        window_height_shift--;
-        if_layout();
-    }
-}
-
-/* increase_tty_win: Makes tty I/O window larger and source window smaller 
- * -----------------
- */ 
-static void increase_tty_win(void){
-   int height = get_gdb_height() + get_tty_height();
-
-   /* Do nothing unless tty I/O window is displayed */
-   if ( !tty_win_on )
-       return;
-
-   if ( tty_win_height_shift + TTY_WIN_DEFAULT_HEIGHT < height) {
-      tty_win_height_shift++;
-      if_layout();
-   }
-}
-
-/* decrease_tty_win: Makes tty I/O window smaller and source window larger 
- * -----------------
- */ 
-static void decrease_tty_win(void){
-   /* Do nothing unless tty I/O window is displayed */
-   if ( !tty_win_on )
-       return;
-    
-    if ( tty_win_height_shift > -TTY_WIN_DEFAULT_HEIGHT) {
-        tty_win_height_shift--;
-        if_layout();
-    }
 }
 
 /* signal_handler: Handles the WINCH signal (xterm resize).
@@ -836,24 +922,21 @@ static void source_input(struct sviewer *sview, int key)
             source_previous(sview);
             break;
         case '=':
-           /* Makes gdb source window larger and source window smaller */ 
-           increase_low_win();
+           // inc window by 1
+           increase_win_height( 0 );
            break;
         case '-':
-           /* Makes gdb source window smaller and source window larger */ 
-           decrease_low_win();
+           // dec window by 1
+           decrease_win_height( 0 );
            break;
         case '+':
-           decrease_tty_win();
+           // inc to jump or inc tty
+           increase_win_height( 1 );
            break;
         case '_':
-           increase_tty_win();
+           // dec to jump or dec tty
+           decrease_win_height( 1 );
            break;
-//        case '=':
-//           /* Makes the windows the same size */
-//           window_height_shift = 0;
-//           if_layout();
-//           break;
         case 'o':
            /* Causes file dialog to be opened */
            tgdb_get_sources();
@@ -947,6 +1030,8 @@ int if_init(void)
     if ( ( fd = filedlg_new(0, 0, HEIGHT, WIDTH)) == NULL)
        return 5;
    
+    /* Set up window layout */
+    window_height_shift = (int)((HEIGHT/2) * (cur_win_split / 2.0)); 
     switch (if_layout()){
         case 1:
             return 3;
@@ -1241,4 +1326,11 @@ void if_search_next( void )
 {
     source_search_regex(src_win, regex_line, 2, regex_direction, regex_icase);
     if_draw();
+}
+
+void if_set_winsplit( WIN_SPLIT_TYPE new_split )
+{
+   cur_win_split = new_split;
+   window_height_shift = (int)((HEIGHT/2) * (cur_win_split / 2.0)); 
+   if_layout();
 }

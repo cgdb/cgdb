@@ -41,6 +41,7 @@ enum ConfigType
 
 static int command_set_focus( const char *value );
 static int command_set_tabstop( int tab );
+static int command_set_winsplit( const char *value );
 
 static struct ConfigVariable
 {
@@ -54,6 +55,7 @@ static struct ConfigVariable
     /* line_coverage */ { "line_coverage", "lc", CONFIG_TYPE_BOOL, &line_coverage_option },
     /* shortcut   */ 	{ "shortcut", "sc", CONFIG_TYPE_BOOL, &shortcut_option },
     /* tabstop   */     { "tabstop", "ts", CONFIG_TYPE_FUNC_INT, command_set_tabstop },
+    /* winsplit */      { "winsplit", "ws", CONFIG_TYPE_FUNC_STRING, command_set_winsplit }, 
 };
 
 static int command_focus_cgdb( void );
@@ -144,6 +146,23 @@ int command_set_tabstop( int value )
 {
 	highlight_tabstop = value;
     return 0;
+}
+
+int command_set_winsplit( const char *value )
+{
+   if( strcasecmp( value, "top_big" ) == 0 ) {
+      if_set_winsplit( WIN_SPLIT_TOP_BIG );
+   } else if( strcasecmp( value, "top_full" ) == 0 ) {
+      if_set_winsplit( WIN_SPLIT_TOP_FULL );
+   } else if( strcasecmp( value, "bottom_big" ) == 0 ) {
+      if_set_winsplit( WIN_SPLIT_BOTTOM_BIG );
+   } else if( strcasecmp( value, "bottom_full" ) == 0 ) {
+      if_set_winsplit( WIN_SPLIT_BOTTOM_FULL );
+   } else {
+      if_set_winsplit( WIN_SPLIT_EVEN );
+   } // end if
+
+   return 0;
 }
 
 int command_focus_cgdb( void )
