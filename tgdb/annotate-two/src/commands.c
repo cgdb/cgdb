@@ -31,6 +31,7 @@ struct commands {
 
 	enum COMMAND_STATE cur_command_state;
 	int cur_field_num;
+   int field_5_newline_hit;
 
 	/* breakpoint information */
 	struct queue *breakpoint_queue;
@@ -73,7 +74,8 @@ struct commands *commands_initialize(void) {
     c->line_number         	= string_init();
 
 	c->cur_command_state 	= VOID_COMMAND;
-	c->cur_field_num 		= 0;
+	c->cur_field_num 		   = 0;
+   c->field_5_newline_hit  = 0;
 
     c->breakpoint_queue    	= queue_init();
     c->breakpoint_string   	= string_init();
@@ -204,6 +206,12 @@ static void parse_breakpoint(struct commands *c, struct queue *q){
 
     strncpy(copy, info_ptr, size + 1); /* modify local copy */
 
+    /* Check to see if this is a watchpoint, if it is, 
+     * don't parse for a breakpoint.
+     */
+    if ( strstr ( copy, " at " ) == NULL )
+      return;
+
     /* This loop starts at the end and traverses backwards, until it finds
      * the ':'. Then, it knows the file number for sure. */
     while(cur != copy){
@@ -303,8 +311,10 @@ void commands_set_field_num( struct commands *c, int field_num){
    c->cur_field_num = field_num;
 
    /* clear buffer and start over */
-   if(c->breakpoint_table && c->cur_command_state == FIELD && c->cur_field_num == 5)
+   if(c->breakpoint_table && c->cur_command_state == FIELD && c->cur_field_num == 5) {
       string_clear(c->breakpoint_string);
+      c->field_5_newline_hit = 0;
+   }
 }
 
 enum COMMAND_STATE commands_get_state( struct commands *c){
@@ -483,7 +493,11 @@ void commands_process(struct commands *c, char a, struct queue *q){
             ||commands_get_state(c) == INFO_SOURCE_RELATIVE){
         commands_process_info_source(c, q, a);   
     } else if(c->breakpoint_table && c->cur_command_state == FIELD && c->cur_field_num == 5){ /* the file name and line num */ 
-        string_addchar(c->breakpoint_string, a);
+        if ( a == '\n' || a == '\r' )
+            c->field_5_newline_hit = 1;
+        
+        if ( !c->field_5_newline_hit )
+            string_addchar(c->breakpoint_string, a);
     } else if(c->breakpoint_table && c->cur_command_state == FIELD && c->cur_field_num == 3 && a == 'y') {
         c->breakpoint_enabled = TRUE;
     } else if ( commands_get_state(c) == TAB_COMPLETE ) {

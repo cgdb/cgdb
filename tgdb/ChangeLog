@@ -1,3 +1,11 @@
+09/12/2003 Bob Rossi <bob@brasko.net>
+
+   * commands.c: global 'struct commands' add 'field_5_newline_hit' member
+   commands_initialize, initialize new member field_5_newline_hit 
+   parse_breakpoint, add check to not try to parse watchpoint variable names.
+   commands_set_field_num, set new member to 0
+   commands_process, set new member if need be.
+
 09/10/2003 Bob Rossi <bob@brasko.net>
 
    * tgdb.h: add tgdb_set_verbose_gui_command_output prototype

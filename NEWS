@@ -1,3 +1,6 @@
+   * Fixed crash in TGDB. It would try to parse watchpoints.
+   It will no longer do this.
+   
    * Added new feature. CGDB added the 'set showtgdbcommands' option.
    If this is set, CGDB will show all the commands that it is sending
    to GDB to get work done. Otherwise, if its not set, CGDB will not show
