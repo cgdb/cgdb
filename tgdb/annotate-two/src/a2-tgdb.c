@@ -46,9 +46,16 @@
 #include "ibuf.h"
 #include "annotate_two.h"
 
-static int a2_set_inferior_tty ( struct annotate_two *a2 ) {
+static int a2_set_inferior_tty ( 
+		struct annotate_two *a2, 
+		struct queue *command_container ) {
 
-    if ( commands_issue_command ( a2->c, ANNOTATE_TTY, a2->inferior_tty_name, 0 ) == -1 ) {
+    if ( commands_issue_command ( 
+				a2->c, 
+				command_container,
+				ANNOTATE_TTY, 
+				a2->inferior_tty_name, 
+				0 ) == -1 ) {
         err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
         return -1;
     }
@@ -90,7 +97,12 @@ static int close_inferior_connection ( struct annotate_two *a2 ) {
 /* Here are the two functions that deal with getting tty information out
  * of the annotate_two subsystem.
  */
-int a2_open_new_tty ( struct annotate_two *a2, int *inferior_stdin, int *inferior_stdout ) {
+
+int a2_open_new_tty ( 
+		struct annotate_two *a2, 
+		struct queue *command_container,
+		int *inferior_stdin, 
+		int *inferior_stdout ) {
     close_inferior_connection(a2);
 
 	/* Open up the tty communication */
@@ -102,7 +114,7 @@ int a2_open_new_tty ( struct annotate_two *a2, int *inferior_stdin, int *inferio
 	*inferior_stdin     = a2->inferior_stdin;
 	*inferior_stdout    = a2->inferior_stdin;
 
-    a2_set_inferior_tty ( a2 );
+    a2_set_inferior_tty ( a2, command_container );
     
     return 0;
 }
@@ -200,6 +212,7 @@ struct annotate_two* a2_create_instance (
 
 int a2_initialize ( 
 	struct annotate_two *a2, 
+	struct queue *command_container,
 	int *debugger_stdin, int *debugger_stdout,
 	int *inferior_stdin, int *inferior_stdout) {
 
@@ -211,7 +224,7 @@ int a2_initialize (
 	a2->c 		= commands_initialize ();
 	a2->g 		= globals_initialize ();
 
-	a2_open_new_tty ( a2, inferior_stdin, inferior_stdout );
+	a2_open_new_tty ( a2, command_container, inferior_stdin, inferior_stdout );
 
     a2->tgdb_initialized = 1;
 
@@ -247,6 +260,7 @@ int a2_is_client_ready(struct annotate_two *a2) {
 
 int a2_parse_io ( 
 		struct annotate_two *a2,
+		struct queue *command_container,
 		const char *input_data, const size_t input_data_size,
 		char *debugger_output, size_t *debugger_output_size,
 		char *inferior_output, size_t *inferior_output_size,
@@ -254,6 +268,10 @@ int a2_parse_io (
 	int val;
 
 	a2->command_finished = 0;
+
+	/* TODO: This is a hack.
+	 * Stop assigning here */
+	a2->command_container = command_container;
 
 	val = a2_handle_data ( a2, a2->sm, input_data, input_data_size,
 		debugger_output, debugger_output_size, q );
@@ -264,14 +282,27 @@ int a2_parse_io (
 		return 0;
 }
 
-int a2_get_source_absolute_filename ( struct annotate_two *a2, const char *file ) {
+int a2_get_source_absolute_filename ( 
+		struct annotate_two *a2, 
+		struct queue *command_container,
+		const char *file ) {
 
-    if ( commands_issue_command ( a2->c, ANNOTATE_LIST, file, 0 ) == -1 ) {
+    if ( commands_issue_command ( 
+				a2->c, 
+				command_container,
+				ANNOTATE_LIST, 
+				file, 
+				0 ) == -1 ) {
         err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
         return -1;
     }
 
-    if ( commands_issue_command ( a2->c, ANNOTATE_INFO_SOURCE_ABSOLUTE, file, 0 ) == -1 ) {
+    if ( commands_issue_command ( 
+				a2->c, 
+				command_container,
+				ANNOTATE_INFO_SOURCE_ABSOLUTE, 
+				file, 
+				0 ) == -1 ) {
         err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
         return -1;
     }
@@ -279,8 +310,15 @@ int a2_get_source_absolute_filename ( struct annotate_two *a2, const char *file 
 	return 0;
 }
 
-int a2_get_inferior_sources ( struct annotate_two *a2 ) {
-    if ( commands_issue_command ( a2->c, ANNOTATE_INFO_SOURCES, NULL, 0 ) == -1 ) {
+int a2_get_inferior_sources ( 
+		struct annotate_two *a2, 
+		struct queue *command_container ) {
+    if ( commands_issue_command ( 
+				a2->c, 
+				command_container,
+				ANNOTATE_INFO_SOURCES, 
+				NULL, 
+				0 ) == -1 ) {
         err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
         return -1;
     }
@@ -288,10 +326,18 @@ int a2_get_inferior_sources ( struct annotate_two *a2 ) {
 	return 0;
 }
 
-int a2_change_prompt(struct annotate_two *a2, const char *prompt) {
+int a2_change_prompt(
+		struct annotate_two *a2, 
+		struct queue *command_container,
+		const char *prompt) {
 
     /* Must call a callback to change the prompt */
-    if ( commands_issue_command ( a2->c, ANNOTATE_SET_PROMPT, prompt, 2 ) == -1 ) {
+    if ( commands_issue_command ( 
+				a2->c, 
+				command_container,
+				ANNOTATE_SET_PROMPT, 
+				prompt, 
+				2 ) == -1 ) {
         err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
         return -1;
     }
@@ -299,8 +345,10 @@ int a2_change_prompt(struct annotate_two *a2, const char *prompt) {
     return 0;
 }
 
-int a2_command_callback(struct annotate_two *a2, const char *command) {
-
+int a2_command_callback(
+		struct annotate_two *a2, 
+		struct queue *command_container,
+		const char *command) {
 	/* Unimplemented */
 	return -1;
 }
@@ -311,7 +359,6 @@ char *a2_return_client_command ( struct annotate_two *a2, enum tgdb_command c ) 
 
 	return a2_tgdb_commands[c];
 }
-
 
 char *a2_client_modify_breakpoint ( struct annotate_two *a2, const char *file, int line, enum tgdb_breakpoint_action b ) {
 	char *val = (char*)xmalloc ( sizeof(char)* ( strlen(file) + 128 ) );
@@ -330,8 +377,11 @@ pid_t a2_get_debugger_pid ( struct annotate_two *a2 ) {
 	return a2->debugger_pid;
 }
 
-int a2_completion_callback(struct annotate_two *a2, const char *command) {
-    if ( commands_issue_command ( a2->c, ANNOTATE_COMPLETE, command, 4 ) == -1 ) {
+int a2_completion_callback(
+		struct annotate_two *a2, 
+		struct queue *command_container,
+		const char *command) {
+    if ( commands_issue_command ( a2->c, command_container, ANNOTATE_COMPLETE, command, 4 ) == -1 ) {
         err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
         return -1;
     }
@@ -339,8 +389,8 @@ int a2_completion_callback(struct annotate_two *a2, const char *command) {
     return 0;
 }
 
-int a2_user_ran_command ( struct annotate_two *a2 ) {
-	return commands_user_ran_command ( a2->c );
+int a2_user_ran_command ( struct annotate_two *a2, struct queue *command_container ) {
+	return commands_user_ran_command ( a2->c, command_container );
 }
 
 int a2_prepare_for_command ( struct annotate_two *a2, struct command *com ) {

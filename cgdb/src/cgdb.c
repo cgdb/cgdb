@@ -77,6 +77,8 @@
 /* Local Variables */
 /* --------------- */
 
+struct tgdb *tgdb; 			  /* The main TGDB context */
+
 char cgdb_home_dir[MAXLINE];  /* Path to home directory with trailing slash */
 char cgdb_help_file[MAXLINE]; /* Path to home directory with trailing slash */
 
@@ -239,7 +241,8 @@ static int create_help_file(void) {
  *  Returns:  -1 on error, 0 on success
  */
 static int start_gdb(int argc, char *argv[]) {
-    if ( tgdb_init(debugger_path, argc, argv, &gdb_fd, &tty_fd, &tgdb_readline_fd) == -1 )
+
+    if ( ( tgdb = tgdb_initialize(debugger_path, argc, argv, &gdb_fd, &tty_fd, &tgdb_readline_fd)) == NULL )
         return -1;
 
     return 0;
@@ -248,11 +251,11 @@ static int start_gdb(int argc, char *argv[]) {
 static void send_key(int focus, int key) {
     if ( focus == 1 ) {
         if ( key == '\r' )
-            tgdb_send_input('\n');
+            tgdb_send_debugger_char (tgdb, '\n');
         else
-            tgdb_send_input(key);
+            tgdb_send_debugger_char (tgdb, key);
     } else if ( focus == 2 ) {
-        tgdb_tty_send(key);
+        tgdb_send_inferior_char (tgdb, key);
     }
 }
 
@@ -440,9 +443,9 @@ static int gdb_input()
     int size;
 
     /* Read from GDB */
-    size = tgdb_recv(buf, GDB_MAXBUF, commandq);
+    size = tgdb_recv_debugger_data( tgdb, buf, GDB_MAXBUF, commandq);
     if (size == -1){
-        err_msg("%s:%d tgdb_recv error \n", __FILE__, __LINE__);
+        err_msg("%s:%d tgdb_recv_debugger_data error \n", __FILE__, __LINE__);
         return -1;
     }
 
@@ -471,9 +474,9 @@ static int child_input()
     int size;
 
     /* Read from GDB */
-    size = tgdb_tty_recv(buf, GDB_MAXBUF);
+    size = tgdb_recv_inferior_data ( tgdb, buf, GDB_MAXBUF);
     if (size == -1){
-        err_msg("%s:%d tgdb_tty_recv error \n", __FILE__, __LINE__);
+        err_msg("%s:%d tgdb_recv_inferior_data error \n", __FILE__, __LINE__);
         return -1;
     }
     buf[size] = 0;
@@ -485,8 +488,8 @@ static int child_input()
 
 static int tgdb_readline_input(void){
     char buf[MAXLINE];
-    if ( tgdb_recv_input(buf) == -1 ) {
-        err_msg("%s:%d tgdb_recv_input error\n", __FILE__, __LINE__);
+    if ( tgdb_recv_readline_data (tgdb, buf, MAXLINE) == -1 ) {
+        err_msg("%s:%d tgdb_recv_readline_data error\n", __FILE__, __LINE__);
         return -1;
     }
     if_print(buf);
@@ -604,7 +607,7 @@ void cleanup()
     if_shutdown();
    
     /* Shut down debugger */
-    tgdb_shutdown();
+    tgdb_shutdown( tgdb );
 }
 
 int init_resize_pipe(void) {

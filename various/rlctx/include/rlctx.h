@@ -11,7 +11,7 @@
 
 struct rlctx;   /* readline context */
 
-typedef int(*rlctx_recv_line)(const char *);
+typedef int(*rlctx_recv_line)(void*, const char *);
 
 /* rlctx_init: Initializes a new readline context. 
  *
@@ -25,9 +25,11 @@ typedef int(*rlctx_recv_line)(const char *);
  *                 the same unique id to get history between sessions.
  *                 If null, readline will not store history.
  *
+ *      p        - The callback functions pass this as the first parameter
+ *
  *      Returns: The new readline context.
  */
-struct rlctx *rlctx_init(const char *home_dir, const char *unique_id);
+struct rlctx *rlctx_init(const char *home_dir, const char *unique_id, void* p);
 
 /* rlctx_close: close a readline context. 
  *

@@ -95,6 +95,9 @@ struct annotate_two* a2_create_instance (
  * \param a2
  *  The annotate two context.
  *
+ * \param command_container
+ *  A list of commands that was generated from this call.
+ *
  * \param debugger_stdin
  *  Writing to this descriptor, writes to the stdin of the debugger.
  *
@@ -112,6 +115,7 @@ struct annotate_two* a2_create_instance (
  */
 int a2_initialize ( 
 	struct annotate_two *a2, 
+	struct queue *command_container,
 	int *debugger_stdin, int *debugger_stdout,
 	int *inferior_stdin, int *inferior_stdout );
 
@@ -178,10 +182,13 @@ int a2_is_client_ready(struct annotate_two *a2);
  * \param a2
  *  The annotate two context.
  *
+ * \param command_container
+ *  A list of commands that was generated from this call.
+ *
  * @return
  * 	-1 on error, 0 on success
  */
-int a2_user_ran_command ( struct annotate_two *a2 );
+int a2_user_ran_command ( struct annotate_two *a2, struct queue *command_container );
 
 /** 
  * a2_prepare_for_command
@@ -233,6 +240,9 @@ int a2_is_misc_prompt ( struct annotate_two *a2 );
   * \param a2
   *  The annotate two context.
   *
+  * \param command_container
+  *  A list of commands that was generated from this call.
+  *
   * \param input_data
   *  This is the stdout from the debugger. This is the data that parse_io 
   *  will parse.
@@ -266,11 +276,11 @@ int a2_is_misc_prompt ( struct annotate_two *a2 );
   */
 int a2_parse_io ( 
 		struct annotate_two *a2,
+		struct queue *command_container,
 		const char *input_data, const size_t input_data_size,
 		char *debugger_output, size_t *debugger_output_size,
 		char *inferior_output, size_t *inferior_output_size,
 		struct queue *q );
-
 //@}
 
 
@@ -291,13 +301,19 @@ int a2_parse_io (
  *  \param a2
  *   The annotate two context.
  *
+ *  \param command_container
+ *   A list of commands that was generated from this call.
+ *
  *  \param file
  *   The relative path that gdb outputted.
  *
  * @return
  *   0 on success, otherwise -1 on error.
  */
-int a2_get_source_absolute_filename ( struct annotate_two *a2, const char *file );
+int a2_get_source_absolute_filename ( 
+		struct annotate_two *a2, 
+		struct queue *command_container,
+		const char *file );
 
 /** 
  * a2_get_inferior_sources
@@ -307,10 +323,15 @@ int a2_get_source_absolute_filename ( struct annotate_two *a2, const char *file 
  *  \param a2
  *   The annotate two context.
  *
+ *  \param command_container
+ *   A list of commands that was generated from this call.
+ *
  * @return
  *   0 on success, otherwise -1 on error.
  */
-int a2_get_inferior_sources ( struct annotate_two *a2 );
+int a2_get_inferior_sources ( 
+		struct annotate_two *a2, 
+		struct queue *command_container );
 
 /** 
  * a2_change_prompt
@@ -323,10 +344,16 @@ int a2_get_inferior_sources ( struct annotate_two *a2 );
  * \param prompt
  *  The new prompt to change too.
  *
+ * \param command_container
+ *  A list of commands that was generated from this call.
+ *
  * @return
  *   0 on success, otherwise -1 on error.
  */
-int a2_change_prompt(struct annotate_two *a2, const char *prompt);
+int a2_change_prompt(
+		struct annotate_two *a2, 
+		struct queue *command_container,
+		const char *prompt);
 
 /** 
  * a2_command_callback
@@ -336,13 +363,19 @@ int a2_change_prompt(struct annotate_two *a2, const char *prompt);
  * \param a2
  *  The annotate two context.
  *
+ * \param command_container
+ *  A list of commands that was generated from this call.
+ *
  * \param command
  *  The command the user typed without the '\n'.
  *
  * @return
  *   0 on success, otherwise -1 on error.
  */
-int a2_command_callback(struct annotate_two *a2, const char *command);
+int a2_command_callback(
+		struct annotate_two *a2, 
+		struct queue *command_container,
+		const char *command);
 
 /** 
  * a2_completion_callback
@@ -352,13 +385,19 @@ int a2_command_callback(struct annotate_two *a2, const char *command);
  * \param a2
  *  The annotate two context.
  *
+ * \param command_container
+ *  A list of commands that was generated from this call.
+ *
  * \param command
  *  The command to be completed
  *
  * @return
  *   0 on success, otherwise -1 on error.
  */
-int a2_completion_callback(struct annotate_two *a2, const char *command);
+int a2_completion_callback(
+		struct annotate_two *a2, 
+		struct queue *command_container,
+		const char *command);
 
 /** 
  * a2_return_client_command
@@ -423,6 +462,9 @@ pid_t a2_get_debugger_pid ( struct annotate_two *a2 );
  * \param a2
  *  The annotate two context.
  *
+ * \param command_container
+ *  A list of commands that was generated from this call.
+ *
  * \param inferior_stdin
  *  Writing to this descriptor, writes to the stdin of the inferior.
  *
@@ -432,7 +474,11 @@ pid_t a2_get_debugger_pid ( struct annotate_two *a2 );
  * @return
  *  0 on success, otherwise -1 on error.
  */
-int a2_open_new_tty ( struct annotate_two *a2, int *inferior_stdin, int *inferior_stdout );
+int a2_open_new_tty ( 
+		struct annotate_two *a2, 
+		struct queue *command_container,
+		int *inferior_stdin, 
+		int *inferior_stdout );
 
 /** 
  * a2_get_tty_name

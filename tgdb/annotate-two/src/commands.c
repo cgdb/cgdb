@@ -65,7 +65,6 @@ struct commands {
 	char last_tab_completion_command[MAXLINE];
 };
 
-
 struct commands *commands_initialize(void) {
 	struct commands *c = (struct commands *)
 		xmalloc ( sizeof ( struct commands ));
@@ -130,7 +129,10 @@ int commands_parse_field(struct commands *c, const char *buf, size_t n, int *fie
 }
 
 /* source filename:line:character:middle:addr */
-int commands_parse_source(struct commands *c, const char *buf, size_t n, struct queue *q){
+int commands_parse_source(
+		struct commands *c, 
+		struct queue *command_container,
+		const char *buf, size_t n, struct queue *q){
     int i = 0;
     char copy[n];
     char *cur = copy + n;
@@ -161,7 +163,12 @@ int commands_parse_source(struct commands *c, const char *buf, size_t n, struct 
     string_add ( c->line_number, line );
 
     /* set up the info_source command to get the relative path */
-    if ( commands_issue_command ( c, ANNOTATE_INFO_SOURCE_RELATIVE, NULL, 1 ) == -1 ) {
+    if ( commands_issue_command ( 
+				c, 
+				command_container,
+				ANNOTATE_INFO_SOURCE_RELATIVE, 
+				NULL, 
+				1 ) == -1 ) {
         err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
         return -1;
     }
@@ -702,8 +709,8 @@ static const char *commands_create_command (
     return ncom;
 }
 
-int commands_user_ran_command ( struct commands *c ) {
-    if ( commands_issue_command ( c, ANNOTATE_INFO_BREAKPOINTS, NULL, 0 ) == -1 ) {
+int commands_user_ran_command ( struct commands *c, struct queue *command_container ) {
+    if ( commands_issue_command ( c, command_container, ANNOTATE_INFO_BREAKPOINTS, NULL, 0 ) == -1 ) {
         err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
         return -1;
     }
@@ -711,7 +718,12 @@ int commands_user_ran_command ( struct commands *c ) {
     return 0;
 }
 
-int commands_issue_command ( struct commands *c, enum annotate_commands com, const char *data, int oob) {
+int commands_issue_command ( 
+		struct commands *c, 
+		struct queue *command_container,
+		enum annotate_commands com, 
+		const char *data, 
+		int oob) {
     const char *ncom = commands_create_command ( c, com, data );
     struct command *command = NULL;
     enum annotate_commands *nacom = (enum annotate_commands *)xmalloc ( sizeof ( enum annotate_commands ) );
@@ -761,10 +773,8 @@ int commands_issue_command ( struct commands *c, enum annotate_commands com, con
                 (void*) nacom ); 
     }
 
-    if ( tgdb_dispatch_command ( command ) == -1 ) {
-        err_msg("%s:%d tgdb_dispatch_command error", __FILE__, __LINE__);
-        return -1;
-    }
+	/* Append to the command_container the commands */
+	queue_append ( command_container, command );
 
     return 0;
 }

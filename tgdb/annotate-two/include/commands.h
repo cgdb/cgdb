@@ -49,7 +49,10 @@ int commands_parse_field(struct commands *c, const char *buf, size_t n, int *fie
  * buf -> The 'source' annotation recieved from gdb.
  * n   -> The size of the annotation.
  */
-int commands_parse_source(struct commands *c, const char *buf, size_t n, struct queue *q);
+int commands_parse_source(
+		struct commands *c, 
+		struct queue *command_container,
+		const char *buf, size_t n, struct queue *q);
 
 /* command_set_state: Sets the state of the command package. This should usually be called
  *                      after an annotation has been read.
@@ -80,6 +83,7 @@ enum COMMAND_STATE commands_get_state(struct commands *c);
  */
 int commands_issue_command (
 		struct commands *c, 
+		struct queue *command_container,
         enum annotate_commands com, 
         const char *data,
         int oob );
@@ -155,6 +159,6 @@ void commands_finalize_command ( struct commands *c, struct queue *q );
  *
  * Returns: -1 on error, 0 on success
  */
-int commands_user_ran_command ( struct commands *c );
+int commands_user_ran_command ( struct commands *c, struct queue *command_container );
 
 #endif

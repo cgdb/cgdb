@@ -41,7 +41,7 @@
 
 struct rlctx *rl;
 
-static int tgdb_command_callback(const char *line) {
+static int tgdb_command_callback(void *p, const char *line) {
     fprintf ( stderr, "COMMAND(%s)\n", line );
     return 0;
 }
@@ -51,7 +51,7 @@ static int tgdb_command_callback(const char *line) {
     return 0;
 }*/
 
-static int tgdb_completion_callback ( const char *line ) {
+static int tgdb_completion_callback ( void *p, const char *line ) {
     fprintf ( stderr, "TAB_COMPLETION(%s)\n", line );
 
     return 0;
@@ -59,7 +59,7 @@ static int tgdb_completion_callback ( const char *line ) {
 
 static int tgdb_init_readline ( char *config_dir, int *fd ) {
     /* Initialize readline */
-    if ( (rl = rlctx_init((const char *)config_dir, "rlctx_driver")) == NULL ) {
+    if ( (rl = rlctx_init((const char *)config_dir, "rlctx_driver", NULL)) == NULL ) {
         err_msg("(%s:%d) rlctx_init failed", __FILE__, __LINE__);
         return -1;
     }

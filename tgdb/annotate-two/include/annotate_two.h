@@ -47,6 +47,13 @@ struct annotate_two {
 
 	char inferior_tty_name[TTY_NAME_SIZE];
 
+	/* TODO: 
+	 * This is a temporary solution. I think.
+	 * If the subsystem appends commands to this queue, they will
+	 * be returned to libtgdb for execution.
+	 */
+	struct queue *command_container;
+
 	/* This is to determine if the first annotation prompt has been reached
 	 * yet. If it hasn't been reached, this should be zero. Otherwise one.
 	 * Its used with the variable below to determine if the annotate 

@@ -31,6 +31,10 @@
 #include <errno.h>
 #endif /* HAVE_ERRNO_H */
 
+#if HAVE_SIGNAL_H
+#include <signal.h>
+#endif
+
 /* Local includes */
 #include "tgdb.h"
 #include "error.h"
@@ -38,11 +42,43 @@
 #include "terminal.h"
 
 struct queue *q;
-struct rlctx *rl;
+struct tgdb *tgdb;
+
+static void signal_handler(int signo) {
+	if ( signo == SIGINT || signo == SIGTERM || signo == SIGQUIT )
+		tgdb_signal_notification ( tgdb, signo );
+}
+
+/* Sets up the signal handler for SIGWINCH
+ * Returns -1 on error. Or 0 on success */
+static int set_up_signal(void) {
+	struct sigaction action;
+
+	action.sa_handler = signal_handler;      
+	sigemptyset(&action.sa_mask);   
+	action.sa_flags = 0;
+
+    if(sigaction(SIGINT, &action, NULL) < 0) {
+        err_ret("%s:%d -> sigaction failed ", __FILE__, __LINE__);
+		return -1;
+	}	
+
+    if(sigaction(SIGTERM, &action, NULL) < 0) {
+        err_ret("%s:%d -> sigaction failed ", __FILE__, __LINE__);
+		return -1;
+	}
+
+    if(sigaction(SIGQUIT, &action, NULL) < 0) {
+        err_ret("%s:%d -> sigaction failed ", __FILE__, __LINE__);
+		return -1;
+	}
+
+	return 0;
+}
 
 static int tgdb_readline_input(void){
     char buf[MAXLINE];
-    if ( tgdb_recv_input(buf) == -1 ) {
+    if ( tgdb_recv_readline_data(tgdb, buf, MAXLINE) == -1 ) {
         err_msg("%s:%d tgdb_recv_input error", __FILE__, __LINE__);
         return -1;
     } 
@@ -56,7 +92,7 @@ static int gdb_input(void) {
     size_t i;
     struct Command *item;
 
-    if( (size = tgdb_recv(buf, MAXLINE, q)) == -1){
+    if( (size = tgdb_recv_debugger_data (tgdb, buf, MAXLINE, q)) == -1){
         err_msg("%s:%d -> file descriptor closed\n", __FILE__, __LINE__);
         return -1;
     } /* end if */
@@ -86,7 +122,7 @@ static void tty_input(void) {
     size_t size;
     size_t i;
 
-    if( (size = tgdb_tty_recv(buf, MAXLINE)) == -1){
+    if( (size = tgdb_recv_inferior_data(tgdb, buf, MAXLINE)) == -1){
     err_msg("%s:%d -> file descriptor closed\n", __FILE__, __LINE__);
     return;
     } /* end if */
@@ -126,7 +162,7 @@ static void stdin_input(int fd) {
 //            tgdb_get_source_absolute_filename ( "afjldkafsd.h" );
 //            continue;
 //        } 
-        tgdb_send_input(command[i]);
+        tgdb_send_debugger_char ( tgdb, command[i]);
     }
 }
 
@@ -198,16 +234,18 @@ int main(int argc, char **argv){
     if ( tty_cbreak(STDIN_FILENO) == -1 )
         err_msg("%s:%d tty_cbreak error\n", __FILE__, __LINE__);
 
-    if ( tgdb_init(NULL, argc-1, argv+1, &gdb_fd, &child_fd, &tgdb_rlctx) == -1 ) {
+    if ( (tgdb = tgdb_initialize(NULL, argc-1, argv+1, &gdb_fd, &child_fd, &tgdb_rlctx)) == NULL ) {
         err_msg("%s:%d tgdb_start error\n", __FILE__, __LINE__);
         goto driver_end;
     }
 
     q = queue_init();
 
+	set_up_signal();
+
     main_loop(gdb_fd, child_fd, tgdb_rlctx);
 
-    if(tgdb_shutdown() == -1)
+    if(tgdb_shutdown( tgdb ) == -1)
         err_msg("%s:%d -> could not shutdown\n", __FILE__, __LINE__);
 
 driver_end:

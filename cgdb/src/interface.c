@@ -67,6 +67,12 @@
 /* Prototypes  */
 /* ----------- */
 
+/* ------------ */
+/* Declarations */
+/* ------------ */
+
+extern struct tgdb *tgdb;
+
 /* ----------- */
 /* Definitions */
 /* ----------- */
@@ -296,7 +302,7 @@ static void update_status_win(void) {
         for ( pos = 0; pos < WIDTH; pos++)
            mvwprintw(tty_status_win, 0, pos, " ");
 
-        mvwprintw(tty_status_win, 0, 0, tgdb_tty_name());
+        mvwprintw(tty_status_win, 0, 0, tgdb_tty_name(tgdb));
         wattroff(tty_status_win, COLOR_PAIR(CGDB_COLOR_STATUS_BAR));
     }
 
@@ -668,7 +674,8 @@ static void signal_handler(int signo) {
             write( resize_pipe[1], &c, sizeof(int));
             resize = 1;
         }
-    }
+    } else if ( signo == SIGINT || signo == SIGTERM || signo == SIGQUIT )
+		tgdb_signal_notification ( tgdb, signo );
 }
 
 /* if_get_command: Gets a command from the user
@@ -954,7 +961,7 @@ static void source_input(struct sviewer *sview, int key)
            break;
         case 'o':
            /* Causes file dialog to be opened */
-           tgdb_get_sources();
+           tgdb_get_inferiors_source_files (tgdb);
            break;
         case ':':
            /* Allows user to go to a line number */ 
@@ -984,7 +991,7 @@ static void source_input(struct sviewer *sview, int key)
 				else
 					t = TGDB_BREAKPOINT_ADD;
 				
-				if_print(tgdb_modify_breakpoint ( path, line + 1, t ) );
+				if_print ( tgdb_modify_breakpoint ( tgdb, path, line + 1, t ) );
                 free(command);
             }
             break;
@@ -995,13 +1002,13 @@ static void source_input(struct sviewer *sview, int key)
     /* Some extended features that are set by :set sc */
     if ( shortcut_option ) {
         switch ( key ) {
-            case 'r': if_print(tgdb_run_client_command (TGDB_RUN)); 	break;
-            case 'n': if_print(tgdb_run_client_command (TGDB_NEXT));  	break;
-            case 's': if_print(tgdb_run_client_command (TGDB_STEP));  	break;
-            case 'c': if_print(tgdb_run_client_command (TGDB_CONTINUE));break;
-            case 'f': if_print(tgdb_run_client_command (TGDB_FINISH));  break;
-            case 'u': if_print(tgdb_run_client_command (TGDB_UP));      break;
-            case 'd': if_print(tgdb_run_client_command (TGDB_DOWN));    break;
+            case 'r': if_print(tgdb_run_debugger_command (tgdb, TGDB_RUN)); 	break;
+            case 'n': if_print(tgdb_run_debugger_command (tgdb, TGDB_NEXT));  	break;
+            case 's': if_print(tgdb_run_debugger_command (tgdb, TGDB_STEP));  	break;
+            case 'c': if_print(tgdb_run_debugger_command (tgdb, TGDB_CONTINUE));break;
+            case 'f': if_print(tgdb_run_debugger_command (tgdb, TGDB_FINISH));  break;
+            case 'u': if_print(tgdb_run_debugger_command (tgdb, TGDB_UP));      break;
+            case 'd': if_print(tgdb_run_debugger_command (tgdb, TGDB_DOWN));    break;
             default:                                    break;
         }
     }
@@ -1012,18 +1019,33 @@ static void source_input(struct sviewer *sview, int key)
 /* Sets up the signal handler for SIGWINCH
  * Returns -1 on error. Or 0 on success */
 static int set_up_signal(void) {
-   struct sigaction action;
+	struct sigaction action;
 
-   action.sa_handler = signal_handler;      
-   sigemptyset(&action.sa_mask);   
-   action.sa_flags = 0;
+	action.sa_handler = signal_handler;      
+	sigemptyset(&action.sa_mask);   
+	action.sa_flags = 0;
 
-   if(sigaction(SIGWINCH, &action, NULL) < 0) {
-      err_ret("%s:%d -> sigaction failed ", __FILE__, __LINE__);
-      return -1;
-   }
+	if(sigaction(SIGWINCH, &action, NULL) < 0) {
+	  err_ret("%s:%d -> sigaction failed ", __FILE__, __LINE__);
+	  return -1;
+	}
 
-   return 0;
+    if(sigaction(SIGINT, &action, NULL) < 0) {
+        err_ret("%s:%d -> sigaction failed ", __FILE__, __LINE__);
+		return -1;
+	}	
+
+    if(sigaction(SIGTERM, &action, NULL) < 0) {
+        err_ret("%s:%d -> sigaction failed ", __FILE__, __LINE__);
+		return -1;
+	}
+
+    if(sigaction(SIGQUIT, &action, NULL) < 0) {
+        err_ret("%s:%d -> sigaction failed ", __FILE__, __LINE__);
+		return -1;
+	}
+
+	return 0;
 }
 
 /* ----------------- */
@@ -1115,7 +1137,7 @@ int internal_if_input(int key) {
 
                      break;
                 case CGDB_KEY_CTRL_T:
-                     if ( tgdb_new_tty() == -1 ) { 
+                     if ( tgdb_tty_new( tgdb ) == -1 ) { 
                          /* Error */
                      } else {
                          scr_free(tty_win);
@@ -1129,23 +1151,23 @@ int internal_if_input(int key) {
                      return 0;
                 case CGDB_KEY_F5:
                     /* Issue GDB run command */
-                    if_print(tgdb_run_client_command(TGDB_RUN));
+                    if_print(tgdb_run_debugger_command ( tgdb, TGDB_RUN));
                     return 0;
                 case CGDB_KEY_F6:
                     /* Issue GDB continue command */
-                    if_print(tgdb_run_client_command(TGDB_CONTINUE));
+                    if_print(tgdb_run_debugger_command (tgdb, TGDB_CONTINUE));
                     return 0;
                 case CGDB_KEY_F7:
                     /* Issue GDB finish command */
-                    if_print(tgdb_run_client_command(TGDB_FINISH));
+                    if_print(tgdb_run_debugger_command (tgdb, TGDB_FINISH));
                     return 0;
                 case CGDB_KEY_F8:
                     /* Issue GDB next command */
-                    if_print(tgdb_run_client_command(TGDB_NEXT));
+                    if_print(tgdb_run_debugger_command (tgdb, TGDB_NEXT));
                     return 0;
                 case CGDB_KEY_F10:
                     /* Issue GDB step command */
-                    if_print(tgdb_run_client_command(TGDB_STEP));
+                    if_print(tgdb_run_debugger_command (tgdb, TGDB_STEP));
                     return 0;
             }
             source_input(src_win, key);
@@ -1168,7 +1190,7 @@ int internal_if_input(int key) {
                 return 0;
             /* The user picked a file */
             } else if ( ret == 1 ) {
-                tgdb_get_source_absolute_filename(filedlg_file);
+                tgdb_get_absolute_path ( tgdb, filedlg_file);
                 strcpy(last_relative_file, filedlg_file);
                 if_set_focus(CGDB);
                 return 0;

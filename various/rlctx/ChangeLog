@@ -1,3 +1,12 @@
+09/04/2003 Bob Rossi <bob@brasko.net>
+
+   * rlctx.h: global rlctx_recv_line, add void* parameter for context.
+   rlctx_init, changed to recieve parameter to pass to callbacks.
+   * rlctx.c: struct rlctx, added callback_program.
+   rlctx_init, changed to match prototype, initializes new member.
+   rlctx_parse_command, call new callback with parameter.
+   * rlctx_driver.c: updated to use new context.
+
 version 0.3.4 (08/14/2003):
 
 08/11/2003 Bob Rossi <bob@brasko.net>

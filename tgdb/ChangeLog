@@ -1,3 +1,38 @@
+09/04/2003 Bob Rossi <bob@brasko.net>
+
+   * a2-tgdb.h: a2_initialize, a2_user_ran_command, a2_parse_io,
+	a2_get_source_absolute_filename, a2_get_inferior_sources
+	a2_change_prompt, a2_command_callback, a2_completion_callback,
+	a2_open_new_tty, adding new param command_container and comment
+   * annotate_two.h: struct annotate_two, add command_container
+   * commands.h: commands_parse_source, commands_issue_command,
+   commands_user_ran_command, adding new param command_container and comment
+   * a2-tgdb.c: a2_set_inferior_tty, a2_open_new_tty, a2_initialize, a2_parse_io,
+   a2_get_source_absolute_filename, a2_get_inferior_sources, a2_change_prompt,
+   a2_command_callback, a2_completion_callback, a2_user_ran_command,
+   add and use command_callback parameter
+   * annotate.c: handle_source, pass new parameter to commands_parse_source.
+   * commands.c: commands_parse_source, commands_user_ran_command, 
+   commands_issue_command, add and use new command_callback parameter. 
+   * data.c: tgdb_initialize_annotation_state, use command_callback parameter.
+   * tgdb.h: adding comments, and removing old interface.
+   tgdb_modify_breakpoint, change return value to char*
+   tgdb_catch_signals, remove prototype
+   tgdb_signal_notification, adding context
+   * tgdb_interface.h:tgdb_dispatch, tgdb_complete_command, remove prototypes
+   command_completed, remove unused typedef.
+   * driver.c: add global tgdb context.
+   signal_handler, set_up_signal new functions
+   tgdb_readline_input, update tgdb_recv_input to new tgdb interface.
+   tgdb_input, update tgdb_recv to new tgdb interface.
+   tty_input, update tgdb_tty_recv to new tgdb interface.
+   stdin_input, update tgdb_send_input to new tgdb interface.
+   main, update tgdb_init,tgdb_shutdown to new tgdb interface.
+   * tgdb.c: add new 'struct tgdb' context.
+   signal_catcher, remove function, tgdb no longer handles signals.
+   unfortunatly, the entire file has changed. A changelog is useless.
+
+
 08/27/2003 Bob Rossi <bob@brasko.net>
 
    * annotate_two.h: annotate_two, added first_prompt_reached and

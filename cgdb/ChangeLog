@@ -1,3 +1,28 @@
+09/03/2003 Bob Rossi <bob@brasko.net>
+
+   * cgdb.c: struct tgdb *tgdb, adding global instance of tgdb library.
+   start_gdb, update tgdb_initialize to use context for new interface.
+   send_key, update tgdb_send_input to use context and new name.
+   gdb_input, update tgdb_recv to use context and new name.
+   child_input, update tgdb_tty_recv to use context and new name.
+   tgdb_readline_input, update tgdb_recv_input to use context and new name.
+   cleanup, update tgdb_shutdown to use context and new name.
+   * cgdbrc.c: global, adding extern to tgdb instance.
+   command_do_continue, command_do_finish, command_do_next, command_do_run,
+   command_do_step, update tgdb_run_client_command to use context and new 
+   name.
+   * interface.c: global, adding extern to tgdb instance.
+   update_status_win, update tgdb_tty_name to use context.
+   signal_handler, catch and send signals TGDB is interested in.
+   source_input, update tgdb_get_sources to use context and new name.
+   source_input, update tgdb_modify_breakpoint to use context.
+   source_input, update tgdb_run_client_command to use context and new name.
+   set_up_signal, catches signals TGDB is interested in.
+   internal_if_input, update tgdb_new_tty to use context and new name.
+   internal_if_input, update tgdb_run_client_command to use context and name.
+   internal_if_input, update tgdb_get_source_absolute_filename to use context
+   and new name.
+
 08/19/2003 Bob Rossi <bob@brasko.net>
 
    * cgdb.c: process_commands, changed TGDB_UPDATE_BREAKPOINTS to handle

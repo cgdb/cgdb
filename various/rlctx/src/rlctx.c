@@ -57,9 +57,14 @@ struct rlctx {
      * It should be freed when the object is freed.
      */
     char *config_file;
+
+	/* This object is a context passed from the client.
+	 * When rlctx calls a callback, it passes this as the first argument.
+	 */
+	void *callback_param;
 };
 
-struct rlctx *rlctx_init(const char *home_dir, const char *unique_id) {
+struct rlctx *rlctx_init(const char *home_dir, const char *unique_id, void* p) {
     int read_history = 0;
     struct rlctx *n = (struct rlctx *)xmalloc(sizeof(struct rlctx));
     pid_t pid;
@@ -119,6 +124,7 @@ struct rlctx *rlctx_init(const char *home_dir, const char *unique_id) {
     n->rlctx_com = string_init();
     n->command_callback     = NULL;
     n->completion_callback  = NULL;
+	n->callback_param       = p;
     
     /* Read in the history */
     if ( read_history ) {
@@ -367,9 +373,9 @@ static void rlctx_parse_command(struct rlctx *rl, char *c, ssize_t size) {
             } else { /* Found a full command, call callback */
                 rlctx_state = DATA;
                 if ( rlctx_com == COMMAND_ENTERED )
-                    (rl->command_callback)(string_get(rl->rlctx_com));
+                    (rl->command_callback)(rl->callback_param, string_get(rl->rlctx_com));
                 else if ( rlctx_com == TAB_COMPLETION )
-                    (rl->completion_callback)(string_get(rl->rlctx_com));
+                    (rl->completion_callback)(rl->callback_param, string_get(rl->rlctx_com));
                 string_clear(rl->rlctx_com);
             }
             /* Don't want to add \032 to command */

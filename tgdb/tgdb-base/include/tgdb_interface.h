@@ -102,28 +102,4 @@ void tgdb_interface_free_command ( void* item);
  */
 void tgdb_interface_print_command ( struct command *item );
 
-/* tgdb_dispatch_command:
- * ----------------------
- *
- *  This is used to put a command into the queue to be run.
- *
- *  Returns -1 on error, or 0 on success
- */
-int tgdb_dispatch_command ( struct command *com );
-
-int tgdb_run_command ( void );
-
-/* tgdb_complete_command:
- * ----------------------
- *
- *  This will complete what the user has at the command prompt according
- *  to the contents of list.
- *
- *  list:   A list of strings that the users command can complete too.
- *  target: The command line to complete for
- */
-int tgdb_complete_command ( struct queue *list, const char *target );
-
-typedef void (*command_completed)(void);
-
 #endif

@@ -19,6 +19,8 @@
 #include "tokenizer.h"
 #include "cgdb.h"
 
+extern struct tgdb *tgdb;
+
 /**
  * The general idea is that the configuration will read in the users ~/.cgdbrc
  * file, or ~/.cgdb/config or whatever, and execute each command.  This will
@@ -221,13 +223,13 @@ int command_focus_tty( void )
 
 int command_do_continue( void )
 {
-    if_print(tgdb_run_client_command( TGDB_CONTINUE ));
+    if_print(tgdb_run_debugger_command ( tgdb, TGDB_CONTINUE ));
     return 0;
 }
 
 int command_do_finish( void )
 {
-    if_print(tgdb_run_client_command( TGDB_FINISH ));
+    if_print(tgdb_run_debugger_command ( tgdb, TGDB_FINISH ));
     return 0;
 }
 
@@ -239,7 +241,7 @@ int command_do_help( void )
 
 int command_do_next( void )
 {
-    if_print(tgdb_run_client_command ( TGDB_NEXT ));
+    if_print(tgdb_run_debugger_command  ( tgdb, TGDB_NEXT ));
     return 0;
 }
 
@@ -261,13 +263,13 @@ int command_do_quit_force( void )
 int command_do_run( void )
 {
     /* FIXME: see if there are any other arguments to pass to the run command */
-    if_print(tgdb_run_client_command ( TGDB_RUN ));
+    if_print(tgdb_run_debugger_command  ( tgdb, TGDB_RUN ));
     return 0;
 }
 
 int command_do_step( void )
 {
-    if_print(tgdb_run_client_command ( TGDB_STEP ));
+    if_print(tgdb_run_debugger_command  ( tgdb, TGDB_STEP ));
     return 0;
 }
 
