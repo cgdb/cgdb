@@ -348,7 +348,7 @@ void hl_wprintw(WINDOW *win, const char *line, int width, int offset)
         }
         else if (line[i] == '\t'){
             /* Tab character, expand to size set by user */
-            j += highlight_tabstop;
+            j += highlight_tabstop - (j % highlight_tabstop);
         }
         else{
             /* Normal character, just increment counter by one */
@@ -379,8 +379,10 @@ void hl_wprintw(WINDOW *win, const char *line, int width, int offset)
         else{
             switch (line[i]){
                 case '\t':
-                    for (j = 0; j < highlight_tabstop && p < width; j++, p++)
+                    do{
                         wprintw(win, " ");
+                        p++;
+                    } while ((p+offset) % highlight_tabstop > 0 && p < width);
                     break;
                 default:
                     wprintw(win, "%c", line[i]);
