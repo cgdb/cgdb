@@ -1,3 +1,7 @@
+03/28/2005 Bob Rossi <bob@brasko.net>
+
+	* NEWS: Fixed a bug in the C/C++ tokenizer to highlight source code.
+
 07/28/2004 Bob Rossi <bob@brasko.net>
 
     * NEWS: Added 'autosourcereload' option and 'source_reload' colon command.

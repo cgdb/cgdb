@@ -100,7 +100,7 @@ IDENTIFIER {L}+{T}*
 <comment>\r\n           { return(TOKENIZER_NEWLINE); }
 <comment>"*"+"/"        { BEGIN(INITIAL); return(TOKENIZER_COMMENT); }
 
-\/\/[^\n]*              { return(TOKENIZER_COMMENT); }
+\/\/[^\r\n]*              { return(TOKENIZER_COMMENT); }
 
 #{L}+                   { return(TOKENIZER_DIRECTIVE); }
 

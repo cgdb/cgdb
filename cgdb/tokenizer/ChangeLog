@@ -1,3 +1,7 @@
+03/28/2005 Bob Rossi <bob@brasko.net>
+
+	* clexer.l: recognize '\r' as end of line in c++ style comment
+
 version 0.5.0 (07/14/2004):
 
 07/14/2004 Bob Rossi <bob@brasko.net>
