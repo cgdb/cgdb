@@ -69,7 +69,7 @@ void state_machine_shutdown ( struct state_machine *sm ) {
 int a2_handle_data(
 		struct annotate_two *a2,
 		struct state_machine *sm, const char *data, const size_t size,
-        char *gui_data, size_t gui_size, struct queue *q){
+        char *gui_data, size_t *gui_size, struct queue *q){
    int i, counter = 0;
    
    /* track state to find next file and line number */
@@ -161,5 +161,6 @@ int a2_handle_data(
    }  /* end for */
 
    gui_data[counter] = '\0';
-   return counter;
+   *gui_size = counter;
+   return 0;
 }

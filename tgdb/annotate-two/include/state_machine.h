@@ -38,6 +38,6 @@ void state_machine_shutdown ( struct state_machine *sm );
  *  gui_size:   The size of the buffer gui_data.
  *  q:          If a command was generated from an annotation, its put in here.
  */
-int a2_handle_data ( struct annotate_two *a2, struct state_machine *sm, const char *data, const size_t size, char *gui_data, size_t gui_size, struct queue *q);
+int a2_handle_data ( struct annotate_two *a2, struct state_machine *sm, const char *data, const size_t size, char *gui_data, size_t *gui_size, struct queue *q);
 
 #endif

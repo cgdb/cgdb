@@ -1,5 +1,25 @@
 08/19/2003 Bob Rossi <bob@brasko.net>
 
+	* a2-tgdb.h: a2_parse_io, change comment of return value.
+	a2_initialize, removed command_finished parameter. It is no longer called
+	by the a2 subsystem.
+	* annotate_two.h: 'struct annotate_two' removed callback function, changed
+	it to an 'int' field. Instead of calling a callback, a2 returns a value. 
+	* state_machine.h: a2_handle_data, changed prototype to take a pointer for
+	the gui size. That way the gui_size can get set on the way out.
+	* state_machine.c: a2_handle_data changed prototype ( above ).
+	a2_handle_data, assigned changed parameter the correct value.
+	* a2-tgdb.c: a2_initialize, removed command_finished parameter.
+	a2_initialize, removed initialization of 'struct annotate_two' callback.
+	a2_parse_io, implemented to return the proper value of the subsystem.
+	* annotate.c: changed call from data_set_state to setting command_finished
+	variable.
+	* data.c: ditto
+	* tgdb.c: tgdb_recv, looks at return value of parse_io, and determines if 
+	a lower level subsystem has finished a command.
+
+08/19/2003 Bob Rossi <bob@brasko.net>
+
    * commands.c: parse_breakpoint, this now can handle spaces in the 
    function name and still parse the filename correctly.
    * types.h: adding new struct tgdb_breakpoint.

@@ -334,7 +334,18 @@ size_t tgdb_recv(char *buf, size_t n, struct queue *q){
 		/* unused for now */
 		char *infbuf = NULL;
 		size_t infbuf_size;
-		a2_parse_io ( a2, local_buf, size, buf, &buf_size, infbuf, &infbuf_size, q );
+		int result;
+		result = a2_parse_io ( a2, local_buf, size, buf, &buf_size, infbuf, &infbuf_size, q );
+
+		if ( result == 0 ) {
+			/* success, and more to parse, ss isn't done */
+		} else if ( result == 1 ) {
+			/* success, and finished command */
+			command_completion_callback();
+		} else if ( result == -1 ) { 
+			/* error */
+        	err_msg("%s:%d a2_parse_io error", __FILE__, __LINE__);
+		}
 	}
 
 	/* 3. if ^c has been sent, clear the buffers.
@@ -867,8 +878,7 @@ int tgdb_init (
 
 	if ( a2_initialize ( a2, 
 					&debugger_stdin, &debugger_stdout, 
-					&inferior_stdin, &inferior_stdout,
-					command_completion_callback ) == -1 ) {
+					&inferior_stdin, &inferior_stdout) == -1 ) {
         err_msg("%s:%d a2_initialize error", __FILE__, __LINE__);
         return -1; 
 	}

@@ -25,7 +25,7 @@ struct annotate_two {
 	int inferior_slave_fd; /* Only kept around so it can be closed properly */
 
 	pid_t debugger_pid;             /* pid of child process */
-	command_completed command_completed_callback;
+	int command_finished;
 	
 	/* The config directory and the init file for gdb */
 	char config_dir[PATH_MAX];

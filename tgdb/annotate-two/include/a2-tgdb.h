@@ -107,18 +107,13 @@ struct annotate_two* a2_create_instance (
  * \param inferior_stdout
  *  Reading from this descriptor, reads from the inferior's stdout.
  *
- * \param command_finished
- *  This function is called by the A2 context, whenever it finishes running
- *  a command on behalf of its caller.
- *
  * @retrun Retruns
  *  0 on success, otherwise -1 on error.
  */
 int a2_initialize ( 
 	struct annotate_two *a2, 
 	int *debugger_stdin, int *debugger_stdout,
-	int *inferior_stdin, int *inferior_stdout,
-	command_completed command_finished);
+	int *inferior_stdin, int *inferior_stdout );
 
 /** a2_shutdown
  *
@@ -265,7 +260,9 @@ int a2_is_misc_prompt ( struct annotate_two *a2 );
   *  of the libtgdb library.
   *
   * @return
-  *  0 on success, otherwise -1 on error.
+  *  1 when it has finished a command, 
+  *  0 on success but hasn't recieved enough I/O to finish the command, 
+  *  otherwise -1 on error.
   */
 int a2_parse_io ( 
 		struct annotate_two *a2,

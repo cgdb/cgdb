@@ -198,8 +198,7 @@ struct annotate_two* a2_create_instance (
 int a2_initialize ( 
 	struct annotate_two *a2, 
 	int *debugger_stdin, int *debugger_stdout,
-	int *inferior_stdin, int *inferior_stdout,
-	command_completed command_finished) {
+	int *inferior_stdin, int *inferior_stdout) {
 
 	*debugger_stdin 	= a2->debugger_stdin;
 	*debugger_stdout 	= a2->debugger_out;
@@ -219,8 +218,6 @@ int a2_initialize (
     }
 
     a2->tgdb_initialized = 1;
-
-	a2->command_completed_callback = command_finished;
 
     return 0;
 }
@@ -258,15 +255,17 @@ int a2_parse_io (
 		char *debugger_output, size_t *debugger_output_size,
 		char *inferior_output, size_t *inferior_output_size,
 		struct queue *q ) {
+	int val;
 
-	size_t size;
+	a2->command_finished = 0;
 
-	size = a2_handle_data ( a2, a2->sm, input_data, input_data_size,
-		debugger_output, *debugger_output_size, q );
+	val = a2_handle_data ( a2, a2->sm, input_data, input_data_size,
+		debugger_output, debugger_output_size, q );
 
-	*debugger_output_size = size;
-
-	return 0;
+	if (a2->command_finished) 
+		return 1;
+	else 
+		return 0;
 }
 
 int a2_get_source_absolute_filename ( struct annotate_two *a2, const char *file ) {

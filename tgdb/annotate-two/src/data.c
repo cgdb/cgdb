@@ -68,7 +68,7 @@ void data_set_state ( struct annotate_two *a2, enum internal_state state ) {
             a2_change_prompt(a2, a2->data->gdb_prompt_last);
          }
 
-		 a2->command_completed_callback();
+		 a2->command_finished = 1;
 
 		 /* This is important, because it resets the commands state.
 		  * With this line not here, if the user hits 'o' from cgdb,

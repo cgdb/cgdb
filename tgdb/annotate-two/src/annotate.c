@@ -32,7 +32,7 @@ static int handle_misc_pre_prompt(struct annotate_two *a2, const char *buf, size
 static int handle_misc_prompt(struct annotate_two *a2, const char *buf, size_t n, struct queue *q){
    globals_set_misc_prompt_command( a2->g, TRUE);
    data_set_state(a2, USER_AT_PROMPT );
-   a2->command_completed_callback();
+   a2->command_finished = 1;
    return 0;
 }
 
