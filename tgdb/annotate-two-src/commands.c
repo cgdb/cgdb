@@ -52,12 +52,7 @@ static int source_relative_prefix_length = 23;
 
 
 extern struct queue *oob_input_queue;
-int tgdb_setup_buffer_command_to_run(
-      struct queue *q,
-      char *com, 
-      enum buffer_command_type com_type,        /* Who is running this command */
-      enum buffer_output_type out_type,         /* Where should the output go */
-      enum buffer_command_to_run com_to_run);   /* What command to run */
+extern struct rlctx *rl;
 
 void commands_init(void) {
     info_source_string  = string_init();
@@ -254,9 +249,15 @@ static int commands_run_info_breakpoints( int fd ) {
 
 static int commands_run_tty(char *tty, int fd){
    char line[MAXLINE];
-   memset(line, '\0', MAXLINE);
-   strcat(line, "tty ");
+   strcpy(line, "tty ");
    strcat(line, tty);
+   return commands_run_com(fd, line, 1);
+}
+
+static int commands_run_tab_completion(char *com, int fd){
+   char line[MAXLINE];
+   strcpy(line, "complete ");
+   strcat(line, com);
    return commands_run_com(fd, line, 1);
 }
 
@@ -316,12 +317,33 @@ static int commands_run_info_source(enum COMMAND_STATE state, int fd){
    return commands_run_com(fd, "info source", 1);
 }
 
+int commands_run_readline_change_prompt(char *prompt) {
+    if ( rlctx_change_prompt(rl, prompt) == -1 ) {
+        err_msg("%s:%d rlctx_change_prompt failed", __FILE__, __LINE__);
+        return -1;
+    }
+
+    return 0;
+}
+
+int commands_run_readline_redisplay(void) {
+    if ( rlctx_redisplay(rl) == -1 ) {
+        err_msg("%s:%d rlctx_change_prompt failed", __FILE__, __LINE__);
+        return -1;
+    }
+
+    return 0;
+}
+
 int commands_run_command(int fd, struct command *com){
     /* Set up data to know the current state */
     switch(com->com_type) {
         case BUFFER_TGDB_COMMAND: data_set_state(INTERNAL_COMMAND);           break;
         case BUFFER_GUI_COMMAND:  data_set_state(GUI_COMMAND);                break;
         case BUFFER_USER_COMMAND: data_set_state(USER_COMMAND);               break;
+        case BUFFER_READLINE_COMMAND: 
+            data_set_state(INTERNAL_COMMAND);               
+            break;
         case BUFFER_VOID: err_msg("%s:%d switch error", __FILE__, __LINE__);  break;
         default: err_msg("%s:%d switch error", __FILE__, __LINE__);           break;
     }
@@ -341,6 +363,12 @@ int commands_run_command(int fd, struct command *com){
             return commands_run_info_breakpoints(fd);               break;
         case COMMANDS_TTY:
             return commands_run_tty(com->data, fd);                 break;
+        case COMMANDS_TAB_COMPLETION:
+            return commands_run_tab_completion(com->data, fd);      break;
+        case COMMANDS_SET_PROMPT:
+            return commands_run_readline_change_prompt(com->data);  break;
+        case COMMANDS_REDISPLAY:
+            return commands_run_readline_redisplay();               break;
         case COMMANDS_VOID:                                         break;
         default: err_msg("%s:%d switch error", __FILE__, __LINE__); break;
     }

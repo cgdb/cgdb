@@ -24,6 +24,7 @@ static enum internal_state data_state = VOID;
 
 #define GDB_PROMPT_SIZE 1024
 static char gdb_prompt[GDB_PROMPT_SIZE];
+static char gdb_prompt_last[GDB_PROMPT_SIZE];
 static int gdb_prompt_size = 0;
 
 int COMMAND_TYPED_AT_PROMPT = 0; 
@@ -55,10 +56,19 @@ void data_set_state(enum internal_state state){
    switch(data_state){
       case VOID:              break;
       case AT_PROMPT:         
-         memset(gdb_prompt, '\0', GDB_PROMPT_SIZE);
          gdb_prompt_size = 0;
          break;
       case USER_AT_PROMPT:    
+
+         /* Null-Terminate the prompt */
+         gdb_prompt[gdb_prompt_size] = '\0';  
+
+         if ( strcmp(gdb_prompt, gdb_prompt_last) != 0 ) {
+            strcpy(gdb_prompt_last, gdb_prompt);
+            /* Update the prompt */
+            a2_tgdb_change_prompt(gdb_prompt_last);
+         }
+
          commands_set_state(VOID, NULL);
          COMMAND_TYPED_AT_PROMPT = 0;
          global_set_signal_recieved(FALSE);
@@ -81,7 +91,7 @@ void data_process(char a, char *buf, int *n, struct queue *q){
             gdb_prompt[gdb_prompt_size++] = a;  
             buf[(*n)++] = a;
             break;
-        case USER_AT_PROMPT:    break;
+        case USER_AT_PROMPT:             break;
         case GUI_COMMAND:
         case INTERNAL_COMMAND:
             if(data_state == INTERNAL_COMMAND)

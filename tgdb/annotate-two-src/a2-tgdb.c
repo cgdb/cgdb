@@ -80,13 +80,19 @@ static struct queue *raw_input_queue;
  * These commands should *always* be run first */
 struct queue *oob_input_queue;
 
+/* This sends commands to the readline program.
+ */
+struct queue *rlc_input_queue;
+
 static sig_atomic_t control_c = 0;              /* If control_c was hit by user */
 
 /* Interface to readline capability */
-static struct rlctx *rl;
+struct rlctx *rl;
 
 /* This is the current command */
 static struct string *current_command = NULL;
+
+static unsigned short tgdb_partially_run_command = 0;
 
 /* a2_tgdb_command_callback: This is called when readline determines a command
  *                           has been typed. 
@@ -95,6 +101,27 @@ static struct string *current_command = NULL;
  */
 static int a2_tgdb_command_callback(const char *line) {
     a2_tgdb_send((char *)line, 0);
+}
+
+/* a2_tgdb_completion_callback: This is called when readline determines a command
+ *                              needs to be completed. 
+ *
+ *      line - The command to be completed
+ */
+static int a2_tgdb_completion_callback(const char *line) {
+    tgdb_setup_buffer_command_to_run(
+            gdb_input_queue,
+            (char *)line,
+            BUFFER_GUI_COMMAND,
+            COMMANDS_SHOW_USER_OUTPUT,
+            COMMANDS_TAB_COMPLETION);
+
+    tgdb_setup_buffer_command_to_run(
+        gdb_input_queue,
+        "",
+        BUFFER_READLINE_COMMAND,
+        COMMANDS_SHOW_USER_OUTPUT,
+        COMMANDS_REDISPLAY);        
 }
 
 /* tgdb_is_debugger_ready: Determines if a command can be sent directly to gdb.
@@ -135,6 +162,7 @@ static int tgdb_has_command_to_run(void) {
            (queue_size(gdb_input_queue) > 0) || 
            (queue_size(raw_input_queue) > 0) || 
            (queue_size(oob_input_queue) > 0) || 
+           (queue_size(rlc_input_queue) > 0) || 
            current_command != NULL )
        )
         return TRUE;
@@ -226,6 +254,9 @@ int a2_tgdb_init(char *debugger, int argc, char **argv, int *gdb, int *child, in
    /* initialize the out of band queue */
    oob_input_queue = queue_init();
 
+   /* initialize the readline command queue */
+   rlc_input_queue = queue_init();
+
    /* Initialize readline */
    if ( (rl = rlctx_init()) == NULL ) {
       err_msg("(%s:%d) rlctx_init failed", __FILE__, __LINE__);
@@ -233,7 +264,13 @@ int a2_tgdb_init(char *debugger, int argc, char **argv, int *gdb, int *child, in
    }
 
    /* Register callback for each command recieved at readline */
-   if ( rlctx_register_callback(rl, &a2_tgdb_command_callback) == -1 ) {
+   if ( rlctx_register_command_callback(rl, &a2_tgdb_command_callback) == -1 ) {
+      err_msg("(%s:%d) rlctx_register_callback failed", __FILE__, __LINE__);
+      return -1;
+   }
+
+   /* Register callback for tab completion */
+   if ( rlctx_register_completion_callback(rl, &a2_tgdb_completion_callback) == -1 ) {
       err_msg("(%s:%d) rlctx_register_callback failed", __FILE__, __LINE__);
       return -1;
    }
@@ -313,8 +350,18 @@ static int tgdb_run_command(void){
 
 tgdb_run_command_tag:
 
+    /* This will redisplay the prompt when a command is run
+     * through the gui with data on the console.
+     */
+    if ( queue_size(rlc_input_queue) > 0 ) {
+        /* This runs commands through readline */
+        struct command *item = NULL;
+        item = queue_pop(rlc_input_queue);
+        commands_run_command(masterfd, item);
+        buffer_free_item(item);
+        
     /* The out of band commands should always be run first */
-    if ( queue_size(oob_input_queue) > 0 ) {
+    } else if ( queue_size(oob_input_queue) > 0 ) {
         /* These commands are always run. 
          * However, if an assumption is made that a misc
          * prompt can never be set while in this spot.
@@ -343,8 +390,20 @@ tgdb_run_command_tag:
         }
 
         commands_run_command(masterfd, item);
+
+        if ( tgdb_partially_run_command && 
+             /* Don't redisplay the prompt for the redisplay prompt command :) */
+             item->com_to_run != COMMANDS_REDISPLAY) {
+            tgdb_setup_buffer_command_to_run(
+                gdb_input_queue,
+                "",
+                BUFFER_READLINE_COMMAND,
+                COMMANDS_SHOW_USER_OUTPUT,
+                COMMANDS_REDISPLAY);        
+        }
+        
         buffer_free_item(item);
-    
+
     /* If the user has typed a command, send it through readline */
     } else if ( queue_size(raw_input_queue) > 0 ) { 
         struct string *item = queue_pop(raw_input_queue);
@@ -371,6 +430,7 @@ tgdb_run_command_tag:
             }
         }
 
+        tgdb_partially_run_command = 1;
         current_command = NULL;
     }
 
@@ -478,8 +538,11 @@ int a2_tgdb_send_input(char c) {
     /* tgdb is not busy, send the data to readline write away */
     if( tgdb_can_issue_command() == TRUE && !COMMAND_TYPED_AT_PROMPT) {
         /* A command has been recieved for this prompt, don't allow another */
-        if ( c == '\n' )
+        if ( c == '\n' ) {
             COMMAND_TYPED_AT_PROMPT = 1;
+            tgdb_partially_run_command = 0;
+        } else
+            tgdb_partially_run_command = 1;
 
         if ( rlctx_send_char(rl, c) == -1 ) {
             err_ret("%s:%d rlctx_send_char error", __FILE__, __LINE__);
@@ -503,11 +566,32 @@ int a2_tgdb_send_input(char c) {
 
 int a2_tgdb_recv_input(char *buf) {
     /* This should return everything in it, the first try */
-    ssize_t size;
+    ssize_t i;
+    ssize_t length;
 
     if ( rlctx_recv(rl, buf, MAXLINE) == -1 ) {
         err_ret("%s:%d -> io_read error", __FILE__, __LINE__);
         return -1;
+    } 
+
+    length = strlen(buf);
+
+    for ( i = 0; i < length; i++) {
+        /* Readline finished writing its prompt */
+        if ( buf[i] == '\031' ) {
+            /* A command is finished, so we say that the libtgdb is at the 
+             * prompt. This is necesarry because readline commands are
+             * sharing the gdb state to determine when we can send a command
+             * to either readline or gdb. Since readline won't make this state
+             * get reached, when a command is finished, we set libtgdb to 
+             * be ready for another prompt.
+             */
+            data_set_state(USER_AT_PROMPT);
+            
+            /* Here we need to see if a command needs to be run */
+            if ( tgdb_has_command_to_run())
+                tgdb_run_command();
+        }
     } 
 
     return 0;
@@ -571,4 +655,15 @@ char *a2_tgdb_tty_name(void) {
 
 char *a2_tgdb_err_msg(void) {
    return err_get();
+}
+
+int a2_tgdb_change_prompt(char *prompt) {
+    tgdb_setup_buffer_command_to_run(
+        gdb_input_queue,
+        prompt,
+        BUFFER_READLINE_COMMAND,
+        COMMANDS_SHOW_USER_OUTPUT,
+        COMMANDS_SET_PROMPT);        
+            
+    return 0;
 }

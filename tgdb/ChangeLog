@@ -1,3 +1,9 @@
+04/08/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * Adding Tab completion
+    * Allowing feature to force redisplay of readline
+    * Adding Change of prompt support
+
 04/03/2003 Bob Rossi <bob_rossi@cox.net>
 
     * Made tgdb return CURRENT_FILE_UPDATE: This tells the gui the 
