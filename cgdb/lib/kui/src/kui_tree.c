@@ -41,6 +41,11 @@ int kui_tree_node_destroy ( struct kui_tree_node *ktnode ) {
 	if ( !ktnode )
 		return -1;
 
+	if ( ktnode->children ) {
+		if ( std_list_destroy ( ktnode->children ) == -1 )
+			retval = -1;
+		ktnode->children = NULL;
+	}
 
 	free ( ktnode );
 	ktnode = NULL;
@@ -365,18 +370,11 @@ int kui_tree_push_key (
 	    int *map_found ) {
 	int found;
 	struct kui_tree_node *ktnode;
-	int *nval;
 
 	*map_found = 0;
 
 	if ( ktree->state != KUI_TREE_MATCHING )
 		return -1;
-
-	nval = malloc ( sizeof ( int ) );
-	if ( !nval )
-		return -1;
-
-	*nval = key;
 
 	/* Check to see if this key matches */
 	if ( kui_tree_find ( key, ktree->cur->children, &found, &ktnode ) == -1 )

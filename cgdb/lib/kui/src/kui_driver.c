@@ -46,6 +46,8 @@
 #include "kui.h"
 #include "kui_term.h"
 
+struct kui_map_set *map;
+
 void main_loop(struct kui_manager *i) {
     int    max;
     fd_set rfds;
@@ -99,7 +101,6 @@ void main_loop(struct kui_manager *i) {
 
 static int create_mappings ( struct kui_manager *kuim ) {
 
-	struct kui_map_set *map;
 	map = kui_ms_create ();
 	if ( !map )
 		return -1;
@@ -117,7 +118,7 @@ static int create_mappings ( struct kui_manager *kuim ) {
 	}
 #endif
 
-#if 0
+#if 1
 	if ( kui_ms_register_map ( map, "abc", "xyz" ) == -1 ) {
 		/* TODO: Free map and return */
 		return -1;
@@ -183,7 +184,6 @@ int main(int argc, char **argv){
 	return 0;
 #endif
 
-	
 #if 1
     struct kui_manager *i;
     /* Initalize curses */
@@ -199,6 +199,8 @@ int main(int argc, char **argv){
     main_loop(i);
 
 	kui_manager_destroy ( i );
+
+	kui_ms_destroy ( map ); 
 
     /* Shutdown curses */
     echo();

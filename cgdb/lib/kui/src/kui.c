@@ -69,6 +69,12 @@ struct kui_map *kui_map_create (
 	if ( !map )
 		return NULL;
 
+	/* Initialize all fields */
+	map->original_key = NULL;
+	map->literal_key = NULL;
+	map->original_value = NULL;
+	map->literal_value = NULL;
+
 	key = strdup ( key_data );
 
 	if ( !key ) {
@@ -196,15 +202,15 @@ struct kui_map_set {
 	std_list maps;
 };
 
-static int kui_map_set_destroy_callback ( void *data ) {
-	struct kui_map_set *kui_ms;
+static int kui_map_destroy_callback ( void *data ) {
+	struct kui_map *map;
 
 	if ( !data  )
 		return -1;
 
-	kui_ms = (struct kui_map_set*)data;
+	map = (struct kui_map*)data;
 
-	return kui_ms_destroy ( kui_ms );
+	return kui_map_destroy ( map );
 }
 
 struct kui_map_set *kui_ms_create ( void ) {
@@ -215,7 +221,7 @@ struct kui_map_set *kui_ms_create ( void ) {
 	if ( !map )
 		return NULL;
 
-	map->maps = std_list_create ( kui_map_set_destroy_callback );
+	map->maps = std_list_create ( kui_map_destroy_callback );
 
 	if ( !map->maps ) {
 		kui_ms_destroy ( map );
@@ -241,6 +247,12 @@ int kui_ms_destroy ( struct kui_map_set *kui_ms ) {
 	if ( kui_ms->ktree ) {
 		if ( kui_tree_destroy ( kui_ms->ktree ) == -1 )
 			retval = -1;
+	}
+
+	if ( kui_ms->maps ) {
+		if ( std_list_destroy ( kui_ms->maps ) == -1 )
+			retval = -1;
+		kui_ms->maps = NULL;
 	}
 
 	free (kui_ms);
@@ -314,10 +326,10 @@ int kui_ms_deregister_map (
 	if ( kui_tree_delete ( kui_ms->ktree, map->literal_key ) == -1 )
 		return -1;
 
-	if ( kui_map_destroy ( map ) == -1 )
+	if ( std_list_remove ( kui_ms->maps, iter ) == NULL )
 		return -1;
 
-	return -1;
+	return 0;
 }
 
 /* }}} */
@@ -364,20 +376,6 @@ struct kuictx {
 	int fd;
 };
 
-static int kui_ms_destroy_callback ( void *param ) {
-	struct kui_map_set *kui_ms = (struct kui_map_set *)param;
-
-	if ( !kui_ms )
-		return -1;
-
-	if ( kui_ms_destroy ( kui_ms ) == -1 )
-		return -1;
-
-	kui_ms = NULL;
-
-	return 0;
-}
-
 static int kui_ms_destroy_int_callback ( void *param ) {
 	int *i = (int*)param;
 
@@ -404,7 +402,7 @@ struct kuictx *kui_create(
 
 	kctx->callback = callback;
 	kctx->state_data = state_data;
-	kctx->kui_map_set_list = std_list_create ( kui_ms_destroy_callback );
+	kctx->kui_map_set_list = std_list_create ( NULL );
 	kctx->ms = ms;
 
 	if ( !kctx->kui_map_set_list ) {
@@ -447,6 +445,12 @@ int kui_destroy ( struct kuictx *kctx ) {
 		if ( std_list_destroy ( kctx->buffer ) == -1 )
 			ret = -1;
 		kctx->buffer = NULL;
+	}
+
+	if ( kctx->volatile_buffer ) {
+		if ( std_list_destroy ( kctx->volatile_buffer ) == -1 )
+			ret = -1;
+		kctx->volatile_buffer = NULL;
 	}
 
 	free (kctx);
@@ -992,9 +996,10 @@ int kui_cangetkey ( struct kuictx *kctx ) {
 struct kui_manager {
 	struct kuictx *terminal_keys;
 	struct kuictx *normal_keys;
+	struct kui_map_set *terminal_key_set;
 };
 
-static int create_terminal_mappings ( struct kuictx *i ) {
+static int create_terminal_mappings ( struct kui_manager *kuim, struct kuictx *i ) {
 	struct kui_map_set *terminal_map;
 	
 	/* Create the terminal kui map */
@@ -1002,6 +1007,8 @@ static int create_terminal_mappings ( struct kuictx *i ) {
 
 	if ( !terminal_map )
 		return -1;
+
+	kuim->terminal_key_set = terminal_map;
 	
 	if ( kui_add_map_set ( i, terminal_map ) == -1 )
 		return -1;
@@ -1057,7 +1064,7 @@ struct kui_manager *kui_manager_create(int stdinfd ) {
 		return NULL;
 	}
 
-	if ( create_terminal_mappings ( man->terminal_keys ) == -1 ) {
+	if ( create_terminal_mappings ( man, man->terminal_keys ) == -1 ) {
 		kui_manager_destroy ( man );
 		return NULL;
 	}
@@ -1078,6 +1085,9 @@ int kui_manager_destroy ( struct kui_manager *kuim ) {
 
 	if ( !kuim )
 		return 0;
+
+	if ( kui_ms_destroy ( kuim->terminal_key_set ) == -1 )
+		ret = -1;
 
 	if ( kui_destroy ( kuim->terminal_keys ) == -1 )
 		ret = -1;
