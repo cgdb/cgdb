@@ -30,7 +30,7 @@ static int breakpoint_started = FALSE;
 
 /* 'info sources' information */
 static int sources_nl = 0;
-static char sources_buf[MAXLINE];
+static char sources_buf[4*MAXLINE];
 static int sources_buf_pos = 0;
 static char *sources[MAXLINE];
 static int sources_pos = 0;
