@@ -3,19 +3,20 @@
 
 D       [0-9]
 L       [a-zA-Z_]
+T       [0-9a-zA-Z_]
+IDENTIFIER {L}+{T}*
 
 %{
 
 #include <stdio.h>
 #include "tokenizer.h"
-//\"(\\.|[^\\"])*\"     { return(TOKENIZER_LITERAL); }
 %}
 
 %x comment
 %x string_literal
 
 %%
-"auto" 					{ return(TOKENIZER_TYPE); }
+"auto"                  { return(TOKENIZER_TYPE); }
 "bool"                  { return(TOKENIZER_TYPE); }
 "char"                  { return(TOKENIZER_TYPE); }
 "class"                 { return(TOKENIZER_TYPE); }
@@ -38,14 +39,14 @@ L       [a-zA-Z_]
 "struct"                { return(TOKENIZER_TYPE); }
 "union"                 { return(TOKENIZER_TYPE); }
 "unsigned"              { return(TOKENIZER_TYPE); }
-"virtual"              	{ return(TOKENIZER_TYPE); }
+"virtual"               { return(TOKENIZER_TYPE); }
 "void"                  { return(TOKENIZER_TYPE); }
 "volatile"              { return(TOKENIZER_TYPE); }
-"wchar_t"              	{ return(TOKENIZER_TYPE); }
+"wchar_t"               { return(TOKENIZER_TYPE); }
 
-"and"                 	{ return(TOKENIZER_KEYWORD); }
+"and"                   { return(TOKENIZER_KEYWORD); }
 "and_eq"                { return(TOKENIZER_KEYWORD); }
-"asm"                 	{ return(TOKENIZER_KEYWORD); }
+"asm"                   { return(TOKENIZER_KEYWORD); }
 "bitand"                { return(TOKENIZER_KEYWORD); }
 "bitor"                 { return(TOKENIZER_KEYWORD); }
 "break"                 { return(TOKENIZER_KEYWORD); }
@@ -55,7 +56,7 @@ L       [a-zA-Z_]
 "const_cast"            { return(TOKENIZER_KEYWORD); }
 "continue"              { return(TOKENIZER_KEYWORD); }
 "default"               { return(TOKENIZER_KEYWORD); }
-"delete"               	{ return(TOKENIZER_KEYWORD); }
+"delete"                { return(TOKENIZER_KEYWORD); }
 "do"                    { return(TOKENIZER_KEYWORD); }
 "dynamic_cast"          { return(TOKENIZER_KEYWORD); }
 "else"                  { return(TOKENIZER_KEYWORD); }
@@ -79,50 +80,50 @@ L       [a-zA-Z_]
 "static_cast"           { return(TOKENIZER_KEYWORD); }
 "switch"                { return(TOKENIZER_KEYWORD); }
 "template"              { return(TOKENIZER_KEYWORD); }
-"this"                	{ return(TOKENIZER_KEYWORD); }
-"throw"                	{ return(TOKENIZER_KEYWORD); }
-"true"                	{ return(TOKENIZER_KEYWORD); }
-"try"                	{ return(TOKENIZER_KEYWORD); }
+"this"                  { return(TOKENIZER_KEYWORD); }
+"throw"                 { return(TOKENIZER_KEYWORD); }
+"true"                  { return(TOKENIZER_KEYWORD); }
+"try"                   { return(TOKENIZER_KEYWORD); }
 "typedef"               { return(TOKENIZER_KEYWORD); }
-"typeid"               	{ return(TOKENIZER_KEYWORD); }
+"typeid"                { return(TOKENIZER_KEYWORD); }
 "typename"              { return(TOKENIZER_KEYWORD); }
-"using"               	{ return(TOKENIZER_KEYWORD); }
+"using"                 { return(TOKENIZER_KEYWORD); }
 "while"                 { return(TOKENIZER_KEYWORD); }
-"xor"                 	{ return(TOKENIZER_KEYWORD); }
+"xor"                   { return(TOKENIZER_KEYWORD); }
 "xor_eq"                { return(TOKENIZER_KEYWORD); }
 
-"/*"					{ BEGIN(comment); return(TOKENIZER_COMMENT); }
-<comment>[^*\r\n]* 		{ return(TOKENIZER_COMMENT); }
+"/*"                    { BEGIN(comment); return(TOKENIZER_COMMENT); }
+<comment>[^*\r\n]*      { return(TOKENIZER_COMMENT); }
 <comment>"*"+[^*/\r\n]* { return(TOKENIZER_COMMENT); }
 <comment>\n             { return(TOKENIZER_NEWLINE); }
 <comment>\r             { return(TOKENIZER_NEWLINE); }
 <comment>\r\n           { return(TOKENIZER_NEWLINE); }
-<comment>"*"+"/"        { BEGIN(INITIAL); return(TOKENIZER_COMMENT);}
+<comment>"*"+"/"        { BEGIN(INITIAL); return(TOKENIZER_COMMENT); }
 
 \/\/[^\n]*              { return(TOKENIZER_COMMENT); }
 
-#{L}+					{ return(TOKENIZER_DIRECTIVE); }
+#{L}+                   { return(TOKENIZER_DIRECTIVE); }
 
-\"											{ BEGIN(string_literal); 	return(TOKENIZER_LITERAL);}
-<string_literal>(\\|\\[^\r\n]|[^\\"\r\n])* 	{ return(TOKENIZER_LITERAL); }
-<string_literal>\n          				{ return(TOKENIZER_NEWLINE); }
-<string_literal>\r          				{ return(TOKENIZER_NEWLINE); }
-<string_literal>\r\n        				{ return(TOKENIZER_NEWLINE); }
-<string_literal>\"        					{ BEGIN(INITIAL); 			return(TOKENIZER_LITERAL);}
+\"                                          { BEGIN(string_literal);    return(TOKENIZER_LITERAL); }
+<string_literal>(\\|\\[^\r\n]|[^\\"\r\n])*  { return(TOKENIZER_LITERAL); }
+<string_literal>\n                          { return(TOKENIZER_NEWLINE); }
+<string_literal>\r                          { return(TOKENIZER_NEWLINE); }
+<string_literal>\r\n                        { return(TOKENIZER_NEWLINE); }
+<string_literal>\"                          { BEGIN(INITIAL);           return(TOKENIZER_LITERAL); }
 
 
-{D}+                { return(TOKENIZER_LITERAL); }
-'.'                { return(TOKENIZER_LITERAL); }
+{D}+                    { return(TOKENIZER_LITERAL); }
+'.'                     { return(TOKENIZER_LITERAL); }
 
-\n						{ return(TOKENIZER_NEWLINE); }
-\r\n 					{ return(TOKENIZER_NEWLINE); }
-\r 						{ return(TOKENIZER_NEWLINE); }
+\n                      { return(TOKENIZER_NEWLINE); }
+\r\n                    { return(TOKENIZER_NEWLINE); }
+\r                      { return(TOKENIZER_NEWLINE); }
 [ \t\v\f]               { return(TOKENIZER_TEXT);    }
-{L}+                    { return(TOKENIZER_TEXT); 	 }
+{IDENTIFIER}            { return(TOKENIZER_TEXT);    }
 .                       { return(TOKENIZER_TEXT);    }
 
 %%
 
 int c_wrap ( void ) {
-	return 1;
+    return 1;
 }

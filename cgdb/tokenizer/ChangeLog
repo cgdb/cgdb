@@ -1,3 +1,8 @@
+07/17/2003 Bob Rossi <bob_rossi@cox.net>
+
+	* clexer.l: Fixed the IDENTIFIER rule. Now Identifiers like
+	BASE64 match, instead of BASE and then 64.
+
 07/16/2003 Bob Rossi <bob_rossi@cox.net>
 
 	* clexer.l: changed string literal rule.
