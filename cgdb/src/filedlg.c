@@ -21,7 +21,7 @@
 #include "filedlg.h"
 #include "cgdb.h"
 #include "highlight.h"
-#include "input.h"
+#include "kui_term.h"
 
 struct file_buffer {
    int length;                     /* Number of files in program */

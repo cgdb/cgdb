@@ -171,7 +171,7 @@ static int command_set_stc ( int value ) {
 int command_set_esc_sequence_timeout( int msec )
 {
 	if ( msec >= 0 && msec <= 10000)
-		cgdb_set_esc_sequence_timeout ( msec );
+		return cgdb_set_esc_sequence_timeout ( msec );
 
     return 0;
 }

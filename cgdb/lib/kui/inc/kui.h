@@ -374,6 +374,36 @@ int kui_cangetkey ( struct kuictx *kctx );
 
 int kui_getkey ( struct kuictx *kctx );
 
+/**
+ * This get's the last sequence of characters read in that made up a
+ * CGDB_KEY_*
+ * Basically, if CGDB_KEY_PPAGE is returned, this will give back the 
+ * characters that made that happen. 
+ *
+ * \param kctx
+ * The kui context.
+ *
+ * \return
+ * NULL if there is no relevant data.
+ * Otherwise a pointer to the sequence recieved.
+ */
+const char *kui_get_raw_data ( struct kuictx *kctx );
+
+/**
+ * Tell's the kui context the maximum number of milliseconds that it is allowed
+ * to block while waiting to complete a mapping.
+ *
+ * \param kctx
+ * The kui context.
+ *
+ * \param msec
+ * The maximum number of milliseconds to block while waiting to complete a map
+ *
+ * \return
+ * 0 on success, or -1 on error.
+ */
+int kui_set_blocking_ms ( struct kuictx *kctx, unsigned long msec );
+
 //@}
 
 /* }}} */
@@ -455,7 +485,7 @@ std_list kui_manager_get_map_sets ( struct kui_manager *kuim );
  */
 int kui_manager_add_map_set ( 
 		struct kui_manager *kuim, 
-		struct kui_map_set *kui_ms );
+		struct kui_map_set *kui_ms ); 
 
 /**
  * Determine's if libkui has data ready to read. It has already been
@@ -483,6 +513,42 @@ int kui_manager_cangetkey ( struct kui_manager *kuim );
 
 int kui_manager_getkey ( struct kui_manager *kuim );
 
+/**
+ * This get's the last sequence of characters read in that made up a
+ * CGDB_KEY_*
+ * Basically, if CGDB_KEY_PPAGE is returned, this will give back the 
+ * characters that made that happen. 
+ *
+ * \param kuim
+ * The kui context.
+ *
+ * \return
+ * NULL if there is no relevant data.
+ * Otherwise a pointer to the sequence recieved.
+ */
+const char *kui_manager_get_raw_data ( struct kui_manager *kuim );
+
+/**
+ * Set's the terminal escape seqeunce time out value.
+ * This is used to tell CGDB how long to block when looking to match terminal
+ * escape sequences. For instance, in order to get F11, Maybe it's necessary
+ * for the charachters 27(ESC) 80(P) 81(Q) to get sent. So, if the user types 
+ * these * within msec each, then CGDB_KEY_F11 get's returned, otherwise the 
+ * key's * are returned as typed.
+ *
+ * \param kuim
+ * The kui context
+ *
+ * \param msec
+ * The maximum number of milliseconds to block while waiting to complete a 
+ * terminal escape sequence.
+ *
+ * \return
+ * 0 on success, or -1 on error.
+ */
+int kui_manager_set_terminal_escape_sequence_timeout ( 
+		struct kui_manager *kuim, 
+		unsigned int msec );
 //@}
 
 /* }}} */

@@ -54,6 +54,6 @@
 
 #define MAXLINE 4096
 
-void cgdb_set_esc_sequence_timeout ( int msec );
+int cgdb_set_esc_sequence_timeout ( int msec );
 
 #endif

@@ -1,3 +1,14 @@
+06/29/2004 Bob Rossi <bob@brasko.net>
+
+	* cgdb.h (cgdb_set_esc_sequence_timeout): changed return type
+	from void to int
+	* cgdb.c (input): removed
+	(kui_ctx): added global object
+	Changed calls from input_ to kui_
+	* cgdbrc.c: use return value of cgdb_set_esc_sequence_timeout
+	* filedlg.c: remove use of input.h
+	* interface.c: remove use of input.h
+
 06/14/2004 Bob Rossi <bob@brasko.net>
 
     * cgdb.c (parse_long_options): add NULL entry to long_options to fix crash 

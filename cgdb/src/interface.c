@@ -51,12 +51,12 @@
 #include "config.h"
 #include "error.h"
 #include "interface.h"
+#include "kui_term.h"
 #include "scroller.h"
 #include "sources.h"
 #include "tgdb.h"
 #include "filedlg.h"
 #include "cgdbrc.h"
-#include "input.h"
 #include "highlight.h"
 #include "fs_util.h"
 

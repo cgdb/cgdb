@@ -61,7 +61,8 @@
 #include "sources.h"
 #include "tgdb.h"
 #include "helptext.h"
-#include "input.h"
+#include "kui.h"
+#include "kui_term.h"
 #include "fs_util.h"
 #include "cgdbrc.h"
 #include "io.h"
@@ -83,7 +84,7 @@ static int tgdb_readline_fd = -1; /* tgdb returns the 'at prompt' data */
 
 static char *debugger_path = NULL;  /* Path to debugger to use */
 
-struct input *input = NULL;         /* Initialize the input package */
+struct kui_manager *kui_ctx = NULL; /* The key input package */
 
 int resize_pipe[2] = { -1, -1 };
 
@@ -265,23 +266,23 @@ static void send_key(int focus, int key) {
 static int user_input(void) {
     static int key, val;
     
-    key = input_getkey(input);
+	key = kui_manager_getkey ( kui_ctx );
 
     /* Process the key */
     switch ( ( val = if_input(key)) ) {
         case 1:
         case 2:
-            if ( key >= CGDB_KEY_ESC && key < CGDB_KEY_ERROR ) {
-                    char *seqbuf = input_get_last_seq(input);
+            if ( kui_term_is_cgdb_key ( key ) ) {
+				char *seqbuf = (char*)kui_manager_get_raw_data( kui_ctx );
 
-                    if ( seqbuf == NULL ) {
-                        err_msg("%s:%d input_get_last_seq error\n", __FILE__, __LINE__);
-                        return -1;
-                    } else {
-                        int length = strlen(seqbuf), i;
-                        for ( i = 0; i < length; i++ )
-                            send_key(val, seqbuf[i]);
-                    }
+				if ( seqbuf == NULL ) {
+					err_msg("%s:%d input_get_last_seq error\n", __FILE__, __LINE__);
+					return -1;
+				} else {
+					int length = strlen(seqbuf), i;
+					for ( i = 0; i < length; i++ )
+						send_key(val, seqbuf[i]);
+				}
             } else
                 send_key(val, key);
     
@@ -636,7 +637,8 @@ int main(int argc, char *argv[]) {
         exit(-1);
     }
 
-    if ( (input = input_init(STDIN_FILENO) ) == NULL )
+	kui_ctx = kui_manager_create ( STDIN_FILENO );
+	if ( !kui_ctx  )
         err_quit("%s: Unable to initialize input library\n", my_name); 
 
     /* Initialize the display */
@@ -674,6 +676,6 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-void cgdb_set_esc_sequence_timeout ( int msec ) {
-	input_set_escape_sequence_timeout_value ( input, msec );
+int cgdb_set_esc_sequence_timeout ( int msec ) {
+	return kui_manager_set_terminal_escape_sequence_timeout ( kui_ctx, msec );
 }
