@@ -24,7 +24,7 @@ typedef int 		(*STDCompareFunc)(
 	const void *a, 
 	const void *b);
 
-typedef void 		(*STDFunc) ( 
+typedef int 		(*STDFunc) ( 
 	void *data, 
 	void *user_data);
 

@@ -1,3 +1,10 @@
+03/18/2004 Bob Rossi <bob@brasko.net>
+
+    * include/std_list.h: Wrote from scratch. Forget Glib.
+	* src/std_list.c: Ditto
+	* src/std_list_driver.c: Ditto
+	* include/std_types.h (STDFunc): change return type from void to int
+
 03/16/2004 Bob Rossi <bob@brasko.net>
 
     * src/Makefile.am: Add tgdb_list.c, std_hash.c, std_tree.c to libadt.
