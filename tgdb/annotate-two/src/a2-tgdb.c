@@ -34,7 +34,7 @@
 #include "fork_util.h"
 #include "fs_util.h"
 #include "pseudo.h"
-#include "error.h"
+#include "logger.h"
 #include "io.h"
 #include "state_machine.h"
 #include "data.h"
@@ -55,7 +55,7 @@ static int a2_set_inferior_tty ( void *ctx ) {
 				ANNOTATE_TTY, 
 				a2->inferior_tty_name, 
 				0 ) == -1 ) {
-        err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "commands_issue_command error");
         return -1;
     }
 
@@ -109,7 +109,7 @@ int a2_open_new_tty (
 
 	/* Open up the tty communication */
 	if ( util_new_tty(&(a2->inferior_stdin), &(a2->inferior_slave_fd), a2->inferior_tty_name) == -1){
-		err_msg("%s:%d -> Could not open child tty", __FILE__, __LINE__);
+		logger_write_pos ( logger, __FILE__, __LINE__, "Could not open child tty");
 		return -1;
 	}
 
@@ -176,7 +176,7 @@ static int tgdb_setup_config_file ( struct annotate_two *a2, const char *dir ) {
             "set prompt (tgdb) \n");
         fclose( fp );
     } else {
-        err_msg("%s:%d fopen error '%s'", __FILE__, __LINE__, a2->a2_gdb_init_file);
+        logger_write_pos ( logger, __FILE__, __LINE__, "fopen error '%s'", a2->a2_gdb_init_file);
         return 0;
     }
 
@@ -186,13 +186,14 @@ static int tgdb_setup_config_file ( struct annotate_two *a2, const char *dir ) {
 void* a2_create_context ( 
 	const char *debugger, 
 	int argc, char **argv,
-	const char *config_dir ) {
+	const char *config_dir,
+    struct logger *logger) {
 	
 	struct annotate_two *a2 = initialize_annotate_two ();
     char a2_debug_file[FSUTIL_PATH_MAX];
 
     if ( !tgdb_setup_config_file( a2, config_dir ) ) {
-        err_msg("%s:%d tgdb_init_config_file error", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_init_config_file error");
         return NULL;
     }
 
@@ -238,7 +239,7 @@ int a2_initialize (
              a2->c,  
 			 a2->client_command_list,
              ANNOTATE_INFO_BREAKPOINTS, NULL, 0 ) == -1 ) {
-        err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "commands_issue_command error");
         return -1;
     }
 
@@ -312,7 +313,7 @@ int a2_get_source_absolute_filename (
 				ANNOTATE_LIST, 
 				file, 
 				0 ) == -1 ) {
-        err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "commands_issue_command error");
         return -1;
     }
 
@@ -322,7 +323,7 @@ int a2_get_source_absolute_filename (
 				ANNOTATE_INFO_SOURCE_ABSOLUTE, 
 				file, 
 				0 ) == -1 ) {
-        err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "commands_issue_command error");
         return -1;
     }
 
@@ -337,7 +338,7 @@ int a2_get_inferior_sources ( void *ctx) {
 				ANNOTATE_INFO_SOURCES, 
 				NULL, 
 				0 ) == -1 ) {
-        err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "commands_issue_command error");
         return -1;
     }
 
@@ -356,7 +357,7 @@ int a2_change_prompt(
 				ANNOTATE_SET_PROMPT, 
 				prompt, 
 				2 ) == -1 ) {
-        err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "commands_issue_command error");
         return -1;
     }
             
@@ -400,7 +401,7 @@ int a2_completion_callback(
 				a2->c, 
 				a2->client_command_list,
 				ANNOTATE_COMPLETE, command, 4 ) == -1 ) {
-        err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "commands_issue_command error");
         return -1;
     }
 

@@ -35,7 +35,6 @@
 #include "fork_util.h"
 #include "fs_util.h"
 #include "pseudo.h"
-#include "error.h"
 #include "io.h"
 #include "tgdb_types.h"
 #include "queue.h"
@@ -232,7 +231,7 @@ static int tgdb_setup_config_file ( struct tgdb_gdbmi *gdbmi, const char *dir ) 
             "set prompt (tgdbmi) \n");
         fclose( fp );
     } else {
-        err_msg("%s:%d fopen error '%s'", __FILE__, __LINE__, gdbmi->gdbmi_gdb_init_file);
+        logger_write_pos ( logger, __FILE__, __LINE__, "fopen error '%s'", gdbmi->gdbmi_gdb_init_file);
         return 0;
     }
 
@@ -242,13 +241,14 @@ static int tgdb_setup_config_file ( struct tgdb_gdbmi *gdbmi, const char *dir ) 
 void* gdbmi_create_context ( 
 	const char *debugger, 
 	int argc, char **argv,
-	const char *config_dir ) {
+	const char *config_dir,
+    struct logger *logger) {
 	
 	struct tgdb_gdbmi *gdbmi = initialize_tgdb_gdbmi ();
     char gdbmi_debug_file[PATH_MAX];
 
     if ( !tgdb_setup_config_file( gdbmi, config_dir ) ) {
-        err_msg("%s:%d tgdb_init_config_file error", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_init_config_file error");
         return NULL;
     }
 

@@ -14,7 +14,7 @@
 #include "commands.h"
 #include "globals.h"
 #include "io.h"
-#include "error.h"
+#include "logger.h"
 #include "a2-tgdb.h"
 #include "sys_util.h"
 
@@ -75,7 +75,7 @@ static int tgdb_initialize_annotation_state ( struct annotate_two *a2 ) {
 		a2_get_source_absolute_filename(a2, NULL);
 
 		if ( commands_issue_command ( a2->c, a2->client_command_list, ANNOTATE_INFO_SOURCE_RELATIVE, NULL, 0 ) == -1 ) {
-			err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
+			logger_write_pos ( logger, __FILE__, __LINE__, "commands_issue_command error");
 			return -1;
 		}
 	}

@@ -20,7 +20,7 @@
 
 /* Local includes */
 #include "tgdb_types.h"
-#include "error.h"
+#include "logger.h"
 #include "sys_util.h"
 #include "ibuf.h"
 #include "tgdb_list.h"
@@ -31,7 +31,7 @@ static int tgdb_types_print_item ( void *command ) {
     FILE *fd = stderr;
 
     if ( !com ) {
-        err_msg("%s:%d ERROR: ITEM IS NULL", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "item is null");
         return -1;
     }
 
@@ -50,7 +50,7 @@ static int tgdb_types_print_item ( void *command ) {
 				tb = (struct tgdb_breakpoint *)tgdb_list_get_item ( iterator );
 
 				if ( tb == NULL )
-					err_msg("%s:%d breakpoint is NULL", __FILE__, __LINE__);
+					logger_write_pos ( logger, __FILE__, __LINE__, "breakpoint is NULL");
 
 				fprintf ( fd, 
 					"\tFILE(%s) FUNCNAME(%s) LINE(%d) ENABLED(%d)\n",

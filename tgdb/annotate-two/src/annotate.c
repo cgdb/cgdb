@@ -11,7 +11,7 @@
 #endif /* HAVE_STDLIB_H */
 
 #include "annotate.h"
-#include "error.h"
+#include "logger.h"
 #include "data.h"
 #include "commands.h"
 #include "globals.h"
@@ -34,7 +34,7 @@ static int handle_misc_pre_prompt(struct annotate_two *a2, const char *buf, size
    /* If tgdb is sending a command, then continue past it */
    if(data_get_state(a2->data) == INTERNAL_COMMAND){
       if(io_write_byte(a2->debugger_stdin, '\n') == -1)
-         err_msg("%s:%d -> Could not send command", __FILE__, __LINE__);
+         logger_write_pos ( logger, __FILE__, __LINE__, "Could not send command");
    } else {
       data_set_state(a2, AT_PROMPT);
    }
@@ -456,7 +456,7 @@ int tgdb_parse_annotation(struct annotate_two *a2, char *data, size_t size, stru
       if(strncmp(data, annotations[i].data, annotations[i].size) == 0){
          if(annotations[i].f){
             if(annotations[i].f(a2, data, size, list) == -1){
-               err_msg("%s:%d -> parsing annotation failed\n", __FILE__, __LINE__);
+               logger_write_pos ( logger, __FILE__, __LINE__, "parsing annotation failed");
             } else 
                break; /* only match one annotation */
          }

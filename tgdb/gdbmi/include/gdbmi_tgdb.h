@@ -11,6 +11,7 @@
 
 #include "tgdb_types.h"
 #include "tgdb_client_command.h"
+#include "logger.h"
 
 /*! \file
  * gdbmi_tgdb.h
@@ -113,7 +114,8 @@ enum gdbmi_commands {
 void *gdbmi_create_context ( 
 	const char *debugger_path, 
 	int argc, char **argv,
-	const char *config_dir );
+	const char *config_dir,
+    struct logger *logger);
 
 /** 
  * This initializes the libgdbmi libarary.

@@ -32,10 +32,10 @@
 #endif /* HAVE_ERRNO_H */
 
 /* Local includes */
-#include "error.h"
 #include "io.h"
 #include "terminal.h"
 #include "rlctx.h"
+#include "logger.h"
 
 #define MAXLINE 4096
 
@@ -60,31 +60,31 @@ static int tgdb_completion_callback ( void *p, const char *line ) {
 static int tgdb_init_readline ( char *config_dir, int *fd ) {
     /* Initialize readline */
     if ( (rl = rlctx_init((const char *)config_dir, "rlctx_driver", NULL)) == NULL ) {
-        err_msg("(%s:%d) rlctx_init failed", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_init failed");
         return -1;
     }
 
     /* Register callback for each command recieved at readline */
     if ( rlctx_register_command_callback(rl, &tgdb_command_callback) == -1 ) {
-        err_msg("(%s:%d) rlctx_register_callback failed", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_register_callback failed");
         return -1;
     }
 
     /* Register callback for tab completion */
     if ( rlctx_register_completion_callback(rl, &tgdb_completion_callback) == -1 ) {
-        err_msg("(%s:%d) rlctx_register_callback failed", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_register_callback failed");
         return -1;
     }
 
     /* Let the GUI check this for reading, 
      * if it finds data, it should call tgdb_recv_input */
     if ( (*fd = rlctx_get_fd(rl)) == -1 ) {
-        err_msg("%s:%d rlctx_get_fd error", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_get_fd error");
         return -1;
     }
 
     if ( rlctx_change_prompt (rl, "(prompt) ") == -1 ) {
-        err_msg("(%s:%d) rlctx_register_callback failed", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_register_callback failed");
         return -1;
     }
 
@@ -93,7 +93,7 @@ static int tgdb_init_readline ( char *config_dir, int *fd ) {
 
 int tgdb_rl_send ( char c ) {
     if ( rlctx_send_char ( rl, c ) == -1 ) {
-        err_msg("(%s:%d) rlctx_send_char failed", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_send_char failed");
         return -1;
     }
 
@@ -105,7 +105,7 @@ static int tgdb_readline_input(void){
     char buf[MAXLINE];
 
     if ( rlctx_recv ( rl, buf, MAXLINE ) == -1 ) {
-        err_msg("%s:%d rlctx_recv error", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_recv error");
         return -1;
     }
     fprintf(stderr, "%s", buf);
@@ -118,7 +118,7 @@ static void stdin_input(int fd) {
     int i;
 
     if( ( size = io_read(STDIN_FILENO, &command, MAXLINE)) < 0 ){
-        err_msg("%s:%d -> could not read byte\n", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "could not read byte\n");
         return;
     } /* end if */
 
@@ -126,7 +126,7 @@ static void stdin_input(int fd) {
         /* For testing only */
         if ( command[i] == '8' )  {
 			if ( rlctx_send_char ( rl, 3 ) == -1 ) {
-				err_msg("(%s:%d) rlctx_send_char failed", __FILE__, __LINE__);
+				logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_send_char failed");
 				return;
 			}
             continue;
@@ -140,7 +140,7 @@ static void stdin_input(int fd) {
         } 
 
         if ( rlctx_send_char ( rl, command[i] ) == -1 ) {
-            err_msg("(%s:%d) rlctx_send_char failed", __FILE__, __LINE__);
+            logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_send_char failed");
             return;
         }
     }
@@ -175,7 +175,7 @@ void main_loop(int readlinefd){
       if(result == -1 && errno == EINTR)
          continue;
       else if(result == -1) /* on error ... must die -> stupid OS */
-         err_dump("%s:%d select failed\n", __FILE__, __LINE__);
+         logger_write_pos ( logger, __FILE__, __LINE__, "select failed\n");
 
       /* stdin -> tgdb */
       if(FD_ISSET(STDIN_FILENO, &rfds))
@@ -198,10 +198,10 @@ int main(int argc, char **argv){
 #endif
 
     if ( tty_cbreak(STDIN_FILENO) == -1 )
-        err_msg("%s:%d tty_cbreak error\n", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "tty_cbreak error\n");
 
     if ( tgdb_init_readline ( ".", &tgdb_rlctx ) == -1 ) {
-        err_msg("%s:%d tty_cbreak error\n", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "tty_cbreak error\n");
         goto reset_driver;
     }
 
@@ -210,7 +210,7 @@ int main(int argc, char **argv){
 reset_driver:
 
     if ( tty_reset(STDIN_FILENO) == -1 )
-        err_msg("%s:%d tty_reset error\n", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "tty_reset error\n");
 
     return 0;
 }

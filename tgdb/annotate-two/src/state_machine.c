@@ -16,7 +16,7 @@
 
 #include "state_machine.h"
 #include "annotate.h"
-#include "error.h"
+#include "logger.h"
 #include "data.h"
 #include "globals.h"
 #include "annotate_two.h"
@@ -115,7 +115,7 @@ int a2_handle_data(
                   sm->tgdb_state = NEW_LINE;
                   break; 
                default:                                                       
-                  err_msg("%s:%d -> Bad state transition", __FILE__, __LINE__);
+                  logger_write_pos ( logger, __FILE__, __LINE__, "Bad state transition");
                   break;
             } /* end switch */
             break;
@@ -138,7 +138,7 @@ int a2_handle_data(
 				  ibuf_addchar ( sm->tgdb_buffer, data[i] );
                   break;
                default:                                                       
-                  err_msg("%s:%d -> Bad state transition", __FILE__, __LINE__);
+                  logger_write_pos ( logger, __FILE__, __LINE__, "Bad state transition");
                   break;
             } /* end switch */
             break;
@@ -166,7 +166,7 @@ int a2_handle_data(
 				  ibuf_addchar ( sm->tgdb_buffer, data[i] );
                   break;
                default:                                                       
-                  err_msg("%s:%d -> Bad state transition", __FILE__, __LINE__);
+                  logger_write_pos ( logger, __FILE__, __LINE__, "Bad state transition");
                   break;
             } /* end switch */
             break;

@@ -27,7 +27,6 @@
 #include "tgdb_client_command.h"
 #include "tgdb_client_interface.h"
 #include "fs_util.h"
-#include "error.h"
 #include "rlctx.h"
 #include "ibuf.h"
 #include "io.h"
@@ -37,6 +36,9 @@
 #include "fork_util.h"
 #include "sys_util.h"
 #include "tgdb_list.h"
+#include "logger.h"
+
+static int num_loggers = 0;
 
 /**
  * The TGDB context data structure.
@@ -169,16 +171,6 @@ struct tgdb {
 	 * An iterator into command_list.
 	 */
 	tgdb_list_iterator *command_list_iterator;
-
-	/**
-	 * This is a TGDB option.
-	 *
-	 * It determines if TGDB print's it's error messages to stdout/stderr.
-	 * If it is 0, don't print them.
-	 * If it is 1, print them.
-	 * The default is 0.
-	 */
-	int tgdb_verbose_error_handling;
 };
 
 /* Temporary prototypes */
@@ -232,13 +224,13 @@ static int tgdb_process_client_commands ( struct tgdb *tgdb ) {
 						break;
 
 					default:
-						err_msg("%s:%d unknown switch error", __FILE__, __LINE__);
+						logger_write_pos ( logger, __FILE__, __LINE__, "unknown switch case" );
 						return -1;
 				}
 				break;
 
 			default:
-				err_msg("%s:%d unknown switch error", __FILE__, __LINE__);
+				logger_write_pos ( logger, __FILE__, __LINE__, "unknown switch case" );
 				return -1;
 		}
 
@@ -249,7 +241,7 @@ static int tgdb_process_client_commands ( struct tgdb *tgdb ) {
 				client_command );
 
 		if ( tgdb_dispatch_command ( tgdb, command ) == -1 ) {
-			err_msg("%s:%d tgdb_dispatch_command error", __FILE__, __LINE__);
+			logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_dispatch_command failed" );
 			return -1;
 		}
 
@@ -294,7 +286,7 @@ static struct tgdb *initialize_tgdb_context ( void ) {
 
 	tgdb->command_list = tgdb_list_init();
 
-	tgdb->tgdb_verbose_error_handling = 0;
+	logger = NULL;
 	
 	return tgdb;
 }
@@ -322,11 +314,53 @@ static int tgdb_initialize_config_dir ( struct tgdb *tgdb, char *config_dir ) {
 
     /* Create the config directory */
     if ( ! fs_util_create_dir_in_base ( home_dir, tgdb_dir ) ) {
-        err_msg("%s:%d fs_util_create_dir_in_base error", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "fs_util_create_dir_in_base error");
         return -1; 
     }
 
     fs_util_get_path ( home_dir, tgdb_dir, config_dir );
+
+    return 0;
+}
+
+/**
+ * Knowing the user's home directory, TGDB can initialize the logger interface
+ *
+ *  \param tgdb
+ *  The tgdb context.
+ *
+ *  \param config_dir 
+ *  The path to the user's config directory
+ *
+ *  \return
+ *  -1 on error, or 0 on success
+ */
+static int tgdb_initialize_logger_interface ( 
+		struct tgdb *tgdb, 
+		char *config_dir ) {
+
+    /* Get the home directory */
+    const char *tgdb_log_file = "tgdb_log.txt";
+	char tgdb_log_path[FSUTIL_PATH_MAX];
+
+    fs_util_get_path ( config_dir, tgdb_log_file, tgdb_log_path );
+
+	/* Initialize the logger */
+	if ( num_loggers == 0 ) {
+		logger = logger_create ();
+
+		if ( !logger ) {
+			printf ( "Error: Could not create log file\n" );
+			return -1;
+		}
+	}
+
+	++num_loggers;
+
+	if ( logger_set_file ( logger, tgdb_log_path ) == -1 ) {
+        printf ( "Error: Could not open log file\n" );
+		return -1;	
+	}
 
     return 0;
 }
@@ -341,12 +375,17 @@ struct tgdb* tgdb_initialize (
 
     /* Create config directory */
     if ( tgdb_initialize_config_dir ( tgdb, config_dir ) == -1 ) {
-        err_msg("%s:%d tgdb_initialize error", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_initialize error");
 		return NULL;
     }
 
+	if ( tgdb_initialize_logger_interface ( tgdb, config_dir ) == -1 ) {
+        printf ( "Could not initialize logger interface\n" );
+		return NULL;
+	}
+
     if ( tgdb_init_readline ( tgdb, config_dir , readline_fd ) == -1 ) {
-        err_msg("%s:%d tgdb_init_readline error", __FILE__, __LINE__);
+		logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_init_readline failed" );
 		return NULL;
     }
 
@@ -367,11 +406,12 @@ struct tgdb* tgdb_initialize (
 	tgdb->tcc = tgdb_client_create_context ( 
 			debugger, argc, argv, config_dir,
 			TGDB_CLIENT_DEBUGGER_GNU_GDB,
-			TGDB_CLIENT_PROTOCOL_GNU_GDB_ANNOTATE_TWO );
+			TGDB_CLIENT_PROTOCOL_GNU_GDB_ANNOTATE_TWO,
+		    logger	);
 
 	/* create an instance and initialize a tgdb_client_context */
 	if ( tgdb->tcc == NULL ) {
-        err_msg("%s:%d tgdb_client_create_context error", __FILE__, __LINE__);
+		logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_client_create_context failed" );
         return NULL; 
 	}
 
@@ -379,7 +419,7 @@ struct tgdb* tgdb_initialize (
 				tgdb->tcc,
 				&(tgdb->debugger_stdin), &(tgdb->debugger_stdout), 
 				&(tgdb->inferior_stdin), &(tgdb->inferior_stdout)) == -1 ) {
-        err_msg("%s:%d tgdb_client_initialize error", __FILE__, __LINE__);
+		logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_client_initialize failed" );
         return NULL; 
 	}
 
@@ -393,7 +433,7 @@ struct tgdb* tgdb_initialize (
         /*a2_setup_io( );*/
     } else {
         /*init_gdbmi ();*/
-        printf ( "Error: gdb does not support annotations\n" );
+		logger_write_pos ( logger, __FILE__, __LINE__, "GDB does not support annotations" );
         return NULL;
     }
 
@@ -403,6 +443,17 @@ struct tgdb* tgdb_initialize (
 int tgdb_shutdown ( struct tgdb *tgdb ) {
     /* free readline */
     rlctx_close(tgdb->rl);
+
+	/* Free the logger */	
+	if ( num_loggers == 1 ) {
+		if ( logger_destroy ( logger ) == -1 ) {
+			printf ( "Could not destroy logger interface\n" );
+			return -1;
+		}
+	}
+
+	--num_loggers;
+	
 	return tgdb_client_destroy_context ( tgdb->tcc );
 }
 
@@ -491,7 +542,7 @@ static int tgdb_handle_signals ( struct tgdb *tgdb ) {
 
 		/* Tell readline that the signal occured */
 		if ( rlctx_send_char(tgdb->rl, (char)3) == -1 ) {
-			err_msg("(%s:%d) rlctx_send_char failed", __FILE__, __LINE__);
+			logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_send_char failed" );
 			return -1;
 		}
     } 
@@ -555,12 +606,12 @@ static int tgdb_send (
 			tcc );
 
     if ( tgdb_dispatch_command ( tgdb, tc ) == -1 ) {
-        err_msg("%s:%d tgdb_dispatch_command error", __FILE__, __LINE__);
+		logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_dispatch_command failed" );
         return -1;
     }
     
     if ( tgdb_client_tgdb_ran_command ( tgdb->tcc ) == -1 ) {
-        err_msg("%s:%d commands_user_ran_command error", __FILE__, __LINE__);
+		logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_client_tgdb_ran_command failed" );
         return -1;
     }
 
@@ -617,7 +668,7 @@ static int tgdb_dispatch_command (
             else
                 queue_append ( tgdb->oob_input_queue, command ); break; 
         default:
-            err_msg("%s:%d unimplemented command", __FILE__, __LINE__);
+			logger_write_pos ( logger, __FILE__, __LINE__, "unimplemented command" );
             return -1;
     }
 
@@ -654,18 +705,18 @@ static int tgdb_deliver_command (
         switch ( command->action_choice ) {
             case TGDB_COMMAND_ACTION_CONSOLE_SET_PROMPT:
                 if ( rlctx_change_prompt ( tgdb->rl, client_command->tgdb_client_command_data ) == -1 ) {
-                    err_msg("%s:%d rlctx_change_prompt  error", __FILE__, __LINE__);
+					logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_change_prompt failed" );
                     return -1;
                 }
                 break;
             case TGDB_COMMAND_ACTION_CONSOLE_REDISPLAY_PROMPT:
                 if ( rlctx_redisplay ( tgdb->rl ) == -1 ) {
-                    err_msg("%s:%d rlctx_change_prompt  error", __FILE__, __LINE__);
+					logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_redisplay failed" );
                     return -1;
                 }
                 break;
             default:
-                err_msg("%s:%d rlctx_send_char failed", __FILE__, __LINE__);
+				logger_write_pos ( logger, __FILE__, __LINE__, "unknown switch case" );
                 return -1;
         }
     } else {
@@ -775,7 +826,7 @@ tgdb_run_command_tag:
 					NULL);
 
             if ( tgdb_dispatch_command ( tgdb, command ) == -1 ) {
-                err_msg("%s:%d tgdb_dispatch_command error", __FILE__, __LINE__);
+				logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_dispatch_command failed" );
                 return -1;
             }
         }
@@ -790,7 +841,7 @@ tgdb_run_command_tag:
 
         for ( i = 0; i < j; i++ ) {
             if ( rlctx_send_char(tgdb->rl, data[i]) == -1 ) {
-                err_msg("(%s:%d) rlctx_send_char failed", __FILE__, __LINE__);
+				logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_send_char failed" );
                 return -1;
             }
         }
@@ -804,7 +855,7 @@ tgdb_run_command_tag:
         
         for ( i = 0; i < j; i++ ) {
             if ( rlctx_send_char(tgdb->rl, data[i]) == -1 ) {
-                err_msg("(%s:%d) rlctx_send_char failed", __FILE__, __LINE__);
+				logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_send_char failed" );
                 return -1;
             }
         }
@@ -841,7 +892,7 @@ int tgdb_change_prompt ( struct tgdb *tgdb, const char *prompt ) {
 			NULL );
 
     if ( tgdb_dispatch_command ( tgdb, command ) == -1 ) {
-        err_msg("%s:%d tgdb_dispatch_command error", __FILE__, __LINE__);
+		logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_dispatch_command failed" );
         return -1;
     }
 
@@ -867,7 +918,7 @@ static int tgdb_completion_callback ( void *p, const char *line ) {
 			NULL );
 
     if ( tgdb_dispatch_command ( tgdb, command ) == -1 ) {
-        err_msg("%s:%d tgdb_dispatch_command error", __FILE__, __LINE__);
+		logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_dispatch_command failed" );
         return -1;
     }
     
@@ -877,26 +928,26 @@ static int tgdb_completion_callback ( void *p, const char *line ) {
 static int tgdb_init_readline ( struct tgdb *tgdb, char *config_dir, int *fd ) {
     /* Initialize readline */
     if ( (tgdb->rl = rlctx_init((const char *)config_dir, "tgdb", (void*)tgdb)) == NULL ) {
-        err_msg("(%s:%d) rlctx_init failed", __FILE__, __LINE__);
+		logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_init failed" );
         return -1;
     }
 
     /* Register callback for each command recieved at readline */
     if ( rlctx_register_command_callback(tgdb->rl, &tgdb_command_callback) == -1 ) {
-        err_msg("(%s:%d) rlctx_register_callback failed", __FILE__, __LINE__);
+		logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_register_command_callback failed" );
         return -1;
     }
 
     /* Register callback for tab completion */
     if ( rlctx_register_completion_callback(tgdb->rl, &tgdb_completion_callback) == -1 ) {
-        err_msg("(%s:%d) rlctx_register_callback failed", __FILE__, __LINE__);
+		logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_register_completion_callback failed" );
         return -1;
     }
 
     /* Let the GUI check this for reading, 
      * if it finds data, it should call tgdb_recv_input */
     if ( (*fd = rlctx_get_fd(tgdb->rl)) == -1 ) {
-        err_msg("%s:%d rlctx_get_fd error", __FILE__, __LINE__);
+		logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_get_fd failed" );
         return -1;
     }
 
@@ -905,7 +956,7 @@ static int tgdb_init_readline ( struct tgdb *tgdb, char *config_dir, int *fd ) {
 
 int tgdb_rl_send ( struct tgdb *tgdb, char c ) {
     if ( rlctx_send_char ( tgdb->rl, c ) == -1 ) {
-        err_msg("(%s:%d) rlctx_send_char failed", __FILE__, __LINE__);
+		logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_send_char failed" );
         return -1;
     }
 
@@ -961,7 +1012,7 @@ int tgdb_send_debugger_data ( struct tgdb *tgdb, const char *buf, const size_t n
 	int i;
 	for ( i = 0; i < n; i++ ) {
 		if ( tgdb_send_debugger_char ( tgdb, buf[i] ) == -1 ) {
-        	err_msg("%s:%d tgdb_send_debugger_char error", __FILE__, __LINE__);
+			logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_send_debugger_char failed" );
 			return -1;
 		}
 	}
@@ -972,7 +1023,7 @@ int tgdb_send_debugger_data ( struct tgdb *tgdb, const char *buf, const size_t n
 /* These functions are used to communicate with the inferior */
 int tgdb_send_inferior_char ( struct tgdb *tgdb, char c ) {
    if(io_write_byte(tgdb->inferior_stdout, c) == -1){
-      err_ret("%s:%d -> could not write byte", __FILE__, __LINE__);
+	  logger_write_pos ( logger, __FILE__, __LINE__, "io_write_byte failed" );
       return -1;
    }
    
@@ -985,7 +1036,7 @@ int tgdb_send_inferior_data ( struct tgdb *tgdb, const char *buf, const size_t n
 	int i;
 	for ( i = 0; i < n; i++ ) {
 		if ( tgdb_send_inferior_char ( tgdb, buf[i] ) == -1 ) {
-        	err_msg("%s:%d tgdb_send_debugger_char error", __FILE__, __LINE__);
+			logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_send_inferior_char failed" );
 			return -1;
 		}
 	}
@@ -1000,7 +1051,7 @@ size_t tgdb_recv_inferior_data ( struct tgdb *tgdb, char *buf, size_t n ) {
 
    /* read all the data possible from the child that is ready. */
    if( (size = io_read(tgdb->inferior_stdin, local_buf, n)) < 0){
-      err_ret("%s:%d inferior_fd read failed", __FILE__, __LINE__);
+      logger_write_pos ( logger, __FILE__, __LINE__, "inferior_fd read failed");
       return -1;
    } 
    
@@ -1014,7 +1065,7 @@ size_t tgdb_recv_readline_data ( struct tgdb *tgdb, char *buf, size_t n ) {
     int length, i;
 
     if ( rlctx_recv ( tgdb->rl, buf, n ) == -1 ) {
-        err_msg("%s:%d rlctx_recv error", __FILE__, __LINE__);
+		logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_recv failed" );
         return -1;
     }
 
@@ -1046,15 +1097,15 @@ static int tgdb_get_quit_command ( struct tgdb *tgdb ) {
 	ret = waitpid ( pid, &status, WNOHANG );
 
 	if ( ret == -1 ) {
-        err_msg("%s:%d waitpid error", __FILE__, __LINE__);
+		logger_write_pos ( logger, __FILE__, __LINE__, "waitpid error" );
 		return -1;
 	} else if ( ret == 0 ) {
 		/* The child didn't die, whats wrong */
-        err_msg("%s:%d waitpid error", __FILE__, __LINE__);
+		logger_write_pos ( logger, __FILE__, __LINE__, "waitpid error" );
 		return -1;
 	} else if ( ret != pid ) {
 		/* What process just died ?!? */ 
-        err_msg("%s:%d waitpid error", __FILE__, __LINE__);
+		logger_write_pos ( logger, __FILE__, __LINE__, "waitpid error" );
 		return -1;
 	}
 
@@ -1108,7 +1159,7 @@ size_t tgdb_recv_debugger_data ( struct tgdb *tgdb, char *buf, size_t n ) {
 
     /* 1. read all the data possible from gdb that is ready. */
     if( (size = io_read(tgdb->debugger_stdout, local_buf, n)) < 0){
-        err_ret("%s:%d -> could not read from masterfd", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "could not read from masterfd");
 		tgdb_get_quit_command ( tgdb );
         return -1;
     } else if ( size == 0 ) {/* EOF */ 
@@ -1147,8 +1198,7 @@ size_t tgdb_recv_debugger_data ( struct tgdb *tgdb, char *buf, size_t n ) {
 			/* success, and finished command */
 			command_completion_callback(tgdb);
 		} else if ( result == -1 ) { 
-			/* error */
-        	err_msg("%s:%d a2_parse_io error", __FILE__, __LINE__);
+			logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_client_parse_io failed" );
 		}
 	}
 
@@ -1156,7 +1206,7 @@ size_t tgdb_recv_debugger_data ( struct tgdb *tgdb, char *buf, size_t n ) {
      * 	  If a signal has been recieved, clear the queue and return
      */
 	if ( tgdb_handle_signals (tgdb) == -1 ) {
-        err_msg("%s:%d tgdb_handle_signals error", __FILE__, __LINE__);
+		logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_handle_signals failed" );
 		return -1;
 	}
 
@@ -1227,7 +1277,7 @@ int tgdb_modify_breakpoint ( struct tgdb *tgdb, const char *file, int line, enum
 		return -1;
 
 	if ( tgdb_send ( tgdb, val, TGDB_COMMAND_FRONT_END ) == -1 ) {
-        err_msg("%s:%d tgdb_send error", __FILE__, __LINE__);
+		logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_send failed" );
 		return -1;
 	}
 
@@ -1268,14 +1318,15 @@ int tgdb_set_verbose_gui_command_output ( struct tgdb *tgdb, int value ) {
 
 int tgdb_set_verbose_error_handling ( struct tgdb *tgdb, int value ) {
 	if ( value == -1 )
-		return tgdb->tgdb_verbose_error_handling;
+		return logger_is_recording ( logger );
 
-	if ( (value == 0) || (value == 1) ) {
-		tgdb->tgdb_verbose_error_handling = value;
-		err_verbose ( value );
-	}
+	if ( value == 1 || value == 0)
+		logger_set_record ( logger, value );
 
-	return tgdb->tgdb_verbose_error_handling;
+	if ( value == 1 )
+		logger_set_fd ( logger, stderr );
+
+	return logger_is_recording ( logger );
 }
 
 void tgdb_traverse_commands ( struct tgdb *tgdb ) {

@@ -55,7 +55,7 @@
 
 /* Local Includes */
 #include "cgdb.h"
-#include "error.h"
+#include "logger.h"
 #include "interface.h"
 #include "scroller.h"
 #include "sources.h"
@@ -77,7 +77,6 @@ struct tgdb *tgdb; 			  /* The main TGDB context */
 char cgdb_home_dir[MAXLINE];  /* Path to home directory with trailing slash */
 char cgdb_help_file[MAXLINE]; /* Path to home directory with trailing slash */
 
-static char *my_name = NULL;  /* Name of this application (argv[0]) */
 static int gdb_fd = -1;       /* File descriptor for GDB communication */
 static int tty_fd = -1;       /* File descriptor for process being debugged */
 static int tgdb_readline_fd = -1; /* tgdb returns the 'at prompt' data */
@@ -197,7 +196,7 @@ static int init_home_dir(void) {
 
     /* Create the config directory */
     if ( ! fs_util_create_dir_in_base ( home_dir, cgdb_dir ) ) {
-        err_msg("%s:%d fs_util_create_dir_in_base error", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "fs_util_create_dir_in_base error");
         return -1; 
     }
 
@@ -277,7 +276,7 @@ static int user_input(void) {
 				char *seqbuf = (char*)kui_manager_get_raw_data( kui_ctx );
 
 				if ( seqbuf == NULL ) {
-					err_msg("%s:%d input_get_last_seq error\n", __FILE__, __LINE__);
+					logger_write_pos ( logger, __FILE__, __LINE__, "input_get_last_seq error");
 					return -1;
 				} else {
 					int length = strlen(seqbuf), i;
@@ -445,7 +444,7 @@ static int gdb_input()
     /* Read from GDB */
     size = tgdb_recv_debugger_data( tgdb, buf, GDB_MAXBUF);
     if (size == -1){
-        err_msg("%s:%d tgdb_recv_debugger_data error \n", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_recv_debugger_data error");
 		free( buf );
 		buf = NULL;
         return -1;
@@ -480,7 +479,7 @@ static int child_input()
     /* Read from GDB */
     size = tgdb_recv_inferior_data ( tgdb, buf, GDB_MAXBUF);
     if (size == -1){
-        err_msg("%s:%d tgdb_recv_inferior_data error \n", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_recv_inferior_data error ");
 		free( buf );
 		buf = NULL;
         return -1;
@@ -497,7 +496,7 @@ static int child_input()
 static int tgdb_readline_input(void){
     char buf[MAXLINE];
     if ( tgdb_recv_readline_data (tgdb, buf, MAXLINE) == -1 ) {
-        err_msg("%s:%d tgdb_recv_readline_data error\n", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_recv_readline_data error");
         return -1;
     }
     if_print(buf);
@@ -518,7 +517,7 @@ static int cgdb_resize_term(int fd) {
 	}
 
     if ( if_resize_term() == -1 ) {
-        err_msg("%s:%d %s: Unreasonable terminal size\n", __FILE__, __LINE__, my_name);
+        logger_write_pos ( logger, __FILE__, __LINE__, "Unreasonable terminal size");
         return -1;
     }
     return 0;
@@ -554,14 +553,16 @@ static void main_loop(void) {
         if (select(max + 1, &rset, NULL, NULL, NULL) == -1){
             if (errno == EINTR)
                 continue;
-            else
-                err_dump("%s: select failed: %s\n", my_name, strerror(errno));
+            else {
+                logger_write_pos ( logger, __FILE__, __LINE__, "select failed: %s", strerror(errno));
+				return;
+			}
         }
 
         /* Input received:  Handle it */
         if (FD_ISSET(STDIN_FILENO, &rset))
             if ( user_input() == -1 ) {
-                err_msg("%s:%d user_input failed\n", __FILE__, __LINE__);
+                logger_write_pos ( logger, __FILE__, __LINE__, "user_input failed");
                 return;
             }
 
@@ -601,6 +602,9 @@ static void main_loop(void) {
  * -------- */
 void cleanup()
 {
+	char *log_file, *tmp_log_file;
+	int has_recv_data;
+
     /* Cleanly scroll the screen up for a prompt */
     scrl(1);
     move(LINES-1, 0);
@@ -613,14 +617,28 @@ void cleanup()
 
     /* Shut down interface */
     if_shutdown();
+
+	/* Finally, should display the errors. 
+	 * TGDB guarentees the logger to be open at this point.
+	 * So, we can get the filename directly from the logger 
+	 */
+	logger_get_file ( logger, &tmp_log_file );
+	log_file = strdup ( tmp_log_file );
+	logger_has_recv_data ( logger, &has_recv_data );
    
     /* Shut down debugger */
     tgdb_shutdown( tgdb );
+
+	if ( has_recv_data )
+		fprintf ( stderr, "CGDB had unexpected results, see %s for details.\n", log_file );
+
+	free ( log_file );
+	log_file = NULL;
 }
 
 int init_resize_pipe(void) {
     if ( pipe(resize_pipe) == -1 ) {
-        err_msg("%s:%d pipe error\n", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "pipe error");
         return -1;
     }
 
@@ -636,42 +654,60 @@ int main(int argc, char *argv[]) {
 
     parse_long_options(&argc, &argv);
 
-    /* Set up some data */
-    my_name = argv[0];
-
-    /* Create the home directory */
-    if ( init_home_dir() == -1 )
-        err_quit("%s: Unable to create home dir ~/.cgdb\n", my_name); 
-
-    if ( create_help_file() == -1 )
-        err_quit("%s: Unable to create help file\n", my_name); 
-
-    /* Start GDB */
+	/* First create tgdb, because it has the error log */
     if (start_gdb(argc, argv) == -1) {
-        err_msg("%s: Unable to invoke GDB\n", my_name); 
-        cleanup();
+        fprintf ( stderr, "%s:%d Unable to invoke GDB", __FILE__, __LINE__); 
         exit(-1);
     }
 
+	/* From here on, the logger is initialized */
+
+    /* Create the home directory */
+    if ( init_home_dir() == -1 ) {
+        logger_write_pos ( logger, __FILE__, __LINE__, "Unable to create home dir ~/.cgdb"); 
+        cleanup();
+        exit(-1);
+	}
+
+    if ( create_help_file() == -1 ) {
+        logger_write_pos ( logger, __FILE__, __LINE__,  "Unable to create help file"); 
+        cleanup();
+        exit(-1);
+	}
+
 	kui_ctx = kui_manager_create ( STDIN_FILENO );
-	if ( !kui_ctx  )
-        err_quit("%s: Unable to initialize input library\n", my_name); 
+	if ( !kui_ctx  ) {
+        logger_write_pos ( logger, __FILE__, __LINE__, "Unable to initialize input library"); 
+        cleanup();
+        exit(-1);
+	}
 
     /* Initialize the display */
     switch (if_init()){
         case 1:
-            err_quit("%s: Unable to initialize the curses library\n", my_name);
+            logger_write_pos ( logger, __FILE__, __LINE__, "Unable to initialize the curses library");
+			cleanup();
+			exit(-1);
         case 2:
-            err_quit("%s: Unable to handle signal: SIGWINCH\n", my_name);
+            logger_write_pos ( logger, __FILE__, __LINE__, "Unable to handle signal: SIGWINCH");
+			cleanup();
+			exit(-1);
         case 3:
-            err_quit("%s: Unreasonable terminal size -- too small\n", my_name);
+            logger_write_pos ( logger, __FILE__, __LINE__, "Unreasonable terminal size -- too small");
+			cleanup();
+			exit(-1);
         case 4:
-            err_quit("%s: New GDB window failed -- out of memory?\n", my_name);
+            logger_write_pos ( logger, __FILE__, __LINE__, "New GDB window failed -- out of memory?");
+			cleanup();
+			exit(-1);
     }
 
     /* Initialize the pipe that is used for resize */
-    if( init_resize_pipe() == -1 )
-        err_quit("%s: init_resize_pipe error\n", my_name); 
+    if( init_resize_pipe() == -1 ) {
+        logger_write_pos ( logger, __FILE__, __LINE__, "init_resize_pipe error"); 
+		cleanup();
+		exit(-1);
+	}
 
     {
         char config_file[ FSUTIL_PATH_MAX ];

@@ -17,7 +17,6 @@
 #include "tgdb_client_command.h"
 #include "tgdb_types.h"
 #include "queue.h"
-#include "error.h"
 #include "sys_util.h"
 
 int tgdb_client_command_destroy ( void* item) {

@@ -11,6 +11,7 @@
 
 #include "tgdb_client_command.h"
 #include "tgdb_client_interface.h"
+#include "logger.h"
 
 /*!
  * \file
@@ -142,6 +143,9 @@ enum tgdb_client_supported_protocols {
  * \param protocol
  * This is the protocol the user wishes to use with the particular debugger.
  *
+ * \param logger
+ * The data structure to report errors to.
+ *
  * @return
  * NULL on error or a valid client context upon success.
  */
@@ -150,7 +154,8 @@ struct tgdb_client_context *tgdb_client_create_context (
 	int argc, char **argv,
 	const char *config_dir,
 	enum tgdb_client_supported_debuggers debugger,
-	enum tgdb_client_supported_protocols protocol);
+	enum tgdb_client_supported_protocols protocol,
+	struct logger *logger);
 
 /** 
  * This will initialize a client context.

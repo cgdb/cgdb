@@ -37,7 +37,7 @@
 
 /* Local includes */
 #include "tgdb.h"
-#include "error.h"
+#include "logger.h"
 #include "io.h"
 #include "terminal.h"
 
@@ -60,17 +60,17 @@ static int set_up_signal(void) {
 	action.sa_flags = 0;
 
     if(sigaction(SIGINT, &action, NULL) < 0) {
-        err_ret("%s:%d -> sigaction failed ", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "sigaction failed ");
 		return -1;
 	}	
 
     if(sigaction(SIGTERM, &action, NULL) < 0) {
-        err_ret("%s:%d -> sigaction failed ", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "sigaction failed ");
 		return -1;
 	}
 
     if(sigaction(SIGQUIT, &action, NULL) < 0) {
-        err_ret("%s:%d -> sigaction failed ", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "sigaction failed ");
 		return -1;
 	}
 
@@ -80,7 +80,7 @@ static int set_up_signal(void) {
 static int tgdb_readline_input(void){
     char buf[MAXLINE];
     if ( tgdb_recv_readline_data(tgdb, buf, MAXLINE) == -1 ) {
-        err_msg("%s:%d tgdb_recv_input error", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_recv_input error");
         return -1;
     } 
     fprintf(stderr, "%s", buf);
@@ -94,13 +94,13 @@ static int gdb_input(void) {
     struct tgdb_command *item;
 
     if( (size = tgdb_recv_debugger_data (tgdb, buf, MAXLINE)) == -1){
-        err_msg("%s:%d -> file descriptor closed\n", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "file descriptor closed");
         return -1;
     } /* end if */
 
     for(i = 0; i < size; ++i)
         if(write(STDOUT_FILENO, &(buf[i]), 1) != 1 ){
-           err_msg("%s:%d -> could not write byte\n", __FILE__, __LINE__);
+           logger_write_pos ( logger, __FILE__, __LINE__, "could not write byte");
            return -1;
         }
 
@@ -123,13 +123,13 @@ static void tty_input(void) {
     size_t i;
 
     if( (size = tgdb_recv_inferior_data(tgdb, buf, MAXLINE)) == -1){
-    err_msg("%s:%d -> file descriptor closed\n", __FILE__, __LINE__);
+    logger_write_pos ( logger, __FILE__, __LINE__, "file descriptor closed");
     return;
     } /* end if */
 
     for(i = 0; i < size; ++i)
         if(write(STDOUT_FILENO, &(buf[i]), 1) != 1 ){
-            err_msg("%s:%d -> could not write byte\n", __FILE__, __LINE__);
+            logger_write_pos ( logger, __FILE__, __LINE__,  "could not write byte");
             return;
         }
 }
@@ -140,7 +140,7 @@ static void stdin_input(int fd) {
     int i;
 
     if( ( size = io_read(STDIN_FILENO, &command, MAXLINE)) < 0 ){
-        err_msg("%s:%d -> could not read byte\n", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "could not read byte");
         return;
     } /* end if */
 
@@ -198,7 +198,7 @@ void main_loop(int masterfd, int childfd, int readlinefd){
       if(result == -1 && errno == EINTR)
          continue;
       else if(result == -1) /* on error ... must die -> stupid OS */
-         err_dump("%s:%d select failed\n", __FILE__, __LINE__);
+         logger_write_pos ( logger, __FILE__, __LINE__, "select failed");
 
       /* stdin -> tgdb */
       if(FD_ISSET(STDIN_FILENO, &rfds))
@@ -232,16 +232,21 @@ int main(int argc, char **argv){
 #endif
 
     if ( tty_cbreak(STDIN_FILENO) == -1 )
-        err_msg("%s:%d tty_cbreak error\n", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "tty_cbreak error");
 
     if ( (tgdb = tgdb_initialize(NULL, argc-1, argv+1, &gdb_fd, &child_fd, &tgdb_rlctx)) == NULL ) {
-        err_msg("%s:%d tgdb_start error\n", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_start error");
         goto driver_end;
     }
 
+	if ( tgdb_set_verbose_error_handling ( tgdb, 1 ) != 1 ) {
+		logger_write_pos ( logger, __FILE__, __LINE__, "driver error");
+		goto driver_end;
+	}
+
 	/* Ask TGDB to print error messages */
 	if ( tgdb_set_verbose_gui_command_output ( tgdb, 1 ) != 1 ) {
-		err_msg("%s:%d driver error\n", __FILE__, __LINE__);
+		logger_write_pos ( logger, __FILE__, __LINE__, "driver error");
 		goto driver_end;
 	}
 
@@ -250,12 +255,12 @@ int main(int argc, char **argv){
     main_loop(gdb_fd, child_fd, tgdb_rlctx);
 
     if(tgdb_shutdown( tgdb ) == -1)
-        err_msg("%s:%d -> could not shutdown\n", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "could not shutdown");
 
 driver_end:
 
     if ( tty_reset(STDIN_FILENO) == -1 )
-        err_msg("%s:%d tty_reset error\n", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "tty_reset error");
 
     return 0;
 }

@@ -56,4 +56,6 @@
 
 int cgdb_set_esc_sequence_timeout ( int msec );
 
+void cleanup();
+
 #endif

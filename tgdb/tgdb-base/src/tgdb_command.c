@@ -17,7 +17,6 @@
 #include "tgdb_types.h"
 #include "tgdb_command.h"
 #include "tgdb_client_command.h"
-#include "error.h"
 #include "sys_util.h"
 
 struct tgdb_queue_command *tgdb_command_create (    

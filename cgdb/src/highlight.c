@@ -39,7 +39,6 @@
 #include "sources.h"
 #include "cgdb.h"
 #include "tokenizer.h"
-#include "error.h"
 #include "interface.h"
 #include "sys_util.h"
 

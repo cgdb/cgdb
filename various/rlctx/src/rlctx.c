@@ -31,7 +31,7 @@
 #include "sys_util.h"
 #include "ibuf.h"
 #include "pseudo.h"
-#include "error.h"
+#include "logger.h"
 #include "fork_util.h"
 #include "fs_util.h"
 
@@ -86,7 +86,7 @@ struct rlctx *rlctx_init(const char *home_dir, const char *unique_id, void* p) {
         if ( stat( n->config_file, &st ) == -1 && errno == ENOENT ) {
             /* Doesn't exist, make sure dir permissions are ok */
             if ( access( home_dir, R_OK | W_OK ) == -1 ) {
-                err_msg("%s:%d access error", __FILE__, __LINE__);
+                logger_write_pos ( logger, __FILE__, __LINE__, "access error");
                 return NULL;
             }
         } else {
@@ -97,7 +97,7 @@ struct rlctx *rlctx_init(const char *home_dir, const char *unique_id, void* p) {
 
     /* Start the readline program, give it the pty name so it can open it */
     if ( (pid = invoke_pty_process_function(n-> tty_name, & n->mfd, &n->cfd, &rlctx_main)) == -1 ) { /* Command fd */
-        err_msg("%s:%d invoke_process error", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "invoke_process error");
         return NULL;
     }
 
@@ -106,7 +106,7 @@ struct rlctx *rlctx_init(const char *home_dir, const char *unique_id, void* p) {
         char c;
         if ( read(n->mfd, &c, 1) != 1 ) {
             /* This means that the process didn't start */
-            err_msg("%s:%d read error", __FILE__, __LINE__);
+            logger_write_pos (logger, __FILE__, __LINE__, "read error");
             fprintf(stderr, "*************************************************\n");
             fprintf(stderr, "Error: rlctx_prog failed to start via execvp.\n");
             fprintf(stderr, "This is probably becuase it is not in your path.\n");
@@ -125,7 +125,7 @@ struct rlctx *rlctx_init(const char *home_dir, const char *unique_id, void* p) {
     /* Read in the history */
     if ( read_history ) {
         if ( rlctx_read_history(n) == -1 ) {
-            err_msg("%s:%d rlctx_read_history error", __FILE__, __LINE__);
+            logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_read_history error");
             return NULL;
         }
     }
@@ -139,7 +139,7 @@ int rlctx_close(struct rlctx *rl) {
 
     /* Can only close the slavename when the process is dead */
     if ( rl && pty_free_process(&rl->mfd, rl->tty_name) == -1 ) {
-        err_msg("%s:%d tgdb_util_free_tty error", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_util_free_tty error");
         return -1;
     }
 
@@ -154,26 +154,26 @@ static int rlctx_send_char_internal(int fd, char c) {
     int result;
     if ( ( result = write(fd, &c, 1 )) == -1 ){ 
         if ( errno == EBADF ) 
-            err_msg("%s:%d write error1", __FILE__, __LINE__);
+            logger_write_pos ( logger, __FILE__, __LINE__, "write error1");
         else if ( errno == EINVAL )
-            err_msg("%s:%d write error2", __FILE__, __LINE__);
+            logger_write_pos ( logger, __FILE__, __LINE__, "write error2");
         else if ( errno == EFBIG ) 
-            err_msg("%s:%d write error3", __FILE__, __LINE__);
+            logger_write_pos ( logger, __FILE__, __LINE__, "write error3");
         else if ( errno == EPIPE ) 
-            err_msg("%s:%d write error4", __FILE__, __LINE__);
+            logger_write_pos ( logger, __FILE__, __LINE__, "write error4");
         else if ( errno == EAGAIN )
-            err_msg("%s:%d write error5", __FILE__, __LINE__);
+            logger_write_pos ( logger, __FILE__, __LINE__, "write error5");
         else if ( errno == EINTR )
-            err_msg("%s:%d write error6", __FILE__, __LINE__);
+            logger_write_pos ( logger, __FILE__, __LINE__, "write error6");
         else if ( errno == ENOSPC )
-            err_msg("%s:%d write error7", __FILE__, __LINE__);
+            logger_write_pos ( logger, __FILE__, __LINE__, "write error7");
         else if ( errno == EIO ) 
-            err_msg("%s:%d write error8", __FILE__, __LINE__);
+            logger_write_pos ( logger, __FILE__, __LINE__, "write error8");
         else
-            err_msg("%s:%d write error9", __FILE__, __LINE__);
+            logger_write_pos ( logger, __FILE__, __LINE__, "write error9");
         return -1;
     } else if ( result != 1 ) {
-        err_msg("%s:%d write error no 1", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "write error no 1");
         return -1;
     }
 
@@ -201,26 +201,26 @@ int rlctx_change_prompt(struct rlctx *rl, const char *prompt) {
 
     /* Send init char */
     if ( rlctx_send_char_internal(rl->cfd, '\032') == -1 ) {
-        err_msg("%s:%d rlctx_send_char_internal error", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_send_char_internal error");
         return -1;
     }
 
     /* Send call char */
     if ( rlctx_send_char_internal(rl->cfd, 'P') == -1 ) {
-        err_msg("%s:%d rlctx_send_char_internal error", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_send_char_internal error");
         return -1;
     }
 
     for ( i = 0; i < length; i++ ) {
         if ( rlctx_send_char_internal(rl->cfd, prompt[i]) == -1 ) {
-            err_msg("%s:%d rlctx_send_char_internal error", __FILE__, __LINE__);
+            logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_send_char_internal error");
             return -1;
         }
     }
 
     /* Send terminate char */
     if ( rlctx_send_char_internal(rl->cfd, '\032') == -1 ) {
-        err_msg("%s:%d rlctx_send_char_internal error", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_send_char_internal error");
         return -1;
     }
 
@@ -231,19 +231,19 @@ int rlctx_redisplay(struct rlctx *rl) {
 
     /* Send init char */
     if ( rlctx_send_char_internal(rl->cfd, '\032') == -1 ) {
-        err_msg("%s:%d rlctx_send_char_internal error", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_send_char_internal error");
         return -1;
     }
 
     /* Send call char */
     if ( rlctx_send_char_internal(rl->cfd, 'T') == -1 ) {
-        err_msg("%s:%d rlctx_send_char_internal error", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_send_char_internal error");
         return -1;
     }
 
     /* Send terminate char */
     if ( rlctx_send_char_internal(rl->cfd, '\032') == -1 ) {
-        err_msg("%s:%d rlctx_send_char_internal error", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_send_char_internal error");
         return -1;
     }
     
@@ -256,26 +256,26 @@ int rlctx_read_history(struct rlctx *rl) {
     
     /* Send init char */
     if ( rlctx_send_char_internal(rl->cfd, '\032') == -1 ) {
-        err_msg("%s:%d rlctx_send_char_internal error", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_send_char_internal error");
         return -1;
     }
 
     /* Send call char */
     if ( rlctx_send_char_internal(rl->cfd, 'R') == -1 ) {
-        err_msg("%s:%d rlctx_send_char_internal error", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_send_char_internal error");
         return -1;
     }
 
     for ( i = 0; i < length; i++ ) {
         if ( rlctx_send_char_internal(rl->cfd, (rl->config_file)[i]) == -1 ) {
-            err_msg("%s:%d rlctx_send_char_internal error", __FILE__, __LINE__);
+            logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_send_char_internal error");
             return -1;
         }
     }
 
     /* Send terminate char */
     if ( rlctx_send_char_internal(rl->cfd, '\032') == -1 ) {
-        err_msg("%s:%d rlctx_send_char_internal error", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_send_char_internal error");
         return -1;
     }
 
@@ -288,26 +288,26 @@ int rlctx_write_history(struct rlctx *rl) {
     
     /* Send init char */
     if ( rlctx_send_char_internal(rl->cfd, '\032') == -1 ) {
-        err_msg("%s:%d rlctx_send_char_internal error", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_send_char_internal error");
         return -1;
     }
 
     /* Send call char */
     if ( rlctx_send_char_internal(rl->cfd, 'W') == -1 ) {
-        err_msg("%s:%d rlctx_send_char_internal error", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_send_char_internal error");
         return -1;
     }
 
     for ( i = 0; i < length; i++ ) {
         if ( rlctx_send_char_internal(rl->cfd, (rl->config_file)[i]) == -1 ) {
-            err_msg("%s:%d rlctx_send_char_internal error", __FILE__, __LINE__);
+            logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_send_char_internal error");
             return -1;
         }
     }
 
     /* Send terminate char */
     if ( rlctx_send_char_internal(rl->cfd, '\032') == -1 ) {
-        err_msg("%s:%d rlctx_send_char_internal error", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_send_char_internal error");
         return -1;
     }
 
@@ -328,17 +328,17 @@ static int rlctx_recv_data(struct rlctx *rl, char *c, ssize_t size) {
     int result;
     if ( ( result = read(rl->mfd, c, size - 1)) == -1 ){ 
         if ( errno == EBADF ) 
-            err_msg("%s:%d write error1", __FILE__, __LINE__);
+            logger_write_pos ( logger, __FILE__, __LINE__, "write error1");
         else if ( errno == EINVAL )
-            err_msg("%s:%d write error2", __FILE__, __LINE__);
+            logger_write_pos ( logger, __FILE__, __LINE__,"write error2");
         else if ( errno == EAGAIN )
-            err_msg("%s:%d write error5", __FILE__, __LINE__);
+            logger_write_pos ( logger, __FILE__, __LINE__,"write error5");
         else if ( errno == EINTR )
-            err_msg("%s:%d write error6", __FILE__, __LINE__);
+            logger_write_pos ( logger, __FILE__, __LINE__,"write error6");
         else if ( errno == EIO ) 
-            err_msg("%s:%d write error8", __FILE__, __LINE__);
+            logger_write_pos ( logger, __FILE__, __LINE__,"write error8");
         else
-            err_msg("%s:%d write error9", __FILE__, __LINE__);
+            logger_write_pos ( logger, __FILE__, __LINE__,"write error9");
         return -1;
     } else if ( result == 0 )   /* EOF */
         return -2;
@@ -385,7 +385,7 @@ static void rlctx_parse_command(struct rlctx *rl, char *c, ssize_t size) {
             else if ( c[i] == 'T' )
                 rlctx_com = TAB_COMPLETION;
             else {
-                err_msg("%s:%d Communication error", __FILE__, __LINE__);
+                logger_write_pos( logger, __FILE__, __LINE__, "Communication error");
                 return;
             }
             command_byte = 0;
@@ -416,7 +416,7 @@ int rlctx_recv(struct rlctx *rl, char *c, ssize_t size) {
 
 int rlctx_register_command_callback(struct rlctx *rl, rlctx_recv_line func ) {
     if ( ! func ) {
-        err_msg("%s:%d NULL func error", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "NULL func error");
         return -1;
     }
 
@@ -427,7 +427,7 @@ int rlctx_register_command_callback(struct rlctx *rl, rlctx_recv_line func ) {
 
 int rlctx_register_completion_callback(struct rlctx *rl, rlctx_recv_line func ) {
     if ( ! func ) {
-        err_msg("%s:%d NULL func error", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "NULL func error");
         return -1;
     }
 

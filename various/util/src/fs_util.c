@@ -31,7 +31,7 @@
 #endif /* HAVE_ERRNO_H */
 
 #include "fs_util.h"
-#include "error.h"
+#include "logger.h"
 
 #define MAXLINE 4096
 
@@ -43,7 +43,7 @@ int fs_util_is_valid ( const char *dir ) {
 #endif
 
     if(dir == NULL) {
-        err_msg("%s:%d -> $HOME is not set", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "$HOME is not set");
         return 0;
     }
 
@@ -58,12 +58,11 @@ int fs_util_is_valid ( const char *dir ) {
     /* Check if directory dir is readable and writeable */
     if ( access ( actual_dir, R_OK | W_OK ) == -1 ) {
         if ( errno == ENOENT ) {
-            err_msg("%s:%d directory '%s' is not set", __FILE__, __LINE__, dir);
+            logger_write_pos ( logger, __FILE__, __LINE__, "directory '%s' is not set", dir);
             return 0; 
         }
 
-        err_msg("%s:%d directory '%s' does not have read/write permissions", 
-                __FILE__, __LINE__, dir);
+        logger_write_pos ( logger, __FILE__, __LINE__, "directory '%s' does not have read/write permissions", dir);
         return 0;
    }
 
@@ -81,7 +80,7 @@ int fs_util_create_dir ( const char *dir ) {
 #endif
 
     if(dir == NULL) {
-        err_msg("%s:%d dir is NULL", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "dir is NULL");
         return 0;
     }
 
@@ -99,14 +98,14 @@ int fs_util_create_dir ( const char *dir ) {
         if ( S_ISDIR ( st.st_mode ) )
             return 1;
         else {
-            err_msg("%s:%d file %d is not a directory", __FILE__, __LINE__, actual_dir);
+            logger_write_pos ( logger, __FILE__, __LINE__, "file %d is not a directory", actual_dir);
             return 0;
         }
     } else {
         /* The file does not exist, create it */
         if ( errno == ENOENT ) {
             if ( mkdir( actual_dir, 0755 ) == -1 ) {
-                err_msg("%s:%d directory %s could not be made", __FILE__, __LINE__, actual_dir);
+                logger_write_pos ( logger, __FILE__, __LINE__, "directory %s could not be made", actual_dir);
                 return 0;
             } else
                 return 1;
@@ -124,7 +123,7 @@ int fs_util_create_dir_in_base ( const char *base, const char *dirname ) {
 
     /* Make surr the directory is valid */
     if ( !fs_util_is_valid ( base ) ) {
-        err_msg("%s:%d fs_util_is_valid error", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "fs_util_is_valid error");
         return -1;
     }
 

@@ -1,5 +1,4 @@
 #include "queue.h"
-#include "error.h"
 #include "sys_util.h"
 
 struct node {

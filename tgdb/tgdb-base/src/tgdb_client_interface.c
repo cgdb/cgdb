@@ -7,7 +7,6 @@
 #include "gdbmi_tgdb.h"
 #include "a2-tgdb.h"
 #include "sys_util.h"
-#include "error.h"
 
 /**
  * This is a list of all of the client interfaces that TGDB supports.
@@ -27,7 +26,8 @@ static struct tgdb_client_debugger_interfaces {
 	void *(*tgdb_client_create_context) ( 
 			const char *debugger_path, 
 			int argc, char **argv,
-			const char *config_dir);
+			const char *config_dir,
+			struct logger *logger );
 
 	int (*tgdb_client_initialize_context)(
 			void *ctx,
@@ -255,6 +255,8 @@ struct tgdb_client_context {
 	 * A client interface. All of the functions that implement the client.
 	 */
 	struct tgdb_client_debugger_interfaces *tgdb_client_interface;
+
+	struct logger *logger;
 };
 
 struct tgdb_client_context *tgdb_client_create_context ( 
@@ -262,7 +264,8 @@ struct tgdb_client_context *tgdb_client_create_context (
 	int argc, char **argv,
 	const char *config_dir,
 	enum tgdb_client_supported_debuggers debugger,
-	enum tgdb_client_supported_protocols protocol) {
+	enum tgdb_client_supported_protocols protocol,
+	struct logger *logger) {
 
 	struct tgdb_client_context *tcc = NULL;
 
@@ -278,6 +281,7 @@ struct tgdb_client_context *tgdb_client_create_context (
 			xmalloc ( sizeof ( struct tgdb_client_context) );
 		tcc->debugger = debugger;
 		tcc->protocol = protocol;
+		tcc->logger   = logger;
 
 		if ( protocol == TGDB_CLIENT_PROTOCOL_GNU_GDB_ANNOTATE_TWO )
 			tcc->tgdb_client_interface = &tgdb_client_debugger_interfaces[0];
@@ -286,16 +290,15 @@ struct tgdb_client_context *tgdb_client_create_context (
 
 		tcc->tgdb_debugger_context =
 			tcc->tgdb_client_interface->tgdb_client_create_context (
-					debugger_path, argc, argv, config_dir );
+					debugger_path, argc, argv, config_dir, logger );
 
 		if ( tcc->tgdb_debugger_context == NULL ) {
 			free ( tcc );
-			err_msg("%s:%d a2_create_instance error", __FILE__, __LINE__);
+			logger_write_pos ( tcc->logger, __FILE__, __LINE__, "a2_create_instance failed" );
 			return NULL; 
 		}
 	} else {
-		err_msg("%s:%d tgdb_client_create_context protocol not recognized", 
-				__FILE__, __LINE__);
+		logger_write_pos ( tcc->logger, __FILE__, __LINE__, "tgdb_client_create_context protocol not recognized" );
 	}
 
 	return tcc;
@@ -307,8 +310,7 @@ int tgdb_client_initialize_context (
 	int *inferior_stdin, int *inferior_stdout ) {
 
 	if ( tcc == NULL || tcc->tgdb_client_interface == NULL ) {
-		err_msg("%s:%d tgdb_client_initilize_context unimplemented", 
-				__FILE__, __LINE__);
+		logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_client_initilize_context unimplemented" );
 		return -1;
 	}
 
@@ -320,8 +322,7 @@ int tgdb_client_initialize_context (
 
 int tgdb_client_destroy_context ( struct tgdb_client_context *tcc ) {
 	if ( tcc == NULL || tcc->tgdb_client_interface == NULL ) {
-		err_msg("%s:%d tgdb_client_destroy_context unimplemented", 
-				__FILE__, __LINE__);
+		logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_client_destroy_context unimplemented" );
 		return -1;
 	}
 
@@ -335,8 +336,7 @@ int tgdb_client_err_msg ( struct tgdb_client_context *tcc ) {
 
 int tgdb_client_is_client_ready ( struct tgdb_client_context *tcc ) {
 	if ( tcc == NULL || tcc->tgdb_client_interface == NULL ) {
-		err_msg("%s:%d tgdb_client_is_client_ready unimplemented", 
-				__FILE__, __LINE__);
+		logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_client_is_client_ready unimplemented" );
 		return -1;
 	}
 
@@ -346,8 +346,7 @@ int tgdb_client_is_client_ready ( struct tgdb_client_context *tcc ) {
 
 int tgdb_client_tgdb_ran_command ( struct tgdb_client_context *tcc ) {
 	if ( tcc == NULL || tcc->tgdb_client_interface == NULL ) {
-		err_msg("%s:%d tgdb_client_tgdb_ran_command unimplemented", 
-				__FILE__, __LINE__);
+		logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_client_tgdb_ran_command unimplemented" );
 		return -1;
 	}
 
@@ -359,8 +358,7 @@ int tgdb_client_prepare_for_command (
 		struct tgdb_client_context *tcc, 
 		struct tgdb_client_command *com ) {
 	if ( tcc == NULL || tcc->tgdb_client_interface == NULL ) {
-		err_msg("%s:%d tgdb_client_prepare_for_command unimplemented", 
-				__FILE__, __LINE__);
+		logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_client_prepare_for_command unimplemented" );
 		return -1;
 	}
 
@@ -370,8 +368,7 @@ int tgdb_client_prepare_for_command (
 
 int tgdb_client_can_tgdb_run_commands ( struct tgdb_client_context *tcc ) {
 	if ( tcc == NULL || tcc->tgdb_client_interface == NULL ) {
-		err_msg("%s:%d tgdb_client_can_tgdb_run_commands unimplemented", 
-				__FILE__, __LINE__);
+		logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_client_can_tgdb_run_commands unimplemented" );
 		return -1;
 	}
 	
@@ -386,7 +383,7 @@ int tgdb_client_parse_io (
 		char *inferior_output, size_t *inferior_output_size,
 	    struct tgdb_list *command_list) {
 	if ( tcc == NULL || tcc->tgdb_client_interface == NULL ) {
-		err_msg("%s:%d tgdb_client_parse_io error", __FILE__, __LINE__);
+		logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_client_parse_io error");
 		return -1;
 	}
 
@@ -401,7 +398,7 @@ struct tgdb_list *tgdb_client_get_client_commands (
 		struct tgdb_client_context *tcc ) {
 
 	if ( tcc == NULL || tcc->tgdb_client_interface == NULL ) {
-		err_msg("%s:%d tgdb_client_get_client_commands error", __FILE__, __LINE__);
+		logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_client_get_client_commands error");
 		return NULL;
 	}
 
@@ -413,8 +410,7 @@ int tgdb_client_get_absolute_path (
 		struct tgdb_client_context *tcc, 
 		const char *relative_path ) {
 	if ( tcc == NULL || tcc->tgdb_client_interface == NULL ) {
-		err_msg("%s:%d tgdb_client_get_absolute_path unimplemented", 
-				__FILE__, __LINE__);
+		logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_client_get_absolute_path unimplemented");
 		return -1;
 	}
 	
@@ -424,8 +420,7 @@ int tgdb_client_get_absolute_path (
 
 int tgdb_client_get_inferior_source_files ( struct tgdb_client_context *tcc ) {
 	if ( tcc == NULL || tcc->tgdb_client_interface == NULL ) {
-		err_msg("%s:%d tgdb_client_get_inferior_source_files unimplemented", 
-				__FILE__, __LINE__);
+		logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_client_get_inferior_source_files unimplemented" );
 		return -1;
 	}
 	
@@ -443,8 +438,7 @@ int tgdb_client_completion_callback(
 		struct tgdb_client_context *tcc,
 		const char *completion_command) {
 	if ( tcc == NULL || tcc->tgdb_client_interface == NULL ) {
-		err_msg("%s:%d tgdb_client_completion_callback unimplemented", 
-				__FILE__, __LINE__);
+		logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_client_completion_callback unimplemented" );
 		return -1;
 	}
 	
@@ -457,8 +451,7 @@ char *tgdb_client_return_command (
         enum tgdb_command_type c ) {
 
 	if ( tcc == NULL || tcc->tgdb_client_interface == NULL ) {
-		err_msg("%s:%d tgdb_client_return_command unimplemented", 
-				__FILE__, __LINE__);
+		logger_write_pos ( logger, __FILE__, __LINE__,  "tgdb_client_return_command unimplemented" );
 		return NULL;
 	}
 
@@ -473,8 +466,7 @@ char *tgdb_client_modify_breakpoint (
 		enum tgdb_breakpoint_action b ) {
 
 	if ( tcc == NULL || tcc->tgdb_client_interface == NULL ) {
-		err_msg("%s:%d tgdb_client_modify_breakpoint unimplemented", 
-				__FILE__, __LINE__);
+		logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_client_modify_breakpoint unimplemented" );
 		return NULL;
 	}
 
@@ -484,8 +476,7 @@ char *tgdb_client_modify_breakpoint (
 
 pid_t tgdb_client_get_debugger_pid ( struct tgdb_client_context *tcc ) {
 	if ( tcc == NULL || tcc->tgdb_client_interface == NULL ) {
-		err_msg("%s:%d tgdb_client_get_debugger_pid unimplemented", 
-				__FILE__, __LINE__);
+		logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_client_get_debugger_pid unimplemented" );
 		return -1;
 	}
 	
@@ -498,8 +489,7 @@ int tgdb_client_open_new_tty (
 		int *inferior_stdin, 
 		int *inferior_stdout ) {
 	if ( tcc == NULL || tcc->tgdb_client_interface == NULL ) {
-		err_msg("%s:%d tgdb_client_open_new_tty unimplemented", 
-				__FILE__, __LINE__);
+		logger_write_pos ( logger, __FILE__, __LINE__,  "tgdb_client_open_new_tty unimplemented" );
 		return -1;
 	}
 	
@@ -510,8 +500,7 @@ int tgdb_client_open_new_tty (
 
 char *tgdb_client_get_tty_name ( struct tgdb_client_context *tcc ) {
 	if ( tcc == NULL || tcc->tgdb_client_interface == NULL ) {
-		err_msg("%s:%d tgdb_client_get_tty_name unimplemented", 
-				__FILE__, __LINE__);
+		logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_client_get_tty_name unimplemented" );
 		return NULL;
 	}
 	

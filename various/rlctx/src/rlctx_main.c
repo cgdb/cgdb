@@ -64,7 +64,7 @@ extern int read_history ();
  /* no history */
 #endif /* HAVE_READLINE_HISTORY */
 
-#include "error.h"
+#include "logger.h"
 #include "ibuf.h"
 
 static struct ibuf *command;
@@ -113,17 +113,17 @@ static int read_command( int fd ) {
 
     if ( ( result = read(fd, buf, size - 1)) == -1 ){ 
         if ( errno == EBADF ) 
-            err_msg("%s:%d write error1", __FILE__, __LINE__);
+            logger_write_pos ( logger, __FILE__, __LINE__, "write error1");
         else if ( errno == EINVAL )
-            err_msg("%s:%d write error2", __FILE__, __LINE__);
+            logger_write_pos ( logger, __FILE__, __LINE__,"write error2");
         else if ( errno == EAGAIN )
-            err_msg("%s:%d write error5", __FILE__, __LINE__);
+            logger_write_pos ( logger, __FILE__, __LINE__,"write error5");
         else if ( errno == EINTR )
-            err_msg("%s:%d write error6", __FILE__, __LINE__);
+            logger_write_pos ( logger, __FILE__, __LINE__,"write error6");
         else if ( errno == EIO ) 
-            err_msg("%s:%d write error8", __FILE__, __LINE__);
+            logger_write_pos ( logger, __FILE__, __LINE__,"write error8");
         else
-            err_msg("%s:%d write error9", __FILE__, __LINE__);
+            logger_write_pos ( logger, __FILE__, __LINE__,"write error9");
         return -1;
     } else if ( result == 0 )   /* EOF */
         return -2;
@@ -173,7 +173,7 @@ static int read_command( int fd ) {
             else if ( buf[i] == 'W' )
                 rlctx_com = WRITE_HISTORY;
             else {
-                err_msg("%s:%d Communication error", __FILE__, __LINE__);
+                logger_write_pos ( logger, __FILE__, __LINE__, "Communication error");
                 return -1;
             }
             command_byte = 0;
@@ -216,7 +216,7 @@ static void main_loop(int infd, int comfd){
             continue;
         else if(result == -1) {/* on error ... must die -> stupid OS */
             finished = 1;
-            err_msg("%s:%d select failed", __FILE__, __LINE__);
+            logger_write_pos ( logger, __FILE__, __LINE__, "select failed");
             return;
         }
 
@@ -230,7 +230,7 @@ static void main_loop(int infd, int comfd){
         /* stdin -> readline input */
         if(FD_ISSET(comfd, &rfds) || FD_ISSET(comfd, &efds))
             if ( read_command ( comfd ) == -1 ) {
-                err_msg("%s:%d read_command failed", __FILE__, __LINE__);
+                logger_write_pos ( logger, __FILE__, __LINE__, "read_command failed");
                 return;
             }
     }
@@ -272,7 +272,7 @@ static int init_readline(void){
     /* Set the terminal type to dumb so the output of readline can be
      * understood by tgdb */
     if ( rl_reset_terminal("dumb") == -1 ) {
-        err_msg("%s:%d rl_reset_terminal\n", __FILE__, __LINE__); 
+        logger_write_pos ( logger, __FILE__, __LINE__, "rl_reset_terminal\n"); 
         return -1;
     }
 
@@ -283,7 +283,7 @@ static int init_readline(void){
 
 static void signal_catcher( int SIGNAL ) {
     if ( SIGNAL != SIGHUP )
-        err_msg("%s:%d caught unknown signal: %d", __FILE__, __LINE__, SIGNAL);
+        logger_write_pos ( logger, __FILE__, __LINE__, "caught unknown signal: %d",SIGNAL);
 
 	if ( SIGNAL == SIGINT ) {
 		/* Delete data entered by user on signal */
@@ -306,12 +306,12 @@ static int rlctx_setup_signals(void) {
    action.sa_flags = 0;
 
    if(sigaction(SIGHUP, &action, NULL) < 0) {
-      err_ret("%s:%d -> sigaction failed ", __FILE__, __LINE__);
+      logger_write_pos ( logger, __FILE__, __LINE__, "sigaction failed ");
       return -1;
    }
 
    if(sigaction(SIGINT, &action, NULL) < 0) {
-      err_ret("%s:%d -> sigaction failed ", __FILE__, __LINE__);
+      logger_write_pos ( logger, __FILE__, __LINE__, "sigaction failed ");
       return -1;
    }
 
@@ -325,7 +325,7 @@ int rlctx_main(int fd) {
     command = ibuf_init();
 
     if ( rlctx_setup_signals() == -1 ) {
-        err_ret("%s:%d rlctx_setup_signals failed ", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_setup_signals failed ");
         return -1;
     }
 

@@ -38,7 +38,7 @@
 #include "sys_util.h"
 #include "fs_util.h"
 #include "pseudo.h"
-#include "error.h"
+#include "logger.h"
 
 /* free_memory: utility function that frees up memory.
  *
@@ -53,12 +53,12 @@ static int pty_free_memory(char *s, int fd, int argc, char *argv[]) {
     int error = 0, i;
 
     if ( s && pty_release(s) == -1) {
-        err_msg("(%s:%d) pty_release failed", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "pty_release failed");
         error = -1;
     }
 
     if ( fd != -1 && close(fd) == -1) {
-        err_msg("(%s:%d) close failed", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "close failed");
         error = -1;
     }
 
@@ -83,13 +83,13 @@ int invoke_pty_process(
     int pin[2] = { -1, -1 };
 
     if ( !name ) {
-      err_msg("%s:%d name error", __FILE__, __LINE__);
+      logger_write_pos ( logger, __FILE__, __LINE__, "name error");
       return -1;
     } 
     
     /* Create an input pipe to the child program */
     if ( pipe(pin) == -1 ) {
-        err_msg("(%s:%d) pipe failed", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "pipe failed");
         free_memory(argc, local_argv);
         return -1;
     }
@@ -115,21 +115,21 @@ int invoke_pty_process(
     pid = pty_fork(masterfd, slavename, SLAVE_SIZE, NULL, NULL);
    
     if ( pid == -1 ) {          /* error, free memory and return  */
-        err_msg("(%s:%d) pty_fork failed", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "pty_fork failed");
         pty_free_memory(slavename, *masterfd, argc, local_argv);
         return -1;
     } else if ( pid == 0 ) {    /* child */
         xclose(pin[1]);
 
         if(execvp(local_argv[0], local_argv) == -1) {
-            err_msg("(%s:%d) execvp failed", __FILE__, __LINE__);
-            err_msg("(%s:%d) %s is not in path", __FILE__, __LINE__, name);
+            logger_write_pos ( logger, __FILE__, __LINE__, "execvp failed");
+            logger_write_pos ( logger, __FILE__, __LINE__, "%s is not in path", name);
             pty_free_memory(slavename, *masterfd, argc, local_argv);
             exit(-1);
         }
 
         exit(-1);
-    } // end if 
+    }
 
     xclose(pin[0]);
     *extra_input = pin[1];
@@ -149,7 +149,7 @@ int invoke_pty_process_function(
 
     /* Create an input pipe to the child program */
     if ( pipe(pin) == -1 ) {
-        err_msg("(%s:%d) pipe failed", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "pipe failed");
         return -1;
     }
         
@@ -157,7 +157,7 @@ int invoke_pty_process_function(
     pid = pty_fork(masterfd, slavename, SLAVE_SIZE, NULL, NULL);
    
     if ( pid == -1 ) {          /* error, free memory and return  */
-        err_msg("(%s:%d) pty_fork failed", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "pty_fork failed");
         pty_free_memory(slavename, *masterfd, 0, NULL);
         return -1;
     } else if ( pid == 0 ) {    /* child */
@@ -167,7 +167,7 @@ int invoke_pty_process_function(
         entry(pin[0]);
         
         exit(-1);
-    } // end if 
+    }
 
     xclose(pin[0]);
     *extra_input = pin[1];
@@ -179,7 +179,7 @@ int util_new_tty(int *masterfd, int *slavefd, char *sname) {
    static char local_slavename[SLAVE_SIZE];
 
    if ( pty_open(masterfd, slavefd, local_slavename, SLAVE_SIZE, NULL, NULL) == -1){
-      err_msg("%s:%d -> Error: PTY open", __FILE__, __LINE__);
+      logger_write_pos ( logger, __FILE__, __LINE__, "PTY open");
       return -1;   
    }
 
@@ -193,7 +193,7 @@ int util_free_tty(int *masterfd, int *slavefd, const char *sname) {
    xclose(*slavefd);
 
    if ( pty_release(sname) == -1 ) {
-      err_msg("%s:%d pty_release error", __FILE__, __LINE__);
+      logger_write_pos ( logger, __FILE__, __LINE__, "pty_release error");
       return -1;   
    }
    
@@ -205,7 +205,7 @@ int pty_free_process(int *masterfd, char *sname) {
    xclose(*masterfd);
 
    if ( pty_release(sname) == -1 ) {
-      err_msg("%s:%d pty_release error", __FILE__, __LINE__);
+      logger_write_pos ( logger, __FILE__, __LINE__, "pty_release error");
       return -1;   
    }
    
@@ -263,19 +263,19 @@ int invoke_debugger(
     local_argv[j] = NULL;
 
     if ( pipe(pin) == -1 ) {
-        err_msg("(%s:%d) pipe failed", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "pipe failed");
         free_memory(argc, local_argv);
         return -1;
     }
 
     if ( pipe(pout) == -1 ) {
-        err_msg("(%s:%d) pipe failed", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "pipe failed");
         free_memory(argc, local_argv);
         return -1;
     }
 
     if ( (pid = fork()) == -1 ) { /* error, free memory and return  */
-        err_msg("(%s:%d) fork failed", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "fork failed");
         return -1;
     } else if ( pid == 0 ) {    /* child */
 
@@ -287,7 +287,7 @@ int invoke_debugger(
         
         /* Make the stdout and stderr go to this pipe */
         if ( (dup2(pout[1], STDOUT_FILENO)) == -1) {
-            err_msg("(%s:%d) dup failed", __FILE__, __LINE__);
+            logger_write_pos ( logger, __FILE__, __LINE__, "dup failed");
             free_memory(argc, local_argv);
             return -1;
         }
@@ -295,21 +295,21 @@ int invoke_debugger(
 
         /* Make stdout and stderr go to the same fd */
         if ( dup2(STDOUT_FILENO, STDERR_FILENO) == -1 ) {
-            err_msg("(%s:%d) dup2 failed", __FILE__, __LINE__);
+            logger_write_pos ( logger, __FILE__, __LINE__, "dup2 failed");
             free_memory(argc, local_argv);
             return -1;
         }
 
         /* Make programs stdin be this pipe */
         if ( (dup2(pin[0], STDIN_FILENO)) == -1) {
-            err_msg("(%s:%d) dup failed", __FILE__, __LINE__);
+            logger_write_pos ( logger, __FILE__, __LINE__, "dup failed");
             free_memory(argc, local_argv);
             return -1;
         }
 
         xclose(pin[0]);
         if(execvp(local_argv[0], local_argv) == -1) {
-            err_msg("(%s:%d) execvp failed", __FILE__, __LINE__);
+            logger_write_pos ( logger, __FILE__, __LINE__, "execvp failed");
             free_memory(argc, local_argv);
             return -1;
         }

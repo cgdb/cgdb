@@ -6,7 +6,6 @@
 #include <curses.h>
 
 /* Local Includes */
-#include "error.h"
 #include "sources.h"
 #include "cgdb.h"
 

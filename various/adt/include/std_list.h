@@ -147,10 +147,12 @@ int std_list_insert_sorted (
  * @return
  * 0 on success, or -1 on error.
  */
-//int std_list_sort (
-//	struct std_list *list,
-//	STDCompareDataFunc compare_func,
-//	void *user_data );
+/*
+ * int std_list_sort (
+ * struct std_list *list,
+ * STDCompareDataFunc compare_func,
+ * void *user_data );
+ */
 
 /**
  * Removes an element from a list. If two elements contain the same data, 

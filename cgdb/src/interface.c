@@ -49,7 +49,7 @@
 /* Local Includes */
 #include "cgdb.h"
 #include "config.h"
-#include "error.h"
+#include "logger.h"
 #include "interface.h"
 #include "kui_term.h"
 #include "scroller.h"
@@ -1024,22 +1024,22 @@ static int set_up_signal(void) {
 	action.sa_flags = 0;
 
 	if(sigaction(SIGWINCH, &action, NULL) < 0) {
-	  err_ret("%s:%d -> sigaction failed ", __FILE__, __LINE__);
+	  logger_write_pos ( logger, __FILE__, __LINE__, "sigaction failed ");
 	  return -1;
 	}
 
     if(sigaction(SIGINT, &action, NULL) < 0) {
-        err_ret("%s:%d -> sigaction failed ", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "sigaction failed ");
 		return -1;
 	}	
 
     if(sigaction(SIGTERM, &action, NULL) < 0) {
-        err_ret("%s:%d -> sigaction failed ", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "sigaction failed ");
 		return -1;
 	}
 
     if(sigaction(SIGQUIT, &action, NULL) < 0) {
-        err_ret("%s:%d -> sigaction failed ", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "sigaction failed ");
 		return -1;
 	}
 

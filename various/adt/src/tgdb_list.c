@@ -1,6 +1,5 @@
 #include "tgdb_list.h"
 #include "sys_util.h"
-#include "error.h"
 
 struct tgdb_list_node {
 	struct tgdb_list_node *next;

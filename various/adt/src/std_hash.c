@@ -216,7 +216,7 @@ std_hash_table_destroy (struct std_hashtable *hash_table)
 }
 
 
-static inline struct ghashnode**
+static struct ghashnode**
 std_hash_table_lookup_node (struct std_hashtable	*hash_table,
 			  const void*	 key)
 {

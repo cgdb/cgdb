@@ -31,7 +31,7 @@ int main(int argc, char **argv){
 		return -1;
 	}
 
-	// Add 1000 items
+	/* Add 1000 items */
 	for ( i = 0; i < 1000; ++i ) {
 		int *data = malloc ( sizeof ( int ) );
 		*data = i;
@@ -42,7 +42,7 @@ int main(int argc, char **argv){
 	}
 			
 
-	// traverse them
+	/* traverse them */
 	for ( 
 		iter = std_list_begin ( l ); 
 		iter != std_list_end ( l ); 
@@ -62,7 +62,7 @@ int main(int argc, char **argv){
 		return -1;
 	}
 
-	// destroy list
+	/* destroy list */
 	if ( std_list_destroy ( l ) == -1 ) {
 		printf ( "deletion failed\n" );
 		return -1;

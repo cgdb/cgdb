@@ -15,7 +15,7 @@
 #endif /* HAVE_TERMIOS_H */
 
 #include "terminal.h"
-#include "error.h"
+#include "logger.h"
 
 /* The terminal attributes before calling tty_cbreak */
 static struct termios save_termios;
@@ -49,7 +49,7 @@ int tty_cbreak(int fd){
    ttystate = TCBREAK;
    ttysavefd = fd;
 
-   // set size
+   /* set size */
    if(ioctl(fd, TIOCGWINSZ, (char *)&size) < 0)
       return -1;
 
@@ -67,7 +67,7 @@ int tty_output_nl(int fd){
 
     /* get attributes */
     if(tcgetattr(fd, &save_termios) < 0){
-        err_msg("%s:%d -> Could not get gdb's pseudo terminal's attributes ", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "Could not get gdb's pseudo terminal's attributes ");
         return -1;
     }
 
@@ -75,7 +75,7 @@ int tty_output_nl(int fd){
     buf.c_oflag &= ~ONLCR; /* turn off NL -> CR NL mapping */
 
     if(tcsetattr(fd, TCSAFLUSH, &buf) < 0){
-        err_msg("%s:%d -> Could not set gdb's pseudo terminal's attributes ", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "Could not set gdb's pseudo terminal's attributes ");
         return -1;
     }
     

@@ -11,6 +11,7 @@
 
 #include "tgdb_types.h"
 #include "tgdb_client_command.h"
+#include "logger.h"
 
 /*! \file
  * a2-tgdb.h
@@ -113,7 +114,8 @@ enum annotate_commands {
 void *a2_create_context ( 
 	const char *debugger_path, 
 	int argc, char **argv,
-	const char *config_dir );
+	const char *config_dir,
+    struct logger *logger );
 
 /** 
  * This initializes the libannotate_two libarary.

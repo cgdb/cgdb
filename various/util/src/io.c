@@ -51,7 +51,7 @@
 #endif /* HAVE_ERRNO_H */
 
 #include "io.h"
-#include "error.h"
+#include "logger.h"
 
 #define MAXLINE 4096
 
@@ -63,19 +63,19 @@ static const char *debug_end   = "";
 
 static void process_error(void) {
    if(errno == EINTR)
-      err_ret("%s:%d -> ERRNO = EINTR", __FILE__, __LINE__);
+      logger_write_pos (logger, __FILE__, __LINE__, "ERRNO = EINTR");
    else if(errno == EAGAIN)
-      err_ret("%s:%d -> ERRNO = EAGAIN", __FILE__, __LINE__);
+      logger_write_pos(logger, __FILE__, __LINE__, "ERRNO = EAGAIN");
    else if(errno == EIO)
-      err_ret("%s:%d -> ERRNO = EIO", __FILE__, __LINE__);
+      logger_write_pos(logger, __FILE__, __LINE__, "ERRNO = EIO");
    else if(errno == EISDIR)
-      err_ret("%s:%d -> ERRNO = EISDIR", __FILE__, __LINE__);
+      logger_write_pos(logger, __FILE__, __LINE__, "ERRNO = EISDIR");
    else if(errno == EBADF)
-      err_ret("%s:%d -> ERRNO = EBADF", __FILE__, __LINE__);
+      logger_write_pos(logger, __FILE__, __LINE__, "ERRNO = EBADF");
    else if(errno == EINVAL)
-      err_ret("%s:%d -> ERRNO = EINVAL", __FILE__, __LINE__);
+      logger_write_pos(logger, __FILE__, __LINE__, "ERRNO = EINVAL");
    else if(errno == EFAULT)
-      err_ret("%s:%d -> ERRNO = EFAULT", __FILE__, __LINE__);
+      logger_write_pos(logger, __FILE__, __LINE__, "ERRNO = EFAULT");
 }
 
 int io_debug_init(const char *filename){
@@ -86,7 +86,7 @@ int io_debug_init(const char *filename){
    strcpy( config_dir, filename );
    
    if( (dfd = fopen(config_dir, "w")) == NULL) {
-      err_msg("%s:%d -> could not open debug file", __FILE__, __LINE__);
+      logger_write_pos (logger, __FILE__, __LINE__, "could not open debug file");
       return -1;
    }
 
@@ -125,7 +125,7 @@ int io_read_byte(char *c, int source){
    if( ( ret_val = read(source, c, 1)) == 0) {
       return -1;
    } else if ( ret_val == -1 ) {
-      err_msg("%s:%d -> I/O error", __FILE__, __LINE__); process_error();
+      logger_write_pos(logger, __FILE__, __LINE__, "I/O error"); process_error();
       return -1;
    } 
 
@@ -143,14 +143,13 @@ int io_rw_byte(int source, int dest){
    char c;
    
    if(read(source, &c, 1) != 1){
-      err_msg("%s:%d -> I/O error", __FILE__, __LINE__);
+      logger_write_pos ( logger, __FILE__, __LINE__, "I/O error");
       process_error();
-      err_ret("source bad\n");
       return -1;
    }
       
    if(write(dest, &c, 1) != 1){
-      err_msg("dest bad\n");
+      logger_write_pos ( logger, __FILE__, __LINE__, "I/O error");
       return -1;
    }
 
@@ -165,7 +164,7 @@ ssize_t io_read(int fd, void *buf, size_t count){
       if(errno == EINTR)
          goto tgdb_read;
       else if ( errno != EIO ) {
-         err_ret("%s:%d -> error reading from fd", __FILE__, __LINE__);
+         logger_write_pos(logger, __FILE__, __LINE__, "error reading from fd" );
          return -1;
       } else {
          return 0; /* Happens on EOF for some reason */
@@ -210,13 +209,13 @@ ssize_t io_writen(int fd, const void *vptr, size_t n) {
             nwritten = 0;
          else
             return -1;
-      } // end if
+      } 
       nleft -= nwritten;
       ptr += nwritten;
-   } // end while
+   }
 
    return (n);
-} // end writen
+} 
 
 void io_display_char(FILE *fd, char c){
    if(c == '\r')
@@ -290,11 +289,11 @@ read_again:
         goto read_again;
     else if ( ret == -1 ) {
         c = 0; 
-        err_msg("Errno(%d)\n", errno);
+        logger_write_pos ( logger, __FILE__, __LINE__, "Errno(%d)\n", errno);
     } else if ( ret == 0 ) {
         c = 0; 
         ret = -1;
-        err_msg("Read returned nothing\n"); 
+        logger_write_pos ( logger, __FILE__, __LINE__, "Read returned nothing\n"); 
     }
 
     /* Set to original state */

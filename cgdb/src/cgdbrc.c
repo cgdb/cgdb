@@ -15,7 +15,6 @@
 #include "command_lexer.h"
 #include "tgdb.h"
 #include "interface.h"
-#include "error.h"
 #include "tokenizer.h"
 #include "cgdb.h"
 

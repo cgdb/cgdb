@@ -5,7 +5,6 @@
 #include <fcntl.h>
 #include <errno.h>
 #include "kui.h"
-#include "error.h"
 #include "sys_util.h"
 #include "io.h"
 #include "kui_term.h"

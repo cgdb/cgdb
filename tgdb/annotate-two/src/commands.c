@@ -16,7 +16,7 @@
 #include "io.h"
 #include "tgdb_types.h"
 #include "globals.h"
-#include "error.h"
+#include "logger.h"
 #include "sys_util.h"
 #include "queue.h"
 #include "ibuf.h"
@@ -209,7 +209,7 @@ void commands_shutdown ( struct commands *c ) {
 
 int commands_parse_field(struct commands *c, const char *buf, size_t n, int *field){
    if(sscanf(buf, "field %d", field) != 1)
-      err_msg("%s:%d -> parsing field annotation failed (%s)\n", __FILE__, __LINE__, buf);
+      logger_write_pos ( logger, __FILE__, __LINE__, "parsing field annotation failed (%s)\n", buf);
 
    return 0;
 }
@@ -233,7 +233,7 @@ int commands_parse_source(
 				char *temp = xmalloc ( sizeof ( char ) * ( length + 1 ) );
 				
                 if(sscanf(cur + 1, "%s", temp) != 1) 
-                    err_msg("%s:%d -> Could not get line number", __FILE__, __LINE__);
+                    logger_write_pos ( logger, __FILE__, __LINE__, "Could not get line number");
 
 				ibuf_add ( line, temp );
 				free ( temp );
@@ -254,7 +254,7 @@ int commands_parse_source(
 		char *temp = xmalloc ( sizeof ( char ) * ( length + 1 ) );
 
 		if(sscanf(copy, "source %s", temp) != 1)
-        err_msg("%s:%d -> Could not get file name", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "Could not get file name");
    
 		ibuf_add ( file, temp );
 		free ( temp );
@@ -276,7 +276,7 @@ int commands_parse_source(
 				ANNOTATE_INFO_SOURCE_RELATIVE, 
 				NULL, 
 				1 ) == -1 ) {
-        err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "commands_issue_command error");
         return -1;
     }
 
@@ -326,7 +326,7 @@ static void parse_breakpoint(
 			char *temp = xmalloc ( sizeof ( char ) * ( length + 1 ) );
 
             if(sscanf(cur + 1, "%s", temp) != 1)
-                err_msg("%s:%d -> Could not get line number", __FILE__, __LINE__);
+                logger_write_pos ( logger, __FILE__, __LINE__, "Could not get line number");
 
 			ibuf_add ( line, temp );
 			free ( temp );
@@ -341,16 +341,16 @@ static void parse_breakpoint(
 
     /* Assertion: The string to parse now looks like '[io]n .* at .*'*/
     if ( !((copy[0] == 'i' || copy[0] == 'o') && copy[1] == 'n' && copy[2] == ' ') ){
-      err_msg("%s:%d -> Could not scan function and file name\n"
-              "\tWas the program compiled with debug info?\n", __FILE__, __LINE__);
+      logger_write_pos ( logger, __FILE__, __LINE__, "Could not scan function and file name\n"
+              "\tWas the program compiled with debug info?");
     }
 
     fcur = &copy[3];
 
     /* Assertion: The string to parse now looks like '.* at .*'*/
     if ( ( cur = strstr(fcur, " at " )) == NULL ) {
-      err_msg("%s:%d -> Could not scan function and file name\n"
-              "\tWas the program compiled with debug info?\n", __FILE__, __LINE__);
+      logger_write_pos ( logger, __FILE__, __LINE__, "Could not scan function and file name\n"
+              "\tWas the program compiled with debug info?");
     }
 
     *cur='\0';
@@ -774,7 +774,7 @@ int commands_prepare_for_command (
         case ANNOTATE_VOID:
 			break;
         default:
-            err_msg ( "%s:%d commands_prepare_for_command error", __FILE__, __LINE__ );
+            logger_write_pos ( logger, __FILE__, __LINE__, "commands_prepare_for_command error");
             break;
     };
    
@@ -876,7 +876,7 @@ static const char *commands_create_command (
             break;
         case ANNOTATE_VOID:
         default: 
-            err_msg("%s:%d switch error", __FILE__, __LINE__);
+            logger_write_pos ( logger, __FILE__, __LINE__, "switch error");
             break;
     };
 
@@ -890,7 +890,7 @@ int commands_user_ran_command (
 				c, 
 				client_command_list, 
 				ANNOTATE_INFO_BREAKPOINTS, NULL, 0 ) == -1 ) {
-        err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "commands_issue_command error");
         return -1;
     }
 
@@ -910,7 +910,7 @@ int commands_issue_command (
     *nacom = com;
 
     if ( ncom == NULL ) {
-        err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
+        logger_write_pos ( logger, __FILE__, __LINE__, "commands_issue_command error");
         return -1;
     }
 
