@@ -6,6 +6,10 @@
 #include <string.h>
 #endif /* HAVE_STRING_H */
 
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif /* HAVE_STDLIB_H */
+
 #include "annotate.h"
 #include "error.h"
 #include "data.h"
@@ -175,6 +179,17 @@ static int handle_display_expression_end(struct annotate_two *a2, const char *bu
 }
 
 static int handle_display_value(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list){
+   return 0;
+}
+
+static int handle_exited(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list){
+	char *tmp = (char*)malloc ( sizeof ( char )*(n+1));
+	int *i = (int *)malloc ( sizeof ( int ) );
+	sprintf ( tmp, buf + 7 ); /* Skip the 'exited ' part */
+	*i = atoi ( tmp ) ;
+	free ( tmp );
+	tmp = NULL;
+    tgdb_types_append_command(list, TGDB_INFERIOR_EXITED, i );
    return 0;
 }
 
@@ -422,6 +437,11 @@ static struct annotation {
      "display-value",
      13,
      handle_display_value
+  },
+  {
+	  "exited",
+	  6,
+	  handle_exited
   },
   {
       NULL,

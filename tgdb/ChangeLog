@@ -1,3 +1,13 @@
+07/14/2004 Bob Rossi <bob@brasko.net>
+
+    * annotate.c (annotations): Added the 'exited' annotation.
+	added 'handle_exited' function.
+	added header for stdlib
+	* tgdb_types.h (INTERFACE_COMMANDS): Added TGDB_INFERIOR_EXITED
+	* tgdb_types.c (tgdb_types_delete_item): Add code to free
+	TGDB_INFERIOR_EXITED
+	(tgdb_types_print_item): Add code to print a TGDB_INFERIOR_EXITED command.
+
 version 0.5.0 (07/14/2004):
 
 07/14/2004 Bob Rossi <bob@brasko.net>

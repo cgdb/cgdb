@@ -112,6 +112,12 @@ static int tgdb_types_print_item ( void *command ) {
         case TGDB_DISPLAY_UPDATE:
 			fprintf ( fd, "TGDB_DISPLAY_UPDATE\n" );
            	break;
+        case TGDB_INFERIOR_EXITED:
+			{
+				int *status = (int*)com->data;
+				fprintf ( fd, "TGDB_INFERIOR_EXITED(%d)\n", *status );
+				break;
+			}
         case TGDB_QUIT:
 			{
 				struct tgdb_debugger_exit_status *status = 
@@ -197,6 +203,13 @@ static int tgdb_types_delete_item ( void *command ){
         case TGDB_DISPLAY_UPDATE:
 			/* Nothing to do */
 			break;
+        case TGDB_INFERIOR_EXITED:
+			{
+				int *status = (int *)com->data;
+				free ( status );
+				status = NULL;
+			}
+           	break;
         case TGDB_QUIT:
 		{
 			struct tgdb_debugger_exit_status *status = 

@@ -1,3 +1,7 @@
+07/25/2004 Bob Rossi <bob@brasko.net>
+
+    * cgdb.c (process_commands): Add case for TGDB_INFERIOR_EXITED
+
 version 0.5.0 (07/14/2004):
 
 07/14/2004 Bob Rossi <bob@brasko.net>

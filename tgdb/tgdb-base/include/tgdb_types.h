@@ -92,6 +92,15 @@ enum INTERFACE_COMMANDS {
  	/**      Currently not used. */
     TGDB_DISPLAY_UPDATE,
 
+	/**
+	 * This happens when the program being debugged by GDB exits. 
+	 * It can be used be the front end to clear any cache that it might have
+	 * obtained by debugging the last program.
+	 *
+	 * The data will be an int pointer, which represents the exit status.
+	 */
+	TGDB_INFERIOR_EXITED,
+
  	/**
 	 * This happens when gdb quits.
      * libtgdb is done. 

@@ -406,7 +406,19 @@ static void process_commands(struct tgdb *tgdb)
 
                 break;
              }
+			case TGDB_INFERIOR_EXITED:
+			 {
+				 /*
+				  * int *status = item->data;
+				  * This could eventually go here, but for now, the update breakpoint 
+				  * display function makes the status bar go back to the name of the file.
+				  *
+				  * if_display_message ( "Program exited with value", 0, " %d", *status );
+				  */
 
+				 /* Clear the cache */
+				 break;
+			 }
             case TGDB_QUIT:
                 cleanup();            
                 exit(0);
