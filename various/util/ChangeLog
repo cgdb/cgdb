@@ -1,3 +1,7 @@
+04/01/2005 Bob Rossi <bob@brasko.net>
+   
+   * Makefile.in: Regenerated with documented autotools version.
+
 version 0.5.0 (07/14/2004):
 version 0.4.2 (05/10/2004):
 version 0.4.1 (04/26/2004):
