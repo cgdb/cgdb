@@ -11,16 +11,27 @@ Pushed off for gdb 0.5.0
 	
 Work to do for cgdb-0.4.0
 
-1. Fix interface to not return strings to the gui, but return structures.
-   like breakpoints, source files, ...
-2. Fix tgdb to call the lower level subsystems in an independent way.
-3. standardize the way TGDB returns paths to the front end.
+1. Modify the structures, to only contain things like 'const char *'
+2. Add new structures to types.h that are intended to work with MI
+3. Fix tgdb to call the lower level subsystems in an independent way.
+4. standardize the way TGDB returns paths to the front end.
    As of know, it returns the full path with the relative path. Then
    it returns a relative path for breakpoints and source files. The front end 
    then needs to look up the full path from the relative path.
-4. Add the return value of gdb when returning with TGDB_QUIT_NORMAL
+5. Add the return value of gdb when returning with TGDB_QUIT_NORMAL
+6. Make 1 quit command. Returning a structure defining how GDB was killed.
 
 Finished:
+
+* rename type tgdb_command to tgdb_command_type.
+* rename type Command to tgdb_command
+* Add tgdb_get_command() function to the tgdb functions.
+* Implemented new tgdb_list ADT
+* Make tgdb use this instead of a queue of items ( breakpoints, frames ... ).
+* Return new list type to the user to traverse the stuff.
+* Have a tgdb function that can traverse the commands, printing either
+   all of them.
+* Have a tgdb function that will free all of the memory returned.
 
 Fix interface to have all functions return an 'int'
 
