@@ -35,23 +35,15 @@ struct kui_map;
  * \param key_data
  * The map's key data
  *
- * \param key_size
- * The size of the map's key data
- *
  * \param value_data
  * The map's value data
- *
- * \param value_size
- * The size of the map's value data
  *
  * @return
  * A new instance on success, or NULL on error. 
  */
 struct kui_map *kui_map_create (
 		const char *key_data, 
-		const int key_size,
-		const char *value_data,
-		const int value_size );
+		const char *value_data );
 
 /**
  * Destroy a kui map.
@@ -106,6 +98,18 @@ int kui_map_get_key ( struct kui_map *map, char **key );
  * 0 on success, -1 on error
  */
 int kui_map_get_value ( struct kui_map *map, char **value );
+
+/**
+ * Used for debugging.
+ * Print's the translated value.
+ *
+ * \param map
+ * The map context
+ *
+ * @return
+ * 0 on success, -1 on error
+ */
+int kui_map_print_cgdb_key_array ( struct kui_map *map );
 
 //@}
 
@@ -168,27 +172,19 @@ int kui_ms_destroy ( struct kui_map_set *kui_ms );
  * \param kui_ms
  * The kui map set to add to.
  *
- * \param key_data
- * The map's key data
+ * \param key
+ * A key. Should be null terminated.
  *
- * \param key_size
- * The size of the map's key data
- *
- * \param value_data
- * The map's value data
- *
- * \param value_size
- * The size of the map's value data
+ * \param value
+ * A value. Should be null terminated.
  *
  * @return
  * 0 on success, or -1 on error
  */ 
 int kui_ms_register_map ( 
-		struct kui_map_set *kui_ss,
-		const char *key_data, 
-		const int key_size,
-		const char *value_data,
-		const int value_size );
+		struct kui_map_set *kui_ms,
+		const char *key, 
+		const char *value );
 
 /**
  * Remove a map from the map set.
@@ -196,19 +192,17 @@ int kui_ms_register_map (
  * \param kui_ms
  * The kui map set to add to.
  *
- * \param key_data
- * The map's key data
- *
- * \param key_size
- * The size of the map's key data
+ * \param key
+ * A key. Should be null terminated.
  *
  * @return
- * 0 on success, or -1 on error
+ * 0 on success, 
+ * or -1 on error 
+ * or -2 if map did not exist.
  */
 int kui_ms_deregister_map (
 		struct kui_map_set *kui_ms,
-		const char *key_data,
-	    const int size	);
+		const char *key );
 
 /**
  * Get's a list of kui_map's. This way, someone can iterate through
@@ -302,6 +296,19 @@ std_list kui_get_map_sets ( struct kuictx *kctx );
 int kui_add_map_set ( 
 		struct kuictx *kctx, 
 		struct kui_map_set *kui_ms );
+
+/**
+ * Determine's if libkui has data ready to read. It has already been
+ * read by the file descriptor, or it was buffered through some other
+ * means.
+ *
+ * \param kctx
+ * The kui context.
+ *
+ * @return
+ * -1 on error, otherwise 1 if can get a key, or 0 if nothing available.
+ */
+int kui_cangetkey ( struct kuictx *kctx );
 
 /**
  * Get's the next key for the application to process.

@@ -123,7 +123,7 @@ AM_CFLAGS = -g -Wall -I$(srcdir)/../../../../various/util/include -I$(srcdir)/..
 
 # create the input library
 noinst_LIBRARIES = libkui.a
-libkui_a_SOURCES = kui.c
+libkui_a_SOURCES = kui.c kui_term.c
 libkui_a_DEPENDENCIES = ../../../../various/util/src/libutil.a
 
 # Installs the driver programs into progs directory
@@ -134,7 +134,7 @@ noinst_bindir = $(top_srcdir)/progs
 kui_driver_LDFLAGS = -L. -L../../../../various/util/src -L../../../../various/adt/src
 kui_driver_LDADD = -lkui -lutil -ladt
 kui_driver_SOURCES = kui_driver.c
-kui_driver_DEPENDENCIES = 
+kui_driver_DEPENDENCIES = ./libkui.a
 kui_driver_CFLAGS = $(AM_CFLAGS)
 subdir = cgdb/lib/kui/src
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
@@ -144,7 +144,7 @@ LIBRARIES = $(noinst_LIBRARIES)
 
 libkui_a_AR = $(AR) cru
 libkui_a_LIBADD =
-am_libkui_a_OBJECTS = kui.$(OBJEXT)
+am_libkui_a_OBJECTS = kui.$(OBJEXT) kui_term.$(OBJEXT)
 libkui_a_OBJECTS = $(am_libkui_a_OBJECTS)
 noinst_bin_PROGRAMS = kui_driver$(EXEEXT)
 PROGRAMS = $(noinst_bin_PROGRAMS)
@@ -156,7 +156,8 @@ DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
 @AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/kui.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/kui_driver-kui_driver.Po
+@AMDEP_TRUE@	./$(DEPDIR)/kui_driver-kui_driver.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/kui_term.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
@@ -220,6 +221,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kui.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kui_driver-kui_driver.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kui_term.Po@am__quote@
 
 distclean-depend:
 	-rm -rf ./$(DEPDIR)

@@ -52,6 +52,9 @@ extern char *tgoto();
 #endif  /* HAVE_UNISTD_H */
 
 #include "kui.h"
+#include "kui_term.h"
+
+struct kui_map_set *terminal_map;
 
 void main_loop(struct kuictx *i) {
     int    max;
@@ -73,16 +76,26 @@ void main_loop(struct kuictx *i) {
             fprintf(stderr, "%s:%d select failed\n", __FILE__, __LINE__);
 
         if(FD_ISSET(STDIN_FILENO, &rfds)) {
-            int c = kui_getkey(i);
+			while ( 1 ) {
+				int c = kui_getkey(i);
 
-			if ( c == -1 )
-				return;
+				if ( c == -1 ) {
+					fprintf ( stderr, "kui_getkey failed\n" );
+					return;
+				}
 
-            if ( c == 'q' ) {
-                return;
-			} else {
-                fprintf(stderr, "(%c:%d)\r\n", c, c);
-            }
+				if ( c == 'q' ) {
+					fprintf ( stderr, "User aborted\n" );
+					return;
+				} else {
+					fprintf(stderr, "(%c:%d)\r\n", c, c);
+				}
+
+				if ( kui_cangetkey ( i ) == 1 )
+					continue;
+				else
+					break;
+			}
         }
     }
 }
@@ -91,7 +104,83 @@ static void usage ( void ) {
 	fprintf ( stderr, "kui_driver\r\n" );
 }
 
+static int create_terminal_mappings ( struct kuictx *i ) {
+	std_list list;
+    std_list_iterator current;
+    void *current_data;
+	struct kui_map *map;
+	char *key, *value;
+	int j, length;
+	
+	/* Create the terminal kui map */
+	terminal_map = kui_term_get_terminal_mappings ();
+
+	if ( !terminal_map )
+		return -1;
+
+	
+	list = kui_ms_get_maps ( terminal_map );
+
+	if ( !list )
+		return -1;
+
+    for (current  = std_list_begin(list); 
+         current != std_list_end(list);
+         current  = std_list_next(current)) {
+
+        if (std_list_get_data(current, &current_data) != 0)
+            return -1;
+
+		map = ( struct kui_map *)current_data;
+
+		if ( kui_map_get_value ( map, &value ) == -1 )
+			return -1;
+
+		if ( kui_map_get_key ( map, &key ) == -1 )
+			return -1;
+
+		length = strlen ( key );
+
+		fprintf ( stderr, "MAP->" ); 
+
+		fprintf ( stderr, "KEY[");
+		for ( j = 0; j < length; ++j )
+			fprintf ( stderr, "(%d)", (int)key[j]);
+	    fprintf ( stderr, "]" );
+		
+		fprintf ( stderr, "VALUE(%s)", value );
+
+		if ( kui_map_print_cgdb_key_array ( map ) == -1 )
+			return -1;
+
+	}
+
+	if ( kui_add_map_set ( i, terminal_map ) == -1 )
+		return -1;
+
+	return 0;
+}
+
+
 int main(int argc, char **argv){
+
+#if 0
+	/* Test translating mappings to values */
+	int *a;
+
+	if ( kui_term_string_to_cgdb_key_array ( argv[1], &a ) == -1 )
+		return -1;
+
+	if ( kui_term_print_cgdb_key_array ( a ) == -1 )
+		return -1;
+
+	free ( a );
+	a = NULL;
+	return 0;
+#endif
+
+	
+#if 1
     struct kuictx *i;
     /* Initalize curses */
     initscr();
@@ -102,10 +191,14 @@ int main(int argc, char **argv){
 
     i = kui_create ( STDIN_FILENO );
 
+	if ( create_terminal_mappings ( i ) == -1 )
+		fprintf ( stderr, "terminal mappings failed\r\n" );
+
     main_loop(i);
 
     /* Shutdown curses */
     echo();
     endwin();
+#endif
     return 0;
 }
