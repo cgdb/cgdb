@@ -1,4 +1,8 @@
 03/31/2005 Bob Rossi <bob@brasko.net>
+	* NEWS: Mention new SIGCHLD code 
+	* RELEASE_TODO: Closed the waitpid race condition bug.
+
+03/31/2005 Bob Rossi <bob@brasko.net>
 	* RELEASE_TODO: stupid todo things I have in mind before release
 
 03/31/2005 Bob Rossi <bob@brasko.net>

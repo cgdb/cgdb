@@ -1,3 +1,10 @@
+03/31/2005 Bob Rossi <bob@brasko.net>
+
+	* tgdb.c (struct tgdb): Add has_sigchld_recv field.
+	(initialize_tgdb_context): Init has_sigchld_recv field.
+	(tgdb_get_quit_command): Add param tgdb_will_quit
+	(tgdb_recv_debugger_data): Handle when has_sigchld_recv is true
+
 03/30/2005 Bob Rossi <bob@brasko.net>
 
 	* commands.c (command_parse_source): Fix runtime memory error.

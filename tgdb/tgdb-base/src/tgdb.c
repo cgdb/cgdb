@@ -171,6 +171,16 @@ struct tgdb {
 	 * An iterator into command_list.
 	 */
 	tgdb_list_iterator *command_list_iterator;
+
+    /**
+     * When GDB dies (purposely or not), the SIGCHLD is sent to the application controlling TGDB.
+     * This data structure represents the fact that SIGCHLD has been sent.
+     *
+     * This currently does not need to track if more than 1 SIGCHLD has been received. So
+     * no matter how many are receieved, this will only be 1. Otherwise if none have been
+     * received this will be 0.
+     */
+    int has_sigchld_recv;
 };
 
 /* Temporary prototypes */
@@ -285,6 +295,7 @@ static struct tgdb *initialize_tgdb_context ( void ) {
 	tgdb->show_gui_commands = 0;
 
 	tgdb->command_list = tgdb_list_init();
+    tgdb->has_sigchld_recv = 0;
 
 	logger = NULL;
 	
@@ -1086,14 +1097,28 @@ size_t tgdb_recv_readline_data ( struct tgdb *tgdb, char *buf, size_t n ) {
  * This is called when GDB has finished.
  * Its job is to add the type of QUIT command that is appropriate.
  *
+ * \param tgdb
+ * The tgdb context
  *
+ * \param tgdb_will_quit
+ * This will return as 1 if tgdb sent the TGDB_QUIT command. Otherwise 0.
+ * 
+ * \return
+ * 0 on success or -1 on error
  */
-static int tgdb_get_quit_command ( struct tgdb *tgdb ) {
+static int tgdb_get_quit_command ( struct tgdb *tgdb, int *tgdb_will_quit ) {
 	pid_t pid 	= tgdb_client_get_debugger_pid ( tgdb->tcc );
 	int status 	= 0;
 	pid_t ret;
-	struct tgdb_debugger_exit_status *tstatus = (struct tgdb_debugger_exit_status *)
-		xmalloc ( sizeof ( struct tgdb_debugger_exit_status ) );
+	struct tgdb_debugger_exit_status *tstatus;
+
+    if ( !tgdb_will_quit )
+        return -1;
+
+    *tgdb_will_quit = 0;
+   
+    tstatus = (struct tgdb_debugger_exit_status *) 
+         xmalloc ( sizeof ( struct tgdb_debugger_exit_status ) );
 
 	ret = waitpid ( pid, &status, WNOHANG );
 
@@ -1101,13 +1126,8 @@ static int tgdb_get_quit_command ( struct tgdb *tgdb ) {
 		logger_write_pos ( logger, __FILE__, __LINE__, "waitpid error" );
 		return -1;
 	} else if ( ret == 0 ) {
-		/* The child didn't die, whats wrong */
-		logger_write_pos ( logger, __FILE__, __LINE__, "waitpid error" );
-		return -1;
-	} else if ( ret != pid ) {
-		/* What process just died ?!? */ 
-		logger_write_pos ( logger, __FILE__, __LINE__, "waitpid error" );
-		return -1;
+		/* This SIGCHLD wasn't for GDB */
+		return 0;
 	}
 
 	if ( (WIFEXITED(status)) == 0 ) {
@@ -1120,13 +1140,14 @@ static int tgdb_get_quit_command ( struct tgdb *tgdb ) {
 	}
 
 	tgdb_types_append_command ( tgdb->command_list, TGDB_QUIT, tstatus );
+    *tgdb_will_quit = 1;
 
 	return 0;
 }
 
 size_t tgdb_recv_debugger_data ( struct tgdb *tgdb, char *buf, size_t n ) {
     char local_buf[10*n];
-    ssize_t size, buf_size;
+    ssize_t size, buf_size = 0;
 
     /* make the queue empty */
     tgdb_delete_commands(tgdb);
@@ -1155,19 +1176,33 @@ size_t tgdb_recv_debugger_data ( struct tgdb *tgdb, char *buf, size_t n ) {
 		return ret;
 	}
 
+    if ( tgdb->has_sigchld_recv ) {
+        int tgdb_will_quit;
+        /* tgdb_get_quit_command will return right away, it's asynchrounous.
+         * We call it to determine if it was GDB that died.
+         * If GDB didn't die, things will work like normal. ignore this.
+         * If GDB did die, this get's the quit command and add's it to the list. It's
+         * OK that the rest of this function get's executed, since the read will simply
+         * return EOF.
+         */
+        int val = tgdb_get_quit_command ( tgdb, &tgdb_will_quit );
+	    if ( val == -1 ) {
+            logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_get_quit_command error" );
+		    return -1;
+        }
+        tgdb->has_sigchld_recv = 0;
+        if ( tgdb_will_quit )
+            goto tgdb_finish;
+    }
+
     /* set buf to null for debug reasons */
     memset(buf,'\0', n);
 
     /* 1. read all the data possible from gdb that is ready. */
     if( (size = io_read(tgdb->debugger_stdout, local_buf, n)) < 0){
         logger_write_pos ( logger, __FILE__, __LINE__, "could not read from masterfd");
-		tgdb_get_quit_command ( tgdb );
         return -1;
     } else if ( size == 0 ) {/* EOF */ 
-        buf_size = 0;
-      
-		tgdb_get_quit_command ( tgdb );
-      
         goto tgdb_finish;
     }
 
@@ -1302,6 +1337,8 @@ int tgdb_signal_notification ( struct tgdb *tgdb, int signum ) {
         kill(pid, SIGTERM);
     } else if ( signum == SIGQUIT ) {       /* ^\ */
         kill(pid, SIGQUIT);
+    } else if ( signum == SIGCHLD ) {
+        tgdb->has_sigchld_recv = 1;
     }
 
 	return 0;

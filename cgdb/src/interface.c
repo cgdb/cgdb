@@ -671,7 +671,8 @@ static void signal_handler(int signo) {
             write( resize_pipe[1], &c, sizeof(int));
             resize = 1;
         }
-    } else if ( signo == SIGINT || signo == SIGTERM || signo == SIGQUIT )
+    } else if ( signo == SIGINT || signo == SIGTERM || 
+                signo == SIGQUIT || signo == SIGCHLD )
 		tgdb_signal_notification ( tgdb, signo );
 }
 
@@ -1038,6 +1039,11 @@ static int set_up_signal(void) {
 	}
 
     if(sigaction(SIGQUIT, &action, NULL) < 0) {
+        logger_write_pos ( logger, __FILE__, __LINE__, "sigaction failed ");
+		return -1;
+	}
+
+    if(sigaction(SIGCHLD, &action, NULL) < 0) {
         logger_write_pos ( logger, __FILE__, __LINE__, "sigaction failed ");
 		return -1;
 	}

@@ -1,4 +1,9 @@
 CVS
+
+   * reworked the signal handling code when GDB dies. Now CGDB handles the SIGCHLD
+   and passes the signal notification to TGDB. This fixes a race condition that 
+   occurred, even though the race condition appeared to be harmless.
+    
    * Several memory runtime fixes found thanks to valgrind. This could potentially
    fix crash's that I just never ran into.
     

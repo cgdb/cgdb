@@ -1,5 +1,10 @@
 03/31/2005 Bob Rossi <bob@brasko.net>
 
+	* interface.c (set_up_signal): Catch the SIGCHLD signal now.
+	(signal_handler): Alert TGDB of SIGCHLD now.
+
+03/31/2005 Bob Rossi <bob@brasko.net>
+
 	* cgdb.c (parse_long_options): Stop looking at args when one is not
 	recognized.
 
