@@ -9,6 +9,9 @@
     * Changed configure from --with-driver to --with-drivers: The reason for
     this is because now there are several driver programs that can be used to
     test cgdb.
+    * Removed cgdb's handling of esc code sequences: cgdb was looking for esc
+    sequences. It was looking for Shift-Arrow keys and Home and End. This has
+    been replaced with new input library.
 
 03/25/2003 Bob Rossi <bob_rossi@cox.net>
 

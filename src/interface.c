@@ -695,8 +695,6 @@ static int capture_regex(struct sviewer *sview) {
  */
 static int tty_input(int key)
 {
-    static enum { NORMAL, ESCAPE, SARROW } state = NORMAL;
-
     /* Handle special keys */
     switch (key){
         case CGDB_KEY_PPAGE:
@@ -711,27 +709,6 @@ static int tty_input(int key)
         case CGDB_KEY_F12:
             scr_end(tty_win);
             break;
-        /* Shift-arrow key support -- portable? */
-        case 27:
-            state = ESCAPE;
-            break;
-        case 91:
-            if (state != ESCAPE)
-                return 2;
-            state++;
-            break;
-        case 97:
-            if (state != SARROW)
-                return 2;
-            scr_up(tty_win, 1);
-            state = NORMAL;
-            break;
-        case 98:
-            if (state != SARROW)
-                return 2;
-            scr_down(tty_win, 1);
-            state = NORMAL;
-            break;        
         default:
             return 2;    
     }
@@ -752,8 +729,6 @@ static int tty_input(int key)
  */
 static int gdb_input(int key)
 {
-    static enum { NORMAL, ESCAPE, SARROW } state = NORMAL;
-
     /* Handle special keys */
     switch (key){
         case CGDB_KEY_PPAGE:
@@ -768,27 +743,6 @@ static int gdb_input(int key)
         case CGDB_KEY_F12:
             scr_end(gdb_win);
             break;
-        /* Shift-arrow key support -- portable? */
-        case 27:
-            state = ESCAPE;
-            break;
-        case 91:
-            if (state != ESCAPE)
-                return 1;
-            state++;
-            break;
-        case 97:
-            if (state != SARROW)
-                return 1;
-            scr_up(gdb_win, 1);
-            state = NORMAL;
-            break;
-        case 98:
-            if (state != SARROW)
-                return 1;
-            scr_down(gdb_win, 1);
-            state = NORMAL;
-            break;        
         default:
             return 1;    
     }
@@ -806,8 +760,6 @@ static int gdb_input(int key)
  */
 static void source_input(struct sviewer *sview, int key)
 {
-    static enum { NORMAL, ESCAPE, ESCAPE2 } state = NORMAL;
-    
     switch (key){
         case CGDB_KEY_UP:
         case 'k':                            /* VI-style up-arrow */
@@ -873,29 +825,6 @@ static void source_input(struct sviewer *sview, int key)
            /* Allows user to go to a line number */ 
            if_run_command(sview);
            return;
-        /* More potentially non-portable escape code bull: HOME and END */
-        case 27:
-            state = ESCAPE;
-            break;
-        case 91:
-            if (state == ESCAPE)
-                state++;
-            break;
-        case 55:
-            if (state == ESCAPE2){
-                state = NORMAL;
-                if (sview->cur && sview->cur->buf.tlines)
-                    source_vscroll(sview, -sview->cur->sel_line);
-            }
-            break;
-        case 56:
-            if (state == ESCAPE2){
-                state = NORMAL;
-                if (sview->cur && sview->cur->buf.tlines)
-                    source_vscroll(sview, sview->cur->buf.length
-                                            - sview->cur->sel_line - 1);
-            }
-            break;
         case ' ':
             {
                 char *path;
