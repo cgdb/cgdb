@@ -356,10 +356,13 @@ static void commands_process_source_line(struct Command  ***com){
 }
 
 static void commands_process_info_source(char a){
-   if ( a == '\r' )
+   if ( a == '\r' ) {
+      /*fprintf(stderr, "CAR_RETURN");*/
       return;
+   }
 
-   if(a == '\n'){
+   if(a == '\n'){ 
+      /*fprintf(stderr, "NEW_LINE");*/
       info_source_nl += 1;
       return;
    }
