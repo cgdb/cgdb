@@ -1,5 +1,10 @@
 03/31/2005 Bob Rossi <bob@brasko.net>
 
+	* cgdb.c (parse_long_options): Stop looking at args when one is not
+	recognized.
+
+03/31/2005 Bob Rossi <bob@brasko.net>
+
 	* cgdb.c (version_info): Update copyright
 
 03/31/2005 Bob Rossi <bob@brasko.net>

@@ -151,6 +151,9 @@ static void parse_long_options(int *argc, char ***argv) {
    		if ( c == -1 )
 			break;
 
+        if ( ((char)c) == '?' )
+            break;
+
         switch (c) {
             case 0:
                 switch ( option_index ) {
@@ -159,7 +162,7 @@ static void parse_long_options(int *argc, char ***argv) {
                         exit(0);
                     case 1:
                         usage();
-                        break;
+                        exit(0);
                     default:
                         break;
                 }
@@ -168,12 +171,12 @@ static void parse_long_options(int *argc, char ***argv) {
                 printf("%s",version_info());
                 exit(0);
             case 'd':
-                debugger_path = optarg;
+                debugger_path = strdup ( optarg );
                 n+=2;
                 break;
             case 'h':
                 usage();
-                break;
+                exit(0);
             default:
                 break;
         }
