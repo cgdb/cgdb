@@ -69,19 +69,19 @@ RANLIB = @RANLIB@
 VERSION = @VERSION@
 
 AM_CFLAGS = -Wall
-noinst_LIBRARIES = libtgdb.a
-libtgdb_a_SOURCES = a2-tgdb.c annotate.c state_machine.c data.c types.c error.c pseudo.c io.c terminal.c commands.c globals.c tgdb_init.c buffer.c util.c
+noinst_LIBRARIES = libannotate-two.a
+libannotate_two_a_SOURCES = a2-tgdb.c annotate.c state_machine.c data.c io.c terminal.c commands.c globals.c tgdb_init.c buffer.c
 
 
-EXTRA_DIST = a2-tgdb.h annotate.h state_machine.h data.h error.h pseudo.h io.h terminal.h commands.h globals.h tgdb_init.h buffer.h util.h
+EXTRA_DIST = a2-tgdb.h annotate.h state_machine.h data.h io.h terminal.h commands.h globals.h tgdb_init.h buffer.h
 
 
 EXTRA_PROGRAMS = driver
 bin_PROGRAMS = @BUILD_DRIVER@
 driver_LDFLAGS = -L.
-driver_LDADD = -ltgdb
+driver_LDADD = -lannotate-two
 driver_SOURCES = driver.c
-driver_DEPENDENCIES = -ltgdb
+driver_DEPENDENCIES = -lannotate-two
 INCLUDES = -I../include
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = ../../config.h
@@ -93,10 +93,9 @@ DEFS = @DEFS@ -I. -I$(srcdir) -I../..
 CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
-libtgdb_a_LIBADD = 
-libtgdb_a_OBJECTS =  a2-tgdb.o annotate.o state_machine.o data.o types.o \
-error.o pseudo.o io.o terminal.o commands.o globals.o tgdb_init.o \
-buffer.o util.o
+libannotate_two_a_LIBADD = 
+libannotate_two_a_OBJECTS =  a2-tgdb.o annotate.o state_machine.o data.o \
+io.o terminal.o commands.o globals.o tgdb_init.o buffer.o
 AR = ar
 PROGRAMS =  $(bin_PROGRAMS)
 
@@ -113,11 +112,10 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 TAR = tar
 GZIP_ENV = --best
 DEP_FILES =  .deps/a2-tgdb.P .deps/annotate.P .deps/buffer.P \
-.deps/commands.P .deps/data.P .deps/driver.P .deps/error.P \
-.deps/globals.P .deps/io.P .deps/pseudo.P .deps/state_machine.P \
-.deps/terminal.P .deps/tgdb_init.P .deps/types.P .deps/util.P
-SOURCES = $(libtgdb_a_SOURCES) $(driver_SOURCES)
-OBJECTS = $(libtgdb_a_OBJECTS) $(driver_OBJECTS)
+.deps/commands.P .deps/data.P .deps/driver.P .deps/globals.P .deps/io.P \
+.deps/state_machine.P .deps/terminal.P .deps/tgdb_init.P
+SOURCES = $(libannotate_two_a_SOURCES) $(driver_SOURCES)
+OBJECTS = $(libannotate_two_a_OBJECTS) $(driver_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
@@ -155,10 +153,10 @@ distclean-compile:
 
 maintainer-clean-compile:
 
-libtgdb.a: $(libtgdb_a_OBJECTS) $(libtgdb_a_DEPENDENCIES)
-	-rm -f libtgdb.a
-	$(AR) cru libtgdb.a $(libtgdb_a_OBJECTS) $(libtgdb_a_LIBADD)
-	$(RANLIB) libtgdb.a
+libannotate-two.a: $(libannotate_two_a_OBJECTS) $(libannotate_two_a_DEPENDENCIES)
+	-rm -f libannotate-two.a
+	$(AR) cru libannotate-two.a $(libannotate_two_a_OBJECTS) $(libannotate_two_a_LIBADD)
+	$(RANLIB) libannotate-two.a
 
 mostlyclean-binPROGRAMS:
 

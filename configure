@@ -4971,7 +4971,7 @@ fi
 done
 
 
-ac_config_files="$ac_config_files Makefile src/Makefile tgdb/Makefile tgdb/annotate-two-src/Makefile tgdb/src/Makefile"
+ac_config_files="$ac_config_files Makefile src/Makefile tgdb/Makefile tgdb/annotate-two-src/Makefile tgdb/gdbmi-src/Makefile tgdb/src/Makefile"
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -5457,6 +5457,7 @@ do
   "src/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
   "tgdb/Makefile" ) CONFIG_FILES="$CONFIG_FILES tgdb/Makefile" ;;
   "tgdb/annotate-two-src/Makefile" ) CONFIG_FILES="$CONFIG_FILES tgdb/annotate-two-src/Makefile" ;;
+  "tgdb/gdbmi-src/Makefile" ) CONFIG_FILES="$CONFIG_FILES tgdb/gdbmi-src/Makefile" ;;
   "tgdb/src/Makefile" ) CONFIG_FILES="$CONFIG_FILES tgdb/src/Makefile" ;;
   "default-1" ) CONFIG_COMMANDS="$CONFIG_COMMANDS default-1" ;;
   "config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;

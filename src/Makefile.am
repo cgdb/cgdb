@@ -1,7 +1,7 @@
 AM_CFLAGS = -I ../tgdb/annotate-two-src -Wall
 bin_PROGRAMS = cgdb
 cgdb_LDFLAGS = -L../tgdb/annotate-two-src -L../tgdb/src
-cgdb_LDADD = -lcommon -ltgdb
+cgdb_LDADD = -ltgdb -lannotate-two -ltgdb
 cgdb_SOURCES = cgdb.c highlight.c interface.c filedlg.c \
                scroller.c sources.c logo.c command_lexer.l commands.c
 

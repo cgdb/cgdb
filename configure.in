@@ -122,4 +122,4 @@ AC_TYPE_SIGNAL
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(mkdir putenv select strdup strerror)
 
-AC_OUTPUT(Makefile src/Makefile tgdb/Makefile tgdb/annotate-two-src/Makefile tgdb/src/Makefile)
+AC_OUTPUT(Makefile src/Makefile tgdb/Makefile tgdb/annotate-two-src/Makefile tgdb/gdbmi-src/Makefile tgdb/src/Makefile)

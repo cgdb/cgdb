@@ -1,2 +1,2 @@
-SUBDIRS = src annotate-two-src
+SUBDIRS = annotate-two-src gdbmi-src src
 EXTRA_DIST = include

@@ -9,6 +9,7 @@
 #include <signal.h>
 
 #include "a2-tgdb.h"
+#include "tgdb_util.h"
 #include "pseudo.h"
 #include "error.h"
 #include "io.h"
@@ -95,11 +96,10 @@ int a2_tgdb_init(char *debugger, int argc, char **argv, int *gdb, int *child){
       err_msg("(%s:%d) Couldn't exec gdb through pty", __FILE__, __LINE__);
       return -1;
    }
-   if ( tgdb_init_new_tty(&master_tty_fd, &slave_tty_fd, child_tty_name) == -1){
+   if ( tgdb_util_new_tty(&master_tty_fd, &slave_tty_fd, child_tty_name) == -1){
       err_msg("%s:%d -> Could not open child tty", __FILE__, __LINE__);
       return -1;
    }
-
 
    tgdb_setup_signals();
    
@@ -443,7 +443,7 @@ int a2_tgdb_new_tty(void) {
    pty_release(child_tty_name);
 
    /* Ask for a new tty */
-   if ( tgdb_init_new_tty(&master_tty_fd, &slave_tty_fd, child_tty_name) == -1){
+   if ( tgdb_util_new_tty(&master_tty_fd, &slave_tty_fd, child_tty_name) == -1){
       err_msg("%s:%d -> Could not open child tty", __FILE__, __LINE__);
       return -1;
    }

@@ -47,16 +47,6 @@ int tgdb_init_does_gdb_need_mapping(char *debugger);
  */
 int tgdb_init_setup_config_file(void);
 
-/* tgdb_init_new_tty: 
- * This will return a masterfd, slavefd and slavename of a new pseudo terminal.
- * It should be used to tell gdb what tty to redirect the child ( program being
- * debugged) input/output to.
- *
- * The sname char pointer should be SLAVE_SIZE long.
- * 
- * Return: -1 on error, 0 on success.
- */
-int tgdb_init_new_tty(int *masterfd, int *slavefd, char *sname);
 #ifdef __cplusplus
 }
 #endif
