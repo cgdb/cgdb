@@ -38,6 +38,8 @@
 #include "highlight.h"
 #include "sources.h"
 #include "cgdb.h"
+#include "tokenizer.h"
+#include "error.h"
 
 int highlight_tabstop = 8;
 
@@ -119,309 +121,92 @@ static char *c_extensions[] = { ".c", ".C", ".cc", ".cpp", ".cxx", ".h", ".hpp" 
 static char *ada_extensions[] = { ".adb", ".ads", ".ada", 
                                   ".ADB", ".ADS", ".ADA" };
 
-static char *c_types[] = { 
-    "auto", "bool", "char", "class", "const", "double", "float", 
-    "friend", "explicit", "extern", "enum", "inline", "int", "long", 
-    "mutable", "namespace", "register", "short", "signed", "static", 
-    "struct", "union", "unsigned", "virtual", "void", "volatile", "wchar_t"
-};
+static int highlight_node ( struct list_node *node, enum tokenizer_language_support l ) {
+	struct tokenizer *t = tokenizer_init ();
+	int ret;
+	struct string *ibuf = string_init ();
+	string_addchar ( ibuf, HL_CHAR );
+	string_addchar ( ibuf, SYN_TEXT );
 
-static char *c_keywords[] = {
-    "and", "and_eq", "asm", "bitand", "bitor", "break", "case", "catch", 
-    "compl", "const_cast", "continue", "default", "delete", "do", 
-    "dynamic_cast", "else", "export", "false", "for", "goto", "if", "new", 
-    "not", "not_eq", "operator", "or", "or_eq", "private", "protected", 
-    "public", "reinterpret_cast", "return", "sizeof", "static_cast", 
-    "switch", "template", "this", "throw", "true", "try", "typedef", 
-    "typeid", "typename", "using", "while", "xor", "xor_eq"
-};
+	/* Initialize */
+	node->buf.length = 0;
+	node->buf.tlines = NULL;
+	node->buf.max_width = 0;
 
-static char *c_separators = " \t\n\r+-/*(),^|&~=;:<>!{}%?\\[]";
-
-static char *ada_types[] = {
-    "array", "boolean", "character", "constant", "fixed", "float", 
-    "integer", "long_float", "long_long_float", "long_integer", 
-    "long_long_integer", "natural", "positive", "short_float", 
-    "short_integer", "short_short_integer", "string"
-};
-static char *ada_keywords[] = {
-    "abort", "abs", "abstract", "accept", "access", "aliased", "all", "and",
-    "at", "begin", "body", "case", "declare", "delay",
-    "delta", "digits", "do", "else", "elsif", "end", "entry", "exception", 
-    "exit", "for", "function", "generic", "goto", "if", "in", "is", "limited",
-    "loop", "mod", "new", "not", "null", "of", "or", "others", "out", "package",
-    "pragma", "private", "procedure", "protected", "raise", "range", "record",
-    "rem", "renames", "requeue", "return", "reverse", "select", "separate", 
-    "subtype", "tagged", "task", "terminate", "then", "type", "until", "use",
-    "when", "while", "with", "xor"
-};
-
-static char *ada_separators = " \t\n\r+-/*(),^|&~=;:<>!{}%?\\[]'";
-
-/* --------------- */
-/* Local Functions */
-/* --------------- */
-
-/* highlight_c:  Called by highlight() to highlight the given C/C++ file.
- * ------------
- *
- *   node:  The node containing the file buffer to highlight.
- */
-static void highlight_c(struct list_node *node)
-{
-    enum state_type { NORMAL, COMMENT, QUOTE1, QUOTE2 } state = NORMAL;
-    char new_line[MAX_LINE];
-    char *separators = c_separators;
-    char *line;
-    int length;
-    int i, j, pos;
-    int cur_color = 0;
-
-    /* Note:    This is a kind of ugly state machine for syntax highlighting.
-     *        Here's the idea.  Iterate through the file, one line at a time.
-     *        Traverse the line, one character at a time.  For comments and
-     *        quotes which can carry over to the next line, set a state so
-     *        that we remember this for the next line.
-     *          To set a color, we insert the HL_CHAR (an unprintable char)
-     *        into the new_line (our new copy of the line we're editing),
-     *        followed by the numeric from enum syntax_type (see highlight.h).
-     *        When we finish with a line, blast the original line from the
-     *        buffer, and replace it with our new_line.
-     *          I may reimplement this more like a lexical analyzer in the
-     *        future.  It seems to work the way it is, but it just feels
-     *        awkward. */
-       
-    for (i = 0; i < node->buf.length; i++){
-        line = node->buf.tlines[i];
-        length = strlen(line);
-        pos = 0;
-        switch(state){
-            case NORMAL:
-                SET_COLOR(new_line, SYN_TEXT);
-                break;
-            case COMMENT:
-                SET_COLOR(new_line, SYN_COMMENT);
-                break;
-            case QUOTE1:
-            case QUOTE2:
-                SET_COLOR(new_line, SYN_LITERAL);
-                break;
-        }
-            
-        for (j = 0; j < length; j++){
-            switch(state){
-                case NORMAL:
-                    /* Check for comment start */
-                    if (line[j] == '/' && j+1 < length){
-                        if (line[j+1] == '/'){
-                            /* C++ style comment */
-                            SET_COLOR(new_line, SYN_COMMENT);
-                            strcpy(new_line+pos, line+j);
-                            pos += length - j;
-                            j = length;
-                            break;
-                        }
-                        if (line[j+1] == '*'){
-                            /* C style comment */
-                            state = COMMENT;
-                            SET_COLOR(new_line, SYN_COMMENT);
-                            new_line[pos++] = line[j];
-                            break;
-                        }
-                    }
-                    
-                    /* Check for quotes */
-                    if (line[j] == '\''){
-                        /* Single quote */
-                        state = QUOTE1;
-                        SET_COLOR(new_line, SYN_LITERAL);
-                    }
-                    if (line[j] == '"'){
-                        /* Double quote */
-                        state = QUOTE2;
-                        SET_COLOR(new_line, SYN_LITERAL);
-                    }
-
-                    /* Check for C/C++ keywords */
-                    if (j == 0 || issep(line[j-1])){
-                        int x;
-                        for (x = 0; x < sizeof(c_types)/sizeof(char *); x++){
-                            if (strncmp(line + j, 
-                                        c_types[x], 
-                                        strlen(c_types[x])) == 0
-                                && (j + strlen(c_types[x]) == length
-                                    || issep(line[j+strlen(c_types[x])])))
-                                SET_COLOR(new_line, SYN_TYPE);
-                        }
-                        for (x = 0; x < sizeof(c_keywords)/sizeof(char *); x++){
-                            if (strncmp(line + j,
-                                        c_keywords[x],
-                                        strlen(c_keywords[x])) == 0
-                                && (j + strlen(c_keywords[x]) == length
-                                    || issep(line[j+strlen(c_keywords[x])])))
-                                SET_COLOR(new_line, SYN_KEYWORD);
-                        }
-                    }
-
-                    /* Check for preprocessor directives */
-                    if (line[j] == '#')
-                        SET_COLOR(new_line, SYN_DIRECTIVE);
-
-                    /* Check for integer/numeric literals */
-                    if (j == 0 || issep(line[j-1])){
-                        if (isdigit(line[j]) || 
-                           (line[j] == '.' && j+1<length && isdigit(line[j+1])))
-                            SET_COLOR(new_line, SYN_LITERAL);
-                    }
-
-                    if (issep(line[j]) && cur_color != SYN_TEXT)
-                        SET_COLOR(new_line, SYN_TEXT);
-                    
-                    new_line[pos++] = line[j];
-                    break;
-                        
-                case COMMENT:
-                    new_line[pos++] = line[j];
-                    if (j > 0 && line[j-1] == '*' && line[j] == '/'){
-                        SET_COLOR(new_line, SYN_TEXT);
-                        state = NORMAL;
-                    }
-                    break;
-                    
-                case QUOTE1:
-                    new_line[pos++] = line[j];
-                    if (line[j] == '\'' && ((j > 0 && line[j-1] != '\\') ||
-                                            (j > 1 && line[j-2] == '\\'))){
-                        SET_COLOR(new_line, SYN_TEXT);
-                        state = NORMAL;
-                    }
-                    break;
-                        
-                case QUOTE2:
-                    new_line[pos++] = line[j];
-                    if (line[j] == '"' && ((j > 0 && line[j-1] != '\\') ||
-                                           (j > 1 && line[j-2] == '\\'))){
-                        SET_COLOR(new_line, SYN_TEXT);
-                        state = NORMAL;
-                    }
-                    break;
-            }
-        }
-
-        free(line);
-        new_line[pos] = 0;
-        node->buf.tlines[i] = strdup(new_line);
+	if ( tokenizer_set_file ( t, node->path, l ) == -1 ) {
+        if_print_message ("%s:%d tokenizer_set_file error", __FILE__, __LINE__);
+        return -1; 
     }
 
-}
+	while ( ( ret = tokenizer_get_token ( t ) ) > 0 ) {
+		enum tokenizer_type e = tokenizer_get_packet_type ( t );
+		/*if_print_message  ( "TOKEN(%d:%s)\n", e, tokenizer_get_printable_enum ( e ) );*/
 
-static void highlight_ada(struct list_node *node)
-{
-    enum state_type { NORMAL, QUOTE1, QUOTE2 } state = NORMAL;
-    char new_line[MAX_LINE];
-    char *separators = ada_separators;
-    char *line;
-    int length;
-    int i, j, pos;
-    int cur_color = 0;
+		switch ( e ) {
+			case TOKENIZER_KEYWORD:
+				string_addchar ( ibuf, HL_CHAR );
+				string_addchar ( ibuf, SYN_KEYWORD );
+				string_add ( ibuf, tokenizer_get_data ( t ) );
+				string_addchar ( ibuf, HL_CHAR );
+				string_addchar ( ibuf, SYN_TEXT );
+				break;
+			case TOKENIZER_TYPE:
+				string_addchar ( ibuf, HL_CHAR );
+				string_addchar ( ibuf, SYN_TYPE );
+				string_add ( ibuf, tokenizer_get_data ( t ) );
+				string_addchar ( ibuf, HL_CHAR );
+				string_addchar ( ibuf, SYN_TEXT );
+				break;
+			case TOKENIZER_LITERAL:
+				string_addchar ( ibuf, HL_CHAR );
+				string_addchar ( ibuf, SYN_LITERAL );
+				string_add ( ibuf, tokenizer_get_data ( t ) );
+				string_addchar ( ibuf, HL_CHAR );
+				string_addchar ( ibuf, SYN_TEXT );
+				break;
+			case TOKENIZER_NUMBER:
+				string_add ( ibuf, tokenizer_get_data ( t ) );
+				break;
+			case TOKENIZER_COMMENT:
+				string_addchar ( ibuf, HL_CHAR );
+				string_addchar ( ibuf, SYN_COMMENT );
+				string_add ( ibuf, tokenizer_get_data ( t ) );
+				string_addchar ( ibuf, HL_CHAR );
+				string_addchar ( ibuf, SYN_TEXT );
+				break;
+			case TOKENIZER_DIRECTIVE:
+				string_addchar ( ibuf, HL_CHAR );
+				string_addchar ( ibuf, SYN_DIRECTIVE );
+				string_add ( ibuf, tokenizer_get_data ( t ) );
+				string_addchar ( ibuf, HL_CHAR );
+				string_addchar ( ibuf, SYN_TEXT );
+				break;
+			case TOKENIZER_TEXT:
+				string_add ( ibuf, tokenizer_get_data ( t ) );
+				break;
+			case TOKENIZER_NEWLINE:
+				node->buf.length++;
+				node->buf.tlines = realloc ( node->buf.tlines, sizeof ( char *) * node->buf.length );
+				node->buf.tlines[node->buf.length-1] = strdup ( string_get ( ibuf ) );
 
-    for (i = 0; i < node->buf.length; i++){
-        line = node->buf.tlines[i];
-        length = strlen(line);
-        pos = 0;
-        switch(state){
-            case NORMAL:
-                SET_COLOR(new_line, SYN_TEXT);
-                break;
-            case QUOTE1:
-            case QUOTE2:
-                SET_COLOR(new_line, SYN_LITERAL);
-                break;
-        }
-            
-        for (j = 0; j < length; j++){
-            switch(state){
-                case NORMAL:
-                    /* Check for comment start */
-                    if (line[j] == '-' && j+1 < length && line[j+1] == '-'){
-                        /* Comment */
-                        SET_COLOR(new_line, SYN_COMMENT);
-                        strcpy(new_line+pos, line+j);
-                        pos += length - j;
-                        j = length;
-                        break;
-                    }
-                    
-                    /* Check for quotes */
-                    if (line[j] == '\'' && j + 2 < length && line[j+2] == '\''){
-                        /* Single quote */
-                        state = QUOTE1;
-                        SET_COLOR(new_line, SYN_LITERAL);
-                    }
-                    if (line[j] == '"'){
-                        /* Double quote */
-                        state = QUOTE2;
-                        SET_COLOR(new_line, SYN_LITERAL);
-                    }
-
-                    /* Check for Ada keywords */
-                    if (j == 0 || issep(line[j-1])){
-                        int x;
-                        for (x = 0; x < sizeof(ada_types)/sizeof(char *); x++){
-                            if (strncasecmp(line + j, 
-                                        ada_types[x], 
-                                        strlen(ada_types[x])) == 0
-                                && (j + strlen(ada_types[x]) == length
-                                || issep(line[j+strlen(ada_types[x])])))
-                                SET_COLOR(new_line, SYN_TYPE);
-                        }
-                        for (x = 0; x<sizeof(ada_keywords)/sizeof(char *); x++){
-                            if (strncasecmp(line + j,
-                                        ada_keywords[x],
-                                        strlen(ada_keywords[x])) == 0
-                                && (j + strlen(ada_keywords[x]) == length
-                                   || issep(line[j+strlen(ada_keywords[x])])))
-                                SET_COLOR(new_line, SYN_KEYWORD);
-                        }
-                    }
-
-                    /* Check for integer/numeric literals */
-                    if (j == 0 || issep(line[j-1])){
-                        if (isdigit(line[j]) || 
-                           (line[j] == '.' && j+1<length && isdigit(line[j+1])))
-                            SET_COLOR(new_line, SYN_LITERAL);
-                    }
-
-                    if (issep(line[j]) && cur_color != SYN_TEXT)
-                        SET_COLOR(new_line, SYN_TEXT);
-                    
-                    new_line[pos++] = line[j];
-                    break;
-                        
-                case QUOTE1:
-                    new_line[pos++] = line[j];
-                    if (line[j] == '\''){
-                        SET_COLOR(new_line, SYN_TEXT);
-                        state = NORMAL;
-                    }
-                    break;
-                        
-                case QUOTE2:
-                    new_line[pos++] = line[j];
-                    if (line[j] == '"'){
-                        SET_COLOR(new_line, SYN_TEXT);
-                        state = NORMAL;
-                    }
-                    break;
-            }
-        }
-
-        free(line);
-        new_line[pos] = 0;
-        node->buf.tlines[i] = strdup(new_line);
-    }
+				if ( string_length ( ibuf ) > node->buf.max_width )
+					node->buf.max_width = string_length ( ibuf );
 
 
+				string_clear ( ibuf );
+				string_addchar ( ibuf, HL_CHAR );
+				string_addchar ( ibuf, SYN_TEXT );
+				break;
+			case TOKENIZER_ERROR:
+				string_add ( ibuf, tokenizer_get_data ( t ) );
+				break;
+			default:
+				return -1;
+				break;
+		}
+	}
+
+	return 0;
 }
 
 /* --------- */
@@ -433,24 +218,21 @@ static void highlight_ada(struct list_node *node)
 void highlight(struct list_node *node)
 {
     char *extension = strrchr(node->path, '.');
+	enum tokenizer_language_support l = TOKENIZER_LANGUAGE_ERROR;
     int i;
 
     if ( !extension )
         return;
 
-    for (i = 0; i < sizeof(c_extensions) / sizeof(char *); i++){
-        if (strcmp(extension, c_extensions[i]) == 0){
-            highlight_c(node);
-            return;
-        }
-    }
+    for (i = 0; i < sizeof(c_extensions) / sizeof(char *); i++)
+        if (strcmp(extension, c_extensions[i]) == 0)
+			l = TOKENIZER_LANGUAGE_C;
 
-    for (i = 0; i < sizeof(ada_extensions) / sizeof(char *); i++){
-        if (strcmp(extension, ada_extensions[i]) == 0){
-            highlight_ada(node);
-            return;
-        }
-    }
+    for (i = 0; i < sizeof(ada_extensions) / sizeof(char *); i++)
+        if (strcmp(extension, ada_extensions[i]) == 0)
+			l = TOKENIZER_LANGUAGE_ADA;
+	
+	highlight_node ( node, l );
 }
 
 /* highlight_line_segment: Creates a new line that is hightlighted.
@@ -485,7 +267,7 @@ static char *highlight_line_segment(const char *orig, int start, int end) {
         return NULL;
 
 #ifdef HIGHLIGHT_DEBUG
-    /*
+	/*
     for ( j = 0; j < strlen(orig); j++ ) {
        char temp[100];
        sprintf(temp, "(%d:%c)", orig[j], orig[j]);
@@ -493,7 +275,7 @@ static char *highlight_line_segment(const char *orig, int start, int end) {
     }
     scr_add(gdb_win, "\r\n");
     scr_refresh(gdb_win, 1);
-    */
+	*/
 #endif
     
     /* This traverses the input line. It creates a new line with the section

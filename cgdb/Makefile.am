@@ -1,2 +1,2 @@
-SUBDIRS = src
+SUBDIRS = tokenizer src
 EXTRA_DIST = include

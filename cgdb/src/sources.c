@@ -216,29 +216,28 @@ static int load_file(struct list_node *node)
     node->buf.breakpts  = NULL;
     node->buf.cur_line  = NULL;
     node->buf.max_width = 0;
-
-    while (!feof(file)){
-        if (fgets(line, MAX_LINE, file)){
-            if (line[strlen(line)-1] == '\n')
-                line[strlen(line)-1] = 0;
-            if (line[strlen(line)-1] == '\r')
-                line[strlen(line)-1] = 0;
-            if (strlen(line) > node->buf.max_width)
-                node->buf.max_width = strlen(line);
-
-            /* Inefficient - Reallocates memory at each line */
-            node->buf.length++;
-            node->buf.tlines   = realloc(node->buf.tlines, 
-                                         sizeof(char *) * node->buf.length);
-            node->buf.tlines[node->buf.length-1] = strdup(line);
-        }
-    }
-    fclose(file);
     
-    /* Allocate the breakpoints array */
-    node->buf.breakpts = malloc(sizeof(char) * node->buf.length);
-    for (i = 0; i < node->buf.length; i++)
-       node->buf.breakpts[i] = 0;
+    if (has_colors())
+        highlight(node);
+	else {
+		while (!feof(file)){
+			if (fgets(line, MAX_LINE, file)){
+				if (line[strlen(line)-1] == '\n')
+					line[strlen(line)-1] = 0;
+				if (line[strlen(line)-1] == '\r')
+					line[strlen(line)-1] = 0;
+				if (strlen(line) > node->buf.max_width)
+					node->buf.max_width = strlen(line);
+
+				/* Inefficient - Reallocates memory at each line */
+				node->buf.length++;
+				node->buf.tlines   = realloc(node->buf.tlines, 
+											 sizeof(char *) * node->buf.length);
+				node->buf.tlines[node->buf.length-1] = strdup(line);
+			}
+		}
+		fclose(file);
+	}
 
     /* Copy into original buffer for regex capabities */
     node->orig_buf.length = node->buf.length;
@@ -249,8 +248,10 @@ static int load_file(struct list_node *node)
     for ( i = 0; i < node->buf.length; i++)
         node->orig_buf.tlines[i] = xstrdup(node->buf.tlines[i]);
 
-    if (has_colors())
-        highlight(node);
+    /* Allocate the breakpoints array */
+    node->buf.breakpts = malloc(sizeof(char) * node->buf.length);
+    for (i = 0; i < node->buf.length; i++)
+       node->buf.breakpts[i] = 0;
 
 	/* Initialize the coverage */
 	node->covered_lines =  (int *)xmalloc ( sizeof ( int ) * node->buf.length);
