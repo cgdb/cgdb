@@ -108,7 +108,7 @@ Quick Reference
     :set autosourcereload -> If this is on, CGDB will automatically reload a 
                        source file if it has changed since CGDB has opened it.
                        If it is off, the file will never be reloaded, until you
-                       start CGDB again. The default is on.
+                       start CGDB again. The default is off.
                        (:set asr)
                        This feature is useful when you are debugging a program,
                        then you modify a source file, recompile, and 'r' in 

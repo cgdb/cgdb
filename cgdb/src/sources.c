@@ -52,7 +52,7 @@
 #include "sys_util.h"
 
 int sources_syntax_on = 1;
-int auto_source_reload = 1;
+int auto_source_reload = 0;
 
 /* --------------- */
 /* Local Functions */

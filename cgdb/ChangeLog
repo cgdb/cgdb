@@ -1,6 +1,11 @@
 03/31/2005 Bob Rossi <bob@brasko.net>
 
     * helptext.h: Updated the README file.
+	* sources.c (auto_source_reload): Change default to be off.
+
+03/31/2005 Bob Rossi <bob@brasko.net>
+
+    * helptext.h: Updated the README file.
 	* cgdbrc.c (COMMANDS): Remove source_reload and add edit
 	* sources.c (load_file): Init more data in node->orig_buf
 

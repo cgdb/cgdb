@@ -1,4 +1,8 @@
 03/31/2005 Bob Rossi <bob@brasko.net>
+	* NEWS: Change :autosourcereload default to off.
+	* README (Colon commands): Ditto.
+
+03/31/2005 Bob Rossi <bob@brasko.net>
 
 	* NEWS: Change :source_reload to :edit
 	* README (Colon commands): Change :source_reload to :edit

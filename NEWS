@@ -20,9 +20,9 @@ CVS
    * Removed depricated libinput from the various subdirectory. It has been
    replaced by libkui.
 
-   * Added 'set asr' or autosourcereload option to CGDB. It is on by default.
+   * Added 'set asr' or autosourcereload option to CGDB. It is off by default.
    It is capable of reloading a source file when CGDB detects that a file has
-   been modified. To turn this feature off do ':set noasr'.
+   been modified. To turn this feature on do ':set asr'.
 
    * The :edit [:e] colon command has been implemented. It forces CGDB to
    reload the current file in the source viewer.
