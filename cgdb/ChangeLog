@@ -1,3 +1,6 @@
+06/14/2003 Mike Mueller <mmueller@cs.uri.edu>
+    * highlight.c: Fixed bug in left/right scrolling when tab characters present
+
 06/14/2003 Peter Kovacs <peter@kovax.org>
 
     * commands.c: Added support for parsing set foo=bar type variables.  Added
