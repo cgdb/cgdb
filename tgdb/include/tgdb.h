@@ -15,6 +15,11 @@ extern "C" {
 #include "terminal.h"
 #include "macro.h"
 
+/* tgdb_init: Allows libtgdb to configure itself.
+ * Returns: 0 on success or -1 on error.
+ * If this function returns -1 then it can not correctly be used 
+ * to interface with gdb.
+ */
 int tgdb_init(void);
 
 /* tgdb_start: This starts up gdb and returns a fd to gdb's output and to
