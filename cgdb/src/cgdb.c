@@ -391,7 +391,7 @@ static void process_commands(struct queue *q)
              * none. */
             case TGDB_SOURCES_DENIED:
                 if_display_message("Error:", 0,  
-                       " No sources available! Was program compiled with debug?");
+                       " No sources available! Was the program compiled with debug?");
                 break;
 
             /* This is the absolute path to the last file the user requested */

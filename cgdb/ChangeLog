@@ -1,5 +1,9 @@
 09/03/2003 Bob Rossi <bob@brasko.net>
 
+   * cgdb.c: process_commands, TGDB_SOURCES_DENIED case, changed comment.
+
+09/03/2003 Bob Rossi <bob@brasko.net>
+
    * cgdb.c: struct tgdb *tgdb, adding global instance of tgdb library.
    start_gdb, update tgdb_initialize to use context for new interface.
    send_key, update tgdb_send_input to use context and new name.
