@@ -79,11 +79,14 @@ dnl Checks for header files.
 AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
 
-dnl determine if terminal headers are available for cgdb
-AC_CHECK_HEADERS(termios.h sys/select.h)
+dnl determine if terminal headers are available for tgdb
+AC_CHECK_HEADERS(pty.h sys/stropts.h termios.h sys/select.h)
 
-dnl determine other headers for cgdb, Error if they do not exist
-AC_CHECK_HEADERS(errno.h signal.h \
+dnl headers for pseudo.c -> don't know what these are for, I didn't write lib.
+AC_CHECK_HEADERS(util.h libutil.h)
+
+dnl determine other headers for tgdb, Error if they do not exist
+AC_CHECK_HEADERS(errno.h fcntl.h grp.h pwd.h signal.h \
 stdarg.h stdio.h stdlib.h string.h sys/ioctl.h \
 sys/stat.h sys/time.h sys/types.h unistd.h,,AC_MSG_ERROR)
 
@@ -111,5 +114,4 @@ AC_TYPE_SIGNAL
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(mkdir putenv select strdup strerror)
 
-AC_CONFIG_SUBDIRS(tgdb)
 AC_OUTPUT(Makefile src/Makefile)
