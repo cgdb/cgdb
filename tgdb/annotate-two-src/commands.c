@@ -320,7 +320,7 @@ int commands_run_command(int fd, struct command *com){
         case COMMANDS_INFO_SOURCES: 
             return commands_run_info_sources(fd);                   break;
         case COMMANDS_INFO_LIST:
-            return commands_run_list(NULL, fd);                     break;
+            return commands_run_list(com->data, fd);                break;
         case COMMANDS_INFO_SOURCE:                                  break;
         case COMMANDS_INFO_BREAKPOINTS:
             return commands_run_info_breakpoints(fd);               break;
