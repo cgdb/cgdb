@@ -105,3 +105,38 @@ void gdbmi_error (const char *s) {
 		printf ( "before (%s)\n", gdbmi_text );
 	}
 }
+
+void* append_to_list ( void *list, void*item ) {
+	void *cur = list;
+	void *prev = NULL;
+	int size = 0;
+
+	if (!item)
+		return NULL;
+
+	while ( cur ) {
+		prev = cur;
+		cur++;
+		size++;
+	}
+
+	/* size is now the number of elements in the list 
+	 * Add one for the new item, also add one for the null terminating value
+	 */
+	list = realloc ( list, sizeof ( void*)*(size+2) );
+
+	/* list was empty */
+	if ( prev == NULL ) {
+		list = item;
+		list++;
+		list = NULL;
+	} else {
+		prev++; /* Get to the new item*/
+		prev = item;
+
+		prev++;
+		prev = NULL;
+	}
+
+	return list;
+}

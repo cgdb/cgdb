@@ -40,32 +40,27 @@ transformations
 	value-list-prime -> value-list | epsilon
 	value-list       -> value-list "," value | "," value 
 
-output 					-> oob-record-list opt-record "(gdb)" nl
-oob-record-list 		-> oob-record-list oob-record | epsilon
-opt-result-record       -> result-record | epsilon
-result-record 			-> opt-token "^" result-class result-list-prime nl
-oob-record 				-> async-record | stream-record
-async-record 			-> exec-async-output | status-async-output | notify-async-output
-exec-async-output 		-> opt-token "*" async-output
-status-async-output 	-> opt-token "+" async-output
-notify-async-output 	-> opt-token "=" async-output
-async-output 			-> async-class result-list-prime nl
-result-class 			-> "done" | "running" | "connected" | "error" | "exit"
-async-class 			-> "stopped" 
-result-list-prime 		-> result-list | epsilon
-result-list       		-> result-list "," result | "," result
+output 					-> oob_record_list opt_result_record "(gdb)" nl
+oob_record_list 		-> oob_record_list oob_record nl | epsilon
+opt_result_record       -> result_record nl | epsilon
+result_record 			-> opt_token "^" result_class result_list_prime
+oob_record 				-> async_record | stream_record
+async_record 			-> opt_token async_record_class async_output
+async_record_class      -> "*" | "+" | "="
+async_output 			-> async_class result_list_prime
+result_class 			-> "done" | "running" | "connected" | "error" | "exit"
+async_class 			-> "stopped" 
+result_list_prime 		-> result_list | epsilon
+result_list       		-> result_list "," result | "," result
 result 					-> variable "=" value
 variable 				-> string
-value-list-prime        -> value-list | epsilon
-value-list              -> value-list "," value | "," value 
-value 					-> const | tuple | list
-const 					-> c-string
-tuple 					-> "{}" | "{" result result-list-prime "}"
-list 					-> "[]" | "[" value value-list-prime "]" | "[" result result-list-prime "]"
-stream-record 			-> console-stream-output | target-stream-output | log-stream-output
-console-stream-output 	-> "~" c-string
-target-stream-output 	-> "@" c-string
-log-stream-output 		-> "&" c-string
-nl 						-> CR | CR-LF
-opt-token               -> token | epsilon
+value_list_prime        -> value_list | epsilon
+value_list              -> value_list "," value | "," value 
+value 					-> c_string | tuple | list
+tuple 					-> "{}" | "{" result result_list_prime "}"
+list 					-> "[]" | "[" value value_list_prime "]" | "[" result result_list_prime "]"
+stream_record 			-> stream_record_class c_string
+stream_record_class     -> "~" | "@" | "&"
+nl 						-> CR | CR_LF
+opt_token               -> token | epsilon
 token 					-> any sequence of digits.
