@@ -18,7 +18,7 @@ input_driver_DEPENDENCIES = ../../util/src libinput.a
 input_driver_CFLAGS = $(AM_CFLAGS)
 
 # This program provides tgdb with a readline interface
-getch_driver_LDFLAGS = -L ../../util/src
+getch_driver_LDFLAGS = -L../../util/src
 getch_driver_LDADD = -lutil
 getch_driver_SOURCES = getch_driver.c
 getch_driver_DEPENDENCIES = ../../util/src
