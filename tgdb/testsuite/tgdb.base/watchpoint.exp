@@ -1,0 +1,49 @@
+# Load the tgdb library
+load_lib tgdb.exp 	
+
+# Don't wait for more than 10 seconds
+set timeout 10 	
+
+# Some basic constants
+set tgdb_dir "tgdb.base"
+set source_file_name "basic"
+set file "$tgdb_dir/$source_file_name"
+set source_file "$source_file_name.c"
+
+# Load the program to test into gdb
+set test "load file"
+if [gdb_file_cmd ${file}] then {
+	exit 1
+}
+
+# Set a breakpoint at main and run
+set function "main"
+if [gdb_breakpoint ${function}] then {
+	exit 1
+}
+
+# Run the program
+set test "run"
+send "r\n"
+expect {
+	-re "Starting program.*$source_file_name.*$tgdb_prompt" { pass "$test" }
+
+	-re ".*No executable file specified.*$tgdb_prompt" { fail "$test" }
+	timeout {
+		fail "timeout $test"
+	}
+}
+
+# set a watchpoint on a scalar, probably a hardware watchpoint
+set variable "argc"
+if [gdb_watchpoint ${variable}] then {
+	fail "hardware watchpoint"
+}
+pass "hardware watchpoint"
+
+# set a watchpoint on an aggregate, probably a software watchpoint
+set variable "software_watchpoint"
+if [gdb_watchpoint ${variable}] then {
+	fail "software watchpoint"
+}
+pass "software watchpoint"

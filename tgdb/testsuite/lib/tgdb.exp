@@ -140,6 +140,26 @@ proc delete_breakpoints {} {
     }
 }
 
+proc gdb_watchpoint { variable } {
+    global tgdb_prompt
+
+    send "watch $variable\n"
+
+    # The first two regexps are what we get with -g, the third is without -g.
+    expect {
+		-re "Hardware watchpoint \[0-9\]*: .*$tgdb_prompt" { return 0}
+		-re "Watchpoint \[0-9\]*: .*$tgdb_prompt" { return 0}
+		-re "No symbol .* in current context\..*$tgdb_prompt" { fail "setting watchpoing at $variable" ; return 1 }
+		-re "Attempt to use a type name as an expression.*$tgdb_prompt" { fail "setting watchpoing at $variable" ; return 1 }
+		-re "$tgdb_prompt" { fail "setting watchpoing at $variable" ; return 1 }
+		timeout { 
+			fail "setting watchpoint at $variable (timeout)" ; 
+			return 1 
+		}
+    }
+    return 1;
+}
+
 #proc gdb_unload {} {
 #    global verbose
 #    global TGDB_PROMPT

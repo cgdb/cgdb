@@ -1,6 +1,11 @@
 #include <stdio.h>
 #include <unistd.h>
 
+struct global_software_watchpoint {
+	int i;
+	char string[1000];
+} software_watchpoint;
+
 int two(int a){
    return a*a;
 }
