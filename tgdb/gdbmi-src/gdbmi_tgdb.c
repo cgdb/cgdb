@@ -10,6 +10,7 @@
 
 #include "gdbmi_tgdb.h"
 #include "gdbmi_init.h"
+#include "gdbmi_parse.h"
 #include "tgdb_util.h"
 #include "util.h"
 #include "pseudo.h"
@@ -93,7 +94,7 @@ size_t gdbmi_tgdb_recv(char *buf, size_t n, struct Command ***com){
    /* 2. At this point local_buf has everything new from this read.
     * Now, the data must be parsed.
     */
-   buf_size = gdbmi_handle_data(local_buf, size, buf, n, com);
+   buf_size = gdbmi_parse(local_buf, size, buf, n, com);
 
    /* 3. Run the users command */
    /* tgdb_run_users_buffered_commands(); */

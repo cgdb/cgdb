@@ -12,7 +12,6 @@ extern "C" {
 #endif 
 
 #include "types.h"
-#include "terminal.h"
 
 /* tgdb_init: Allows libtgdb to configure itself.
  * Returns: 0 on success or -1 on error.
