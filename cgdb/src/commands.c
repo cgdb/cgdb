@@ -81,6 +81,8 @@ static int command_search_next( void );
 static int command_start_tty( void );
 static int command_toggle_tty( void );
 
+static int command_parse_syntax( void );
+
 typedef int (*action_t)(void);
 static struct commands
 {
@@ -103,6 +105,7 @@ static struct commands
     /* search_next */ { "search_next", command_search_next },
     /* start_tty   */ { "start_tty",   command_start_tty },
     /* step        */ { "step",        command_do_step },
+    /* syntax      */ { "syntax",      command_parse_syntax },
     /* toggle_tty  */ { "toggle_tty",  command_toggle_tty },
     /* tty         */ { "tty",         command_focus_tty },
 };
@@ -185,12 +188,13 @@ int command_set_syntax_type ( const char *value )
 {
 	enum tokenizer_language_support l = TOKENIZER_LANGUAGE_UNKNOWN;
 
-	if( strcasecmp( value, "c" ) == 0 )
+	if( strcasecmp( value, "c" ) == 0 ) {
 		l = TOKENIZER_LANGUAGE_C;
-	else if( strcasecmp( value, "ada" ) == 0 )
+	} else if( strcasecmp( value, "ada" ) == 0 ) {
 		l = TOKENIZER_LANGUAGE_ADA;
-	else if( strcasecmp( value, "off" ) == 0 )
+	} else if( strcasecmp( value, "off" ) == 0 ) {
 		l = TOKENIZER_LANGUAGE_UNKNOWN;
+	}
 	
 	if_highlight_sviewer ( l );
 
@@ -289,6 +293,43 @@ int command_toggle_tty( void )
 {
     if_tty_toggle();
     return 0;
+}
+
+int command_parse_syntax( void )
+{
+  /* This is something like: 
+     :syntax
+     :syntax on
+     :syntax off
+  */
+
+  int rv = 1;
+  switch( (rv = yylex()) ) {
+  case EOL: {
+    /* TODO: Print out syntax info (like vim?) */
+  } break;
+  case BOOLEAN: 
+  case IDENTIFIER: {
+    const char *value = get_token();
+    if( strcasecmp( value, "on" ) == 0 ||
+	strcasecmp( value, "yes") == 0 )
+    {
+      extern int sources_syntax_on;
+      sources_syntax_on = 1;
+    } else if ( strcasecmp( value, "no" ) == 0 ||
+		strcasecmp( value, "off") == 0 ) {
+      extern int sources_syntax_on;
+      if_highlight_sviewer ( TOKENIZER_LANGUAGE_UNKNOWN ); // force window to redraw properly
+      sources_syntax_on = 0;
+    }
+
+    if_draw(); 
+  } break;
+  default:
+    break;
+  }
+
+  return 0;
 }
 
 int command_parse_set( void )
