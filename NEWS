@@ -5,6 +5,6 @@ cgdb-0.3.2
 	to the second it used to take. Believe me, 1 second to load a file 
 	can get frustrating when you wait enough times. :)
 
-	* CGDB now reads $HOME/.cgdb/cgdbrc, this is usefull for automating
+	* CGDB now reads $HOME/.cgdb/cgdbrc, this is useful for automating
 	any commands the user would normally type into the status bar.
-	This is a *great* first attemt at making cgdb configurable.
+	This is a *great* first attempt at making cgdb configurable.
