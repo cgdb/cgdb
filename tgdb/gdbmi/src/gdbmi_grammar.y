@@ -106,6 +106,7 @@ output: opt_oob_record_list opt_result_record OPEN_PAREN variable CLOSED_PAREN N
 		printf ( "Expected 'gdb'\n" );
 	} else
 		printf ("VALID\n" ); 
+	free ( $4 );
 } ;
 
 opt_oob_record_list: {

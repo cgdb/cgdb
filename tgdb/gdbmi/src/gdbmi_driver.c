@@ -76,19 +76,26 @@ int main ( int argc, char **argv ) {
 		usage( argv[0] );	
 
 	/* Initialize data */
+
 	gdbmi_in = fopen ( argv[1], "r" );
 
 	if ( !gdbmi_in ) {
-        fprintf ( stderr, "%s:%d gdbmi_lexer error", __FILE__, __LINE__ );
-        return -1;
-    }
+		fprintf ( stderr, "%s:%d gdbmi_lexer error", __FILE__, __LINE__ );
+		return -1;
+	}
 
-//	if ( instrument_lexer () == -1 )
-//		return -1;
+	//	if ( instrument_lexer () == -1 )
+	//		return -1;
 
 	gdbmi_parse ();
-
 	print_output ( tree );
+
+	if ( destroy_output ( tree ) == -1 ) {
+		fprintf ( stderr, "%s:%d free failed", __FILE__, __LINE__ );
+		return -1;
+	}
+
+	fclose ( gdbmi_in );
 
 	return 0;
 }

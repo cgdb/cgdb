@@ -40,7 +40,22 @@ output_ptr create_output ( void ) {
 	return calloc ( 1, sizeof ( struct output ) );
 }
 
-int destory_output ( output_ptr param ) {
+int destroy_output ( output_ptr param ) {
+	if ( !param )
+		return 0;
+
+	if ( destroy_oob_record ( param->oob_record ) == -1 )
+		return -1;
+	param->oob_record = NULL;
+
+	if ( destroy_result_record ( param->result_record ) == -1 )
+		return -1;
+	param->result_record = NULL;
+
+	if ( destroy_output ( param->next ) == -1 )
+		return -1;
+	param->next = NULL;
+	
 	free ( param );
 	param = NULL;
 	return 0;
@@ -88,6 +103,13 @@ result_record_ptr create_result_record ( void ) {
 }
 
 int destroy_result_record ( result_record_ptr param ) {
+	if ( !param )
+		return 0;
+
+	if ( destroy_result ( param->result ) == -1 )
+		return -1;
+	param->result = NULL;
+
 	free ( param );
 	param = NULL;
 	return 0;
@@ -120,6 +142,22 @@ result_ptr create_result ( void ) {
 }
 
 int destroy_result ( result_ptr param ) {
+	if ( !param )
+		return 0;
+
+	if ( param->variable ) {
+		free ( param->variable );
+		param->variable = NULL;
+	}
+
+	if ( destroy_value ( param->value ) == -1 )
+		return -1;
+	param->value = NULL;
+	
+	if ( destroy_result ( param->next ) == -1 )
+		return -1;
+	param->next = NULL;
+
 	free ( param );
 	param = NULL;
 	return 0;
@@ -180,6 +218,25 @@ oob_record_ptr create_oob_record ( void ) {
 }
 
 int destroy_oob_record ( oob_record_ptr param ) {
+	if ( !param )
+		return 0;
+
+	if ( param->record == GDBMI_ASYNC ) {
+		if ( destroy_async_record ( param->variant.async_record ) == -1 )
+			return -1;
+		param->variant.async_record = NULL;
+	} else if ( param->record == GDBMI_STREAM ) {
+		if ( destroy_stream_record ( param->variant.stream_record ) == -1 )
+			return -1;
+		param->variant.stream_record = NULL;
+	} else {
+		return -1;
+	}
+
+	if ( destroy_oob_record ( param->next ) == -1 )
+		return -1;
+	param->next = NULL;
+
 	free ( param );
 	param = NULL;
 	return 0;
@@ -270,6 +327,13 @@ async_record_ptr create_async_record ( void ) {
 }
 
 int destroy_async_record ( async_record_ptr param ) {
+	if ( !param ) 
+		return 0;
+
+	if ( destroy_result ( param->result ) == -1 )
+		return -1;
+	param->result = NULL;
+
 	free ( param );
 	param = NULL;
 	return 0;
@@ -336,6 +400,29 @@ value_ptr create_value ( void ) {
 }
 
 int destroy_value ( value_ptr param ) {
+	if ( !param )
+		return 0;
+
+	if ( param->value_kind == GDBMI_CSTRING ) {
+		if ( param->variant.cstring ) {
+			free ( param->variant.cstring );
+			param->variant.cstring = NULL;
+		}
+	} else if ( param->value_kind == GDBMI_TUPLE ) {
+		if ( destroy_tuple ( param->variant.tuple ) == -1 )
+			return -1;
+		param->variant.tuple = NULL;
+	} else if ( param->value_kind == GDBMI_LIST ) {
+		if ( destroy_list ( param->variant.list ) == -1 )
+			return -1;
+		param->variant.list = NULL;
+	} else
+		return -1;
+
+	if ( destroy_value ( param->next ) == -1 )
+		return -1;
+	param->next = NULL;
+
 	free ( param );
 	param = NULL;
 	return 0;
@@ -407,6 +494,17 @@ tuple_ptr create_tuple ( void ) {
 }
 
 int destroy_tuple ( tuple_ptr param ) {
+	if ( !param )
+		return 0;
+
+	if ( destroy_result ( param->result ) == -1 )
+		return -1;
+	param->result = NULL;
+
+	if ( destroy_tuple ( param->next ) == -1 )
+		return -1;
+	param->next = NULL;
+
 	free ( param );
 	param = NULL;
 	return 0;
@@ -433,6 +531,24 @@ list_ptr create_list ( void ) {
 }
 
 int destroy_list ( list_ptr param ) {
+	if ( !param )
+		return 0;
+
+	if ( param->list_kind == GDBMI_VALUE ) {
+		if ( destroy_value ( param->variant.value ) == -1 )
+			return -1;
+		param->variant.value = NULL;
+	} else if ( param->list_kind == GDBMI_RESULT ) {
+		if ( destroy_result ( param->variant.result ) == -1 )
+			return -1;
+		param->variant.result = NULL;
+	} else
+		return -1;
+
+	if ( destroy_list ( param->next ) == -1 )
+		return -1;
+	param->next = NULL;
+
 	free ( param );
 	param = NULL;
 	return 0;
@@ -487,6 +603,14 @@ stream_record_ptr create_stream_record ( void ) {
 }
 
 int destroy_stream_record ( stream_record_ptr param ) {
+	if ( !param )
+		return 0;
+
+	if ( param->cstring ) {
+		free ( param->cstring );
+		param->cstring = NULL;
+	}
+
 	free ( param );
 	param = NULL;
 	return 0;

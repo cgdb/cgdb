@@ -170,7 +170,7 @@ struct async_record {
  */
 struct result {
 	/** Key */
-	const char *variable;
+	char *variable;
 	/** Value */
 	value_ptr value;
 	/** Pointer to the next result */
@@ -187,7 +187,7 @@ struct value {
 	enum value_kind value_kind;
 
 	union {
-		const char *cstring;
+		char *cstring;
 		tuple_ptr tuple;
 		list_ptr list;
 	} variant;
@@ -219,7 +219,7 @@ struct list {
 
 struct stream_record {
 	enum stream_record_kind stream_record;
-	const char *cstring;
+	char *cstring;
 };
 
 /* Print result class */
@@ -227,7 +227,7 @@ int print_result_class ( enum result_class param );
 
 /* Creating, Destroying and printing output */
 output_ptr create_output ( void );
-int destory_output ( output_ptr param );
+int destroy_output ( output_ptr param );
 output_ptr append_output ( output_ptr list, output_ptr item );
 int print_output ( output_ptr param );
 
