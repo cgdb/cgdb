@@ -27,17 +27,17 @@ extern char *tgoto();
 #define MAXLINE 4096
 #define MAX_SEQ_LIST_SIZE 8
 
-/* This contains all of the ESC sequences this unit cares about. 
+/** 
+ * This contains all of the ESC sequences this unit cares about. 
  * It contains the correct information to get esc sequences out of both
  * termcap and terminfo.
- *
- * tname        - The termcap capability name
- * tiname       - The terminfo capability name
- * cgdb_key_code- Human readable description about the capability name
  */
 struct tlist {
+	/// the termcap capability name
     char *tname;
+	/// the terminfo capability name
     char *tiname;
+	/// the ascii representation of this key
     char *cgdb_key_code;
 } seqlist[] = {
   { "@7", "kend",   "<End>" },
@@ -324,9 +324,21 @@ struct kui_map_set *kui_term_get_terminal_mappings ( void ) {
 	return map;
 }
 
+/**
+ * This is the main data structure in determining the string representation
+ * of a terminal key sequence, or an unprintable char.
+ *
+ * With the proper functions built on top of this data structure, the user
+ * should be able to get the string representation from the CGDB_KEY and
+ * vice versa.
+ */
 struct cgdb_key_data {
+	/// This is the "key" that can be converted to text.
 	enum cgdb_key key;
+	/// This is the text value associated with the key
 	const char *keycode;
+	/// This is here purely for debugging purposes, it is used to print out the key
+	/// in human readable form.
 	const char *key_as_string;
 } cgdb_keys[CGDB_KEY_ERROR-CGDB_KEY_ESC+1] = {
 	{

@@ -279,6 +279,15 @@ typedef int (*kui_getkey_callback)(
  * \param callback
  * The function that libkui calls to have 1 char read.
  *
+ * \param ms
+ * The number of milliseconds that this context should block while 
+ * attempting to match a mapping by waiting for the user to type
+ * the next key.
+ *
+ * \param state_data
+ * This is a piece of data that is not looked at by this context. It
+ * is passed to the callback.
+ *
  * @return
  * A new instance on success, or NULL on error. 
  */

@@ -1,7 +1,22 @@
 #include <stdlib.h>
+#include <string.h>
 #include "kui_tree.h"
 
+// Internal Documentation {{{
+/*
+ * This documentation is intended to be a brief description behind how kui_tree
+ * works internally.
+ *
+ */
+
+// }}}
+
 /* struct kui_tree_node {{{ */
+
+/**
+ * This is a node in the ku_tree.
+ * It represents a single key. Many nodes could make up a single map.
+ */
 struct kui_tree_node {
 	/**
 	 * The key this node represents.
@@ -256,11 +271,25 @@ static int kui_tree_node_delete (
 /* }}} */
 
 /* struct kui_tree {{{ */
+
+/**
+ * This data structure is capable of storing a set of maps internally in such a
+ * way that it is easy to see what maps are active if a char at a time is fed
+ * to this structure.
+ *
+ * Also, it can determine what mapping was reached if one was found.
+ */
 struct kui_tree {
+	/// The root of the tree
 	struct kui_tree_node *root;
+	/// The current position pointing into the tree ( while looking for a map )
 	struct kui_tree_node *cur;
+	/// The last node found while looking for a map.
+	/// This happens because maps can be subsets of other maps.
 	struct kui_tree_node *found_node;
+	/// The internal state of the tree ( still looking, map found, not found )
 	enum kui_tree_state state;
+	/// If a map was found at all, this is set to 1 while looking, otherwise 0.
 	int found;
 };
 

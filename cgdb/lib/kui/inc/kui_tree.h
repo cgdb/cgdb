@@ -1,6 +1,12 @@
 #ifndef __KUI_TREE_H__
 #define __KUI_TREE_H__
 
+// Includes {{{
+
+#include "std_list.h"
+
+// }}}
+
 /* Doxygen headers {{{ */
 /*! 
  * \file
@@ -13,8 +19,6 @@
  * exactly which macro's have been completed, and how much data is extra.
  */
 /* }}} */
-
-#include "std_list.h"
 
 /* struct kui_map {{{ */
 /******************************************************************************/
@@ -74,6 +78,9 @@ int kui_tree_destroy ( struct kui_tree *ktree );
  * \param klist
  * The data to add into the tree.
  * It is a null terminated list.
+ *
+ * \param data
+ * If this is the "value" part of the map being inserted.
  *
  * @return
  * 0 on success, or -1 on error.

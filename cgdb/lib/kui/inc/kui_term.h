@@ -1,7 +1,24 @@
 #ifndef __INPUT_H__
 #define __INPUT_H__
 
+// includes {{{
+
 #include "kui.h"
+
+// }}}
+
+/* Doxygen headers {{{ */
+/*! 
+ * \file
+ * kui_term.h
+ *
+ * \brief
+ * This interface is intended to provide a key interface to an application. It 
+ * represents unprintable char's and terminal escape sequences via an enumeration.
+ * This enumeration has convertion functions capable of changing an enum into
+ * an ascii representation and back.
+ */
+/* }}} */
 
 /* enum cgdb_key {{{ */
 

@@ -416,7 +416,7 @@ int command_parse_set( void )
                     } 
                     if( variable->data ) 
                     { free( variable->data ); }
-                    (char *)variable->data = strdup( data );
+                    variable->data = strdup( data );
                 } else {
                     rv = 1;
                 }
