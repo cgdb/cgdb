@@ -44,12 +44,14 @@ void queue_free_list(struct node *item, item_free_func func) {
    while ( cur != NULL ) {
       prev = cur;
       cur = cur->next;
-      func ( prev->data );
+      if ( func )
+	 func ( prev->data );
       free ( prev );
       prev = NULL; 
    }
 
-   func ( cur->data );
+   if ( func )
+     func ( cur->data );
    free ( cur );
    prev = NULL; 
 }
