@@ -1,3 +1,8 @@
+06/23/2003 Bob Rossi <bob_rossi@cox.net>
+
+	* input.c: input_read, now calls io_data_ready instead of hard-codeing
+	the useful functionality into it. Now others can use this functionality.
+
 04/14/2003 Bob Rossi <bob_rossi@cox.net>
    
    * Changed time out for esc sequences from 1000 to 40000: I found 

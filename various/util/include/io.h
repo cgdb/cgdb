@@ -74,4 +74,18 @@ void io_debug_write_fmt(const char *fmt, ...);
  */
 void io_display_char(FILE *fd, char c);
 
+/* io_data_ready:
+ * --------------
+ *
+ * fd 	the descriptor to check for.
+ * ms 	the amount of time in milliseconds to wait.
+ * 		pass 0, if you do not want to wait.
+ *
+ * This function checks to see if data is ready on FD.
+ * If this function returns 1 then at least one byte can be read.
+ *
+ * Return: 1 if data is ready, otherwise 0
+ */
+int io_data_ready ( int fd, int ms );
+
 #endif // __IO_H__

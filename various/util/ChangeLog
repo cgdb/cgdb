@@ -1,3 +1,9 @@
+06/23/2003 Bob Rossi <bob_rossi@cox.net>
+
+	* io.h: Added io_data_ready function. Checks to see if data is 
+	ready for reading on a file descriptor.
+	* io.c: Implements io_data_ready
+
 06/01/2003 Bob Rossi <bob_rossi@cox.net>
 
     * fs_util.h: Changed 'char *' to 'const char *' in prototypes where needed

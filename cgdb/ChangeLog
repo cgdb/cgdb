@@ -1,3 +1,8 @@
+06/23/2003 Bob Rossi <bob_rossi@cox.net>
+
+	* cgdb.c: cgdb_resize_term now only calls if_resize_term if there is not
+	another resize signal to handle. It only handles the last one now.
+
 06/22/2003 Bob Rossi <bob_rossi@cox.net>
 
 	* interface.c: Fix flicker problem when ':set sc' is set.

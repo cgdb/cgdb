@@ -71,6 +71,7 @@
 #include "input.h"
 #include "fs_util.h"
 #include "commands.h"
+#include "io.h"
 
 /* --------------- */
 /* Local Variables */
@@ -491,6 +492,15 @@ static int tgdb_readline_input(void){
 static int cgdb_resize_term(int fd) {
     int c;
     read(resize_pipe[0], &c, sizeof(int) );
+
+	/* If there is more input in the pipe, that means another resize has
+	 * been recieved, and we still have not handled this one. So, skip this
+	 * one and only handle the next one.
+	 */
+	if ( io_data_ready( resize_pipe[0], 0 ) ) {
+		if_print ( "skip signal\n" );
+		return 0;
+	}
 
     if ( if_resize_term() == -1 ) {
         err_msg("%s:%d %s: Unreasonable terminal size\n", __FILE__, __LINE__, my_name);

@@ -2,8 +2,6 @@ Bug fixes before cgdb-0.3.2 release.
 
 Bugs:
 
-o Fix resizing to fast bug. ( Only handle last resize, not all ).
-  This is easy to reproduce when running over the Internet. :)
 o Fix ws option. It doesn't lock properly. Resize window real small, then
   resize it big, its not the correct percent.
 o Make ws option receive a percent, so we can make it any size.
@@ -16,3 +14,7 @@ o Make -/+ go to either full screen or 1 line off, on odd or even size.
 Closed:
 
 o Fix 'set sc' flicker problem. When user hits 'n', a flicker occurs.
+o Fix resizing to fast bug. ( Only handle last resize, not all ).
+  This is easy to reproduce when running over the Internet. :)
+  This doesn't really seem to be the problem. However, the potential
+  bug is still fixed.

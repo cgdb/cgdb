@@ -10,22 +10,6 @@
 #include <stdarg.h>
 #endif /* HAVE_STDARG_H */
 
-#if HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif /* HAVE_SYS_TYPES_H */
-
-#if HAVE_SYS_STAT_H
-#include <sys/stat.h>
-#endif
-
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif  /* HAVE_UNISTD_H */
-
-#if HAVE_STRING_H
-#include <string.h>
-#endif /* HAVE_STRING_H */
-
 #if HAVE_STDLIB_H 
 #include <stdlib.h>
 #endif  /* HAVE_STDLIB_H */
@@ -33,6 +17,30 @@
 #if HAVE_ERRNO_H
 #include <errno.h>
 #endif /* HAVE_ERRNO_H */
+
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif  /* HAVE_UNISTD_H */
+
+#if HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+
+#if HAVE_STRING_H
+#include <string.h>
+#endif /* HAVE_STRING_H */
+
+#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif /* HAVE_SYS_TYPES_H */
+
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
+
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif  /* HAVE_SYS_SELECT_H */
 
 #include "io.h"
 #include "error.h"
@@ -215,4 +223,28 @@ void io_display_char(FILE *fd, char c){
       fprintf(fd, "(%c)", c);
 
    fflush(fd);
+}
+
+int io_data_ready ( int fd, int ms ) {
+	int ret;
+
+#if defined(HAVE_SELECT)
+    fd_set readfds, exceptfds;
+    struct timeval timeout;
+    
+	FD_ZERO(&readfds);
+    FD_ZERO (&exceptfds);
+    FD_SET (fd, &readfds);
+    FD_SET (fd, &exceptfds);
+    
+    timeout.tv_sec = 0;
+    timeout.tv_usec = 1000*ms;
+
+    ret = select (fd + 1, &readfds, (fd_set *)NULL, &exceptfds, &timeout);
+
+    if (ret <= 0)
+        return 0;   /* Nothing to read. */
+	else
+		return 1;
+#endif
 }

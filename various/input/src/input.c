@@ -61,6 +61,7 @@ extern char *tgoto();
 #include "sys_util.h"
 #include "input.h"
 #include "error.h"
+#include "io.h"
 
 #define MAXLINE 4096
 #define MAX_SEQ_LIST_SIZE 8
@@ -403,18 +404,6 @@ int input_read(int fd, unsigned int esc_seq_timeout_value) {
     int ret;
     int flag = 0;
 
-#if defined(HAVE_SELECT)
-    fd_set readfds, exceptfds;
-    struct timeval timeout;
-#endif
-
-#if defined(HAVE_SELECT)
-    FD_ZERO(&readfds);
-    FD_ZERO (&exceptfds);
-    FD_SET (fd, &readfds);
-    FD_SET (fd, &exceptfds);
-    
-    timeout.tv_sec = 0;
     /* This is the timeout that readline uses, so it must be good.
      * However, when I hit ESC and then o from the gdb window, the input lib 
      * returns the key binding Alt-o which doesn't cause the filedlg to be 
@@ -425,13 +414,8 @@ int input_read(int fd, unsigned int esc_seq_timeout_value) {
     /* This is a good value that causes Alt-o to be returned when it should
      * be and ESC, o when it should be.
      */
-    timeout.tv_usec =   esc_seq_timeout_value*1000;
-
-    ret = select (fd + 1, &readfds, (fd_set *)NULL, &exceptfds, &timeout);
-
-    if (ret <= 0)
+	if ( io_data_ready ( fd, esc_seq_timeout_value ) == 0 )
         return 0;   /* Nothing to read. */
-#endif
 
     /* Set nonblocking */
     flag = fcntl(fd, F_GETFL, 0);
