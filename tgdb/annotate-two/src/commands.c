@@ -49,7 +49,7 @@ struct commands {
 	/* 'info sources' information */
 	int sources_ready;
 	struct string *info_sources_string;
-	struct queue *source_files; /* The queue of current files */
+	struct tgdb_list *inferior_source_files;
 
 	/* String that is output by gdb to get the absolute path to a file */
 	const char *source_prefix;
@@ -89,7 +89,7 @@ struct commands *commands_initialize(void) {
 
 	c->sources_ready 		= 0;
     c->info_sources_string 	= string_init();
-    c->source_files        	= queue_init();
+	c->inferior_source_files= tgdb_list_init ();
 
 	c->source_prefix 		= "Located in ";
 	c->source_prefix_length = 11;
@@ -383,11 +383,11 @@ static void commands_process_source_line(struct commands *c ){
             nfile = calloc(sizeof(char),i - start) ;
             strncpy(nfile, info_ptr + start , i - start - 1);
             start += ((i + 1) - start); 
-            queue_append(c->source_files, nfile);
+			tgdb_list_append ( c->inferior_source_files, nfile );
         } else if (i == length - 1 ){
             nfile = calloc(sizeof(char),i - start + 2);
             strncpy(nfile, info_ptr + start , i - start + 1);
-            queue_append(c->source_files, nfile);
+			tgdb_list_append ( c->inferior_source_files, nfile );
         }
     }
 }
@@ -484,8 +484,8 @@ void commands_send_gui_sources(struct commands *c, struct queue *q){
 	/* If the inferior program was not compiled with debug, then no sources
 	 * will be available. If no sources are available, do not return the
 	 * TGDB_UPDATE_SOURCE_FILES command. */
-	if ( queue_size ( c->source_files ) > 0 )
-		tgdb_append_command ( q, TGDB_UPDATE_SOURCE_FILES, c->source_files );
+	if ( tgdb_list_size ( c->inferior_source_files ) > 0 )
+		tgdb_append_command ( q, TGDB_UPDATE_SOURCE_FILES, c->inferior_source_files );
 }
 
 void commands_process(struct commands *c, char a, struct queue *q){

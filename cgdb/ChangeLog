@@ -1,11 +1,16 @@
 09/25/2003 Bob Rossi <bob@brasko.net>
 
-   * cgdb.c: process_commands, implement new TGDB_UPDATE_FILE_POSITION
+   * cgdb.c: removed #include 'queue.h'
+   process_commands, implement TGDB_UPDATE_SOURCE_FILES case.
+
+09/25/2003 Bob Rossi <bob@brasko.net>
+
+   * cgdb.c: process_commands, implement TGDB_UPDATE_FILE_POSITION case.
 
 09/25/2003 Bob Rossi <bob@brasko.net>
 
    * cgdb.c: Add new #include of "tgdb_list.h"
-   process_commands, implement new TGDB_UPDATE_BREAKPOINTS case.
+   process_commands, implement TGDB_UPDATE_BREAKPOINTS case.
 
 09/23/2003 Bob Rossi <bob@brasko.net>
 

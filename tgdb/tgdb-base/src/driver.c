@@ -102,7 +102,7 @@ static int gdb_input(void) {
            return -1;
         }
 
-    /* tgdb_traverse_commands ( tgdb );*/
+    /*tgdb_traverse_commands ( tgdb );*/
 
     while ( (item = tgdb_get_command(tgdb)) != NULL ) {
 
@@ -162,9 +162,9 @@ static void stdin_input(int fd) {
         } 
         
         if ( command[i] == '0' )  {
-			tgdb_get_sources ();
+			tgdb_get_inferiors_source_files ( tgdb );
             continue;
-        } */
+        }*/
         tgdb_send_debugger_char ( tgdb, command[i]);
     }
 }

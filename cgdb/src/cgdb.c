@@ -66,7 +66,6 @@
 #include "sources.h"
 #include "tgdb.h"
 #include "helptext.h"
-#include "queue.h"
 #include "ibuf.h"
 #include "input.h"
 #include "fs_util.h"
@@ -357,18 +356,19 @@ static void process_commands(struct tgdb *tgdb)
             /* This is a list of all the source files */
             case TGDB_UPDATE_SOURCE_FILES:
             {
-                struct queue *q = (struct queue *) item->data;
+				struct tgdb_list *list =
+					(struct tgdb_list *) item->data;
+				tgdb_list_iterator *i = tgdb_list_get_first ( list );
                 char *s;
 
                 if_clear_filedlg();
 
-                while ( queue_size ( q ) > 0 ) {
-                    s = queue_pop( q );
+                while ( i ) {
+					s = tgdb_list_get_item ( i );
 
                     if_add_filedlg_choice( s );
 
-                    free ( s );
-                    s = NULL;
+					i = tgdb_list_next ( i );
                 }
 
                 if_set_focus(FILE_DLG);

@@ -40,9 +40,8 @@ extern "C" {
  *
  *      All breakpoints that are set.
  *
- *      This is a struct tgdb_list
- *          It containes a 'struct string' for each filename. The filename is
- *          represented with a relative path.
+ *      This is a 'struct tgdb_list *'
+ *          It contains a 'struct tgdb_breakpoint *' for each breakpoint.
  *
  *  TGDB_UPDATE_FILE_POSITION:
  *  --------------------------
@@ -50,18 +49,17 @@ extern "C" {
  *      This tells the gui what filename/line number the debugger is on.
  *      It gets generated whenever it changes.
  *
- *		This is a 'struct tgdb_file_position'
+ *		This is a 'struct tgdb_file_position *'
  *
  *  TGDB_UPDATE_SOURCE_FILES:
  *  -------------------------
  *
  *      This returns a list of all the source files that make up the 
- *      debugged program.
+ *      inferior program.
  *
- *      This is a struct queue. 
- *          It contains a char* from the help for each filename. The filename may
- *          be represented as a relative or absolute path. The client must free
- *          this memory.
+ * 	    This is a 'struct tgdb_list *'
+ *          It contains a const char* for each filename. The filename may
+ *          be represented as a relative or absolute path. 
  *
  *  TGDB_SOURCES_DENIED:
  *  --------------------

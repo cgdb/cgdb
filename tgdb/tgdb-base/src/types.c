@@ -65,20 +65,20 @@ static void tgdb_print_item(void *item) {
                   string_get ( tfp->absolute_path ), 
                   string_get ( tfp->relative_path ), 
                   tfp->line_number);
-                                    
-                break;
            }
            break;
         case TGDB_UPDATE_SOURCE_FILES:
             {
-                struct queue *q = (struct queue *) com->data;
+				struct tgdb_list *list = ( struct tgdb_list *) com->data;
+				tgdb_list_iterator *i;
                 char *s;
 
-                while ( queue_size ( q ) > 0 ) {
-                    s = queue_pop( q );
+				i = tgdb_list_get_first ( list );
+
+                while ( i ) {
+					s = (char*)tgdb_list_get_item ( i );
                     fprintf ( stderr, "TGDB_SOURCE_FILE (%s)\n", s );
-                    free ( s );
-                    s = NULL;
+					i = tgdb_list_next ( i );
                 }
             }
 
@@ -133,7 +133,7 @@ static void tgdb_print_item(void *item) {
 //    }
 }
 
-int tgdb_breakpoint_free ( void *data ) {
+static int tgdb_breakpoint_free ( void *data ) {
 	struct tgdb_breakpoint *tb;
 	tb = (struct tgdb_breakpoint *)data;
 
@@ -144,6 +144,13 @@ int tgdb_breakpoint_free ( void *data ) {
 	tb->funcname = NULL;
 	free ( tb );
 	tb = NULL;
+	return 0;
+}
+
+static int tgdb_source_files_free ( void *data ) {
+	char *s = (char*)data;
+	free ( s );
+	s = NULL;
 	return 0;
 }
 
@@ -177,6 +184,10 @@ void tgdb_delete_command(void *item){
 			break;
 		}
         case TGDB_UPDATE_SOURCE_FILES:
+            {
+				struct tgdb_list *list = ( struct tgdb_list *) com->data;
+				tgdb_list_free ( list, tgdb_source_files_free );
+            }
         case TGDB_SOURCES_DENIED:
         case TGDB_ABSOLUTE_SOURCE_ACCEPTED:
         case TGDB_ABSOLUTE_SOURCE_DENIED:

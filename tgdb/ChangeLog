@@ -1,5 +1,19 @@
 09/25/2003 Bob Rossi <bob@brasko.net>
 
+   * commands.c: 'struct commands' changed member 'struct queue
+   *source_files' to 'struct tgdb_list *inferior_source_files'.
+   commands_initialize, initialize changed member variable.
+   commands_process_source_line(), commands_send_gui_sources()
+   * types.h: Fix comments for TGDB_UPDATE_BREAKPOINTS, 
+   TGDB_UPDATE_FILE_POSITION and TGDB_UPDATE_SOURCE_FILES.
+   * types.c: tgdb_print_item, implement TGDB_UPDATE_SOURCE_FILES
+   tgdb_breakpoint_free, make static.
+   add static tgdb_source_files_free.
+   tgdb_delete_command, implement TGDB_UPDATE_SOURCE_FILES case.
+   * driver.c: stdin_input
+
+09/25/2003 Bob Rossi <bob@brasko.net>
+
    * commands.c: commands_process_info_source
    * types.h: change comment for TGDB_UPDATE_BREAKPOINTS and 
    TGDB_UPDATE_FILE_POSITION.
