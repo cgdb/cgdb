@@ -105,11 +105,6 @@ int commands_parse_source(const char *buf, size_t n, struct queue *q){
     if(sscanf(copy, "source %s", file) != 1)
         err_msg("%s:%d -> Could not get file name", __FILE__, __LINE__);
    
-//    if(tgdb_append_command(q, SOURCE_FILE_UPDATE, file, NULL, NULL) == -1)
-//        err_msg("%s:%d -> Could not send command", __FILE__, __LINE__);
-//
-//    if(tgdb_append_command(q, LINE_NUMBER_UPDATE, line, NULL, NULL) == -1)
-//        err_msg("%s:%d -> Could not send command", __FILE__, __LINE__);
     string_clear( absolute_path );
     string_add ( absolute_path, file );
     string_clear( line_number );
@@ -176,9 +171,6 @@ static void parse_breakpoint(struct queue *q){
     string_add ( s, file );
 
     queue_append ( breakpoint_queue, s );
-
-//    if(tgdb_append_command(q, BREAKPOINT, ) == -1)
-//        err_msg("%s:%d -> Could not send command", __FILE__, __LINE__);
 }
 
 
@@ -197,9 +189,6 @@ void commands_set_state(enum COMMAND_STATE state, struct queue *q){
             if(string_length(breakpoint_string) > 0)
                 parse_breakpoint(q);
 
-//            if(tgdb_append_command(q, BREAKPOINTS_END, NULL, NULL, NULL) == -1)
-//                err_msg("%s:%d -> Could not send command", __FILE__, __LINE__);
-
             /* At this point, annotate needs to send the breakpoints to the gui.
              * All of the valid breakpoints are stored in breakpoint_queue. */
             tgdb_append_command ( q, TGDB_UPDATE_BREAKPOINTS, breakpoint_queue );
@@ -207,24 +196,13 @@ void commands_set_state(enum COMMAND_STATE state, struct queue *q){
             string_clear(breakpoint_string);
             breakpoint_enabled = FALSE;
 
-            /* Whats the point of this? */
-//            if(breakpoint_started == FALSE){
-//                if(tgdb_append_command(q, BREAKPOINTS_BEGIN, NULL, NULL, NULL) == -1)
-//                    err_msg("%s:%d -> Could not send command", __FILE__, __LINE__);
-//            
-//                if(tgdb_append_command(q, BREAKPOINTS_END, NULL, NULL, NULL) == -1)
-//                    err_msg("%s:%d -> Could not send command", __FILE__, __LINE__);
-//            }
-
             breakpoint_started = FALSE;
             break;
         case BREAKPOINT_HEADERS: 
             breakpoint_table = 0; 
             break;
         case BREAKPOINT_TABLE_BEGIN: 
-//            if(tgdb_append_command(q, BREAKPOINTS_BEGIN, NULL, NULL, NULL) == -1)
-//                err_msg("%s:%d -> Could not send command", __FILE__, __LINE__);
-
+            
             /* The breakpoint queue should be empty at this point */
             breakpoint_table = 1; 
             breakpoint_started = TRUE;
@@ -289,8 +267,6 @@ void commands_send_source_absolute_source_file(struct queue *q){
           string_add ( accepted, path );
           tgdb_append_command(q, TGDB_ABSOLUTE_SOURCE_ACCEPTED, accepted);
       } else { /* This happens only when libtgdb starts */
-//         tgdb_append_command(q, SOURCE_FILE_UPDATE, path, NULL, NULL);
-//         tgdb_append_command(q, LINE_NUMBER_UPDATE, "1", NULL, NULL);
             string_clear( absolute_path );
             string_add ( absolute_path, path );
             string_clear( line_number );
