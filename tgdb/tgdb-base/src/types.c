@@ -17,7 +17,7 @@
 #include "ibuf.h"
 
 static void tgdb_print_item(void *item) {
-    struct Command *com = (struct Command *)item;
+    struct tgdb_command *com = (struct tgdb_command *)item;
 //    FILE *fd = stderr;
 
     if ( !com ) {
@@ -118,7 +118,7 @@ static void tgdb_print_item(void *item) {
 }
 
 void tgdb_delete_command(void *item){
-    struct Command *com = (struct Command*) item;
+    struct tgdb_command *com = (struct tgdb_command*) item;
 
     if ( !com ) {
         return;
@@ -136,7 +136,8 @@ void tgdb_append_command(
             struct queue *q, 
             enum INTERFACE_COMMANDS new_header, 
             void *ndata){
-    struct Command *item = (struct Command *)xmalloc(sizeof(struct Command));
+    struct tgdb_command *item = (struct tgdb_command *)
+			xmalloc(sizeof(struct tgdb_command));
     item->header = new_header;
     item->data = ndata;
     queue_append(q, item);

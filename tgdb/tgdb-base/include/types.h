@@ -119,7 +119,7 @@ enum INTERFACE_COMMANDS {
     TGDB_QUIT_NORMAL
 };
 
-struct Command {
+struct tgdb_command {
    enum INTERFACE_COMMANDS header;
    void *data;
 };

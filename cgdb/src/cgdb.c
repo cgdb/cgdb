@@ -298,7 +298,7 @@ static int user_input(void) {
 
 static void process_commands(struct queue *q)
 {
-    struct Command *item;
+    struct tgdb_command *item;
 
     while ( queue_size(q) > 0 ) {
         item = queue_pop(q);

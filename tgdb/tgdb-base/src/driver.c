@@ -90,7 +90,7 @@ static int gdb_input(void) {
     char buf[MAXLINE];
     size_t size;
     size_t i;
-    struct Command *item;
+    struct tgdb_command *item;
 
     if( (size = tgdb_recv_debugger_data (tgdb, buf, MAXLINE, q)) == -1){
         err_msg("%s:%d -> file descriptor closed\n", __FILE__, __LINE__);
