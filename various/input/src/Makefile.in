@@ -137,12 +137,14 @@ input_driver_LDFLAGS = -L. -L../../util/src
 input_driver_LDADD = -linput -lutil
 input_driver_SOURCES = input_driver.c
 input_driver_DEPENDENCIES = ../../util/src libinput.a
+input_driver_CFLAGS = $(AM_CFLAGS)
 
 # This program provides tgdb with a readline interface
 getch_driver_LDFLAGS = -L ../../util/src
 getch_driver_LDADD = -lutil
 getch_driver_SOURCES = getch_driver.c
 getch_driver_DEPENDENCIES = ../../util/src
+getch_driver_CFLAGS = $(AM_CFLAGS)
 subdir = various/input/src
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
@@ -157,16 +159,17 @@ EXTRA_PROGRAMS = input_driver$(EXEEXT) getch_driver$(EXEEXT)
 bin_PROGRAMS = @BUILD_INPUT_DRIVERS@
 PROGRAMS = $(bin_PROGRAMS)
 
-am_getch_driver_OBJECTS = getch_driver.$(OBJEXT)
+am_getch_driver_OBJECTS = getch_driver-getch_driver.$(OBJEXT)
 getch_driver_OBJECTS = $(am_getch_driver_OBJECTS)
-am_input_driver_OBJECTS = input_driver.$(OBJEXT)
+am_input_driver_OBJECTS = input_driver-input_driver.$(OBJEXT)
 input_driver_OBJECTS = $(am_input_driver_OBJECTS)
 
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
-@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/getch_driver.Po ./$(DEPDIR)/input.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/input_driver.Po
+@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/getch_driver-getch_driver.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/input.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/input_driver-input_driver.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
@@ -218,9 +221,11 @@ uninstall-binPROGRAMS:
 
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+getch_driver-getch_driver.$(OBJEXT): getch_driver.c
 getch_driver$(EXEEXT): $(getch_driver_OBJECTS) $(getch_driver_DEPENDENCIES) 
 	@rm -f getch_driver$(EXEEXT)
 	$(LINK) $(getch_driver_LDFLAGS) $(getch_driver_OBJECTS) $(getch_driver_LDADD) $(LIBS)
+input_driver-input_driver.$(OBJEXT): input_driver.c
 input_driver$(EXEEXT): $(input_driver_OBJECTS) $(input_driver_DEPENDENCIES) 
 	@rm -f input_driver$(EXEEXT)
 	$(LINK) $(input_driver_LDFLAGS) $(input_driver_OBJECTS) $(input_driver_LDADD) $(LIBS)
@@ -231,9 +236,9 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getch_driver.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getch_driver-getch_driver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/input.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/input_driver.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/input_driver-input_driver.Po@am__quote@
 
 distclean-depend:
 	-rm -rf ./$(DEPDIR)
@@ -259,6 +264,50 @@ distclean-depend:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(COMPILE) -c `if test -f '$<'; then $(CYGPATH_W) '$<'; else $(CYGPATH_W) '$(srcdir)/$<'`
+
+getch_driver-getch_driver.o: getch_driver.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(getch_driver_CFLAGS) $(CFLAGS) -MT getch_driver-getch_driver.o -MD -MP -MF "$(DEPDIR)/getch_driver-getch_driver.Tpo" \
+@am__fastdepCC_TRUE@	  -c -o getch_driver-getch_driver.o `test -f 'getch_driver.c' || echo '$(srcdir)/'`getch_driver.c; \
+@am__fastdepCC_TRUE@	then mv "$(DEPDIR)/getch_driver-getch_driver.Tpo" "$(DEPDIR)/getch_driver-getch_driver.Po"; \
+@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/getch_driver-getch_driver.Tpo"; exit 1; \
+@am__fastdepCC_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='getch_driver.c' object='getch_driver-getch_driver.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/getch_driver-getch_driver.Po' tmpdepfile='$(DEPDIR)/getch_driver-getch_driver.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(getch_driver_CFLAGS) $(CFLAGS) -c -o getch_driver-getch_driver.o `test -f 'getch_driver.c' || echo '$(srcdir)/'`getch_driver.c
+
+getch_driver-getch_driver.obj: getch_driver.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(getch_driver_CFLAGS) $(CFLAGS) -MT getch_driver-getch_driver.obj -MD -MP -MF "$(DEPDIR)/getch_driver-getch_driver.Tpo" \
+@am__fastdepCC_TRUE@	  -c -o getch_driver-getch_driver.obj `if test -f 'getch_driver.c'; then $(CYGPATH_W) 'getch_driver.c'; else $(CYGPATH_W) '$(srcdir)/getch_driver.c'`; \
+@am__fastdepCC_TRUE@	then mv "$(DEPDIR)/getch_driver-getch_driver.Tpo" "$(DEPDIR)/getch_driver-getch_driver.Po"; \
+@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/getch_driver-getch_driver.Tpo"; exit 1; \
+@am__fastdepCC_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='getch_driver.c' object='getch_driver-getch_driver.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/getch_driver-getch_driver.Po' tmpdepfile='$(DEPDIR)/getch_driver-getch_driver.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(getch_driver_CFLAGS) $(CFLAGS) -c -o getch_driver-getch_driver.obj `if test -f 'getch_driver.c'; then $(CYGPATH_W) 'getch_driver.c'; else $(CYGPATH_W) '$(srcdir)/getch_driver.c'`
+
+input_driver-input_driver.o: input_driver.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(input_driver_CFLAGS) $(CFLAGS) -MT input_driver-input_driver.o -MD -MP -MF "$(DEPDIR)/input_driver-input_driver.Tpo" \
+@am__fastdepCC_TRUE@	  -c -o input_driver-input_driver.o `test -f 'input_driver.c' || echo '$(srcdir)/'`input_driver.c; \
+@am__fastdepCC_TRUE@	then mv "$(DEPDIR)/input_driver-input_driver.Tpo" "$(DEPDIR)/input_driver-input_driver.Po"; \
+@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/input_driver-input_driver.Tpo"; exit 1; \
+@am__fastdepCC_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='input_driver.c' object='input_driver-input_driver.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/input_driver-input_driver.Po' tmpdepfile='$(DEPDIR)/input_driver-input_driver.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(input_driver_CFLAGS) $(CFLAGS) -c -o input_driver-input_driver.o `test -f 'input_driver.c' || echo '$(srcdir)/'`input_driver.c
+
+input_driver-input_driver.obj: input_driver.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(input_driver_CFLAGS) $(CFLAGS) -MT input_driver-input_driver.obj -MD -MP -MF "$(DEPDIR)/input_driver-input_driver.Tpo" \
+@am__fastdepCC_TRUE@	  -c -o input_driver-input_driver.obj `if test -f 'input_driver.c'; then $(CYGPATH_W) 'input_driver.c'; else $(CYGPATH_W) '$(srcdir)/input_driver.c'`; \
+@am__fastdepCC_TRUE@	then mv "$(DEPDIR)/input_driver-input_driver.Tpo" "$(DEPDIR)/input_driver-input_driver.Po"; \
+@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/input_driver-input_driver.Tpo"; exit 1; \
+@am__fastdepCC_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='input_driver.c' object='input_driver-input_driver.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/input_driver-input_driver.Po' tmpdepfile='$(DEPDIR)/input_driver-input_driver.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(input_driver_CFLAGS) $(CFLAGS) -c -o input_driver-input_driver.obj `if test -f 'input_driver.c'; then $(CYGPATH_W) 'input_driver.c'; else $(CYGPATH_W) '$(srcdir)/input_driver.c'`
 uninstall-info-am:
 
 ETAGS = etags

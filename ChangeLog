@@ -1,0 +1,7 @@
+04/27/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * Changed configure to only build cgdb by default: the drivers can only be
+    built when the user runs configure with --with-drivers
+    * Moved the error check for readline with the readline check in config
+
+version 0.3.0 (04/11/2003):
