@@ -81,7 +81,6 @@ static int tgdb_setup_signals(void){
 int tgdb_init(char *debugger, int argc, char **argv, int *gdb, int *child){
    tgdb_init_setup_config_file();
    io_debug_init(NULL);
-   macro_start();
    
    if ( (tgdb_need_mapping = tgdb_init_does_gdb_need_mapping(debugger)) == -1) {
       err_msg("(%s:%d) Couldn't detect mapping", __FILE__, __LINE__);

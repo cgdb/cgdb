@@ -1121,15 +1121,6 @@ int internal_if_input(int key) {
                        if_draw();
                     }
                     return 0;
-                case 'm':
-                    macro_start();
-                    return 0;
-                case 'M':
-                    macro_load("macro_text.txt");
-                    return 0;
-                case 'S':
-                    macro_save("macro_text.txt");
-                    return 0;
                 case '/':
                 case '?':
                     regex_direction = ('/' == key);

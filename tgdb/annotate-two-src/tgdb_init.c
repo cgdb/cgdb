@@ -18,7 +18,6 @@
 #include "terminal.h"
 #include "config.h"
 #include "util.h"
-#include "macro.h"
 
 /* free_memory: utility function that frees up memory.
  *
@@ -226,9 +225,7 @@ int tgdb_init_does_gdb_need_mapping(char *debugger) {
         } while ( io_read_byte(&cur, masterfd) != -1);
 
 
-        macro_turn_macro_off();
         io_writen(masterfd, "quit\n", 5); /* Tell gdb to quit */
-        macro_turn_macro_on();
         
         /* Read rest of data */
         while( io_read_byte(&cur, masterfd) != -1);

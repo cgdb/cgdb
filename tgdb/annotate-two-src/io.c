@@ -11,7 +11,6 @@
 #include "error.h"
 #include "globals.h"
 #include "types.h"
-#include "macro.h"
 
 static FILE *dfd = NULL;
 static int debug_on = 0;
@@ -89,8 +88,6 @@ int io_read_byte(char *c, int source){
 }
 
 int io_write_byte(int dest, char c){
-    macro_write_char(c);
-   
    if(write(dest, &c, 1) != 1)
       return -1;
 
@@ -161,8 +158,6 @@ ssize_t io_writen(int fd, const void *vptr, size_t n) {
    ssize_t nwritten;
    size_t nleft = n;
    const char *ptr = (const char *)vptr;
-
-   macro_write_str((char *)vptr);
 
    while(nleft > 0) {
       if( (nwritten = write( fd, ptr, nleft)) <= 0) {

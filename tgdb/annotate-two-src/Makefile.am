@@ -5,7 +5,7 @@ state_machine.c state_machine.h data.c data.h  \
 types.c error.c error.h \
 pseudo.c pseudo.h io.c io.h terminal.c terminal.h \
 commands.c commands.h globals.c globals.h \
-macro.c macro.h tgdb_init.c tgdb_init.h buffer.c buffer.h \
+tgdb_init.c tgdb_init.h buffer.c buffer.h \
 util.c util.h
 
 EXTRA_PROGRAMS=driver

@@ -13,7 +13,6 @@
 #include "types.h"
 #include "globals.h"
 #include "error.h"
-#include "macro.h"
 
 extern int masterfd;
 static int commands = 0;
@@ -199,9 +198,6 @@ enum COMMAND_STATE commands_get_state(void){
 static int commands_run_server_command(int fd, char *com){
    data_prepare_run_command();
 
-   if(data_get_state() == INTERNAL_COMMAND)
-      macro_turn_macro_off();
-
    /* writes ^E^U */
    if(data_user_has_typed() == 1)
      io_writen(fd, "\05\025", 2);         
@@ -214,9 +210,6 @@ static int commands_run_server_command(int fd, char *com){
    if(data_user_has_typed() == 1)
      io_writen(fd, "\031", 1);         
    
-   if(data_get_state() == INTERNAL_COMMAND)
-      macro_turn_macro_on();
-
    return 0;
 }
 

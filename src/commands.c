@@ -5,7 +5,6 @@
 #include "command_lexer.h"
 #include "tgdb.h"
 #include "interface.h"
-#include "macro.h"
 #include "error.h"
 
 /**
@@ -33,10 +32,6 @@ static int command_focus_cgdb( void );
 static int command_focus_gdb( void );
 static int command_focus_tty( void );
 
-static int command_macro_run( void );
-static int command_macro_save( void );
-static int command_macro_start( void );
-
 static int command_do_continue( void );
 static int command_do_finish( void );
 static int command_do_help( void );
@@ -62,9 +57,6 @@ static struct commands
     /* finish      */ { "finish",      command_do_finish },
     /* help        */ { "help",        command_do_help },
     /* insert      */ { "insert",      command_focus_gdb },
-    /* macro_run   */ { "macro_run",   command_macro_run }, 
-    /* macro_save  */ { "macro_save",  command_macro_save },
-    /* macro_start */ { "macro_start", command_macro_start },
     /* next        */ { "next",        command_do_next },
     /* q           */ { "q",           command_do_quit },
     /* q!          */ { "q!",          command_do_quit_force },
@@ -120,26 +112,6 @@ int command_focus_gdb( void )
 int command_focus_tty( void )
 {
     if_set_focus( TTY );
-    return 0;
-}
-
-int command_macro_run( void )
-{
-    // FIXME: This should ask for a filename (yylex)
-    macro_load( "macro_text.txt" );
-    return 0;
-}
-
-int command_macro_save( void )
-{
-    // FIXME: This should ask for a filename (yylex)
-    macro_save( "macro_text.txt" );
-    return 0;
-}
-
-int command_macro_start( void )
-{
-    macro_start();
     return 0;
 }
 

@@ -67,17 +67,7 @@ void mainLoop(int masterfd, int childfd){
             return;
          } /* end if */
 
-         if(byte == '9'){
-            if(macro_save("macro1.txt") == -1){
-               err_msg("%s:%d -> failed to run command\n", __FILE__, __LINE__);
-               return;
-            }
-         } else if(byte == '8'){
-            if(macro_load("macro1.txt") == -1){
-               err_msg("%s:%d -> failed to run command\n", __FILE__, __LINE__);
-               return;
-            }
-         } else if ( byte == '7'){
+         if ( byte == '7'){
            tgdb_get_sources();  
          } else {
                static char *result;
@@ -148,7 +138,6 @@ int main(int argc, char **argv){
    if ( tgdb_init(NULL, argc-1, argv+1, &gdb_fd, &child_fd) == -1 )
       err_msg("%s:%d -> could not init\n", __FILE__, __LINE__);
 
-   macro_start();
    mainLoop(gdb_fd, child_fd);
 
    if(tgdb_shutdown() == -1)

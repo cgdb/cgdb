@@ -3,6 +3,8 @@
     * Reorganized tgdb to be able to interface with gdb in multiple ways:
     This means that annotate-two-src interfaces with older gdb's using 
     annotate level 2. gdb-mi-src interfaces with gdb's that support mi.
+    * Removed macro support from tgdb: It should be done from the application
+    level not the library level.
 
 version 0.2.3 (01/30/2003):
 

@@ -19,7 +19,6 @@ int handle_misc_pre_prompt(const char *buf, size_t n, struct Command ***com){
    extern int misc_pre_prompt;
    
    if(data_get_state() == INTERNAL_COMMAND){
-      /* This should not be put into the macro */
       if(io_write_byte(masterfd, '\n') == -1)
          err_msg("%s:%d -> Could not send command", __FILE__, __LINE__);
 

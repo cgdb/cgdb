@@ -1,6 +1,9 @@
 02/12/2003 Bob Rossi <bob_rossi@cox.net>
    
    * Fixed cgdb to interface with new tgdb
+   * Removed macro support from cgdb: It was using tgdb's macro
+   support which has been removed. The macro support should be done
+   from the application level.
 
 02/11/2003 Bob Rossi <bob_rossi@cox.net>
    
