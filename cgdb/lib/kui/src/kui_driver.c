@@ -104,7 +104,26 @@ static int create_mappings ( struct kui_manager *kuim ) {
 	if ( !map )
 		return -1;
 
+#if 1
+
 	if ( kui_ms_register_map ( map, "abc", "xyz" ) == -1 ) {
+		/* TODO: Free map and return */
+		return -1;
+	}
+
+	if ( kui_ms_deregister_map ( map, "abc" ) == -1 ) {
+		/* TODO: Free map and return */
+		return -1;
+	}
+#endif
+
+#if 0
+	if ( kui_ms_register_map ( map, "abc", "xyz" ) == -1 ) {
+		/* TODO: Free map and return */
+		return -1;
+	}
+
+	if ( kui_ms_register_map ( map, "abc", "xyp" ) == -1 ) {
 		/* TODO: Free map and return */
 		return -1;
 	}
@@ -139,6 +158,7 @@ static int create_mappings ( struct kui_manager *kuim ) {
 		return -1;
 	}
 
+#endif
 	if ( kui_manager_add_map_set ( kuim, map ) == -1 )
 		return -1;
 

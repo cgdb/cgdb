@@ -172,6 +172,17 @@ std_list_iterator std_list_remove (
 	std_list_iterator iter );
 
 /**
+ * Removes all the elements from a list. 
+ *
+ * \param list
+ * The list to remove an item from.
+ *
+ * @return
+ * 0 on success, or -1 on error.
+ */
+int std_list_remove_all ( struct std_list *list );
+
+/**
  * Finds an element in a list, using a supplied function to find the 
  * desired element. It iterates over the list, calling the given function 
  * which should return 0 when the desired element is found. The function 

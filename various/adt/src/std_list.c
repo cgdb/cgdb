@@ -133,11 +133,8 @@ struct std_list* std_list_create ( STDDestroyNotify destroy_func )
   return list;
 }
 
-int std_list_destroy ( struct std_list *list ) {
+int std_list_remove_all ( struct std_list *list ) {
 	std_list_iterator iter;
-
-	if ( !list )
-		return -1;
 
 	/* Traverse the list and free the data members */
 	for ( iter = std_list_begin ( list ); 
@@ -147,9 +144,21 @@ int std_list_destroy ( struct std_list *list ) {
 	    if (!iter )
 			return -1;
 	}
+	
+	return 0;
+}
+
+int std_list_destroy ( struct std_list *list ) {
+
+	if ( !list )
+		return -1;
+
+
+	if ( std_list_remove_all ( list ) == -1 )
+		return -1;
 
     /* Free the dummy node (remove won't do this) */
-    std_list_node_destroy(iter, list->destroy_func);   
+    std_list_node_destroy(list->end, list->destroy_func);   
     
     /* Free the list structure */
     free(list); 

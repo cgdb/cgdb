@@ -2,7 +2,7 @@ AM_CFLAGS = -g -Wall -I$(srcdir)/../../../../various/util/include -I$(srcdir)/..
 
 # create the input library
 noinst_LIBRARIES = libkui.a
-libkui_a_SOURCES = kui.c kui_term.c
+libkui_a_SOURCES = kui.c kui_term.c kui_tree.c
 libkui_a_DEPENDENCIES = ../../../../various/util/src/libutil.a
 
 
