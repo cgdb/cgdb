@@ -1,3 +1,8 @@
+10/23/2003 Bob Rossi <bob@brasko.net>
+
+   * tgdb_list.h: add tgdb_list_clear prototype
+   * tgdb_list.c: add tgdb_list_clear implementation
+
 10/13/2003 Bob Rossi <bob@brasko.net>
 
    * ibuf.h: rename 'struct string' to 'string ibuf'

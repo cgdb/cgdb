@@ -16,7 +16,7 @@ extern "C" {
 #endif 
 
 #include "tgdb_types.h"
-#include "tgdb_interface.h"
+#include "tgdb_client_command.h"
 #include "annotate_two.h"
 
 struct data;

@@ -2,7 +2,7 @@
 #define __COMMANDS_H__
 
 #include "tgdb_types.h"
-#include "tgdb_interface.h"
+#include "tgdb_client_command.h"
 #include "a2-tgdb.h"
 
 struct commands;
@@ -48,7 +48,7 @@ int commands_parse_field(struct commands *c, const char *buf, size_t n, int *fie
  */
 int commands_parse_source(
 		struct commands *c, 
-		struct queue *command_container,
+		struct tgdb_list *client_command_list,
 		const char *buf, size_t n, 
 		struct tgdb_list *list );
 
@@ -84,7 +84,7 @@ enum COMMAND_STATE commands_get_state(struct commands *c);
  */
 int commands_issue_command (
 		struct commands *c, 
-		struct queue *command_container,
+		struct tgdb_list *client_command_list,
         enum annotate_commands com, 
         const char *data,
         int oob );
@@ -172,6 +172,8 @@ void commands_finalize_command (
  *
  * Returns: -1 on error, 0 on success
  */
-int commands_user_ran_command ( struct commands *c, struct queue *command_container );
+int commands_user_ran_command ( 
+		struct commands *c, 
+		struct tgdb_list *client_command_list );
 
 #endif

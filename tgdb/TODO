@@ -1,23 +1,28 @@
 1.0 Proposol 
 * stack window
 
-Pushed off for gdb 0.5.0
-------------------------
+tgdb 0.6.0
+----------
 
-> Integrate gdbmi stubs into libtgdb and get gdbmi integrated into tgdb
-> Get assembly language working.
-> Get tab completion to work through readline ?
+* Modify the readline library to be context driven.
+* Make all dependencie's of TGDB be context driven. ( util library ... )
+
+tgdb 0.5.0
+----------
+
+* Integrate gdbmi stubs into libtgdb and get gdbmi integrated into tgdb
+* Get assembly language working.
+* Get tab completion to work through readline ?
    This is *very* difficult to do. I don't know if it is possible.
-> Modify the readline library to be context driven.
-> Add new structures to types.h that are intended to work with MI
-> Write internal documentation
-> standardize the way TGDB returns paths to the front end.
+* Add new structures to types.h that are intended to work with MI
+* Write internal documentation
+* standardize the way TGDB returns paths to the front end.
    As of know, it returns the full path with the relative path. Then
    it returns a relative path for breakpoints and source files. The front end 
    then needs to look up the full path from the relative path.
 	
-Work to do for cgdb-0.4.0
--------------------------
+tdb-0.4.0
+---------
 
 Non-technical
 -------------
@@ -26,14 +31,14 @@ Non-technical
 
 technical
 ---------
-* Standardize tgdb_interface. Maybe change its name. The clients should be
-  able to generate and add commands to the command queue here. The commands
-  should be made cleaner.
 * Get in touch with 'Ronald Landheer-Cieslak' about Makefile.am patch to
   build CVS out of the source tree.
 
 Finished:
 
+* Standardize tgdb_interface. Maybe change its name. The clients should be
+  able to generate and add commands to the command queue here. The commands
+  should be made cleaner.
 * Change use of 'struct queue' for tgdb_get_command.
 * Change all use's of 'struct string' to the proper 'struct ibuf'.
 * Remove #define MAXLINE in tgdb_types.h, there should be no hard coded 

@@ -1,3 +1,9 @@
+10/23/2003 Bob Rossi <bob@brasko.net>
+
+   * error.h: Add err_verbose prototype.
+   * error.c: Add err_verbose implementation.
+   Add static int to library.
+
 08/27/2003 Bob Rossi <bob@brasko.net>
 
    * fork_util.c: invoke_debugger, adding --annotate=2 when invoking GDB.

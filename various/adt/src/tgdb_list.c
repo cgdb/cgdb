@@ -283,6 +283,20 @@ int tgdb_list_free ( struct tgdb_list *tlist, tgdb_list_func func ) {
 	return 0;
 }
 
+int tgdb_list_clear ( struct tgdb_list *tlist ) {
+	tgdb_list_iterator *i= tgdb_list_get_first( tlist );
+
+	while ( i ) {
+		tgdb_list_delete ( tlist, i );
+		/* Can't call tgdb_list_next () here on the iterator.
+		 * This is because the iterator was just deleted.
+		 */
+		i = tgdb_list_get_first( tlist );
+	}
+
+	return 0;
+}
+
 int tgdb_list_size ( struct tgdb_list *tlist ) {
 	if ( tlist ) 
 		return tlist->size;

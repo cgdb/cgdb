@@ -46,14 +46,12 @@
 #include "ibuf.h"
 #include "annotate_two.h"
 
-static int a2_set_inferior_tty ( 
-		void *ctx, 
-		struct queue *command_container ) {
+static int a2_set_inferior_tty ( void *ctx ) {
 	struct annotate_two *a2 = (struct annotate_two *)ctx;
 
     if ( commands_issue_command ( 
 				a2->c, 
-				command_container,
+				a2->client_command_list,
 				ANNOTATE_TTY, 
 				a2->inferior_tty_name, 
 				0 ) == -1 ) {
@@ -103,7 +101,6 @@ static int close_inferior_connection ( void *ctx ) {
 
 int a2_open_new_tty ( 
 		void *ctx,
-		struct queue *command_container,
 		int *inferior_stdin, 
 		int *inferior_stdout ) {
 	struct annotate_two *a2 = (struct annotate_two *)ctx;
@@ -119,7 +116,7 @@ int a2_open_new_tty (
 	*inferior_stdin     = a2->inferior_stdin;
 	*inferior_stdout    = a2->inferior_stdin;
 
-    a2_set_inferior_tty ( a2, command_container );
+    a2_set_inferior_tty ( a2 );
     
     return 0;
 }
@@ -218,7 +215,6 @@ void* a2_create_context (
 
 int a2_initialize ( 
 	void *ctx,
-	struct queue *command_container,
 	int *debugger_stdin, int *debugger_stdout,
 	int *inferior_stdin, int *inferior_stdout) {
 	struct annotate_two *a2 = (struct annotate_two *)ctx;
@@ -230,15 +226,17 @@ int a2_initialize (
 	a2->sm 	 	= state_machine_initialize ();
 	a2->c 		= commands_initialize ();
 	a2->g 		= globals_initialize ();
+	a2->client_command_list = tgdb_list_init ();
 
-	a2_open_new_tty ( a2, command_container, inferior_stdin, inferior_stdout );
+	a2_open_new_tty ( a2, inferior_stdin, inferior_stdout );
 
    /* gdb may already have some breakpoints when it starts. This could happen
     * if the user puts breakpoints in there .gdbinit.
     * This makes sure that TGDB asks for the breakpoints on start up.
     */
     if ( commands_issue_command ( 
-             a2->c, command_container, 
+             a2->c,  
+			 a2->client_command_list,
              ANNOTATE_INFO_BREAKPOINTS, NULL, 0 ) == -1 ) {
         err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
         return -1;
@@ -280,7 +278,6 @@ int a2_is_client_ready(void *ctx) {
 
 int a2_parse_io ( 
 		void *ctx,
-		struct queue *command_container,
 		const char *input_data, const size_t input_data_size,
 		char *debugger_output, size_t *debugger_output_size,
 		char *inferior_output, size_t *inferior_output_size,
@@ -289,10 +286,6 @@ int a2_parse_io (
 	struct annotate_two *a2 = (struct annotate_two *)ctx;
 
 	a2->command_finished = 0;
-
-	/* TODO: This is a hack.
-	 * Stop assigning here */
-	a2->command_container = command_container;
 
 	val = a2_handle_data ( a2, a2->sm, input_data, input_data_size,
 		debugger_output, debugger_output_size, list );
@@ -303,15 +296,19 @@ int a2_parse_io (
 		return 0;
 }
 
+struct tgdb_list *a2_get_client_commands ( void *ctx ) {
+	struct annotate_two *a2 = (struct annotate_two *)ctx;
+	return a2->client_command_list;
+}
+
 int a2_get_source_absolute_filename ( 
 		void *ctx,
-		struct queue *command_container,
 		const char *file ) {
 	struct annotate_two *a2 = (struct annotate_two *)ctx;
 
     if ( commands_issue_command ( 
 				a2->c, 
-				command_container,
+				a2->client_command_list,
 				ANNOTATE_LIST, 
 				file, 
 				0 ) == -1 ) {
@@ -321,7 +318,7 @@ int a2_get_source_absolute_filename (
 
     if ( commands_issue_command ( 
 				a2->c, 
-				command_container,
+				a2->client_command_list,
 				ANNOTATE_INFO_SOURCE_ABSOLUTE, 
 				file, 
 				0 ) == -1 ) {
@@ -332,13 +329,11 @@ int a2_get_source_absolute_filename (
 	return 0;
 }
 
-int a2_get_inferior_sources ( 
-		void *ctx,
-		struct queue *command_container ) {
+int a2_get_inferior_sources ( void *ctx) {
 	struct annotate_two *a2 = (struct annotate_two *)ctx;
     if ( commands_issue_command ( 
 				a2->c, 
-				command_container,
+				a2->client_command_list,
 				ANNOTATE_INFO_SOURCES, 
 				NULL, 
 				0 ) == -1 ) {
@@ -351,14 +346,13 @@ int a2_get_inferior_sources (
 
 int a2_change_prompt(
 		void *ctx,
-		struct queue *command_container,
 		const char *prompt) {
 	struct annotate_two *a2 = (struct annotate_two *)ctx;
 
     /* Must call a callback to change the prompt */
     if ( commands_issue_command ( 
 				a2->c, 
-				command_container,
+				a2->client_command_list,
 				ANNOTATE_SET_PROMPT, 
 				prompt, 
 				2 ) == -1 ) {
@@ -371,7 +365,6 @@ int a2_change_prompt(
 
 int a2_command_callback(
 		void *ctx,
-		struct queue *command_container,
 		const char *command) {
 	/* Unimplemented */
 	return -1;
@@ -408,10 +401,12 @@ pid_t a2_get_debugger_pid ( void *ctx ) {
 
 int a2_completion_callback(
 		void *ctx,
-		struct queue *command_container,
 		const char *command) {
 	struct annotate_two *a2 = (struct annotate_two *)ctx;
-    if ( commands_issue_command ( a2->c, command_container, ANNOTATE_COMPLETE, command, 4 ) == -1 ) {
+    if ( commands_issue_command ( 
+				a2->c, 
+				a2->client_command_list,
+				ANNOTATE_COMPLETE, command, 4 ) == -1 ) {
         err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
         return -1;
     }
@@ -419,9 +414,9 @@ int a2_completion_callback(
     return 0;
 }
 
-int a2_user_ran_command ( void *ctx, struct queue *command_container ) {
+int a2_user_ran_command ( void *ctx ) {
 	struct annotate_two *a2 = (struct annotate_two *)ctx;
-	return commands_user_ran_command ( a2->c, command_container );
+	return commands_user_ran_command ( a2->c, a2->client_command_list );
 }
 
 int a2_prepare_for_command ( void *ctx, struct tgdb_client_command *com ) {

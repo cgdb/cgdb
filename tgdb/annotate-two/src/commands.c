@@ -217,7 +217,7 @@ int commands_parse_field(struct commands *c, const char *buf, size_t n, int *fie
 /* source filename:line:character:middle:addr */
 int commands_parse_source(
 		struct commands *c, 
-		struct queue *command_container,
+		struct tgdb_list *client_command_list,
 		const char *buf, size_t n, 
 		struct tgdb_list *list){
     int i = 0;
@@ -272,7 +272,7 @@ int commands_parse_source(
     /* set up the info_source command to get the relative path */
     if ( commands_issue_command ( 
 				c, 
-				command_container,
+				client_command_list,
 				ANNOTATE_INFO_SOURCE_RELATIVE, 
 				NULL, 
 				1 ) == -1 ) {
@@ -491,15 +491,16 @@ void commands_send_source_absolute_source_file (
 
       /* requesting file */
       if(c->last_info_source_requested == NULL) {
-		  struct tgdb_source_file *tsf = (struct tgdb_source_file *)
-			  xmalloc ( sizeof ( struct tgdb_source_file ) );
-		  tsf->absolute_path = strdup ( path );
-          tgdb_types_append_command(list, TGDB_ABSOLUTE_SOURCE_ACCEPTED, tsf);
-      } else { /* This happens only when libtgdb starts */
+		  	/* This happens only when libtgdb starts */
             ibuf_clear( c->absolute_path );
             ibuf_add ( c->absolute_path, path );
             ibuf_clear( c->line_number );
             ibuf_add ( c->line_number, "1" );
+      } else { 
+		  struct tgdb_source_file *tsf = (struct tgdb_source_file *)
+			  xmalloc ( sizeof ( struct tgdb_source_file ) );
+		  tsf->absolute_path = strdup ( path );
+          tgdb_types_append_command(list, TGDB_ABSOLUTE_SOURCE_ACCEPTED, tsf);
       }
    /* not found */
    } else {
@@ -722,8 +723,12 @@ void commands_finalize_command (
     }
 }
 
-int commands_prepare_for_command ( struct annotate_two *a2, struct commands *c, struct tgdb_client_command *com ) {
-    enum annotate_commands *a_com = ( enum annotate_commands *) com->client_data;
+int commands_prepare_for_command ( 
+		struct annotate_two *a2, 
+		struct commands *c, 
+		struct tgdb_client_command *com ) {
+
+    enum annotate_commands *a_com = ( enum annotate_commands *) com->tgdb_client_private_data;
 
     /* Set the commands state to nothing */
     commands_set_state(c , VOID, NULL);
@@ -746,7 +751,7 @@ int commands_prepare_for_command ( struct annotate_two *a2, struct commands *c, 
             commands_prepare_info_sources ( a2, c );
             break;
         case ANNOTATE_LIST:
-            commands_prepare_list ( a2, c, com -> data );
+            commands_prepare_list ( a2, c, com->tgdb_client_command_data );
             break;
         case ANNOTATE_INFO_SOURCE_RELATIVE:
             commands_prepare_info_source ( a2, c, INFO_SOURCE_RELATIVE );
@@ -761,17 +766,20 @@ int commands_prepare_for_command ( struct annotate_two *a2, struct commands *c, 
             break;  /* Nothing to do */
         case ANNOTATE_COMPLETE:
             commands_prepare_tab_completion ( a2, c );
-            io_debug_write_fmt("<%s\n>", com->data);
+            io_debug_write_fmt("<%s\n>", com->tgdb_client_command_data);
             return 0;
             break;  /* Nothing to do */
+		case ANNOTATE_INFO_SOURCE:
+		case ANNOTATE_SET_PROMPT:
         case ANNOTATE_VOID:
+			break;
         default:
             err_msg ( "%s:%d commands_prepare_for_command error", __FILE__, __LINE__ );
             break;
     };
    
     data_set_state(a2, INTERNAL_COMMAND );
-    io_debug_write_fmt("<%s\n>", com->data);
+    io_debug_write_fmt("<%s\n>", com->tgdb_client_command_data);
 
     return 0;
 }
@@ -875,8 +883,13 @@ static const char *commands_create_command (
     return ncom;
 }
 
-int commands_user_ran_command ( struct commands *c, struct queue *command_container ) {
-    if ( commands_issue_command ( c, command_container, ANNOTATE_INFO_BREAKPOINTS, NULL, 0 ) == -1 ) {
+int commands_user_ran_command ( 
+		struct commands *c, 
+		struct tgdb_list *client_command_list ) {
+    if ( commands_issue_command ( 
+				c, 
+				client_command_list, 
+				ANNOTATE_INFO_BREAKPOINTS, NULL, 0 ) == -1 ) {
         err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
         return -1;
     }
@@ -886,12 +899,12 @@ int commands_user_ran_command ( struct commands *c, struct queue *command_contai
 
 int commands_issue_command ( 
 		struct commands *c, 
-		struct queue *command_container,
+		struct tgdb_list *client_command_list,
 		enum annotate_commands com, 
 		const char *data, 
 		int oob) {
     const char *ncom = commands_create_command ( c, com, data );
-    struct tgdb_client_command *command = NULL;
+    struct tgdb_client_command *client_command = NULL;
     enum annotate_commands *nacom = (enum annotate_commands *)xmalloc ( sizeof ( enum annotate_commands ) );
     
     *nacom = com;
@@ -902,45 +915,38 @@ int commands_issue_command (
     }
 
     /* This should send the command to tgdb-base to handle */ 
-    if ( oob == 1 ) {
-        command = tgdb_interface_new_command ( 
+	if ( oob == 0 ) {
+        client_command = tgdb_client_command_create ( 
                 ncom,
-                BUFFER_OOB_COMMAND,
-                COMMANDS_HIDE_OUTPUT,
-                COMMANDS_VOID,
+                TGDB_CLIENT_COMMAND_NORMAL,
+                TGDB_CLIENT_COMMAND_DISPLAY_NOTHING,
+                TGDB_CLIENT_COMMAND_ACTION_NONE,
+                (void*) nacom ); 
+	} else if ( oob == 1 ) {
+        client_command = tgdb_client_command_create ( 
+                ncom,
+                TGDB_CLIENT_COMMAND_PRIORITY,
+                TGDB_CLIENT_COMMAND_DISPLAY_NOTHING,
+				TGDB_CLIENT_COMMAND_ACTION_NONE,
                 (void*) nacom ); 
     } else if ( oob == 2 ) {
-        command = tgdb_interface_new_command ( 
+        client_command = tgdb_client_command_create ( 
                 ncom,
-                BUFFER_READLINE_COMMAND,
-                COMMANDS_HIDE_OUTPUT,
-                COMMANDS_SET_PROMPT,
+                TGDB_CLIENT_COMMAND_TGDB_BASE,
+                TGDB_CLIENT_COMMAND_DISPLAY_NOTHING,
+                TGDB_CLIENT_COMMAND_ACTION_CONSOLE_SET_PROMPT,
                 NULL ); 
-    } else if ( oob == 0 ){
-        command = tgdb_interface_new_command ( 
-                ncom,
-                BUFFER_TGDB_COMMAND,
-                COMMANDS_HIDE_OUTPUT,
-                COMMANDS_VOID,
-                (void*) nacom ); 
-    } else if ( oob == 3 ) {
-        command = tgdb_interface_new_command ( 
-                ncom,
-                BUFFER_TGDB_COMMAND,
-                COMMANDS_SHOW_USER_OUTPUT,
-                COMMANDS_VOID,
-                (void*) nacom ); 
     } else if ( oob == 4 ) {
-        command = tgdb_interface_new_command ( 
+        client_command = tgdb_client_command_create ( 
                 ncom,
-                BUFFER_GUI_COMMAND,
-                COMMANDS_SHOW_USER_OUTPUT,
-                COMMANDS_VOID,
+                TGDB_CLIENT_COMMAND_NORMAL,
+                TGDB_CLIENT_COMMAND_DISPLAY_COMMAND_AND_RESULTS,
+                TGDB_CLIENT_COMMAND_ACTION_NONE,
                 (void*) nacom ); 
     }
 
 	/* Append to the command_container the commands */
-	queue_append ( command_container, command );
+	tgdb_list_append ( client_command_list, client_command );
 
     return 0;
 }

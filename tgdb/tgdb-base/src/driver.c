@@ -236,6 +236,13 @@ int main(int argc, char **argv){
         goto driver_end;
     }
 
+	
+	/* Ask TGDB to print error messages */
+	if ( tgdb_set_verbose_gui_command_output ( tgdb, 1 ) != 1 ) {
+		err_msg("%s:%d driver error\n", __FILE__, __LINE__);
+		goto driver_end;
+	}
+
 	set_up_signal();
 
     main_loop(gdb_fd, child_fd, tgdb_rlctx);

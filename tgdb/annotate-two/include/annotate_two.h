@@ -13,7 +13,7 @@
 #include <sys/types.h>
 #endif /* HAVE_SYS_TYPES_H */
 
-#include "tgdb_interface.h"
+#include "tgdb_client_command.h"
 
 #define TTY_NAME_SIZE 64
 
@@ -99,12 +99,9 @@ struct annotate_two {
 	char inferior_tty_name[TTY_NAME_SIZE];
 
 	/** 
-	 * TODO
-	 * This is a temporary solution. I think.
-	 * If the subsystem appends commands to this queue, they will
-	 * be returned to libtgdb for execution.
+	 * This is a list of all the commands generated since in the last call. 
 	 */
-	struct queue *command_container;
+	struct tgdb_list *client_command_list;
 
 	/** 
 	 * This is to determine if the first annotation prompt has been reached

@@ -119,6 +119,17 @@ int tgdb_list_foreach ( struct tgdb_list *tlist, tgdb_list_func func );
  */
 int tgdb_list_free ( struct tgdb_list *tlist, tgdb_list_func func );
 
+/*
+ * This will clear a list.
+ *
+ * tlist
+ * 	  The list to free
+ *
+ * returns
+ *    -1 on error, 0 on success.
+ */
+int tgdb_list_clear ( struct tgdb_list *tlist );
+
 /* 
  * Gets the size of the list.
  *

@@ -33,6 +33,9 @@ void err_msg(const char *fmt, ...);
  * Print a message and terminate. */
 void err_quit(const char *fmt, ...);
 
+/* if value is 1, print to stderr, if 0, don't print */
+void err_verbose ( int value );
+
 #ifdef __cplusplus
 }
 #endif

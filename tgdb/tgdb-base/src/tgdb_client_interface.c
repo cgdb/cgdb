@@ -30,7 +30,6 @@ static struct tgdb_client_debugger_interfaces {
 
 	int (*tgdb_client_initialize_context)(
 			void *ctx,
-			struct queue *command_container,
 			int *debugger_stdin, int *debugger_stdout,
 			int *inferior_stdin, int *inferior_stdout );
 
@@ -44,8 +43,7 @@ static struct tgdb_client_debugger_interfaces {
 			void *ctx );
 
 	int (*tgdb_client_tgdb_ran_command) ( 
-			void *ctx,
-			struct queue *command_container );
+			void *ctx );
 
 	int (*tgdb_client_prepare_for_command) (
 			void *ctx,
@@ -56,29 +54,27 @@ static struct tgdb_client_debugger_interfaces {
 
 	int (*tgdb_client_parse_io) ( 
 			void *ctx,
-			struct queue *command_container,
 			const char *input_data, const size_t input_data_size,
 			char *debugger_output, size_t *debugger_output_size,
 			char *inferior_output, size_t *inferior_output_size,
 		    struct tgdb_list *list);
 
+	struct tgdb_list *(*tgdb_client_get_client_commands) ( 
+			void *ctx );
+
 	int (*tgdb_client_get_absolute_path) ( 
 			void *ctx, 
-			struct queue *command_container,
 			const char *relative_path );
 
 	int (*tgdb_client_get_inferior_source_files) ( 
-			void *ctx, 
-			struct queue *command_container );
+			void *ctx );
 
 	int (*tgdb_client_change_debugger_prompt) (
 			void *ctx,
-			struct queue *command_container,
 			const char *prompt);
 
 	int (*tgdb_client_completion_callback) (
 			void *ctx,
-			struct queue *command_container,
 			const char *completion_command);
 
 	char *(*tgdb_client_return_command) (
@@ -96,7 +92,6 @@ static struct tgdb_client_debugger_interfaces {
 
 	int (*tgdb_client_open_new_tty) ( 
 			void *ctx,
-			struct queue *command_container,
 			int *inferior_stdin, 
 			int *inferior_stdout );
 
@@ -126,6 +121,8 @@ static struct tgdb_client_debugger_interfaces {
 		a2_is_misc_prompt,
 		/* tgdb_client_parse_io */
 		a2_parse_io,
+		/* tgdb_client_get_client_commands */
+		a2_get_client_commands,
 		/* tgdb_client_get_absolute_path */
 		a2_get_source_absolute_filename,
 		/* tgdb_client_get_inferior_source_files */
@@ -292,7 +289,6 @@ struct tgdb_client_context *tgdb_client_create_context (
 
 int tgdb_client_initialize_context ( 
 	struct tgdb_client_context *tcc,
-	struct queue *command_container,
 	int *debugger_stdin, int *debugger_stdout,
 	int *inferior_stdin, int *inferior_stdout ) {
 
@@ -303,7 +299,7 @@ int tgdb_client_initialize_context (
 	}
 
 	return tcc->tgdb_client_interface->tgdb_client_initialize_context (
-			tcc->tgdb_debugger_context, command_container, 
+			tcc->tgdb_debugger_context, 
 			debugger_stdin, debugger_stdout,
 			inferior_stdin, inferior_stdout );
 }
@@ -334,9 +330,7 @@ int tgdb_client_is_client_ready ( struct tgdb_client_context *tcc ) {
 			tcc->tgdb_debugger_context );
 }
 
-int tgdb_client_tgdb_ran_command ( 
-		struct tgdb_client_context *tcc, 
-		struct queue *command_container ) {
+int tgdb_client_tgdb_ran_command ( struct tgdb_client_context *tcc ) {
 	if ( tcc == NULL || tcc->tgdb_client_interface == NULL ) {
 		err_msg("%s:%d tgdb_client_tgdb_ran_command unimplemented", 
 				__FILE__, __LINE__);
@@ -344,7 +338,7 @@ int tgdb_client_tgdb_ran_command (
 	}
 
 	return tcc->tgdb_client_interface->tgdb_client_tgdb_ran_command ( 
-			tcc->tgdb_debugger_context, command_container );
+			tcc->tgdb_debugger_context );
 }
 
 int tgdb_client_prepare_for_command ( 
@@ -373,26 +367,36 @@ int tgdb_client_can_tgdb_run_commands ( struct tgdb_client_context *tcc ) {
 
 int tgdb_client_parse_io ( 
 		struct tgdb_client_context *tcc,
-		struct queue *command_container,
 		const char *input_data, const size_t input_data_size,
 		char *debugger_output, size_t *debugger_output_size,
 		char *inferior_output, size_t *inferior_output_size,
 	    struct tgdb_list *command_list) {
 	if ( tcc == NULL || tcc->tgdb_client_interface == NULL ) {
-		err_msg("%s:%d tgdb_client_parse_io unimplemented", __FILE__, __LINE__);
+		err_msg("%s:%d tgdb_client_parse_io error", __FILE__, __LINE__);
 		return -1;
 	}
 
 	return tcc->tgdb_client_interface->tgdb_client_parse_io ( 
-			tcc->tgdb_debugger_context, command_container, 
+			tcc->tgdb_debugger_context, 
 			input_data, input_data_size,
 			debugger_output, debugger_output_size,
 			inferior_output, inferior_output_size, command_list );
 }
 
+struct tgdb_list *tgdb_client_get_client_commands ( 
+		struct tgdb_client_context *tcc ) {
+
+	if ( tcc == NULL || tcc->tgdb_client_interface == NULL ) {
+		err_msg("%s:%d tgdb_client_get_client_commands error", __FILE__, __LINE__);
+		return NULL;
+	}
+
+	return tcc->tgdb_client_interface->tgdb_client_get_client_commands (
+			tcc->tgdb_debugger_context );
+}
+
 int tgdb_client_get_absolute_path ( 
 		struct tgdb_client_context *tcc, 
-		struct queue *command_container,
 		const char *relative_path ) {
 	if ( tcc == NULL || tcc->tgdb_client_interface == NULL ) {
 		err_msg("%s:%d tgdb_client_get_absolute_path unimplemented", 
@@ -401,12 +405,10 @@ int tgdb_client_get_absolute_path (
 	}
 	
 	return tcc->tgdb_client_interface->tgdb_client_get_absolute_path ( 
-			tcc->tgdb_debugger_context, command_container, relative_path );
+			tcc->tgdb_debugger_context, relative_path );
 }
 
-int tgdb_client_get_inferior_source_files ( 
-		struct tgdb_client_context *tcc, 
-		struct queue *command_container ) {
+int tgdb_client_get_inferior_source_files ( struct tgdb_client_context *tcc ) {
 	if ( tcc == NULL || tcc->tgdb_client_interface == NULL ) {
 		err_msg("%s:%d tgdb_client_get_inferior_source_files unimplemented", 
 				__FILE__, __LINE__);
@@ -414,19 +416,17 @@ int tgdb_client_get_inferior_source_files (
 	}
 	
 	return tcc->tgdb_client_interface->tgdb_client_get_inferior_source_files ( 
-			tcc->tgdb_debugger_context, command_container );
+			tcc->tgdb_debugger_context );
 }
 
 int tgdb_client_change_debugger_prompt(
 		struct tgdb_client_context *tcc,
-		struct queue *command_container,
 		const char *prompt) {
 	return -1;
 }
 
 int tgdb_client_completion_callback(
 		struct tgdb_client_context *tcc,
-		struct queue *command_container,
 		const char *completion_command) {
 	if ( tcc == NULL || tcc->tgdb_client_interface == NULL ) {
 		err_msg("%s:%d tgdb_client_completion_callback unimplemented", 
@@ -435,7 +435,7 @@ int tgdb_client_completion_callback(
 	}
 	
 	return tcc->tgdb_client_interface->tgdb_client_completion_callback ( 
-			tcc->tgdb_debugger_context, command_container, completion_command );
+			tcc->tgdb_debugger_context, completion_command );
 }
 
 char *tgdb_client_return_command (
@@ -481,7 +481,6 @@ pid_t tgdb_client_get_debugger_pid ( struct tgdb_client_context *tcc ) {
 
 int tgdb_client_open_new_tty ( 
 		struct tgdb_client_context *tcc,
-		struct queue *command_container,
 		int *inferior_stdin, 
 		int *inferior_stdout ) {
 	if ( tcc == NULL || tcc->tgdb_client_interface == NULL ) {
@@ -491,7 +490,7 @@ int tgdb_client_open_new_tty (
 	}
 	
 	return tcc->tgdb_client_interface->tgdb_client_open_new_tty ( 
-			tcc->tgdb_debugger_context, command_container, 
+			tcc->tgdb_debugger_context, 
 			inferior_stdin, inferior_stdout );
 }
 

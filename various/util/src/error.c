@@ -26,9 +26,21 @@
 
 #define MAXLINE 4096
 
+/* TODO: This needs to become context dependent.
+ * Otherwise, multiple instances of TGDB will have the same buffer's.
+ */
+static int print_to_stderr = 0;
+
 static char err_buf[MAXLINE], err_buf_internal[MAXLINE];
 
 static void err_doit(int errnoflag, const char *fmt, va_list ap);
+
+void err_verbose ( int value ) {
+	if ( value == 1 )
+		print_to_stderr = 1;
+	else if ( value == 0 )
+		print_to_stderr = 0;
+}
 
 /* Nonfatal error related to a system call.
  * Print a message and return. */
@@ -110,9 +122,11 @@ static void err_doit(int errnoflag, const char *fmt, va_list ap) {
     * Change to see on stdout
     *************************/
     /* in case stdout and stderr are the same */
-   /*fflush(stdout);      
-   fputs(buf, stderr);
-   fflush(stderr);*/
+   if ( print_to_stderr ) {
+	   fflush(stdout);      
+	   fputs(buf, stderr);
+	   fflush(stderr);
+   }
 
    return;
 }

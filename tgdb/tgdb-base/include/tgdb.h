@@ -509,6 +509,26 @@ int tgdb_catch_signals ( struct tgdb *tgdb, int catch_signals );
  */
 int tgdb_set_verbose_gui_command_output ( struct tgdb *tgdb, int value );
 
+/**
+ * This will make TGDB handle error's in a verbose mode.
+ * The basically mean's that when TGDB find's an error, the message is
+ * printed to stdout/stderr. Normally this is not acceptable because TGDB can
+ * simple not print when any front end is using it. Imparticular, TGDB can
+ * not print when a curses based front end is using it.
+ *
+ * \param tgdb
+ * An instance of the tgdb library to operate on.
+ *
+ * \param value
+ * if -1, query to see if the option is set.
+ * If 0, the option will be turned off.
+ * If 1, the option will be turned on.
+ *
+ * @return
+ * 1 if option is set, otherwise 0
+ */
+int tgdb_set_verbose_error_handling ( struct tgdb *tgdb, int value );
+
 //@}
 
 #ifdef __cplusplus

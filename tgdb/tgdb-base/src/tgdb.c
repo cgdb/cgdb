@@ -28,18 +28,16 @@
 #endif
 
 #include "tgdb.h"
-#include "tgdb_interface.h"
+#include "tgdb_command.h"
+#include "tgdb_client_command.h"
 #include "tgdb_client_interface.h"
-#include "a2-tgdb.h"
 #include "fs_util.h"
-#include "gdbmi_tgdb.h"
 #include "error.h"
 #include "rlctx.h"
 #include "ibuf.h"
 #include "io.h"
+#include "queue.h"
 
-#include "state_machine.h"
-#include "commands.h"
 #include "pseudo.h" /* SLAVE_SIZE constant */
 #include "fork_util.h"
 #include "sys_util.h"
@@ -102,11 +100,6 @@ struct tgdb {
 	 * This sends commands to the readline program.
 	 */
 	struct queue *rlc_input_queue;
-
-	/**
-	 * This is used to recieve commands from the lower level subsystem.
-	 */
-	struct queue *command_container;
 
 	/** 
 	 * Interface to readline context
@@ -181,24 +174,95 @@ struct tgdb {
 	 * An iterator into command_list.
 	 */
 	tgdb_list_iterator *command_list_iterator;
+
+	/**
+	 * This is a TGDB option.
+	 *
+	 * It determines if TGDB print's it's error messages to stdout/stderr.
+	 * If it is 0, don't print them.
+	 * If it is 1, print them.
+	 * The default is 0.
+	 */
+	int tgdb_verbose_error_handling;
 };
 
 /* Temporary prototypes */
-static int tgdb_deliver_command ( struct tgdb *tgdb, int fd, struct tgdb_client_command *command );
+static int tgdb_deliver_command ( struct tgdb *tgdb, int fd, struct tgdb_queue_command *command );
 static int tgdb_run_command( struct tgdb *tgdb );
 static int tgdb_init_readline ( struct tgdb *tgdb, char *config_dir, int *fd );
-static int tgdb_dispatch_command ( struct tgdb *tgdb, struct tgdb_client_command *com );
+static int tgdb_dispatch_command ( struct tgdb *tgdb, struct tgdb_queue_command *com );
 
-static int tgdb_process_command_container ( struct tgdb *tgdb ) {
-	int i;
-	int length = queue_size ( tgdb->command_container );
-	
-	for ( i = 0; i < length; i++ ) {
-		if ( tgdb_dispatch_command ( tgdb, queue_pop ( tgdb->command_container )) == -1 ) {
+/**
+ * Process the commands that were created by the client
+ *
+ * \param tgdb
+ * The TGDB context
+ *
+ * @return
+ * -1 on error, 0 on success
+ */
+static int tgdb_process_client_commands ( struct tgdb *tgdb ) {
+	struct tgdb_list *client_command_list;
+	tgdb_list_iterator *iterator;
+	struct tgdb_client_command *client_command;
+	struct tgdb_queue_command *command;
+	char *command_data = NULL;
+
+	client_command_list = tgdb_client_get_client_commands ( tgdb->tcc );
+	iterator = tgdb_list_get_first ( client_command_list );
+
+	while ( iterator ) {
+		enum tgdb_command_choice command_choice;
+		enum tgdb_command_action_choice action_choice = TGDB_COMMAND_ACTION_NONE;
+
+		client_command = ( struct tgdb_client_command *) tgdb_list_get_item ( iterator );
+
+		switch ( client_command->command_choice ) {
+			case TGDB_CLIENT_COMMAND_NORMAL:
+				command_choice = TGDB_COMMAND_TGDB_CLIENT;
+				break;
+
+			case TGDB_CLIENT_COMMAND_PRIORITY:
+				command_choice = TGDB_COMMAND_TGDB_CLIENT_PRIORITY;
+				break;
+				
+			case TGDB_CLIENT_COMMAND_TGDB_BASE:
+				command_choice = TGDB_COMMAND_READLINE;
+				switch ( client_command->action_choice ) {
+					case TGDB_CLIENT_COMMAND_ACTION_NONE:
+						break;
+					case TGDB_CLIENT_COMMAND_ACTION_CONSOLE_SET_PROMPT:
+						action_choice = TGDB_COMMAND_ACTION_CONSOLE_SET_PROMPT;
+						command_data = strdup ( client_command->tgdb_client_command_data );
+						break;
+
+					default:
+						err_msg("%s:%d unknown switch error", __FILE__, __LINE__);
+						return -1;
+				}
+				break;
+
+			default:
+				err_msg("%s:%d unknown switch error", __FILE__, __LINE__);
+				return -1;
+		}
+
+		command = tgdb_command_create ( 
+				command_data,
+				command_choice,
+				action_choice,
+				client_command );
+
+		if ( tgdb_dispatch_command ( tgdb, command ) == -1 ) {
 			err_msg("%s:%d tgdb_dispatch_command error", __FILE__, __LINE__);
 			return -1;
 		}
+
+		iterator = tgdb_list_next ( iterator );
 	}
+
+	/* free the list of client commands */
+	tgdb_list_clear ( client_command_list );
 
 	return 0;
 }
@@ -221,8 +285,6 @@ static struct tgdb *initialize_tgdb_context ( void ) {
 	tgdb->oob_input_queue = NULL;
 	tgdb->rlc_input_queue = NULL;
 
-	tgdb->command_container = NULL;
-
 	tgdb->rl 			  = NULL;
 
 	tgdb->current_command = NULL;
@@ -236,6 +298,8 @@ static struct tgdb *initialize_tgdb_context ( void ) {
 	tgdb->show_gui_commands = 0;
 
 	tgdb->command_list = tgdb_list_init();
+
+	tgdb->tgdb_verbose_error_handling = 0;
 	
 	return tgdb;
 }
@@ -305,9 +369,6 @@ struct tgdb* tgdb_initialize (
     /* initialize the readline command queue */
     tgdb->rlc_input_queue = queue_init();
 
-    /* initialize the queue that the ss can append to */
-    tgdb->command_container = queue_init();
-
 	tgdb->tcc = tgdb_client_create_context ( 
 			debugger, argc, argv, config_dir,
 			TGDB_CLIENT_DEBUGGER_GNU_GDB,
@@ -321,14 +382,13 @@ struct tgdb* tgdb_initialize (
 
 	if ( tgdb_client_initialize_context ( 
 				tgdb->tcc,
-				tgdb->command_container,
 				&(tgdb->debugger_stdin), &(tgdb->debugger_stdout), 
 				&(tgdb->inferior_stdin), &(tgdb->inferior_stdout)) == -1 ) {
         err_msg("%s:%d tgdb_client_initialize error", __FILE__, __LINE__);
         return NULL; 
 	}
 
-	tgdb_process_command_container ( tgdb );
+	tgdb_process_client_commands ( tgdb );
 
 	*debugger_fd = tgdb->debugger_stdout;
 	*inferior_fd = tgdb->inferior_stdout;
@@ -368,15 +428,6 @@ static char* tgdb_client_modify_breakpoint_call(struct tgdb *tgdb, const char *f
 	return tgdb_client_modify_breakpoint ( tgdb->tcc, file, line , b );
 }
 
-
-/*static void init_gdbmi ( void ) {
-    tgdb_get_sources                    = gdbmi_tgdb_get_sources;
-    tgdb_get_source_absolute_filename   = gdbmi_tgdb_get_source_absolute_filename;
-    tgdb_err_msg                        = gdbmi_tgdb_err_msg;
-    tgdb_client_shutdown                = gdbmi_tgdb_shutdown;
-	tgdb_get_client_command             = gdbmi_tgdb_return_client_command;
-	tgdb_client_modify_breakpoint_call  = gdbmi_tgdb_client_modify_breakpoint;
-}*/
 
 /* These functions are used to determine the state of libtgdb */
 
@@ -440,7 +491,7 @@ static int tgdb_handle_signals ( struct tgdb *tgdb ) {
     /* TODO: Put signal blocking code here so that ^c is not pressed while 
      * checking for it */
 
-        queue_free_list(tgdb->gdb_input_queue, tgdb_interface_free_command);
+        queue_free_list(tgdb->gdb_input_queue, tgdb_command_destroy);
         tgdb->control_c = 0;
 
 		/* Tell readline that the signal occured */
@@ -461,98 +512,117 @@ static int tgdb_handle_signals ( struct tgdb *tgdb ) {
  * Sends a command to the debugger.
  *
  * \param tgdb
- *  An instance of the tgdb library to operate on.
+ * An instance of the tgdb library to operate on.
  *
  * \param command
- *  This is the command that should be sent to the debugger.
+ * This is the command that should be sent to the debugger.
  *
- * \param bct
- *  This tells tgdb_send who is sending the command. Currently, if readline 
- *  gets a command from the user, it calls this function. Also, this function
- *  gets called usually when the GUI tries to run a command.
+ * \param command_choice
+ * This tells tgdb_send who is sending the command. Currently, if readline 
+ * gets a command from the user, it calls this function. Also, this function
+ * gets called usually when the GUI tries to run a command.
  *
  * @return
- *  0 on success, or -1 on error.
+ * 0 on success, or -1 on error.
  */
-static int tgdb_send(struct tgdb *tgdb, char *command, enum buffer_command_type bct) {
-    struct tgdb_client_command *ncom;
+static int tgdb_send (
+		struct tgdb *tgdb, 
+		char *command, 
+		enum tgdb_command_choice command_choice) {
+
+    struct tgdb_client_command *tcc;
+	struct tgdb_queue_command *tc;
 	struct ibuf *temp_command = ibuf_init ();
     int length = strlen ( command );
 
+	/* Add a newline to the end of the command if it doesn't exist */
 	ibuf_add ( temp_command, command );
 
     if ( command[length-1] != '\n' )
 		ibuf_addchar ( temp_command, '\n' );
 
-    ncom = tgdb_interface_new_command ( 
+	/* Create the client command */
+    tcc = tgdb_client_command_create ( 
             ibuf_get ( temp_command ), 
-            bct, 
-            COMMANDS_SHOW_USER_OUTPUT, 
-            COMMANDS_VOID, 
+			TGDB_CLIENT_COMMAND_NORMAL,
+            TGDB_CLIENT_COMMAND_DISPLAY_COMMAND_AND_RESULTS, 
+            TGDB_CLIENT_COMMAND_ACTION_NONE, 
             NULL );
 
 	ibuf_free ( temp_command );
 	temp_command = NULL;
 
-    if ( tgdb_dispatch_command ( tgdb, ncom ) == -1 ) {
+	/* Create the TGDB command */
+	tc = tgdb_command_create ( 
+			NULL,
+			command_choice, 
+			TGDB_COMMAND_ACTION_NONE,
+			tcc );
+
+    if ( tgdb_dispatch_command ( tgdb, tc ) == -1 ) {
         err_msg("%s:%d tgdb_dispatch_command error", __FILE__, __LINE__);
         return -1;
     }
     
-    if ( tgdb_client_tgdb_ran_command ( tgdb->tcc, tgdb->command_container ) == -1 ) {
+    if ( tgdb_client_tgdb_ran_command ( tgdb->tcc ) == -1 ) {
         err_msg("%s:%d commands_user_ran_command error", __FILE__, __LINE__);
         return -1;
     }
 
-	tgdb_process_command_container ( tgdb );
+	tgdb_process_client_commands ( tgdb );
 
 	return 0;
 }
 
-/* tgdb_dispatch_command:
- * ----------------------
- *
+/**
  * This will dispatch a command to be run now if ready, otherwise,
  * the command will be put in a queue to run later.
  *
- * com - The command to dispatch
+ * \param tgdb
+ * The TGDB context to use.
  *
- * return       - 0 on success or -1 on error
+ * \param command
+ * The command to dispatch
+ *
+ * @return
+ * 0 on success or -1 on error
  */
-static int tgdb_dispatch_command ( struct tgdb *tgdb, struct tgdb_client_command *com ) {
+static int tgdb_dispatch_command ( 
+		struct tgdb *tgdb, 
+		struct tgdb_queue_command *command ) {
+
     int ret = 0;
 
-    switch ( com->com_type ) {
-        case BUFFER_GUI_COMMAND:
-        case BUFFER_TGDB_COMMAND:
+    switch ( command->command_choice ) {
+        case TGDB_COMMAND_FRONT_END:
+		case TGDB_COMMAND_TGDB_CLIENT:
             if ( tgdb_can_issue_command(tgdb) )
-                ret = tgdb_deliver_command ( tgdb, tgdb->debugger_stdin, com );
+                ret = tgdb_deliver_command ( tgdb, tgdb->debugger_stdin, command );
             else
-                queue_append ( tgdb->gdb_input_queue, com );
+                queue_append ( tgdb->gdb_input_queue, command );
             break;
 
-        case BUFFER_USER_COMMAND:
+        case TGDB_COMMAND_CONSOLE:
             if ( tgdb_can_issue_command(tgdb) )
-                ret = tgdb_deliver_command ( tgdb, tgdb->debugger_stdin, com );
+                ret = tgdb_deliver_command ( tgdb, tgdb->debugger_stdin, command );
             else
-                queue_append ( tgdb->raw_input_queue, com );
+                queue_append ( tgdb->raw_input_queue, command );
             break;
         
-        case BUFFER_READLINE_COMMAND:
+        case TGDB_COMMAND_READLINE:
             if ( tgdb_can_issue_command(tgdb) ) {
-                ret = tgdb_deliver_command ( tgdb, tgdb->debugger_stdin, com );
+                ret = tgdb_deliver_command ( tgdb, tgdb->debugger_stdin, command );
             } else
-                queue_append ( tgdb->rlc_input_queue, com );
+                queue_append ( tgdb->rlc_input_queue, command );
             break;
 
-        case BUFFER_OOB_COMMAND:
+        case TGDB_COMMAND_TGDB_CLIENT_PRIORITY:
             if ( tgdb_can_issue_command(tgdb) )
-                ret = tgdb_deliver_command ( tgdb, tgdb->debugger_stdin, com );
+                ret = tgdb_deliver_command ( tgdb, tgdb->debugger_stdin, command );
             else
-                queue_append ( tgdb->oob_input_queue, com ); break; 
-        case BUFFER_VOID:
+                queue_append ( tgdb->oob_input_queue, command ); break; 
         default:
-            err_msg("%s:%d invaled com_type", __FILE__, __LINE__);
+            err_msg("%s:%d unimplemented command", __FILE__, __LINE__);
             return -1;
     }
 
@@ -562,36 +632,45 @@ static int tgdb_dispatch_command ( struct tgdb *tgdb, struct tgdb_client_command
     return 0;
 }
 
-/* tgdb_deliver_command:
- * ---------------------
- *  
+/** 
  *  Sends a command to the debugger  
  *
- *  fd      - the file descriptor to write to ( debugger's input )
- *  command - the command to run
+ * \param tgdb
+ * The TGDB context to use.
+ *
+ * \param fd 
+ * the file descriptor to write to ( debugger's input )
+ *
+ * \param command 
+ * the command to run
  *
  *  NOTE: This function assummes valid commands are being sent to it. 
  *        Error checking should be done before inserting into queue.
  */
-static int tgdb_deliver_command ( struct tgdb *tgdb, int fd, struct tgdb_client_command *command ) {
+static int tgdb_deliver_command ( 
+		struct tgdb *tgdb, 
+		int fd, 
+		struct tgdb_queue_command *command ) {
 
-    if ( command->com_type == BUFFER_READLINE_COMMAND ) {
+	struct tgdb_client_command *client_command = command->client_command;
+
+    if ( command->command_choice == TGDB_COMMAND_READLINE ) {
         /* A readline command handled by tgdb-base */
-        switch ( command->com_to_run ) {
-            case COMMANDS_SET_PROMPT:
-                if ( rlctx_change_prompt ( tgdb->rl, command->data ) == -1 ) {
+        switch ( command->action_choice ) {
+            case TGDB_COMMAND_ACTION_CONSOLE_SET_PROMPT:
+                if ( rlctx_change_prompt ( tgdb->rl, client_command->tgdb_client_command_data ) == -1 ) {
                     err_msg("%s:%d rlctx_change_prompt  error", __FILE__, __LINE__);
                     return -1;
                 }
                 break;
-            case COMMANDS_REDISPLAY:
+            case TGDB_COMMAND_ACTION_CONSOLE_REDISPLAY_PROMPT:
                 if ( rlctx_redisplay ( tgdb->rl ) == -1 ) {
                     err_msg("%s:%d rlctx_change_prompt  error", __FILE__, __LINE__);
                     return -1;
                 }
                 break;
             default:
-                err_msg("(%s:%d) rlctx_send_char failed", __FILE__, __LINE__);
+                err_msg("%s:%d rlctx_send_char failed", __FILE__, __LINE__);
                 return -1;
         }
     } else {
@@ -603,18 +682,21 @@ static int tgdb_deliver_command ( struct tgdb *tgdb, int fd, struct tgdb_client_
 		 * purposes only, or for people who want to know the commands there
 		 * debugger is being given.
 		 */
-		if ( command->com_type == BUFFER_GUI_COMMAND ) 
-		   tgdb->last_gui_command = xstrdup ( command->data );
+		if ( command->command_choice == TGDB_COMMAND_FRONT_END ) 
+		   tgdb->last_gui_command = xstrdup ( client_command->tgdb_client_command_data );
 
         /* A command for the debugger */
-        if ( tgdb_client_prepare_for_command ( tgdb->tcc, command ) == -1 ) {
-            return -2;
-        }
+		if ( tgdb_client_prepare_for_command ( tgdb->tcc, client_command ) == -1 ) {
+			return -2;
+		}
     
         /* A regular command from the client */
-        io_debug_write_fmt ( "<%s>", command -> data );
+        io_debug_write_fmt ( "<%s>", client_command->tgdb_client_command_data );
 
-        io_writen ( fd, command -> data, strlen ( command -> data ) );
+        io_writen ( 
+				fd, 
+				client_command->tgdb_client_command_data, 
+				strlen ( client_command->tgdb_client_command_data ) );
     }
 
     return 0;
@@ -633,10 +715,10 @@ tgdb_run_command_tag:
      */
     if ( queue_size(tgdb->rlc_input_queue) > 0 ) {
         /* This runs commands through readline */
-        struct tgdb_client_command *item = NULL;
+        struct tgdb_queue_command *item = NULL;
         item = queue_pop(tgdb->rlc_input_queue);
         tgdb_deliver_command(tgdb, tgdb->debugger_stdin, item);
-        tgdb_interface_free_command ( item );
+        tgdb_command_destroy ( item );
         
     /* The out of band commands should always be run first */
     } else if ( queue_size(tgdb->oob_input_queue) > 0 ) {
@@ -644,13 +726,13 @@ tgdb_run_command_tag:
          * However, if an assumption is made that a misc
          * prompt can never be set while in this spot.
          */
-        struct tgdb_client_command *item = NULL;
+        struct tgdb_queue_command *item = NULL;
         item = queue_pop(tgdb->oob_input_queue);
         tgdb_deliver_command(tgdb, tgdb->debugger_stdin, item);
-        tgdb_interface_free_command ( item );
+        tgdb_command_destroy ( item );
     /* If the queue is not empty, run a command */
     } else if ( queue_size(tgdb->gdb_input_queue) > 0 ) {
-        struct tgdb_client_command *item = NULL;
+        struct tgdb_queue_command *item = NULL;
         item = queue_pop(tgdb->gdb_input_queue);
 
         /* TODO: The comment and code below is in only one of 2 spots.
@@ -661,8 +743,8 @@ tgdb_run_command_tag:
          * In fact throw them out for now, since they are only 
          * 'info breakpoints' */
         if ( tgdb_client_can_tgdb_run_commands(tgdb->tcc) == TRUE ) {
-            if ( item->com_type != BUFFER_USER_COMMAND ) {
-                tgdb_interface_free_command ( item );
+            if ( item->command_choice != TGDB_COMMAND_CONSOLE ) {
+                tgdb_command_destroy ( item );
                 goto tgdb_run_command_tag;
             }
         }
@@ -674,28 +756,27 @@ tgdb_run_command_tag:
 
         if ( tgdb->tgdb_partially_run_command && 
              /* Don't redisplay the prompt for the redisplay prompt command :) */
-             item->com_to_run != COMMANDS_REDISPLAY) {
-            struct tgdb_client_command *ncom;
+             item->action_choice != TGDB_COMMAND_ACTION_CONSOLE_REDISPLAY_PROMPT) {
+			struct tgdb_queue_command *command;
 
-            ncom = tgdb_interface_new_command ( 
-                    NULL,
-                    BUFFER_READLINE_COMMAND, 
-                    COMMANDS_SHOW_USER_OUTPUT, 
-                    COMMANDS_REDISPLAY, 
-                    NULL );
+			command = tgdb_command_create ( 
+					NULL,
+					TGDB_COMMAND_READLINE,
+					TGDB_COMMAND_ACTION_CONSOLE_REDISPLAY_PROMPT,
+					NULL);
 
-            if ( tgdb_dispatch_command ( tgdb, ncom ) == -1 ) {
+            if ( tgdb_dispatch_command ( tgdb, command ) == -1 ) {
                 err_msg("%s:%d tgdb_dispatch_command error", __FILE__, __LINE__);
                 return -1;
             }
         }
         
-        tgdb_interface_free_command ( item );
+        tgdb_command_destroy ( item );
 
     /* If the user has typed a command, send it through readline */
     } else if ( queue_size(tgdb->raw_input_queue) > 0 ) { 
-        struct tgdb_client_command *item = queue_pop(tgdb->raw_input_queue);
-        char *data = item->data;
+        struct tgdb_queue_command *item = queue_pop(tgdb->raw_input_queue);
+        char *data = item->tgdb_command_data;
         int i, j = strlen ( data );
 
         for ( i = 0; i < j; i++ ) {
@@ -705,7 +786,7 @@ tgdb_run_command_tag:
             }
         }
 
-        free ( item->data ); 
+        free ( item->tgdb_command_data ); 
     /* Send the partially typed command through readline */
     } else if ( tgdb->current_command != NULL ) {
         int i,j = ibuf_length(tgdb->current_command);
@@ -735,21 +816,21 @@ static int tgdb_command_callback(void *p, const char *line) {
 	struct tgdb *tgdb = (struct tgdb *)p;
 	ibuf_add ( command, line );
 	ibuf_addchar ( command, '\n' );
-    tgdb_send(tgdb, ibuf_get ( command ), BUFFER_USER_COMMAND);
+    tgdb_send(tgdb, ibuf_get ( command ), TGDB_COMMAND_CONSOLE);
 	ibuf_free ( command );
 	command = NULL;
     return 0;
 }
 
 int tgdb_change_prompt ( struct tgdb *tgdb, const char *prompt ) {
-    struct tgdb_client_command *ncom= tgdb_interface_new_command ( 
-            prompt, 
-            BUFFER_READLINE_COMMAND, 
-            COMMANDS_HIDE_OUTPUT, 
-            COMMANDS_SET_PROMPT, 
-            NULL );
 
-    if ( tgdb_dispatch_command ( tgdb, ncom ) == -1 ) {
+	struct tgdb_queue_command *command = tgdb_command_create ( 
+			prompt,
+			TGDB_COMMAND_READLINE,
+			TGDB_COMMAND_ACTION_CONSOLE_SET_PROMPT,
+			NULL );
+
+    if ( tgdb_dispatch_command ( tgdb, command ) == -1 ) {
         err_msg("%s:%d tgdb_dispatch_command error", __FILE__, __LINE__);
         return -1;
     }
@@ -757,24 +838,25 @@ int tgdb_change_prompt ( struct tgdb *tgdb, const char *prompt ) {
     return 0;
 }
 
+/**
+ * This is called called when the user desires tab completion.
+ */
 static int tgdb_completion_callback ( void *p, const char *line ) {
-    struct tgdb_client_command *ncom;
+	struct tgdb_queue_command *command;
 	struct tgdb *tgdb = (struct tgdb *)p;
 
     /* Allow the client to generate a command for tab completion */
-    tgdb_client_completion_callback ( tgdb->tcc, tgdb->command_container, line ); 
+    tgdb_client_completion_callback ( tgdb->tcc, line ); 
 
-	tgdb_process_command_container ( tgdb );
+	tgdb_process_client_commands ( tgdb );
 
-    /* Redisplay the prompt */
-    ncom = tgdb_interface_new_command ( 
-            NULL,
-            BUFFER_READLINE_COMMAND, 
-            COMMANDS_SHOW_USER_OUTPUT, 
-            COMMANDS_REDISPLAY, 
-            NULL );
+	command = tgdb_command_create ( 
+			NULL,
+			TGDB_COMMAND_READLINE,
+			TGDB_COMMAND_ACTION_CONSOLE_REDISPLAY_PROMPT,
+			NULL );
 
-    if ( tgdb_dispatch_command ( tgdb, ncom ) == -1 ) {
+    if ( tgdb_dispatch_command ( tgdb, command ) == -1 ) {
         err_msg("%s:%d tgdb_dispatch_command error", __FILE__, __LINE__);
         return -1;
     }
@@ -1026,13 +1108,13 @@ size_t tgdb_recv_debugger_data ( struct tgdb *tgdb, char *buf, size_t n ) {
 		size_t infbuf_size;
 		int result;
 		result = tgdb_client_parse_io ( 
-				tgdb->tcc, tgdb->command_container, 
+				tgdb->tcc, 
 				local_buf, size, 
 				buf, &buf_size, 
 				infbuf, &infbuf_size, 
 				tgdb->command_list );
 
-		tgdb_process_command_container ( tgdb );
+		tgdb_process_client_commands ( tgdb );
 
 		if ( result == 0 ) {
 			/* success, and more to parse, ss isn't done */
@@ -1086,10 +1168,9 @@ int tgdb_tty_new ( struct tgdb *tgdb ) {
 	int ret =
     tgdb_client_open_new_tty ( 
 			tgdb->tcc, 
-			tgdb->command_container, 
 			&tgdb->inferior_stdin, &tgdb->inferior_stdout );
 
-	tgdb_process_command_container ( tgdb );
+	tgdb_process_client_commands ( tgdb );
 
 	return ret;
 }
@@ -1099,20 +1180,19 @@ const char *tgdb_tty_name ( struct tgdb *tgdb ) {
 }
 
 int tgdb_get_inferiors_source_files ( struct tgdb *tgdb ) {
-	int ret = tgdb_client_get_inferior_source_files ( 
-			tgdb->tcc, tgdb->command_container );
-	tgdb_process_command_container ( tgdb );
+	int ret = tgdb_client_get_inferior_source_files ( tgdb->tcc );
+	tgdb_process_client_commands ( tgdb );
 	return ret;
 }
 
 int tgdb_get_absolute_path ( struct tgdb *tgdb, const char *file ) {
-	int ret = tgdb_client_get_absolute_path ( tgdb->tcc, tgdb->command_container, file );
-	tgdb_process_command_container ( tgdb );
+	int ret = tgdb_client_get_absolute_path ( tgdb->tcc, file );
+	tgdb_process_client_commands ( tgdb );
 	return ret;
 }
 
 int tgdb_run_debugger_command ( struct tgdb *tgdb, enum tgdb_command_type c ) {
- 	return tgdb_send ( tgdb, tgdb_get_client_command (tgdb, c), BUFFER_GUI_COMMAND );
+ 	return tgdb_send ( tgdb, tgdb_get_client_command (tgdb, c), TGDB_COMMAND_FRONT_END );
 }
 
 int tgdb_modify_breakpoint ( struct tgdb *tgdb, const char *file, int line, enum tgdb_breakpoint_action b ) {
@@ -1121,7 +1201,7 @@ int tgdb_modify_breakpoint ( struct tgdb *tgdb, const char *file, int line, enum
 	if ( val == NULL )
 		return -1;
 
-	if ( tgdb_send ( tgdb, val, BUFFER_GUI_COMMAND ) == -1 ) {
+	if ( tgdb_send ( tgdb, val, TGDB_COMMAND_FRONT_END ) == -1 ) {
         err_msg("%s:%d tgdb_send error", __FILE__, __LINE__);
 		return -1;
 	}
@@ -1145,13 +1225,25 @@ int tgdb_signal_notification ( struct tgdb *tgdb, int signum ) {
 }
 
 int tgdb_set_verbose_gui_command_output ( struct tgdb *tgdb, int value ) {
-	if ( (value == 0) || (value == 1) )
+	if ( (value == 0) || (value == 1) ) {
 		tgdb->show_gui_commands = value;
+		err_verbose ( value );
+	}
 
 	if ( tgdb->show_gui_commands == 1 )
 		return 1;
 	
 	return 0;
+}
+
+int tgdb_set_verbose_error_handling ( struct tgdb *tgdb, int value ) {
+	if ( value == -1 )
+		return tgdb->tgdb_verbose_error_handling;
+
+	if ( (value == 0) || (value == 1) )
+		tgdb->tgdb_verbose_error_handling = value;
+
+	return tgdb->tgdb_verbose_error_handling;
 }
 
 void tgdb_traverse_commands ( struct tgdb *tgdb ) {

@@ -1,3 +1,77 @@
+10/23/2003 Bob Rossi <bob@brasko.net>
+
+   * TODO: Finished task 'standardize command queue interface'
+   * a2-tgdb.h: removed include of tgdb_interface.h.
+   added include of tgdb_client_command.h.
+   a2_initialize, a2_user_ran_command, a2_parse_io,
+   a2_get_source_absolute_filename, a2_get_inferior_sources, a2_change_prompt,
+   a2_command_callback, a2_completion_callback, a2_open_new_tty, 
+   removed command_container parameter and comments.
+   Added function a2_get_client_commands.
+   * annotate_two.h: removed include of tgdb_interface.h.
+   added include of tgdb_client_command.h.
+   removed 'command_container' member and replaced it with
+   client_command_list.
+   * command.h:removed include of tgdb_interface.h.
+   added include of tgdb_client_command.h.
+   commands_parse_source, commands_issue_command, commands_user_ran_command,
+   removed command_container parameter.
+   * data.h:removed include of tgdb_interface.h.
+   added include of tgdb_client_command.h.
+   * a2-tgdb.c: a2_set_inferior_tty, a2_open_new_tty, a2_initialize,
+   a2_parse_io, a2_get_client_commands, a2_get_inferior_sources,
+   a2_change_prompt, a2_command_callback, a2_completion_callback,
+   a2_user_ran_command, removed 'command_container' parameter member and
+   implementation.
+   * annotate.c: handle_source, don't pass parameter just removed.
+   * commands.c: commands_parse_source, commands_prepare_for_command,
+   commands_user_ran_command, commands_issue_command, removed implementation
+   with parameters command_container.
+   * data.c: tgdb_initialize_annotation_state, change implementation to not
+   use parameters command_container.
+   * tgdb.h: Add new interface function to the front end
+   tgdb_set_verbose_error_handling.
+   * tgdb_client_interface.h: removed include of "queue.h".
+   removed include of "tgdb_interface.h".
+   add include of "tgdb_client_command.h".
+   add include of "tgdb_client_interface.h".
+   tgdb_client_initialize_context, tgdb_client_tgdb_ran_command,
+   tgdb_client_parse_io, tgdb_client_get_absolute_path,
+   tgdb_client_get_inferior_source_files, tgdb_client_change_debugger_prompt,
+   tgdb_client_completion_callback, tgdb_client_open_new_tty,
+   add function tgdb_client_get_client_commands
+   removed command_container parameter and comments.
+   * driver.c: add command to give verbose error messages.
+   * tgdb.c: removed include of "tgdb_interface.h".
+   add include of "tgdb_command.h".
+   add include of "tgdb_client_command.h".
+   remove include of "a2-tgdb.h".
+   removed include of "gdbmi_tgdb.h".
+   add include of "queue.h".
+   removed include of "state_machine.h".
+   removed include of "commands.h".
+   removed member command_container from struct tgdb.
+   added member tgdb_verbose_error_handling to struct tgdb.
+   tgdb_deliver_command, tgdb_dispatch_command, changed parameter from
+   tgdb_client_command to tgdb_queue_command.
+   changed tgdb_process_command_container to tgdb_process_client_commands.
+   tgdb_initialize, initialize new variable.
+   remove init_gdbmi function.
+   tgdb_send, change type of parameter bct.
+   add function tgdb_set_verbose_error_handling.
+   * tgdb_client_interface.c:
+   member tgdb_client_initialize_context, tgdb_client_tgdb_ran_command,
+   tgdb_client_parse_io, tgdb_client_get_client_commands,
+   tgdb_client_get_absolute_path, tgdb_client_get_inferior_source_files,
+   tgdb_client_change_debugger_prompt, tgdb_client_completion_callback,
+   tgdb_client_open_new_tty, rmeoved parameter command_container.
+   added a2_get_client_commands.
+   tgdb_client_initialize_context, tgdb_client_tgdb_ran_command,
+   tgdb_client_parse_io, tgdb_client_get_client_commands,
+   tgdb_client_get_absolute_path, tgdb_client_get_inferior_source_files,
+   tgdb_client_change_debugger_prompt, tgdb_client_completion_callback,
+   tgdb_client_open_new_tty, remove command_callback parameter.
+
 10/13/2003 Bob Rossi <bob@brasko.net>
 
    * TODO: Finished task ( changed 'struct queue' )

@@ -9,13 +9,8 @@
 #include <sys/types.h>
 #endif /* HAVE_SYS_TYPES_H */
 
-/* TODO 
- * Remove this include. Don't make this unit depend on the queue type.
- * I am thinking that only tgdb-base should know about its queue's and
- * all the other clients should store data there own way. 
- */
-#include "queue.h"
-#include "tgdb_interface.h"
+#include "tgdb_client_command.h"
+#include "tgdb_client_interface.h"
 
 /*!
  * \file
@@ -163,9 +158,6 @@ struct tgdb_client_context *tgdb_client_create_context (
  * \param tcc
  * The client context to initialize
  *
- * \param command_container
- * A list of commands that was generated from this call.
- *
  * \param debugger_stdin
  * Writing to this descriptor, writes to the stdin of the debugger.
  *
@@ -187,7 +179,6 @@ struct tgdb_client_context *tgdb_client_create_context (
  */
 int tgdb_client_initialize_context ( 
 	struct tgdb_client_context *tcc,
-	struct queue *command_container,
 	int *debugger_stdin, int *debugger_stdout,
 	int *inferior_stdin, int *inferior_stdout );
 
@@ -252,18 +243,13 @@ int tgdb_client_is_client_ready ( struct tgdb_client_context *tcc );
  * \param tcc
  * The client context.
  *
- * \param command_container
- * A list of commands that was generated from this call.
- *
  * @return
  * -1 on error, 0 on success
  *
  * \post
  * command_container is set.
  */
-int tgdb_client_tgdb_ran_command ( 
-		struct tgdb_client_context *tcc, 
-		struct queue *command_container );
+int tgdb_client_tgdb_ran_command ( struct tgdb_client_context *tcc );
 
 /** 
  * This is currently called by TGDB before TGDB runs the command.
@@ -314,9 +300,6 @@ int tgdb_client_can_tgdb_run_commands ( struct tgdb_client_context *tcc );
   * \param tcc
   * The client context.
   *
-  * \param command_container
-  * A list of commands that was generated from this call.
-  *
   * \param input_data
   * This is the stdout/stderr from the debugger. This is the data that 
   * should parse be parsed.
@@ -353,11 +336,24 @@ int tgdb_client_can_tgdb_run_commands ( struct tgdb_client_context *tcc );
   */
 int tgdb_client_parse_io ( 
 		struct tgdb_client_context *tcc,
-		struct queue *command_container,
 		const char *input_data, const size_t input_data_size,
 		char *debugger_output, size_t *debugger_output_size,
 		char *inferior_output, size_t *inferior_output_size,
 	    struct tgdb_list *list );
+
+/**
+ * Get's all of the commands that the client generated during the last call.
+ *
+ * \param tcc
+ * The client context.
+ *
+ * @return
+ * NULL if there are no commands. 
+ * Otherwise a list of tgdb_client_commands.
+ * The order of these commands must be preserved.
+ */
+struct tgdb_list *tgdb_client_get_client_commands ( 
+		struct tgdb_client_context *tcc );
 //@}
 
 
@@ -376,9 +372,6 @@ int tgdb_client_parse_io (
  * \param tcc
  * The client context.
  *
- * \param command_container
- * A list of commands that was generated from this call.
- *
  * \param relative_path
  * The path that the debugger outputted. ( Usually relative ).
  *
@@ -391,7 +384,6 @@ int tgdb_client_parse_io (
  */
 int tgdb_client_get_absolute_path ( 
 		struct tgdb_client_context *tcc, 
-		struct queue *command_container,
 		const char *relative_path );
 
 /** 
@@ -400,24 +392,16 @@ int tgdb_client_get_absolute_path (
  * \param tcc
  * The client context.
  *
- * \param command_container
- * A list of commands that was generated from this call.
- *
  * @return
  * 0 on success, otherwise -1 on error.
  */
-int tgdb_client_get_inferior_source_files ( 
-		struct tgdb_client_context *tcc, 
-		struct queue *command_container );
+int tgdb_client_get_inferior_source_files ( struct tgdb_client_context *tcc );
 
 /** 
  * This will change the prompt the user sees to PROMPT.
  *
  * \param tcc
  * The client context.
- *
- * \param command_container
- * A list of commands that was generated from this call.
  *
  * \param prompt
  * The new prompt to change to.
@@ -427,7 +411,6 @@ int tgdb_client_get_inferior_source_files (
  */
 int tgdb_client_change_debugger_prompt(
 		struct tgdb_client_context *tcc,
-		struct queue *command_container,
 		const char *prompt);
 
 /** 
@@ -435,9 +418,6 @@ int tgdb_client_change_debugger_prompt(
  *
  * \param tcc
  * The client context.
- *
- * \param command_container
- * A list of commands that was generated from this call.
  *
  * \param completion_command
  * The command to be completed
@@ -447,7 +427,6 @@ int tgdb_client_change_debugger_prompt(
  */
 int tgdb_client_completion_callback(
 		struct tgdb_client_context *tcc,
-		struct queue *command_container,
 		const char *completion_command);
 
 /** 
@@ -515,9 +494,6 @@ pid_t tgdb_client_get_debugger_pid ( struct tgdb_client_context *tcc );
  * \param tcc
  * The client context.
  *
- * \param command_container
- * A list of commands that was generated from this call.
- *
  * \param inferior_stdin
  * Writing to this descriptor, writes to the stdin of the inferior.
  *
@@ -533,7 +509,6 @@ pid_t tgdb_client_get_debugger_pid ( struct tgdb_client_context *tcc );
  */
 int tgdb_client_open_new_tty ( 
 		struct tgdb_client_context *tcc,
-		struct queue *command_container,
 		int *inferior_stdin, 
 		int *inferior_stdout );
 

@@ -10,7 +10,7 @@
 #endif /* HAVE_SYS_TYPES_H */
 
 #include "tgdb_types.h"
-#include "tgdb_interface.h"
+#include "tgdb_client_command.h"
 #include "queue.h"
 
 /*! \file
@@ -122,9 +122,6 @@ void *a2_create_context (
  * \param a2
  * The annotate two context.
  *
- * \param command_container
- * A list of commands that was generated from this call.
- *
  * \param debugger_stdin
  * Writing to this descriptor, writes to the stdin of the debugger.
  *
@@ -142,7 +139,6 @@ void *a2_create_context (
  */
 int a2_initialize ( 
 	void *a2, 
-	struct queue *command_container,
 	int *debugger_stdin, int *debugger_stdout,
 	int *inferior_stdin, int *inferior_stdout );
 
@@ -202,13 +198,10 @@ int a2_is_client_ready(void *ctx);
  * \param ctx
  * The annotate two context.
  *
- * \param command_container
- * A list of commands that was generated from this call.
- *
  * @return
  * -1 on error, 0 on success
  */
-int a2_user_ran_command ( void *ctx, struct queue *command_container );
+int a2_user_ran_command ( void *ctx );
 
 /** 
  *  Prepare's the client for the command COM to be run.
@@ -254,9 +247,6 @@ int a2_is_misc_prompt ( void *ctx );
   * \param ctx
   * The annotate two context.
   *
-  * \param command_container
-  * A list of commands that was generated from this call.
-  *
   * \param input_data
   * This is the stdout from the debugger. This is the data that parse_io 
   * will parse.
@@ -290,11 +280,24 @@ int a2_is_misc_prompt ( void *ctx );
   */
 int a2_parse_io ( 
 		void *ctx,
-		struct queue *command_container,
 		const char *input_data, const size_t input_data_size,
 		char *debugger_output, size_t *debugger_output_size,
 		char *inferior_output, size_t *inferior_output_size,
 		struct tgdb_list *list );
+
+/**
+ * Returns all of the commands the annotate two subsystem generated during
+ * the last call.
+ *
+ * \param ctx
+ * The annotate two context.
+ *
+ * @return
+ * NULL if no commands were generated.
+ * Otherwise, a list of tgdb_client_commands.
+ */
+struct tgdb_list *a2_get_client_commands ( void *ctx );
+
 //@}
 
 /******************************************************************************/
@@ -312,9 +315,6 @@ int a2_parse_io (
  * \param ctx
  * The annotate two context.
  *
- * \param command_container
- * A list of commands that was generated from this call.
- *
  * \param file
  * The relative path that gdb outputted.
  *
@@ -323,7 +323,6 @@ int a2_parse_io (
  */
 int a2_get_source_absolute_filename ( 
 		void *ctx, 
-		struct queue *command_container,
 		const char *file );
 
 /** 
@@ -332,15 +331,10 @@ int a2_get_source_absolute_filename (
  * \param ctx
  * The annotate two context.
  *
- * \param command_container
- * A list of commands that was generated from this call.
- *
  * @return
  * 0 on success, otherwise -1 on error.
  */
-int a2_get_inferior_sources ( 
-		void *ctx, 
-		struct queue *command_container );
+int a2_get_inferior_sources ( void *ctx );
 
 /** 
  * This will change the prompt the user sees to PROMPT.
@@ -351,16 +345,10 @@ int a2_get_inferior_sources (
  * \param prompt
  * The new prompt to change too.
  *
- * \param command_container
- * A list of commands that was generated from this call.
- *
  * @return
  * 0 on success, otherwise -1 on error.
  */
-int a2_change_prompt(
-		void *ctx, 
-		struct queue *command_container,
-		const char *prompt);
+int a2_change_prompt( void *ctx, const char *prompt);
 
 /** 
  * This is called when readline determines a command has been typed. 
@@ -368,19 +356,13 @@ int a2_change_prompt(
  * \param ctx
  * The annotate two context.
  *
- * \param command_container
- * A list of commands that was generated from this call.
- *
  * \param command
  * The command the user typed without the '\n'.
  *
  * @return
  * 0 on success, otherwise -1 on error.
  */
-int a2_command_callback(
-		void *ctx, 
-		struct queue *command_container,
-		const char *command);
+int a2_command_callback( void *ctx, const char *command);
 
 /** 
  * This is called when readline determines a command needs to be completed.
@@ -388,19 +370,13 @@ int a2_command_callback(
  * \param ctx
  * The annotate two context.
  *
- * \param command_container
- * A list of commands that was generated from this call.
- *
  * \param command
  * The command to be completed
  *
  * @return
  * 0 on success, otherwise -1 on error.
  */
-int a2_completion_callback(
-		void *ctx, 
-		struct queue *command_container,
-		const char *command);
+int a2_completion_callback( void *ctx, const char *command);
 
 /** 
  * This returns the command to send to gdb for the enum C.
@@ -463,9 +439,6 @@ pid_t a2_get_debugger_pid ( void *ctx );
  * \param ctx
  * The annotate two context.
  *
- * \param command_container
- * A list of commands that was generated from this call.
- *
  * \param inferior_stdin
  * Writing to this descriptor, writes to the stdin of the inferior.
  *
@@ -475,11 +448,7 @@ pid_t a2_get_debugger_pid ( void *ctx );
  * @return
  * 0 on success, otherwise -1 on error.
  */
-int a2_open_new_tty ( 
-		void *ctx,
-		struct queue *command_container,
-		int *inferior_stdin, 
-		int *inferior_stdout );
+int a2_open_new_tty ( void *ctx, int *inferior_stdin, int *inferior_stdout );
 
 /** 
  * \param ctx

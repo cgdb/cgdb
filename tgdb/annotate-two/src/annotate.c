@@ -15,7 +15,7 @@
 
 static int handle_source(struct annotate_two *a2, const char *buf,  size_t n, struct tgdb_list *list){
    int ret = commands_parse_source(
-		   a2->c, a2->command_container, buf, n, list);
+		   a2->c, a2->client_command_list, buf, n, list);
 
    /* This tells the annotate subsystem if the source annotation has been
 	* reached. This is important because if the source annotation has been 
