@@ -1,3 +1,7 @@
+04/30/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * Removed terminal.h & terminal.c: They now live in the libutil
+
 04/27/2003 Bob Rossi <bob_rossi@cox.net>
 
     * Reorganized the cvs tree
