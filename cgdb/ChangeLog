@@ -1,3 +1,7 @@
+09/10/2003 Bob Rossi <bob@brasko.net>
+
+   * interface.c: update_status_win, add cast to remove compiler warning.
+
 09/09/2003 Bob Rossi <bob@brasko.net>
 
    * cgdbrc.c: command_do_continue, command_do_finish, command_do_next,

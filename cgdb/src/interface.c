@@ -302,7 +302,7 @@ static void update_status_win(void) {
         for ( pos = 0; pos < WIDTH; pos++)
            mvwprintw(tty_status_win, 0, pos, " ");
 
-        mvwprintw(tty_status_win, 0, 0, tgdb_tty_name(tgdb));
+        mvwprintw(tty_status_win, 0, 0, (char*)tgdb_tty_name(tgdb));
         wattroff(tty_status_win, COLOR_PAIR(CGDB_COLOR_STATUS_BAR));
     }
 
