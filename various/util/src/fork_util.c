@@ -144,6 +144,41 @@ int invoke_pty_process(
     return pid;
 }
 
+int invoke_pty_process_function( 
+            char *slavename, int *masterfd, int *extra_input,
+            int (*entry)(int)) {
+
+    pid_t pid;          /* PID of child process (gdb) to be returned */
+    int pin[2] = { -1, -1 };
+
+    /* Create an input pipe to the child program */
+    if ( pipe(pin) == -1 ) {
+        err_msg("(%s:%d) pipe failed", __FILE__, __LINE__);
+        return -1;
+    }
+        
+    /* Fork into two processes with a shared pty pipe */
+    pid = pty_fork(masterfd, slavename, SLAVE_SIZE, NULL, NULL);
+   
+    if ( pid == -1 ) {          /* error, free memory and return  */
+        err_msg("(%s:%d) pty_fork failed", __FILE__, __LINE__);
+        pty_free_memory(slavename, *masterfd, 0, NULL);
+        return -1;
+    } else if ( pid == 0 ) {    /* child */
+        xclose(pin[1]);
+
+        /* Call entry point to new program */
+        entry(pin[0]);
+        
+        exit(-1);
+    } // end if 
+
+    xclose(pin[0]);
+    *extra_input = pin[1];
+
+    return pid;
+}
+
 int util_new_tty(int *masterfd, int *slavefd, char *sname) {
    static char local_slavename[SLAVE_SIZE];
 

@@ -38,6 +38,22 @@ int invoke_pty_process(
     char *slavename, int *masterfd,
     int *extra_input);
 
+/* invoke_pty_process: Starts a child process and puts a pty 
+ * ------------        between them.
+ *   slavename  - Output param: The name of the pty device used.
+ *   masterfd   - Output parameter: File descriptor of pty
+ *   extra_input- This is an extra pipe into the process created.
+ *   entry      - This is the function called instead of exec.
+ *                It is passed the read end of extra_input.
+ *
+ * Returns: PID of GDB process on success, -1 on error
+ */ 
+
+int invoke_pty_process_function( 
+    char *slavename, int *masterfd, 
+    int *extra_input,
+    int (*entry)(int));
+
 int pty_free_process(int *masterfd, char *sname);
 
 /* tgdb_util_new_tty: 

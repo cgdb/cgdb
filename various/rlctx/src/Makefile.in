@@ -133,16 +133,8 @@ AM_CFLAGS = -g -Wall \
 # create the input library
 # This depends on input
 noinst_LIBRARIES = librlctx.a
-librlctx_a_SOURCES = rlctx.c
+librlctx_a_SOURCES = rlctx.c rlctx_main.c
 librlctx_a_DEPENDENCIES = ../../util/src ../../adt/src
-
-bin_PROGRAMS = rlctx_prog
-
-# This is the input driver
-rlctx_prog_LDFLAGS = -L. -L../../util/src -L../../adt/src
-rlctx_prog_LDADD = -lrlctx -ladt -lutil
-rlctx_prog_SOURCES = rlctx_prog.c
-rlctx_prog_DEPENDENCIES = ../../util/src ../../adt/src librlctx.a
 subdir = various/rlctx/src
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
@@ -151,25 +143,20 @@ LIBRARIES = $(noinst_LIBRARIES)
 
 librlctx_a_AR = $(AR) cru
 librlctx_a_LIBADD =
-am_librlctx_a_OBJECTS = rlctx.$(OBJEXT)
+am_librlctx_a_OBJECTS = rlctx.$(OBJEXT) rlctx_main.$(OBJEXT)
 librlctx_a_OBJECTS = $(am_librlctx_a_OBJECTS)
-bin_PROGRAMS = rlctx_prog$(EXEEXT)
-PROGRAMS = $(bin_PROGRAMS)
-
-am_rlctx_prog_OBJECTS = rlctx_prog.$(OBJEXT)
-rlctx_prog_OBJECTS = $(am_rlctx_prog_OBJECTS)
 
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
-@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/rlctx.Po ./$(DEPDIR)/rlctx_prog.Po
+@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/rlctx.Po ./$(DEPDIR)/rlctx_main.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES = $(librlctx_a_SOURCES) $(rlctx_prog_SOURCES)
+DIST_SOURCES = $(librlctx_a_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in
-SOURCES = $(librlctx_a_SOURCES) $(rlctx_prog_SOURCES)
+SOURCES = $(librlctx_a_SOURCES)
 
 all: all-am
 
@@ -189,33 +176,6 @@ librlctx.a: $(librlctx_a_OBJECTS) $(librlctx_a_DEPENDENCIES)
 	-rm -f librlctx.a
 	$(librlctx_a_AR) librlctx.a $(librlctx_a_OBJECTS) $(librlctx_a_LIBADD)
 	$(RANLIB) librlctx.a
-binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
-install-binPROGRAMS: $(bin_PROGRAMS)
-	@$(NORMAL_INSTALL)
-	$(mkinstalldirs) $(DESTDIR)$(bindir)
-	@list='$(bin_PROGRAMS)'; for p in $$list; do \
-	  p1=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
-	  if test -f $$p \
-	  ; then \
-	    f=`echo "$$p1" | sed 's,^.*/,,;$(transform);s/$$/$(EXEEXT)/'`; \
-	   echo " $(INSTALL_PROGRAM_ENV) $(binPROGRAMS_INSTALL) $$p $(DESTDIR)$(bindir)/$$f"; \
-	   $(INSTALL_PROGRAM_ENV) $(binPROGRAMS_INSTALL) $$p $(DESTDIR)$(bindir)/$$f || exit 1; \
-	  else :; fi; \
-	done
-
-uninstall-binPROGRAMS:
-	@$(NORMAL_UNINSTALL)
-	@list='$(bin_PROGRAMS)'; for p in $$list; do \
-	  f=`echo "$$p" | sed 's,^.*/,,;s/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/'`; \
-	  echo " rm -f $(DESTDIR)$(bindir)/$$f"; \
-	  rm -f $(DESTDIR)$(bindir)/$$f; \
-	done
-
-clean-binPROGRAMS:
-	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
-rlctx_prog$(EXEEXT): $(rlctx_prog_OBJECTS) $(rlctx_prog_DEPENDENCIES) 
-	@rm -f rlctx_prog$(EXEEXT)
-	$(LINK) $(rlctx_prog_LDFLAGS) $(rlctx_prog_OBJECTS) $(rlctx_prog_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT) core *.core
@@ -224,7 +184,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rlctx.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rlctx_prog.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rlctx_main.Po@am__quote@
 
 distclean-depend:
 	-rm -rf ./$(DEPDIR)
@@ -337,10 +297,9 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(LIBRARIES) $(PROGRAMS)
+all-am: Makefile $(LIBRARIES)
 
 installdirs:
-	$(mkinstalldirs) $(DESTDIR)$(bindir)
 
 install: install-am
 install-exec: install-exec-am
@@ -368,8 +327,7 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-generic clean-noinstLIBRARIES \
-	mostlyclean-am
+clean-am: clean-generic clean-noinstLIBRARIES mostlyclean-am
 
 distclean: distclean-am
 
@@ -386,7 +344,7 @@ info-am:
 
 install-data-am:
 
-install-exec-am: install-binPROGRAMS
+install-exec-am:
 
 install-info: install-info-am
 
@@ -410,20 +368,27 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-binPROGRAMS uninstall-info-am
+uninstall-am: uninstall-info-am
 
-.PHONY: CTAGS GTAGS all all-am check check-am clean clean-binPROGRAMS \
-	clean-generic clean-noinstLIBRARIES ctags distclean \
-	distclean-compile distclean-depend distclean-generic \
-	distclean-tags distdir dvi dvi-am info info-am install \
-	install-am install-binPROGRAMS install-data install-data-am \
-	install-exec install-exec-am install-info install-info-am \
-	install-man install-strip installcheck installcheck-am \
-	installdirs maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-compile mostlyclean-generic pdf pdf-am \
-	ps ps-am tags uninstall uninstall-am uninstall-binPROGRAMS \
-	uninstall-info-am
+.PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
+	clean-noinstLIBRARIES ctags distclean distclean-compile \
+	distclean-depend distclean-generic distclean-tags distdir dvi \
+	dvi-am info info-am install install-am install-data \
+	install-data-am install-exec install-exec-am install-info \
+	install-info-am install-man install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
+	uninstall-am uninstall-info-am
 
+
+#bin_PROGRAMS = rlctx_prog
+
+# This is the input driver
+#rlctx_prog_LDFLAGS = -L. -L../../util/src -L../../adt/src
+#rlctx_prog_LDADD = -lrlctx -ladt -lutil
+#rlctx_prog_SOURCES = rlctx_prog.c
+#rlctx_prog_DEPENDENCIES = ../../util/src ../../adt/src librlctx.a
 
 # This program provides tgdb with a readline interface
 # There should be a driver program to test the functionality of rlctx

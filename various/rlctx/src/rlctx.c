@@ -27,6 +27,7 @@
 #endif
 
 #include "rlctx.h"
+#include "rlctx_main.h"
 #include "sys_util.h"
 #include "ibuf.h"
 #include "pseudo.h"
@@ -57,8 +58,6 @@ struct rlctx *rlctx_init(const char *home_dir, const char *unique_id) {
     int read_history = 0;
     struct rlctx *n = (struct rlctx *)xmalloc(sizeof(struct rlctx));
     pid_t pid;
-    char **argv = NULL;
-    char *progname = "rlctx_prog";
     struct stat st;
 
 
@@ -89,7 +88,7 @@ struct rlctx *rlctx_init(const char *home_dir, const char *unique_id) {
     }
 
     /* Start the readline program, give it the pty name so it can open it */
-    if ( (pid = invoke_pty_process(progname, 0, argv, n-> tty_name, & n->mfd, &n->cfd)) == -1 ) { /* Command fd */
+    if ( (pid = invoke_pty_process_function(n-> tty_name, & n->mfd, &n->cfd, &rlctx_main)) == -1 ) { /* Command fd */
         err_msg("%s:%d invoke_process error", __FILE__, __LINE__);
         return NULL;
     }

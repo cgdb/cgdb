@@ -191,7 +191,7 @@ static int read_command( int fd ) {
 
 static unsigned short finished = 0;
 
-void main_loop(int infd, int comfd){
+static void main_loop(int infd, int comfd){
     int    max;
     fd_set rfds;
     fd_set efds;
@@ -301,9 +301,7 @@ static int rlctx_setup_signals(void) {
    return 0;
 }
 
-int main(int argc, char **argv) {
-    int fd = atoi(argv[1]);
-
+int rlctx_main(int fd) {
     /* Write a single byte to tell caller that this program was started */
     fprintf(stderr, "\032");
 
