@@ -1,4 +1,8 @@
 04/01/2005 Bob Rossi <bob@brasko.net>
+
+    * release-todo.txt: Update auto tool versions.
+
+04/01/2005 Bob Rossi <bob@brasko.net>
    
    * README: Update autosourcereload option text.
    * Makefile.in: Regenerated with documented autotools version.
