@@ -24,6 +24,10 @@
 	 */
 	 struct annotate_two;
 
+	/***************************************************************************
+	 * Starting and Stopping Commands.
+	 **************************************************************************/
+
     /* a2_create_instance
 	 * ------------------
 	 *
@@ -45,57 +49,176 @@
 	 * ----
 	 *  The arguments to pass to the debugger    
      *
-     * debugger_stdin
-     * --------------
-     *  Writing writes to debugger's stdin
-     *
-     * debugger_fd
-     * -----------
-	 *  The descriptor to the debugger's I/O
-     *
      * config_dir
      * ----------
      *  The current config directory. Files can be stored here.
      *
-     *  Returns
-     *  -------
-     *      NULL on error, A valid descriptor upon success
+     * Returns
+     * -------
+     *  NULL on error, A valid descriptor upon success
      *
 	 */
-	struct annotate_two* tgdb_create_instance ( 
+	struct annotate_two* a2_create_instance ( 
 		const char *debugger, 
 		int argc, char **argv,
-		int *debugger_stdin, int *debugger_fd, const char *config_dir );
+		const char *config_dir );
 
-	
-	/* a2_tgdb_initialize
+	/* a2_initialize
+	 * -------------
+	 *
+	 * This initializes the libannotate_two libarary.
+	 *  
+	 * a2
+	 * --
+	 *  The annotate two context.
+	 *
+	 * debugger_stdin
+	 * --------------
+	 *  Writing to this descriptor, writes to the stdin of the debugger.
+	 *
+	 * debugger_stdout
+	 * ---------------
+	 *  Reading from this descriptor, reads from the debugger's stdout.
+	 *
+	 * inferior_stdin
+	 * --------------
+	 *  Writing to this descriptor, writes to the stdin of the inferior.
+	 *
+	 * inferior_stdout
+	 * ---------------
+	 *  Reading from this descriptor, reads from the inferior's stdout.
+	 *
+	 * inferior_tty_name
+	 * -----------------
+	 *  The name of the tty to use for the inferior.
+	 *
+	 * Retruns
+	 * -------
+	 *  0 on success, otherwise -1 on error.
+	 */
+	int a2_initialize ( 
+		struct annotate_two *a2, 
+		int *debugger_stdin, int *debugger_stdout,
+		int *inferior_stdin, int *inferior_stdout,
+		const char *inferior_tty_name );
+
+	/* a2_shutdown
+	 * -----------
+	 *
+	 * Shuts down the annotate two context. No more calls can be made on the
+	 * current context. It will clean up after itself. All descriptors it 
+	 * opened, it will close.
+	 *
+	 * a2
+	 * --
+	 *  The annotate two context.
+	 *
+	 * Retruns
+	 * -------
+	 *  0 on success, otherwise -1 on error.
+	 */
+	int a2_shutdown ( struct annotate_two *a2 );
+
+	/***************************************************************************
+	 * Status Commands
+	 **************************************************************************/
+
+	/* a2_err_msg
+	 * ----------
+	 *
+	 * Returns the last error message ?
+	 * Not implemented yet.
+	 * What should it return? How should errors be handled?
+	 *
+	 * a2
+	 * --
+	 *  The annotate two context.
+	 *
+	 * Returns
+	 * -------
+	 *  0 on success, otherwise -1 on error.
+	 */
+	int a2_err_msg ( struct annotate_two *a2 );
+
+	/* a2_is_client_ready
 	 * ------------------
 	 *
-	 *  This initializes the libannotate_two libarary.
-	 *  
-	 *  a2
-	 *  --
-	 *   The annotate two context.
+ 	 * This determines if the annotate two subsystem is ready to recieve
+ 	 * another command.
 	 *
-	 *  inferior_tty_name
-	 *  -----------------
-	 *   The name of the tty to use for the inferior.
+	 * a2
+	 * --
+	 *  The annotate two context.
+	 *
+     * Returns
+	 * -------
+	 *  1 if it is ready, 0 if it is not.
 	 */
-	int a2_tgdb_initialize ( struct annotate_two *a2, const char *inferior_tty_name );
+	int a2_is_client_ready(struct annotate_two *a2);
 
-	/* a2_tgdb_shutdown
-	 * ----------------
-	 *
-	 *  Shuts down the annotate two context. No more calls can be made on the
-	 *  current context.
-	 *
-	 *  a2
-	 *  --
-	 *   The annotate two context.
-	 */
-	int a2_tgdb_shutdown ( struct annotate_two *a2 );
+	/***************************************************************************
+	 * Input/Output Commands
+	 **************************************************************************/
 
-	/* a2_tgdb_get_source_absolute_filename
+	 /* a2_parse_io
+	  * -----------
+	  *
+	  * This recieves all of the output from the debugger. It is all routed 
+	  * through this function. 
+	  *
+	  * a2
+	  * --
+	  *  The annotate two context.
+	  *
+	  * debugger_stdout
+	  * ---------------
+	  *  This is the stdout from the debugger. This is the data that parse_io 
+	  *  will parse.
+	  *
+	  * debugger_stdout_size
+	  * --------------------
+	  *  This is the size of debuggger_stdout
+	  *
+	  * debugger_output
+	  * ---------------
+	  *  This is an out variable. It contains data that has been determined to
+	  *  be the output of the debugger that the user should see.
+	  *
+	  * debugger_output_size
+	  * --------------------
+	  *  This is the size of debugger_output
+	  *
+	  * inferior_output
+	  * ---------------
+	  *  This is an out variable. It contains data that has been determined to
+	  *  be the output of the inferior that the user should see.
+	  *
+	  * inferior_output_size
+	  * --------------------
+	  *  This is the size of inferior_output
+	  *
+      * q
+      * -
+	  *  Any commands that the annotate_two subsystem has discovered will
+	  *  be added to the queue Q. This will eventually update the client
+	  *  of the libtgdb library.
+	  *
+	  * Returns
+	  * -------
+	  *  0 on success, otherwise -1 on error.
+	  */
+	int a2_parse_io ( 
+			struct annotate_two *a2,
+			const char *debugger_stdout, const size_t debugger_stdout_size,
+			char **debugger_output, size_t debugger_output_size,
+			char **inferior_output, size_t inferior_output_size,
+			struct queue *q );
+
+	/***************************************************************************
+	 * Functional Commands
+	 **************************************************************************/
+
+	/* a2_get_source_absolute_filename
 	 * ------------------------------------
 	 *
 	 *  Gets the Absolute path of FILE.
@@ -108,10 +231,10 @@
 	 *  ----
 	 *   The relative path that gdb outputted.
 	 */
-	int a2_tgdb_get_source_absolute_filename ( struct annotate_two *a2, const char *file );
+	int a2_get_source_absolute_filename ( struct annotate_two *a2, const char *file );
 
-	/* a2_tgdb_get_sources
-	 * -------------------
+	/* a2_get_inferior_sources
+	 * -----------------------
 	 *
 	 *  Gets all the source files that the inferior makes up.
 	 *
@@ -119,7 +242,7 @@
 	 *  --
 	 *   The annotate two context.
 	 */
-	int a2_tgdb_get_sources ( struct annotate_two *a2 );
+	int a2_get_inferior_sources ( struct annotate_two *a2 );
 
 	/* a2_set_inferior_tty
 	 * -------------------
@@ -136,20 +259,8 @@
 	 */
 	int a2_set_inferior_tty ( struct annotate_two *a2, const char *inferior_tty_name );
 
-	/* a2_tgdb_err_msg
-	 * ---------------
-	 *
-	 * Returns the last error message ?
-	 * Not implemented yet.
-	 *
-	 * a2
-	 * --
-	 *  The annotate two context.
-	 */
-	int a2_tgdb_err_msg ( struct annotate_two *a2 );
-
-	/* a2_tgdb_change_prompt
-	 * ---------------------
+	/* a2_change_prompt
+	 * ----------------
 	 *
 	 *  This will change the prompt the user sees to PROMPT.
 	 *
@@ -161,9 +272,9 @@
 	 * ------
 	 *  The new prompt to change too.
 	 */
-	int a2_tgdb_change_prompt(struct annotate_two *a2, const char *prompt);
+	int a2_change_prompt(struct annotate_two *a2, const char *prompt);
 
-	/* a2_tgdb_command_callback
+	/* a2_command_callback
 	 * ------------------------
 	 *
  	 * This is called when readline determines a command has been typed. 
@@ -176,9 +287,9 @@
 	 * ---- 
 	 *  The command the user typed without the '\n'.
 	 */
-	int a2_tgdb_command_callback(struct annotate_two *a2, const char *command);
+	int a2_command_callback(struct annotate_two *a2, const char *command);
 
-	/* a2_tgdb_completion_callback
+	/* a2_completion_callback
 	 * ---------------------------
 	 *
  	 * This is called when readline determines a command needs to be completed.
@@ -191,54 +302,9 @@
 	 * ----
 	 *  The command to be completed
 	 */
-	int a2_tgdb_completion_callback(struct annotate_two *a2, const char *command);
+	int a2_completion_callback(struct annotate_two *a2, const char *command);
 
-	/* a2_is_ready
-	 * -----------
-	 *
-	 * Returns 1 if ready to recieve data, otherwise 0
-	 *
-	 * a2
-	 * --
-	 *  The annotate two context.
-	 */
-	int a2_is_ready ( struct annotate_two *a2 );
-
-	/* a2_commands_typed_at_prompt
-	 * ---------------------------
-	 *
- 	 * This functions recieves the characters the user has typed.
- 	 * It only gets called if it is not busy ( the function above )
-	 *
-	 * This functions is a hack, and must be removed.
-	 *
-	 * a2
-	 * --
-	 *  The annotate two context.
-	 *
-	 * i
-	 * -
-	 *  ???
-	 */
-	void a2_command_typed_at_prompt ( struct annotate_two *a2, int i );
-
-	/* a2_tgdb_is_debugger_ready
-	 * -------------------------
-	 *
- 	 * This determines if the annotate two subsystem is ready to have gdb recieve
- 	 * another command.
-	 *
-	 * a2
-	 * --
-	 *  The annotate two context.
-	 *
-     * Returns
-	 * -------
-	 *  1 if it is ready, 0 if it is not.
-	 */
-	int a2_tgdb_is_debugger_ready(struct annotate_two *a2);
-
-	/* a2_tgdb_return_client_command
+	/* a2_return_client_command
 	 * -----------------------------
 	 *
  	 *  This returns the command to send to gdb for the enum C.
@@ -252,9 +318,9 @@
 	 * -
 	 *  The command to run.
 	 */
-	char *a2_tgdb_return_client_command ( struct annotate_two *a2, enum tgdb_command c );
+	char *a2_return_client_command ( struct annotate_two *a2, enum tgdb_command c );
 
-	/* a2_tgdb_client_modify_breakpoint
+	/* a2_client_modify_breakpoint
 	 * --------------------------------
 	 *
 	 * a2
@@ -264,7 +330,7 @@
  	 * Look at tgdb.h
 	 *
 	 */
-	char *a2_tgdb_client_modify_breakpoint ( struct annotate_two *a2, const char *file, int line, enum tgdb_breakpoint_action b );
+	char *a2_client_modify_breakpoint ( struct annotate_two *a2, const char *file, int line, enum tgdb_breakpoint_action b );
 
 #endif
 
