@@ -58,10 +58,6 @@ void main_loop(struct kuictx *i) {
     fd_set rfds;
     int result;
 
-	/* Kuictx return values */
-	kui_sequence_key key;
-	int kui_input_key;
-
     max = STDIN_FILENO;
 
     while(1){
@@ -77,7 +73,10 @@ void main_loop(struct kuictx *i) {
             fprintf(stderr, "%s:%d select failed\n", __FILE__, __LINE__);
 
         if(FD_ISSET(STDIN_FILENO, &rfds)) {
-            int c = kui_getkey(i, &key, &kui_input_key);
+            int c = kui_getkey(i);
+
+			if ( c == -1 )
+				return;
 
             if ( c == 'q' ) {
                 return;

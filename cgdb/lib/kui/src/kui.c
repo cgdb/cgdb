@@ -4,7 +4,7 @@
 
 /** This simply maintains a list of sequence/key pairs. */
 struct kui_sequence_set {
-
+	
 };
 
 /** Needs doco */
@@ -54,7 +54,8 @@ int kui_ss_register_sequence (
 		struct kui_sequence_set *kui_ss,
 		const int sequence[], 
 		const int size,
-	    kui_sequence_key *key ) {
+		const int data[],
+		const int data_size ) {
 
 	/* Not implemented */
 	return -1;
@@ -62,7 +63,8 @@ int kui_ss_register_sequence (
 
 int kui_ss_deregister_sequence (
 		struct kui_sequence_set *kui_ss,
-		kui_sequence_key *key ) {
+		const int sequence[],
+	    const int size	) {
 	/* Not implemented */
 	return -1;
 }
@@ -84,10 +86,10 @@ int kui_set_sequence_set (
 	return 0;
 }
 
-int kui_getkey ( 
-		struct kuictx *kctx,
-	    kui_sequence_key *key,
-	    int *input_key	) {
+int kui_getkey ( struct kuictx *kctx ) {
+
+	if ( !kctx )
+		return -1;
 
 	/* Not implemented */
 	return -1;

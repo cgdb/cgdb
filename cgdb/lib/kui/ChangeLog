@@ -1,3 +1,9 @@
+03/12/2004 Bob Rossi <bob@brasko.net>
+
+    * inc/kui.h: reduce complexity of interface.
+	* src/kui.c: change to match kui.h
+	* src/kui_driver.c: ditto
+
 03/02/2004 Bob Rossi <bob@brasko.net>
 
     * inc/kui.h: move comments around
