@@ -1,0 +1,84 @@
+-------------------------------------------
+Current To Do List (in no particular order)
+-------------------------------------------
+
+   o Set the terminal size so that GDB:
+      - Paginates after the correct number of lines.  This must be 
+        modified any time the GDB window is resized.  Or, should we
+        just disable GDB's pager, since the user can scroll back in
+        the curses GUI?  Maybe that should be configurable.
+      - Thinks the terminal is *very* wide.  This is so it does not try
+        to force its ideas of how lines should wrap on us.  The curses
+        GUI should be free to manipulate lines however it sees fit.
+
+   o Resizing issues:
+      - Maximize followed by minimize -- does not redraw
+      - Resize events don't occur while GDB (or debugged program) is
+        outputting massive amounts of data.  Doing a CTRL+W causes a
+        resize, however.  Is there ANY way to simulate input on stdin?
+      - Eventually... flicker reduction?
+
+   o Support monochrome terminals (vt100, etc.)
+
+   o Support terminals that don't handle the ACS lines
+
+   o Investigate nocbreak problem on Solaris
+   
+   o Optimize display of GDB output -- it's currently quite slow
+
+   o Add a feature to open an editor using the CGDB_EDITOR env var
+     when the user hits ^E. It opens the current file in the source
+     windows, or does nothing.
+
+   o Fix resizing issues. Is cgdb resizing?
+
+   o Investigate removing log10 function calls from sources.c.
+
+------
+ BUGS
+------
+
+   o Open:
+      - CTRL+C can cause problems
+      - TAB character messing up with horizontal scrolling (source window)
+      - Cursor vanishes when breakpoints are set/unset
+
+   o Closed:
+      - DOS source files make cgdb barf
+      - Syntax highlighting for C breaks on '\\'
+      - Pressing CTRL+SPACE crashes cgdb (see interface.c for fix)
+      - Arrow keys still not working properly (left, right, CTRL+A/E, etc.)
+
+-------------
+Nice Features
+-------------
+
+   o Highlight GDB window, maybe with different colors for:
+      - User input
+      - Standard output
+      - Standard error
+
+   o Make config file (~/.tgdb/cgdbrc).  Configurable items:
+      - Syntax highlighting colors
+      - GUI style (size, colors, etc.)
+      - Key bindings
+
+----------------------------
+Done (moved from To Do List)
+----------------------------
+
+   o Track the current position of the cursor in the input line so that
+     the user can use the left and right arrow keys (as well as CTRL+U
+     and CTRL+K).  If any of these currently work, it's by sheer luck.
+
+   o Scrolling in the source window (arrow keys, PGUP, PGDN, HOME, END)
+
+   o Setting breakpoints via the source window
+
+   o Ada syntax highlighting
+   
+   o Allow source window to scroll left/right for source files with
+     long lines
+
+   o Allow user to open source files for perusal/breakpoint setting
+     (Popup window with a list of files)
