@@ -1,5 +1,9 @@
 06/17/2003 Bob Rossi <bob_rossi@cox.net>
 
+	* sources.c: Make sure orig_buf is valid.
+
+06/17/2003 Bob Rossi <bob_rossi@cox.net>
+
 	* Makefile.am: Added tokenizer directory to compile script
 	* highlight.c: removed highligh_c and highlight_ada
 	removed c_types, c_keywords, ada_types, ada_keywords

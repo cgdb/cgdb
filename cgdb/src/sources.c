@@ -208,45 +208,53 @@ static int load_file(struct list_node *node)
     char line[MAX_LINE];
     int i;
 
-    if (!(file = fopen(node->path, "r")))
-        return 1;
-
     node->buf.length    = 0;
     node->buf.tlines    = NULL;
     node->buf.breakpts  = NULL;
     node->buf.cur_line  = NULL;
     node->buf.max_width = 0;
-    
-    if (has_colors())
-        highlight(node);
-	else {
-		while (!feof(file)){
-			if (fgets(line, MAX_LINE, file)){
-				if (line[strlen(line)-1] == '\n')
-					line[strlen(line)-1] = 0;
-				if (line[strlen(line)-1] == '\r')
-					line[strlen(line)-1] = 0;
-				if (strlen(line) > node->buf.max_width)
-					node->buf.max_width = strlen(line);
 
-				/* Inefficient - Reallocates memory at each line */
-				node->buf.length++;
-				node->buf.tlines   = realloc(node->buf.tlines, 
-											 sizeof(char *) * node->buf.length);
-				node->buf.tlines[node->buf.length-1] = strdup(line);
-			}
+	/* Open file and save in original buffer.
+	 * I am not sure if this should be done this way in the future.
+	 * Maybe this data should be recieved from flex.
+	 */
+	node->orig_buf.length = 0;
+	node->orig_buf.tlines = NULL;
+	node->orig_buf.max_width = 0;
+
+    if (!(file = fopen(node->path, "r")))
+        return 1;
+
+	while (!feof(file)){
+		if (fgets(line, MAX_LINE, file)){
+			if (line[strlen(line)-1] == '\n')
+				line[strlen(line)-1] = 0;
+			if (line[strlen(line)-1] == '\r')
+				line[strlen(line)-1] = 0;
+			if (strlen(line) > node->orig_buf.max_width)
+				node->orig_buf.max_width = strlen(line);
+
+			/* Inefficient - Reallocates memory at each line */
+			node->orig_buf.length++;
+			node->orig_buf.tlines   = realloc(node->orig_buf.tlines, 
+										 sizeof(char *) * node->orig_buf.length);
+			node->orig_buf.tlines[node->orig_buf.length-1] = strdup(line);
 		}
-		fclose(file);
 	}
 
-    /* Copy into original buffer for regex capabities */
-    node->orig_buf.length = node->buf.length;
-    node->orig_buf.max_width = node->buf.max_width;
-    node->orig_buf.breakpts = NULL; /* Don't need for regex */
-    node->orig_buf.tlines = (char **)xmalloc(sizeof(char *) * node->buf.length);
-
-    for ( i = 0; i < node->buf.length; i++)
-        node->orig_buf.tlines[i] = xstrdup(node->buf.tlines[i]);
+	fclose(file);
+    
+	/* Add the highlighted lines */
+	if (has_colors())
+        highlight(node);
+	else {
+		int i;
+		node->buf.length = node->orig_buf.length;
+		node->buf.max_width = node->orig_buf.max_width;
+		node->buf.tlines = xmalloc ( sizeof ( char * ) * node->orig_buf.length );
+		for ( i = 0; i < node->orig_buf.length; i++ )
+			node->buf.tlines[i] = xstrdup ( node->orig_buf.tlines[i] );
+	}
 
     /* Allocate the breakpoints array */
     node->buf.breakpts = malloc(sizeof(char) * node->buf.length);
