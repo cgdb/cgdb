@@ -599,6 +599,10 @@ static void tgdb_send_user_command(char *line) {
 static int init_readline(void){
     FILE *out, *in;
 
+    /* Don't let readline install signal handler's */
+    rl_catch_signals = 0;
+    rl_catch_sigwinch = 0;
+
     if ( pipe(readline_infd) == -1 ) {
        err_msg("(%s:%d) pipe failed", __FILE__, __LINE__);
        return -1;
