@@ -1,6 +1,9 @@
 04/02/2003 Bob Rossi <bob_rossi@cox.net>
 
     * Changed rlctx_prog rl_callback_read_char to respect EOF
+    * Changed rlctx_prog to respect the exception set in select loop:
+    In cygwin, EOF is detected in the exception set. So this needs to 
+    be read.
 
 04/01/2003 Bob Rossi <bob_rossi@cox.net>
 

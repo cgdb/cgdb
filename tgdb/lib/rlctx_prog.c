@@ -63,16 +63,19 @@ extern int read_history ();
 void main_loop(void){
     int    max;
     fd_set rfds;
+    fd_set efds;
     int result;
   
     max = STDIN_FILENO;
    
     while(1){
         FD_ZERO(&rfds);
+        FD_ZERO(&efds);
       
         FD_SET(STDIN_FILENO, &rfds);
+        FD_SET(STDIN_FILENO, &efds);
       
-        result = select(max + 1, &rfds, NULL, NULL, NULL);
+        result = select(max + 1, &rfds, NULL, &efds, NULL);
       
         /* if the signal interuppted system call keep going */
         if(result == -1 && errno == EINTR)
@@ -81,15 +84,17 @@ void main_loop(void){
             err_dump("main.c:mainLoop - select failed\n");
 
         /* stdin -> readline input */
-        if(FD_ISSET(STDIN_FILENO, &rfds))
+        if(FD_ISSET(STDIN_FILENO, &rfds) || FD_ISSET(STDIN_FILENO, &efds))
             rl_callback_read_char();
     }
 }
 
 static void rlctx_send_user_command(char *line) {
     /* This happens when rl_callback_read_char gets EOF */
-    if ( line == NULL )
+    if ( line == NULL ) {
+        rl_callback_handler_remove();
         exit(-1);
+    }
     
     /* Don't add the enter command */
     if ( line && *line != '\0' )
