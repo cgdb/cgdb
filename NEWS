@@ -1,3 +1,7 @@
+
+   * Fixed highlighting bug. This ( '\"' ) would start a string literal 
+   in C/C++.
+
 cgdb-0.3.3b
 
 	* Fixed string literal bug where files don't highlight properly in C/C++.

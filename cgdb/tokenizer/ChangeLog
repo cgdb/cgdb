@@ -1,3 +1,8 @@
+07/28/2003 Bob Rossi <bob_rossi@cox.net>
+
+   * clexer.l: Fixed a bug with string literals. A rule to match
+   '\"' has been added.
+
 07/17/2003 Bob Rossi <bob_rossi@cox.net>
 
 	* clexer.l: Fixed the IDENTIFIER rule. Now Identifiers like
