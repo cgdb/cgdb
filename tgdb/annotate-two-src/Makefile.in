@@ -70,10 +70,10 @@ VERSION = @VERSION@
 
 AM_CFLAGS = -Wall
 noinst_LIBRARIES = libannotate-two.a
-libannotate_two_a_SOURCES = a2-tgdb.c annotate.c state_machine.c data.c io.c terminal.c commands.c globals.c tgdb_init.c buffer.c
+libannotate_two_a_SOURCES = a2-tgdb.c annotate.c state_machine.c data.c terminal.c commands.c globals.c tgdb_init.c buffer.c
 
 
-EXTRA_DIST = a2-tgdb.h annotate.h state_machine.h data.h io.h terminal.h commands.h globals.h tgdb_init.h buffer.h
+EXTRA_DIST = a2-tgdb.h annotate.h state_machine.h data.h terminal.h commands.h globals.h tgdb_init.h buffer.h
 
 
 EXTRA_PROGRAMS = driver
@@ -95,7 +95,7 @@ LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 libannotate_two_a_LIBADD = 
 libannotate_two_a_OBJECTS =  a2-tgdb.o annotate.o state_machine.o data.o \
-io.o terminal.o commands.o globals.o tgdb_init.o buffer.o
+terminal.o commands.o globals.o tgdb_init.o buffer.o
 AR = ar
 PROGRAMS =  $(bin_PROGRAMS)
 
@@ -112,7 +112,7 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 TAR = tar
 GZIP_ENV = --best
 DEP_FILES =  .deps/a2-tgdb.P .deps/annotate.P .deps/buffer.P \
-.deps/commands.P .deps/data.P .deps/driver.P .deps/globals.P .deps/io.P \
+.deps/commands.P .deps/data.P .deps/driver.P .deps/globals.P \
 .deps/state_machine.P .deps/terminal.P .deps/tgdb_init.P
 SOURCES = $(libannotate_two_a_SOURCES) $(driver_SOURCES)
 OBJECTS = $(libannotate_two_a_OBJECTS) $(driver_OBJECTS)

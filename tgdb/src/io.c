@@ -38,10 +38,9 @@ static void process_error(void) {
 int io_debug_init(const char *filename){
    char config_dir[MAXLINE];
    if ( filename == NULL )
-      global_get_config_gdb_debug_file(config_dir);
-   else
-      strcpy( config_dir, filename );
+       return -1;
    
+   strcpy( config_dir, filename );
    
    if( (dfd = fopen(config_dir, "w")) == NULL) {
       err_msg("%s:%d -> could not open debug file", __FILE__, __LINE__);

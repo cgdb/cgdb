@@ -71,7 +71,7 @@ VERSION = @VERSION@
 AM_CFLAGS = -Wall
 INCLUDES = -I ../include -I ../annotate-two-src -I ../gdb-mi-src
 noinst_LIBRARIES = libtgdb.a
-libtgdb_a_SOURCES = tgdb.c tgdb_util.c types.c pseudo.c error.c util.c
+libtgdb_a_SOURCES = tgdb.c tgdb_util.c types.c pseudo.c error.c util.c io.c
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = ../../config.h
 CONFIG_CLEAN_FILES = 
@@ -83,7 +83,8 @@ CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 libtgdb_a_LIBADD = 
-libtgdb_a_OBJECTS =  tgdb.o tgdb_util.o types.o pseudo.o error.o util.o
+libtgdb_a_OBJECTS =  tgdb.o tgdb_util.o types.o pseudo.o error.o util.o \
+io.o
 AR = ar
 CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -96,8 +97,8 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = tar
 GZIP_ENV = --best
-DEP_FILES =  .deps/error.P .deps/pseudo.P .deps/tgdb.P .deps/tgdb_util.P \
-.deps/types.P .deps/util.P
+DEP_FILES =  .deps/error.P .deps/io.P .deps/pseudo.P .deps/tgdb.P \
+.deps/tgdb_util.P .deps/types.P .deps/util.P
 SOURCES = $(libtgdb_a_SOURCES)
 OBJECTS = $(libtgdb_a_OBJECTS)
 

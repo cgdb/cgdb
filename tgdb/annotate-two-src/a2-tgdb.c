@@ -80,8 +80,11 @@ static int tgdb_setup_signals(void){
 }
 
 int a2_tgdb_init(char *debugger, int argc, char **argv, int *gdb, int *child){
+   char config_file[MAXLINE];
    tgdb_init_setup_config_file();
-   io_debug_init(NULL);
+
+   global_get_config_gdb_debug_file(config_file);
+   io_debug_init(config_file);
    
    if ( (tgdb_need_mapping = tgdb_init_does_gdb_need_mapping(debugger)) == -1) {
       err_msg("(%s:%d) Couldn't detect mapping", __FILE__, __LINE__);
