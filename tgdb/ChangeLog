@@ -1,6 +1,7 @@
 version 0.2.2 (01/23/2003):
 
-01/22/2003
+01/22/2003  Bob Rossi  <bob_rossi@cox.net>
+
     * Changed tgdb, not halting when doing multiple line tab completion: 
     Fix tgdb when interfacing with readline, if readline returns a '\r' then 
     tgdb puts the prompt back otherwise, if readline issues a '\n' by doing 
@@ -10,51 +11,48 @@ version 0.2.2 (01/23/2003):
 
 version 0.2.1 (01/19/2003):
 
-01/18/2003
+01/18/2003  Bob Rossi  <bob_rossi@cox.net>
+
     * Changed control char input: Telling libtgdb which control 
     chars the user can type that make it ok to start looking for an 
     annotation even though the user did not type '\n'.
-
-01/18/2003
     * Changed interface of the io unit: Changed interface of 
     I/O package. I initially made the functions return the char's they
     read and wrote and made '\0' be the error condition. However, it is
     of course possible to read the char '\0'. So, now the functions return
     an int with the error condition and take the char as a parameter.
-
-01/18/2003
     * Changed key input bug: If the user entered ^l, ^j, ^m ...,
     tgdb would not understand that the '\r' was from the annotation
     because the user never hit the '\n' key. This is now fixed by having
     the state_machine automatically say the user hit enter if readline
     returns a '\n' when the user is in USER_AT_PROMPT mode.
 
-01/16/2003
+01/16/2003   Bob Rossi  <bob_rossi@cox.net>
+
     * Changed tgdb to not ignore \r's when a signal is caught: tgdb
     was ignoring carriage returns when a signal was caught while the
     user was interfacing with gdb. This would make it miss annotations.
 
 version 0.2 (01/13/2003):
 
-01/05/2003
+01/05/2003  Bob Rossi  <bob_rossi@cox.net>
+
     * Changed tgdb to allow the gui to pick the debugger: They user can
     specify which debugger they want to use. "gdb" is given by default.
 
-12/28/2002
+12/28/2002  Bob Rossi  <bob_rossi@cox.net>
+
     * Changed tgdb and cgdb to have support for one macro: To test out
     the macro support I have added the ability to run one macro.
-
-12/28/2002
     * Fixed bug in tgdb in unfilled buffer in buffer.c: When a buffer
     was not filled and it was returned, it was not null terminated.
 
-12/27/2002
+12/27/2002  Bob Rossi  <bob_rossi@cox.net>
+
     * Changed tgdb to return an error SOURCES_DENIED when tgdb_get_sources:
     When the client tries to get a list of sources. The error SOURCES_DENIED
     is returned to indicate that the debugger (gdb) gave an error. This 
     usually happens when the program was not compiled with debug.
-
-12/27/2002
     * Changed tgdb to return the filename that was denied when 
     ABSOLUTE_SOURCE_DENIED is returned: When the clients requests the absolute
     filename of a file through tgdb_get_source_absolute_filename and gdb says
@@ -62,7 +60,8 @@ version 0.2 (01/13/2003):
     with the name of the file. Previously they would just have gotten the
     notification.
 
-12/23/2002
+12/23/2002  Bob Rossi  <bob_rossi@cox.net>
+
     * Changed tgdb to return errors through tgdb_err_msg: This function is
     now responsible for returning errors to the client. If a particular 
     function in libtgdb fails, then this function must be called to get
@@ -70,7 +69,9 @@ version 0.2 (01/13/2003):
     to return the new error code ( -1 ) to allow the client to know that
     tgdb_err_msg needs to be called.
 
-12/22/2002
+12/22/2002  Bob Rossi  <bob_rossi@cox.net>
+
     * Changed tgdb to add tgdb_tty_name: This function gets the name of the
     pseudo Terminal that tgdb uses to communicate with the debugged program.
 
+NO CHANGELOG NOTES HAVE BEEN ADDED BEFORE DATE ABOVE

@@ -1,49 +1,48 @@
+01/29/2003  Bob Rossi  <bob_rossi@cox.net>
 
-01/29/2003
     * Fixed the resize problem on solaris by not calling signal:
     cgdb no longer calls the signal function to say that it wants to
     catch a signal. It now uses the POSIX signal handler functions instead.
     This fixed the resizing issue on solaris.
 
-01/25/2003
-    * removed h key, it is depricated: :help should be used instead.
+01/25/2003  Bob Rossi  <bob_rossi@cox.net>
 
+    * removed h key, it is depricated: :help should be used instead.
     * removed ^k, it is depricated: :q and :q! should be used instead.
 
-01/24/2003
-    * Added quit command: Added :q and :q! commands.
+01/24/2003  Mike Mueller  <mmueller@cs.uri.edu>
 
+    * Added quit command: Added :q and :q! commands.
     * Fixed 'current line' discrepancy: Using the :123 line format, the
     'G', and the 'gg' commands, actually altered the current executing line
     pointer in the interface.  Fixed this so that the user-selected line is
     changed, but the current executing line remains unchanged.
-
     * Changed arrow in source window: Changed the - (dash) to an ACS_LTEE
     character.  If this causes problems on some systems, I'll remove it.
-
     * Changed GDB window tabs: Modified the GDB output window's tab 
     behavior to resemble a standard terminal.  This means tab stops every 
     8 characters, instead of just translating tabs to a fixed amount of spaces.
-
     * Added logo: Added a few ASCII art logos to cgdb.  
+
 version 0.2.2 (01/23/2003):
 
-01/23/2003
+01/23/2003  Bob Rossi  <bob_rossi@cox.net>
+
     * Changed file dialog: cgdb's file dialog now does not display all
     the files in strcmp order. It puts regular files first, then relative
     files ( files that start with '.' ) and then absolute files.
 
-01/22/2003
+01/22/2003  Bob Rossi  <bob_rossi@cox.net>
+
     * Changed current line color: cgdb now displays the current line
     as bright white, not red ( that's already ment a breakpoint )
 
 version 0.2.1 (01/19/2003):
 
-01/18/2003
+01/18/2003  Bob Rossi  <bob_rossi@cox.net>
+
     * Changed the configure scripts for select.h: Changed the configure
     script to not fail if select.h isn't on the host.
-
-01/18/2003
     * Changed the configure scripts: Changed configure to only build
     cgdb with ncurses unless the user types --with-curses. And then
     it will try to build with curses. The reason is that cgdb does
@@ -51,38 +50,39 @@ version 0.2.1 (01/19/2003):
 
 version 0.2 (01/13/2003):
 
-01/08/2003
+01/08/2003  Bob Rossi  <bob_rossi@cox.net>
+
     * Changed cgdb to traverse previously viewed source files: The user
     can traverse through the source files that have been viewed.
 
-01/05/2003
+01/05/2003  Bob Rossi  <bob_rossi@cox.net>
+
     * Changed cgdb to have some command line support: cgdb now has 
     command line support to print help, version and allow the user 
     to pick which debugger cgdb should use.
 
-01/04/2003
+01/04/2003  Bob Rossi  <bob_rossi@cox.net>
+
     * Changed cgdb to support colon commands: When the user types
     a colon (:) from the source window they can enter a command. If the 
     command is garbage, then No such command: ... is displayed. Otherwise,
     the command is processed. Currently the only two commands are
     ':set ic' and ':set noic'.
 
-12/28/2002
+12/28/2002  Bob Rossi  <bob_rossi@cox.net>
+
     * Changed cgdb, added file helptext.h which contains the help file:
     The file helptext.h now contains an array which is the help file that
     gets displayed when the user hits the 'h' key in the source window.
     This will eventually be the manual.
-
-12/28/2002
     * Changed cgdb, can print long messages to status bar now: added 
     if_display_message to interface. This allows printing of lines that are 
     longer than the terminal is wide.
-
-12/28/2002
     * Changed tgdb and cgdb to have support for one macro: To test out
     the macro support I have added the ability to run one macro.
 
-12/27/2002
+12/27/2002  Bob Rossi  <bob_rossi@cox.net>
+
     * Changed cgdb to have a help dialog: When the user hits 'h' a help 
     dialog appears. cgdb looks in $HOME/.cgdb/help.txt for the file. 
     However, as of know the file is not being created. Copying a file
@@ -90,30 +90,35 @@ version 0.2 (01/13/2003):
     determine what the correct method of copying the file should be.
     ( make install, creating the file in the c code, ... )
 
-12/22/2002
+12/22/2002  Bob Rossi  <bob_rossi@cox.net>
+
     * Changed cgdb to handle input to the debugged program via a pty:
     This is a major change. It allows the debugged program to recieve input
     through gdb's tty command. This seperates gdb's input and the debugged
     program's input. It is the initial "tty-window" release.
 
-12/21/2002
+12/21/2002  Bob Rossi  <bob_rossi@cox.net>
+
     * Changed status bar info: Either shows the current file name, or it shows
     the search, reverse search or line search. Full line.
 
 version 0.1.1 (12/19/2002):
 
-12/19/2002
+12/19/2002  Bob Rossi  <bob_rossi@cox.net>
     * Fixed Resize window event: The resizing of the cgdb application was not
     occuring when the focus was on the gdb window.
-
     * Fixed regex color highlighting bug in the source window: When searching
     with the regex in the source window, the color that was matched was 
     incorrect. Fixed the algorithm and made it more efficient.
-
     * Fixed sources so they compile on AIX 4.3: Got cgdb to compile and run
     on AIX 4.3. It doesn't run perfect yet ( the curses is out of wack,
     displaying order , color ... ) but it compiles and runs.
-
     * Fixed bug in processing ada breakpoint exception output from gdb: If the
     user set a breakpoint on an exception in ada, the tgdb library would not
     be able to parse the output from gdb's command 'info breakpoints'.
+
+version 0.1 (12/09/2002)  <mmueller@cs.uri.edu>
+
+    * Wrote Initial version of cgdb: Basically designed and wrote cgdb. All
+    the initial thought ( algorithms, structures ) was done previous to this
+    date.
