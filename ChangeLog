@@ -5,6 +5,9 @@
     if focus == cgdb.
     * cgdb.c ( remove realpath ): There is no more call to realpath to 
     determine the breakpoint.
+    * Add another hack to keep relative file from file dialog: This way
+    when the user sets a breakpoint on a file opened from the file 
+    dialog, the relative file is known.
 
 04/02/2003 Bob Rossi <bob_rossi@cox.net>
 

@@ -1050,6 +1050,7 @@ int internal_if_input(int key) {
             return gdb_input(key);
         case FILE_DLG: {
             static char filedlg_file[MAX_LINE];
+            extern char last_relative_file[MAX_LINE];
             int ret = filedlg_recv_char(fd, key, filedlg_file);
             /* The user cancelled */
             if ( ret == -1 ) { 
@@ -1061,6 +1062,7 @@ int internal_if_input(int key) {
             /* The user picked a file */
             } else if ( ret == 1 ) {
                 tgdb_get_source_absolute_filename(filedlg_file);
+                strcpy(last_relative_file, filedlg_file);
                 if_set_focus(CGDB);
                 return 0;
             }

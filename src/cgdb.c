@@ -88,6 +88,8 @@ struct input *input = NULL;         /* Initialize the input package */
 
 int resize_pipe[2] = { -1, -1 };
 
+char last_relative_file[MAX_LINE];
+
 /* ------------------------ */
 /* Initialization functions */
 /* ------------------------ */
@@ -403,6 +405,7 @@ static void process_commands(struct queue *q)
             /* This is the absolute path to the last file the user requested */
             case ABSOLUTE_SOURCE_ACCEPTED:
                 if_show_file(com, 1);
+                source_set_relative_path(if_get_sview(), com, last_relative_file);
                 break;
 
             /* The source file requested does not exist */
