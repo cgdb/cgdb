@@ -67,3 +67,5 @@ This new version contains the following changes:
     * Changelog entry 2
       (no long descriptions, just the part before the ':')
 
+Enjoy,
+The CGDB Team
