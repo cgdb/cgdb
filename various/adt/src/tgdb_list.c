@@ -182,67 +182,105 @@ static struct tgdb_list_node* tgdb_list_new_node ( void ) {
 	return node;
 }
 
-void tgdb_list_append ( struct tgdb_list *tlist, void *item ) {
-	struct tgdb_list_node *node = tgdb_list_new_node ();
+int tgdb_list_append ( struct tgdb_list *tlist, void *item ) {
+	struct tgdb_list_node *node;
+
+	if ( !tlist )
+		return -1;
+
+	if ( (node = tgdb_list_new_node ()) == NULL )
+		return -1;
 
 	node->data = item;
 
 	tgdb_list_insert ( tlist, tlist->tail, NULL, node );	
+
+	return 0;
 }
 
-void tgdb_list_prepend ( struct tgdb_list *tlist, void *item ) {
-	struct tgdb_list_node *node = tgdb_list_new_node ();
+int tgdb_list_prepend ( struct tgdb_list *tlist, void *item ) {
+	struct tgdb_list_node *node;
+
+	if ( !tlist )
+		return -1;
+
+	if ( (node = tgdb_list_new_node ()) == NULL )
+		return -1;
 
 	node->data = item;
 
  	tgdb_list_insert ( tlist, NULL, tlist->head, node );	
+
+	return 0;
 }
 
-void tgdb_list_insert_after ( 
+int tgdb_list_insert_after ( 
 		struct tgdb_list *tlist, 
-		tgdb_list_iterator i, 
+		tgdb_list_iterator *i, 
 		void *item ) {
+	struct tgdb_list_node *node;
+
+	if ( !tlist )
+		return -1;
+
+	if ( (node = tgdb_list_new_node ()) == NULL )
+		return -1;
 	
-	struct tgdb_list_node *node = tgdb_list_new_node ();
-
 	node->data = item;
 
-	tgdb_list_insert ( tlist, iterator, iterator->next, node );
+	tgdb_list_insert ( tlist, i, i->next, node );
+
+	return 0;
 }
 
-void tgdb_list_insert_before ( 
+int tgdb_list_insert_before ( 
 		struct tgdb_list *tlist,
-		tgdb_list_iterator tlisti, 
+		tgdb_list_iterator *i, 
 		void *item ) {
 
-	struct tgdb_list_node *node = tgdb_list_new_node ();
-	struct tgdb_list_node *iterator = (struct tgdb_list_node*)i;
+	struct tgdb_list_node *node;
+
+	if ( !tlist )
+		return -1;
+
+	if ( (node = tgdb_list_new_node ()) == NULL )
+		return -1;
 
 	node->data = item;
 
-	tgdb_list_insert ( tlist, iterator->prev, iterator, node );
+	tgdb_list_insert ( tlist, i->prev, i, node );
+
+	return 0;
 }
 
-void tgdb_list_foreach ( struct tgdb_list *tlist, tgdb_list_func func ) {
-	int val;
-	tgdb_list_iterator iter = tgdb_list_get_first( tlist );
+int tgdb_list_foreach ( struct tgdb_list *tlist, tgdb_list_func func ) {
+	tgdb_list_iterator *i= tgdb_list_get_first( tlist );
 
-	while ( iter ) {
-		func ( i->node->data );
-		iter = tgdb_list_next ( iter );
+	while ( i ) {
+		if ( func ( i->data ) == -1 )
+			return -1;
+		i = tgdb_list_next ( i );
 	}
+
+	return 0;
 }
 
 
 
-void tgdb_list_free ( struct tgdb_list *tlist, tgdb_list_func func ) {
-	tgdb_list_iterator iter = tgdb_list_get_first( tlist );
+int tgdb_list_free ( struct tgdb_list *tlist, tgdb_list_func func ) {
+	tgdb_list_iterator *i= tgdb_list_get_first( tlist );
 
-	while ( iter ) {
-		func ( i->node->data );
-		tgdb_list_delete ( tlist, i->node->data );
-		iter = tgdb_list_next ( iter );
+	while ( i ) {
+		if ( func ( i->data ) == -1 )
+			return -1;
+		tgdb_list_delete ( tlist, i );
+		/* Can't call tgdb_list_next () here on the iterator.
+		 * This is because the iterator was just deleted.
+		 */
+		i = tgdb_list_get_first( tlist );
 	}
+
+	return 0;
 }
 
 int tgdb_list_size ( struct tgdb_list *tlist ) {
@@ -252,26 +290,26 @@ int tgdb_list_size ( struct tgdb_list *tlist ) {
 	return 0;
 }
 
-tgdb_list_iterator tgdb_list_get_first ( struct tgdb_list *tlist ) {
+tgdb_list_iterator *tgdb_list_get_first ( struct tgdb_list *tlist ) {
 	if ( tlist ) {
-	  return (tgdb_list_iterator)tlist->head;
+	  return tlist->head;
 	}
 
 	return NULL;
 }
 
-tgdb_list_iterator tgdb_list_get_last ( struct tgdb_list *tlist ) {
+tgdb_list_iterator *tgdb_list_get_last ( struct tgdb_list *tlist ) {
 	if ( tlist ) {
 		if ( tlist->size == 1 )
-			return (tgdb_list_iterator)tlist->head;
+			return tlist->head;
 		else
-			return (tgdb_list_iterator)tlist->tail;
+			return tlist->tail;
 	}
 
 	return NULL;
 }
 
-tgdb_list_iterator tgdb_list_next ( tgdb_list_iterator i ) {
+tgdb_list_iterator *tgdb_list_next ( tgdb_list_iterator *i ) {
 	if ( i ) {
 	  return i->next;
 	}
@@ -279,7 +317,7 @@ tgdb_list_iterator tgdb_list_next ( tgdb_list_iterator i ) {
 	return NULL;
 }
 
-tgdb_list_iterator tgdb_list_previous ( tgdb_list_iterator i ) {
+tgdb_list_iterator *tgdb_list_previous ( tgdb_list_iterator *i ) {
 	if ( i ) {
 	  return i->prev;
 	}
@@ -287,7 +325,7 @@ tgdb_list_iterator tgdb_list_previous ( tgdb_list_iterator i ) {
 	return NULL;
 }
 
-void *tgdb_list_get_item ( tgdb_list_iterator i ) {
+void *tgdb_list_get_item ( tgdb_list_iterator *i ) {
 	if ( i )
 		return i->data;
 
