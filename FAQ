@@ -1,7 +1,12 @@
 							Section I General Information
 
 1. What is cgdb?
-	cgdb is a curses interface to the GNU debugger.
+	CGDB is a curses-based interface to the GNU Debugger (GDB).
+	The goal of CGDB is to be lightweight and responsive; not encumbered with 
+	unnecessary features. The interface is designed to deliver the familiar 
+	GDB text interface, with a split screen showing the source as it executes. 
+	The UI is modeled on the classic Unix text editor, vi. Those familiar with 
+	vi should feel right at home using CGDB.
 
 2. Where can I get cgdb?
 	The cgdb project is hosted on http://sourceforge.net/. You can view the 
@@ -26,6 +31,22 @@
 
 1. How do I install cgdb?
 	For now, cgdb can only be installed by compiling it from sources.
+	Goto cgdb's home page to get them.
+
+2. What dependencies does cgdb have?
+	cgdb could not have been written without the use of other libraries.
+	1. cgdb depends on readline-4.2 or greater.
+	2. cgdb depends on ncurses/curses.  The version number is not known.
+	   I have used libncurses.so.5 successfully.
+	3. If you decide to modify the tokenizer library or the config
+	   file module, you will need to have flex installed.
+	   I have used flex 2.5.4 to build cgdb.
+	4. cgdb uses autoconf/automake to build its configure scripts and 
+	   makefiles. At the time of this writing, cgdb was using
+          * aclocal  (GNU automake)   1.7
+          * autoconf (GNU Autoconf)   2.57
+          * libtool  (GNU libtool)    1.4.3
+          * m4       (GNU m4)         1.4
 
 							Section III Problems
 
@@ -38,4 +59,5 @@
 	keys.
 
 	If you have problems using any of the keys above, you should modify 
-	the value of ..
+	the value of escdelay. Please look at the README file for more 
+	information on escdelay.
