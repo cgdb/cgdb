@@ -134,6 +134,9 @@ int (*tgdb_get_source_absolute_filename)(char *file);
  */
 char* (*tgdb_err_msg)(void);
 
+/* tgdb_get_prompt: Returns a pointer to the current prompt */
+char* (*tgdb_get_prompt)(void);
+
 /*  tgdb_shutdown: Terminates tgdb's library support.
  *
  * RETURNS: 0 on success or -1 on error

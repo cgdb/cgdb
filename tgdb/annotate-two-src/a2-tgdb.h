@@ -16,5 +16,6 @@ size_t a2_tgdb_tty_recv(char *buf, size_t n);
 int a2_tgdb_new_tty(void);
 char *a2_tgdb_tty_name(void);
 char *a2_tgdb_err_msg(void);
+char *a2_tgdb_get_prompt(void);
 
 #endif /* __A2_TGDB_H__ */

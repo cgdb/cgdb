@@ -3,43 +3,6 @@
 
 /* This unit holds global data to tgdb. It helps keep track of obscure states */
 
-/****************************************************
- Keeps track of what the user has typed at the prompt 
- ***************************************************/
-void global_user_typed_char(char a);
-/* This should be called at the post prompt */
-void global_reset_command_line_data(void);
-
-/* did_user_press_enter: Tells if the user has hit enter at the command prompt.
- *    Returns: 1 if the user hit enter since the last prompt annotation.
- *       otherwise 0.
- */
-int global_did_user_press_enter(void);
-/* global_did_user_press_special_control_char: 
- *  Tells if the user typed a special control char at the command prompt.
- *  The control chars of interest are.
- *  ^d -> 4
- *  ^j -> 10
- *  ^l -> 12
- *  ^m -> 13
- *    Returns: 1 if the user hit one since the last prompt annotation.
- *       otherwise 0.
- */
-int global_did_user_press_special_control_char(void);
-
-/* has_user_typed: Tells if the user has hit any char after the command prompt.
- *    Returns: 1 if the user hit a char since the last prompt annotation.
- *       otherwise 0.
- */
-int global_has_user_typed(void);
-
-/* This gets set when the a '\n' gets recieved and the user did not type it.
- * This can happen if the user hits something that sends a '\n' or if readline
- * sends a '\n' during command completion.
- */
-unsigned int global_has_implicit_enter_benen_recieved(void);
-void global_set_implicit_enter(unsigned short set);
-
 /* This turns true if tgdb gets a misc prompt. This is so that we do not 
  * send commands to gdb at this point.
  */

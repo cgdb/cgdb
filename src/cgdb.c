@@ -470,8 +470,6 @@ static void readline_input(void){
     if_print(buf);
 }
 
-/* Hack for now, this needs to be removed and the functions below 
- * need to be taken out */
 #include <tgdb/annotate-two-src/data.h>
 
 static void main_loop(void)
@@ -480,11 +478,8 @@ static void main_loop(void)
     int max;
     
     max = (gdb_fd > STDIN_FILENO) ? gdb_fd : STDIN_FILENO;
-    max = ((max > tty_fd) ? max : tty_fd);
-    
-    /* If tgdb is ready to accept a command */
-    if ( data_get_state() == USER_AT_PROMPT )
-        max = ((max > readline_fd[0]) ? max : readline_fd[0]);
+    max = (max > tty_fd) ? max : tty_fd;
+    max = (max > readline_fd[0]) ? max : readline_fd[0];
 
     /* Main (infinite) loop:
      *   Sits and waits for input on either stdin (user input) or the
@@ -559,10 +554,12 @@ void cleanup()
 
 static void tgdb_send_user_command(char *line) {
     char buf[strlen(line) + 2];
+    char *ret;
     add_history(line);
     sprintf(buf, "%s\n", line);
-    tgdb_send(buf);
-    if_print("\n"); /* Clear everything typed */
+    if_print("\r");     /* Clear everything typed, libtgdb returns it */
+    if ( (ret = tgdb_send(buf)));
+        if_print(ret);
 }
 
 static int init_readline(void){
@@ -582,37 +579,41 @@ static int init_readline(void){
     rl_outstream = n;
 
     /* Initalize gdb */
-    rl_callback_handler_install("(gdb) ", tgdb_send_user_command);
-
-    /* Set the terminal to Dumb */
+    rl_callback_handler_install(tgdb_get_prompt(), tgdb_send_user_command);
+    
     if ( rl_reset_terminal("dumb") == -1 ) {
         err_msg("%s:%d rl_reset_terminal\n", __FILE__, __LINE__); 
         return -1;
     }
-    
+
     return 0;
 }
 
 int main(int argc, char *argv[]) {
+/* Uncomment to debug and attach */
+#if 0
+    int c;
+    read(0, &c, 1);
+#endif
     parse_long_options(&argc, &argv);
 
     /* Set up some data */
     my_name = argv[0];
 
-    if ( init_readline() == -1 )
-        err_quit("%s:%d Unable to start readline\n", __FILE__, __LINE__); 
-    
     /* Create the home directory */
     if ( init_home_dir() == -1 )
         err_quit("%s: Unable to create home dir ~/.cgdb\n", my_name); 
 
     if ( create_help_file() == -1 )
         err_quit("%s: Unable to create help file\n", my_name); 
-    
+
     /* Start GDB */
     if (start_gdb(argc, argv))
         err_quit("%s: Unable to invoke GDB\n", my_name); 
-    
+
+    if ( init_readline() == -1 )
+        err_quit("%s:%d Unable to start readline\n", __FILE__, __LINE__); 
+
     /* Initialize the display */
     switch (if_init()){
         case 1:

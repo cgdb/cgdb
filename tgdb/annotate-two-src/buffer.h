@@ -51,28 +51,16 @@ void buffer_free_command ( void *item );
  */
 struct node *buffer_write_command_and_append ( struct node *n, struct command *com );
 
-/* buffer_get_incomplete_command:
- * This will return what the user is currently typing for a command. 
- * It will copy into buf what is being typed.
- * Return: 
- *    It will return a pointer to buf.
- *    or NULL if nothing has been typed.
- */
-char *buffer_get_incomplete_command( char *buf );
-
 /* buffer_is_empty: 
  * Determines if the internal buffer is empty.
  * Returns: TRUE if empty, otherwise FALSE.
  */
 int buffer_is_empty(void);
 
-/* buffer_write_char:
- *    This keeps track of all of the char's it gets until a new line
- *    is reached. At that point, a new command is added to the list.
- *    Only a '\b' will remove one char from what is in the buffer.
- *    A ^W may someday be supported.
+/* buffer_write_line:
+ * Writes a  command to the buffer
  */
-struct node *buffer_write_char ( struct node *com, const char c );
+struct node *buffer_write_line ( struct node *com, const char *c );
 
 /* Set's the internal string to '\0' */
 void buffer_clear_string ( void );

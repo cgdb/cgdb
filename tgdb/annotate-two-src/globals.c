@@ -5,56 +5,6 @@
 #include "globals.h"
 #include <string.h>
 
-/* Keeps track of what the user has typed at the prompt */
-
-/* This determines if any char has been typed by the
- * user since the prompt annotation has been sent by gdb
- */
-static unsigned short user_typed_anything = FALSE;
-
-/* This determines if the char enter has been typed by the
- * user since the prompt annotation has been sent by gdb
- */
-static unsigned short user_typed_enter = FALSE;
-static unsigned short user_typed_special_control_char = FALSE;
-
-void global_user_typed_char(char a){
-   user_typed_anything = TRUE;
-
-   if(a == '\n')
-      user_typed_enter = TRUE;
-
-   if( a == 4 || a == 10 || a == 12 || a == 13 )
-       user_typed_special_control_char = TRUE;
-}
-
-void global_reset_command_line_data(void){
-   user_typed_anything = FALSE;
-   user_typed_enter = FALSE;
-   user_typed_special_control_char = FALSE;
-}
-
-int global_did_user_press_enter(void){
-   return user_typed_enter;
-}
-
-int global_did_user_press_special_control_char(void) {
-    return user_typed_special_control_char;
-}
-
-int global_has_user_typed(void){
-   return user_typed_anything;
-}
-
-static unsigned short implicit_enter = FALSE;
-unsigned int global_has_implicit_enter_benen_recieved(void) {
-    return implicit_enter;
-}
-
-void global_set_implicit_enter(unsigned short set) {
-    implicit_enter = set;
-}
-
 /* This turns true if tgdb gets a misc prompt. This is so that we do not 
  * send commands to gdb at this point.
  */

@@ -105,21 +105,21 @@ gdbmi_recv_finish:
    return buf_size;
 }
 
-char *gdbmi_tgdb_send(char c){
+char *gdbmi_tgdb_send(char *c){
     static char buf[4];
-    memset(buf, '\0', 4); 
-    buf[0] = c;
-
-    if(io_write_byte(gdb_stdin, c) == -1){
-        err_ret("%s:%d io_write_byte error", __FILE__, __LINE__);
-        return NULL;
-    }
-
-    /* Ask for the file name after every command */
-    if ( c == '\n' ) {
-        char *str = "-interpreter-exec console \"info source\"\n";
-        io_writen(gdb_stdin, strlen(str) , str);
-    }
+//    memset(buf, '\0', 4); 
+//    buf[0] = c;
+//
+//    if(io_write_byte(gdb_stdin, c) == -1){
+//        err_ret("%s:%d io_write_byte error", __FILE__, __LINE__);
+//        return NULL;
+//    }
+//
+//    /* Ask for the file name after every command */
+//    if ( c == '\n' ) {
+//        char *str = "-interpreter-exec console \"info source\"\n";
+//        io_writen(gdb_stdin, strlen(str) , str);
+//    }
     
     return buf;   
 }
@@ -143,4 +143,8 @@ char *gdbmi_tgdb_tty_name(void) {
 
 char *gdbmi_tgdb_err_msg(void) {
    return (char *)0;
+}
+
+char *gdbmi_tgdb_get_prompt(void) {
+    return (char *)0;
 }

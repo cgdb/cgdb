@@ -153,14 +153,7 @@ static int tgdb_run_users_buffered_commands(void){
          head = buffer_remove_and_increment ( head, buffer_free_command );
          buf_ret_val = 1;
       } else {
-         /* Maybe there was a part of a command left */
-         if ( buffer_get_incomplete_command(buffered_cmd) != NULL ) {
-            com_type = BUFFER_USER_COMMAND;
-            out_type = COMMANDS_SHOW_USER_OUTPUT;
-            com_to_run = COMMANDS_VOID;
-            buf_ret_val = 1;
-         } else
-            buffered_cmd[0] = 0;
+         buffered_cmd[0] = 0;
       }
    }
 
@@ -217,8 +210,8 @@ static int tgdb_run_users_buffered_commands(void){
                   err_msg("%s:%d -> could not run tgdb command(%s)", __FILE__, __LINE__, buffered_cmd);
                break;
             case BUFFER_USER_COMMAND:
-               /* writing user command to file */
-            
+               /* write prompt and command to user, before command to gdb */
+
                /* running user command */
                if(io_writen(masterfd, buffered_cmd, length) != length)
                   err_msg("%s:%d -> could not write messge(%s)", __FILE__, __LINE__, buffered_cmd);
@@ -247,8 +240,6 @@ static int tgdb_can_issue_command(void) {
       tgdb_initialized && 
       /* The user is at the prompt */
       data_get_state() == USER_AT_PROMPT && 
-      /* The user has not typed enter */
-      global_did_user_press_enter() == 0 &&
       /* This line boiles down to:
        * If the buffered list is empty or the user is at the misc prompt 
        */
@@ -356,8 +347,6 @@ size_t a2_tgdb_recv(char *buf, size_t n, struct Command ***com){
 
    local_buf[size] = '\0';
 
-//   io_debug_write_fmt("[****\n%s\n****]", local_buf);
-
    /* This is a hack, copies the buffer back into local buffer, 
     * then it translates all '\n' into '\r\n'
     */ 
@@ -379,8 +368,6 @@ size_t a2_tgdb_recv(char *buf, size_t n, struct Command ***com){
         local_buf[i++] = '\0';
    }
 
-//    io_debug_write_fmt("[****\n%s\n****]", local_buf);
-
    /* At this point local_buf has everything new from this read.
     * Basically this function is responsible for seperating the annotations
     * that gdb writes from the data. 
@@ -390,8 +377,7 @@ size_t a2_tgdb_recv(char *buf, size_t n, struct Command ***com){
    /* 3. runs the users buffered command if any exists */
    if( global_can_issue_command() == TRUE && 
        data_get_state() == USER_AT_PROMPT && 
-        DATA_AT_PROMPT &&  /* Only one command at a time */
-        global_did_user_press_enter() == 0)
+        DATA_AT_PROMPT)   /* Only one command at a time */
       tgdb_run_users_buffered_commands();
 
    tgdb_finish:
@@ -404,28 +390,26 @@ size_t a2_tgdb_recv(char *buf, size_t n, struct Command ***com){
 
 /* Sends the user typed line to gdb */
 char *a2_tgdb_send(char *line){
-   static char buf[4];
-   memset(buf, '\0', 4); 
-   buf[0] = line[0];
+   static char buf[MAXLINE];
+   memset(buf, '\0', MAXLINE); 
    
    io_debug_write_fmt("%s", line);
    if (tgdb_can_issue_command()) {     
-      global_user_typed_char(line[0]);
-      
       /* tgdb always requests that breakpoints be checked because of
        * buggy gdb annotations */
       tgdb_setup_buffer_command_to_run ( NULL, BUFFER_TGDB_COMMAND, COMMANDS_HIDE_OUTPUT, COMMANDS_INFO_BREAKPOINTS );
+
+      strcpy(buf, data_get_prompt());
+      strcat(buf, line);
 
       if(io_writen(masterfd, line, strlen(line)) == -1){
          err_ret("%s:%d -> could not write byte", __FILE__, __LINE__);
          return NULL;
       }
    } else {
-       /* TODO: Needs to be fixed, should there still be a buffer ? */
-//      head = buffer_write_char ( head, c );
-//
-//      if(c == '\n')
-//         tgdb_setup_buffer_command_to_run ( NULL, BUFFER_TGDB_COMMAND, COMMANDS_HIDE_OUTPUT, COMMANDS_INFO_BREAKPOINTS );
+      /* TODO: Needs to be fixed */
+      head = buffer_write_line ( head, line );
+      tgdb_setup_buffer_command_to_run ( NULL, BUFFER_TGDB_COMMAND, COMMANDS_HIDE_OUTPUT, COMMANDS_INFO_BREAKPOINTS );
    }
    
    return buf;   
@@ -483,4 +467,8 @@ char *a2_tgdb_tty_name(void) {
 
 char *a2_tgdb_err_msg(void) {
    return err_get();
+}
+
+char *a2_tgdb_get_prompt(void) {
+    data_get_prompt();
 }

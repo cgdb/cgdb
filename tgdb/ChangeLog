@@ -1,9 +1,21 @@
+02/24/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * Fixing buffer support for line at a time input: Trying to get support
+    for buffered commands to work with line at a time interface.
+    * Removed legacy globals functions: Removed functions that were looking
+    at what char's have been typed and making decisions from that.
+    * Modified buffer package to take commands instead of char's: The buffer
+    package now takes only full commands at a time.
+    * Fixing gdbmi interface to work with new libtgdb interface.
+
 02/23/2003 Bob Rossi <bob_rossi@cox.net>
 
     * Changed the Makefile's back to not using libtool: The new version of 
     automake support making static libraries from files in multiple dirs.
     * Major re-write, tgdb takes a command at a time now: libtgdb 
     now takes a command at a time. Instead of a char.
+    * Removing states from data that checked for char's the user typed:
+    This is because libtgdb now only accepts full commands.
 
 02/19/2003 Bob Rossi <bob_rossi@cox.net>
 

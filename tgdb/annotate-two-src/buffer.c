@@ -100,50 +100,19 @@ int buffer_is_empty(void) {
       return FALSE;
 }
 
-char *buffer_get_incomplete_command( char *buf ) {
-   if ( user_command_length == 0 )
-      return NULL;
-    
-    strncpy ( buf, user_command, user_command_length + 1);
-    
-    memset(user_command, '\0', user_command_length);
-    user_command_length = 0;
+struct node *buffer_write_line ( struct node *com, const char *c ) {
 
-    return buf;
-}
-   
-struct node *buffer_write_char ( struct node *com, const char c ) {
+  struct node *temp = NULL;
+  struct command *ncom = ( struct command *) xmalloc (sizeof(struct command));
+  int length = strlen(c);
+  ncom->data = xmalloc ( sizeof( char) * ( length + 1) );
+  strncpy ( ncom->data, c, length + 1);
+  ncom->com_type = BUFFER_USER_COMMAND;
+  ncom->out_type = COMMANDS_SHOW_USER_OUTPUT;
+  ncom->com_to_run  = COMMANDS_VOID;
+  temp = buffer_write_command_and_append( com,  ncom);
 
-   if ( c == '\n' ) {
-      struct node *temp = NULL;
-      if ( user_command_length < MAXLINE - 1 ) {
-         struct command *ncom = ( struct command *) xmalloc (sizeof(struct command));
-         user_command[user_command_length++] = c;
-         user_command[user_command_length++] = '\0';
-
-         ncom->data = xmalloc ( sizeof( char) * ( user_command_length) );
-         strncpy ( ncom->data, user_command, user_command_length);
-         ncom->com_type = BUFFER_USER_COMMAND;
-         ncom->out_type = COMMANDS_SHOW_USER_OUTPUT;
-         ncom->com_to_run  = COMMANDS_VOID;
-         
-         temp = buffer_write_command_and_append( com,  ncom);
-         memset( user_command, '\0', user_command_length ); 
-         user_command_length = 0;  
-      }
-      return temp;
-   } else if ( c == '\b' ) {
-      if ( user_command_length > 0 )
-         user_command[--user_command_length] = '\0';
-      return com;
-   } else {
-      if ( user_command_length < MAXLINE ) {
-         user_command[user_command_length++] = c;
-         user_command[user_command_length] = '\0';
-      }
-
-      return com;
-   }
+  return temp;
 }
 
 void buffer_clear_string ( void ) {

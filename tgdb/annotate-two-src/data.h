@@ -45,6 +45,11 @@ void data_prepare_run_command(void);
  */
 int data_user_has_typed(void);
 
+/* data_get_prompt: This returns the current gdb prompt
+ * Returns a pointer to the current prompt.
+ */
+char *data_get_prompt(void);
+
 #ifdef __cplusplus
 }
 #endif
