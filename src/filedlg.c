@@ -425,7 +425,7 @@ static int capture_regex(struct filedlg *fd) {
       }
 
       /* If the user hit backspace or delete remove a char */
-      if ( c == 8 || c == 127 ) {
+      if ( CGDB_BACKSPACE_KEY(c) ) {
          if (regex_line_pos > 0)
             --regex_line_pos;
 
