@@ -1,5 +1,11 @@
 CVS
 
+   * fixed an annoying bug that appeared while searching for a string. If you 
+   canceled the source view regex search by hitting ESC, 2 bad things would happen.
+   You would end up on the line that you cancelled at
+   The currently displayed line would stay the line you can cancelled at, even when
+   you start moving around again.
+
    * reworked the signal handling code when GDB dies. Now CGDB handles the SIGCHLD
    and passes the signal notification to TGDB. This fixes a race condition that 
    occurred, even though the race condition appeared to be harmless.

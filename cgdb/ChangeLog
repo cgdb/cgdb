@@ -1,5 +1,10 @@
 03/31/2005 Bob Rossi <bob@brasko.net>
 
+	* interface.c (capture_regex): Save current source viewer line.
+	* sources.c (source_search_regex): Clear current line.
+
+03/31/2005 Bob Rossi <bob@brasko.net>
+
 	* highlight.c (hl_regex): Fix memory runtime errors.
 	* sources.c (source_del): Fix memory runtime errors.
 

@@ -766,6 +766,7 @@ static void if_run_command(struct sviewer *sview) {
 static int capture_regex(struct sviewer *sview) {
    int c;
    
+   int orig_line = sview->cur->sel_line;
    /* Initialize the function for finding a regex and tell user */
    regex_search = 1;
    regex_line_pos = 0;
@@ -782,6 +783,7 @@ static int capture_regex(struct sviewer *sview) {
          *regex_line = '\0';
          regex_search = 0;
          source_search_regex(sview, regex_line, 2, regex_direction, regex_icase);
+         sview->cur->sel_line = orig_line;
          if_draw();
          return 1;
       }
