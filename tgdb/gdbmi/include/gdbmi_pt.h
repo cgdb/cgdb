@@ -13,7 +13,7 @@ typedef struct gdbmi_tuple *gdbmi_tuple_ptr;
 typedef struct gdbmi_list *gdbmi_list_ptr;
 
 /**
- * A kind of result's that GDB is capable of producing.
+ * A choice of result's that GDB is capable of producing.
  */
 enum gdbmi_result_class {
 	GDBMI_DONE,
@@ -53,7 +53,7 @@ struct gdbmi_result_record {
 	 */
 	gdbmi_token_t token;
 
-	/** The kind of result that this class represents */
+	/** The choice of result that this class represents */
 	enum gdbmi_result_class result_class;
 
 	/** The results of the command. */
@@ -75,7 +75,7 @@ struct gdbmi_result_record {
  * \GDBMI_STREAM
  * This is the result of normal output from the console, target or GDB.
  */
-enum gdbmi_oob_record_kind {
+enum gdbmi_oob_record_choice {
 	GDBMI_ASYNC,
 	GDBMI_STREAM
 };
@@ -85,9 +85,9 @@ enum gdbmi_oob_record_kind {
  */
 struct gdbmi_oob_record {
 	/**
-	 * This is the kind of oob_record
+	 * This is the choice of oob_record
 	 */
-	enum gdbmi_oob_record_kind record;
+	enum gdbmi_oob_record_choice record;
 	union {
 		 /** If it's an GDBMI_ASYNC record */
 		gdbmi_async_record_ptr async_record;
@@ -100,9 +100,9 @@ struct gdbmi_oob_record {
 };
 
 /**
- * This represents each kind of asyncronous record GDB is capable of sending. 
+ * This represents each choice of asyncronous record GDB is capable of sending. 
  */
-enum gdbmi_async_record_kind {
+enum gdbmi_async_record_choice {
 	/** 
 	 * contains on-going status information about the progress 
 	 * of a slow operation. It can be discarded. 
@@ -122,9 +122,9 @@ enum gdbmi_async_record_kind {
 };
 
 /**
- * This represents each kind of stream record GDB is capable of sending. 
+ * This represents each choice of stream record GDB is capable of sending. 
  */
-enum gdbmi_stream_record_kind {
+enum gdbmi_stream_record_choice {
 	/** 
 	 * Output that should be displayed as is in the console. 
 	 * It is the textual response to a CLI command. 
@@ -155,8 +155,8 @@ struct gdbmi_async_record {
 	 */
 	gdbmi_token_t token;
 
-	/** The kind of asyncronous record this represents */
-	enum gdbmi_async_record_kind async_record;
+	/** The choice of asyncronous record this represents */
+	enum gdbmi_async_record_choice async_record;
 
 	enum gdbmi_async_class async_class;
 
@@ -177,14 +177,14 @@ struct gdbmi_result {
 	gdbmi_result_ptr next;
 };
 
-enum gdbmi_value_kind {
+enum gdbmi_value_choice {
 	GDBMI_CSTRING,
 	GDBMI_TUPLE,
 	GDBMI_LIST
 };
 
 struct gdbmi_value {
-	enum gdbmi_value_kind value_kind;
+	enum gdbmi_value_choice value_choice;
 
 	union {
 		char *cstring;
@@ -200,14 +200,14 @@ struct gdbmi_tuple {
 	gdbmi_tuple_ptr next;
 };
 
-enum gdbmi_list_kind {
+enum gdbmi_list_choice {
 	GDBMI_VALUE,
 	GDBMI_RESULT
 };
 
 
 struct gdbmi_list {
-	enum gdbmi_list_kind list_kind;
+	enum gdbmi_list_choice list_choice;
 	
 	union {
 		gdbmi_value_ptr value;
@@ -218,7 +218,7 @@ struct gdbmi_list {
 };
 
 struct gdbmi_stream_record {
-	enum gdbmi_stream_record_kind stream_record;
+	enum gdbmi_stream_record_choice stream_record;
 	char *cstring;
 };
 
@@ -242,7 +242,7 @@ int destroy_gdbmi_result ( gdbmi_result_ptr param );
 gdbmi_result_ptr append_gdbmi_result ( gdbmi_result_ptr list, gdbmi_result_ptr item );
 int print_gdbmi_result ( gdbmi_result_ptr param );
 
-int print_gdbmi_oob_record_kind ( enum gdbmi_oob_record_kind param );
+int print_gdbmi_oob_record_choice ( enum gdbmi_oob_record_choice param );
 
 /* Creating, Destroying and printing oob_record */
 gdbmi_oob_record_ptr create_gdbmi_oob_record ( void );
@@ -250,9 +250,9 @@ int destroy_gdbmi_oob_record ( gdbmi_oob_record_ptr param );
 gdbmi_oob_record_ptr append_gdbmi_oob_record ( gdbmi_oob_record_ptr list, gdbmi_oob_record_ptr item );
 int print_gdbmi_oob_record ( gdbmi_oob_record_ptr param );
 
-int print_gdbmi_async_record_kind ( enum gdbmi_async_record_kind param );
+int print_gdbmi_async_record_choice ( enum gdbmi_async_record_choice param );
 
-int print_gdbmi_stream_record_kind ( enum gdbmi_stream_record_kind param );
+int print_gdbmi_stream_record_choice ( enum gdbmi_stream_record_choice param );
 
 /* Creating, Destroying and printing async_record */
 gdbmi_async_record_ptr create_gdbmi_async_record ( void );
@@ -261,7 +261,7 @@ int print_gdbmi_async_record ( gdbmi_async_record_ptr param );
 
 int print_gdbmi_async_class ( enum gdbmi_async_class param );
 
-int print_gdbmi_value_kind ( enum gdbmi_value_kind param );
+int print_gdbmi_value_choice ( enum gdbmi_value_choice param );
 
 /* Creating, Destroying and printing value */
 gdbmi_value_ptr create_gdbmi_value ( void );
@@ -274,7 +274,7 @@ gdbmi_tuple_ptr create_gdbmi_tuple ( void );
 int destroy_gdbmi_tuple ( gdbmi_tuple_ptr param );
 int print_gdbmi_tuple ( gdbmi_tuple_ptr param );
 
-int print_gdbmi_list_kind ( enum gdbmi_list_kind param );
+int print_gdbmi_list_choice ( enum gdbmi_list_choice param );
 
 /* Creating, Destroying and printing list */
 gdbmi_list_ptr create_gdbmi_list ( void );

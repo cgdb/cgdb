@@ -49,7 +49,7 @@ void gdbmi_error (const char *s) {
 	struct gdbmi_oob_record *u_oob_record;
 	struct gdbmi_result_record *u_result_record;
 	int u_result_class;
-	int u_async_record_kind;
+	int u_async_record_choice;
 	struct gdbmi_result *u_result;
 	long u_token;
 	struct gdbmi_async_record *u_async_record;
@@ -59,7 +59,7 @@ void gdbmi_error (const char *s) {
 	struct gdbmi_value *u_value;
 	struct gdbmi_tuple *u_tuple;
 	struct gdbmi_list *u_list;
-	int u_stream_record_kind;
+	int u_stream_record_choice;
 }
 
 %type <u_output> opt_output_list
@@ -70,7 +70,7 @@ void gdbmi_error (const char *s) {
 %type <u_result_record> opt_result_record
 %type <u_result_record> result_record
 %type <u_result_class> result_class
-%type <u_async_record_kind> async_record_class
+%type <u_async_record_choice> async_record_class
 %type <u_result> result_list
 %type <u_result> result
 %type <u_token> opt_token
@@ -83,7 +83,7 @@ void gdbmi_error (const char *s) {
 %type <u_value> value_list
 %type <u_tuple> tuple
 %type <u_list> list
-%type <u_stream_record_kind> stream_record_class
+%type <u_stream_record_choice> stream_record_class
 
 
 %start opt_output_list
@@ -237,19 +237,19 @@ value_list: value_list COMMA value {
 
 value: CSTRING {
 	$$ = create_gdbmi_value ();
-	$$->value_kind = GDBMI_CSTRING;
+	$$->value_choice = GDBMI_CSTRING;
 	$$->option.cstring = strdup ( gdbmi_text ); 
 };
 
 value: tuple {
 	$$ = create_gdbmi_value ();
-	$$->value_kind = GDBMI_TUPLE;
+	$$->value_choice = GDBMI_TUPLE;
 	$$->option.tuple = $1;
 };
 
 value: list {
 	$$ = create_gdbmi_value ();
-	$$->value_kind = GDBMI_LIST;
+	$$->value_choice = GDBMI_LIST;
 	$$->option.list = $1;
 };
 
@@ -268,13 +268,13 @@ list: OPEN_BRACKET CLOSED_BRACKET {
 
 list: OPEN_BRACKET value_list CLOSED_BRACKET {
 	$$ = create_gdbmi_list ();
-	$$->list_kind = GDBMI_VALUE;
+	$$->list_choice = GDBMI_VALUE;
 	$$->option.value = $2;
 };
 
 list: OPEN_BRACKET result_list CLOSED_BRACKET {
 	$$ = create_gdbmi_list ();
-	$$->list_kind = GDBMI_RESULT;
+	$$->list_choice = GDBMI_RESULT;
 	$$->option.result = $2;
 };
 
