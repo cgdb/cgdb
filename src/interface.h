@@ -148,5 +148,10 @@ void if_search_next( void );
  */
 void if_tty_toggle( void );
 
+/* if_draw:
+ * -----------
+ */
+ void if_draw( void );
+
 #endif
 

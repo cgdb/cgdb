@@ -269,6 +269,20 @@ int command_parse_string( const char *buffer )
             /* ignore this stuff for now. */
             rv = 1;
             break;
+        case NUMBER: {
+            const char *number = get_token();
+            if ( number[0] == '+' ) {
+               source_vscroll( if_get_sview(), atoi( number+1 ));
+               rv = 0;
+            } else if ( number[0] == '-' ) {
+               source_vscroll( if_get_sview(), -atoi( number+1 ));
+               rv = 0;
+            } else {
+               source_set_sel_line(if_get_sview(), atoi( number ));
+               rv = 0;
+            }
+            if_draw();
+        } break;
         case IDENTIFIER: {
             action_t action = get_command( get_token() );
             if ( action ) {

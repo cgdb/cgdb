@@ -1,8 +1,17 @@
+02/11/2003 Bob Rossi <bob_rossi@cox.net>
+   
+   * Added the command to goto a line in the source window: This options was
+   present before but it was not picked up by the new command parser.
+   * Changed the 'n' key to mean 'next forward search' and the 'N' key to 
+   mean 'next reverse search': This is not exactly like vi because if your 
+   searching in reverse, 'N' will still keep you searching in reverse.
+
 02/05/2003 Peter Kovacs <peter@kovax.org>
+
     * Integrated new command parser: commands.c now takes care of processing
-      all :commands and all :set commands.  Added new commands :insert :next
-      :run :continue :macro_run :macro_save :macro_start.  Added verbose set
-      commands :set ignorecase and :set shortcut.
+    all :commands and all :set commands.  Added new commands :insert :next
+    :run :continue :macro_run :macro_save :macro_start.  Added verbose set
+    commands :set ignorecase and :set shortcut.
 
 version 0.2.3 (01/30/2003):
 

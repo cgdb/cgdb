@@ -32,7 +32,7 @@ const char * get_token( void )
 
 (yes|YES|Yes|Y|y|no|NO|No|n|N)                             { count(); return BOOLEAN; }
 ((<({L}|{D}|[^>])*>)|({L}({L}|{D})*))\!?                   { count(); return IDENTIFIER; }
-{D}+                                                       { count(); return NUMBER; }
+[+-]?{D}+                                                       { count(); return NUMBER; }
 \"(\\.|[^\\"])*\"                                          { count(); return STRING; }
 
 "="                                                        { count(); return '='; }

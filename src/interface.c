@@ -350,7 +350,7 @@ void if_display_message(const char *msg, int width, const char *fmt, ...) {
 /* if_draw: Draws the interface on the screen.
  * --------
  */
-static void if_draw()
+void if_draw( void )
 {
     update_status_win();
 
@@ -1138,8 +1138,12 @@ int internal_if_input(int key) {
                     source_search_regex_init(src_win);
                     capture_regex(src_win);
                     return 0;
-                case '.':
-                     source_search_regex(src_win, regex_line, 2, regex_direction, regex_icase);
+                case 'n':
+                     source_search_regex(src_win, regex_line, 2, 1, regex_icase);
+                     if_draw();
+                     break;
+                case 'N':
+                     source_search_regex(src_win, regex_line, 2, 0, regex_icase);
                      if_draw();
                      break;
                 case 'T':
