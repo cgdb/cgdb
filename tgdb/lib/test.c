@@ -11,14 +11,14 @@ int one(int a, int b){
 
 void short_func(void){
    int i = 0;
-   sleep(0);
+   sleep(1);
    i = 1;
    i = 2;
 }
 
 void long_func(void){
    int k = 0;
-   sleep(0);
+   sleep(3);
    k = 1;
    k = 2;
 }
