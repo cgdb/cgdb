@@ -133,7 +133,7 @@ void *a2_create_context (
  * \param inferior_stdout
  * Reading from this descriptor, reads from the inferior's stdout.
  *
- * @retrun Retruns
+ * @return Retruns
  * 0 on success, otherwise -1 on error.
  */
 int a2_initialize ( 
