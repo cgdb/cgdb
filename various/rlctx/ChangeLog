@@ -1,3 +1,9 @@
+08/11/2003 Bob Rossi <bob@brasko.net>
+
+	* rlctx_driver.c: tgdb_init_readline, adding prompt to driver
+	* rlctx_main.c: signal_catcher, added code to catch and handle SIGINT
+	rlctx_setup_signals, setup signal handler for SIGINT
+
 version 0.3.3a (07/16/2003):
 
 version 0.3.3 (07/15/2003):

@@ -128,6 +128,13 @@ static int handle_error_begin(const char *buf, size_t n, struct queue *q){
       return 0;
    }
 
+   /* After a signal is sent (^c), the debugger will then output 
+	* something like "Quit\n", so that should be displayed to the user.
+	* Unfortunatly, the debugger ( gdb ) isn't nice enough to return a 
+	* post-prompt when a signal is recieved.
+	*/
+   data_set_state(VOID);
+
    return 0;
 }
 

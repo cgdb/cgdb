@@ -1,3 +1,14 @@
+08/11/2003 Bob Rossi <bob@brasko.net>
+	The basic purpose of this commit is to handle the control_c signal.
+
+	* annotate.c: handle_error_begin, added call to set data state to VOID.
+	* commands.c: commands_prepare_for_command, call global_list_finished.
+	commands_issue_command, initialize global variable
+	* tgdb.c: moving control_c from bottom of file to top.
+	introduce new function tgdb_handle_signals.
+	tgdb_recv, call to tgdb_handle_signals
+	tgdb_run_command, removed signal handling code from function.
+
 08/01/2003 Bob Rossi <bob@brasko.net>
 
 	* a2-tgdb.c: remove global tgdb_partially_run_command.

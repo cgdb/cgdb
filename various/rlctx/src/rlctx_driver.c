@@ -83,6 +83,11 @@ static int tgdb_init_readline ( char *config_dir, int *fd ) {
         return -1;
     }
 
+    if ( rlctx_change_prompt (rl, "(prompt) ") == -1 ) {
+        err_msg("(%s:%d) rlctx_register_callback failed", __FILE__, __LINE__);
+        return -1;
+    }
+
     return 0;
 }
 
@@ -120,6 +125,10 @@ static void stdin_input(int fd) {
     for ( i = 0; i < size; i++ ) {
         /* For testing only */
         if ( command[i] == '8' )  {
+			if ( rlctx_send_char ( rl, 3 ) == -1 ) {
+				err_msg("(%s:%d) rlctx_send_char failed", __FILE__, __LINE__);
+				return;
+			}
             continue;
         } 
         if ( command[i] == '9' )  {

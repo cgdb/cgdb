@@ -508,6 +508,9 @@ int commands_prepare_for_command ( struct command *com ) {
     /* Set the commands state to nothing */
     commands_set_state(VOID, NULL);
 
+	/* The list command is no longer running */
+    global_list_finished();
+
     if ( global_list_had_error () == TRUE && commands_get_state() == INFO_LIST )  {
         global_set_list_error ( FALSE );
         return -1;
@@ -653,7 +656,7 @@ int commands_user_ran_command ( void ) {
 
 int commands_issue_command ( enum annotate_commands com, const char *data, int oob) {
     const char *ncom = commands_create_command ( com, data );
-    struct command *command;
+    struct command *command = NULL;
     enum annotate_commands *nacom = (enum annotate_commands *)xmalloc ( sizeof ( enum annotate_commands ) );
     
     *nacom = com;

@@ -105,6 +105,9 @@ static int (*tgdb_client_shutdown)(void);
 static char* (*tgdb_get_client_command)(enum tgdb_command c);
 static char* (*tgdb_client_modify_breakpoint_call)(const char *file, int line, enum tgdb_breakpoint_action b);
 
+sig_atomic_t control_c = 0; /* If ^c was hit by user */
+
+
 /* These are 2 very important state variables.
  *
  * IS_SUBSYSTEM_READY_FOR_NEXT_COMMAND
@@ -207,6 +210,26 @@ int is_ready ( void ) {
     return 0;
 }
 
+/* tgdb_handle_signals
+ */
+static int tgdb_handle_signals ( void ) {
+	if ( control_c ) {
+    /* TODO: Put signal blocking code here so that ^c is not pressed while 
+     * checking for it */
+
+        queue_free_list(gdb_input_queue, tgdb_interface_free_command);
+        control_c = 0;
+
+		/* Tell readline that the signal occured */
+		if ( rlctx_send_char(rl, (char)3) == -1 ) {
+			err_msg("(%s:%d) rlctx_send_char failed", __FILE__, __LINE__);
+			return -1;
+		}
+    } 
+
+	return 0;
+}
+
 /*******************************************************************************
  * This is the main_loop stuff for tgdb-base
  ******************************************************************************/
@@ -250,7 +273,15 @@ size_t tgdb_recv(char *buf, size_t n, struct queue *q){
      */
     buf_size = a2_handle_data(local_buf, size, buf, n, q);
 
-    /* 3. runs the users buffered command if any exists */
+	/* 3. if ^c has been sent, clear the buffers.
+     * 	  If a signal has been recieved, clear the queue and return
+     */
+	if ( tgdb_handle_signals () == -1 ) {
+        err_msg("%s:%d tgdb_handle_signals error", __FILE__, __LINE__);
+		return -1;
+	}
+
+    /* 4. runs the users buffered command if any exists */
     if ( tgdb_has_command_to_run())
         tgdb_run_command();
 
@@ -413,26 +444,12 @@ static int tgdb_deliver_command ( int fd, struct command *command ) {
     return 0;
 }
 
-sig_atomic_t control_c = 0; /* If ^c was hit by user */
-
 /* tgdb_run_buffered_command: Sends to gdb the next command.
  *
  * return:  0 on normal termination ( command was run )
  *          2 if the queue was cleared because of ^c
  */
 int tgdb_run_command(void){
-    /* TODO: Put signal blocking code here so that ^c is not pressed while 
-     * checking for it */
-
-    /* If a signal has been recieved, clear the queue and return */
-    if(control_c) { 
-        queue_free_list(gdb_input_queue, tgdb_interface_free_command);
-        /* TODO: Setting control_c here stops crashing, but it doesn't solve
-         * the problem. readline needs to know to reset the prompt. */
-        control_c = 0;
-        return 2;
-    } 
-
 tgdb_run_command_tag:
 
     /* This will redisplay the prompt when a command is run

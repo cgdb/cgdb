@@ -284,6 +284,18 @@ static int init_readline(void){
 static void signal_catcher( int SIGNAL ) {
     if ( SIGNAL != SIGHUP )
         err_msg("%s:%d caught unknown signal: %d", __FILE__, __LINE__, SIGNAL);
+
+	if ( SIGNAL == SIGINT ) {
+		/* Delete data entered by user on signal */
+		rl_free_line_state();
+		rl_delete_text ( 0 , rl_end );
+		rl_point = 0;
+		rl_mark  = 0;
+
+		/* No redisplay needs to be done, its a hack to get signals 
+		 * partially working. */
+		redisplay();
+	}
 }
 
 static int rlctx_setup_signals(void) {
@@ -294,6 +306,11 @@ static int rlctx_setup_signals(void) {
    action.sa_flags = 0;
 
    if(sigaction(SIGHUP, &action, NULL) < 0) {
+      err_ret("%s:%d -> sigaction failed ", __FILE__, __LINE__);
+      return -1;
+   }
+
+   if(sigaction(SIGINT, &action, NULL) < 0) {
       err_ret("%s:%d -> sigaction failed ", __FILE__, __LINE__);
       return -1;
    }
@@ -311,7 +328,7 @@ int rlctx_main(int fd) {
         err_ret("%s:%d rlctx_setup_signals failed ", __FILE__, __LINE__);
         return -1;
     }
-    
+
     init_readline();
 
     main_loop(STDIN_FILENO, fd);
