@@ -27,11 +27,12 @@
 extern int regex_icase ;
 extern int shortcut_option ;
 extern int line_coverage_option;
+extern int highlight_tabstop;
 
 enum ConfigType
 {
     CONFIG_TYPE_BOOL, /* set ic / set noic */
-    CONFIG_TYPE_INT,  /* set tabspace=8 */
+    CONFIG_TYPE_INT,  /* set tabstop=8 */
     CONFIG_TYPE_STRING,
     CONFIG_TYPE_FUNC_VOID,
     CONFIG_TYPE_FUNC_INT,
@@ -39,7 +40,7 @@ enum ConfigType
 };
 
 static int command_set_focus( const char *value );
-static int command_set_tabspace( int tab );
+static int command_set_tabstop( int tab );
 
 static struct ConfigVariable
 {
@@ -48,11 +49,11 @@ static struct ConfigVariable
     void *data;
 } VARIABLES[] = {
     // keep this stuff sorted! !sort
-    /* focus      */ { "focus", "fo", CONFIG_TYPE_FUNC_STRING, command_set_focus },
+    /* focus      */ 	{ "focus", "fo", CONFIG_TYPE_FUNC_STRING, command_set_focus },
     /* ignorecase */ 	{ "ignorecase", "ic", CONFIG_TYPE_BOOL, &regex_icase },
     /* line_coverage */ { "line_coverage", "lc", CONFIG_TYPE_BOOL, &line_coverage_option },
     /* shortcut   */ 	{ "shortcut", "sc", CONFIG_TYPE_BOOL, &shortcut_option },
-    /* tabspace   */    { "tabspace", "ts", CONFIG_TYPE_FUNC_INT, command_set_tabspace },
+    /* tabstop   */     { "tabstop", "ts", CONFIG_TYPE_FUNC_INT, command_set_tabstop },
 };
 
 static int command_focus_cgdb( void );
@@ -139,10 +140,10 @@ int command_set_focus( const char *value )
     return 0;
 }
 
-int command_set_tabspace( int value )
+int command_set_tabstop( int value )
 {
-    fprintf( stderr, "Unimplemented.\n" );
-    return 1;
+	highlight_tabstop = value;
+    return 0;
 }
 
 int command_focus_cgdb( void )
@@ -245,7 +246,7 @@ int command_parse_set( void )
      * set ignorecase
      * set noignorecase
      * set focus=gdb
-     * set tabspace=8
+     * set tabstop=8
      */
 
     int rv = 1;
@@ -270,7 +271,7 @@ int command_parse_set( void )
             if( boolean == 0 &&
                 variable->type != CONFIG_TYPE_BOOL ) {
                 /* this is an error, you cant' do:
-                 * set notabspace 
+                 * set notabstop 
                  */
                 rv = 1;
             }
@@ -421,8 +422,8 @@ int command_parse_file( FILE *fp )
     {
        if( command_parse_string( buffer ) )
        {
-           fprintf( stderr, "Error parsing line %d: %s\n", yylinenumber, buffer );
-           return 1;
+           if_print_message ("Error parsing line %d: %s\n", yylinenumber, buffer );
+		   return -1;
        }
     }
 

@@ -54,6 +54,13 @@ int if_input(int key);
  */
 void if_print(const char *buf);
 
+/* if_print_message: Prints data to the GDB input/output window.
+ * -----------------
+ *
+ * fmt:     The message to display
+ */
+void if_print_message(const char *fmt, ...);
+
 /* if_tty_print: Prints data to the tty input/output window.
  * -------------
  *

@@ -1,3 +1,11 @@
+06/14/2003 Bob Rossi <bob_rossi@cox.net>
+
+	* commands.c: Implemented tab_stop feature. Changed tabspace to tabstop.
+				  Changed parse error call from printf to if_print_message.
+ 	* highlight.c: changed to use tabstop variable.
+	* interface.c: Added if_print_message.
+	* interface.h: Added if_print_message.
+
 06/12/2003 Bob Rossi <bob_rossi@cox.net>
 
 	* commands.c: sorted VARIABLES structure

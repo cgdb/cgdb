@@ -39,6 +39,8 @@
 #include "sources.h"
 #include "cgdb.h"
 
+int highlight_tabstop = 8;
+
 /* ----------- */
 /* Definitions */
 /* ----------- */
@@ -589,7 +591,7 @@ void hl_wprintw(WINDOW *win, const char *line, int width, int offset)
         else{
             switch (line[i]){
                 case '\t':
-                    for (j = 0; j < 4 && p < width; j++, p++)
+                    for (j = 0; j < highlight_tabstop && p < width; j++, p++)
                         wprintw(win, " ");
                     break;
                 default:

@@ -1119,6 +1119,22 @@ void if_print(const char *buf)
     }
 }
 
+void if_print_message (const char *fmt, ...) {
+    va_list ap;
+    char va_buf[MAXLINE];
+
+    /* Get the buffer with format */
+    va_start(ap, fmt);
+#ifdef   HAVE_VSNPRINTF
+    vsnprintf(va_buf, sizeof(va_buf), fmt, ap);  /* this is safe */
+#else
+    vsprintf(va_buf, fmt, ap);             /* this is not safe */
+#endif
+    va_end(ap);
+
+	if_print ( va_buf );
+}
+
 void if_show_file(char *path, int line)
 {
     if (source_set_exec_line(src_win, path, line) == 0)
