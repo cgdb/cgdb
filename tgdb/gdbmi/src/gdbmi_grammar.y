@@ -47,7 +47,6 @@ output_ptr syntax_tree;
 	long u_token;
 	struct async_record *u_async_record;
 	struct stream_record *u_stream_record;
-	struct async_output *u_async_output;
 	int u_async_class;
 	char *u_variable;
 	struct value *u_value;
@@ -65,14 +64,12 @@ output_ptr syntax_tree;
 %type <u_result_record> result_record
 %type <u_result_class> result_class
 %type <u_async_record_kind> async_record_class
-%type <u_result> opt_result_list
 %type <u_result> result_list
 %type <u_result> result
 %type <u_token> opt_token
 %type <u_token> token
 %type <u_async_record> async_record
 %type <u_stream_record> stream_record
-%type <u_async_output> async_output
 %type <u_async_class> async_class
 %type <u_variable> variable
 %type <u_value> value
@@ -85,6 +82,7 @@ output_ptr syntax_tree;
 %start opt_output_list
 
 %%
+
 
 opt_output_list: {
 };
@@ -132,7 +130,7 @@ result_record: opt_token CARROT result_class {
 	$$->result = NULL;
 };
 
-result_record: opt_token CARROT result_class COMMA opt_result_list {
+result_record: opt_token CARROT result_class COMMA result_list {
 	$$ = malloc ( sizeof ( struct result_record ) );
 	$$->token = $1;
 	$$->result_class = $3;
@@ -151,11 +149,19 @@ oob_record: stream_record {
 	$$->variant.stream_record = $1;
 };
 
-async_record: opt_token async_record_class async_output {
+async_record: opt_token async_record_class async_class {
 	$$ = malloc ( sizeof ( struct async_record ) );
 	$$->token = $1;
 	$$->async_record = $2;
-	$$->async_output = $3;
+	$$->async_class = $3;
+};
+
+async_record: opt_token async_record_class async_class COMMA result_list {
+	$$ = malloc ( sizeof ( struct async_record ) );
+	$$->token = $1;
+	$$->async_record = $2;
+	$$->async_class = $3;
+	$$->result_ptr = $5;
 };
 
 async_record_class: MULT_OP {
@@ -168,12 +174,6 @@ async_record_class: ADD_OP {
 
 async_record_class: EQUAL_SIGN {
 	$$ = GDBMI_NOTIFY;	
-};
-
-async_output: async_class COMMA opt_result_list {
-	$$ = malloc ( sizeof ( struct async_output ) );
-	$$->async_class = $1;
-	$$->result_ptr = $3;
 };
 
 result_class: DONE {
@@ -198,14 +198,6 @@ result_class: EXIT {
 
 async_class: STOPPED {
 	$$ = GDBMI_STOPPED;
-};
-
-opt_result_list: {
-	$$ = NULL;
-};
-
-opt_result_list: result_list {
-	$$ = $1;
 };
 
 result_list: result {
@@ -258,7 +250,6 @@ tuple: OPEN_BRACE CLOSED_BRACE {
 
 tuple: OPEN_BRACE result_list CLOSED_BRACE {
 	$$ = malloc ( sizeof ( struct tuple ) );
-	/* Order probably matters here */
 	$$->result = $2;
 };
 
@@ -268,14 +259,12 @@ list: OPEN_BRACKET CLOSED_BRACKET {
 
 list: OPEN_BRACKET value_list CLOSED_BRACKET {
 	$$ = malloc ( sizeof ( struct list ) );
-	/* Order probably matters here */
 	$$->list = GDBMI_VALUE;
 	$$->variant.value = $2;
 };
 
 list: OPEN_BRACKET result_list CLOSED_BRACKET {
 	$$ = malloc ( sizeof ( struct list ) );
-	/* Order probably matters here */
 	$$->list = GDBMI_RESULT;
 	$$->variant.result = $2;
 };

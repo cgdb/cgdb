@@ -10,7 +10,6 @@ typedef struct result *result_ptr;
 typedef struct async_record *async_record_ptr;
 typedef struct stream_record *stream_record_ptr;
 enum async_class;
-typedef struct async_output *async_output_ptr;
 typedef struct value *value_ptr;
 typedef struct tuple *tuple_ptr;
 typedef struct list *list_ptr;
@@ -141,6 +140,10 @@ enum stream_record_kind {
 	GDBMI_LOG
 };
 
+enum async_class {
+	GDBMI_STOPPED
+};
+
 /**
  * An asyncronous record
  */
@@ -154,16 +157,8 @@ struct async_record {
 	/** The kind of asyncronous record this represents */
 	enum async_record_kind async_record;
 
-	/** The output of the asynchronous record */
-	async_output_ptr async_output;
-};
-
-enum async_class {
-	GDBMI_STOPPED
-};
-
-struct async_output {
 	enum async_class async_class;
+
 	result_ptr result_ptr;
 };
 
@@ -243,6 +238,36 @@ int destroy_oob_record ( oob_record_ptr param );
 int print_oob_record ( oob_record_ptr param );
 
 int print_async_record_kind ( enum async_record_kind param );
+
+int print_stream_record_kind ( enum stream_record_kind param );
+
+async_record_ptr create_async_record ( void );
+int destroy_async_record ( async_record_ptr param );
+int print_async_record ( async_record_ptr param );
+
+int print_async_class ( enum async_class param );
+
+async_record_ptr create_async_record ( void );
+int destroy_record_output ( async_record_ptr param );
+int print_record_output ( async_record_ptr param );
+
+int print_value_kind ( enum value_kind param );
+
+value_ptr create_value ( void );
+int destroy_value ( value_ptr param );
+int print_value ( value_ptr param );
+
+tuple_ptr create_tuple ( void );
+int destroy_tuple ( tuple_ptr param );
+int print_tuple ( tuple_ptr param );
+
+list_ptr create_list ( void );
+int destroy_list ( list_ptr param );
+int print_list ( list_ptr param );
+
+stream_record_ptr create_stream_record_ptr ( void );
+int destroy_stream_record_ptr ( stream_record_ptr param );
+int print_stream_record_ptr ( stream_record_ptr param );
 
 void* append_to_list ( void *list, void*item );
 #endif

@@ -1,5 +1,6 @@
 %option prefix="gdbmi_"
 %option outfile="lex.yy.c"
+%option yylineno
 
 DIGIT       [0-9]
 L       [a-zA-Z_]
