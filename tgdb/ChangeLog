@@ -1,3 +1,7 @@
+04/02/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * Changed rlctx_prog rl_callback_read_char to respect EOF
+
 04/01/2003 Bob Rossi <bob_rossi@cox.net>
 
     * Automatically building getch_driver and input_driver: This is done

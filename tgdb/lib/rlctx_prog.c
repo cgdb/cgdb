@@ -87,6 +87,10 @@ void main_loop(void){
 }
 
 static void rlctx_send_user_command(char *line) {
+    /* This happens when rl_callback_read_char gets EOF */
+    if ( line == NULL )
+        exit(-1);
+    
     /* Don't add the enter command */
     if ( line && *line != '\0' )
         add_history(line);
