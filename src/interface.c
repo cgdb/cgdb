@@ -445,7 +445,7 @@ static int if_layout()
 static int if_resize()
 {
     if (ioctl(fileno(stdout), TIOCGWINSZ, &screen_size) != -1){
-#ifdef HAVE_NCURSES_H
+#ifdef HAVE_NCURSES
         if (screen_size.ws_row != LINES || screen_size.ws_col != COLS){
             resizeterm(screen_size.ws_row, screen_size.ws_col);
             return if_layout();
