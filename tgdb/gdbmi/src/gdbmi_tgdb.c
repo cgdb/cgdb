@@ -103,6 +103,11 @@ struct tgdb_gdbmi {
 	 * This is a list of all the commands generated since in the last call. 
 	 */
 	struct tgdb_list *client_command_list;
+
+	/**
+	 * This data structure represents all of the lines that make up one
+	 * output command from GDB.
+	 */
 };
 
 //static int gdbmi_set_inferior_tty ( void *ctx ) {
@@ -318,22 +323,27 @@ int gdbmi_parse_io (
 		char *debugger_output, size_t *debugger_output_size,
 		char *inferior_output, size_t *inferior_output_size,
 		struct tgdb_list *list ) {
+//	struct tgdb_gdbmi *gdbmi = (struct tgdb_gdbmi *)ctx;
 //	int val;
 
 //	val = gdbmi_handle_data ( gdbmi, gdbmi->sm, input_data, input_data_size,
 //		debugger_output, debugger_output_size, list );
 
-	static char *tmp_prompt = "\n(gdb) \n";
+//	strncpy ( debugger_output, input_data, input_data_size );
+//	*debugger_output_size = input_data_size;
+//
+//
+//	/* \n(gdb) is the end of a record */
+//	if ( input_data_size > 7 &&
+//		 (strcmp ( &debugger_output[input_data_size-8], tmp_prompt) == 0 ) )
+//		return 1;
 
-	strncpy ( debugger_output, input_data, input_data_size );
-	*debugger_output_size = input_data_size;
 
+	/* The MI parser is capable of recieving one command of output and parsing it
+	 * into a parse tree. the command is always a set of new lines.
+	 */
 
-	/* \n(gdb) is the end of a record */
-	if ( input_data_size > 7 &&
-		 (strcmp ( &debugger_output[input_data_size-8], tmp_prompt) == 0 ) )
-		return 1;
-
+	
 	return 0;
 }
 

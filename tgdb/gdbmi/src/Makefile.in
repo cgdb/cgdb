@@ -132,6 +132,7 @@ AM_CFLAGS = -g -Wall \
 noinst_LIBRARIES = libgdbmi.a
 
 libgdbmi_a_SOURCES = \
+gdbmi_parser.c \
 gdbmi_parse.c \
 gdbmi_tgdb.c \
 gdbmi_grammar.y \
@@ -153,8 +154,14 @@ gdbmi_driver_SOURCES = \
 	gdbmi_driver.c \
 	gdbmi_grammar.y \
 	gdbmi_lexer.l \
+	gdbmi_parser.c \
 	gdbmi_pt.c
 
+
+gdbmi_driver_LDFLAGS = \
+-L$(top_builddir)/various/util/src
+
+gdbmi_driver_LDADD = -lutil
 subdir = tgdb/gdbmi/src
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
@@ -163,19 +170,17 @@ LIBRARIES = $(noinst_LIBRARIES)
 
 libgdbmi_a_AR = $(AR) cru
 libgdbmi_a_LIBADD =
-am_libgdbmi_a_OBJECTS = gdbmi_parse.$(OBJEXT) gdbmi_tgdb.$(OBJEXT) \
-	gdbmi_grammar.$(OBJEXT) gdbmi_lexer.$(OBJEXT) \
-	gdbmi_pt.$(OBJEXT)
+am_libgdbmi_a_OBJECTS = gdbmi_parser.$(OBJEXT) gdbmi_parse.$(OBJEXT) \
+	gdbmi_tgdb.$(OBJEXT) gdbmi_grammar.$(OBJEXT) \
+	gdbmi_lexer.$(OBJEXT) gdbmi_pt.$(OBJEXT)
 libgdbmi_a_OBJECTS = $(am_libgdbmi_a_OBJECTS)
 noinst_bin_PROGRAMS = gdbmi_driver$(EXEEXT)
 PROGRAMS = $(noinst_bin_PROGRAMS)
 
 am_gdbmi_driver_OBJECTS = gdbmi_driver.$(OBJEXT) gdbmi_grammar.$(OBJEXT) \
-	gdbmi_lexer.$(OBJEXT) gdbmi_pt.$(OBJEXT)
+	gdbmi_lexer.$(OBJEXT) gdbmi_parser.$(OBJEXT) gdbmi_pt.$(OBJEXT)
 gdbmi_driver_OBJECTS = $(am_gdbmi_driver_OBJECTS)
-gdbmi_driver_LDADD = $(LDADD)
 gdbmi_driver_DEPENDENCIES =
-gdbmi_driver_LDFLAGS =
 
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
@@ -183,7 +188,8 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/gdbmi_driver.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/gdbmi_grammar.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/gdbmi_lexer.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/gdbmi_parse.Po ./$(DEPDIR)/gdbmi_pt.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/gdbmi_parse.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/gdbmi_parser.Po ./$(DEPDIR)/gdbmi_pt.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/gdbmi_tgdb.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -252,6 +258,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdbmi_grammar.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdbmi_lexer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdbmi_parse.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdbmi_parser.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdbmi_pt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdbmi_tgdb.Po@am__quote@
 

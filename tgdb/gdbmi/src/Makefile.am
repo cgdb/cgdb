@@ -9,6 +9,7 @@ AM_CFLAGS = -g -Wall \
 noinst_LIBRARIES = libgdbmi.a
 
 libgdbmi_a_SOURCES = \
+gdbmi_parser.c \
 gdbmi_parse.c \
 gdbmi_tgdb.c \
 gdbmi_grammar.y \
@@ -28,7 +29,12 @@ gdbmi_driver_SOURCES = \
 	gdbmi_driver.c \
 	gdbmi_grammar.y \
 	gdbmi_lexer.l \
+	gdbmi_parser.c \
 	gdbmi_pt.c
+
+gdbmi_driver_LDFLAGS = \
+-L$(top_builddir)/various/util/src
+gdbmi_driver_LDADD = -lutil
 
 clean:
 	rm -f gdbmi_lexer.c \

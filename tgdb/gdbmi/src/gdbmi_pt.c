@@ -11,7 +11,7 @@ int print_token ( long l ) {
 }
 
 /* Print result class */
-int print_result_class ( enum result_class param ) {
+int print_gdbmi_result_class ( enum gdbmi_result_class param ) {
 	switch ( param ) {
 		case GDBMI_DONE:
 			printf ( "GDBMI_DONE\n" );
@@ -35,24 +35,24 @@ int print_result_class ( enum result_class param ) {
 	return 0;
 }
 
-/* Creating, Destroying and printing output */
-output_ptr create_output ( void ) {
-	return calloc ( 1, sizeof ( struct output ) );
+/* Creating, Destroying and printing gdbmi_output*/
+gdbmi_output_ptr create_gdbmi_output( void ) {
+	return calloc ( 1, sizeof ( struct gdbmi_output) );
 }
 
-int destroy_output ( output_ptr param ) {
+int destroy_gdbmi_output( gdbmi_output_ptr param ) {
 	if ( !param )
 		return 0;
 
-	if ( destroy_oob_record ( param->oob_record ) == -1 )
+	if ( destroy_gdbmi_oob_record ( param->oob_record ) == -1 )
 		return -1;
 	param->oob_record = NULL;
 
-	if ( destroy_result_record ( param->result_record ) == -1 )
+	if ( destroy_gdbmi_result_record ( param->result_record ) == -1 )
 		return -1;
 	param->result_record = NULL;
 
-	if ( destroy_output ( param->next ) == -1 )
+	if ( destroy_gdbmi_output( param->next ) == -1 )
 		return -1;
 	param->next = NULL;
 	
@@ -61,14 +61,14 @@ int destroy_output ( output_ptr param ) {
 	return 0;
 }
 
-output_ptr append_output ( output_ptr list, output_ptr item ) {
+gdbmi_output_ptr append_gdbmi_output( gdbmi_output_ptr list, gdbmi_output_ptr item ) {
 	if ( !item )
 		return NULL;
 
 	if ( !list )
 		list = item;
 	else {
-		output_ptr cur = list;
+		gdbmi_output_ptr cur = list;
 		while ( cur->next )
 			cur=cur->next;
 
@@ -78,16 +78,16 @@ output_ptr append_output ( output_ptr list, output_ptr item ) {
 	return list;
 }
 
-int print_output ( output_ptr param ) {
-	output_ptr cur = param;
+int print_gdbmi_output( gdbmi_output_ptr param ) {
+	gdbmi_output_ptr cur = param;
 	int result;
 
 	while ( cur ) {
-		result = print_oob_record ( cur->oob_record );
+		result = print_gdbmi_oob_record ( cur->oob_record );
 		if ( result == -1 )
 			return -1;
 		
-		result = print_result_record ( cur->result_record );
+		result = print_gdbmi_result_record ( cur->result_record );
 		if ( result == -1 )
 			return -1;
 
@@ -98,15 +98,15 @@ int print_output ( output_ptr param ) {
 }
 
 /* Creating, Destroying and printing record */
-result_record_ptr create_result_record ( void ) {
-	return calloc ( 1, sizeof ( struct result_record ) );
+gdbmi_result_record_ptr create_gdbmi_result_record ( void ) {
+	return calloc ( 1, sizeof ( struct gdbmi_result_record ) );
 }
 
-int destroy_result_record ( result_record_ptr param ) {
+int destroy_gdbmi_result_record ( gdbmi_result_record_ptr param ) {
 	if ( !param )
 		return 0;
 
-	if ( destroy_result ( param->result ) == -1 )
+	if ( destroy_gdbmi_result ( param->result ) == -1 )
 		return -1;
 	param->result = NULL;
 
@@ -115,7 +115,7 @@ int destroy_result_record ( result_record_ptr param ) {
 	return 0;
 }
 
-int print_result_record ( result_record_ptr param ) {
+int print_gdbmi_result_record ( gdbmi_result_record_ptr param ) {
 	int result;
 
 	if ( !param )
@@ -125,11 +125,11 @@ int print_result_record ( result_record_ptr param ) {
 	if ( result == -1 )
 		return -1;
 	
-	result = print_result_class ( param->result_class );
+	result = print_gdbmi_result_class ( param->result_class );
 	if ( result == -1 )
 		return -1;
 	
-	result = print_result ( param->result );
+	result = print_gdbmi_result ( param->result );
 	if ( result == -1 )
 		return -1;
 
@@ -137,11 +137,11 @@ int print_result_record ( result_record_ptr param ) {
 }
 
 /* Creating, Destroying and printing result */
-result_ptr create_result ( void ) {
-	return calloc ( 1, sizeof ( struct result_record ) );
+gdbmi_result_ptr create_gdbmi_result ( void ) {
+	return calloc ( 1, sizeof ( struct gdbmi_result_record ) );
 }
 
-int destroy_result ( result_ptr param ) {
+int destroy_gdbmi_result ( gdbmi_result_ptr param ) {
 	if ( !param )
 		return 0;
 
@@ -150,11 +150,11 @@ int destroy_result ( result_ptr param ) {
 		param->variable = NULL;
 	}
 
-	if ( destroy_value ( param->value ) == -1 )
+	if ( destroy_gdbmi_value ( param->value ) == -1 )
 		return -1;
 	param->value = NULL;
 	
-	if ( destroy_result ( param->next ) == -1 )
+	if ( destroy_gdbmi_result ( param->next ) == -1 )
 		return -1;
 	param->next = NULL;
 
@@ -163,14 +163,14 @@ int destroy_result ( result_ptr param ) {
 	return 0;
 }
 
-result_ptr append_result ( result_ptr list, result_ptr item ) {
+gdbmi_result_ptr append_gdbmi_result ( gdbmi_result_ptr list, gdbmi_result_ptr item ) {
 	if ( !item )
 		return NULL;
 
 	if ( !list )
 		list = item;
 	else {
-		result_ptr cur = list;
+		gdbmi_result_ptr cur = list;
 		while ( cur->next )
 			cur=cur->next;
 
@@ -180,14 +180,14 @@ result_ptr append_result ( result_ptr list, result_ptr item ) {
 	return list;
 }
 
-int print_result ( result_ptr param ) {
-	result_ptr cur = param;
+int print_gdbmi_result ( gdbmi_result_ptr param ) {
+	gdbmi_result_ptr cur = param;
 	int result;
 
 	while ( cur ) {
 		printf ( "variable->(%s)\n", cur->variable );
 		
-		result = print_value ( cur->value );
+		result = print_gdbmi_value ( cur->value );
 		if ( result == -1 )
 			return -1;
 
@@ -197,7 +197,7 @@ int print_result ( result_ptr param ) {
 	return 0;
 }
 
-int print_oob_record_kind ( enum oob_record_kind param ) {
+int print_gdbmi_oob_record_kind ( enum gdbmi_oob_record_kind param ) {
 	switch ( param ) {
 		case GDBMI_ASYNC:
 			printf ( "GDBMI_ASYNC\n" );
@@ -213,27 +213,27 @@ int print_oob_record_kind ( enum oob_record_kind param ) {
 }
 
 /* Creating, Destroying and printing oob_record */
-oob_record_ptr create_oob_record ( void ) {
-	return calloc ( 1, sizeof ( struct oob_record ) );
+gdbmi_oob_record_ptr create_gdbmi_oob_record ( void ) {
+	return calloc ( 1, sizeof ( struct gdbmi_oob_record ) );
 }
 
-int destroy_oob_record ( oob_record_ptr param ) {
+int destroy_gdbmi_oob_record ( gdbmi_oob_record_ptr param ) {
 	if ( !param )
 		return 0;
 
 	if ( param->record == GDBMI_ASYNC ) {
-		if ( destroy_async_record ( param->variant.async_record ) == -1 )
+		if ( destroy_gdbmi_async_record ( param->variant.async_record ) == -1 )
 			return -1;
 		param->variant.async_record = NULL;
 	} else if ( param->record == GDBMI_STREAM ) {
-		if ( destroy_stream_record ( param->variant.stream_record ) == -1 )
+		if ( destroy_gdbmi_stream_record ( param->variant.stream_record ) == -1 )
 			return -1;
 		param->variant.stream_record = NULL;
 	} else {
 		return -1;
 	}
 
-	if ( destroy_oob_record ( param->next ) == -1 )
+	if ( destroy_gdbmi_oob_record ( param->next ) == -1 )
 		return -1;
 	param->next = NULL;
 
@@ -242,14 +242,14 @@ int destroy_oob_record ( oob_record_ptr param ) {
 	return 0;
 }
 
-oob_record_ptr append_oob_record ( oob_record_ptr list, oob_record_ptr item ) {
+gdbmi_oob_record_ptr append_gdbmi_oob_record ( gdbmi_oob_record_ptr list, gdbmi_oob_record_ptr item ) {
 	if ( !item )
 		return NULL;
 
 	if ( !list )
 		list = item;
 	else {
-		oob_record_ptr cur = list;
+		gdbmi_oob_record_ptr cur = list;
 		while ( cur->next )
 			cur=cur->next;
 
@@ -259,21 +259,21 @@ oob_record_ptr append_oob_record ( oob_record_ptr list, oob_record_ptr item ) {
 	return list;
 }
 
-int print_oob_record ( oob_record_ptr param ) {
-	oob_record_ptr cur = param;
+int print_gdbmi_oob_record ( gdbmi_oob_record_ptr param ) {
+	gdbmi_oob_record_ptr cur = param;
 	int result;
 
 	while ( cur ) {
-		result = print_oob_record_kind ( cur->record );
+		result = print_gdbmi_oob_record_kind ( cur->record );
 		if ( result == -1 )
 			return -1;
 
 		if ( cur->record == GDBMI_ASYNC ) {
-			result = print_async_record ( cur->variant.async_record );
+			result = print_gdbmi_async_record ( cur->variant.async_record );
 			if ( result == -1 )
 				return -1;
 		} else if ( cur->record == GDBMI_STREAM ) {
-			result = print_stream_record ( cur->variant.stream_record );
+			result = print_gdbmi_stream_record ( cur->variant.stream_record );
 			if ( result == -1 )
 				return -1;
 		} else
@@ -285,7 +285,7 @@ int print_oob_record ( oob_record_ptr param ) {
 	return 0;
 }
 
-int print_async_record_kind ( enum async_record_kind param ) {
+int print_gdbmi_async_record_kind ( enum gdbmi_async_record_kind param ) {
 	switch ( param ) {
 		case GDBMI_STATUS:
 			printf ( "GDBMI_STATUS\n" );
@@ -303,7 +303,7 @@ int print_async_record_kind ( enum async_record_kind param ) {
 	return 0;
 }
 
-int print_stream_record_kind ( enum stream_record_kind param ) {
+int print_gdbmi_stream_record_kind ( enum gdbmi_stream_record_kind param ) {
 	switch ( param ) {
 		case GDBMI_CONSOLE:
 			printf ( "GDBMI_CONSOLE\n" );
@@ -322,15 +322,15 @@ int print_stream_record_kind ( enum stream_record_kind param ) {
 }
 
 /* Creating, Destroying and printing async_record */
-async_record_ptr create_async_record ( void ) {
-	return calloc ( 1, sizeof ( struct async_record ) );
+gdbmi_async_record_ptr create_gdbmi_async_record ( void ) {
+	return calloc ( 1, sizeof ( struct gdbmi_async_record ) );
 }
 
-int destroy_async_record ( async_record_ptr param ) {
+int destroy_gdbmi_async_record ( gdbmi_async_record_ptr param ) {
 	if ( !param ) 
 		return 0;
 
-	if ( destroy_result ( param->result ) == -1 )
+	if ( destroy_gdbmi_result ( param->result ) == -1 )
 		return -1;
 	param->result = NULL;
 
@@ -339,7 +339,7 @@ int destroy_async_record ( async_record_ptr param ) {
 	return 0;
 }
 
-int print_async_record ( async_record_ptr param ) {
+int print_gdbmi_async_record ( gdbmi_async_record_ptr param ) {
 	int result;
 
 	if ( !param )
@@ -349,22 +349,22 @@ int print_async_record ( async_record_ptr param ) {
 	if ( result == -1 )
 		return -1;
 
-	result = print_async_record_kind ( param->async_record );
+	result = print_gdbmi_async_record_kind ( param->async_record );
 	if ( result == -1 )
 		return -1;
 	
-	result = print_async_class ( param->async_class );
+	result = print_gdbmi_async_class ( param->async_class );
 	if ( result == -1 )
 		return -1;
 
-	result = print_result ( param->result );
+	result = print_gdbmi_result ( param->result );
 	if ( result == -1 )
 		return -1;
 
 	return 0;
 }
 
-int print_async_class ( enum async_class param ) {
+int print_gdbmi_async_class ( enum gdbmi_async_class param ) {
 	switch ( param ) {
 		case GDBMI_STOPPED:
 			printf ( "GDBMI_STOPPED\n" );
@@ -376,7 +376,7 @@ int print_async_class ( enum async_class param ) {
 	return 0;
 }
 
-int print_value_kind ( enum value_kind param ) {
+int print_gdbmi_value_kind ( enum gdbmi_value_kind param ) {
 	switch ( param ) {
 		case GDBMI_CSTRING:
 			printf ( "GDBMI_CSTRING\n" );
@@ -395,11 +395,11 @@ int print_value_kind ( enum value_kind param ) {
 }
 
 /* Creating, Destroying and printing value */
-value_ptr create_value ( void ) {
-	return calloc ( 1, sizeof ( struct value ) );
+gdbmi_value_ptr create_gdbmi_value ( void ) {
+	return calloc ( 1, sizeof ( struct gdbmi_value ) );
 }
 
-int destroy_value ( value_ptr param ) {
+int destroy_gdbmi_value ( gdbmi_value_ptr param ) {
 	if ( !param )
 		return 0;
 
@@ -409,17 +409,17 @@ int destroy_value ( value_ptr param ) {
 			param->variant.cstring = NULL;
 		}
 	} else if ( param->value_kind == GDBMI_TUPLE ) {
-		if ( destroy_tuple ( param->variant.tuple ) == -1 )
+		if ( destroy_gdbmi_tuple ( param->variant.tuple ) == -1 )
 			return -1;
 		param->variant.tuple = NULL;
 	} else if ( param->value_kind == GDBMI_LIST ) {
-		if ( destroy_list ( param->variant.list ) == -1 )
+		if ( destroy_gdbmi_list ( param->variant.list ) == -1 )
 			return -1;
 		param->variant.list = NULL;
 	} else
 		return -1;
 
-	if ( destroy_value ( param->next ) == -1 )
+	if ( destroy_gdbmi_value ( param->next ) == -1 )
 		return -1;
 	param->next = NULL;
 
@@ -428,14 +428,14 @@ int destroy_value ( value_ptr param ) {
 	return 0;
 }
 
-value_ptr append_value ( value_ptr list, value_ptr item ) {
+gdbmi_value_ptr append_gdbmi_value ( gdbmi_value_ptr list, gdbmi_value_ptr item ) {
 	if ( !item )
 		return NULL;
 
 	if ( !list )
 		list = item;
 	else {
-		value_ptr cur = list;
+		gdbmi_value_ptr cur = list;
 		while ( cur->next )
 			cur=cur->next;
 
@@ -445,23 +445,23 @@ value_ptr append_value ( value_ptr list, value_ptr item ) {
 	return list;
 }
 
-int print_value ( value_ptr param ) {
-	value_ptr cur = param;
+int print_gdbmi_value ( gdbmi_value_ptr param ) {
+	gdbmi_value_ptr cur = param;
 	int result;
 
 	while ( cur ) {
-		result = print_value_kind ( cur->value_kind );
+		result = print_gdbmi_value_kind ( cur->value_kind );
 		if ( result == -1 )
 			return -1;
 
 		if ( cur->value_kind == GDBMI_CSTRING ) {
 			printf ( "cstring->(%s)\n", cur->variant.cstring );
 		} else if ( cur->value_kind == GDBMI_TUPLE ) {
-			result = print_tuple ( cur->variant.tuple );
+			result = print_gdbmi_tuple ( cur->variant.tuple );
 			if ( result == -1 )
 				return -1;
 		} else if ( cur->value_kind == GDBMI_LIST ) {
-			result = print_list ( cur->variant.list );
+			result = print_gdbmi_list ( cur->variant.list );
 			if ( result == -1 )
 				return -1;
 		} else
@@ -473,7 +473,44 @@ int print_value ( value_ptr param ) {
 	return 0;
 }
 
-int print_list_kind ( enum list_kind param ) {
+/* Creating, Destroying and printing tuple */
+gdbmi_tuple_ptr create_gdbmi_tuple ( void ) {
+	return calloc ( 1, sizeof ( struct gdbmi_tuple ) );
+}
+
+int destroy_gdbmi_tuple ( gdbmi_tuple_ptr param ) {
+	if ( !param )
+		return 0;
+
+	if ( destroy_gdbmi_result ( param->result ) == -1 )
+		return -1;
+	param->result = NULL;
+
+	if ( destroy_gdbmi_tuple ( param->next ) == -1 )
+		return -1;
+	param->next = NULL;
+
+	free ( param );
+	param = NULL;
+	return 0;
+}
+
+int print_gdbmi_tuple ( gdbmi_tuple_ptr param ) {
+	gdbmi_tuple_ptr cur = param;
+	int result;
+
+	while ( cur ) {
+		result = print_gdbmi_result ( cur->result );
+		if ( result == -1 )
+			return -1;
+
+		cur = cur->next;
+	}
+
+	return 0;
+}
+
+int print_gdbmi_list_kind ( enum gdbmi_list_kind param ) {
 	switch ( param ) {
 		case GDBMI_VALUE:
 			printf ( "GDBMI_VALUE\n" );
@@ -488,64 +525,27 @@ int print_list_kind ( enum list_kind param ) {
 	return 0;
 }
 
-/* Creating, Destroying and printing tuple */
-tuple_ptr create_tuple ( void ) {
-	return calloc ( 1, sizeof ( struct tuple ) );
-}
-
-int destroy_tuple ( tuple_ptr param ) {
-	if ( !param )
-		return 0;
-
-	if ( destroy_result ( param->result ) == -1 )
-		return -1;
-	param->result = NULL;
-
-	if ( destroy_tuple ( param->next ) == -1 )
-		return -1;
-	param->next = NULL;
-
-	free ( param );
-	param = NULL;
-	return 0;
-}
-
-int print_tuple ( tuple_ptr param ) {
-	tuple_ptr cur = param;
-	int result;
-
-	while ( cur ) {
-		result = print_result ( cur->result );
-		if ( result == -1 )
-			return -1;
-
-		cur = cur->next;
-	}
-
-	return 0;
-}
-
 /* Creating, Destroying and printing list */
-list_ptr create_list ( void ) {
-	return calloc ( 1, sizeof ( struct list ) );
+gdbmi_list_ptr create_gdbmi_list ( void ) {
+	return calloc ( 1, sizeof ( struct gdbmi_list ) );
 }
 
-int destroy_list ( list_ptr param ) {
+int destroy_gdbmi_list ( gdbmi_list_ptr param ) {
 	if ( !param )
 		return 0;
 
 	if ( param->list_kind == GDBMI_VALUE ) {
-		if ( destroy_value ( param->variant.value ) == -1 )
+		if ( destroy_gdbmi_value ( param->variant.value ) == -1 )
 			return -1;
 		param->variant.value = NULL;
 	} else if ( param->list_kind == GDBMI_RESULT ) {
-		if ( destroy_result ( param->variant.result ) == -1 )
+		if ( destroy_gdbmi_result ( param->variant.result ) == -1 )
 			return -1;
 		param->variant.result = NULL;
 	} else
 		return -1;
 
-	if ( destroy_list ( param->next ) == -1 )
+	if ( destroy_gdbmi_list ( param->next ) == -1 )
 		return -1;
 	param->next = NULL;
 
@@ -554,14 +554,14 @@ int destroy_list ( list_ptr param ) {
 	return 0;
 }
 
-list_ptr append_list ( list_ptr list, list_ptr item ) {
+gdbmi_list_ptr append_gdbmi_list ( gdbmi_list_ptr list, gdbmi_list_ptr item ) {
 	if ( !item )
 		return NULL;
 
 	if ( !list )
 		list = item;
 	else {
-		list_ptr cur = list;
+		gdbmi_list_ptr cur = list;
 		while ( cur->next )
 			cur=cur->next;
 
@@ -571,21 +571,21 @@ list_ptr append_list ( list_ptr list, list_ptr item ) {
 	return list;
 }
 
-int print_list ( list_ptr param ) {
-	list_ptr cur = param;
+int print_gdbmi_list ( gdbmi_list_ptr param ) {
+	gdbmi_list_ptr cur = param;
 	int result;
 
 	while ( cur ) {
-		result = print_list_kind ( cur->list_kind );
+		result = print_gdbmi_list_kind ( cur->list_kind );
 		if ( result == -1 )
 			return -1;
 
 		if ( cur->list_kind == GDBMI_VALUE ) {
-			result = print_value ( cur->variant.value );
+			result = print_gdbmi_value ( cur->variant.value );
 			if ( result == -1 )
 				return -1;
 		} else if ( cur->list_kind == GDBMI_RESULT ) {
-			result = print_result ( cur->variant.result );
+			result = print_gdbmi_result ( cur->variant.result );
 			if ( result == -1 )
 				return -1;
 		} else
@@ -598,11 +598,11 @@ int print_list ( list_ptr param ) {
 }
 
 /* Creating, Destroying and printing stream_record */
-stream_record_ptr create_stream_record ( void ) {
-	return calloc ( 1, sizeof ( struct stream_record ) );
+gdbmi_stream_record_ptr create_gdbmi_stream_record ( void ) {
+	return calloc ( 1, sizeof ( struct gdbmi_stream_record ) );
 }
 
-int destroy_stream_record ( stream_record_ptr param ) {
+int destroy_gdbmi_stream_record ( gdbmi_stream_record_ptr param ) {
 	if ( !param )
 		return 0;
 
@@ -616,13 +616,13 @@ int destroy_stream_record ( stream_record_ptr param ) {
 	return 0;
 }
 
-int print_stream_record ( stream_record_ptr param ) {
+int print_gdbmi_stream_record ( gdbmi_stream_record_ptr param ) {
 	int result;
 
 	if ( !param )
 		return 0;
 
-	result = print_stream_record_kind ( param->stream_record );
+	result = print_gdbmi_stream_record_kind ( param->stream_record );
 	if ( result == -1 )
 		return -1;
 

@@ -3,14 +3,26 @@
 
 %{
 #include <string.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include "gdbmi_pt.h"
+#include "logger.h"
 
 extern char *gdbmi_text;
 extern int gdbmi_lex ( void );
 void gdbmi_error (const char *s);
-output_ptr tree;
+extern int gdbmi_lineno;
+gdbmi_output_ptr tree;
+
+void gdbmi_error (const char *s) { 
+	logger_write_pos ( logger, __FILE__, __LINE__, "Error: %s ", s );
+	if ( strcmp ( gdbmi_text, "\n" ) == 0 ) {
+		logger_write_pos ( logger, __FILE__, __LINE__, "at end of line %d\n", gdbmi_lineno );
+	} else {
+		logger_write_pos ( logger, __FILE__, __LINE__, "at token(%s), line (%d)\n", gdbmi_text, gdbmi_lineno );
+		gdbmi_lex();
+		logger_write_pos ( logger, __FILE__, __LINE__, "before (%s)\n", gdbmi_text );
+	}
+}
 %}
 
 %token OPEN_BRACE 		/* { */
@@ -33,20 +45,20 @@ output_ptr tree;
 %token CARROT 			/* ^ */
 
 %union {
-	struct output *u_output;
-	struct oob_record *u_oob_record;
-	struct result_record *u_result_record;
+	struct gdbmi_output *u_output;
+	struct gdbmi_oob_record *u_oob_record;
+	struct gdbmi_result_record *u_result_record;
 	int u_result_class;
 	int u_async_record_kind;
-	struct result *u_result;
+	struct gdbmi_result *u_result;
 	long u_token;
-	struct async_record *u_async_record;
-	struct stream_record *u_stream_record;
+	struct gdbmi_async_record *u_async_record;
+	struct gdbmi_stream_record *u_stream_record;
 	int u_async_class;
 	char *u_variable;
-	struct value *u_value;
-	struct tuple *u_tuple;
-	struct list *u_list;
+	struct gdbmi_value *u_value;
+	struct gdbmi_tuple *u_tuple;
+	struct gdbmi_list *u_list;
 	int u_stream_record_kind;
 }
 
@@ -85,7 +97,6 @@ opt_output_list: {
 
 opt_output_list: output_list {
 	tree = $1;	
-	printf ( "Parser passed\n" );
 };
 
 output_list: output {
@@ -93,19 +104,19 @@ output_list: output {
 };
 
 output_list: output_list output {
-	$$ = append_output ( $1, $2 );
+	$$ = append_gdbmi_output ( $1, $2 );
 };
 
 output: opt_oob_record_list opt_result_record OPEN_PAREN variable CLOSED_PAREN NEWLINE { 
-	$$ = create_output ();
+	$$ = create_gdbmi_output ();
 	$$->oob_record = $1;
 	$$->result_record = $2;
 
 	if ( strcmp ( "gdb", $4 ) != 0 ) {
 		gdbmi_error ( "Syntax error" );
-		printf ( "Expected 'gdb'\n" );
-	} else
-		printf ("VALID\n" ); 
+		logger_write_pos ( logger, __FILE__, __LINE__, "Expected 'gdb'" );
+	} 
+
 	free ( $4 );
 } ;
 
@@ -114,7 +125,7 @@ opt_oob_record_list: {
 };
 
 opt_oob_record_list: opt_oob_record_list oob_record NEWLINE {
-	$$ = append_oob_record ( $1, $2 );
+	$$ = append_gdbmi_oob_record ( $1, $2 );
 };
 
 opt_result_record: {
@@ -126,40 +137,40 @@ opt_result_record: result_record NEWLINE {
 };
 
 result_record: opt_token CARROT result_class {
-	$$ = create_result_record ();
+	$$ = create_gdbmi_result_record ();
 	$$->token = $1;
 	$$->result_class = $3;
 	$$->result = NULL;
 };
 
 result_record: opt_token CARROT result_class COMMA result_list {
-	$$ = create_result_record ();
+	$$ = create_gdbmi_result_record ();
 	$$->token = $1;
 	$$->result_class = $3;
 	$$->result = $5;
 };
 
 oob_record: async_record {
-	$$ = create_oob_record();
+	$$ = create_gdbmi_oob_record();
 	$$->record = GDBMI_ASYNC;
 	$$->variant.async_record = $1;
 };
 
 oob_record: stream_record {
-	$$ = create_oob_record();
+	$$ = create_gdbmi_oob_record();
 	$$->record = GDBMI_STREAM;
 	$$->variant.stream_record = $1;
 };
 
 async_record: opt_token async_record_class async_class {
-	$$ = create_async_record ();
+	$$ = create_gdbmi_async_record ();
 	$$->token = $1;
 	$$->async_record = $2;
 	$$->async_class = $3;
 };
 
 async_record: opt_token async_record_class async_class COMMA result_list {
-	$$ = create_async_record ();
+	$$ = create_gdbmi_async_record ();
 	$$->token = $1;
 	$$->async_record = $2;
 	$$->async_class = $3;
@@ -191,28 +202,28 @@ result_class: STRING_LITERAL {
 		$$ = GDBMI_EXIT;
 	else {
 		gdbmi_error ( "Syntax error" );
-		printf ( "Expected 'done|running|connected|error|exit'\n" );
+		logger_write_pos ( logger, __FILE__, __LINE__, "Expected 'done|running|connected|error|exit'" );
 	}
 };
 
 async_class: STRING_LITERAL {
 	if ( strcmp ( "stopped", gdbmi_text ) != 0 ) {
 		gdbmi_error ( "Syntax error" );
-		printf ( "Expected 'stopped'\n" );
+		logger_write_pos ( logger, __FILE__, __LINE__, "Expected 'stopped'" );
 	}
 	$$ = GDBMI_STOPPED;
 };
 
 result_list: result {
-	$$ = append_result ( NULL, $1 );	
+	$$ = append_gdbmi_result ( NULL, $1 );	
 };
 
 result_list: result_list COMMA result {
-	$$ = append_result ( $1, $3 );
+	$$ = append_gdbmi_result ( $1, $3 );
 };
 
 result: variable EQUAL_SIGN value {
-	$$ = create_result ();
+	$$ = create_gdbmi_result ();
 	$$->variable = $1;
 	$$->value = $3;
 };
@@ -222,27 +233,27 @@ variable: STRING_LITERAL {
 };
 
 value_list: value {
-	$$ = append_value ( NULL, $1 );	
+	$$ = append_gdbmi_value ( NULL, $1 );	
 };
 
 value_list: value_list COMMA value {
-	$$ = append_value ( $1, $3 ); 
+	$$ = append_gdbmi_value ( $1, $3 ); 
 };
 
 value: CSTRING {
-	$$ = create_value ();
+	$$ = create_gdbmi_value ();
 	$$->value_kind = GDBMI_CSTRING;
 	$$->variant.cstring = strdup ( gdbmi_text ); 
 };
 
 value: tuple {
-	$$ = create_value ();
+	$$ = create_gdbmi_value ();
 	$$->value_kind = GDBMI_TUPLE;
 	$$->variant.tuple = $1;
 };
 
 value: list {
-	$$ = create_value ();
+	$$ = create_gdbmi_value ();
 	$$->value_kind = GDBMI_LIST;
 	$$->variant.list = $1;
 };
@@ -252,7 +263,7 @@ tuple: OPEN_BRACE CLOSED_BRACE {
 };
 
 tuple: OPEN_BRACE result_list CLOSED_BRACE {
-	$$ = create_tuple ();
+	$$ = create_gdbmi_tuple ();
 	$$->result = $2;
 };
 
@@ -261,19 +272,19 @@ list: OPEN_BRACKET CLOSED_BRACKET {
 };
 
 list: OPEN_BRACKET value_list CLOSED_BRACKET {
-	$$ = create_list ();
+	$$ = create_gdbmi_list ();
 	$$->list_kind = GDBMI_VALUE;
 	$$->variant.value = $2;
 };
 
 list: OPEN_BRACKET result_list CLOSED_BRACKET {
-	$$ = create_list ();
+	$$ = create_gdbmi_list ();
 	$$->list_kind = GDBMI_RESULT;
 	$$->variant.result = $2;
 };
 
 stream_record: stream_record_class CSTRING {
-	$$ = create_stream_record ();
+	$$ = create_gdbmi_stream_record ();
 	$$->stream_record = $1;
 	$$->cstring = strdup ( gdbmi_text );
 };
