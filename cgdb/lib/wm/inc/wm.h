@@ -44,17 +44,12 @@
 typedef struct wmctx *wmctx;
 
 /**
- * Window identifier type (comparable to a file descriptor)
- */
-typedef int wid_t;
-
-
-/**
  * Creates a new window management context.  This should be called before
  * attempting any other window management operations.  When done, call
  * wm_destroy() to deallocate the context.
  *
- * @param  widget  The initial window which will occupy the entire space.
+ * @param  widget  The initial widget, which will be bound to the first window
+ *                 that is automatically created.  This cannot be NULL.
  *
  * @return A new context is returned, or NULL on error.
  */

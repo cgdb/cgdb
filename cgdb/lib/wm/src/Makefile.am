@@ -2,7 +2,7 @@ AM_CFLAGS = -g -Wall -I$(srcdir)/../../../../various/adt/include -I$(srcdir)/../
 
 # create the input library
 noinst_LIBRARIES = libwm.a
-libwm_a_SOURCES = wm.c
+libwm_a_SOURCES = wm.c window.c
 
 # Installs the driver programs into progs directory
 noinst_bin_PROGRAMS = wm_driver

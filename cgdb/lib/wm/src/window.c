@@ -4,6 +4,10 @@
  * Window code for CGDB.  See header for full documentation.
  */
 
+/* Standard Includes */
+#include <assert.h>
+#include <stdlib.h>
+
 /* Local Includes */
 #include "window.h"
 
@@ -13,10 +17,25 @@
 
 wm_window window_create(wm_widget widget)
 {
-    return NULL;
+    /* Parameter bounds check */
+    assert(widget != NULL);
+
+    /* Allocate a new window */
+    wm_window window = (wm_window) malloc(sizeof(struct wm_window));
+    
+    /* In such low level code, be extra paranoid */
+    if (window != NULL){
+        window->widget = widget;
+    }
+
+    return window;
 }
 
 int window_destroy(wm_window window)
 {
-    return -1;
+    if (window != NULL) {
+        free(window);
+    }
+
+    return 0;
 }

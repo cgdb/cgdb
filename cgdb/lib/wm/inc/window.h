@@ -33,9 +33,9 @@
 //@{
 
 /**
- * Window object 
+ * Unique window identifier type (comparable to a file descriptor)
  */
-typedef struct wm_window *wm_window;
+typedef int wid_t;
 
 /* Forward declarations */
 struct wm_widget;
@@ -130,10 +130,32 @@ struct wm_widget {
 };
 
 /**
+ * Window: This is a structure that contains all window-specific data.  No
+ * one outside of window.c ever sees the contents of this structure, it is
+ * for internal use only.
+ */
+typedef struct wm_window {
+
+    /**
+     * A unique identifier for this window.  Not used internally, this is 
+     * provided for the Window Manager.  (Yes it breaks encapsulation, to
+     * a small extent, but it means one less data structure was needed.)
+     */
+    wid_t id;
+
+    /**
+     * The widget encapsulated by this window; this pointer will never be NULL.
+     */
+    wm_widget widget;
+
+} *wm_window;
+
+/**
  * Creates a new window with the specified widget.  The user-defined constructor
  * of the given widget is called after allocation.
  *
- * @param  widget  Widget to which the window is permanently bound
+ * @param  widget  Widget to which the window is permanently bound.  Widget
+ *                 should never be NULL.
  *
  * @return A newly allocated wm_window is returned, or NULL on error.
  */
@@ -143,9 +165,9 @@ wm_window window_create(wm_widget widget);
  * Destroys the specified window.  Calls the destroy function of the associated
  * widget before deallocating.
  *
- * @param  window  The window to destroy.
+ * @param  window  The window to destroy.  If window is NULL, nothing is done.
  *
- * @return Zero on success, non-zero on failure.
+ * @return Zero on success, non-zero on failure.  This method never fails.
  */
 int window_destroy(wm_window window);
 

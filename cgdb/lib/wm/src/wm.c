@@ -4,6 +4,9 @@
  * Window manager code for CGDB.  See header for full documentation.
  */
 
+/* Standard Includes */
+#include <assert.h>
+
 /* Project Includes */
 #include <std_list.h>
 
@@ -15,7 +18,8 @@
 /* --------------- */
 
 /**
- * A row in the grid that is the window layout.
+ * A row in the grid that is the window layout.  There are no accessor methods
+ * for this type, use the members directly.
  *
  * \see wmctx
  */
@@ -67,7 +71,8 @@ struct wmctx {
 /* ------------------------- */
 
 /**
- * Creates a wm_row object.
+ * Creates a wm_row object.  Window list is initialized to an empty list,
+ * height default to zero.
  *
  * @return Newly allocated row, or NULL on failure.
  */
@@ -76,7 +81,9 @@ static wm_row wm_row_create();
 /**
  * Destroys a wm_row object.
  *
- * @return Zero on success, non-zero on failure.
+ * @param row  The row to destroy, if NULL no action is performed.
+ *
+ * @return Zero on success, non-zero on failure.  This method never fails.
  */
 static int wm_row_destroy(wm_row row);
 
@@ -88,15 +95,48 @@ static int wm_row_destroy(wm_row row);
  */
 wmctx wm_create(wm_widget widget)
 {
-    wmctx rv = malloc(sizeof(struct wmctx));
+    /* Parameter bounds check */
+    assert(widget != NULL);
 
-    return rv;
+    /* Allocate a new context and initial window */
+    wmctx context    = (wmctx)     malloc(sizeof(struct wmctx));
+    wm_window window = window_create(widget);
+    wm_row    row    = wm_row_create();
+    /* Be extra paranoid */
+    if (window == NULL || row == NULL) {
+        window_destroy(window);
+        free(context);
+        context = NULL;
+    }
+
+    if (context != NULL) {
+
+        /* TODO: Verify that this is the safest way to destroy our lists. */
+        context->windows = std_list_create((STDDestroyNotify) window_destroy);
+        context->grid    = std_list_create((STDDestroyNotify) wm_row_destroy);
+
+        /* Populate the window list and grid with an initial window */
+        window->id = 0;
+        std_list_append(context->windows, window);
+        std_list_append(row->windows, window);
+
+        /* Slap that initial row into the grid */
+        std_list_append(context->grid, row);
+    }
+
+    return context;
 }
 
 /* wm_destroy:
  */
 int wm_destroy(wmctx context)
 {
+    if (context != NULL) {
+        std_list_destroy(context->windows);
+        std_list_destroy(context->grid);
+        free(context);
+    }
+
     return 0;
 }
 
@@ -154,17 +194,30 @@ int wm_option_set(wm_option option, wm_optval value)
 
 static wm_row wm_row_create()
 {
-    wm_row *rv = malloc(sizeof(struct wm_row));
+    wm_row row = malloc(sizeof(struct wm_row));
 
-    if (rv){
+    /* Be extra paranoid */
+    if (row){
+
+        /* No destroy function passed in because we don't want to destroy
+         * windows in this list.  As mentioned above, this list is only used
+         * for layout information.  The primary window list is in the wm_ctx.
+         */
+        row->windows = std_list_create(NULL);
+        row->height  = 0;
 
     }
 
-    return rv;
+    return row;
 }
 
 static int wm_row_destroy(wm_row row)
 {
-    return -1;
+    if (row != NULL) {
+        std_list_destroy(row->windows);
+        free(row);
+    }
+
+    return 0;
 }
 
