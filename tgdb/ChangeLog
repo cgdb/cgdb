@@ -1,5 +1,15 @@
 09/27/2003 Bob Rossi <bob@brasko.net>
 
+   * commands.c: commands_process_info_source, populate new 'struct
+   tgdb_file_position.
+   * types.h: struct tgdb_file_position, changed members absolute_path and
+   relative_path, they are now 'char*' instead of 'struct string'
+   * types.c: tgdb_print_command TGDB_UPDATE_FILE_POSITION case, change to use
+   new 'struct tgdb_file_position'
+   tgdb_delete_command, ditto
+
+09/27/2003 Bob Rossi <bob@brasko.net>
+
    * commands.c: parse_breakpoint, changed to use new 'struct tgdb_breakpoint'
    * types.h: struct tgdb_breakpoint, changed members file and funcname from
    'struct string' to 'char *'

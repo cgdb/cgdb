@@ -59,8 +59,8 @@ static void tgdb_print_item(void *item) {
 
                 fprintf ( fd, 
                   "TGDB_UPDATE_FILE_POSITION ABSOLUTE(%s)RELATIVE(%s)LINE(%d)\n",
-                  string_get ( tfp->absolute_path ), 
-                  string_get ( tfp->relative_path ), 
+                  tfp->absolute_path, 
+                  tfp->relative_path, 
                   tfp->line_number);
            		break;
            }
@@ -151,9 +151,9 @@ void tgdb_delete_command(void *item){
 			struct tgdb_file_position *tfp = 
 					(struct tgdb_file_position *)com->data;
 
-			string_free ( tfp->absolute_path ), 
+			free ( tfp->absolute_path ), 
 			tfp->absolute_path = NULL;
-			string_free ( tfp->relative_path ), 
+			free ( tfp->relative_path ), 
 			tfp->relative_path = NULL;
 
 			free ( tfp );

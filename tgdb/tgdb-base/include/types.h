@@ -231,8 +231,8 @@ struct tgdb_breakpoint {
  *     The line number in the file.
  */
 struct tgdb_file_position {
-	struct string *absolute_path;
-	struct string *relative_path;
+	char *absolute_path;
+	char *relative_path;
 	int line_number;
 };
 

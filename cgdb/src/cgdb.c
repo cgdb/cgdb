@@ -341,13 +341,13 @@ static void process_commands(struct tgdb *tgdb)
 				tfp = (struct tgdb_file_position *) item->data;
 
                 if_show_file ( 
-                    string_get (tfp->absolute_path), 
+                    tfp->absolute_path, 
                     tfp->line_number);
 
                 source_set_relative_path ( 
                     if_get_sview(), 
-                    string_get ( tfp->absolute_path ), 
-                    string_get ( tfp->relative_path ) );
+                    tfp->absolute_path, 
+                    tfp->relative_path);
 
                 break;
             }

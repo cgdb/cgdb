@@ -1,5 +1,10 @@
 09/27/2003 Bob Rossi <bob@brasko.net>
 
+   * cgdb.c: process_commands, TGDB_UDPATE_FILE_POSITION, remove use of
+   'struct string', TGDB now returns 'char*'
+
+09/27/2003 Bob Rossi <bob@brasko.net>
+
    * cgdb.c: process_commands, TGDB_UPDATE_BREAKPOINTS case
 
 09/26/2003 Bob Rossi <bob@brasko.net>

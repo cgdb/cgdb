@@ -432,9 +432,8 @@ static void commands_process_info_source(struct commands *c, struct queue *q, ch
 				 */
 				struct tgdb_file_position *tfp = (struct tgdb_file_position *)
 					xmalloc ( sizeof ( struct tgdb_file_position ) );
-				tfp->absolute_path = string_dup ( c->absolute_path );
-				tfp->relative_path = string_init ();
-				string_add ( tfp->relative_path, info_ptr + c->source_relative_prefix_length );
+				tfp->absolute_path = strdup ( string_get ( c->absolute_path ) );
+				tfp->relative_path = strdup ( info_ptr + c->source_relative_prefix_length );
 				tfp->line_number   = atoi ( string_get ( c->line_number ) );
 
                 tgdb_append_command(q, TGDB_UPDATE_FILE_POSITION, tfp );
