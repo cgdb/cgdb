@@ -1,5 +1,13 @@
 09/21/2003 Bob Rossi <bob@brasko.net>
 
+   * cgdb.c: global commandq variable removed.
+   process_commands, changed parameter from 'struct queue' to 'struct tgdb'
+   gdb_input, removed parameter commandq in call to tgdb_recv_debugger_data
+   call process_commands with tgdb instead of commandq
+   main, remove initialization of commandq
+
+09/21/2003 Bob Rossi <bob@brasko.net>
+
    * cgdb.c: process_commands, rename 'Command' to 'tgdb_command'
 
 09/15/2003 Bob Rossi <bob@brasko.net>

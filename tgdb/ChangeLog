@@ -1,5 +1,19 @@
 09/21/2003 Bob Rossi <bob@brasko.net>
 
+   * tgdb.h: tgb_recv_debugger_data, remove queue parameter.
+   add tgdb_get_command and tgdb_traverse_commands functions
+   * tgdb.c: global struct tgdb, add member 'q'. 
+   tgdb_initialize, initialize new member 'q'
+   tgdb_get_quit_command, remove parameter 'struct queue'
+   tgdb_recv_debugger_data, removed parameter 'q'
+   tgdb_get_command, add new function
+   * driver.c: remove global 'struct queue *q'
+   gdb_input, remove parameter to tgdb_recv_debugger_data
+   change while loop to use tgdb_get_command instead of using the queue
+   main, remove initialization of 'struct queue *q'
+
+09/21/2003 Bob Rossi <bob@brasko.net>
+
    * types.h: Command, rename type from 'Command' to 'tgdb_command'
    * types.c: tgdb_print_item,tgdb_delete_command,tgdb_append_command, renamed
    Command to tgdb_command.

@@ -41,7 +41,6 @@
 #include "io.h"
 #include "terminal.h"
 
-struct queue *q;
 struct tgdb *tgdb;
 
 static void signal_handler(int signo) {
@@ -92,7 +91,7 @@ static int gdb_input(void) {
     size_t i;
     struct tgdb_command *item;
 
-    if( (size = tgdb_recv_debugger_data (tgdb, buf, MAXLINE, q)) == -1){
+    if( (size = tgdb_recv_debugger_data (tgdb, buf, MAXLINE)) == -1){
         err_msg("%s:%d -> file descriptor closed\n", __FILE__, __LINE__);
         return -1;
     } /* end if */
@@ -105,8 +104,8 @@ static int gdb_input(void) {
 
     /*tgdb_traverse_command(q);*/
 
-    while ( queue_size(q) > 0 ) {
-        item = queue_pop(q);
+    while ( (item = tgdb_get_command(tgdb)) != NULL ) {
+
         if( item->header == TGDB_QUIT_NORMAL ) {
            fprintf ( stderr, "%s:%d TGDB_QUIT_NORMAL\n", __FILE__, __LINE__);
            return -1;
@@ -242,8 +241,6 @@ int main(int argc, char **argv){
         err_msg("%s:%d tgdb_start error\n", __FILE__, __LINE__);
         goto driver_end;
     }
-
-    q = queue_init();
 
 	set_up_signal();
 

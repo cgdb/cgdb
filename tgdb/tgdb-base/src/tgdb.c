@@ -154,6 +154,12 @@ struct tgdb {
 	 * running. Otherwise, if it is 1, it does.
 	 */
 	int show_gui_commands;
+
+	/* 
+	 * This is the queue of commands TGDB has currently made to give to the 
+	 * front end.
+	 */
+	struct queue *q;
 };
 
 /* Temporary prototypes */
@@ -207,6 +213,8 @@ struct tgdb *initialize_tgdb_context ( void ) {
 
 	tgdb->last_gui_command = NULL;
 	tgdb->show_gui_commands = 0;
+
+	tgdb->q = queue_init();
 	
 	return tgdb;
 }
@@ -888,7 +896,7 @@ size_t tgdb_recv_readline_data ( struct tgdb *tgdb, char *buf, size_t n ) {
  *
  *
  */
-static int tgdb_get_quit_command ( struct tgdb *tgdb, struct queue *q ) {
+static int tgdb_get_quit_command ( struct tgdb *tgdb ) {
 	pid_t pid 	= a2_get_debugger_pid ( tgdb->a2 );
 	int status 	= 0;
 	pid_t ret;
@@ -909,19 +917,19 @@ static int tgdb_get_quit_command ( struct tgdb *tgdb, struct queue *q ) {
 	}
 
 	if ( (WIFEXITED(status)) == 0 ) /* Child did not exit normally */
-		tgdb_append_command(q,TGDB_QUIT_ABNORMAL, NULL );
+		tgdb_append_command(tgdb->q,TGDB_QUIT_ABNORMAL, NULL );
 	else
-		tgdb_append_command(q, TGDB_QUIT_NORMAL, NULL );
+		tgdb_append_command(tgdb->q, TGDB_QUIT_NORMAL, NULL );
 
 	return 0;
 }
 
-size_t tgdb_recv_debugger_data ( struct tgdb *tgdb, char *buf, size_t n, struct queue *q ) {
+size_t tgdb_recv_debugger_data ( struct tgdb *tgdb, char *buf, size_t n ) {
     char local_buf[10*n];
     ssize_t size, buf_size;
 
     /* make the queue empty */
-    tgdb_delete_commands(q);
+    tgdb_delete_commands(tgdb->q);
 
 	/* TODO: This is kind of a hack.
 	 * Since I know that I didn't do a read yet, the next select loop will
@@ -953,12 +961,12 @@ size_t tgdb_recv_debugger_data ( struct tgdb *tgdb, char *buf, size_t n, struct 
     /* 1. read all the data possible from gdb that is ready. */
     if( (size = io_read(tgdb->debugger_stdout, local_buf, n)) < 0){
         err_ret("%s:%d -> could not read from masterfd", __FILE__, __LINE__);
-		tgdb_get_quit_command ( tgdb, q );
+		tgdb_get_quit_command ( tgdb );
         return -1;
     } else if ( size == 0 ) {/* EOF */ 
         buf_size = 0;
       
-		tgdb_get_quit_command ( tgdb, q );
+		tgdb_get_quit_command ( tgdb );
       
         goto tgdb_finish;
     }
@@ -976,7 +984,7 @@ size_t tgdb_recv_debugger_data ( struct tgdb *tgdb, char *buf, size_t n, struct 
 		char *infbuf = NULL;
 		size_t infbuf_size;
 		int result;
-		result = a2_parse_io ( tgdb->a2, tgdb->command_container, local_buf, size, buf, &buf_size, infbuf, &infbuf_size, q );
+		result = a2_parse_io ( tgdb->a2, tgdb->command_container, local_buf, size, buf, &buf_size, infbuf, &infbuf_size, tgdb->q );
 
 		tgdb_process_command_container ( tgdb );
 
@@ -1008,6 +1016,12 @@ size_t tgdb_recv_debugger_data ( struct tgdb *tgdb, char *buf, size_t n, struct 
     return buf_size;
 }
 
+struct tgdb_command *tgdb_get_command ( struct tgdb *tgdb ) {
+	if ( queue_size  ( tgdb->q ) > 0 )
+		return queue_pop ( tgdb->q );
+
+	return NULL;
+}
 
 int tgdb_tty_new ( struct tgdb *tgdb ) {
 	int ret =

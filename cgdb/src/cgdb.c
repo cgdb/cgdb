@@ -88,7 +88,6 @@ static int tty_fd = -1;       /* File descriptor for process being debugged */
 static int tgdb_readline_fd = -1; /* tgdb returns the 'at prompt' data */
 
 static char *debugger_path = NULL;  /* Path to debugger to use */
-struct queue *commandq;
 
 struct input *input = NULL;         /* Initialize the input package */
 
@@ -296,12 +295,11 @@ static int user_input(void) {
     return 0;
 }
 
-static void process_commands(struct queue *q)
+static void process_commands(struct tgdb *tgdb)
 {
     struct tgdb_command *item;
 
-    while ( queue_size(q) > 0 ) {
-        item = queue_pop(q);
+    while ( ( item = tgdb_get_command (tgdb )) != NULL ) {
         
         switch (item -> header){
             /* This updates all the breakpoints */
@@ -444,7 +442,7 @@ static int gdb_input()
     int size;
 
     /* Read from GDB */
-    size = tgdb_recv_debugger_data( tgdb, buf, GDB_MAXBUF, commandq);
+    size = tgdb_recv_debugger_data( tgdb, buf, GDB_MAXBUF);
     if (size == -1){
         err_msg("%s:%d tgdb_recv_debugger_data error \n", __FILE__, __LINE__);
         return -1;
@@ -452,7 +450,7 @@ static int gdb_input()
 
     buf[size] = 0;
 
-    process_commands(commandq);
+    process_commands(tgdb);
 
     /* Display GDB output 
      * The strlen check is here so that if_print does not get called
@@ -645,8 +643,6 @@ int main(int argc, char *argv[]) {
         cleanup();
         exit(-1);
     }
-
-    commandq = queue_init();
 
     if ( (input = input_init(STDIN_FILENO) ) == NULL )
         err_quit("%s: Unable to initialize input library\n", my_name); 
