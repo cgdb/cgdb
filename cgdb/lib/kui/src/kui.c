@@ -231,7 +231,7 @@ static int kui_map_compare_callback (
 	struct kui_map *one = (struct kui_map *)a;
 	struct kui_map *two = (struct kui_map *)b;
 
-	return strcasecmp ( one->original_key, two->original_key );
+	return strcmp ( one->original_key, two->original_key );
 }
 
 int kui_ms_register_map ( 
