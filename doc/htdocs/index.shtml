@@ -34,6 +34,20 @@ Some features offered by CGDB are:<P>
 <B>News</b><BR>
 <BLOCKQUOTE>
 
+  <I>Nov 29, 2004</i><BR>
+  <BLOCKQUOTE>
+  Yes, yes, yes, I know. There has not been a release of CGDB in a long time. 
+  I've been so busy that I only have time to fix the bugs that are reported. 
+  Hopefully after the holidays I'll have more time to get CGDB up to 1.0. I've
+  been working on GDB and have some small patches that will get CGDB ready to use
+  GDB/MI to make CGDB a much more powerful interface to GDB. I think that everyone
+  will appreciate CGDB even more once this functionality is implemented.
+  <BR>
+  <BR>
+  Anyways, if you are interested in helping out with the project, or have any
+  cool feature requests, or just want to say that you enjoy CGDB, let me know ...
+  </blockquote>
+
   <I>July 14, 2004</i><BR>
   <BLOCKQUOTE>
   CGDB v0.5.0 was released today, see the <A Href="download.shtml">download 
