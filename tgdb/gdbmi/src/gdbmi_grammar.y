@@ -151,13 +151,13 @@ result_record: opt_token CARROT result_class COMMA result_list {
 oob_record: async_record {
 	$$ = create_gdbmi_oob_record();
 	$$->record = GDBMI_ASYNC;
-	$$->variant.async_record = $1;
+	$$->option.async_record = $1;
 };
 
 oob_record: stream_record {
 	$$ = create_gdbmi_oob_record();
 	$$->record = GDBMI_STREAM;
-	$$->variant.stream_record = $1;
+	$$->option.stream_record = $1;
 };
 
 async_record: opt_token async_record_class async_class {
@@ -238,19 +238,19 @@ value_list: value_list COMMA value {
 value: CSTRING {
 	$$ = create_gdbmi_value ();
 	$$->value_kind = GDBMI_CSTRING;
-	$$->variant.cstring = strdup ( gdbmi_text ); 
+	$$->option.cstring = strdup ( gdbmi_text ); 
 };
 
 value: tuple {
 	$$ = create_gdbmi_value ();
 	$$->value_kind = GDBMI_TUPLE;
-	$$->variant.tuple = $1;
+	$$->option.tuple = $1;
 };
 
 value: list {
 	$$ = create_gdbmi_value ();
 	$$->value_kind = GDBMI_LIST;
-	$$->variant.list = $1;
+	$$->option.list = $1;
 };
 
 tuple: OPEN_BRACE CLOSED_BRACE {
@@ -269,13 +269,13 @@ list: OPEN_BRACKET CLOSED_BRACKET {
 list: OPEN_BRACKET value_list CLOSED_BRACKET {
 	$$ = create_gdbmi_list ();
 	$$->list_kind = GDBMI_VALUE;
-	$$->variant.value = $2;
+	$$->option.value = $2;
 };
 
 list: OPEN_BRACKET result_list CLOSED_BRACKET {
 	$$ = create_gdbmi_list ();
 	$$->list_kind = GDBMI_RESULT;
-	$$->variant.result = $2;
+	$$->option.result = $2;
 };
 
 stream_record: stream_record_class CSTRING {

@@ -93,7 +93,7 @@ struct gdbmi_oob_record {
 		gdbmi_async_record_ptr async_record;
 		 /** If it's an GDBMI_STREAM record */
 		gdbmi_stream_record_ptr stream_record;
-	} variant;
+	} option;
 
 	/** A pointer to the next oob_record */
 	gdbmi_oob_record_ptr next;
@@ -190,7 +190,7 @@ struct gdbmi_value {
 		char *cstring;
 		gdbmi_tuple_ptr tuple;
 		gdbmi_list_ptr list;
-	} variant;
+	} option;
 
 	gdbmi_value_ptr next;
 };
@@ -212,7 +212,7 @@ struct gdbmi_list {
 	union {
 		gdbmi_value_ptr value;
 		gdbmi_result_ptr result;
-	} variant;
+	} option;
 
 	gdbmi_list_ptr next;
 };

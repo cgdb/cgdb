@@ -222,13 +222,13 @@ int destroy_gdbmi_oob_record ( gdbmi_oob_record_ptr param ) {
 		return 0;
 
 	if ( param->record == GDBMI_ASYNC ) {
-		if ( destroy_gdbmi_async_record ( param->variant.async_record ) == -1 )
+		if ( destroy_gdbmi_async_record ( param->option.async_record ) == -1 )
 			return -1;
-		param->variant.async_record = NULL;
+		param->option.async_record = NULL;
 	} else if ( param->record == GDBMI_STREAM ) {
-		if ( destroy_gdbmi_stream_record ( param->variant.stream_record ) == -1 )
+		if ( destroy_gdbmi_stream_record ( param->option.stream_record ) == -1 )
 			return -1;
-		param->variant.stream_record = NULL;
+		param->option.stream_record = NULL;
 	} else {
 		return -1;
 	}
@@ -269,11 +269,11 @@ int print_gdbmi_oob_record ( gdbmi_oob_record_ptr param ) {
 			return -1;
 
 		if ( cur->record == GDBMI_ASYNC ) {
-			result = print_gdbmi_async_record ( cur->variant.async_record );
+			result = print_gdbmi_async_record ( cur->option.async_record );
 			if ( result == -1 )
 				return -1;
 		} else if ( cur->record == GDBMI_STREAM ) {
-			result = print_gdbmi_stream_record ( cur->variant.stream_record );
+			result = print_gdbmi_stream_record ( cur->option.stream_record );
 			if ( result == -1 )
 				return -1;
 		} else
@@ -404,18 +404,18 @@ int destroy_gdbmi_value ( gdbmi_value_ptr param ) {
 		return 0;
 
 	if ( param->value_kind == GDBMI_CSTRING ) {
-		if ( param->variant.cstring ) {
-			free ( param->variant.cstring );
-			param->variant.cstring = NULL;
+		if ( param->option.cstring ) {
+			free ( param->option.cstring );
+			param->option.cstring = NULL;
 		}
 	} else if ( param->value_kind == GDBMI_TUPLE ) {
-		if ( destroy_gdbmi_tuple ( param->variant.tuple ) == -1 )
+		if ( destroy_gdbmi_tuple ( param->option.tuple ) == -1 )
 			return -1;
-		param->variant.tuple = NULL;
+		param->option.tuple = NULL;
 	} else if ( param->value_kind == GDBMI_LIST ) {
-		if ( destroy_gdbmi_list ( param->variant.list ) == -1 )
+		if ( destroy_gdbmi_list ( param->option.list ) == -1 )
 			return -1;
-		param->variant.list = NULL;
+		param->option.list = NULL;
 	} else
 		return -1;
 
@@ -455,13 +455,13 @@ int print_gdbmi_value ( gdbmi_value_ptr param ) {
 			return -1;
 
 		if ( cur->value_kind == GDBMI_CSTRING ) {
-			printf ( "cstring->(%s)\n", cur->variant.cstring );
+			printf ( "cstring->(%s)\n", cur->option.cstring );
 		} else if ( cur->value_kind == GDBMI_TUPLE ) {
-			result = print_gdbmi_tuple ( cur->variant.tuple );
+			result = print_gdbmi_tuple ( cur->option.tuple );
 			if ( result == -1 )
 				return -1;
 		} else if ( cur->value_kind == GDBMI_LIST ) {
-			result = print_gdbmi_list ( cur->variant.list );
+			result = print_gdbmi_list ( cur->option.list );
 			if ( result == -1 )
 				return -1;
 		} else
@@ -535,13 +535,13 @@ int destroy_gdbmi_list ( gdbmi_list_ptr param ) {
 		return 0;
 
 	if ( param->list_kind == GDBMI_VALUE ) {
-		if ( destroy_gdbmi_value ( param->variant.value ) == -1 )
+		if ( destroy_gdbmi_value ( param->option.value ) == -1 )
 			return -1;
-		param->variant.value = NULL;
+		param->option.value = NULL;
 	} else if ( param->list_kind == GDBMI_RESULT ) {
-		if ( destroy_gdbmi_result ( param->variant.result ) == -1 )
+		if ( destroy_gdbmi_result ( param->option.result ) == -1 )
 			return -1;
-		param->variant.result = NULL;
+		param->option.result = NULL;
 	} else
 		return -1;
 
@@ -581,11 +581,11 @@ int print_gdbmi_list ( gdbmi_list_ptr param ) {
 			return -1;
 
 		if ( cur->list_kind == GDBMI_VALUE ) {
-			result = print_gdbmi_value ( cur->variant.value );
+			result = print_gdbmi_value ( cur->option.value );
 			if ( result == -1 )
 				return -1;
 		} else if ( cur->list_kind == GDBMI_RESULT ) {
-			result = print_gdbmi_result ( cur->variant.result );
+			result = print_gdbmi_result ( cur->option.result );
 			if ( result == -1 )
 				return -1;
 		} else
