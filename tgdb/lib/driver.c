@@ -188,7 +188,7 @@ static void stdin_input(int fd) {
 
     for ( i = 0; i < size; i++ ) {
         if (write(masterfd, &command[i], 1) != 1 ) {
-            err_quit("%s:%d rl_stuff_char error\n", __FILE__, __LINE__);
+            err_quit("%s:%d write error\n", __FILE__, __LINE__);
             return;
         }
 
