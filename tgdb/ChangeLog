@@ -1,3 +1,8 @@
+03/22/2004 Bob Rossi <bob@brasko.net>
+ 
+    * Doxyfile: Generates a tag via GENERATE_TAGFILE, and uses the tag
+	file generated from various, using TAGFILES
+
 03/02/2004 Bob Rossi <bob@brasko.net>
 
     * Doxyfile: Make the doxygen output QUIET

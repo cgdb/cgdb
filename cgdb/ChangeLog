@@ -1,3 +1,8 @@
+03/22/2004 Bob Rossi <bob@brasko.net>
+
+    * lib/Doxyfile: Moved to ./cgdb/Doxyfile
+    * Doxyfile: New file moved from ./cgdb/lib/Doxyfile
+
 03/06/2004 Bob Rossi <bob@brasko.net>
 
     * cgdb.c (version_info): change Copyright info. Changed date.

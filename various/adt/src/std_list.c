@@ -8,21 +8,57 @@
 /* Local Includes */
 #include "std_list.h"
 
-/* Data Structures */
-/* --------------- */
+/**
+ * A node in the linked list.
+ */
 struct std_list_node
 {
-    void *data;
+	/**
+	 * The data stored in the node.
+	 */ 
+	void *data;
+
+	/**
+	 * The next node in the list, or NULL.
+	 */
     struct std_list_node *next;
+
+	/**
+	 * The previous node in the list, or NULL.
+	 */
     struct std_list_node *prev;
 };
 
+/**
+ * The doubly linked list context.
+ *
+ * This stores the begin and end (one past last node) of the list,
+ * and can store any state data associated with a list context.
+ */
 struct std_list
 {
+	/**
+	 * A pointer to the first node in the list.
+	 *
+	 * If the list is empty, this points to end.
+	 */
     struct std_list_node *begin;
-    struct std_list_node *end;
-    int length;
 
+	/**
+	 * A pointer to the node after the last node in the list.
+	 * If the list is empty, this points to an empty node.
+	 */
+    struct std_list_node *end;
+	
+	/**   
+	 * The size of the list.
+	 */
+	int length;
+
+	/**
+	 * A destroy function used to free the user's data before a list
+	 * item is free'd.
+	 */
 	STDDestroyNotify destroy_func;
 };
 

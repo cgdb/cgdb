@@ -39,8 +39,9 @@
 	  </P>
 
       <UL>
+        <LI><A Href="html-various">Supporting C library routines </a></li>
         <LI><A Href="html-libtgdb">TGDB interfaces</a></li>
-        <LI><A Href="html-cgdbsupport">CGDB supporting libraries</a></li>
+        <LI><A Href="html-cgdb">CGDB internal documentation</a></li>
       </ul>
 
       <P>

@@ -1,3 +1,8 @@
+03/22/2004 Bob Rossi <bob@brasko.net>
+
+    * Makefile.am: Add doxygen rule to build ./various,./tgdb,./cgdb
+	* Makefile.in: Update for people without auto tools
+
 03/02/2004 Bob Rossi <bob@brasko.net>
 	
     * Makefile.am: Add doxygen rule for cgdb/lib

@@ -3,8 +3,8 @@
 #---------------------------------------------------------------------------
 # General configuration options
 #---------------------------------------------------------------------------
-PROJECT_NAME           = libtgdb
-PROJECT_NUMBER         = 0.4.0
+PROJECT_NAME           = Various_libraries
+PROJECT_NUMBER         =
 OUTPUT_DIRECTORY       = ../doc/htdocs
 OUTPUT_LANGUAGE        = English
 EXTRACT_ALL            = NO
@@ -52,9 +52,10 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 # configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT                  = ./gdbmi \
-                         ./tgdb-base \
-                         ./annotate-two
+INPUT                  = ./adt \
+                         ./input \
+						 ./rlctx \
+						 ./util
 FILE_PATTERNS          = *.h \
                          *.c
 RECURSIVE              = YES
@@ -85,7 +86,7 @@ IGNORE_PREFIX          =
 #---------------------------------------------------------------------------
 GENERATE_HTML          = YES
 #HTML_OUTPUT            = html
-HTML_OUTPUT            = html-libtgdb
+HTML_OUTPUT            = html-various
 HTML_FILE_EXTENSION    = .html
 HTML_HEADER            = 
 HTML_FOOTER            = 
@@ -152,8 +153,8 @@ SKIP_FUNCTION_MACROS   = YES
 #---------------------------------------------------------------------------
 # Configuration::addtions related to external references   
 #---------------------------------------------------------------------------
-TAGFILES               = ../various/various.tag=../doc/htdocs/html-various
-GENERATE_TAGFILE       = libtgdb.tag
+TAGFILES               = 
+GENERATE_TAGFILE       = various.tag
 ALLEXTERNALS           = NO
 EXTERNAL_GROUPS        = YES
 PERL_PATH              = /usr/bin/perl
