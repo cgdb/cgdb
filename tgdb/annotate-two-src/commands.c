@@ -111,7 +111,6 @@ static void parse_breakpoint(struct Command ***com){
 
    strncpy(copy, breakpoint_buffer, breakpoint_buffer_pos); /* modify local copy */
 
-
    while(cur != copy){
       if((*cur) == ':'){
          if(sscanf(cur + 1, "%s", line) != 1)

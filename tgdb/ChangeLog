@@ -1,3 +1,16 @@
+02/26/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * Added extra parameter to tgdb_start: A new fd is returned from 
+    tgdb_start, it signals the user when data the user is typing is 
+    ready to be returned.
+    * Added function tgdb_send_input: The gui should send to this function
+    every char the user has typed ( from readline ).
+    * Added function tgdb_recv_input: The gui calls this function when the
+    new descriptor is active ( from select ) and gets back data to write 
+    to the terminal.
+    * Updated gdbmi branch to compile with new interface
+    * Implemented new interface in annotate-two-src
+
 02/24/2003 Bob Rossi <bob_rossi@cox.net>
 
     * Fixing buffer support for line at a time input: Trying to get support

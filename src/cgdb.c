@@ -76,6 +76,7 @@ static char *my_name = NULL;  /* Name of this application (argv[0]) */
 static int gdb_fd = -1;       /* File descriptor for GDB communication */
 static int tty_fd = -1;       /* File descriptor for process being debugged */
 static int readline_fd[2] = { -1, -1 }; /* readline write to this */
+static int tgdb_readline_fd = -1;       /* tgdb returns the 'at prompt' data */
 
 static char *debugger_path = NULL;  /* Path to debugger to use */
 
@@ -253,7 +254,7 @@ static int create_help_file(void) {
 static int start_gdb(int argc, char *argv[]) {
     tgdb_init();
 
-    if ( tgdb_start(debugger_path, argc, argv, &gdb_fd, &tty_fd) == -1 )
+    if ( tgdb_start(debugger_path, argc, argv, &gdb_fd, &tty_fd, &tgdb_readline_fd) == -1 )
         return 1;
 
     return 0;
@@ -476,26 +477,22 @@ static void child_input()
     if_tty_print(buf);
 }
 
+/* This is the output of readline, it should be displayed in the gdb window 
+ * if the gdb is ready to accept a command */
 static void readline_input(void){
-    char *buf = malloc(sizeof(char)*2);
+    char c;
     
-/* This reads a char at a time to avoid writing '\n'.
- * It should be optimized to read a larger buffer and to extract the '\n'.
- */
-    if ( read(readline_fd[0], buf, 1) != 1 ) 
+    if ( read(readline_fd[0], &c, 1) != 1 ) 
         err_quit("%s:%d read error\n", __FILE__, __LINE__);
 
-    buf[1] = 0;
-
-    if ( buf[0] == '\n' ) {
-        free(buf);
-        return;
-    }
-    
-    if_print(buf);
+    tgdb_send_input(c);
 }
 
-#include <tgdb/annotate-two-src/data.h>
+static void tgdb_readline_input(void){
+    char buf[MAXLINE];
+    tgdb_recv_input(buf);
+    if_print(buf);
+}
 
 static void main_loop(void)
 {
@@ -505,6 +502,7 @@ static void main_loop(void)
     max = (gdb_fd > STDIN_FILENO) ? gdb_fd : STDIN_FILENO;
     max = (max > tty_fd) ? max : tty_fd;
     max = (max > readline_fd[0]) ? max : readline_fd[0];
+    max = (max > tgdb_readline_fd) ? max : tgdb_readline_fd;
 
     /* Main (infinite) loop:
      *   Sits and waits for input on either stdin (user input) or the
@@ -516,13 +514,12 @@ static void main_loop(void)
 
         /* Reset the fd_set, and watch for input from GDB or stdin */
         FD_ZERO(&set);
+        
         FD_SET(STDIN_FILENO, &set);
-
         FD_SET(gdb_fd, &set);
         FD_SET(tty_fd, &set);
-
-        if ( data_get_state() == USER_AT_PROMPT )
-            FD_SET(readline_fd[0], &set);
+        FD_SET(readline_fd[0], &set);
+        FD_SET(tgdb_readline_fd, &set);
     
         /* Wait for input */
         if (select(max + 1, &set, NULL, NULL, NULL) == -1){
@@ -537,15 +534,18 @@ static void main_loop(void)
         /* Input received:  Handle it */
         if (FD_ISSET(STDIN_FILENO, &set))
             user_input();
+
+        if (FD_ISSET(readline_fd[0], &set))
+            readline_input();
+
+        if (FD_ISSET(tgdb_readline_fd, &set))
+            tgdb_readline_input();
             
         if (FD_ISSET(gdb_fd, &set))
             gdb_input();
 
         if (FD_ISSET(tty_fd, &set))
             child_input();
-
-        if (FD_ISSET(readline_fd[0], &set))
-            readline_input();
     }
 }
 
@@ -582,8 +582,7 @@ static void tgdb_send_user_command(char *line) {
     char *ret;
     add_history(line);
     sprintf(buf, "%s\n", line);
-    if_print("\r");     /* Clear everything typed, libtgdb returns it */
-    if ( (ret = tgdb_send(buf)));
+    if ( (ret = tgdb_send(buf)) != NULL )
         if_print(ret);
 }
 

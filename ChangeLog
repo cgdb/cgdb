@@ -1,3 +1,9 @@
+02/26/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * Implemented new changes to the libtgdb interface to support readline:
+    cgdb should now be able to send all the data the user typed to tgdb, 
+    and tgdb figures out what data to send back and in what order.
+
 02/24/2003 Bob Rossi <bob_rossi@cox.net>
 
     * Fixed interface between cgdb and tgdb: cgdb gets the prompt from 

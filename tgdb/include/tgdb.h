@@ -35,10 +35,12 @@ int tgdb_init(void);
  *            argv:     The arguments to pass to the debugger.
  *            gdb:      The descriptor to the debugger's I/O.
  *            child:    The descriptor to the debugged program.
+ *            readline: The descriptor that returns readline's output
  *
  * RETURNS: 0 on success or -1 on error
  */
-int (*tgdb_start)(char *debugger, int argc, char **argv, int *gdb, int *child);
+int (*tgdb_start)(char *debugger, int argc, char **argv, 
+                    int *gdb, int *child, int *readline);
 
 /* tgdb_send: Sends a character to the debugger that the user typed.
  *
@@ -49,6 +51,20 @@ int (*tgdb_start)(char *debugger, int argc, char **argv, int *gdb, int *child);
  *          This string is statically allocated, so do not free it.
  */
 char *(*tgdb_send)(char *line);
+
+/* tgdb_send_input: GUI should send every char the user is typing to gdb
+ *
+ * c        - Every character typed by the user to gdb.
+ * RETURNS: 0 on success or -1 on error
+ */
+int (*tgdb_send_input)(char c);
+
+/* tgdb_recv_input: All data returned from this should be displayed.
+ *
+ * buf        - This buf should be displayed
+ * RETURNS: 0 on success or -1 on error
+ */
+int (*tgdb_recv_input)(char *buf);
 
 /* tgdb_tty_send: Sends a character to the program being debugged by gdb.
  *

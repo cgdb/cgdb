@@ -31,6 +31,7 @@ static int tgdb_setup_buffer_command_to_run(char *com,
 
 int masterfd = -1;                     /* master fd of the pseudo-terminal */
 int gdb_stdout = -1;
+static int readline_fd[2] = { -1, -1 };
 static char slavename[SLAVE_SIZE];     /* the name of the slave psuedo-termainl */
 
 int master_tty_fd = -1, slave_tty_fd = -1;
@@ -42,6 +43,9 @@ static pid_t debugger_pid;             /* pid of child process */
 static struct node *head;
 static sig_atomic_t control_c = 0;              /* If control_c was hit by user */
 
+
+static char user_cur_command[MAXLINE];
+static int user_cur_command_pos = 0;
 
 /* signal_catcher: Is called when a signal is sent to this process. 
  *    It passes the signal along to gdb. Thats what the user intended.
@@ -77,8 +81,9 @@ static int tgdb_setup_signals(void){
    return 0;
 }
 
-int a2_tgdb_init(char *debugger, int argc, char **argv, int *gdb, int *child){
+int a2_tgdb_init(char *debugger, int argc, char **argv, int *gdb, int *child, int *readline){
    char *config_file;
+
    tgdb_init_setup_config_file();
    config_file = tgdb_util_get_config_gdb_debug_file();
    io_debug_init(config_file);
@@ -104,6 +109,17 @@ int a2_tgdb_init(char *debugger, int argc, char **argv, int *gdb, int *child){
 
    *gdb     = gdb_stdout;
    *child   = master_tty_fd;
+
+   /* Set up the readline pipe */
+   if ( pipe(readline_fd) == -1 ) {
+      err_msg("(%s:%d) pipe failed", __FILE__, __LINE__);
+      return -1;
+   }
+
+   /* Let the GUI check this for reading, 
+    * if it finds data, it should call tgdb_recv_input */
+   *readline    = readline_fd[0];
+   
    tgdb_initialized = 1;
 
    return 0;
@@ -122,7 +138,7 @@ int a2_tgdb_shutdown(void){
    return 0;
 }
 
-static int tgdb_run_users_buffered_commands(void){
+static int tgdb_run_users_buffered_commands(char *buf, int *buf_size){
    static char buffered_cmd[2000+1];
    extern int DATA_AT_PROMPT;
    int buf_ret_val = 0, recv_sig = 0;
@@ -153,7 +169,7 @@ static int tgdb_run_users_buffered_commands(void){
          head = buffer_remove_and_increment ( head, buffer_free_command );
          buf_ret_val = 1;
       } else {
-         buffered_cmd[0] = 0;
+          return -2;
       }
    }
 
@@ -210,7 +226,10 @@ static int tgdb_run_users_buffered_commands(void){
                   err_msg("%s:%d -> could not run tgdb command(%s)", __FILE__, __LINE__, buffered_cmd);
                break;
             case BUFFER_USER_COMMAND:
-               /* write prompt and command to user, before command to gdb */
+               /* write command to user, before command to gdb */
+               strcat(buf, data_get_prompt());
+               strcat(buf, buffered_cmd);
+               *buf_size = *buf_size + strlen(data_get_prompt()) + length;
 
                /* running user command */
                if(io_writen(masterfd, buffered_cmd, length) != length)
@@ -321,7 +340,7 @@ int a2_tgdb_get_sources(void){
  *
  */
 size_t a2_tgdb_recv(char *buf, size_t n, struct Command ***com){
-   char local_buf[n + n];
+   char local_buf[10*n];
    ssize_t size, buf_size;
    extern int DATA_AT_PROMPT;
 
@@ -347,7 +366,7 @@ size_t a2_tgdb_recv(char *buf, size_t n, struct Command ***com){
 
    local_buf[size] = '\0';
 
-   /* This is a hack, copies the buffer back into local buffer, 
+   /* 2. This is a hack, copies the buffer back into local buffer, 
     * then it translates all '\n' into '\r\n'
     */ 
    {
@@ -368,17 +387,35 @@ size_t a2_tgdb_recv(char *buf, size_t n, struct Command ***com){
         local_buf[i++] = '\0';
    }
 
-   /* At this point local_buf has everything new from this read.
+   /* 3. At this point local_buf has everything new from this read.
     * Basically this function is responsible for seperating the annotations
     * that gdb writes from the data. 
+    *
+    * buf and buf_size are the data to be returned from the user.
     */
    buf_size = a2_handle_data(local_buf, size, buf, n, com);
 
-   /* 3. runs the users buffered command if any exists */
+   /* 4. runs the users buffered command if any exists */
    if( global_can_issue_command() == TRUE && 
        data_get_state() == USER_AT_PROMPT && 
-        DATA_AT_PROMPT)   /* Only one command at a time */
-      tgdb_run_users_buffered_commands();
+        DATA_AT_PROMPT) { /* Only one command at a time */
+       int result = tgdb_run_users_buffered_commands(buf, &buf_size);
+
+        /* There are no more command to run,
+         * Display the data the user's unfinished command if
+         * the current command is done outputting */
+       if ( result == -2 && user_cur_command_pos > 0 ) {
+//           char buf2[100];
+//           sprintf(buf2, "%d:%s", user_cur_command_pos, user_cur_command);
+//           strcat(buf, buf2);
+//           buf_size += strlen(buf2);
+
+           strcat(buf, user_cur_command);
+           buf_size += user_cur_command_pos;
+           user_cur_command_pos = 0;
+           user_cur_command[0] = '\0';
+       }
+   }
 
    tgdb_finish:
 
@@ -399,20 +436,75 @@ char *a2_tgdb_send(char *line){
        * buggy gdb annotations */
       tgdb_setup_buffer_command_to_run ( NULL, BUFFER_TGDB_COMMAND, COMMANDS_HIDE_OUTPUT, COMMANDS_INFO_BREAKPOINTS );
 
-      strcpy(buf, data_get_prompt());
-      strcat(buf, line);
-
+      buf[0] = '\n';
       if(io_writen(masterfd, line, strlen(line)) == -1){
          err_ret("%s:%d -> could not write byte", __FILE__, __LINE__);
          return NULL;
       }
    } else {
       /* TODO: Needs to be fixed */
+      buf[0] = '\n';
       head = buffer_write_line ( head, line );
       tgdb_setup_buffer_command_to_run ( NULL, BUFFER_TGDB_COMMAND, COMMANDS_HIDE_OUTPUT, COMMANDS_INFO_BREAKPOINTS );
    }
    
    return buf;   
+}
+
+int a2_tgdb_send_input(char c) {
+//        fprintf(stderr, "[%c]", c);
+
+    /* If tgdb is in a state to issue a command, then this data can be
+     * returned right away */
+    if( tgdb_can_issue_command() == TRUE ) {
+//        fprintf(stderr, "{%c}", c);
+       if(io_write_byte(readline_fd[1], c) == -1){
+          err_ret("%s:%d -> io_write_byte error", __FILE__, __LINE__);
+          return -1;
+       }
+    } else {
+//        fprintf(stderr, "<%c>", c);
+    /* At this point, tgdb is busy, and has more output to display before
+     * this data, lets save the command. to be displayed.
+     *
+     * Start buffering the data to show it later, either
+     * 1. Will show a unfinished chunk of data
+     *      This happens when the user types data, but not a full command, 
+     *      and then gdb finishes what it is doing. This unfinished
+     *      command must be returned.
+     *
+     * 2. Will display the completed command before data is processed.
+     *      This happens when the user typed a whole command ( and '\n' )
+     *      while gdb was busy.
+     */
+        /* Don't add the new line, it can be added later */
+        if ( c != '\n' ) {
+            user_cur_command[user_cur_command_pos++] = c;
+        } else {
+            user_cur_command_pos = 0;
+            user_cur_command[0] = '\0';
+        }
+    }
+
+    return 0;
+}
+
+int a2_tgdb_recv_input(char *buf) {
+    /* This should return everything in it, the first try */
+    ssize_t size;
+    
+    if ( ( size = io_read(readline_fd[0], buf, MAXLINE)) < 0 ) {
+      err_ret("%s:%d -> io_read error", __FILE__, __LINE__);
+      return -1;
+    } 
+
+//    {
+//        int i;
+//    for ( i = 0; i < size; i++)
+//        fprintf(stderr, "<%c>", buf[i]);
+//    }
+    
+    return 0;
 }
 
 /* Sends a character to program being debugged by gdb */
