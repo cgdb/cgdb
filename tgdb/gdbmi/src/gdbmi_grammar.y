@@ -5,7 +5,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "gdbmi_il.h"
+#include "gdbmi_pt.h"
 
 extern char *gdbmi_text;
 extern int gdbmi_lex ( void );

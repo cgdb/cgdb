@@ -13,7 +13,7 @@ gdbmi_parse.c \
 gdbmi_tgdb.c \
 gdbmi_grammar.y \
 gdbmi_lexer.l \
-gdbmi_il.c
+gdbmi_pt.c
 
 # Installs the driver programs into progs directory
 noinst_bin_PROGRAMS = gdbmi_driver
@@ -28,7 +28,7 @@ gdbmi_driver_SOURCES = \
 	gdbmi_driver.c \
 	gdbmi_grammar.y \
 	gdbmi_lexer.l \
-	gdbmi_il.c
+	gdbmi_pt.c
 
 clean:
 	rm -f gdbmi_lexer.c \
