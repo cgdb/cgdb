@@ -1,7 +1,7 @@
 04/09/2003 Bob Rossi <bob_rossi@cox.net>
 
     * Adding support for reading/writing of command history
-    * Set data state to INTERNAL_COMMAND before running TAB_COMPLETION
+    * Set data state to USER_COMMAND before running TAB_COMPLETION
 
 04/08/2003 Bob Rossi <bob_rossi@cox.net>
 
