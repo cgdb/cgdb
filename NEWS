@@ -1,3 +1,10 @@
+   * Added new feature. CGDB added the 'set showtgdbcommands' option.
+   If this is set, CGDB will show all the commands that it is sending
+   to GDB to get work done. Otherwise, if its not set, CGDB will not show
+   the user the commands. The default value is off. Although, I currently
+   have mine set :). After all, you never can be to sure what this 
+   program is doing ...
+   
    * Fixed bug in TGDB. TGDB used to return a newline for the front end to
    print when a GUI command was issued. This made sure the output of the
    command happened on a different line than the prompt. If the user ran 

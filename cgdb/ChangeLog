@@ -1,5 +1,14 @@
 09/10/2003 Bob Rossi <bob@brasko.net>
 
+   * helptext.h: Auto-generated because of README change.
+   * cgdbrc.c: global ConfigType, add CONFIG_TYPE_FUNC_BOOL to structure.
+   added global prototype command_set_stc
+   global ConfigVariable, initialized for new variable showtgdbcommands
+   added command_set_stc to implement new command
+   command_parse_set, added case for CONFIG_TYPE_FUNC_BOOL
+
+09/10/2003 Bob Rossi <bob@brasko.net>
+
    * interface.c: update_status_win, add cast to remove compiler warning.
 
 09/09/2003 Bob Rossi <bob@brasko.net>

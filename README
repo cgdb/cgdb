@@ -97,6 +97,10 @@ Quick Reference
                        value between 0 and 10000, inclusive. The default 
                        setting for the ESCDELAY environment variable is 40 
                        (forty tenths of a second).
+    :set showtgdbcommands -> If this is on, CGDB will show all of the commands
+                       that it sends to GDB. If it is off, CGDB will not show
+                       the commands that it gives to GDB. The default is off.
+                       (:set stc)
 
 2. At gdb and tty window
 ------------------------

@@ -465,6 +465,28 @@ int tgdb_modify_breakpoint ( struct tgdb *tgdb, const char *file, int line, enum
  */
 int tgdb_signal_notification ( struct tgdb *tgdb, int signum );
 
+/***************************************************************************
+ * tgdb's options
+ **************************************************************************/
+
+/*
+ * This sets the verbosity of the GUI's commands.
+ * If the value is set to 0, the GUI's commands will not be shown.
+ * If the value is set to 1, the GUI's commands will be shown.
+ * The default value for TGDB is to be off.
+ *
+ * tgdb
+ *  An instance of the tgdb library to operate on.
+ *
+ * value
+ *  0 to not show GUI commands, 1 to show them, otherwise nothing is done.
+ *  You would use a value other than 0 or 1 just to query if the option is set.
+ *
+ * Returns
+ *  1 if option is set, otherwise 0
+ */
+int tgdb_set_verbose_gui_command_output ( struct tgdb *tgdb, int value );
+
 #ifdef __cplusplus
 }
 #endif

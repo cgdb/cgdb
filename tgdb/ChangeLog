@@ -1,3 +1,11 @@
+09/10/2003 Bob Rossi <bob@brasko.net>
+
+   * tgdb.h: add tgdb_set_verbose_gui_command_output prototype
+   * tgdb.c: global struct tgdb, add show_gui_commands member.
+   tgdb_initialize, initialize show_gui_commands
+   tgdb_recv_debugger_data, modfiy to return gui command
+   tgdb_set_verbose_gui_command_output, implement new config option.
+
 09/09/2003 Bob Rossi <bob@brasko.net>
 
    * tgdb.h: tgdb_run_debugger_command, tgdb_modify_breakpoint, both of the

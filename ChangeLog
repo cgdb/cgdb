@@ -1,3 +1,8 @@
+09/10/2003 Bob Rossi <bob@brasko.net>
+
+    * NEWS: Add new feature. showtgdbcommands.
+	* README: Documented new feature, showtgdbcommands.
+
 09/09/2003 Bob Rossi <bob@brasko.net>
 
 	* NEWS: Fixed TGDB bug. TGDB will not return an extra newline when the

@@ -137,6 +137,15 @@ struct tgdb {
 	 * As anyone is allowed to call xfree on it.
 	 */
 	char *last_gui_command;
+
+	/*
+	 * This is a TGDB option.
+	 * It determines if the user wants to see the commands the GUI is running.
+	 * 
+	 * If it is 0, the user does not want to see the commands the GUI is 
+	 * running. Otherwise, if it is 1, it does.
+	 */
+	int show_gui_commands;
 };
 
 /* Temporary prototypes */
@@ -189,6 +198,7 @@ struct tgdb *initialize_tgdb_context ( void ) {
 	tgdb->HAS_USER_SENT_COMMAND = 0;
 
 	tgdb->last_gui_command = NULL;
+	tgdb->show_gui_commands = 0;
 	
 	return tgdb;
 }
@@ -881,10 +891,18 @@ size_t tgdb_recv_debugger_data ( struct tgdb *tgdb, char *buf, size_t n, struct 
 	 * beggining of buf.
 	 */
 	if ( tgdb->last_gui_command != NULL ) {
-		strcpy ( buf, "\n" );
+		int ret;
+		if ( tgdb->show_gui_commands ) {
+			strcpy ( buf, tgdb->last_gui_command );
+			ret = strlen ( tgdb->last_gui_command );
+		} else {
+			strcpy ( buf, "\n" );
+			ret = 1;
+		}
+
 		free ( tgdb->last_gui_command );
 		tgdb->last_gui_command = NULL;
-		return 1;
+		return ret;
 	}
 
     /* set buf to null for debug reasons */
@@ -1004,5 +1022,15 @@ int tgdb_signal_notification ( struct tgdb *tgdb, int signum ) {
         kill(a2_get_debugger_pid( tgdb->a2 ), SIGQUIT);
     }
 
+	return 0;
+}
+
+int tgdb_set_verbose_gui_command_output ( struct tgdb *tgdb, int value ) {
+	if ( (value == 0) || (value == 1) )
+		tgdb->show_gui_commands = value;
+
+	if ( tgdb->show_gui_commands == 1 )
+		return 1;
+	
 	return 0;
 }

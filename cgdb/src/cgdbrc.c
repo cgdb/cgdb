@@ -39,6 +39,7 @@ enum ConfigType
     CONFIG_TYPE_INT,  /* set tabstop=8 */
     CONFIG_TYPE_STRING,
     CONFIG_TYPE_FUNC_VOID,
+    CONFIG_TYPE_FUNC_BOOL,
     CONFIG_TYPE_FUNC_INT,
     CONFIG_TYPE_FUNC_STRING,
 };
@@ -48,6 +49,7 @@ static int command_set_winsplit( const char *value );
 static int command_set_winminheight( int value );
 static int command_set_syntax_type( const char *value );
 static int command_set_esc_sequence_timeout( int msec );
+static int command_set_stc ( int value );
 
 static struct ConfigVariable
 {
@@ -56,15 +58,16 @@ static struct ConfigVariable
     void *data;
 } VARIABLES[] = {
     // keep this stuff sorted! !sort
-    /* escdelay   */ 	{ "escdelay", "escdelay", CONFIG_TYPE_FUNC_INT, command_set_esc_sequence_timeout },
-    /* focus      */ 	{ "focus", "fo", CONFIG_TYPE_FUNC_STRING, command_set_focus },
-    /* ignorecase */ 	{ "ignorecase", "ic", CONFIG_TYPE_BOOL, &regex_icase },
-    /* line_coverage */ { "line_coverage", "lc", CONFIG_TYPE_BOOL, &line_coverage_option },
-    /* shortcut   */ 	{ "shortcut", "sc", CONFIG_TYPE_BOOL, &shortcut_option },
-    /* syntax */      	{ "syntax", "syn", CONFIG_TYPE_FUNC_STRING, command_set_syntax_type }, 
-    /* tabstop   */     { "tabstop", "ts", CONFIG_TYPE_INT, &highlight_tabstop },
-    /* winminheight */  { "winminheight", "wmh", CONFIG_TYPE_FUNC_INT, &command_set_winminheight },
-    /* winsplit */      { "winsplit", "ws", CONFIG_TYPE_FUNC_STRING, command_set_winsplit }, 
+    /* escdelay   */ 		{ "escdelay", "escdelay", CONFIG_TYPE_FUNC_INT, command_set_esc_sequence_timeout },
+    /* focus      */ 		{ "focus", "fo", CONFIG_TYPE_FUNC_STRING, command_set_focus },
+    /* ignorecase */ 		{ "ignorecase", "ic", CONFIG_TYPE_BOOL, &regex_icase },
+    /* line_coverage */ 	{ "line_coverage", "lc", CONFIG_TYPE_BOOL, &line_coverage_option },
+    /* shortcut   */ 		{ "shortcut", "sc", CONFIG_TYPE_BOOL, &shortcut_option },
+	/* showtgdbcommands */ 	{ "showtgdbcommands", "stc", CONFIG_TYPE_FUNC_BOOL, &command_set_stc },
+    /* syntax */      		{ "syntax", "syn", CONFIG_TYPE_FUNC_STRING, command_set_syntax_type }, 
+    /* tabstop   */     	{ "tabstop", "ts", CONFIG_TYPE_INT, &highlight_tabstop },
+    /* winminheight */  	{ "winminheight", "wmh", CONFIG_TYPE_FUNC_INT, &command_set_winminheight },
+    /* winsplit */      	{ "winsplit", "ws", CONFIG_TYPE_FUNC_STRING, command_set_winsplit }, 
 };
 
 static int command_focus_cgdb( void );
@@ -152,6 +155,15 @@ int command_set_focus( const char *value )
     }
 
     return 0;
+}
+
+static int command_set_stc ( int value ) {
+	if ( (value == 0) || (value == 1) ) 
+		tgdb_set_verbose_gui_command_output ( tgdb, value );
+	else
+		return 1;
+
+	return 0;
 }
 
 int command_set_esc_sequence_timeout( int msec )
@@ -413,6 +425,13 @@ int command_parse_set( void )
                 { rv = functor(); }
                 else 
                 { rv = 1; }
+            } break;
+            case CONFIG_TYPE_FUNC_BOOL: {
+                int (*functor)( int ) = (int(*)(int))variable->data;
+                    if( functor )
+                    { rv = functor( boolean ); }
+                    else
+                    { rv = 1; }
             } break;
             case CONFIG_TYPE_FUNC_INT: {
                 int (*functor)( int ) = (int(*)(int))variable->data;
