@@ -1,3 +1,12 @@
+09/29/2003 Bob Rossi <bob@brasko.net>
+
+   * tgdb_list.h: global item_func, changed name to tgdb_list_func
+   tgdb_list_foreach, tgdb_list_free, updateing for new typedef name
+   tgdb_get_item, changed to tgdb_list_get_item
+   * tgdb_list.c: tgdb_list_node, moved member named data to bottom of struct.
+   tgdb_list_foreach, tgdb_list_free, ditto
+   tgdb_get_item, ditto
+
 09/23/2003 Bob Rossi <bob@brasko.net>
 
    * tgdb_list.h: Add new doubly linked list interface

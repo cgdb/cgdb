@@ -3,9 +3,9 @@
 #include "error.h"
 
 struct tgdb_list_node {
-	void *data;
 	struct tgdb_list_node *next;
 	struct tgdb_list_node *prev;
+	void *data;
 };
 
 struct tgdb_list {
@@ -231,7 +231,7 @@ void tgdb_list_insert_before (
 	tgdb_list_insert ( tlist, tlisti->node->prev, tlisti->node, node );
 }
 
-void tgdb_list_foreach ( struct tgdb_list *tlist, item_func func ) {
+void tgdb_list_foreach ( struct tgdb_list *tlist, tgdb_list_func func ) {
 	struct tgdb_list_iterator i;
 	int val;
 
@@ -245,7 +245,7 @@ void tgdb_list_foreach ( struct tgdb_list *tlist, item_func func ) {
 
 
 
-void tgdb_list_free ( struct tgdb_list *tlist, item_func func ) {
+void tgdb_list_free ( struct tgdb_list *tlist, tgdb_list_func func ) {
 	struct tgdb_list_iterator i;
 	int val;
 
@@ -305,7 +305,7 @@ int tgdb_list_previous ( struct tgdb_list_iterator *i ) {
 	return 0;
 }
 
-void *tgdb_get_item ( struct tgdb_list_iterator *i ) {
+void *tgdb_list_get_item ( struct tgdb_list_iterator *i ) {
 	if ( i )
 		return i->node->data;
 

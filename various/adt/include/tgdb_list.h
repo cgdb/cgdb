@@ -4,7 +4,7 @@
 struct tgdb_list;
 struct tgdb_list_iterator;
 
-typedef void (*item_func)(void *item);
+typedef void (*tgdb_list_func)(void *item);
 
 /* 
  * Initializes a new empty list.
@@ -81,7 +81,7 @@ void tgdb_list_insert_before (
  * func
  *    The function to call on each item
  */
-void tgdb_list_foreach ( struct tgdb_list *tlist, item_func func );
+void tgdb_list_foreach ( struct tgdb_list *tlist, tgdb_list_func func );
 
 /* Freeing the tree */
 
@@ -96,7 +96,7 @@ void tgdb_list_foreach ( struct tgdb_list *tlist, item_func func );
  * func
  *    The function to free an item
  */
-void tgdb_list_free ( struct tgdb_list *tlist, item_func func );
+void tgdb_list_free ( struct tgdb_list *tlist, tgdb_list_func func );
 
 /* 
  * Gets the size of the list.
@@ -170,6 +170,6 @@ int tgdb_list_previous ( struct tgdb_list_iterator *i );
  * return
  *    The item at the iterator, or NULL on error
  */
-void *tgdb_get_item ( struct tgdb_list_iterator *i );
+void *tgdb_list_get_item ( struct tgdb_list_iterator *i );
 
 #endif /* __TGDB_LIST_H__ */
