@@ -2,6 +2,7 @@
 #include "sys_util.h"
 #include <limits.h>
 #include <stdio.h>
+#include <string.h>
 
 /* Some default file extensions */
 char *c_extensions[] = { ".c", ".C", ".cc", ".cpp", ".cxx", ".h", ".hpp" };

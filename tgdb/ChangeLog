@@ -1,3 +1,10 @@
+08/19/2003 Bob Rossi <bob@brasko.net>
+
+   * commands.c: parse_breakpoint, this now can handle spaces in the 
+   function name and still parse the filename correctly.
+   * types.h: adding new struct tgdb_breakpoint.
+   * types.c: tgdb_print_item, can now print TGDB_UPDATE_SOURCE_FILES.
+
 08/18/2003 Bob Rossi <bob@brasko.net>
 
 	* annotate_two.h: adding 'struct annotate_two' context

@@ -1,3 +1,7 @@
+08/19/2003 Bob Rossi <bob@brasko.net>
+
+   * ibuf.c: added #include <string.h>
+
 version 0.3.4 (08/14/2003):
 
 version 0.3.3a (07/16/2003):

@@ -1,6 +1,10 @@
 #include "ibuf.h"
 #include "sys_util.h"
 
+#if HAVE_STRING_H
+#include <string.h>
+#endif /* HAVE_STRING_H */
+
 struct string {
     char *buf;
     unsigned long cur_buf_pos;

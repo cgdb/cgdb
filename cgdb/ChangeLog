@@ -1,3 +1,8 @@
+08/19/2003 Bob Rossi <bob@brasko.net>
+
+   * cgdb.c: process_commands, changed TGDB_UPDATE_BREAKPOINTS to handle
+   the new libtgdb 'struct tgdb_breakpoint' instead of parsing a 'struct ibuf'.
+
 08/16/2003 Bob Rossi <bob@brasko.net>
 	
 	* FAQ: changed tty question to reflect 2 reasons its tty's are needed.

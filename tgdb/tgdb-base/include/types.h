@@ -180,6 +180,36 @@ enum tgdb_breakpoint_action {
 	TGDB_BREAKPOINT_ENABLE
 };
 
+/* TGDB_BREAKPOINT
+ * ---------------
+ *
+ * This structure represents a breakpoint.
+ * Each field represents a portion of the breakpoint.
+ *
+ * file
+ * ----
+ *    This is the file that the breakpoint is set in. This path name can be
+ *    relative.
+ *
+ * funcname
+ * --------
+ *    The name of the function the breakpoint is set at.
+ *
+ * line
+ * ----
+ *    The line number where the breakpoint is set.
+ *
+ * enabled
+ * -------
+ *    0 if it is not enabled or 1 if it is enabled.
+ */
+struct tgdb_breakpoint {
+   struct string *file;
+   struct string *funcname;
+   int line;
+   int enabled;
+};
+
 #ifdef __cplusplus
 }
 #endif

@@ -166,13 +166,25 @@ int commands_parse_source(struct commands *c, const char *buf, size_t n, struct 
     return 0;
 }
 
+/* Unfortunatly, the line that this function has to parse is completly 
+ * ambiguous. GDB does not output a line that can be read in a 
+ * non-ambiguous way. Therefore, TGDB tries its best to read the line 
+ * properly. The line is in this format.
+ *
+ *  '[io]n .* at .*:number'
+ *
+ * so, TGDB can parser the ':number' part without a problem. However,
+ * it may not be able to get function name and filename correctly. If
+ * the filename contains ' at ' then, it TGDB will stop prematurly.
+ */
+
 static void parse_breakpoint(struct commands *c, struct queue *q){
     unsigned long size = string_length(c->breakpoint_string);
     char copy[size + 1];
     char *cur = copy + size, *fcur;
     char fname[MAXLINE + 2], file[MAXLINE], line[MAXLINE];
     static char *info_ptr; 
-    struct string *s;
+    struct tgdb_breakpoint *tb;
 
     memset(fname, '\0', MAXLINE + 2);
     memset(file, '\0', MAXLINE);
@@ -182,6 +194,8 @@ static void parse_breakpoint(struct commands *c, struct queue *q){
 
     strncpy(copy, info_ptr, size + 1); /* modify local copy */
 
+    /* This loop starts at the end and traverses backwards, until it finds
+     * the ':'. Then, it knows the file number for sure. */
     while(cur != copy){
         if((*cur) == ':'){
             if(sscanf(cur + 1, "%s", line) != 1)
@@ -194,30 +208,41 @@ static void parse_breakpoint(struct commands *c, struct queue *q){
         --cur;
     } /* end while */
 
-    if(sscanf(copy, "in %s at ", fname) != 1) { /* regular breakpoint */
-        if(sscanf(copy, "on %s at ", fname) != 1) /* Break on ada exception */
-            err_msg("%s:%d -> Could not scan function and file name\n"
-                "\tWas the program compiled with debug info?\n", __FILE__, __LINE__);
+    /* Assertion: The string to parse now looks like '[io]n .* at .*'*/
+    if ( !((copy[0] == 'i' || copy[0] == 'o') && copy[1] == 'n' && copy[2] == ' ') ){
+      err_msg("%s:%d -> Could not scan function and file name\n"
+              "\tWas the program compiled with debug info?\n", __FILE__, __LINE__);
     }
-   
-    fcur = copy + strlen(fname) + 7;
 
-    strncpy(file, fcur, strlen(fcur));
+    fcur = &copy[3];
+
+    /* Assertion: The string to parse now looks like '.* at .*'*/
+    if ( ( cur = strstr(fcur, " at " )) == NULL ) {
+      err_msg("%s:%d -> Could not scan function and file name\n"
+              "\tWas the program compiled with debug info?\n", __FILE__, __LINE__);
+    }
+
+    *cur='\0';
+    strcpy ( fname, fcur );
+
+    /* Assertion: The string to parse now looks like ' at .*'*/
+    cur += 4;
+    /* Assertion: The string to parse now looks like '.*' */
+    strcpy(file, cur);
+
+    tb = ( struct tgdb_breakpoint*) xmalloc ( sizeof ( struct tgdb_breakpoint) );
+    tb->file = string_init ();
+    string_add ( tb->file, file );
+    tb->funcname = string_init ();
+    string_add ( tb->funcname, fname );
+    sscanf (line, "%d", &tb->line);
 
     if(c->breakpoint_enabled == TRUE)
-        strcat(fname, " y");
+        tb->enabled = 1;
     else
-        strcat(fname, " n");
+        tb->enabled = 0;
 
-    s = string_init ();
-
-    string_add ( s, fname );
-    string_add ( s, " " );
-    string_add ( s, line );
-    string_add ( s, " " );
-    string_add ( s, file );
-
-    queue_append ( c->breakpoint_queue, s );
+    queue_append ( c->breakpoint_queue, tb );
 }
 
 

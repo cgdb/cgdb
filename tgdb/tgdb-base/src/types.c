@@ -26,20 +26,33 @@ static void tgdb_print_item(void *item) {
 
     switch ( com->header ) {
         case TGDB_UPDATE_BREAKPOINTS:
-
+           break;
         case TGDB_UPDATE_FILE_POSITION:
-
+           break;
         case TGDB_UPDATE_SOURCE_FILES:
+            {
+                struct queue *q = (struct queue *) com->data;
+                char *s;
 
+                while ( queue_size ( q ) > 0 ) {
+                    s = queue_pop( q );
+                    fprintf ( stderr, "TGDB_SOURCE_FILE (%s)\n", s );
+                    free ( s );
+                    s = NULL;
+                }
+            }
+
+            break;
         case TGDB_SOURCES_DENIED:
-
+           break;
         case TGDB_ABSOLUTE_SOURCE_ACCEPTED:
-
+           break;
         case TGDB_ABSOLUTE_SOURCE_DENIED:
-
+           break;
         case TGDB_DISPLAY_UPDATE:
-
+           break;
         case TGDB_QUIT:
+           break;
 
         default:
 

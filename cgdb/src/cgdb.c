@@ -306,25 +306,29 @@ static void process_commands(struct queue *q)
             {
                 struct sviewer *sview = if_get_sview();
                 char *file; 
-                char enabled;
-                int line;
                 struct queue *q = (struct queue *) item->data;
-                struct string *s;
+                struct tgdb_breakpoint *tb;
 
                 source_clear_breaks(if_get_sview());
 
                 while ( queue_size ( q ) > 0 ) {
-                    s = queue_pop( q );
-                    file = malloc(strlen(string_get ( s ))+1);
+                    tb = queue_pop( q );
 
-                    sscanf(string_get ( s ), "%s %c %d %s", file, &enabled, &line, file);
-                    if (enabled == 'y')
-                        source_enable_break(sview, file, line);
+                    file = malloc(string_length ( tb->file )+1);
+                    strcpy ( file, string_get ( tb->file ) );
+
+                    if ( tb->enabled )
+                        source_enable_break(sview, file, tb->line);
                     else
-                        source_disable_break(sview, file, line);
+                        source_disable_break(sview, file, tb->line);
 
-                    string_free ( s );
-                    s = NULL;
+                    /* free the memory. This should be done by libtgdb eventually */
+                    string_free ( tb->file );
+                    tb->file = NULL;
+                    string_free ( tb->funcname );
+                    tb->funcname = NULL;
+                    free ( tb );
+                    tb = NULL;
                 }
 
                 if_show_file(NULL, 0);
