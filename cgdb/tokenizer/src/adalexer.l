@@ -101,7 +101,7 @@ L                       [a-zA-Z_]
 "xor"                   { return(TOKENIZER_KEYWORD); }
  
 --([^\r\n\f\v])*        { return(TOKENIZER_COMMENT); }
-\"(\".|([^"]\"))*\"        { return(TOKENIZER_LITERAL); }
+\"(\".|.)*\"     { return(TOKENIZER_LITERAL); }
 {D}+						   { return(TOKENIZER_LITERAL); }
 '.'					      { return(TOKENIZER_LITERAL); }
 

@@ -1,3 +1,8 @@
+08/12/2003 Bob Rossi <bob@brasko.net>
+
+   * adalexer.l: fixed ada string literal rule.
+   * adatest.adb: Added file to test ada string literals.
+
 07/28/2003 Bob Rossi <bob_rossi@cox.net>
 
    * clexer.l: Fixed a bug with string literals. A rule to match

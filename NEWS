@@ -1,3 +1,5 @@
+   * Fixed ada highlighting bug. String literals were not being highlighted.
+   
    * Temporarily fixed the ^c bug. The data at the console is now cleared when
    the user hits ^c. A better fix will be arranged for when full signal handling
    support is integrated.

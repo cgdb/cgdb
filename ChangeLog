@@ -1,3 +1,7 @@
+08/12/2003 Bob Rossi <bob@brasko.net>
+
+	* NEWS: Updating NEWS file with ada highlighting string literal bug.
+
 08/11/2003 Bob Rossi <bob@brasko.net>
 
 	* NEWS: Updating NEWS file with control_c bug fix.
