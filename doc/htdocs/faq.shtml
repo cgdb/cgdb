@@ -41,7 +41,7 @@
     <P><B>What OS's does CGDB compile/run on?</b></p>
     <P>
     CGDB is used daily on Linux, Solaris and Cygwin (WinNT,200,XP). 
-    It has been reported to work on AIX,FreeBSD and many more.
+    It has been reported to work on AIX,FreeBSD,HURD and many more.
     </P>
 
     <A Name="features"></a>

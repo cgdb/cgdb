@@ -33,6 +33,16 @@ Some features offered by CGDB are:<P>
 
 <B>News</b><BR>
 <BLOCKQUOTE>
+
+  <I>April 26, 2004</i><BR>
+  <BLOCKQUOTE>
+  CGDB v0.4.1 was released today, see the <A Href="download.shtml">download 
+  page</a> to try it out. This is mostly a bug fix release, although it 
+  does have some very interesting bug fixes. Tab completion was fixed, since it
+  didn't work properly in .4.0. Also, a major memory leak was fixed, thanks
+  to an anonymous developer. Finally, CGDB should now compile and run on the 
+  HURD system, although I haven't tested it myself. Anyways, download and enjoy.
+  </blockquote>
   
   <I>October 28, 2003</i><BR>
   <BLOCKQUOTE>
@@ -184,7 +194,7 @@ Some features offered by CGDB are:<P>
 
 </blockquote>
 
-<!--<TABLE Width="100%">
+<TABLE Width="100%">
 <TR>
   <TD Align=Right>
     <A Href="http://sourceforge.net"><IMG 
@@ -192,7 +202,7 @@ Some features offered by CGDB are:<P>
     Width=125 Height=37 Border=0 Alt="SourceForge.net Logo"></a>
   </td>
 </tr>
-</table>-->
+</table>
 
 <!--#include file="footer.inc"-->
   

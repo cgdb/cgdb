@@ -1,5 +1,11 @@
 version 0.4.1 (04/26/2004):
 
+04/26/2004 Bob Rossi <bob@brasko.net>
+
+    * download.shtml: Change download directorly link
+    * faq: Added OS that cgdb compiles on
+    * index.shtml: Added a release note
+
 03/22/2004 Bob Rossi <bob@brasko.net>
 
     * documentation.shtml: Updating doxygen paths, and adding various.
