@@ -6,6 +6,9 @@
     * Fixed return values of _input functions in cgdb.c: These functions would
     quit on there own. They have no right to do so, they should report an
     error and have cgdb quit in some common location
+    * Changed configure from --with-driver to --with-drivers: The reason for
+    this is because now there are several driver programs that can be used to
+    test cgdb.
 
 03/25/2003 Bob Rossi <bob_rossi@cox.net>
 

@@ -56,8 +56,8 @@ dnl If the user asked for curses, ncurses is set to no. Otherwise ncurses is yes
 
 dnl These 2 statements determine if the user wants the alternate driver program to be built
 dnl It is used to stimulate libtgdb with data. It is a simple interface to libtgdb
-    AC_ARG_WITH(driver,
-        [  --with-driver           Build the driver program to test libtgdb (optional)],BUILD_DRIVER=driver BUILD_INPUT_DRIVER="input_driver getch_driver",BUILD_DRIVER= BUILD_INPUT_DRIVER=)
+    AC_ARG_WITH(drivers,
+        [  --with-drivers          Build the driver programs to test libtgdb (optional)],BUILD_DRIVER=driver BUILD_INPUT_DRIVER="input_driver getch_driver",BUILD_DRIVER= BUILD_INPUT_DRIVER=)
     AC_SUBST([BUILD_DRIVER])
     AC_SUBST([BUILD_INPUT_DRIVER])
 

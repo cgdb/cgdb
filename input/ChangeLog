@@ -1,3 +1,7 @@
+03/26/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * Adding the Alt-A through Alt-Z key bindings
+
 03/25/2003 Bob Rossi <bob_rossi@cox.net>
 
     * Adding the input interface for the first time: This should help cgdb

@@ -859,7 +859,7 @@ Optional Packages:
   --with-ncurses-prefix=DIR  Prefix where ncurses is installed (optional)
   --with-curses-prefix=DIR   Prefix where curses is installed (optional)
   --with-curses           Use curses library: not ncurses (optional)
-  --with-driver           Build the driver program to test libtgdb (optional)
+  --with-drivers          Build the driver programs to test libtgdb (optional)
 
 Some influential environment variables:
   CC          C compiler command
@@ -4150,9 +4150,9 @@ else
 fi;
 
 
-# Check whether --with-driver or --without-driver was given.
-if test "${with_driver+set}" = set; then
-  withval="$with_driver"
+# Check whether --with-drivers or --without-drivers was given.
+if test "${with_drivers+set}" = set; then
+  withval="$with_drivers"
   BUILD_DRIVER=driver BUILD_INPUT_DRIVER="input_driver getch_driver"
 else
   BUILD_DRIVER= BUILD_INPUT_DRIVER=
