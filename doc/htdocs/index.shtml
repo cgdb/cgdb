@@ -34,6 +34,13 @@ Some features offered by CGDB are:<P>
 <B>News</b><BR>
 <BLOCKQUOTE>
 
+  <I>May 10, 2004</i><BR>
+  <BLOCKQUOTE>
+  CGDB v0.4.2 was released today, see the <A Href="download.shtml">download 
+  page</a> to try it out. This is simply a bug fix release that allows CGDB
+  to compile an run on AIX 4.3. Enjoy.
+  </blockquote>
+
   <I>May 6, 2004</i><BR>
   <BLOCKQUOTE>
   Well there is some great news for the CGDB project. It is under development 
@@ -243,6 +250,7 @@ Some features offered by CGDB are:<P>
 
 </blockquote>
 
+<!--
 <TABLE Width="100%">
 <TR>
   <TD Align=Right>
@@ -252,6 +260,7 @@ Some features offered by CGDB are:<P>
   </td>
 </tr>
 </table>
+--!>
 
 <!--#include file="footer.inc"-->
   
