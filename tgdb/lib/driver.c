@@ -58,7 +58,6 @@ static void tgdb_send_user_command(char *line) {
     char *ret;
     add_history(line);
     sprintf(buf, "%s\n", line);
-    fprintf(stderr, "\n");
     tgdb_send(buf);
 }
 
