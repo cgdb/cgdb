@@ -1,11 +1,11 @@
-1.0 Proposol 
+1.0 Proposal 
 * stack window
 
 tgdb 0.6.0
 ----------
 
 * Modify the readline library to be context driven.
-* Make all dependencie's of TGDB be context driven. ( util library ... )
+* Make all dependencies of TGDB be context driven. ( util library ... )
 
 tgdb 0.5.0
 ----------
@@ -23,6 +23,17 @@ tgdb 0.5.0
 * Fix bug in TGDB annotate 2 subsystem where it is returning 
   TGDB_ABSOLUTE_SOURCE_DENIED 3 times when it is started with out a program 
   to debug. Should it even return this command at all?
+
+tgdb 0.5.0 issues raised by developers
+---------------------------------------
+
+* Robert Lemmen asked me to remove the config.* files from the releases.
+  They are inappropriate to distribute to the user since they are machine 
+  dependent.
+
+* I received a patch from Santiago Vila that made CGDB work on GNU/HURD.
+  I have to remove all occurrences of PATH_MAX. I can apply the patch
+  for know, or come up with a better all around approach.
 	
 tgdb-0.4.0 and before
 
@@ -37,7 +48,7 @@ tgdb-0.4.0 and before
 * Change all use's of 'struct string' to the proper 'struct ibuf'.
 * Remove #define MAXLINE in tgdb_types.h, there should be no hard coded 
   constants in TGDB.
-* Comment all tgdb-base headers to be complient with doxygen
+* Comment all tgdb-base headers to be compliant with doxygen
 * Get testsuite to install with automake
 * Add the return value of gdb when returning with TGDB_QUIT_NORMAL
 * Make 1 quit command. Returning a structure defining how GDB was killed.
