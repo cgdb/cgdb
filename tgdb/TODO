@@ -31,10 +31,10 @@ technical
   should be made cleaner.
 * Get in touch with 'Ronald Landheer-Cieslak' about Makefile.am patch to
   build CVS out of the source tree.
-* Change use of 'struct queue' for tgdb_get_command.
 
 Finished:
 
+* Change use of 'struct queue' for tgdb_get_command.
 * Change all use's of 'struct string' to the proper 'struct ibuf'.
 * Remove #define MAXLINE in tgdb_types.h, there should be no hard coded 
   constants in TGDB.

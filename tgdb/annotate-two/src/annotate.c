@@ -13,8 +13,9 @@
 #include "globals.h"
 #include "io.h"
 
-static int handle_source(struct annotate_two *a2, const char *buf,  size_t n, struct queue *q){
-   int ret = commands_parse_source(a2->c, a2->command_container, buf, n, q);
+static int handle_source(struct annotate_two *a2, const char *buf,  size_t n, struct tgdb_list *list){
+   int ret = commands_parse_source(
+		   a2->c, a2->command_container, buf, n, list);
 
    /* This tells the annotate subsystem if the source annotation has been
 	* reached. This is important because if the source annotation has been 
@@ -25,7 +26,7 @@ static int handle_source(struct annotate_two *a2, const char *buf,  size_t n, st
    return ret;
 }
 
-static int handle_misc_pre_prompt(struct annotate_two *a2, const char *buf, size_t n, struct queue *q){
+static int handle_misc_pre_prompt(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list){
    /* If tgdb is sending a command, then continue past it */
    if(data_get_state(a2->data) == INTERNAL_COMMAND){
       if(io_write_byte(a2->debugger_stdin, '\n') == -1)
@@ -37,32 +38,32 @@ static int handle_misc_pre_prompt(struct annotate_two *a2, const char *buf, size
    return 0;
 }
 
-static int handle_misc_prompt(struct annotate_two *a2, const char *buf, size_t n, struct queue *q){
+static int handle_misc_prompt(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list){
    globals_set_misc_prompt_command( a2->g, TRUE);
    data_set_state(a2, USER_AT_PROMPT );
    a2->command_finished = 1;
    return 0;
 }
 
-static int handle_misc_post_prompt(struct annotate_two *a2, const char *buf, size_t n, struct queue *q){
+static int handle_misc_post_prompt(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list){
    globals_set_misc_prompt_command( a2->g, FALSE);
    data_set_state(a2, POST_PROMPT );
 
    return 0;
 }
 
-static int handle_pre_prompt(struct annotate_two *a2, const char *buf, size_t n, struct queue *q){
+static int handle_pre_prompt(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list){
    data_set_state(a2, AT_PROMPT );
    
    return 0;
 }
 
-static int handle_prompt(struct annotate_two *a2, const char *buf, size_t n, struct queue *q){
+static int handle_prompt(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list){
    /* This return TGDB_ABSOLUTE_SOURCE_DENIED if there was no absolute path
 	* given when 'info source' was run.
 	* It tells the gui that the source is not available.
 	*/
-   commands_finalize_command ( a2->c, q );
+   commands_finalize_command ( a2->c, list );
    
    /* All done. */
    data_set_state(a2, USER_AT_PROMPT );
@@ -70,63 +71,63 @@ static int handle_prompt(struct annotate_two *a2, const char *buf, size_t n, str
    /* 'info sources' is done, return the sources to the gui */
    if(global_has_info_sources_started(a2->g) == TRUE){
       global_reset_info_sources_started(a2->g);
-      commands_send_gui_sources(a2->c, q);
+      commands_send_gui_sources(a2->c, list);
       return 0;
    } 
 
    return 0;
 }
 
-static int handle_post_prompt(struct annotate_two *a2, const char *buf, size_t n, struct queue *q){
+static int handle_post_prompt(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list){
    data_set_state(a2, POST_PROMPT );
    return 0;
 }
 
-static int handle_breakpoints_invalid(struct annotate_two *a2, const char *buf, size_t n, struct queue *q){
+static int handle_breakpoints_invalid(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list){
    return 0;
 }
 
-static int handle_breakpoints_headers(struct annotate_two *a2, const char *buf, size_t n, struct queue *q){
-   commands_set_state(a2->c, BREAKPOINT_HEADERS, q);
+static int handle_breakpoints_headers(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list){
+   commands_set_state(a2->c, BREAKPOINT_HEADERS, list);
    return 0;
 }
 
-static int handle_breakpoints_table(struct annotate_two *a2, const char *buf, size_t n, struct queue *q){
-   commands_set_state(a2->c, BREAKPOINT_TABLE_BEGIN, q);
+static int handle_breakpoints_table(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list){
+   commands_set_state(a2->c, BREAKPOINT_TABLE_BEGIN, list);
    return 0;
 }
 
-static int handle_breakpoints_table_end(struct annotate_two *a2, const char *buf, size_t n, struct queue *q){
-   commands_set_state(a2->c, BREAKPOINT_TABLE_END, q);
+static int handle_breakpoints_table_end(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list){
+   commands_set_state(a2->c, BREAKPOINT_TABLE_END, list);
    return 0;
 }
 
-static int handle_field(struct annotate_two *a2, const char *buf, size_t n, struct queue *q){
+static int handle_field(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list){
    int i = -1;
    
    commands_parse_field(a2->c, buf, n, &i);
    commands_set_field_num(a2->c, i);
-   commands_set_state(a2->c, FIELD, q);
+   commands_set_state(a2->c, FIELD, list);
 
    return 0;
 }
 
-static int handle_record(struct annotate_two *a2, const char *buf, size_t n, struct queue *q){
-   commands_set_state(a2->c, RECORD, q);
+static int handle_record(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list){
+   commands_set_state(a2->c, RECORD, list);
    return 0;
 }
 
-static int handle_error(struct annotate_two *a2, const char *buf, size_t n, struct queue *q){
+static int handle_error(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list){
    data_set_state(a2, POST_PROMPT );  /* TEMPORARY */
    return 0;
 }
 
-static int handle_error_begin(struct annotate_two *a2, const char *buf, size_t n, struct queue *q){
+static int handle_error_begin(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list){
    /* If the user listed the files ( info sources ) and there is an 
     * annotate error ( usually meaning that gdb can not find the symbols
     * for the debugged program ) then send a denied response. */
    if ( commands_get_state(a2->c) == INFO_SOURCES ) {
-        tgdb_append_command(q, TGDB_SOURCES_DENIED, NULL );
+        tgdb_types_append_command(list, TGDB_SOURCES_DENIED, NULL );
         return 0;
    }
 
@@ -134,7 +135,7 @@ static int handle_error_begin(struct annotate_two *a2, const char *buf, size_t n
    if(global_has_list_started(a2->g) == TRUE){
       global_list_finished(a2->g);
       global_set_list_error ( a2->g, TRUE );
-      commands_list_command_finished(a2->c, q, 0);
+      commands_list_command_finished(a2->c, list, 0);
       return 0;
    }
 
@@ -148,36 +149,36 @@ static int handle_error_begin(struct annotate_two *a2, const char *buf, size_t n
    return 0;
 }
 
-static int handle_quit(struct annotate_two *a2, const char *buf, size_t n, struct queue *q){
+static int handle_quit(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list){
    data_set_state(a2, POST_PROMPT );  /* TEMPORARY */
    return 0;
 }
 
-static int handle_display_begin(struct annotate_two *a2, const char *buf, size_t n, struct queue *q){
+static int handle_display_begin(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list){
    return 0;
 }
 
-static int handle_display_number_end(struct annotate_two *a2, const char *buf, size_t n, struct queue *q){
+static int handle_display_number_end(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list){
    return 0;
 }
 
-static int handle_display_format(struct annotate_two *a2, const char *buf, size_t n, struct queue *q){
+static int handle_display_format(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list){
    return 0;
 }
 
-static int handle_display_expression(struct annotate_two *a2, const char *buf, size_t n, struct queue *q){
+static int handle_display_expression(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list){
    return 0;
 }
 
-static int handle_display_expression_end(struct annotate_two *a2, const char *buf, size_t n, struct queue *q){
+static int handle_display_expression_end(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list){
    return 0;
 }
 
-static int handle_display_value(struct annotate_two *a2, const char *buf, size_t n, struct queue *q){
+static int handle_display_value(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list){
    return 0;
 }
 
-static int NOT_SUPPORTED(struct annotate_two *a2, const char *buf, size_t n, struct queue *q){
+static int NOT_SUPPORTED(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list){
    return 0;
 }
 
@@ -200,7 +201,7 @@ static struct annotation {
 	/**
 	 * The function to call when the annotation is found.
 	 */
-    int (*f)(struct annotate_two *a2, const char *buf, size_t n, struct queue *q);
+    int (*f)(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list);
 } annotations[] = {
   {
       "source",
@@ -429,12 +430,12 @@ static struct annotation {
   }
 };
 
-int tgdb_parse_annotation(struct annotate_two *a2, char *data, size_t size, struct queue *q) {
+int tgdb_parse_annotation(struct annotate_two *a2, char *data, size_t size, struct tgdb_list *list) {
    int i;
    for(i = 0; annotations[i].data != NULL; ++i){
       if(strncmp(data, annotations[i].data, annotations[i].size) == 0){
          if(annotations[i].f){
-            if(annotations[i].f(a2, data, size, q) == -1){
+            if(annotations[i].f(a2, data, size, list) == -1){
                err_msg("%s:%d -> parsing annotation failed\n", __FILE__, __LINE__);
             } else 
                break; /* only match one annotation */

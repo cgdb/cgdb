@@ -284,7 +284,7 @@ int a2_parse_io (
 		const char *input_data, const size_t input_data_size,
 		char *debugger_output, size_t *debugger_output_size,
 		char *inferior_output, size_t *inferior_output_size,
-		struct queue *q ) {
+		struct tgdb_list *list ) {
 	int val;
 	struct annotate_two *a2 = (struct annotate_two *)ctx;
 
@@ -295,7 +295,7 @@ int a2_parse_io (
 	a2->command_container = command_container;
 
 	val = a2_handle_data ( a2, a2->sm, input_data, input_data_size,
-		debugger_output, debugger_output_size, q );
+		debugger_output, debugger_output_size, list );
 
 	if (a2->command_finished) 
 		return 1;

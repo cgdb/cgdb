@@ -412,8 +412,6 @@ static void process_commands(struct tgdb *tgdb)
             default:
                 break;
         }
-
-        tgdb_types_free_command ( (void*) item );
     }
 }
 

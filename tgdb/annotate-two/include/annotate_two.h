@@ -9,6 +9,10 @@
 #include <limits.h>
 #endif /* HAVE_LIMITS_H */
 
+#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif /* HAVE_SYS_TYPES_H */
+
 #include "tgdb_interface.h"
 
 #define TTY_NAME_SIZE 64

@@ -32,6 +32,8 @@ extern "C" {
 #define FALSE 0
 #endif
 
+#include "tgdb_list.h"
+
 /**
  *  This is the commands interface used between the front end and TGDB.
  *  When TGDB is responding to a request or when an event is being generated
@@ -123,21 +125,42 @@ struct tgdb_command {
 //@{
 
 /**
- * This will print a command to stderr.
+ * This will print a client generated command to stderr.
+ * These are the commands that are returned to the front end.
  * It is currently used for debugging purposes.
  *
  * \param command
- *     The command to print. It should be of type 'struct tgdb_command'
+ * The command to print. It should be of type 'struct tgdb_command'
+ *
+ * @return
+ * Will return -1 if the print command failed. Otherwise, 0.
  */
-void tgdb_types_print_command ( void *command );
+int tgdb_types_print_command ( void *command );
 
 /**
- * This will free a command.
+ * This will free a client generated command.
+ * These are the commands that are returned to the front end.
  *
  * \param command
- *     The command to print. It should be of type 'struct tgdb_command'
+ * The command to print. It should be of type 'struct tgdb_command'
+ * 
+ * @return
+ * Will return -1 if free'ing failed. Otherwise, 0.
  */
-void tgdb_types_free_command ( void *command );
+int tgdb_types_free_command ( void *command );
+
+
+/**
+ * This will append a new command into TGDB's queue.
+ *
+ * \param command_list
+ * \param new_header
+ * \param ndata
+ */
+void tgdb_types_append_command(
+	struct tgdb_list *command_list, 
+    enum INTERFACE_COMMANDS new_header, 
+    void *ndata);
 
 //@}
 

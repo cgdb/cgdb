@@ -49,12 +49,16 @@ int commands_parse_field(struct commands *c, const char *buf, size_t n, int *fie
 int commands_parse_source(
 		struct commands *c, 
 		struct queue *command_container,
-		const char *buf, size_t n, struct queue *q);
+		const char *buf, size_t n, 
+		struct tgdb_list *list );
 
 /* command_set_state: Sets the state of the command package. This should usually be called
  *                      after an annotation has been read.
  */
-void commands_set_state(struct commands *c, enum COMMAND_STATE state, struct queue *q);
+void commands_set_state (
+		struct commands *c, 
+		enum COMMAND_STATE state, 
+		struct tgdb_list *list);
 
 /* commands_set_field_num: This is used for breakpoint annotations.
  *             field_num is the field that the breakpoint annotation is on.
@@ -91,27 +95,37 @@ int commands_issue_command (
  *    a     -> the character recieved from gdb.
  *    com   -> commands to give back to gdb.
  */
-void commands_process(struct commands *c, char a, struct queue *q);
+void commands_process ( 
+		struct commands *c, 
+		char a, 
+		struct tgdb_list *list);
 
 /* commands_list_command_finished: Returns to the gui the absolute path of
  *                                  the filename requested.
  *
  *  if success is 0 then the list failed, otherwise it worked.
  */
-void commands_list_command_finished(struct commands *c, struct queue *q, int success);
+void commands_list_command_finished (
+		struct commands *c, 
+		struct tgdb_list *list, 
+		int success);
 
 /* commands_send_gui_sources: This gives the gui all of the sources that were
  *                            just read from gdb through an 'info sources' prompt.
  *
  *    com   -> commands to give back to gdb.
  */
-void commands_send_gui_sources(struct commands *c, struct queue *q);
+void commands_send_gui_sources (
+		struct commands *c, 
+		struct tgdb_list *list);
 
 /* commands_send_source_absolute_source_file: This will send to the gui the 
  *             absolute path to the file being requested. Otherwise the gui
  *             will be notified that the file is not valid.
  */
-void commands_send_source_absolute_source_file(struct commands *c, struct queue *q);
+void commands_send_source_absolute_source_file (
+		struct commands *c, 
+		struct tgdb_list *list);
 
 /* The 3 functions below are for tgdb only.
  * These functions are responsible for keeping tgdb up to date with gdb.
@@ -146,7 +160,9 @@ int commands_prepare_for_command ( struct annotate_two *a2, struct commands *c, 
  *
  *  This can be called to finalize work when the end of a command is reached.
  */
-void commands_finalize_command ( struct commands *c, struct queue *q );
+void commands_finalize_command ( 
+		struct commands *c, 
+		struct tgdb_list *list );
 
 /* commands_user_ran_command:
  * --------------------------

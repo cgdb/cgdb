@@ -112,8 +112,6 @@ static int gdb_input(void) {
            fprintf ( stderr, "%s:%d TGDB_QUIT\n", __FILE__, __LINE__);
            return -1;
 		}
-
-     	tgdb_types_free_command ( (void*)item );
     }
 
     return 0;

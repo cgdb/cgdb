@@ -26,13 +26,13 @@
 #include "tgdb_list.h"
 #include "queue.h"
 
-static void tgdb_types_print_item ( void *command ) {
+static int tgdb_types_print_item ( void *command ) {
 	struct tgdb_command *com = ( struct tgdb_command * ) command;
     FILE *fd = stderr;
 
     if ( !com ) {
         err_msg("%s:%d ERROR: ITEM IS NULL", __FILE__, __LINE__);
-        return;
+        return -1;
     }
 
     switch ( com->header ) {
@@ -121,6 +121,8 @@ static void tgdb_types_print_item ( void *command ) {
 				break;
 			}
     }
+
+	return 0;
 }
 
 static int tgdb_types_breakpoint_free ( void *data ) {
@@ -144,12 +146,11 @@ static int tgdb_types_source_files_free ( void *data ) {
 	return 0;
 }
 
-static void tgdb_types_delete_item ( void *command ){
+static int tgdb_types_delete_item ( void *command ){
 	struct tgdb_command *com = ( struct tgdb_command * ) command;
 
-    if ( !com ) {
-        return;
-    }
+    if ( !com )
+        return -1;
 
     switch ( com->header ) {
         case TGDB_UPDATE_BREAKPOINTS:
@@ -208,24 +209,25 @@ static void tgdb_types_delete_item ( void *command ){
   
     free(com);
     com = NULL;
+	return 0;
 }
 
-void tgdb_types_print_command ( void *command ) {
-	tgdb_types_print_item ( ( void *) command );
+int tgdb_types_print_command ( void *command ) {
+	return tgdb_types_print_item ( ( void *) command );
 }
 
-void tgdb_types_free_command ( void *command ) {
-	tgdb_types_delete_item ( (void *) command );
+int tgdb_types_free_command ( void *command ) {
+	return tgdb_types_delete_item ( (void *) command );
 }
 
-void tgdb_append_command(
-            struct queue *q, 
-            enum INTERFACE_COMMANDS new_header, 
-            void *ndata){
+void tgdb_types_append_command(
+	struct tgdb_list *command_list, 
+	enum INTERFACE_COMMANDS new_header, 
+	void *ndata){
     struct tgdb_command *item = (struct tgdb_command *)
 			xmalloc(sizeof(struct tgdb_command));
     item->header = new_header;
     item->data = ndata;
-    queue_append(q, item);
+	tgdb_list_append ( command_list, item );
     /*err_msg("UPDATE(%s)", command);*/
 }

@@ -1,5 +1,10 @@
 10/13/2003 Bob Rossi <bob@brasko.net>
 
+   * cgdb.c: process_commands, no longer call tgdb_types_free_command.
+   TGDB does the work automatically now.
+
+10/13/2003 Bob Rossi <bob@brasko.net>
+
    * highlight.c: Changed every occurence from 'string_*' to 'ibuf_*'
    * tokenizer.c: ditto
 

@@ -60,7 +60,7 @@ static struct tgdb_client_debugger_interfaces {
 			const char *input_data, const size_t input_data_size,
 			char *debugger_output, size_t *debugger_output_size,
 			char *inferior_output, size_t *inferior_output_size,
-		    struct queue *q);
+		    struct tgdb_list *list);
 
 	int (*tgdb_client_get_absolute_path) ( 
 			void *ctx, 
@@ -377,7 +377,7 @@ int tgdb_client_parse_io (
 		const char *input_data, const size_t input_data_size,
 		char *debugger_output, size_t *debugger_output_size,
 		char *inferior_output, size_t *inferior_output_size,
-	    struct queue *q	) {
+	    struct tgdb_list *command_list) {
 	if ( tcc == NULL || tcc->tgdb_client_interface == NULL ) {
 		err_msg("%s:%d tgdb_client_parse_io unimplemented", __FILE__, __LINE__);
 		return -1;
@@ -387,7 +387,7 @@ int tgdb_client_parse_io (
 			tcc->tgdb_debugger_context, command_container, 
 			input_data, input_data_size,
 			debugger_output, debugger_output_size,
-			inferior_output, inferior_output_size, q );
+			inferior_output, inferior_output_size, command_list );
 }
 
 int tgdb_client_get_absolute_path ( 

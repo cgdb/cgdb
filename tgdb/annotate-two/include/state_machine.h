@@ -29,15 +29,27 @@ struct state_machine;
 struct state_machine *state_machine_initialize ( void );
 void state_machine_shutdown ( struct state_machine *sm );
 
-/* a2_handle_data:
- * ---------------
+/**
+ * \param data
+ * The buffer to parse.
  *
- *  data:       The buffer to parse.
- *  size:       The size of the buffer data.
- *  gui_data:   This is the information in DATA that was not an annotation.
- *  gui_size:   The size of the buffer gui_data.
- *  q:          If a command was generated from an annotation, its put in here.
+ * \param size
+ * The size of the buffer data.
+ *
+ * \param gui_data
+ * This is the information in DATA that was not an annotation.
+ *
+ * \param gui_size
+ * The size of the buffer gui_data.
+ *
+ * \param command_list
+ * If a command was generated from an annotation, its put in here.
  */
-int a2_handle_data ( struct annotate_two *a2, struct state_machine *sm, const char *data, const size_t size, char *gui_data, size_t *gui_size, struct queue *q);
+int a2_handle_data ( 
+		struct annotate_two *a2, 
+		struct state_machine *sm, 
+		const char *data, const size_t size, 
+		char *gui_data, size_t *gui_size, 
+		struct tgdb_list *command_list);
 
 #endif

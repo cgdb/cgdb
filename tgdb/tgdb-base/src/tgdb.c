@@ -43,6 +43,7 @@
 #include "pseudo.h" /* SLAVE_SIZE constant */
 #include "fork_util.h"
 #include "sys_util.h"
+#include "tgdb_list.h"
 
 /**
  * The TGDB context data structure.
@@ -174,7 +175,12 @@ struct tgdb {
 	 * This is the queue of commands TGDB has currently made to give to the 
 	 * front end.
 	 */
-	struct queue *q;
+	struct tgdb_list *command_list;
+
+	/**
+	 * An iterator into command_list.
+	 */
+	tgdb_list_iterator *command_list_iterator;
 };
 
 /* Temporary prototypes */
@@ -229,7 +235,7 @@ static struct tgdb *initialize_tgdb_context ( void ) {
 	tgdb->last_gui_command = NULL;
 	tgdb->show_gui_commands = 0;
 
-	tgdb->q = queue_init();
+	tgdb->command_list = tgdb_list_init();
 	
 	return tgdb;
 }
@@ -954,7 +960,7 @@ static int tgdb_get_quit_command ( struct tgdb *tgdb ) {
 		tstatus->return_value = WEXITSTATUS(status);
 	}
 
-	tgdb_append_command(tgdb->q,TGDB_QUIT, tstatus );
+	tgdb_types_append_command ( tgdb->command_list, TGDB_QUIT, tstatus );
 
 	return 0;
 }
@@ -1024,7 +1030,7 @@ size_t tgdb_recv_debugger_data ( struct tgdb *tgdb, char *buf, size_t n ) {
 				local_buf, size, 
 				buf, &buf_size, 
 				infbuf, &infbuf_size, 
-				tgdb->q );
+				tgdb->command_list );
 
 		tgdb_process_command_container ( tgdb );
 
@@ -1053,14 +1059,27 @@ size_t tgdb_recv_debugger_data ( struct tgdb *tgdb, char *buf, size_t n ) {
 
     tgdb_finish:
 
+	/* Set the iterator to the beggining. So when the user
+	 * calls tgdb_get_command it, it will be in the right spot.
+	 */
+	tgdb->command_list_iterator = tgdb_list_get_first ( tgdb->command_list );
+
     return buf_size;
 }
 
 struct tgdb_command *tgdb_get_command ( struct tgdb *tgdb ) {
-	if ( queue_size  ( tgdb->q ) > 0 )
-		return queue_pop ( tgdb->q );
+	struct tgdb_command *command;
 
-	return NULL;
+	if ( tgdb->command_list_iterator == NULL )
+		return NULL;
+
+	command = (struct tgdb_command *) tgdb_list_get_item ( 
+			tgdb->command_list_iterator );
+
+	tgdb->command_list_iterator = tgdb_list_next ( 
+			tgdb->command_list_iterator );
+
+	return command;
 }
 
 int tgdb_tty_new ( struct tgdb *tgdb ) {
@@ -1136,9 +1155,9 @@ int tgdb_set_verbose_gui_command_output ( struct tgdb *tgdb, int value ) {
 }
 
 void tgdb_traverse_commands ( struct tgdb *tgdb ) {
-    queue_traverse_list(tgdb->q, tgdb_types_print_command);
+    tgdb_list_foreach ( tgdb->command_list, tgdb_types_print_command);
 }
 
 void tgdb_delete_commands ( struct tgdb *tgdb ) {
-    queue_free_list(tgdb->q, tgdb_types_free_command);
+    tgdb_list_free (tgdb->command_list, tgdb_types_free_command);
 }

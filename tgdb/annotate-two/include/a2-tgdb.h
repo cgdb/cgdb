@@ -11,6 +11,7 @@
 
 #include "tgdb_types.h"
 #include "tgdb_interface.h"
+#include "queue.h"
 
 /*! \file
  * a2-tgdb.h
@@ -277,7 +278,7 @@ int a2_is_misc_prompt ( void *ctx );
   * \param inferior_output_size
   * This is the size of inferior_output
   *
-  * \param q
+  * \param list
   * Any commands that the annotate_two context has discovered will
   * be added to the queue Q. This will eventually update the client
   * of the libtgdb library.
@@ -293,7 +294,7 @@ int a2_parse_io (
 		const char *input_data, const size_t input_data_size,
 		char *debugger_output, size_t *debugger_output_size,
 		char *inferior_output, size_t *inferior_output_size,
-		struct queue *q );
+		struct tgdb_list *list );
 //@}
 
 /******************************************************************************/

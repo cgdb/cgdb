@@ -11,7 +11,6 @@
  * then pass them onto TGDB.
  */
 
-#include "queue.h"
 #include "tgdb_types.h"
 
 /**
@@ -170,7 +169,9 @@ struct tgdb_client_command *tgdb_interface_new_command(
         void *client_data);
 
 /**
- * This is a function for debugging. It will print a command.
+ * This will print a TGDB queue command to stderr.
+ * These are the commands given by TGDB to the debugger.
+ * This is a function for debugging. 
  *
  * \param item
  * The command to print
@@ -178,24 +179,14 @@ struct tgdb_client_command *tgdb_interface_new_command(
 void tgdb_interface_print_command ( void *item );
 
 /** 
- * Free a command 
+ * This will free a TGDB queue command.
+ * These are the commands given by TGDB to the debugger.
+ * This is a function for debugging. 
  *
  * \param item
  * The command to free
  */
 void tgdb_interface_free_command ( void *item);
-
-/**
- * This appends a new command onto the com structure.
- *
- * \param q
- * \param new_header
- * \param ndata
- */
-void tgdb_append_command(
-            struct queue *q, 
-            enum INTERFACE_COMMANDS new_header, 
-            void *ndata);
 
 //@}
 #endif

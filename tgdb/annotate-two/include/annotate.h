@@ -12,6 +12,9 @@
 #include "tgdb_types.h"
 #include "annotate_two.h"
 
-int tgdb_parse_annotation(struct annotate_two *a2, char *data, size_t size, struct queue *q);
+int tgdb_parse_annotation (
+		struct annotate_two *a2, 
+		char *data, size_t size, 
+		struct tgdb_list *list);
 
 #endif

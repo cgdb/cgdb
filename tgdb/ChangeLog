@@ -1,5 +1,34 @@
 10/13/2003 Bob Rossi <bob@brasko.net>
 
+   * TODO: Finished task ( changed 'struct queue' )
+   * a2-tgdb.h: Add include of 'queue.h'
+   a2_parse_io, change parameter q and add comment.
+   * annotate.h: tgdb_parse_annotation, ditto
+   * annotate_two.h: Add #include for sys/types.h
+   * commands.h: commands_parse_source, commands_set_state, 
+   commands_process, commands_list_command_finished,
+   commands_send_gui_sources, commands_send_source_absolute_source_file,
+   commands_finalize_command, ditto
+   * data.h: data_process, ditto
+   * state_machine.h: a2_handle_data, ditto
+   * a2-tgdb.c: implement changes.
+   * annotate.c: ditto
+   * commands.c: ditto
+   * data.c: ditto
+   * state_machine.c: ditto
+   * tgdb_client_interface.h: ditto
+   * tgdb_interface.h: ditto
+   Remove tgdb_append_command prototype.
+   * tgdb_types.h: ditto
+   Add tgdb_types_append_command prototype.
+   * driver.c: no longer call tgdb_types_free_command
+   * tgdb.c: ditto
+   Add #include for tgdb_list.h
+   * tgdb_client_interface.c: ditto
+   * tgdb_types.h: ditto
+
+10/13/2003 Bob Rossi <bob@brasko.net>
+
    * TODO: Preparing TODO for .4.0
 
 10/13/2003 Bob Rossi <bob@brasko.net>
