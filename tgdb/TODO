@@ -24,20 +24,11 @@ tgdb 0.5.0
   TGDB_ABSOLUTE_SOURCE_DENIED 3 times when it is started with out a program 
   to debug. Should it even return this command at all?
 	
-tdb-0.4.0
----------
+tgdb-0.4.0 and before
 
-Non-technical
--------------
-* Work on webpage for cgdb/tgdb
-
-technical
----------
 * Get in touch with 'Ronald Landheer-Cieslak' about Makefile.am patch to
   build CVS out of the source tree.
-
-Finished:
-
+* Work on webpage for cgdb/tgdb
 * Make sure mueller's wrap searching feature gets documented.
 * Standardize tgdb_interface. Maybe change its name. The clients should be
   able to generate and add commands to the command queue here. The commands
