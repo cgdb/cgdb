@@ -1,0 +1,23 @@
+03-04-2004:
+-----------
+
+  Decisions:
+
+    CGDB 1.0 will not support :map parameters such as <buffer> and <silent>
+
+    Application definitely feeds back to mapper for recursion.  Every
+    character that the app parses results in feeding the new input buffer back
+    to the mapper.
+
+  Things to consider:
+
+    Mappings are recursive
+    Mappings can switch mode (insert/command)
+    
+    Mapper may have to select on input to handle the delay for ambiguous maps.
+    This may result in the undesirable side effect of the rest of the GUI
+    (i.e. gdb's window) not updating until the user completes a command.
+    Depending on the length of the command, this could be several seconds of a
+    'frozen' GDB window.  No bad side effects except that it doesn't look
+    professional.
+
