@@ -1,4 +1,9 @@
 03/31/2005 Bob Rossi <bob@brasko.net>
+
+	* configure (VERSION): Update to 0.5.0-cvs
+	* configure.in (AM_INIT_AUTOMAKE): Update to 0.5.0-cvs
+
+03/31/2005 Bob Rossi <bob@brasko.net>
 	* NEWS: Mention new SIGCHLD code 
 	* RELEASE_TODO: Closed the waitpid race condition bug.
 
