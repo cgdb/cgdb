@@ -52,9 +52,6 @@ Quick Reference
     :finish      -> send a finish command to gdb
     :help        -> Opens the help dialog
     :insert      -> move focus to the gdb window
-    :macro_run   -> run the saved macro
-    :macro_save  -> finish save the currently started macro.
-    :macro_start -> start saving commands to a macro
     :next        -> send a next command to gdb
     :quit        -> Quit cgdb (may be abbreviated as :q)
     :quit!       -> Quit cgdb, even if debugged program is running (abbreviated
@@ -71,13 +68,6 @@ Quick Reference
     :set ignorecase -> Sets searching case insensitive (:set ic)
     :set shortcut   -> Enables shortcut commands typed in source window 
                        (:set sc)
-
-    Initial macro work ( only one macro works,  need to generalize )
-    ------------------
-
-    m           -> macro start
-    S           -> macro save
-    M           -> macro run
 
 2. At gdb and tty window
 ------------------------
