@@ -8,27 +8,15 @@
 /* This turns true if tgdb gets a misc prompt. This is so that we do not 
  * send commands to gdb at this point.
  */
-static unsigned short internal_prompt_command = FALSE;
+static unsigned short misc_prompt_command = FALSE;
    
-int globals_is_internal_prompt(void){
-   return internal_prompt_command;
+int globals_is_misc_prompt(void){
+   return misc_prompt_command;
 }
    
-void globals_set_internal_prompt_command(unsigned short set){
-   internal_prompt_command = set;
+void globals_set_misc_prompt_command(unsigned short set){
+   misc_prompt_command = set;
 }  
-
-/* This turns true if tgdb gets a prompt. Otherwise, something like
- * overload-prompt is no good, and tgdb can not issue a command. */
-static unsigned short can_issue_command = TRUE;
-
-int global_can_issue_command(void){
-   return can_issue_command;
-}
-
-void global_set_can_issue_command(unsigned short set){
-   can_issue_command = set;
-}
 
 static unsigned short tgdb_recieved_signal = FALSE;
 

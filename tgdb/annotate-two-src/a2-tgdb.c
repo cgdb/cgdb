@@ -50,16 +50,18 @@ static int user_cur_command_pos = 0;
  * Returns: TRUE if can issue directly to gdb. Otherwise FALSE.
  */
 static int tgdb_can_issue_command(void) {
-   if ( tgdb_initialized && 
-      /* The user is at the prompt */
-      data_get_state() == USER_AT_PROMPT && 
-      /* This line boiles down to:
-       * If the buffered list is empty or the user is at the misc prompt 
-       */
-      ( queue_size(gdb_input_queue) == 0 || global_can_issue_command() == FALSE))
-      return TRUE;
-   else 
+   if ( !tgdb_initialized )
       return FALSE;
+
+   /* If the user is at the misc prompt */
+   if ( globals_is_misc_prompt() == TRUE )
+      return TRUE;
+   
+   /* If the user is at the prompt and the queue is empty */
+   if ( data_get_state() == USER_AT_PROMPT && queue_size(gdb_input_queue) == 0)
+      return TRUE;
+      
+   return FALSE;
 }
 
 /* tgdb_setup_buffer_command_to_run: This sets up a command to run.
@@ -78,7 +80,7 @@ static int tgdb_setup_buffer_command_to_run(
    struct command *item = buffer_new_item(com, com_type, out_type, com_to_run);
    
    /*fprintf(stderr, "SIZE_OF_BUFFER(%d)\n", buffer_size(head));*/
-   if(global_can_issue_command() == TRUE && tgdb_can_issue_command()) {
+   if(tgdb_can_issue_command()) {
       commands_run_command(masterfd, item);
       buffer_free_item(item);
    } else /* writing the command for later execution */
@@ -285,8 +287,7 @@ size_t a2_tgdb_recv(char *buf, size_t n, struct queue *q){
    buf_size = a2_handle_data(local_buf, size, buf, n, q);
 
    /* 4. runs the users buffered command if any exists */
-   if( global_can_issue_command() == TRUE && 
-       data_get_state() == USER_AT_PROMPT && 
+   if(  data_get_state() == USER_AT_PROMPT && 
        DATA_AT_PROMPT) { /* Only one command at a time */
        int result = tgdb_run_command();
 

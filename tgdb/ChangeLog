@@ -1,3 +1,9 @@
+03/11/2003 Bob Rossi <bob_rossi@cox.net>
+
+   * tgdb now allows a user to enter a command at a misc prompt:
+   This fixes the problem where tgdb does not know that it is ok for the 
+   user to enter a command at the misc prompt.
+
 03/06/2003 Bob Rossi <bob_rossi@cox.net>
 
    * Changed the command interface to be a queue

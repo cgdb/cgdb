@@ -6,15 +6,8 @@
 /* This turns true if tgdb gets a misc prompt. This is so that we do not 
  * send commands to gdb at this point.
  */
-int globals_is_internal_prompt(void);
-void globals_set_internal_prompt_command(unsigned short set);
-
-/* global_can_issue_command: Tells tgdb if it can issue a command to gdb.
- * Return: 1 if tgdb can issue a command, otherwise 0.
- */
-int global_can_issue_command(void);
-/* if 1, then tgdb can issue a command, 0 can not */
-void global_set_can_issue_command(unsigned short set);
+int globals_is_misc_prompt(void);
+void globals_set_misc_prompt_command(unsigned short set);
 
 /* if a signal was recieved by library. Once, the user reaches the prompt,
  * the signal is cleared.

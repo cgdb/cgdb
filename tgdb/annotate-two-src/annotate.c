@@ -18,14 +18,12 @@ static int handle_source(const char *buf,  size_t n, struct queue *q){
 static int handle_misc_pre_prompt(const char *buf, size_t n, struct queue *q){
    extern int misc_pre_prompt;
    
+   /* If tgdb is sending a command, then continue past it */
    if(data_get_state() == INTERNAL_COMMAND){
       if(io_write_byte(masterfd, '\n') == -1)
          err_msg("%s:%d -> Could not send command", __FILE__, __LINE__);
-
-      globals_set_internal_prompt_command(TRUE);
    } else {
       data_set_state(AT_PROMPT);
-      global_set_can_issue_command(FALSE);
       misc_pre_prompt = 1;
    }
 
@@ -33,22 +31,12 @@ static int handle_misc_pre_prompt(const char *buf, size_t n, struct queue *q){
 }
 
 static int handle_misc_prompt(const char *buf, size_t n, struct queue *q){
-   /* If not at a prompt (from height being to small) while tgdb or the
-    * gui is running an internal command.
-    */
-   if(globals_is_internal_prompt() == FALSE)
-      data_set_state(USER_AT_PROMPT);
-
+   globals_set_misc_prompt_command(TRUE);
    return 0;
 }
 
 static int handle_misc_post_prompt(const char *buf, size_t n, struct queue *q){
-   if(globals_is_internal_prompt() == TRUE){
-      globals_set_internal_prompt_command(FALSE);
-   } else {
-      data_set_state(POST_PROMPT);
-      global_set_can_issue_command(TRUE);
-   }
+   globals_set_misc_prompt_command(FALSE);
 
    return 0;
 }
