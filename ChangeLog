@@ -1,3 +1,8 @@
+02/27/2004 Bob Rossi <bob@brasko.net>
+
+    * configure.in (AC_OUTPUT): Add cgdb/lib, cgdb/lib/kui and
+	cgdb/lib/kui/src
+
 01/09/2004 Bob Rossi <bob@brasko.net>
 
    * NEWS: Updated to say CGDB now compiles on the HURD 

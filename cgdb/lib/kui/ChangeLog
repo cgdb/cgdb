@@ -1,0 +1,10 @@
+02/26/2004 Bob Rossi <bob@brasko.net>
+
+    * inc: Added include directory.
+	* src: Added source directory.
+	* src/Makefile.am: Add initial automake file to build libkui and
+	kui_driver
+	* src/kui.c: Initial kui file that will make up libkui
+	* src/kui_driver.c: A standalone application that can test the
+	functionality of libkui.
+	* inc/kui.h: Initial specification for libkui

@@ -6111,7 +6111,7 @@ done
 
 
 #tgdb/Makefile tgdb/annotate-two-src/Makefile tgdb/gdbmi-src/Makefile tgdb/lib/Makefile)
-                                                                                                                                                                                                                  ac_config_files="$ac_config_files Makefile various/Makefile various/util/Makefile various/util/src/Makefile various/input/Makefile various/input/src/Makefile various/adt/Makefile various/adt/src/Makefile various/rlctx/Makefile various/rlctx/src/Makefile tgdb/Makefile tgdb/annotate-two/Makefile tgdb/annotate-two/src/Makefile tgdb/gdbmi/Makefile tgdb/gdbmi/src/Makefile tgdb/tgdb-base/Makefile tgdb/tgdb-base/src/Makefile cgdb/Makefile cgdb/src/Makefile cgdb/tokenizer/Makefile cgdb/tokenizer/src/Makefile"
+                                                                                                                                                                                                                                                ac_config_files="$ac_config_files Makefile various/Makefile various/util/Makefile various/util/src/Makefile various/input/Makefile various/input/src/Makefile various/adt/Makefile various/adt/src/Makefile various/rlctx/Makefile various/rlctx/src/Makefile tgdb/Makefile tgdb/annotate-two/Makefile tgdb/annotate-two/src/Makefile tgdb/gdbmi/Makefile tgdb/gdbmi/src/Makefile tgdb/tgdb-base/Makefile tgdb/tgdb-base/src/Makefile cgdb/Makefile cgdb/src/Makefile cgdb/lib/Makefile cgdb/lib/kui/Makefile cgdb/lib/kui/src/Makefile cgdb/tokenizer/Makefile cgdb/tokenizer/src/Makefile"
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -6686,6 +6686,9 @@ do
   "tgdb/tgdb-base/src/Makefile" ) CONFIG_FILES="$CONFIG_FILES tgdb/tgdb-base/src/Makefile" ;;
   "cgdb/Makefile" ) CONFIG_FILES="$CONFIG_FILES cgdb/Makefile" ;;
   "cgdb/src/Makefile" ) CONFIG_FILES="$CONFIG_FILES cgdb/src/Makefile" ;;
+  "cgdb/lib/Makefile" ) CONFIG_FILES="$CONFIG_FILES cgdb/lib/Makefile" ;;
+  "cgdb/lib/kui/Makefile" ) CONFIG_FILES="$CONFIG_FILES cgdb/lib/kui/Makefile" ;;
+  "cgdb/lib/kui/src/Makefile" ) CONFIG_FILES="$CONFIG_FILES cgdb/lib/kui/src/Makefile" ;;
   "cgdb/tokenizer/Makefile" ) CONFIG_FILES="$CONFIG_FILES cgdb/tokenizer/Makefile" ;;
   "cgdb/tokenizer/src/Makefile" ) CONFIG_FILES="$CONFIG_FILES cgdb/tokenizer/src/Makefile" ;;
   "depfiles" ) CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;

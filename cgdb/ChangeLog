@@ -1,3 +1,7 @@
+02/27/2004 Bob Rossi <bob@brasko.net>
+
+    * lib: Add directory
+
 01/29/2004 Bob Rossi <bob@brasko.net>
 
    * cgdb.c: Changed PATH_MAX to FSUTIL_PATH_MAX and #include <limits.h> to
