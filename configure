@@ -1541,7 +1541,7 @@ fi
 
 # Define the identity of the package.
  PACKAGE=cgdb
- VERSION=0.3.2-cvs
+ VERSION=0.3.3
 
 
 cat >>confdefs.h <<_ACEOF

@@ -64,6 +64,10 @@
 	the value of escdelay. Please look at the README file for more 
 	information on escdelay.
 
+2. Why does cgdb not work when a tty can not be opened?
+   Basically, this is a bug. In future releases the problem will be solved.
+   The only real problem is that the readline capabilities won't work if a tty
+   can not be opened.
 
 							Section IV Using cgdb
 
