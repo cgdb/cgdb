@@ -14,10 +14,19 @@
 typedef int wid_t;
 
 /* Window object (implementation in src) */
-struct window;
+struct wm_window;
 
 /* Widget type */
-typedef void *Widget;
+typedef struct {
+    
+    /* Curses window for the widget to work in */
+    WINDOW *win;
+    
+    /* Private data: Not touched by windowing code, meant for widget-specific
+     * information. */
+    void *data;
+
+} wm_widget;
 
 /* ------------------- */
 /* Function Prototypes */
