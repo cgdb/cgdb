@@ -72,15 +72,16 @@ static int tgdb_setup_buffer_command_to_run(
  *    It passes the signal along to gdb. Thats what the user intended.
  */ 
 static void signal_catcher(int SIGNAL){
-   /* signal recieved */
-   global_set_signal_recieved(TRUE);
-
-   control_c = 1;
+    /* signal recieved */
+    global_set_signal_recieved(TRUE);
 
     if ( SIGNAL == SIGINT ) {               /* ^c */
+        control_c = 1;
         kill(debugger_pid, SIGINT);
-    } else if ( SIGNAL == SIGTERM ) {       /* ^\ */
+    } else if ( SIGNAL == SIGTERM ) { 
         kill(debugger_pid, SIGTERM);
+    } else if ( SIGNAL == SIGQUIT ) {       /* ^\ */
+        kill(debugger_pid, SIGQUIT);
     } else 
         err_msg("caught unknown signal: %d", debugger_pid);
 }
@@ -102,6 +103,9 @@ static int tgdb_setup_signals(void){
    if(sigaction(SIGTERM, &action, NULL) < 0)
       err_ret("%s:%d -> sigaction failed ", __FILE__, __LINE__);
 
+   if(sigaction(SIGQUIT, &action, NULL) < 0)
+      err_ret("%s:%d -> sigaction failed ", __FILE__, __LINE__);
+
    return 0;
 }
 
@@ -111,6 +115,7 @@ int a2_tgdb_init(char *debugger, int argc, char **argv, int *gdb, int *child, in
    tgdb_init_setup_config_file();
    config_file = tgdb_util_get_config_gdb_debug_file();
    io_debug_init(config_file);
+   commands_init();
    
    /* initialize users circular buffer */
    gdb_input_queue = queue_init();
@@ -161,9 +166,13 @@ int a2_tgdb_shutdown(void){
    return 0;
 }
 
-static int tgdb_run_users_buffered_commands(char *buf, int *buf_size){
+/* tgdb_run_buffered_command: Sends to gdb the next command.
+ *
+ * return:  0 on normal termination ( command was run )
+ *          2 if the queue was cleared because of ^c
+ */
+static int tgdb_run_command(void){
     extern int DATA_AT_PROMPT;
-    int recv_sig = 0;
     struct command *item = NULL;
 
     /* TODO: Put signal blocking code here so that ^c is not pressed while 
@@ -172,13 +181,15 @@ static int tgdb_run_users_buffered_commands(char *buf, int *buf_size){
     /* If a signal has been recieved, clear the queue and return */
     if(control_c) { 
         queue_free_list(gdb_input_queue, buffer_free_item);
-        return 0;
-    } else if ( queue_size(gdb_input_queue) == 0 )
-       return -2;
-    else
-        item = queue_pop(gdb_input_queue);
-
+        return 2;
+    } 
+    
+    /* If the queue is empty, return */
+    if ( queue_size(gdb_input_queue) == 0 )
+       return 2;
+   
     DATA_AT_PROMPT = 0;
+    item = queue_pop(gdb_input_queue);
     commands_run_command(masterfd, item);
     buffer_free_item(item);
     return 0;
@@ -274,12 +285,12 @@ size_t a2_tgdb_recv(char *buf, size_t n, struct Command ***com){
    if( global_can_issue_command() == TRUE && 
        data_get_state() == USER_AT_PROMPT && 
        DATA_AT_PROMPT) { /* Only one command at a time */
-       int result = tgdb_run_users_buffered_commands(buf, &buf_size);
+       int result = tgdb_run_command();
 
         /* There are no more command to run,
          * Display the data the user's unfinished command if
          * the current command is done outputting */
-       if ( result == -2 && user_cur_command_pos > 0 ) {
+       if ( result == 2 && user_cur_command_pos > 0 ) {
            char temp[MAXLINE * 5];
            user_cur_command[user_cur_command_pos] = '\0';
            temp[0] = '\0';

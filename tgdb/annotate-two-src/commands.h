@@ -23,6 +23,9 @@ enum COMMAND_STATE {
    INFO_SOURCE
 };
 
+/* commands_init: Initialize the commands unit */
+void commands_init(void);
+
 /* commands_parse_field: This is called when tgdb gets a field annotation
  *                       from gdb. 
  * buf -> The 'field' annotation recieved from gdb.

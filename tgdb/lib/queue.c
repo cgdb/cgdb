@@ -74,10 +74,6 @@ void queue_free_list(struct queue *q, item_func func) {
         prev = NULL; 
     }
 
-    if ( func )
-        func ( cur->data );
-    free ( cur );
-    cur = NULL; 
     q->size = 0;
 }
 

@@ -3,6 +3,8 @@
    * Perfected the queue unit :)
    * Moved all of the command running into commands: This makes one nice entry
    point to running a command.
+   * Wrote an infinate string unit: This replaced all the constant size
+   buffers
 
 03/03/2003 Bob Rossi <bob_rossi@cox.net>
 
