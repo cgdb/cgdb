@@ -6,22 +6,23 @@ Pushed off for gdb 0.5.0
    This is *very* difficult to do. I don't know if it is possible.
 > Modify the readline library to be context driven.
 > Add new structures to types.h that are intended to work with MI
+> Write internal documentation
 	
 Work to do for cgdb-0.4.0
 
+> Get testsuite to install with automake
 > Work on webpage for cgdb/tgdb
 > Comment all headers to be complient with doxygen
-> Write internal documentation
 > Change use of 'struct queue' for tgdb_get_command.
 > standardize the way TGDB returns paths to the front end.
    As of know, it returns the full path with the relative path. Then
    it returns a relative path for breakpoints and source files. The front end 
    then needs to look up the full path from the relative path.
-> Add the return value of gdb when returning with TGDB_QUIT_NORMAL
-> Make 1 quit command. Returning a structure defining how GDB was killed.
 
 Finished:
 
+* Add the return value of gdb when returning with TGDB_QUIT_NORMAL
+* Make 1 quit command. Returning a structure defining how GDB was killed.
 * Fix tgdb to call the lower level subsystems in an independent way.
 * Modify the structures, to only contain things like 'const char *'
 * rename type tgdb_command to tgdb_command_type.

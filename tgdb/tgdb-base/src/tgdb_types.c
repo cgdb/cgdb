@@ -112,12 +112,14 @@ static void tgdb_types_print_item ( void *command ) {
         case TGDB_DISPLAY_UPDATE:
 			fprintf ( fd, "TGDB_DISPLAY_UPDATE\n" );
            	break;
-        case TGDB_QUIT_ABNORMAL:
-			fprintf ( fd, "TGDB_QUIT_ABNORMAL\n" );
-			break;
-		case TGDB_QUIT_NORMAL:
-			fprintf ( fd, "TGDB_QUIT_NORMAL\n" );
-           	break;
+        case TGDB_QUIT:
+			{
+				struct tgdb_debugger_exit_status *status = 
+						(struct tgdb_debugger_exit_status *) com->data;
+				fprintf( fd, "TGDB_QUIT EXIT_STATUS(%d)RETURN_VALUE(%d)\n", 
+						status->exit_status, status->return_value );
+				break;
+			}
     }
 }
 
@@ -194,12 +196,14 @@ static void tgdb_types_delete_item ( void *command ){
         case TGDB_DISPLAY_UPDATE:
 			/* Nothing to do */
 			break;
-        case TGDB_QUIT_ABNORMAL:
-			/* Nothing to do */
+        case TGDB_QUIT:
+		{
+			struct tgdb_debugger_exit_status *status = 
+					(struct tgdb_debugger_exit_status *) com->data;
+			free ( status );
+			status = NULL;
 			break;
-		case TGDB_QUIT_NORMAL:
-			/* Nothing to do */
-			break;
+		}
     }
   
     free(com);

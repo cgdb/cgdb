@@ -86,19 +86,14 @@ extern "C" {
  *
  *      Currently not used.
  *
- *  TGDB_QUIT_ABNORMAL
- *  ------------------
+ *  TGDB_QUIT
+ *  ---------
  *
- * 		This happens when gdb quits abnormally.
+ * 		This happens when gdb quits.
  *      libtgdb is done. 
  *      You will get no more responses after this one.
  *
- *  TGDB_QUIT_NORMAL
- *  ----------------
- *
- * 		This happens when gdb quits normally.
- *      libtgdb is done. 
- *      You will get no more responses after this one.
+ *      This is a 'struct tgdb_quit_status *'
  */
 enum INTERFACE_COMMANDS {       
     TGDB_UPDATE_BREAKPOINTS,
@@ -108,8 +103,7 @@ enum INTERFACE_COMMANDS {
     TGDB_ABSOLUTE_SOURCE_ACCEPTED,
     TGDB_ABSOLUTE_SOURCE_DENIED,
     TGDB_DISPLAY_UPDATE,
-	TGDB_QUIT_ABNORMAL,
-    TGDB_QUIT_NORMAL
+	TGDB_QUIT
 };
 
 /*
@@ -219,6 +213,23 @@ struct tgdb_file_position {
  */
 struct tgdb_source_file {
 	char *absolute_path;
+};
+
+/**
+ * 
+ * This tells the front end how the debugger terminated.
+ *
+ * \field exit_status
+ *     If this is 0, the debugger terminated normally and return_value is valid
+ *     If this is -1, the debugger terminated abnormally and return_value is 
+ *     invalid
+ *
+ * \field return_value
+ *     This is the return value of the debugger upon normal termination.
+ */
+struct tgdb_debugger_exit_status {
+	int exit_status;
+	int return_value;
 };
 
 #ifdef __cplusplus

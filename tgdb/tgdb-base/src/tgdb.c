@@ -907,6 +907,8 @@ static int tgdb_get_quit_command ( struct tgdb *tgdb ) {
 	pid_t pid 	= tgdb_client_get_debugger_pid ( tgdb->tcc );
 	int status 	= 0;
 	pid_t ret;
+	struct tgdb_debugger_exit_status *tstatus = (struct tgdb_debugger_exit_status *)
+		xmalloc ( sizeof ( struct tgdb_debugger_exit_status ) );
 
 	ret = waitpid ( pid, &status, WNOHANG );
 
@@ -923,10 +925,16 @@ static int tgdb_get_quit_command ( struct tgdb *tgdb ) {
 		return -1;
 	}
 
-	if ( (WIFEXITED(status)) == 0 ) /* Child did not exit normally */
-		tgdb_append_command(tgdb->q,TGDB_QUIT_ABNORMAL, NULL );
-	else
-		tgdb_append_command(tgdb->q, TGDB_QUIT_NORMAL, NULL );
+	if ( (WIFEXITED(status)) == 0 ) {
+		/* Child did not exit normally */
+		tstatus->exit_status  = -1;
+		tstatus->return_value = 0;
+	} else {
+		tstatus->exit_status  = 0;
+		tstatus->return_value = WEXITSTATUS(status);
+	}
+
+	tgdb_append_command(tgdb->q,TGDB_QUIT, tstatus );
 
 	return 0;
 }

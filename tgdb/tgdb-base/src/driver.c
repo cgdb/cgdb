@@ -106,17 +106,12 @@ static int gdb_input(void) {
 
     while ( (item = tgdb_get_command(tgdb)) != NULL ) {
 
-        if( item->header == TGDB_QUIT_NORMAL ) {
-           fprintf ( stderr, "%s:%d TGDB_QUIT_NORMAL\n", __FILE__, __LINE__);
+        if( item->header == TGDB_QUIT) {
+           fprintf ( stderr, "%s:%d TGDB_QUIT\n", __FILE__, __LINE__);
            return -1;
 		}
 
-        if( item->header == TGDB_QUIT_ABNORMAL) {
-           fprintf(stderr, "%s:%d TGDB_QUIT_ABNORMAL\n", __FILE__, __LINE__);
-           return -1;
-		}
-
-      tgdb_types_free_command ( (void*)item );
+     	tgdb_types_free_command ( (void*)item );
     }
 
     return 0;

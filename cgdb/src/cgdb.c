@@ -404,8 +404,7 @@ static void process_commands(struct tgdb *tgdb)
                 break;
              }
 
-            case TGDB_QUIT_NORMAL:
-			case TGDB_QUIT_ABNORMAL:
+            case TGDB_QUIT:
                 cleanup();            
                 exit(0);
                 break;

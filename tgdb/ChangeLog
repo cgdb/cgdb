@@ -1,5 +1,17 @@
 10/05/2003 Bob Rossi <bob@brasko.net>
 
+   * TODO: Update things done.
+   * tgdb_types.h: enum INTERFACE_COMMANDS, remove TGDB_QUIT_ABNORMAL and
+   TGDB_QUIT_NORMAL to make 1 command TGDB_QUIT.
+   add 'struct tgdb_debugger_exit_status'.
+   * driver.c: update gdb_input to use new 'TGDB_QUIT'
+   * tgdb.c: tgdb_get_quit_command, update to use new quit structure.
+   * tgdb_types.c: tgdb_types_print_item, tgdb_types_delete_item, 
+   update to print TGDB_QUIT command and remove TGDB_QUIT_ABNORMAL 
+   and TGDB_QUIT_NORMAL
+
+10/05/2003 Bob Rossi <bob@brasko.net>
+
    * TODO: Finished task. Made TGDB call lower level subsystems in an
    independent way
    * a2-tgdb.h: changed name of a2_create_instance to a2_create_context.
