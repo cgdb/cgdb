@@ -1,3 +1,5 @@
+cgdb-0.3.4
+
    * Fixed bug in cgdb. If the user hit 'o' in cgdb, then got out of the 
    file dialog, the next time ^c was typed in the gdb window, the prompt
    would not refresh itself properly.

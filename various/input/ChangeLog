@@ -1,3 +1,5 @@
+version 0.3.4 (08/14/2003):
+
 08/01/2003 Bob Rossi <bob_rossi@brasko.net>
 
 	* input.c: input_get_seq, made sure that control chars don't get buffered.
