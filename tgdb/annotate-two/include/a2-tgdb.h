@@ -82,8 +82,8 @@ enum annotate_commands {
  * @return
  *  NULL on error, A valid descriptor upon success
  */
-struct annotate_two* a2_create_instance ( 
-	const char *debugger, 
+void *a2_create_context ( 
+	const char *debugger_path, 
 	int argc, char **argv,
 	const char *config_dir );
 
@@ -114,7 +114,7 @@ struct annotate_two* a2_create_instance (
  *  0 on success, otherwise -1 on error.
  */
 int a2_initialize ( 
-	struct annotate_two *a2, 
+	void *a2, 
 	struct queue *command_container,
 	int *debugger_stdin, int *debugger_stdout,
 	int *inferior_stdin, int *inferior_stdout );
@@ -125,13 +125,13 @@ int a2_initialize (
  * current context. It will clean up after itself. All descriptors it 
  * opened, it will close.
  *
- * \param a2
+ * \param ctx
  *  The annotate two context.
  *
  * @return
  *  0 on success, otherwise -1 on error.
  */
-int a2_shutdown ( struct annotate_two *a2 );
+int a2_shutdown ( void *ctx );
 
 //@}
 
@@ -151,13 +151,13 @@ int a2_shutdown ( struct annotate_two *a2 );
  * Not implemented yet.
  * What should it return? How should errors be handled?
  *
- * \param a2
+ * \param ctx
  *  The annotate two context.
  *
  * @return
  *  0 on success, otherwise -1 on error.
  */
-int a2_err_msg ( struct annotate_two *a2 );
+int a2_err_msg ( void *ctx );
 
 /** 
  * a2_is_client_ready
@@ -165,13 +165,13 @@ int a2_err_msg ( struct annotate_two *a2 );
  * This determines if the annotate two context is ready to recieve
  * another command.
  *
- * \param a2
+ * \param ctx
  *  The annotate two context.
  *
  * @return
  *  1 if it is ready, 0 if it is not.
  */
-int a2_is_client_ready(struct annotate_two *a2);
+int a2_is_client_ready(void *ctx);
 
 /** 
  * a2_user_ran_command
@@ -179,7 +179,7 @@ int a2_is_client_ready(struct annotate_two *a2);
  * This lets the annotate_two know that the user ran a command.
  * The client can update itself here if it need to.
  *
- * \param a2
+ * \param ctx
  *  The annotate two context.
  *
  * \param command_container
@@ -188,14 +188,14 @@ int a2_is_client_ready(struct annotate_two *a2);
  * @return
  * 	-1 on error, 0 on success
  */
-int a2_user_ran_command ( struct annotate_two *a2, struct queue *command_container );
+int a2_user_ran_command ( void *ctx, struct queue *command_container );
 
 /** 
  * a2_prepare_for_command
  *
  *  Prepare's the client for the command COM to be run.
  *
- * \param a2
+ * \param ctx
  *  The annotate two context.
  *
  *  \param com
@@ -204,7 +204,7 @@ int a2_user_ran_command ( struct annotate_two *a2, struct queue *command_contain
  * @return
  * 	-1 on error, 0 on success
  */
-int a2_prepare_for_command ( struct annotate_two *a2, struct tgdb_client_command *com );
+int a2_prepare_for_command ( void *ctx, struct tgdb_client_command *com );
 
 /** 
  * a2_is_misc_prompt
@@ -212,13 +212,13 @@ int a2_prepare_for_command ( struct annotate_two *a2, struct tgdb_client_command
  *  This is a hack. It should be removed eventually.
  *  It tells tgdb-base not to send its internal commands when this is true.
  *
- * \param a2
+ * \param ctx
  *  The annotate two context.
  *
  * @return
  *  1 if it is at a misc prompt, 0 if it is not.
  */
-int a2_is_misc_prompt ( struct annotate_two *a2 );
+int a2_is_misc_prompt ( void *ctx );
 
 //@}
 
@@ -237,7 +237,7 @@ int a2_is_misc_prompt ( struct annotate_two *a2 );
   * This recieves all of the output from the debugger. It is all routed 
   * through this function. 
   *
-  * \param a2
+  * \param ctx
   *  The annotate two context.
   *
   * \param command_container
@@ -275,7 +275,7 @@ int a2_is_misc_prompt ( struct annotate_two *a2 );
   *  otherwise -1 on error.
   */
 int a2_parse_io ( 
-		struct annotate_two *a2,
+		void *ctx,
 		struct queue *command_container,
 		const char *input_data, const size_t input_data_size,
 		char *debugger_output, size_t *debugger_output_size,
@@ -298,7 +298,7 @@ int a2_parse_io (
  *
  *  Gets the Absolute path of FILE.
  *  
- *  \param a2
+ *  \param ctx
  *   The annotate two context.
  *
  *  \param command_container
@@ -311,7 +311,7 @@ int a2_parse_io (
  *   0 on success, otherwise -1 on error.
  */
 int a2_get_source_absolute_filename ( 
-		struct annotate_two *a2, 
+		void *ctx, 
 		struct queue *command_container,
 		const char *file );
 
@@ -320,7 +320,7 @@ int a2_get_source_absolute_filename (
  *
  *  Gets all the source files that the inferior makes up.
  *
- *  \param a2
+ *  \param ctx
  *   The annotate two context.
  *
  *  \param command_container
@@ -330,7 +330,7 @@ int a2_get_source_absolute_filename (
  *   0 on success, otherwise -1 on error.
  */
 int a2_get_inferior_sources ( 
-		struct annotate_two *a2, 
+		void *ctx, 
 		struct queue *command_container );
 
 /** 
@@ -338,7 +338,7 @@ int a2_get_inferior_sources (
  *
  *  This will change the prompt the user sees to PROMPT.
  *
- * \param a2
+ * \param ctx
  *  The annotate two context.
  *
  * \param prompt
@@ -351,7 +351,7 @@ int a2_get_inferior_sources (
  *   0 on success, otherwise -1 on error.
  */
 int a2_change_prompt(
-		struct annotate_two *a2, 
+		void *ctx, 
 		struct queue *command_container,
 		const char *prompt);
 
@@ -360,7 +360,7 @@ int a2_change_prompt(
  *
  * This is called when readline determines a command has been typed. 
  *
- * \param a2
+ * \param ctx
  *  The annotate two context.
  *
  * \param command_container
@@ -373,7 +373,7 @@ int a2_change_prompt(
  *   0 on success, otherwise -1 on error.
  */
 int a2_command_callback(
-		struct annotate_two *a2, 
+		void *ctx, 
 		struct queue *command_container,
 		const char *command);
 
@@ -382,7 +382,7 @@ int a2_command_callback(
  *
  * This is called when readline determines a command needs to be completed.
  *
- * \param a2
+ * \param ctx
  *  The annotate two context.
  *
  * \param command_container
@@ -395,7 +395,7 @@ int a2_command_callback(
  *   0 on success, otherwise -1 on error.
  */
 int a2_completion_callback(
-		struct annotate_two *a2, 
+		void *ctx, 
 		struct queue *command_container,
 		const char *command);
 
@@ -405,7 +405,7 @@ int a2_completion_callback(
  *  This returns the command to send to gdb for the enum C.
  *  It will return NULL on error, otherwise correct string on output.
  *
- * \param a2
+ * \param ctx
  *  	The annotate two context.
  *
  * \param c
@@ -414,12 +414,12 @@ int a2_completion_callback(
  * @return
  *   	Command on success, otherwise NULL on error.
  */
-char *a2_return_client_command ( struct annotate_two *a2, enum tgdb_command_type c );
+char *a2_return_client_command ( void *ctx, enum tgdb_command_type c );
 
 /** 
  * a2_client_modify_breakpoint
  *
- * \param a2
+ * \param ctx
  * 	The annotate two context.
  *
  * \param file
@@ -432,18 +432,22 @@ char *a2_return_client_command ( struct annotate_two *a2, enum tgdb_command_type
  * @return
  * 	NULL on error or message to print to terminal
  */
-char *a2_client_modify_breakpoint ( struct annotate_two *a2, const char *file, int line, enum tgdb_breakpoint_action b );
+char *a2_client_modify_breakpoint ( 
+		void *ctx, 
+		const char *file, 
+		int line, 
+		enum tgdb_breakpoint_action b );
 
 /** 
  * a2_get_debuger_pid
  *
- * \param a2
+ * \param ctx
  *  The annotate two context.
  *
  *  @return 
  *  -1 on error. Or pid on Success.
  */
-pid_t a2_get_debugger_pid ( struct annotate_two *a2 );
+pid_t a2_get_debugger_pid ( void *ctx );
 
 //@}
 
@@ -459,7 +463,7 @@ pid_t a2_get_debugger_pid ( struct annotate_two *a2 );
 /** 
  * a2_open_new_tty
  *
- * \param a2
+ * \param ctx
  *  The annotate two context.
  *
  * \param command_container
@@ -475,7 +479,7 @@ pid_t a2_get_debugger_pid ( struct annotate_two *a2 );
  *  0 on success, otherwise -1 on error.
  */
 int a2_open_new_tty ( 
-		struct annotate_two *a2, 
+		void *ctx,
 		struct queue *command_container,
 		int *inferior_stdin, 
 		int *inferior_stdout );
@@ -483,13 +487,13 @@ int a2_open_new_tty (
 /** 
  * a2_get_tty_name
  *
- * \param a2
+ * \param ctx
  *  The annotate two context.
  *
  * @return
  * 	tty name on success, otherwise NULL on error.
  */
-char *a2_get_tty_name ( struct annotate_two *a2 );
+char *a2_get_tty_name ( void *ctx );
 
 //@}
 

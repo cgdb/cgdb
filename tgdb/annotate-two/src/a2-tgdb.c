@@ -47,8 +47,9 @@
 #include "annotate_two.h"
 
 static int a2_set_inferior_tty ( 
-		struct annotate_two *a2, 
+		void *ctx, 
 		struct queue *command_container ) {
+	struct annotate_two *a2 = (struct annotate_two *)ctx;
 
     if ( commands_issue_command ( 
 				a2->c, 
@@ -75,7 +76,9 @@ static char *a2_tgdb_commands[] = {
 };
 
 
-static int close_inferior_connection ( struct annotate_two *a2 ) {
+static int close_inferior_connection ( void *ctx ) {
+	struct annotate_two *a2 = (struct annotate_two *)ctx;
+
 	if ( a2->inferior_stdin != -1 )
 		xclose ( a2->inferior_stdin );
 
@@ -99,10 +102,12 @@ static int close_inferior_connection ( struct annotate_two *a2 ) {
  */
 
 int a2_open_new_tty ( 
-		struct annotate_two *a2, 
+		void *ctx,
 		struct queue *command_container,
 		int *inferior_stdin, 
 		int *inferior_stdout ) {
+	struct annotate_two *a2 = (struct annotate_two *)ctx;
+
     close_inferior_connection(a2);
 
 	/* Open up the tty communication */
@@ -119,7 +124,8 @@ int a2_open_new_tty (
     return 0;
 }
 
-char *a2_get_tty_name ( struct annotate_two *a2 ) {
+char *a2_get_tty_name ( void *ctx ) {
+	struct annotate_two *a2 = (struct annotate_two *)ctx;
 	return a2->inferior_tty_name;
 }
 
@@ -180,7 +186,7 @@ static int tgdb_setup_config_file ( struct annotate_two *a2, const char *dir ) {
     return 1;
 }
 
-struct annotate_two* a2_create_instance ( 
+void* a2_create_context ( 
 	const char *debugger, 
 	int argc, char **argv,
 	const char *config_dir ) {
@@ -211,10 +217,11 @@ struct annotate_two* a2_create_instance (
 }
 
 int a2_initialize ( 
-	struct annotate_two *a2, 
+	void *ctx,
 	struct queue *command_container,
 	int *debugger_stdin, int *debugger_stdout,
 	int *inferior_stdin, int *inferior_stdout) {
+	struct annotate_two *a2 = (struct annotate_two *)ctx;
 
 	*debugger_stdin 	= a2->debugger_stdin;
 	*debugger_stdout 	= a2->debugger_out;
@@ -243,7 +250,8 @@ int a2_initialize (
 }
 
 /* TODO: Implement shutdown properly */
-int a2_shutdown ( struct annotate_two *a2 ) {
+int a2_shutdown ( void *ctx ) {
+	struct annotate_two *a2 = (struct annotate_two *)ctx;
     xclose(a2->debugger_stdin);
 
 	data_shutdown ( a2->data );
@@ -254,11 +262,12 @@ int a2_shutdown ( struct annotate_two *a2 ) {
 }
 
 /* TODO: Implement error messages. */
-int a2_err_msg ( struct annotate_two *a2 ) {
+int a2_err_msg ( void *ctx ) {
 	return -1;
 }
 
-int a2_is_client_ready(struct annotate_two *a2) {
+int a2_is_client_ready(void *ctx) {
+	struct annotate_two *a2 = (struct annotate_two *)ctx;
     if ( !a2->tgdb_initialized )
         return FALSE;
 
@@ -270,13 +279,14 @@ int a2_is_client_ready(struct annotate_two *a2) {
 }
 
 int a2_parse_io ( 
-		struct annotate_two *a2,
+		void *ctx,
 		struct queue *command_container,
 		const char *input_data, const size_t input_data_size,
 		char *debugger_output, size_t *debugger_output_size,
 		char *inferior_output, size_t *inferior_output_size,
 		struct queue *q ) {
 	int val;
+	struct annotate_two *a2 = (struct annotate_two *)ctx;
 
 	a2->command_finished = 0;
 
@@ -294,9 +304,10 @@ int a2_parse_io (
 }
 
 int a2_get_source_absolute_filename ( 
-		struct annotate_two *a2, 
+		void *ctx,
 		struct queue *command_container,
 		const char *file ) {
+	struct annotate_two *a2 = (struct annotate_two *)ctx;
 
     if ( commands_issue_command ( 
 				a2->c, 
@@ -322,8 +333,9 @@ int a2_get_source_absolute_filename (
 }
 
 int a2_get_inferior_sources ( 
-		struct annotate_two *a2, 
+		void *ctx,
 		struct queue *command_container ) {
+	struct annotate_two *a2 = (struct annotate_two *)ctx;
     if ( commands_issue_command ( 
 				a2->c, 
 				command_container,
@@ -338,9 +350,10 @@ int a2_get_inferior_sources (
 }
 
 int a2_change_prompt(
-		struct annotate_two *a2, 
+		void *ctx,
 		struct queue *command_container,
 		const char *prompt) {
+	struct annotate_two *a2 = (struct annotate_two *)ctx;
 
     /* Must call a callback to change the prompt */
     if ( commands_issue_command ( 
@@ -357,21 +370,25 @@ int a2_change_prompt(
 }
 
 int a2_command_callback(
-		struct annotate_two *a2, 
+		void *ctx,
 		struct queue *command_container,
 		const char *command) {
 	/* Unimplemented */
 	return -1;
 }
 
-char *a2_return_client_command ( struct annotate_two *a2, enum tgdb_command_type c ) {
+char *a2_return_client_command ( void *ctx, enum tgdb_command_type c ) {
 	if ( c < TGDB_CONTINUE || c >= TGDB_ERROR )
 		return NULL;
 
 	return a2_tgdb_commands[c];
 }
 
-char *a2_client_modify_breakpoint ( struct annotate_two *a2, const char *file, int line, enum tgdb_breakpoint_action b ) {
+char *a2_client_modify_breakpoint ( 
+		void *ctx, 
+		const char *file, 
+		int line, 
+		enum tgdb_breakpoint_action b ) {
 	char *val = (char*)xmalloc ( sizeof(char)* ( strlen(file) + 128 ) );
 
 	if ( b == TGDB_BREAKPOINT_ADD ) {
@@ -384,14 +401,16 @@ char *a2_client_modify_breakpoint ( struct annotate_two *a2, const char *file, i
 		return NULL;
 }
 
-pid_t a2_get_debugger_pid ( struct annotate_two *a2 ) {
+pid_t a2_get_debugger_pid ( void *ctx ) {
+	struct annotate_two *a2 = (struct annotate_two *)ctx;
 	return a2->debugger_pid;
 }
 
 int a2_completion_callback(
-		struct annotate_two *a2, 
+		void *ctx,
 		struct queue *command_container,
 		const char *command) {
+	struct annotate_two *a2 = (struct annotate_two *)ctx;
     if ( commands_issue_command ( a2->c, command_container, ANNOTATE_COMPLETE, command, 4 ) == -1 ) {
         err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
         return -1;
@@ -400,14 +419,17 @@ int a2_completion_callback(
     return 0;
 }
 
-int a2_user_ran_command ( struct annotate_two *a2, struct queue *command_container ) {
+int a2_user_ran_command ( void *ctx, struct queue *command_container ) {
+	struct annotate_two *a2 = (struct annotate_two *)ctx;
 	return commands_user_ran_command ( a2->c, command_container );
 }
 
-int a2_prepare_for_command ( struct annotate_two *a2, struct tgdb_client_command *com ) {
+int a2_prepare_for_command ( void *ctx, struct tgdb_client_command *com ) {
+	struct annotate_two *a2 = (struct annotate_two *)ctx;
 	return commands_prepare_for_command ( a2, a2->c, com );
 }
 
-int a2_is_misc_prompt ( struct annotate_two *a2 ) {
+int a2_is_misc_prompt ( void *ctx ) {
+	struct annotate_two *a2 = (struct annotate_two *)ctx;
 	return globals_is_misc_prompt ( a2->g );
 }

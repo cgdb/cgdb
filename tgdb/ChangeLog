@@ -1,3 +1,32 @@
+10/05/2003 Bob Rossi <bob@brasko.net>
+
+   * TODO: Finished task. Made TGDB call lower level subsystems in an
+   independent way
+   * a2-tgdb.h: changed name of a2_create_instance to a2_create_context.
+   a2_create_instance, a2_initialize, a2_shutdown, a2_err_msg,
+   a2_is_client_ready, a2_user_ran_command, a2_prepare_for_command,
+   a2_is_misc_prompt, a2_parse_io, a2_get_source_absolute_filename,
+   a2_get_inferior_source_files, a2_change_prompt, a2_command_callback,
+   a2_completion_callback, a2_return_client_command,
+   a2_client_modify_breakpoint, a2_get_debugger_pid, a2_open_new_tty,
+   a2_get_tty_name, changed all uses of 'struct annotate_two *a2' to void *tcc.
+   * a2-tgdb.c: ditto for implementation
+   * tgdb-base/src/Makefile.am: Added file tgdb_client_interface.c
+   * tgdb.c: Add '#include "tgdb_client_interface.h"'
+   'struct tgdb', removed member 'struct annotate_two *a2' and replaced it
+   with 'struct tgdb_client_context *tcc'
+   initialize_tgdb_context, made static.
+   initialize_tgdb_context, tgdb_initialize, tgdb_shutdown, tgdb_err_msg, 
+   tgdb_get_client_command, tgdb_client_modify_breakpoint_call,
+   tgdb_can_issue_command, tgdb_has_command_to_run, tgdb_send,
+   tgdb_deliver_command, tgdb_run_command, tgdb_change_prompt,
+   tgdb_get_quit_command, tgdb_recv_debugger_data, tgdb_tty_name,
+   tgdb_get_inferiors_source_files, tgdb_get_absolute_path,
+   tgdb_signal_notification, Change TGDB to use 'tgdb_client_interface'
+   instead of hardcoding calls to annotate two.
+   * tgdb_client_interface.h: Add new interface for TGDB.
+   * tgdb_client_interface.c: Add new implementation.
+
 10/03/2003 Bob Rossi <bob@brasko.net>
 
    * TODO: Add item
