@@ -187,17 +187,17 @@ static struct annotation {
   {
       "pre-commands",
       12,
-      handle_misc_pre_prompt 
+      handle_pre_prompt 
   },
   {
       "commands",
       8,
-      handle_misc_prompt
+      handle_prompt
   },
   {
       "post-commands",
       13,
-      handle_misc_post_prompt
+      handle_post_prompt
   },
   {
       "pre-overload-choice",

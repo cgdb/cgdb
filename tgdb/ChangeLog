@@ -1,3 +1,9 @@
+03/26/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * tgdb now supports the commands feature of gdb: This was broken at
+    some point but is now implemented to work correctly. It is treated like a 
+    regular prompt.
+
 03/23/2003 Bob Rossi <bob_rossi@cox.net>
 
     * tgdb now fully supports readline: tgdb now can support commands by using
