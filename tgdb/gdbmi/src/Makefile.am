@@ -15,7 +15,7 @@ gdbmi_grammar.y \
 gdbmi_lexer.l
 
 # Installs the driver programs into progs directory
-noinst_bin_PROGRAMS = gdbmi_lexer_driver
+noinst_bin_PROGRAMS = gdbmi_driver
 noinst_bindir = $(top_builddir)/progs
 
 libgdbmi_a_DEPENDENCIES = \
@@ -23,8 +23,8 @@ $(top_srcdir)/various/util/src \
 $(top_srcdir)/various/adt/src
  
 # This is the input driver
-gdbmi_lexer_driver_SOURCES = \
-	gdbmi_lexer_driver.c \
+gdbmi_driver_SOURCES = \
+	gdbmi_driver.c \
 	gdbmi_grammar.y \
 	gdbmi_lexer.l 
 

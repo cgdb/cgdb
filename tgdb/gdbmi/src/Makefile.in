@@ -139,7 +139,7 @@ gdbmi_lexer.l
 
 
 # Installs the driver programs into progs directory
-noinst_bin_PROGRAMS = gdbmi_lexer_driver
+noinst_bin_PROGRAMS = gdbmi_driver
 noinst_bindir = $(top_builddir)/progs
 
 libgdbmi_a_DEPENDENCIES = \
@@ -148,8 +148,8 @@ $(top_srcdir)/various/adt/src
 
 
 # This is the input driver
-gdbmi_lexer_driver_SOURCES = \
-	gdbmi_lexer_driver.c \
+gdbmi_driver_SOURCES = \
+	gdbmi_driver.c \
 	gdbmi_grammar.y \
 	gdbmi_lexer.l 
 
@@ -164,22 +164,22 @@ libgdbmi_a_LIBADD =
 am_libgdbmi_a_OBJECTS = gdbmi_parse.$(OBJEXT) gdbmi_tgdb.$(OBJEXT) \
 	gdbmi_grammar.$(OBJEXT) gdbmi_lexer.$(OBJEXT)
 libgdbmi_a_OBJECTS = $(am_libgdbmi_a_OBJECTS)
-noinst_bin_PROGRAMS = gdbmi_lexer_driver$(EXEEXT)
+noinst_bin_PROGRAMS = gdbmi_driver$(EXEEXT)
 PROGRAMS = $(noinst_bin_PROGRAMS)
 
-am_gdbmi_lexer_driver_OBJECTS = gdbmi_lexer_driver.$(OBJEXT) \
-	gdbmi_grammar.$(OBJEXT) gdbmi_lexer.$(OBJEXT)
-gdbmi_lexer_driver_OBJECTS = $(am_gdbmi_lexer_driver_OBJECTS)
-gdbmi_lexer_driver_LDADD = $(LDADD)
-gdbmi_lexer_driver_DEPENDENCIES =
-gdbmi_lexer_driver_LDFLAGS =
+am_gdbmi_driver_OBJECTS = gdbmi_driver.$(OBJEXT) gdbmi_grammar.$(OBJEXT) \
+	gdbmi_lexer.$(OBJEXT)
+gdbmi_driver_OBJECTS = $(am_gdbmi_driver_OBJECTS)
+gdbmi_driver_LDADD = $(LDADD)
+gdbmi_driver_DEPENDENCIES =
+gdbmi_driver_LDFLAGS =
 
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
-@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/gdbmi_grammar.Po \
+@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/gdbmi_driver.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/gdbmi_grammar.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/gdbmi_lexer.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/gdbmi_lexer_driver.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/gdbmi_parse.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/gdbmi_tgdb.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
@@ -189,9 +189,9 @@ LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 LEXCOMPILE = $(LEX) $(LFLAGS) $(AM_LFLAGS)
 YLWRAP = $(top_srcdir)/config/ylwrap
 YACCCOMPILE = $(YACC) $(YFLAGS) $(AM_YFLAGS)
-DIST_SOURCES = $(libgdbmi_a_SOURCES) $(gdbmi_lexer_driver_SOURCES)
+DIST_SOURCES = $(libgdbmi_a_SOURCES) $(gdbmi_driver_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in gdbmi_grammar.c gdbmi_lexer.c
-SOURCES = $(libgdbmi_a_SOURCES) $(gdbmi_lexer_driver_SOURCES)
+SOURCES = $(libgdbmi_a_SOURCES) $(gdbmi_driver_SOURCES)
 
 all: all-am
 
@@ -235,9 +235,9 @@ uninstall-noinst_binPROGRAMS:
 
 clean-noinst_binPROGRAMS:
 	-test -z "$(noinst_bin_PROGRAMS)" || rm -f $(noinst_bin_PROGRAMS)
-gdbmi_lexer_driver$(EXEEXT): $(gdbmi_lexer_driver_OBJECTS) $(gdbmi_lexer_driver_DEPENDENCIES) 
-	@rm -f gdbmi_lexer_driver$(EXEEXT)
-	$(LINK) $(gdbmi_lexer_driver_LDFLAGS) $(gdbmi_lexer_driver_OBJECTS) $(gdbmi_lexer_driver_LDADD) $(LIBS)
+gdbmi_driver$(EXEEXT): $(gdbmi_driver_OBJECTS) $(gdbmi_driver_DEPENDENCIES) 
+	@rm -f gdbmi_driver$(EXEEXT)
+	$(LINK) $(gdbmi_driver_LDFLAGS) $(gdbmi_driver_OBJECTS) $(gdbmi_driver_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT) core *.core
@@ -245,9 +245,9 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdbmi_driver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdbmi_grammar.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdbmi_lexer.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdbmi_lexer_driver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdbmi_parse.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdbmi_tgdb.Po@am__quote@
 
