@@ -10,8 +10,28 @@ noinst_LIBRARIES = libgdbmi.a
 
 libgdbmi_a_SOURCES = \
 gdbmi_parse.c \
-gdbmi_tgdb.c
+gdbmi_tgdb.c \
+gdbmi_grammar.y \
+gdbmi_lexer.l
+
+# Installs the driver programs into progs directory
+noinst_bin_PROGRAMS = gdbmi_lexer_driver
+noinst_bindir = $(top_builddir)/progs
 
 libgdbmi_a_DEPENDENCIES = \
 $(top_srcdir)/various/util/src \
 $(top_srcdir)/various/adt/src
+ 
+# This is the input driver
+gdbmi_lexer_driver_SOURCES = \
+	gdbmi_lexer_driver.c \
+	gdbmi_grammar.y \
+	gdbmi_lexer.l 
+
+clean:
+	rm -f gdbmi_lexer.c \
+	gdbmi_grammar.c \
+	gdbmi_grammar.h \
+	gdbmi_grammar.output \
+	gdbmi_grammar.tab.c \
+	gdbmi_grammar.tab.h

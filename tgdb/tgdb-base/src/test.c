@@ -25,13 +25,9 @@ void long_func(void){
 
 #define SIZE 100000
 
-/** Make doxygen happy */
 struct test {
-/** Make doxygen happy */
    int a;
-/** Make doxygen happy */
    int b;
-/** Make doxygen happy */
    int c;  
 } a = { 1, 2, 3 };
 

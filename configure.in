@@ -12,6 +12,7 @@ AC_PROG_INSTALL
 
 AC_PROG_RANLIB
 AM_PROG_LEX
+AC_PROG_YACC
 
 # Readline will kill configure if there isn't any available.
 VL_LIB_READLINE

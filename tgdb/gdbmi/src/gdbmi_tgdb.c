@@ -186,9 +186,9 @@ struct tgdb_gdbmi {
 //	return a2->inferior_tty_name;
 //}
 
-/* initialize_annotate_two
+/* initialize_gdbmi
  *
- * initializes an annotate_two subsystem and sets up all initial values.
+ * initializes a gdbmi subsystem and sets up all initial values.
  */
 static struct tgdb_gdbmi *initialize_tgdb_gdbmi ( void ) {
 	struct tgdb_gdbmi *gdbmi = (struct tgdb_gdbmi *)
@@ -323,10 +323,18 @@ int gdbmi_parse_io (
 //	val = gdbmi_handle_data ( gdbmi, gdbmi->sm, input_data, input_data_size,
 //		debugger_output, debugger_output_size, list );
 
+	static char *tmp_prompt = "\n(gdb) \n";
+
 	strncpy ( debugger_output, input_data, input_data_size );
 	*debugger_output_size = input_data_size;
 
-	return 1;
+
+	/* \n(gdb) is the end of a record */
+	if ( input_data_size > 7 &&
+		 (strcmp ( &debugger_output[input_data_size-8], tmp_prompt) == 0 ) )
+		return 1;
+
+	return 0;
 }
 
 
