@@ -1,16 +1,21 @@
-A lot of work to do for cgdb-0.4.0
+Pushed off for gdb 0.5.0
+
+1. Integrate gdbmi stubs into libtgdb and get gdbmi integrated into tgdb
+
+2. Return to the gui the assembly code for each source line.
+   Only do this if the user has an assembly option set.
+
+3. Get tab completion to work through readline ?
+   This is *very* difficult to do. I don't know if it is possible.
+
+4. Find an alternate readline library that can be instantiated multiple times per
+   process.
+	
+Work to do for cgdb-0.4.0
 
 1. Add a dejagnu testsuite to the annotate_driver and gdbmi_driver
 
 2. Create a better interface to the front ends
-
-Pushed off for gdb 0.5.0
-
-3. Integrate gdbmi stubs into libtgdb
-    The actual integration of gdbmi will be done by 0.5.0
-
-4. Get tab completion to work through readline ?
-	
 
 Finished:
 
