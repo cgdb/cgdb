@@ -29,13 +29,12 @@ static int breakpoint_enabled = FALSE;
 static int breakpoint_started = FALSE;
 
 /* 'info source' information */
-static int info_source_nl = 0;
 static int info_source_buf_pos = 0;
 static char info_source_buf[MAXLINE];
 static char last_info_source_requested[MAXLINE];
 
 /* 'info sources' information */
-static int sources_nl = 0;
+static int sources_ready = 0;
 static char *sources_buf;
 static int sources_buf_block_size = 0;
 static int sources_buf_pos = 0;
@@ -49,8 +48,8 @@ static int source_prefix_length = 11;
 
 static int buf_add(char **buf, char c, int *pos, int *blocksize) {
     if(*pos == MAXLINE*(*blocksize)){
-        *buf = (char *)realloc(*buf, (++(*blocksize))*MAXLINE);
-        memset(*buf + MAX_LINE, '\0', ((*blocksize) - 1)*MAXLINE);
+       *blocksize = *blocksize + 1;
+        *buf = (char *)realloc(*buf, (*blocksize)*MAXLINE);
     }
 
     (*buf)[(*pos)++] = c;   
@@ -246,7 +245,7 @@ int commands_run_tty(char *tty, int fd){
  *    Returns: -1 on error, 0 on sucess.
  */
 int commands_run_info_sources(int fd){
-   sources_nl = 0;
+   sources_ready = 0;
    sources_buf_pos = 0; 
 
    if(sources_buf != NULL){
@@ -282,7 +281,6 @@ int commands_run_list(char *filename, int fd){
 }
 
 static int commands_run_info_source(int fd){
-   info_source_nl = 0; 
    info_source_buf_pos = 0;
    memset(info_source_buf, '\0', MAXLINE);
    
@@ -383,7 +381,8 @@ static void commands_process_info_source(char a){
 
 /* process's source files */
 static void commands_process_sources(char a, struct Command ***com){
-//   sources_buf[sources_buf_pos++] = a;
+   static const char *sourcesReadyString = "Source files for which symbols ";
+   static const int sourcesReadyStringLength = 31;
    buf_add(&sources_buf, a, &sources_buf_pos, &sources_buf_block_size);
    
    if(a == '\n'){
@@ -395,12 +394,15 @@ static void commands_process_sources(char a, struct Command ***com){
        * 3. and are not empty 
        */
 
+      /*fprintf(stderr, "LINE(%s)BLOCK(%d)BUF_POS(%d)", sources_buf, sources_buf_block_size, sources_buf_pos);*/
+
+      if ( strncmp(sources_buf, sourcesReadyString, sourcesReadyStringLength) == 0 )
+         sources_ready = 1;
+
        /* is this a valid line */
-       if(strlen(sources_buf) > 1 && sources_buf_pos > 0 && 
-          sources_nl >= 1 && sources_buf[sources_buf_pos - 1] != ':')
+       if(sources_buf_pos > 0 && sources_ready && sources_buf[sources_buf_pos - 1] != ':')
           commands_process_source_line(com); 
       
-      sources_nl += 1;
       sources_buf_pos = 0;
       memset(sources_buf, '\0', sources_buf_block_size*MAX_LINE);
    }

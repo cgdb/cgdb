@@ -125,7 +125,7 @@ static int gdb_input(void) {
        return;
     }
 
-    /*tgdb_traverse_command(stderr, &com);*/
+    tgdb_traverse_command(stderr, &com);
 
     { 
     size_t j;
@@ -160,6 +160,8 @@ static void stdin_input(int fd) {
     static char *result;
     ssize_t size;
     int i;
+
+    /*tgdb_get_sources();*/
 
     if( ( size = io_read(STDIN_FILENO, &command, MAXLINE)) < 0 ){
     err_msg("%s:%d -> could not read byte\n", __FILE__, __LINE__);
