@@ -1,5 +1,7 @@
 CVS
 
+cgdb-0.5.0 (07/14/2004)
+
    * "progs" directory is no longer installed in a potentially 
    read-only directory. It is installed now in top_builddir, instead of
    top_srcdir.

@@ -1,3 +1,5 @@
+version 0.5.0 (07/14/2004):
+
 07/14/2004 Bob Rossi <bob@brasko.net>
 
     * src/Makefile.am (noinst_bindir): changed top_srcdir to top_builddir

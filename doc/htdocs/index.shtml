@@ -34,6 +34,31 @@ Some features offered by CGDB are:<P>
 <B>News</b><BR>
 <BLOCKQUOTE>
 
+  <I>July 14, 2004</i><BR>
+  <BLOCKQUOTE>
+  CGDB v0.5.0 was released today, see the <A Href="download.shtml">download 
+  page</a> to try it out. This contains many important bug fixes. Including 
+  some that prevent CGDB from crashes. When the user would enter many commands
+  in the time it took GDB to respond to one, CGDB would get confused, and a
+  crash could occur. This is now fixed. Also, there were some silly off by
+  one crash's. 
+  <BR>
+  Finally, the reason CGDB is bumped up to .5.0 is because libkui has been
+  successfully implemented. This was 1 out of the 4 libraries that were 
+  necessary in order to make CGDB a very usable, configurable curses front
+  end. The new library removes a few keystroke bugs that used to bother me
+  that I could never track down in the old code. Also, in the near future,
+  vim style 'map' commands should be easy to implement. After all, that was
+  one of the whole points of libkui.
+  <BR>
+  Thanks goes out to Michael S. Peek for reporting and fixing several important
+  bugs (especially the crashes). Also, Robert Lemmen is always ensuring a good 
+  and speedy package on the great debian distribution.
+  <BR>
+  Enjoy!
+
+  </blockquote>
+
   <I>May 10, 2004</i><BR>
   <BLOCKQUOTE>
   CGDB v0.4.2 was released today, see the <A Href="download.shtml">download 

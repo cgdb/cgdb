@@ -1,3 +1,5 @@
+version 0.5.0 (07/14/2004):
+
 07/14/2004 Bob Rossi <bob@brasko.net>
 
     * cgdb.c (create_help_file): null-terminate dashes.
