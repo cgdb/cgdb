@@ -1,5 +1,9 @@
 CVS
 
+   * "progs" directory is no longer installed in a potentially 
+   read-only directory. It is installed now in top_builddir, instead of
+   top_srcdir.
+
    * Added libkui into CGDB. This is the fisrt of the 4 new libraries
    designed to make CGDB flexible and modular.
 
