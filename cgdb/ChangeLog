@@ -1,3 +1,7 @@
+07/14/2004 Bob Rossi <bob@brasko.net>
+
+    * cgdb.c (create_help_file): null-terminate dashes.
+
 06/29/2004 Bob Rossi <bob@brasko.net>
 
 	* cgdb.h (cgdb_set_esc_sequence_timeout): changed return type

@@ -670,8 +670,8 @@ int pty_change_window_size(int masterfd, int row, int col, int xpixel, int ypixe
  */
 pid_t pty_fork(int *masterfd, char *slavename, size_t slavenamesize, const struct termios *slave_termios, const struct winsize *slave_winsize)
 {
-	int slavefd;
-	pid_t pid;
+	int slavefd = 0;
+	pid_t pid = 0;
 
 	/*
 	** Note: we don't use forkpty() because it closes the master in the

@@ -222,8 +222,9 @@ static int create_help_file(void) {
 
    /* Write cgdb version number */
    length = 5 + strlen(VERSION);
-   dashes = (char *)malloc(sizeof(char) * (length));
+   dashes = (char *)malloc(sizeof(char) * (length+1));
    memset(dashes, '-', length);
+   dashes[length] = 0;
    fprintf(fd, "CGDB %s\n%s\n\n", VERSION, dashes);
    free(dashes);
 
