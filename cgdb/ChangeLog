@@ -1,5 +1,11 @@
 04/02/2005 Bob Rossi <bob@brasko.net>
 
+	* sources.c (get_relative_node): Guard against strcmp with NULL pointer.
+	(get_node): Ditto.
+	(source_add): Init lpath field.
+
+04/02/2005 Bob Rossi <bob@brasko.net>
+
     * helptext.h: Updated the README file.
 	* sources.h (struct sviewer): Remove queue, queue_index and
 	queue_top_index fields.

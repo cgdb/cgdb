@@ -85,6 +85,7 @@ static struct list_node *get_relative_node(struct sviewer *sview, const char *lp
     struct list_node *cur;
     
     for (cur = sview->list_head; cur != NULL; cur = cur->next)
+      if ( cur->lpath ) 
          if (strcmp(lpath, cur->lpath) == 0)
              return cur;
     
@@ -103,6 +104,7 @@ static struct list_node *get_node(struct sviewer *sview, const char *path)
     struct list_node *cur;
     
     for (cur = sview->list_head; cur != NULL; cur = cur->next)
+      if ( cur->path )
          if (strcmp(path, cur->path) == 0)
              return cur;
     
@@ -301,6 +303,7 @@ int source_add(struct sviewer *sview, const char *path)
     
     new_node = malloc(sizeof(struct list_node));
     new_node->path         = strdup(path);
+    new_node->lpath        = NULL;
     new_node->buf.length   = 0;
     new_node->buf.tlines    = NULL;    /* This signals an empty buffer */
     new_node->sel_line     = 0;

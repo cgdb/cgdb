@@ -1,4 +1,7 @@
 CVS
+   * fixed crash when user tries to set a breakpoint on a file that's not 
+   a source file. This would happen if you typed ':help' to get into the 
+   help, and then tried to set a breakpoint using the spacebar.
 
    * obsolete the b and f commands. These were responsible for moving between
    the previous and the next source file. They made CGDB unstable and I don't
