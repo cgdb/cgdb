@@ -1,5 +1,10 @@
 07/15/2003 Bob Rossi <bob@brasko.net>
 
+	* filedlg.c: filedlg_recv_char would not recoginize CGDB_KEY_CTRL_M
+	as a new line. Which it is.
+
+07/15/2003 Bob Rossi <bob@brasko.net>
+
 	* helptext.h: Changing tabs to spaces.
 
 version 0.3.3 (07/15/2003):

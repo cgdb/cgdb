@@ -504,6 +504,7 @@ int filedlg_recv_char(struct filedlg *fd, int key, char *file) {
         /* User selected a file */
         case '\n':
         case '\r':
+		case CGDB_KEY_CTRL_M:
             strcpy(file, fd->buf->files[fd->buf->sel_line]);
             return 1; 
         default:
