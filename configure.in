@@ -3,6 +3,7 @@ AC_INIT(src)
 AC_CONFIG_AUX_DIR(config)
 AM_CONFIG_HEADER(config.h)
 AM_INIT_AUTOMAKE(cgdb, 0.2.2)
+AM_MAINTAINER_MODE
 
 dnl Checks for programs.
 AC_PROG_CC

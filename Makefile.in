@@ -61,6 +61,7 @@ host_alias = @host_alias@
 host_triplet = @host@
 BUILD_DRIVER = @BUILD_DRIVER@
 CC = @CC@
+MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 PACKAGE = @PACKAGE@
 RANLIB = @RANLIB@
@@ -83,15 +84,39 @@ TAR = tar
 GZIP_ENV = --best
 all: all-redirect
 .SUFFIXES:
-$(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
 	cd $(top_srcdir) && $(AUTOMAKE) --gnu Makefile
 
 Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status $(BUILT_SOURCES)
 	cd $(top_builddir) \
 	  && CONFIG_FILES=$@ CONFIG_HEADERS= $(SHELL) ./config.status
 
-$(ACLOCAL_M4):  configure.in 
+$(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ configure.in 
 	cd $(srcdir) && $(ACLOCAL)
+
+config.status: $(srcdir)/configure.in $(CONFIG_STATUS_DEPENDENCIES)
+	$(SHELL) ./config.status --recheck
+$(srcdir)/configure: @MAINTAINER_MODE_TRUE@$(srcdir)/configure.in $(ACLOCAL_M4) $(CONFIGURE_DEPENDENCIES)
+	cd $(srcdir) && $(AUTOCONF)
+
+config.h: stamp-h
+	@if test ! -f $@; then \
+		rm -f stamp-h; \
+		$(MAKE) stamp-h; \
+	else :; fi
+stamp-h: $(srcdir)/config.h.in $(top_builddir)/config.status
+	cd $(top_builddir) \
+	  && CONFIG_FILES= CONFIG_HEADERS=config.h \
+	     $(SHELL) ./config.status
+	@echo timestamp > stamp-h 2> /dev/null
+$(srcdir)/config.h.in: @MAINTAINER_MODE_TRUE@$(srcdir)/stamp-h.in
+	@if test ! -f $@; then \
+		rm -f $(srcdir)/stamp-h.in; \
+		$(MAKE) $(srcdir)/stamp-h.in; \
+	else :; fi
+$(srcdir)/stamp-h.in: $(top_srcdir)/configure.in $(ACLOCAL_M4) 
+	cd $(top_srcdir) && $(AUTOHEADER)
+	@echo timestamp > $(srcdir)/stamp-h.in 2> /dev/null
 
 mostlyclean-hdr:
 
@@ -328,18 +353,6 @@ install uninstall-am uninstall all-redirect all-am all installdirs-am \
 installdirs mostlyclean-generic distclean-generic clean-generic \
 maintainer-clean-generic clean mostlyclean distclean maintainer-clean
 
-
-# Stop rebuilding if timestamps are off.
-
-$(srcdir)/Makefile.in:
-Makefile:
-$(ACLOCAL_M4):
-config.status:
-$(srcdir)/configure:
-config.h:
-stamp-h:
-$(srcdir)/config.h.in:
-$(srcdir)/stamp-h.in:
 
 dist-hook:
 	rm -rf `find $(distdir)/config -name CVS`

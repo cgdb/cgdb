@@ -61,6 +61,7 @@ host_alias = @host_alias@
 host_triplet = @host@
 BUILD_DRIVER = @BUILD_DRIVER@
 CC = @CC@
+MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 PACKAGE = @PACKAGE@
 RANLIB = @RANLIB@
@@ -80,7 +81,7 @@ TAR = tar
 GZIP_ENV = --best
 all: all-redirect
 .SUFFIXES:
-$(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
 	cd $(top_srcdir) && $(AUTOMAKE) --gnu tgdb/Makefile
 
 Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status $(BUILT_SOURCES)

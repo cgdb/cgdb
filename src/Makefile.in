@@ -61,6 +61,7 @@ host_alias = @host_alias@
 host_triplet = @host@
 BUILD_DRIVER = @BUILD_DRIVER@
 CC = @CC@
+MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 PACKAGE = @PACKAGE@
 RANLIB = @RANLIB@
@@ -107,7 +108,7 @@ OBJECTS = $(cgdb_OBJECTS)
 all: all-redirect
 .SUFFIXES:
 .SUFFIXES: .S .c .o .s
-$(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
 	cd $(top_srcdir) && $(AUTOMAKE) --gnu src/Makefile
 
 Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status $(BUILT_SOURCES)

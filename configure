@@ -828,6 +828,12 @@ if test -n "$ac_init_help"; then
 
   cat <<\_ACEOF
 
+Optional Features:
+  --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
+  --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
+  --enable-maintainer-mode enable make rules and dependencies not useful
+                          (and sometimes confusing) to the casual installer
+
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
@@ -1484,6 +1490,29 @@ else
    echo "$as_me:$LINENO: result: missing" >&5
 echo "${ECHO_T}missing" >&6
 fi
+
+
+echo "$as_me:$LINENO: checking whether to enable maintainer-specific portions of Makefiles" >&5
+echo $ECHO_N "checking whether to enable maintainer-specific portions of Makefiles... $ECHO_C" >&6
+    # Check whether --enable-maintainer-mode or --disable-maintainer-mode was given.
+if test "${enable_maintainer_mode+set}" = set; then
+  enableval="$enable_maintainer_mode"
+  USE_MAINTAINER_MODE=$enableval
+else
+  USE_MAINTAINER_MODE=no
+fi;
+  echo "$as_me:$LINENO: result: $USE_MAINTAINER_MODE" >&5
+echo "${ECHO_T}$USE_MAINTAINER_MODE" >&6
+
+
+if test $USE_MAINTAINER_MODE = yes; then
+  MAINTAINER_MODE_TRUE=
+  MAINTAINER_MODE_FALSE='#'
+else
+  MAINTAINER_MODE_TRUE='#'
+  MAINTAINER_MODE_FALSE=
+fi
+  MAINT=$MAINTAINER_MODE_TRUE
 
 
 
@@ -5236,6 +5265,9 @@ s,@AUTOMAKE@,$AUTOMAKE,;t t
 s,@AUTOHEADER@,$AUTOHEADER,;t t
 s,@MAKEINFO@,$MAKEINFO,;t t
 s,@SET_MAKE@,$SET_MAKE,;t t
+s,@MAINTAINER_MODE_TRUE@,$MAINTAINER_MODE_TRUE,;t t
+s,@MAINTAINER_MODE_FALSE@,$MAINTAINER_MODE_FALSE,;t t
+s,@MAINT@,$MAINT,;t t
 s,@CC@,$CC,;t t
 s,@CFLAGS@,$CFLAGS,;t t
 s,@LDFLAGS@,$LDFLAGS,;t t
