@@ -128,7 +128,8 @@ io.c \
 pseudo.c \
 sys_util.c \
 fork_util.c \
-fs_util.c
+fs_util.c \
+terminal.c
 
 subdir = various/util/src
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
@@ -139,7 +140,8 @@ LIBRARIES = $(noinst_LIBRARIES)
 libutil_a_AR = $(AR) cru
 libutil_a_LIBADD =
 am_libutil_a_OBJECTS = error.$(OBJEXT) io.$(OBJEXT) pseudo.$(OBJEXT) \
-	sys_util.$(OBJEXT) fork_util.$(OBJEXT) fs_util.$(OBJEXT)
+	sys_util.$(OBJEXT) fork_util.$(OBJEXT) fs_util.$(OBJEXT) \
+	terminal.$(OBJEXT)
 libutil_a_OBJECTS = $(am_libutil_a_OBJECTS)
 
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
@@ -147,7 +149,8 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
 @AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/error.Po ./$(DEPDIR)/fork_util.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/fs_util.Po ./$(DEPDIR)/io.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/pseudo.Po ./$(DEPDIR)/sys_util.Po
+@AMDEP_TRUE@	./$(DEPDIR)/pseudo.Po ./$(DEPDIR)/sys_util.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/terminal.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
@@ -187,6 +190,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pseudo.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sys_util.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/terminal.Po@am__quote@
 
 distclean-depend:
 	-rm -rf ./$(DEPDIR)

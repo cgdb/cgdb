@@ -44,7 +44,7 @@
 #include "types.h"
 #include "io.h"
 #include "globals.h"
-#include "terminal.h"
+//#include "terminal.h"
 #include "config.h"
 #include "sys_util.h"
 #include "fs_util.h"

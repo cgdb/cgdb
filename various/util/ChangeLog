@@ -1,3 +1,8 @@
+04/30/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * Adding include/terminal.h and src/terminal.c: They provide functions to
+    change the terminal settings ( cbreak, raw, normal ... )
+
 version 0.3.1 (04/28/2003):
 
 04/27/2003 Bob Rossi <bob_rossi@cox.net>

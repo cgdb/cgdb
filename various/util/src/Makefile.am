@@ -7,4 +7,5 @@ io.c \
 pseudo.c \
 sys_util.c \
 fork_util.c \
-fs_util.c
+fs_util.c \
+terminal.c

@@ -17,7 +17,6 @@ commands.c \
 data.c \
 globals.c \
 state_machine.c \
-terminal.c \
 tgdb_init.c
 
 libannotate_two_a_DEPENDENCIES = \
