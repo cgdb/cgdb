@@ -1,7 +1,7 @@
 #! /bin/sh
 # ylwrap - wrapper for lex/yacc invocations.
 #
-# Copyright (C) 1996, 1997, 1998, 1999, 2001, 2002 Free Software
+# Copyright (C) 1996, 1997, 1998, 1999, 2001, 2002, 2003 Free Software
 # Foundation, Inc.
 #
 # Written by Tom Tromey <tromey@cygnus.com>.
@@ -134,7 +134,7 @@ if test $status -eq 0; then
 	 TARGET=`echo "$2" | sed \
                  -e 'y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/'\
                  -e 's/[^ABCDEFGHIJKLMNOPQRSTUVWXYZ]/_/g'`
-         sed "/^#/{s,$input_rx,,;s,$from,$2,;s,$FORM,$TO,;}" "$from" >"$target" ||
+         sed "/^#/{s,$input_rx,,;s,$from,$2,;s,$FROM,$TO,;}" "$from" >"$target" ||
             status=$?
       else
 	 # A missing file is only an error for the first file.  This

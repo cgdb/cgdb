@@ -114,6 +114,9 @@ Quick Reference
                        then you modify a source file, recompile, and 'r' in 
                        GDB's CLI window. The file in this case will be updated 
                        to show the new version.
+                       Note, CGDB only looks at the timestamp of the source file to
+                       determine if it has changed. So if you modify the source file,
+                       and didn't recompile yet, CGDB will still pick up on the changes.
 
 2. At gdb and tty window
 ------------------------

@@ -1,3 +1,7 @@
+04/01/2005 Bob Rossi <bob@brasko.net>
+   
+   * Makefile.in: Regenerated with documented autotools version.
+
 03/31/2005 Bob Rossi <bob@brasko.net>
 
 	* interface.c (capture_regex): Save current source viewer line.

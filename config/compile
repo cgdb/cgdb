@@ -28,6 +28,14 @@
 # compile PROGRAM [ARGS]...
 # `-o FOO.o' is removed from the args passed to the actual compile.
 
+# Usage statement added by Billy Biggs <vektor@dumbterm.net>.
+if [ -z $1 ]; then
+    echo "Wrapper for compilers which do not understand '-c -o'."
+    echo "usage: compile PROGRAM [ARGS]..."
+    echo "'-o FOO.o' is removed from the args passed to the actual compile."
+    exit 1
+fi
+
 prog=$1
 shift
 

@@ -1,3 +1,10 @@
+04/01/2005 Bob Rossi <bob@brasko.net>
+   
+   * README: Update autosourcereload option text.
+   * Makefile.in: Regenerated with documented autotools version.
+   * aclocal.m4: Ditto.
+   * configure: Ditto.
+
 03/31/2005 Bob Rossi <bob@brasko.net>
 
 	* NEWS: Mention searching regex bug
