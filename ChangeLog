@@ -1,3 +1,10 @@
+version 0.3.1 (04/28/2003):
+
+04/28/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * removed '--with-drivers' from configure: All drivers are automatically
+    built, but they are not installed. They end up in $(top_srcdir)/progs.
+
 04/27/2003 Bob Rossi <bob_rossi@cox.net>
 
     * Changed configure to only build cgdb by default: the drivers can only be

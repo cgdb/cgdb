@@ -44,8 +44,6 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
-BUILD_DRIVERS = @BUILD_DRIVERS@
-BUILD_INPUT_DRIVERS = @BUILD_INPUT_DRIVERS@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
@@ -137,8 +135,8 @@ tgdb.c \
 types.c
 
 
-EXTRA_PROGRAMS = tgdb_driver
-bin_PROGRAMS = @BUILD_DRIVERS@
+noinst_bin_PROGRAMS = tgdb_driver
+noinst_bindir = $(top_srcdir)/progs
 
 tgdb_driver_LDFLAGS = \
 -L$(top_srcdir)/tgdb/tgdb-base/src \
@@ -171,9 +169,8 @@ libtgdb_a_AR = $(AR) cru
 libtgdb_a_LIBADD =
 am_libtgdb_a_OBJECTS = tgdb.$(OBJEXT) types.$(OBJEXT)
 libtgdb_a_OBJECTS = $(am_libtgdb_a_OBJECTS)
-EXTRA_PROGRAMS = tgdb_driver$(EXEEXT)
-bin_PROGRAMS = @BUILD_DRIVERS@
-PROGRAMS = $(bin_PROGRAMS)
+noinst_bin_PROGRAMS = tgdb_driver$(EXEEXT)
+PROGRAMS = $(noinst_bin_PROGRAMS)
 
 am_tgdb_driver_OBJECTS = driver.$(OBJEXT)
 tgdb_driver_OBJECTS = $(am_tgdb_driver_OBJECTS)
@@ -209,30 +206,30 @@ libtgdb.a: $(libtgdb_a_OBJECTS) $(libtgdb_a_DEPENDENCIES)
 	-rm -f libtgdb.a
 	$(libtgdb_a_AR) libtgdb.a $(libtgdb_a_OBJECTS) $(libtgdb_a_LIBADD)
 	$(RANLIB) libtgdb.a
-binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
-install-binPROGRAMS: $(bin_PROGRAMS)
+noinst_binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
+install-noinst_binPROGRAMS: $(noinst_bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
-	$(mkinstalldirs) $(DESTDIR)$(bindir)
-	@list='$(bin_PROGRAMS)'; for p in $$list; do \
+	$(mkinstalldirs) $(DESTDIR)$(noinst_bindir)
+	@list='$(noinst_bin_PROGRAMS)'; for p in $$list; do \
 	  p1=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
 	  if test -f $$p \
 	  ; then \
 	    f=`echo "$$p1" | sed 's,^.*/,,;$(transform);s/$$/$(EXEEXT)/'`; \
-	   echo " $(INSTALL_PROGRAM_ENV) $(binPROGRAMS_INSTALL) $$p $(DESTDIR)$(bindir)/$$f"; \
-	   $(INSTALL_PROGRAM_ENV) $(binPROGRAMS_INSTALL) $$p $(DESTDIR)$(bindir)/$$f || exit 1; \
+	   echo " $(INSTALL_PROGRAM_ENV) $(noinst_binPROGRAMS_INSTALL) $$p $(DESTDIR)$(noinst_bindir)/$$f"; \
+	   $(INSTALL_PROGRAM_ENV) $(noinst_binPROGRAMS_INSTALL) $$p $(DESTDIR)$(noinst_bindir)/$$f || exit 1; \
 	  else :; fi; \
 	done
 
-uninstall-binPROGRAMS:
+uninstall-noinst_binPROGRAMS:
 	@$(NORMAL_UNINSTALL)
-	@list='$(bin_PROGRAMS)'; for p in $$list; do \
+	@list='$(noinst_bin_PROGRAMS)'; for p in $$list; do \
 	  f=`echo "$$p" | sed 's,^.*/,,;s/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/'`; \
-	  echo " rm -f $(DESTDIR)$(bindir)/$$f"; \
-	  rm -f $(DESTDIR)$(bindir)/$$f; \
+	  echo " rm -f $(DESTDIR)$(noinst_bindir)/$$f"; \
+	  rm -f $(DESTDIR)$(noinst_bindir)/$$f; \
 	done
 
-clean-binPROGRAMS:
-	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+clean-noinst_binPROGRAMS:
+	-test -z "$(noinst_bin_PROGRAMS)" || rm -f $(noinst_bin_PROGRAMS)
 tgdb_driver$(EXEEXT): $(tgdb_driver_OBJECTS) $(tgdb_driver_DEPENDENCIES) 
 	@rm -f tgdb_driver$(EXEEXT)
 	$(LINK) $(tgdb_driver_LDFLAGS) $(tgdb_driver_OBJECTS) $(tgdb_driver_LDADD) $(LIBS)
@@ -361,7 +358,7 @@ check: check-am
 all-am: Makefile $(LIBRARIES) $(PROGRAMS)
 
 installdirs:
-	$(mkinstalldirs) $(DESTDIR)$(bindir)
+	$(mkinstalldirs) $(DESTDIR)$(noinst_bindir)
 
 install: install-am
 install-exec: install-exec-am
@@ -389,7 +386,7 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-generic clean-noinstLIBRARIES \
+clean-am: clean-generic clean-noinstLIBRARIES clean-noinst_binPROGRAMS \
 	mostlyclean-am
 
 distclean: distclean-am
@@ -405,9 +402,9 @@ info: info-am
 
 info-am:
 
-install-data-am:
+install-data-am: install-noinst_binPROGRAMS
 
-install-exec-am: install-binPROGRAMS
+install-exec-am:
 
 install-info: install-info-am
 
@@ -431,19 +428,19 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-binPROGRAMS uninstall-info-am
+uninstall-am: uninstall-info-am uninstall-noinst_binPROGRAMS
 
-.PHONY: CTAGS GTAGS all all-am check check-am clean clean-binPROGRAMS \
-	clean-generic clean-noinstLIBRARIES ctags distclean \
+.PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
+	clean-noinstLIBRARIES clean-noinst_binPROGRAMS ctags distclean \
 	distclean-compile distclean-depend distclean-generic \
 	distclean-tags distdir dvi dvi-am info info-am install \
-	install-am install-binPROGRAMS install-data install-data-am \
-	install-exec install-exec-am install-info install-info-am \
-	install-man install-strip installcheck installcheck-am \
-	installdirs maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-compile mostlyclean-generic pdf pdf-am \
-	ps ps-am tags uninstall uninstall-am uninstall-binPROGRAMS \
-	uninstall-info-am
+	install-am install-data install-data-am install-exec \
+	install-exec-am install-info install-info-am install-man \
+	install-noinst_binPROGRAMS install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
+	uninstall-am uninstall-info-am uninstall-noinst_binPROGRAMS
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

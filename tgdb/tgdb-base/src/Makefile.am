@@ -12,8 +12,8 @@ libtgdb_a_SOURCES = \
 tgdb.c \
 types.c
 
-EXTRA_PROGRAMS=tgdb_driver
-bin_PROGRAMS = @BUILD_DRIVERS@
+noinst_bin_PROGRAMS = tgdb_driver
+noinst_bindir = $(top_srcdir)/progs
 
 tgdb_driver_LDFLAGS = \
 -L$(top_srcdir)/tgdb/tgdb-base/src \

@@ -2,7 +2,7 @@ dnl Process this file with autoconf to produce a configure script.
 AC_INIT(cgdb)
 AC_CONFIG_AUX_DIR(config)
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(cgdb, 0.3.0-cvs)
+AM_INIT_AUTOMAKE(cgdb, 0.3.1)
 AM_MAINTAINER_MODE
 
 dnl Checks for programs.
@@ -54,13 +54,6 @@ dnl If the user asked for curses, ncurses is set to no. Otherwise ncurses is yes
     
     AC_ARG_WITH(curses,
         [  --with-curses           Use curses library: not ncurses (optional)],ncurses=no,ncurses=yes)
-
-dnl These 2 statements determine if the user wants the alternate driver program to be built
-dnl It is used to stimulate libtgdb with data. It is a simple interface to libtgdb
-    AC_ARG_WITH(drivers,
-        [  --with-drivers          Build the driver programs to test libtgdb (optional)],BUILD_DRIVERS=tgdb_driver BUILD_INPUT_DRIVERS="input_driver getch_driver",BUILD_DRIVERS= BUILD_INPUT_DRIVERS=)
-    AC_SUBST([BUILD_DRIVERS])
-    AC_SUBST([BUILD_INPUT_DRIVERS])
 
 dnl If the user want ncurses, Try to find it and add it to the linking library.
     if test $ncurses = yes; then

@@ -308,7 +308,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO AMTAR install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM AWK SET_MAKE MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE RANLIB ac_ct_RANLIB LEX LEXLIB LEX_OUTPUT_ROOT CPP EGREP build build_cpu build_vendor build_os host host_cpu host_vendor host_os BUILD_DRIVERS BUILD_INPUT_DRIVERS LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO AMTAR install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM AWK SET_MAKE MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE RANLIB ac_ct_RANLIB LEX LEXLIB LEX_OUTPUT_ROOT CPP EGREP build build_cpu build_vendor build_os host host_cpu host_vendor host_os LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -859,7 +859,6 @@ Optional Packages:
   --with-ncurses-prefix=DIR  Prefix where ncurses is installed (optional)
   --with-curses-prefix=DIR   Prefix where curses is installed (optional)
   --with-curses           Use curses library: not ncurses (optional)
-  --with-drivers          Build the driver programs to test libtgdb (optional)
 
 Some influential environment variables:
   CC          C compiler command
@@ -1542,7 +1541,7 @@ fi
 
 # Define the identity of the package.
  PACKAGE=cgdb
- VERSION=0.3.0-cvs
+ VERSION=0.3.1
 
 
 cat >>confdefs.h <<_ACEOF
@@ -4161,17 +4160,6 @@ if test "${with_curses+set}" = set; then
 else
   ncurses=yes
 fi;
-
-
-# Check whether --with-drivers or --without-drivers was given.
-if test "${with_drivers+set}" = set; then
-  withval="$with_drivers"
-  BUILD_DRIVERS=tgdb_driver BUILD_INPUT_DRIVERS="input_driver getch_driver"
-else
-  BUILD_DRIVERS= BUILD_INPUT_DRIVERS=
-fi;
-
-
 
     if test $ncurses = yes; then
         echo "$as_me:$LINENO: checking for initscr in -lncurses" >&5
@@ -6837,8 +6825,6 @@ s,@host@,$host,;t t
 s,@host_cpu@,$host_cpu,;t t
 s,@host_vendor@,$host_vendor,;t t
 s,@host_os@,$host_os,;t t
-s,@BUILD_DRIVERS@,$BUILD_DRIVERS,;t t
-s,@BUILD_INPUT_DRIVERS@,$BUILD_INPUT_DRIVERS,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
 s,@LTLIBOBJS@,$LTLIBOBJS,;t t
 CEOF
