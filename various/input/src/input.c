@@ -424,7 +424,7 @@ int input_read(int fd) {
     /* This is a good value that causes Alt-o to be returned when it should
      * be and ESC, o when it should be.
      */
-    timeout.tv_usec =   1000;   
+    timeout.tv_usec =   40000;
 
     ret = select (fd + 1, &readfds, (fd_set *)NULL, &exceptfds, &timeout);
 

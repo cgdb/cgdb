@@ -1,3 +1,8 @@
+04/14/2003 Bob Rossi <bob_rossi@cox.net>
+   
+   * Changed time out for esc sequences from 1000 to 40000: I found 
+   a computer where 1000 was to slow.
+
 version 0.3.1 (04/28/2003):
 
 version 0.3.0 (04/11/2003):
