@@ -487,6 +487,7 @@ static int input_get_seq(struct input *input) {
     int possible[list_size];
     int c;
     int still_possible;
+	int first_key = 1;
 
     /* Initalize all possible esq sequences to be a possible match */
     for ( i = 0; i < list_size; i++ )
@@ -526,6 +527,21 @@ static int input_get_seq(struct input *input) {
         /* This forces the algorithm to stop after a macro is found */
         if ( !still_possible )
             break;
+
+		/* A special case. if the key is one of the control keys
+		 * then a second key does not need to be read. 
+		 *
+		 * This makes the bad assumption that an esc key can not
+		 * start with a control char.
+		 */
+		if ( first_key && cur_pos != -1 && 
+				list[cur_pos].macro >= CGDB_KEY_CTRL_A &&
+				list[cur_pos].macro <= CGDB_KEY_CTRL_Z ) {
+			c = 0;
+			break;
+		}
+		
+		first_key = 0;
     }
 
     /* At this point, all esc sequences have failed to match.

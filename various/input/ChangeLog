@@ -1,3 +1,9 @@
+08/01/2003 Bob Rossi <bob_rossi@brasko.net>
+
+	* input.c: input_get_seq, made sure that control chars don't get buffered.
+	This fixes a bug, if the user held ^m for a long time, then hit any other
+	key, ^m would come out first, and then the other key.
+
 version 0.3.3a (07/16/2003):
 
 version 0.3.3 (07/15/2003):
