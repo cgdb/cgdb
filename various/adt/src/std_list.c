@@ -283,7 +283,7 @@ std_list_iterator std_list_remove (
 		before = iter->prev;
 		after = iter->next;
 
-		list->begin->next = after;
+		before->next = after;
 		after->prev = before;
 	}
 

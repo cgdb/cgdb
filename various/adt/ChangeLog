@@ -1,3 +1,7 @@
+04/06/2004 Bob Rossi <bob@brasko.net>
+
+    * std_list.c (std_list_remove): Fixed bug in remove function.
+
 03/25/2004 Bob Rossi <bob@brasko.net>
 
     * std_types.h (STDDestroyNotify): Changed return value from void to int.
