@@ -1,0 +1,9 @@
+<!--#include file="header.inc"-->
+
+<H2>Screenshots</H2>
+
+<B>cgdb: Our curses-based interface</b><P>
+  <IMG Src="cgdb.png" Alt="cgdb screenshot">
+
+<!--#include file="footer.inc"-->
+

@@ -1,0 +1,188 @@
+<!--#include file="header.inc"-->
+
+<!-- Description -->
+<B>Description</b><P>
+<BLOCKQUOTE>
+CGDB is a curses-based interface to the GNU Debugger (GDB).  The goal of
+CGDB is to be lightweight and responsive; not encumbered with unnecessary
+features.<P>
+
+The interface is designed to deliver the familiar GDB text interface, with a
+split screen showing the source as it executes.  The UI is modeled on the
+classic Unix text editor, vi.  Those familiar with vi should feel right at
+home using CGDB.<P>
+
+The library responsible for communicating with GDB is called Trivial GDB
+(tgdb, or more accurately, libtgdb).  This abstraction allows the UI code
+to be independent of the debugger, as well as greatly simplifying its
+implementation.<P>
+
+Those wanting to develop other interfaces to GDB are welcome
+to use libtgdb as the basis for their program.  Many of the headaches of
+parsing GDB's output and annotations can be avoided by using it.<P>
+
+Some features offered by CGDB are:<P>
+<UL>
+  <LI>Syntax-highlighted source window</li>
+  <LI>Visual breakpoint setting</li>
+  <LI>Keyboard shortcuts for common functions</li>
+  <LI>Searching source window (using regexp)</li>
+</ul>
+
+</blockquote>
+
+<B>News</b><BR>
+<BLOCKQUOTE>
+
+  <I>August 14, 2003</i><BR>
+  <BLOCKQUOTE>
+    CGDB v0.3.4 released today, see the <A Href="download.shtml">download
+    page</a> to try it out. It fixes several bugs including,
+    <UL>
+        <LI> Fixed libinput bug. If user held down '\n' ( let it get sent many 
+             times ) when they hit the next key, '\n' would get sent again. This 
+             was a <U>Very</U> frustrating bug.
+        <LI> Data at prompt is now cleared when the user hits ^c.
+        <LI> After user opened the file dialog, the next time they hit ^c,
+             it would not refresh the prompt.
+        <LI> Fix C/C++ highlighting bug, '\"' would screw up the source window.
+        <LI> Fixed ada highlighting bug. String literals were not highlighted.
+    </UL>
+  </blockquote>
+
+  <I>July 16, 2003</i><BR>
+  <BLOCKQUOTE>
+    CGDB v0.3.3a released today, see the <A Href="download.shtml">download
+    page</a> to try it out. There was a bug in the file dialog. The user 
+    could not select files through it. This release resolves that problem.
+  </blockquote>
+
+  <I>July 15, 2003</i><BR>
+  <BLOCKQUOTE>
+    CGDB v0.3.3 released today, see the <A Href="download.shtml">download
+    page</a> to try it out. It is mainly a bug fix release. Basically we fixed,
+    <UL>
+        <LI> CGDB can handle tabs in a file properly. They will line up like vim.
+        <LI> Added VI-style page up/page down commands. Depricated old commands.
+        <LI> Fixed major bug in ada highlighter. Files were not displayed properly.
+    </UL>
+  </blockquote>
+
+  <I>June 25, 2003</i><BR>
+  <BLOCKQUOTE>
+    CGDB v0.3.2 released today, see the <A Href="download.shtml">download
+    page</a> to try it out. The release is great for us because we got to
+    work more on functionality and ease of use for the user. Some of the 
+    great new features added to CGDB are
+    <UL>
+        <LI> CGDB can automate commands by reading the cgdbrc config file
+        <LI> CGDB can parse/highlight 15000+ lines in a fraction of a second
+        <LI> CGDB indents tab spaces correctly using the :set tabstop command
+        <LI> The user can specify the esc timeout using :set escdelay=milliseconds
+        <LI> The user can stop syntax highlighting using :set syntax=off
+    </UL>
+    
+    As the general framework for CGDB grows, adding new functionality will
+    keep getting easier to do. Hopefully you enjoy these features as much as
+    we do!
+  </blockquote>
+
+  <I>April 28, 2003</i><BR>
+  <BLOCKQUOTE>
+    CGDB v0.3.1 released today, see the <A Href="download.shtml">download
+    page</a> to try it out. This version doesn't have any new functionality. The 
+    goal of this release was to re-organize the entire build system. This
+    involved moving the cvs tree around and fixing autoconf/automake problems.
+    In the end, the only program that gets installed now is cgdb. The drivers
+    are kept local in the directory where make is run. Also, cgdb no longer 
+    depends on rlctx_prog ( the readline context executable ). 
+    This is a big improvement and a step in the right direction for cgdb.
+  </blockquote>
+
+  <I>April 11, 2003</i><BR>
+  <BLOCKQUOTE>
+    CGDB v0.3.0 released today, see the <A Href="download.shtml">download
+    page</a> to try it out. It contains reliable readline integration and
+    reliable visual breakpoint lines. It is the most stable version yet.
+  </blockquote>
+
+  <I>January 30, 2003</i><BR>
+  <BLOCKQUOTE>
+    CGDB v0.2.3 released today, see the <A Href="download.shtml">download
+    page</a> to try it out. The switch to the new web site is officially 
+    complete today.  Hopefully it didn't cause too much confusion.  Feel free 
+    to report any problems with the new site 
+    (<A Href="contact.shtml">contact page</a>).
+  </blockquote>
+
+  <I>January 27, 2003</i><BR>
+  <BLOCKQUOTE>
+    CGDB v0.2.2 was released a few days ago.  It contains several important
+    fixes, and we recommend you upgrade to it.  Since the interface is
+    beginning to stabilize, we are beginning to focus on robustness.  Expect
+    more configurability in future releases.<P>
+    
+    Revised web page today:  Changed the looks to be more pleasing and easy to
+    navigate.  Modified descriptions to reflect our focus shift from libtgdb
+    to the CGDB interface.<P>
+
+    We were concerned that the TGDB/CGDB naming convention was confusing,
+    so the project is now simply being called CGDB.  It is still based on
+    libtgdb, and both are still packaged together.  However, most visitors
+    are mainly interested in the curses interface, not developing a new one.
+  </blockquote><P>
+
+  <I>January 14, 2003</I><BR>
+  <BLOCKQUOTE>
+    CGDB/TGDB 0.2 is out. It has many bug fixes and many new major features.
+    It supports full pseudo terminal semantics to the program being debugged.
+    This means that you can interact with readline, read a char at a time, ...
+    CGDB also supports command line options, limited macro support, 
+    previously/next viewing of files, : commands like vi, and several others.
+  </blockquote><P>
+
+  <I>December 9, 2002</I><BR>
+  <BLOCKQUOTE>
+   Well, The first curses release is up. It has been tested well. Hopefully you
+   will find it as usefull as I do.  It is equiped with basic features and is 
+   ready for use. Enjoy!
+  </blockquote><P>
+
+  <I>September 15, 2002</I><BR>
+  <BLOCKQUOTE>
+    Our interfaces are reaching a state where they are quite usable.  Most
+    of the known issues have been resolved.  A few more features are planned
+    before the first tarball is put on the site.
+    I put up a screenshot of the curses GUI, as well.
+  </blockquote>
+
+  <I>August 23, 2002</I><BR>
+  <BLOCKQUOTE>
+    The project is moving along at a slow pace but quality work has been
+    produced. Since its inception, Bobby took two weeks off and got married!
+    Mueller also took a week off just to stay sane. We hope to have a beta up 
+    by the end of September.
+  </blockquote><P>
+
+  <I>July 11, 2002</I><BR>
+  <BLOCKQUOTE>
+    Initial development... The project was started last week, and significant
+    progress is being made on both the GUI and the wrapper aspect of the code.
+    We expect to have a usable release online in the next few weeks.  Stay
+    tuned for updates!
+  </blockquote><P>
+
+</blockquote>
+
+<TABLE Width="100%">
+<TR>
+  <TD Align=Right>
+    <A Href="http://sourceforge.net"><IMG 
+    Src="http://sourceforge.net/sflogo.php?group_id=72581&amp;type=4" 
+    Width=125 Height=37 Border=0 Alt="SourceForge.net Logo"></a>
+    <!-- <IMG Src="http://68.9.203.191:81/~mike/cgdb/pixel.gif"> -->
+  </td>
+</tr>
+</table>
+<!--#include file="footer.inc"-->
+  

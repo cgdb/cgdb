@@ -16,8 +16,12 @@ Work to do for cgdb-0.4.0
 
 Non-technical
 > Work on webpage for cgdb/tgdb
+> Make sure mueller's wrap searching feature gets documented.
 
 technical
+> Standardize tgdb_interface. Maybe change its name. The clients should be
+  able to generate and add commands to the command queue here. The commands
+  should be made cleaner.
 > Remove #defines in tgdb_types.h, there should be no hard coded constants
   in TGDB.
 > Get in touch with 'Ronald Landheer-Cieslak' about Makefile.am patch to

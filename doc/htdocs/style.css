@@ -1,0 +1,25 @@
+BODY {
+    background-color: #FFFFFF;
+    color:            #000000;
+    font-family:      Verdana, Arial, sans-serif;
+}
+
+a:link    { color: #000070 }
+a:visited { color: #000070 }
+a:hover   { color: #505050 }
+a:active  { color: #505050 }
+A { text-decoration:none }
+
+.Menu {
+    background-color: #B0C0F0;       /* Indigo */
+    border-style: solid;
+    border-width: 1px;
+    border-color: #000000;
+    line-height: 22pt;
+    text-align: left;
+}
+
+.Main {
+    background-color: #FFFFFF;
+    margin: 1em 1em 1em 1em;
+}

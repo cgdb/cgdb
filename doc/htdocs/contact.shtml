@@ -1,0 +1,34 @@
+<!--#include file="header.inc" -->
+
+<B>Mailing Lists</b><P>
+<BLOCKQUOTE>
+  If you need support using CGDB (reporting a bug, submitting a patch, or
+  even just asking how to use features of CGDB), there are a few mailing
+  lists you can join.  The mailing lists can also provide you with
+  announcements of the latest releases and other important information.
+  If you're interested in signing up to these mailing lists, visit:
+  <BLOCKQUOTE>
+  <A Href="http://sourceforge.net/mail/?group_id=72581">SourceForge 
+  Mailing Lists</a> 
+  </blockquote>
+</blockquote>
+
+<B>CGDB Maintainers</b><P>
+<BLOCKQUOTE>
+  <TABLE Width="70%">
+  <TR>
+    <TD><B>Name</b></td>
+    <TD><B>Contact</b></td>
+  </tr>
+  <TR>
+    <TD>Bob Rossi</td>
+    <TD>bob_rossi at cox.net</td>
+  </tr>
+  <TR>
+    <TD>Mike Mueller</td>
+    <TD>mmueller at cs.uri.edu</td>
+  </tr>
+  </table>
+</blockquote>
+
+<!--#include file="footer.inc" -->

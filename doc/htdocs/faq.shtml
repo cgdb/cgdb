@@ -1,0 +1,46 @@
+<!--#include file="header.inc" -->
+
+    <P><B>Frequently Asked Questions</b></p>
+
+    <OL>
+      <LI><A Href="#features">When will feature X be added?</a>
+      <LI><A Href="#distro">Will CGDB be packaged with my favorite Linux
+                            distribution?</a>
+      <LI><A Href="#versions">What versions of GDB are supported?</a>
+      <LI><A Href="#whouses">Who uses CGDB?</a>
+    </ol>
+
+    <A Name="features"></a>
+    <P><B>When will feature X be added?</b></p>
+    <P>Please see our current <A href="proposal.shtml">proposal</a> for the
+    feature set that is expected to be in CGDB version 1.0.  We are hoping
+    to have 1.0 ready before the start of 2004.  If you feel it is missing
+    any important features, please contact us via the cgdb-devel mailing
+    list.</p>
+
+    <A Name="distro"></a>
+    <P><B>Will CGDB be packaged with my favorite Linux distribution?</b></p>
+    <P>Currently CGDB is undergoing packaging for the Debian Linux
+    distribution.  Hopefully it will be included in their system shortly.
+    Mike plans on packaging it for Gentoo soon, too.  If you would like to
+    see a package for a different distribution, you are welcome to make one. :)
+    </p>
+
+    <A Name="versions"</a>
+    <P><B>What versions of GDB are supported?</b></p>
+    <P>This is an area where CGDB shines -- CGDB has been tested successfully
+    on versions of GDB as old as 4.17 (Gnat's patched GDB).  It supports all
+    recent releases up to the current 5.3.  We will continue to test it to
+    ensure it continues to support the latest GDB.  Unlike some frontends,
+    CGDB does not require a patched GDB, or a special version of any kind.</p>
+
+    <A Name="whouses"></a>
+    <P><B>Who uses CGDB?</b></p>
+    <P>We're excited to see that many people are catching onto the project
+    even in its current immature state.  We've been contacted by people
+    worldwide (US, France, Germany, Poland, India, China, Japan) about it!
+    We hope that it can become the de facto text GDB front end, at least for
+    Vim fans. :) (Emacs users can check into the TUI, which is a compile-time
+    option that can be build into GDB.)</p>
+
+<!--#include file="footer.inc" -->

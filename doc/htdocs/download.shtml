@@ -1,0 +1,36 @@
+<!--#include file="header.inc" -->
+
+    <B>Download CGDB</b><P>
+
+    <BLOCKQUOTE>
+      Latest version:
+      <A Href="http://66.35.250.221:80/sourceforge/cgdb/cgdb-0.3.4.tar.gz">cgdb-0.3.4.tar.gz</a> -
+      <A Href="http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/*checkout*/cgdb/cgdb/cgdb/ChangeLog?rev=1.29">ChangeLog</a><P>
+
+    </blockquote>
+
+    <B>Anonymous CVS</b><P>
+
+    <BLOCKQUOTE>
+      The most recent changes to CGDB can be found by checking out
+      a copy of the current CVS tree.  You may want to try this to see if
+      a bug is resolved before reporting the error.  It should be noted that
+      the CVS tree is not guaranteed to be stable and is not tested as well
+      as the latest tarball probably is.
+
+      To get a copy of the CVS tree, run the following commands:
+
+      <P Style="font-family: Courier, monospace">
+        cvs -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/cgdb login<BR>
+        (blank password)<BR><BR>
+          
+        cvs -z3 -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/cgdb co cgdb
+      </p>
+
+      If you don't have CVS, visit their
+      <A Href="http://www.cvshome.org">home page</a>.
+
+    </blockquote>
+
+
+<!--#include file="footer.inc" -->
