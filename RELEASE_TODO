@@ -9,7 +9,6 @@ o Make ws option receive a percent, so we can make it any size.
   this way. I would be silly if someone needed 35% ...
   However, making it take a percent does not solve the whole problem.
   The user needs to start at one of these offsets. How should this be done?
-o Make -/+ go to either full screen or 2 lines off, on odd or even size.
 
 Closed:
 
@@ -18,3 +17,6 @@ o Fix resizing to fast bug. ( Only handle last resize, not all ).
   This is easy to reproduce when running over the Internet. :)
   This doesn't really seem to be the problem. However, the potential
   bug is still fixed.
+o Make -/+ go to either full screen or 2 lines off, on odd or even size.
+  This was fixed by adding option winminheight :) (Ben's idea),
+  Now you can make the value whatever you want it to be.

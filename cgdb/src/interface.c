@@ -1,5 +1,5 @@
 /* interface.c:
- * ------------
+* ------------
  * 
  * Provides the routines for displaying the interface, and interacting with
  * the user via keystrokes.
@@ -71,21 +71,21 @@
 /* Definitions */
 /* ----------- */
 
+/* This determines the minimum number of rows wants to close a window too 
+ * A window should never become smaller than this size */
+static int interface_winminheight = 0;
+
 /* The offset that determines allows gdb/sources window to grow or shrink */
 static int window_height_shift;
 
 /* This is for the tty I/O window */
-static const int TTY_WIN_DEFAULT_HEIGHT = 4;
+#define TTY_WIN_DEFAULT_HEIGHT ((interface_winminheight>4)?interface_winminheight:4)
 static int tty_win_height_shift = 0;
 #define TTY_WIN_OFFSET ( TTY_WIN_DEFAULT_HEIGHT + tty_win_height_shift )
 
 /* Height and width of the terminal */
 #define HEIGHT      (screen_size.ws_row)
 #define WIDTH       (screen_size.ws_col)
-
-/* Max and Min values for window_height_shift */
-#define MAX_WINDOW_HEIGHT_SHIFT (HEIGHT/2 - ((tty_win_on)?TTY_WIN_OFFSET + 1:0) - 3)
-#define MIN_WINDOW_HEIGHT_SHIFT (-(HEIGHT/2 - ((HEIGHT+1)%2) - 1))
 
 /* Current window split state */
 WIN_SPLIT_TYPE cur_win_split = WIN_SPLIT_EVEN;
@@ -412,8 +412,35 @@ void if_draw( void )
     /* This check is here so that the cursor goes to the 
      * cgdb window. The cursor would stay in the gdb window 
      * on cygwin */
-    if ( focus == CGDB ) 
+    if ( get_src_height() > 0 && focus == CGDB ) 
         wrefresh(src_win->win);
+}
+
+/* validate_window_sizes:
+ * ----------------------
+ *
+ * This will make sure that the gdb_window, status_bar and source window
+ * have appropriate sizes. Each of the windows will not be able to grow
+ * smaller than INTERFACE_WINMINHEIGHT in size. It will also restrict the
+ * size of windows to being within the size of the terminal.
+ */
+static void validate_window_sizes ( void ) {
+   int tty_window_offset         = (tty_win_on)?TTY_WIN_OFFSET + 1: 0;
+   int odd_height                = (HEIGHT+1)%2;
+   int max_window_height_shift   = (HEIGHT/2) - tty_window_offset - odd_height;
+   int min_window_height_shift   = -(HEIGHT/2);
+
+   /* update max and min based off of users winminheight request */
+   min_window_height_shift += interface_winminheight;
+   max_window_height_shift -= interface_winminheight;
+
+    /* Make sure that the windows offset is within its bounds: 
+     * This checks the window offset.
+     * */
+    if ( window_height_shift > max_window_height_shift )
+       window_height_shift = max_window_height_shift;
+    else if ( window_height_shift < min_window_height_shift )
+       window_height_shift = min_window_height_shift;
 }
 
 /* if_layout: Update the layout of the screen based on current terminal size.
@@ -427,13 +454,7 @@ static int if_layout()
     if (COLS < 20 || LINES < 10)
         return 1;
 
-    /* Make sure that the windows offset is within its bounds: 
-     * This checks the window offset.
-     * */
-    if ( window_height_shift >= MAX_WINDOW_HEIGHT_SHIFT )
-       window_height_shift = MAX_WINDOW_HEIGHT_SHIFT;
-    else if ( window_height_shift <= MIN_WINDOW_HEIGHT_SHIFT )
-       window_height_shift = MIN_WINDOW_HEIGHT_SHIFT;
+    validate_window_sizes ();
 
     /* Initialize the GDB I/O window */
     if (gdb_win == NULL){
@@ -536,7 +557,7 @@ static void increase_win_height( int jump_or_tty ) {
          // tty window is visible
          height = get_gdb_height() + get_tty_height();
 
-         if ( tty_win_height_shift + TTY_WIN_DEFAULT_HEIGHT < height - 2) {
+         if ( tty_win_height_shift + TTY_WIN_DEFAULT_HEIGHT < height - interface_winminheight) {
             // increase tty window size by 1
             tty_win_height_shift++;
          }
@@ -569,19 +590,12 @@ static void increase_win_height( int jump_or_tty ) {
       window_height_shift++;           // increase src window size by 1
 
    }
-
-   // check bounds of window_height_shift
-   if ( window_height_shift >= MAX_WINDOW_HEIGHT_SHIFT )
-      window_height_shift = MAX_WINDOW_HEIGHT_SHIFT;
-   else if ( window_height_shift <= MIN_WINDOW_HEIGHT_SHIFT )
-      window_height_shift = MIN_WINDOW_HEIGHT_SHIFT;
-
+   
    // reduce flicker by avoiding unnecessary redraws
    if( window_height_shift != old_window_height_shift || 
        tty_win_height_shift != old_tty_win_height_shift ) {
       if_layout();
    }
-
 }
 
 /*
@@ -602,7 +616,7 @@ static void decrease_win_height( int jump_or_tty ) {
       // user input: '_'
       if( tty_win_on ) {
          // tty window is visible
-         if ( tty_win_height_shift > -(TTY_WIN_DEFAULT_HEIGHT - 2) ) {
+         if ( tty_win_height_shift > -(TTY_WIN_DEFAULT_HEIGHT - interface_winminheight) ) {
             // decrease tty window size by 1
             tty_win_height_shift--;
          }
@@ -635,12 +649,6 @@ static void decrease_win_height( int jump_or_tty ) {
       window_height_shift--;           // decrease src window size by 1
 
    }
-
-   // check bounds of window_height_shift
-   if ( window_height_shift >= MAX_WINDOW_HEIGHT_SHIFT )
-      window_height_shift = MAX_WINDOW_HEIGHT_SHIFT;
-   else if ( window_height_shift <= MIN_WINDOW_HEIGHT_SHIFT )
-      window_height_shift = MIN_WINDOW_HEIGHT_SHIFT;
 
    // reduce flicker by avoiding unnecessary redraws
    if( window_height_shift != old_window_height_shift || 
@@ -1342,4 +1350,18 @@ void if_highlight_sviewer ( enum tokenizer_language_support l ) {
 		highlight ( src_win->cur );
 		if_draw ();
 	}
+}
+
+int if_change_winminheight ( int value ) {
+   if ( value < 0 )
+      return -1;
+   else if ( tty_win_on && value > HEIGHT/3 )
+      return -1;
+   else if ( value > HEIGHT/2 )
+      return -1;
+
+   interface_winminheight = value;
+   if_layout();
+
+   return 0;
 }

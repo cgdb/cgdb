@@ -43,6 +43,7 @@ enum ConfigType
 
 static int command_set_focus( const char *value );
 static int command_set_winsplit( const char *value );
+static int command_set_winminheight( int value );
 static int command_set_syntax_type( const char *value );
 static int command_set_esc_sequence_timeout( int msec );
 
@@ -60,6 +61,7 @@ static struct ConfigVariable
     /* shortcut   */ 	{ "shortcut", "sc", CONFIG_TYPE_BOOL, &shortcut_option },
     /* syntax */      	{ "syntax", "syn", CONFIG_TYPE_FUNC_STRING, command_set_syntax_type }, 
     /* tabstop   */     { "tabstop", "ts", CONFIG_TYPE_INT, &highlight_tabstop },
+    /* winminheight */  { "winminheight", "wmh", CONFIG_TYPE_FUNC_INT, &command_set_winminheight },
     /* winsplit */      { "winsplit", "ws", CONFIG_TYPE_FUNC_STRING, command_set_winsplit }, 
 };
 
@@ -170,6 +172,13 @@ int command_set_winsplit( const char *value )
    } // end if
 
    return 0;
+}
+
+static int command_set_winminheight( int value ) {
+   if ( if_change_winminheight ( value ) == -1 )
+      return -1;
+
+    return 0;
 }
 
 int command_set_syntax_type ( const char *value )

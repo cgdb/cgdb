@@ -1,3 +1,12 @@
+06/25/2003 Bob Rossi <bob_rossi@cox.net>
+
+   * interface.h: add if_change_winminheight
+   * interface.c: implement if_change_winminheight, and add function
+   validate_window_sizes to make sure window heights are correct.
+   Add check to not highlight source window if its size is 0.
+   * commands.c: add new option winmingheight "wmh"
+   * helptext.h: Added winminheight doco
+
 06/23/2003 Bob Rossi <bob_rossi@cox.net>
 
 	* cgdb.c: cgdb_resize_term now only calls if_resize_term if there is not

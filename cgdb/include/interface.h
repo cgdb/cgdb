@@ -188,5 +188,14 @@ void if_set_winsplit( WIN_SPLIT_TYPE newSplit );
  */
 void if_highlight_sviewer ( enum tokenizer_language_support l );
 
+/* if_change_winminheight:
+ * -----------------------
+ * 
+ * This sets the minimal height of a window. Windows will never become smaller.
+ *
+ * Returns -1 if value is not acceptable. Otherwise, 0.
+ */
+int if_change_winminheight ( int value );
+
 #endif
 
