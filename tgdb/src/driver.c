@@ -1,0 +1,163 @@
+/* From configure */
+#include "config.h"
+
+/* Library includes */
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#include <errno.h>
+#include <stdio.h>
+#include <string.h>
+#include <termios.h>
+#include <sys/ioctl.h>
+
+/* Local includes */
+#include "tgdb.h"
+#include "error.h"
+#include "io.h"
+#include "terminal.h"
+
+void mainLoop(int masterfd, int childfd){
+  int    max;
+  fd_set rfds;
+  int result;
+
+   /* get max fd  for select loop */
+   max = (masterfd > STDIN_FILENO) ? masterfd : STDIN_FILENO;
+   max = (max > childfd) ? max : childfd;
+   
+   while(1){
+      /* Clear the set and 
+       *
+       * READ FROM:
+       * stdin          (user or gui ... who is the user anyway 
+       * master         (gdb's stdout)
+       * gui_stdout     (gui's stdout sending new info)
+       *
+       */
+      FD_ZERO(&rfds);
+      
+      FD_SET(STDIN_FILENO, &rfds);
+      FD_SET(masterfd, &rfds);
+      FD_SET(childfd, &rfds);
+      
+      result = select(max + 1, &rfds, NULL, NULL, NULL);
+      
+      /* if the signal interuppted system call keep going */
+      if(result == -1 && errno == EINTR)
+         continue;
+      else if(result == -1) /* on error ... must die -> stupid OS */
+         err_dump("main.c:mainLoop - select failed\n");
+
+      /* stdin -> gdb's input */
+      if(STDIN_FILENO != -1 && FD_ISSET(STDIN_FILENO, &rfds)){
+         char byte;
+
+         if( io_read_byte(&byte, STDIN_FILENO) == -1){
+            err_msg("%s:%d -> could not read byte\n", __FILE__, __LINE__);
+            return;
+         } /* end if */
+
+         if(byte == '9'){
+            if(macro_save("macro1.txt") == -1){
+               err_msg("%s:%d -> failed to run command\n", __FILE__, __LINE__);
+               return;
+            }
+         } else if(byte == '8'){
+            if(macro_load("macro1.txt") == -1){
+               err_msg("%s:%d -> failed to run command\n", __FILE__, __LINE__);
+               return;
+            }
+         } else if ( byte == '7'){
+           tgdb_get_sources();  
+         } else {
+               static char *result;
+               if( (result = tgdb_send(byte)) == NULL){
+                  err_msg("%s:%d -> file descriptor closed\n", __FILE__, __LINE__);
+                  return;
+               } else
+                     fprintf(stderr, "%s", result);
+         }
+      } /* end if */
+              
+      /* gdb's output -> stdout */
+      if(masterfd != -1 && FD_ISSET(masterfd, &rfds)){
+         char buf[MAXLINE];
+         struct Command **com;
+         size_t size;
+         size_t i;
+         
+         if( (size = tgdb_recv(buf, MAXLINE, &com)) == -1){
+            err_msg("%s:%d -> file descriptor closed\n", __FILE__, __LINE__);
+            return;
+         } /* end if */
+
+         for(i = 0; i < size; ++i)
+            if(write(STDOUT_FILENO, &(buf[i]), 1) != 1 ){
+               err_msg("%s:%d -> could not write byte\n", __FILE__, __LINE__);
+               return;
+            }
+
+//         tgdb_traverse_command(stderr, &com);
+
+         { 
+            size_t j;
+            for(j = 0; com != NULL && com[j] != NULL ; ++j)
+               if((*com)[j].header == QUIT)
+                  return;
+         } 
+
+         tgdb_delete_command(&com);
+      } /* end if */
+
+      if(childfd != -1 && FD_ISSET(childfd, &rfds)){
+         char buf[MAXLINE];
+         size_t size;
+         size_t i;
+         
+         if( (size = tgdb_tty_recv(buf, MAXLINE)) == -1){
+            err_msg("%s:%d -> file descriptor closed\n", __FILE__, __LINE__);
+            return;
+         } /* end if */
+
+         for(i = 0; i < size; ++i)
+            if(write(STDOUT_FILENO, &(buf[i]), 1) != 1 ){
+               err_msg("%s:%d -> could not write byte\n", __FILE__, __LINE__);
+               return;
+            }
+      } /* end if */
+   }
+}
+
+int main(int argc, char **argv){
+   
+   int gdb_fd, child_fd;
+
+   if(tty_cbreak(STDIN_FILENO) < 0)
+      fprintf(stderr, "tty_cbreak error\n");   
+   
+   if ( tgdb_init(NULL, argc-1, argv+1, &gdb_fd, &child_fd) == -1 )
+      err_msg("%s:%d -> could not init\n", __FILE__, __LINE__);
+
+   macro_start();
+   mainLoop(gdb_fd, child_fd);
+
+   if(tgdb_shutdown() == -1)
+      err_msg("%s:%d -> could not shutdown\n", __FILE__, __LINE__);
+
+   /* reset the terminal to how it was */
+   if(tty_reset(STDIN_FILENO) == -1)
+      err_msg("Terminal attributes could not be reset ...\n 
+               try typeing 'reset' at the prompt\n");
+
+   return 0;
+}
