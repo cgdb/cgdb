@@ -15,6 +15,9 @@
 /* have /dev/ptmx */
 #undef HAVE_DEV_PTMX
 
+/* Define to 1 if you have the <dlfcn.h> header file. */
+#undef HAVE_DLFCN_H
+
 /* Define to 1 if you don't have `vprintf' but do have `_doprnt.' */
 #undef HAVE_DOPRNT
 

@@ -1,6 +1,6 @@
 rm -rf autom4te.cache/
 
-aclocal
+aclocal -I .
 autoconf
 autoheader
 automake -a

@@ -6,13 +6,13 @@ lib_LTLIBRARIES = libtgdb.la
 tgdb_srcdir = $(top_srcdir)/tgdb
 
 libtgdb_la_SOURCES = \
-$(tgdb_srcdir)/tgdb.c \
-$(tgdb_srcdir)/tgdb_util.c \
-$(tgdb_srcdir)/types.c \
-$(tgdb_srcdir)/pseudo.c \
-$(tgdb_srcdir)/error.c \
-$(tgdb_srcdir)/util.c \
-$(tgdb_srcdir)/io.c \
+$(tgdb_srcdir)/lib/tgdb.c \
+$(tgdb_srcdir)/lib/tgdb_util.c \
+$(tgdb_srcdir)/lib/types.c \
+$(tgdb_srcdir)/lib/pseudo.c \
+$(tgdb_srcdir)/lib/error.c \
+$(tgdb_srcdir)/lib/util.c \
+$(tgdb_srcdir)/lib/io.c \
 $(tgdb_srcdir)/annotate-two-src/a2-tgdb.c \
 $(tgdb_srcdir)/annotate-two-src/annotate.c \
 $(tgdb_srcdir)/annotate-two-src/state_machine.c \
