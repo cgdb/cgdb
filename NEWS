@@ -1,3 +1,8 @@
+   * Fixed bug in TGDB. TGDB would not return the correct file:line if the
+   user ran a command file through gdb on init and the file instructed gdb
+   to set a breakpoint and run. CGDB would display line 1 of the correct 
+   file instead of the correct line.
+   
    * Fixed bug in TGDB/CGDB. TGDB would return TGDB_UPDATE_SOURCE_FILES when 
    there was no source files in the list ( ex. if the inferior was compiled 
    without debug).  This would cause CGDB to act buggy when the user tried to 

@@ -46,6 +46,18 @@ struct annotate_two {
 	struct globals *g;
 
 	char inferior_tty_name[TTY_NAME_SIZE];
+
+	/* This is to determine if the first annotation prompt has been reached
+	 * yet. If it hasn't been reached, this should be zero. Otherwise one.
+	 * Its used with the variable below to determine if the annotate 
+	 * subsystem needs to probe gdb for the initial file to display.
+	 */
+	int first_prompt_reached;
+	
+	/* This is used to show if the source annotation has been recieved yet.
+	 * It is set to 0 if it hasn't, otherwise 1.
+	 */
+	int source_already_received;
 };
 
 #endif /* __ANNOTATE_TWO_H__ */

@@ -1,3 +1,8 @@
+08/27/2003 Bob Rossi <bob@brasko.net>
+
+	* NEWS: Fixed TGDB bug. TGDB will now return the correct line number
+	when the user starts gdb with a .gdbinit. Before it would display line 1.
+
 08/20/2003 Bob Rossi <bob@brasko.net>
 
 	* NEWS: Fixed CGDB/TGDB bug. The file dialog window works when the inferior

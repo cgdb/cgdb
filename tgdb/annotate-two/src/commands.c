@@ -149,6 +149,9 @@ int commands_parse_source(struct commands *c, const char *buf, size_t n, struct 
         --cur;
     } /* end while */
      
+	/*TODO: I don't think this will work with filenames that contain spaces.
+	 * It should be changed. Look at the algorithm in the function below.
+	 */
     if(sscanf(copy, "source %s", file) != 1)
         err_msg("%s:%d -> Could not get file name", __FILE__, __LINE__);
    

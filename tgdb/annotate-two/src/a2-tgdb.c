@@ -132,6 +132,9 @@ static struct annotate_two *initialize_annotate_two ( void ) {
 	a2->config_dir[0] 		= '\0';
 	a2->a2_gdb_init_file[0] = '\0';
 
+	a2->first_prompt_reached    = 0;
+	a2->source_already_received = 0;
+
 	return a2;
 }
 
@@ -209,13 +212,6 @@ int a2_initialize (
 	a2->g 		= globals_initialize ();
 
 	a2_open_new_tty ( a2, inferior_stdin, inferior_stdout );
-
-    a2_get_source_absolute_filename(a2, NULL);
-
-    if ( commands_issue_command ( a2->c, ANNOTATE_INFO_SOURCE_RELATIVE, NULL, 0 ) == -1 ) {
-        err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
-        return -1;
-    }
 
     a2->tgdb_initialized = 1;
 
