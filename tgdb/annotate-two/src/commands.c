@@ -169,6 +169,7 @@ struct commands *commands_initialize(void) {
 
     c->info_source_string  	= ibuf_init();
 	c->info_source_ready   	= 0;
+	c->last_info_source_requested = ibuf_init();
 
 	c->sources_ready 		= 0;
     c->info_sources_string 	= ibuf_init();

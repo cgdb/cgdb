@@ -1,4 +1,9 @@
 CVS
+   * Fix CGDB command line interface. If the user invoked CGDB like this,
+   'cgdb --args ./main one two three', then CGDB would hang or crash. This
+   was because it use to add extra command line options to GDB on the end.
+   Now it prepends the options to GDB, so that the --args command line 
+   can still be honored.
 
    * Added new logger interface. This traps all errors to a file or 
    a file descriptor. There is now a mechanism to write warnings and 
@@ -9,7 +14,7 @@ CVS
 
    * Added 'set asr' or autosourcereload option to CGDB. It is on by default.
    It is capable of reloading a source file when CGDB detects that a file has
-   been modified. To turn this feature of do ':set noasr'.
+   been modified. To turn this feature off do ':set noasr'.
 
    * The :source_reload colon command has been implemented. It forces CGDB to
    reload the current file in the source viewer.

@@ -246,10 +246,10 @@ int invoke_debugger(
     else
         local_argv[j++] = xstrdup(GDB);
 
-    /* copy in all the data the user entered */ 
-    for (i = 0; i < argc; i++)
-        local_argv[j++] = xstrdup(argv[i]);
-
+	/* NOTE: These options have to come first, since if the user
+	 * typed '--args' to GDB, everything at the end of the 
+	 * users options become parameters to the inferior.
+	 */
     local_argv[j++] = xstrdup(NW);
 
     /* add the init file that the user did not type */    
@@ -260,6 +260,11 @@ int invoke_debugger(
 
     local_argv[j++] = xstrdup(X);
     local_argv[j++] = xstrdup(F);
+
+    /* copy in all the data the user entered */ 
+    for (i = 0; i < argc; i++)
+        local_argv[j++] = xstrdup(argv[i]);
+
     local_argv[j] = NULL;
 
     if ( pipe(pin) == -1 ) {
