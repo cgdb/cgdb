@@ -1,3 +1,7 @@
+03/27/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * Changed cgdb to version 0.3.0 in cvs.
+
 03/26/2003 Bob Rossi <bob_rossi@cox.net>
 
     * Fixed resizing with new input library: cgdb now writes to a pipe in the
