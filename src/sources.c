@@ -594,13 +594,13 @@ void source_search_regex_init(struct sviewer *sview) {
     if ( sview == NULL || sview->cur == NULL)
         return;
 
-    /* Start from beggining of line if not at same line */
+    /* Start from beginning of line if not at same line */
     if ( sview->cur->sel_rline != sview->cur->sel_line ) {
         sview->cur->sel_col_rend = 0;
         sview->cur->sel_col_rbeg = 0;
     }
     
-    /* Start searching at the beggining of the selected line */
+    /* Start searching at the beginning of the selected line */
     sview->cur->sel_rline    = sview->cur->sel_line;
     sview->modified = 1;
 }
@@ -609,7 +609,7 @@ int source_search_regex(struct sviewer *sview,
                         const char *regex, int opt,
                         int direction, int icase) {
 
-    if ( sview == NULL || sview->cur == NULL )
+    if ( sview == NULL || sview->cur == NULL || regex == NULL || regex[0] == 0)
         return -1;
     sview->modified = 1;
 
