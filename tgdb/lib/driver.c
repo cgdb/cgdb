@@ -58,26 +58,43 @@ static void tgdb_send_user_command(char *line) {
     char *ret;
     add_history(line);
     sprintf(buf, "%s\n", line);
-    if ( (ret = tgdb_send(buf)) != NULL )
-        fprintf(stderr, "%s", ret);
+    fprintf(stderr, "\n");
+    tgdb_send(buf);
 }
 
 static int readline_fd[2] = { -1, -1 }; /* readline write to this */
+
+/* pty for readline stdin */
+static int masterfd, slavefd;
+char sname[SLAVE_SIZE];
+
 static int init_readline(void){
-    FILE *n;
+    FILE *out, *in;
 
     if ( pipe(readline_fd) == -1 ) {
        err_msg("(%s:%d) pipe failed", __FILE__, __LINE__);
        return -1;
     }
 
-    if ( (n = fdopen(readline_fd[1], "w")) == NULL ) {
+    /* Open a new pty */
+    if ( tgdb_util_new_tty(&masterfd, &slavefd, sname) == -1 ) {
+       err_msg("(%s:%d) tgdb_util_new_tty failed", __FILE__, __LINE__);
+       return -1;
+    }
+
+    if ( (out = fdopen(readline_fd[1], "w")) == NULL ) {
+       err_msg("(%s:%d) fdopen failed", __FILE__, __LINE__);
+       return -1;
+    }
+
+    if ( (in = fdopen(slavefd, "r")) == NULL ) {
        err_msg("(%s:%d) fdopen failed", __FILE__, __LINE__);
        return -1;
     }
 
     /* Set readline's output stream */
-    rl_outstream = n;
+    rl_instream = in;
+    rl_outstream = out;
     
     /* Initalize gdb */
     rl_callback_handler_install(tgdb_get_prompt(), tgdb_send_user_command);
@@ -99,13 +116,14 @@ static void tgdb_readline_input(void){
 /* This is the output of readline, it should be displayed in the gdb window 
  * if the gdb is ready to accept a command */
 static void readline_input(int fd){
-    char c;
+    char buf[MAXLINE];
+    ssize_t size, i;
     
-    if ( read(fd, &c, 1) != 1 ) 
+    if ( ( size = read(fd, &buf, MAXLINE)) == 0  ) 
         err_quit("%s:%d read error\n", __FILE__, __LINE__);
-    /*fprintf(stderr, "%c", c);*/
 
-    tgdb_send_input(c);
+    for ( i = 0; i < size; i++)
+        tgdb_send_input(buf[i]);
 }
 
 static int gdb_input(void) {
@@ -125,7 +143,7 @@ static int gdb_input(void) {
        return;
     }
 
-    tgdb_traverse_command(stderr, &com);
+    /*tgdb_traverse_command(stderr, &com);*/
 
     { 
     size_t j;
@@ -169,12 +187,17 @@ static void stdin_input(int fd) {
     } /* end if */
 
     for ( i = 0; i < size; i++ ) {
-     if ( rl_stuff_char(command[i]) != 1 ) {
-        err_quit("%s:%d rl_stuff_char error\n", __FILE__, __LINE__);
-        return;
-     }
+        if (write(masterfd, &command[i], 1) != 1 ) {
+            err_quit("%s:%d rl_stuff_char error\n", __FILE__, __LINE__);
+            return;
+        }
+
     }
-   rl_callback_read_char();
+}
+
+static void readline_stdin(void) {
+    /* If this is called in the loop, then ESC sequences don't work */
+    rl_callback_read_char();
 }
 
 void mainLoop(int masterfd, int childfd, int readlinefd){
@@ -187,6 +210,7 @@ void mainLoop(int masterfd, int childfd, int readlinefd){
    max = (max > childfd) ? max : childfd;
    max = (max > readline_fd[0]) ? max : readline_fd[0];
    max = (max > readlinefd) ? max : readlinefd;
+   max = (max > slavefd) ? max : slavefd;
    
    while(1){
       /* Clear the set and 
@@ -204,6 +228,7 @@ void mainLoop(int masterfd, int childfd, int readlinefd){
       FD_SET(childfd, &rfds);
       FD_SET(readline_fd[0], &rfds);
       FD_SET(readlinefd, &rfds);
+      FD_SET(slavefd, &rfds);
       
       result = select(max + 1, &rfds, NULL, NULL, NULL);
       
@@ -213,23 +238,30 @@ void mainLoop(int masterfd, int childfd, int readlinefd){
       else if(result == -1) /* on error ... must die -> stupid OS */
          err_dump("main.c:mainLoop - select failed\n");
 
+      /* readline output -> tgdb input */
       if(FD_ISSET(readline_fd[0], &rfds))
           readline_input(readline_fd[0]);
 
-      /* stdin -> gdb's input */
+      /* stdin -> readline input */
       if(FD_ISSET(STDIN_FILENO, &rfds))
           stdin_input(STDIN_FILENO);
+
+      /* gdb's output -> stdout ( triggered from readline input ) */
+      if(FD_ISSET(readlinefd, &rfds))
+          tgdb_readline_input();
+
+      /* Readline stdin */
+      if(FD_ISSET(slavefd, &rfds))
+          readline_stdin();
               
       /* gdb's output -> stdout */
       if(FD_ISSET(masterfd, &rfds))
           if ( gdb_input() == -1 )
               return;
 
+      /* child's output -> stdout */
       if(FD_ISSET(childfd, &rfds))
           tty_input();
-
-      if(FD_ISSET(readlinefd, &rfds))
-          tgdb_readline_input();
    }
 }
 
@@ -241,9 +273,12 @@ int main(int argc, char **argv){
    read(0, &c ,1);
 #endif
 
+   if ( tty_cbreak(STDIN_FILENO) == -1 )
+      err_msg("%s:%d tty_cbreak error\n", __FILE__, __LINE__);
+
    tgdb_init();
    if ( tgdb_start(NULL, argc-1, argv+1, &gdb_fd, &child_fd, &tgdb_readline_fd) == -1 )
-      err_msg("%s:%d -> could not init\n", __FILE__, __LINE__);
+      err_msg("%s:%d tgdb_start error\n", __FILE__, __LINE__);
 
    init_readline();
 
@@ -253,6 +288,9 @@ int main(int argc, char **argv){
 
    if(tgdb_shutdown() == -1)
       err_msg("%s:%d -> could not shutdown\n", __FILE__, __LINE__);
+
+   if ( tty_reset(STDIN_FILENO) == -1 )
+      err_msg("%s:%d tty_reset error\n", __FILE__, __LINE__);
 
    return 0;
 }

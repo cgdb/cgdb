@@ -46,6 +46,7 @@ static sig_atomic_t control_c = 0;              /* If control_c was hit by user 
 
 static char user_cur_command[MAXLINE];
 static int user_cur_command_pos = 0;
+static int user_new_line = 0;
 
 /* signal_catcher: Is called when a signal is sent to this process. 
  *    It passes the signal along to gdb. Thats what the user intended.
@@ -405,14 +406,27 @@ size_t a2_tgdb_recv(char *buf, size_t n, struct Command ***com){
          * Display the data the user's unfinished command if
          * the current command is done outputting */
        if ( result == -2 && user_cur_command_pos > 0 ) {
+           char temp[MAXLINE];
 //           char buf2[100];
 //           sprintf(buf2, "%d:%s", user_cur_command_pos, user_cur_command);
 //           strcat(buf, buf2);
 //           buf_size += strlen(buf2);
+           user_cur_command[user_cur_command_pos] = '\0';
+//           if ( user_new_line )
+//               strcpy(temp, "\n");
+//           else
+               temp[0] = '\0';
 
-           strcat(buf, user_cur_command);
-           buf_size += user_cur_command_pos;
+           if ( buf_size > 0 )
+               strcat(temp, buf);
+
+           strcat(temp, user_cur_command);
+
+           /* copy back */
+           strcpy(buf, temp);
+           buf_size += (user_cur_command_pos + 1);
            user_cur_command_pos = 0;
+           user_new_line = 0;
            user_cur_command[0] = '\0';
        }
    }
@@ -428,7 +442,6 @@ size_t a2_tgdb_recv(char *buf, size_t n, struct Command ***com){
 /* Sends the user typed line to gdb */
 char *a2_tgdb_send(char *line){
    static char buf[MAXLINE];
-   memset(buf, '\0', MAXLINE); 
    
    if (tgdb_can_issue_command()) {     
       /*io_debug_write_fmt("%s", line);*/
@@ -436,14 +449,12 @@ char *a2_tgdb_send(char *line){
        * buggy gdb annotations */
       tgdb_setup_buffer_command_to_run ( NULL, BUFFER_TGDB_COMMAND, COMMANDS_HIDE_OUTPUT, COMMANDS_INFO_BREAKPOINTS );
 
-      buf[0] = '\n';
       if(io_writen(masterfd, line, strlen(line)) == -1){
          err_ret("%s:%d -> could not write byte", __FILE__, __LINE__);
          return NULL;
       }
    } else {
       /* TODO: Needs to be fixed */
-      buf[0] = '\n';
       head = buffer_write_line ( head, line );
       tgdb_setup_buffer_command_to_run ( NULL, BUFFER_TGDB_COMMAND, COMMANDS_HIDE_OUTPUT, COMMANDS_INFO_BREAKPOINTS );
    }
@@ -452,18 +463,14 @@ char *a2_tgdb_send(char *line){
 }
 
 int a2_tgdb_send_input(char c) {
-//        fprintf(stderr, "[%c]", c);
-
     /* If tgdb is in a state to issue a command, then this data can be
      * returned right away */
     if( tgdb_can_issue_command() == TRUE ) {
-//        fprintf(stderr, "{%c}", c);
        if(io_write_byte(readline_fd[1], c) == -1){
           err_ret("%s:%d -> io_write_byte error", __FILE__, __LINE__);
           return -1;
        }
     } else {
-//        fprintf(stderr, "<%c>", c);
     /* At this point, tgdb is busy, and has more output to display before
      * this data, lets save the command. to be displayed.
      *
@@ -477,10 +484,20 @@ int a2_tgdb_send_input(char c) {
      *      This happens when the user typed a whole command ( and '\n' )
      *      while gdb was busy.
      */
-        /* Don't add the new line, it can be added later */
-        if ( c != '\n' ) {
-            user_cur_command[user_cur_command_pos++] = c;
-        } else {
+//        internal_user_cur_command[internal_user_cur_command_pos++] = c;
+//        
+//        if ( c == '\n' ) {
+//            strncpy(user_cur_command, internal_user_cur_command, internal_user_cur_command_pos);
+//            user_cur_command_pos = internal_user_cur_command_pos;
+//            
+//            internal_user_cur_command_pos = 0;
+//            internal_user_cur_command[0] = '\0';
+//        }
+        //
+        user_cur_command[user_cur_command_pos++] = c;
+        
+        if ( c == '\n' || c == '\r') {
+            user_new_line = 1;
             user_cur_command_pos = 0;
             user_cur_command[0] = '\0';
         }
