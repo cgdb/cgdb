@@ -3,6 +3,8 @@
     * Implemented new changes to the libtgdb interface to support readline:
     cgdb should now be able to send all the data the user typed to tgdb, 
     and tgdb figures out what data to send back and in what order.
+    * Fixed crash in cgdb: If user hit ' ' into the cgdb window when there
+    was no file selected, cgdb would crash.
 
 02/24/2003 Bob Rossi <bob_rossi@cox.net>
 

@@ -891,11 +891,13 @@ static void source_input(struct sviewer *sview, int key)
         case ' ':
             {
                 char *path;
-                int   line = sview->cur->sel_line;
+                int   line;
                 char *command;
 
-                if (!sview->cur || !sview->cur->path || !line)
+                if (!sview || !sview->cur || !sview->cur->path || !line)
                     return;
+
+                line = sview->cur->sel_line;
 
                 /* Get filename (strip path off -- GDB is dumb) */
                 path = strrchr(sview->cur->path, '/') + 1;
