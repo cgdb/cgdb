@@ -1,4 +1,8 @@
 07/02/2003 Bob Rossi <bob@brasko.net>
+	
+	* tgdb.h: Prototyped interface for .4.0
+
+07/02/2003 Bob Rossi <bob@brasko.net>
 
 	* tgdb.h: Adding commands tgdb_run_client_command
 	tgdb_set_breakpoint_file_line. Remove tgdb_send command. It is now a
