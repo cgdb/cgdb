@@ -107,8 +107,15 @@ static int gdb_input(void) {
 
     while ( queue_size(q) > 0 ) {
         item = queue_pop(q);
-        if(item->header == TGDB_QUIT)
+        if( item->header == TGDB_QUIT_NORMAL ) {
+           fprintf ( stderr, "%s:%d TGDB_QUIT_NORMAL\n", __FILE__, __LINE__);
            return -1;
+		}
+
+        if( item->header == TGDB_QUIT_ABNORMAL) {
+           fprintf(stderr, "%s:%d TGDB_QUIT_ABNORMAL\n", __FILE__, __LINE__);
+           return -1;
+		}
 
         tgdb_delete_command(item);
     }

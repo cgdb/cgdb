@@ -76,7 +76,8 @@ static void tgdb_print_item(void *item) {
            break;
         case TGDB_DISPLAY_UPDATE:
            break;
-        case TGDB_QUIT:
+        case TGDB_QUIT_ABNORMAL:
+		case TGDB_QUIT_NORMAL:
            break;
 
         default:

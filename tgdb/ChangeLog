@@ -1,3 +1,15 @@
+09/15/2003 Bob Rossi <bob@brasko.net>
+
+   * gdbmi_tgdb.c: gdbmi_tgdb_recv, stubbed out function.
+   * types.h: enum INTERFACE_COMMANDS, removed TGDB_QUIT and added
+   TGDB_QUIT_NORMAL and TGDB_QUIT_ABNORMAL
+   * driver.c: gdb_input, changed to handle new TGDB_QUIT commands.
+   * tgdb.c: Added HAVE_SYS_TYPES_H and HAVE_SYS_WAIT_H
+   added tgdb_get_quit_command.
+   tgdb_recv_debugger_data, call tgdb_get_quit_command instead of just adding
+   TGDB_QUIT to the list.
+   * types.c: tgdb_print_item, add case to switch for TGDB_QUIT_* commands.
+
 09/12/2003 Bob Rossi <bob@brasko.net>
 
    * commands.c: global 'struct commands' add 'field_5_newline_hit' member

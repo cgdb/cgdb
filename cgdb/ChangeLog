@@ -1,3 +1,8 @@
+09/15/2003 Bob Rossi <bob@brasko.net>
+
+   * cgdb.c: process_commands, removed TGDB_QUIT from switch and added
+   TGDB_QUIT_NORMAL and TGDB_QUIT_ABNORMAL
+
 09/10/2003 Bob Rossi <bob@brasko.net>
 
    * helptext.h: Auto-generated because of README change.

@@ -19,6 +19,14 @@
 #include <string.h>
 #endif /* HAVE_STRING_H */
 
+#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+
+#if HAVE_SYS_WAIT_H
+#include <sys/wait.h>
+#endif
+
 #include "tgdb.h"
 #include "tgdb_interface.h"
 #include "a2-tgdb.h"
@@ -874,6 +882,40 @@ size_t tgdb_recv_readline_data ( struct tgdb *tgdb, char *buf, size_t n ) {
     return length;
 }
 
+/* 
+ * This is called when GDB has finished.
+ * Its job is to add the type of QUIT command that is appropriate.
+ *
+ *
+ */
+static int tgdb_get_quit_command ( struct tgdb *tgdb, struct queue *q ) {
+	pid_t pid 	= a2_get_debugger_pid ( tgdb->a2 );
+	int status 	= 0;
+	pid_t ret;
+
+	ret = waitpid ( pid, &status, WNOHANG );
+
+	if ( ret == -1 ) {
+        err_msg("%s:%d waitpid error", __FILE__, __LINE__);
+		return -1;
+	} else if ( ret == 0 ) {
+		/* The child didn't die, whats wrong */
+        err_msg("%s:%d waitpid error", __FILE__, __LINE__);
+		return -1;
+	} else if ( ret != pid ) {
+		/* What process just died ?!? */ 
+        err_msg("%s:%d waitpid error", __FILE__, __LINE__);
+		return -1;
+	}
+
+	if ( (WIFEXITED(status)) == 0 ) /* Child did not exit normally */
+		tgdb_append_command(q,TGDB_QUIT_ABNORMAL, NULL );
+	else
+		tgdb_append_command(q, TGDB_QUIT_NORMAL, NULL );
+
+	return 0;
+}
+
 size_t tgdb_recv_debugger_data ( struct tgdb *tgdb, char *buf, size_t n, struct queue *q ) {
     char local_buf[10*n];
     ssize_t size, buf_size;
@@ -911,12 +953,12 @@ size_t tgdb_recv_debugger_data ( struct tgdb *tgdb, char *buf, size_t n, struct 
     /* 1. read all the data possible from gdb that is ready. */
     if( (size = io_read(tgdb->debugger_stdout, local_buf, n)) < 0){
         err_ret("%s:%d -> could not read from masterfd", __FILE__, __LINE__);
-        tgdb_append_command(q, TGDB_QUIT, NULL );
+		tgdb_get_quit_command ( tgdb, q );
         return -1;
     } else if ( size == 0 ) {/* EOF */ 
         buf_size = 0;
       
-        tgdb_append_command(q, TGDB_QUIT, NULL );
+		tgdb_get_quit_command ( tgdb, q );
       
         goto tgdb_finish;
     }

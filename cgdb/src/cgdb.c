@@ -421,7 +421,8 @@ static void process_commands(struct queue *q)
                 break;
              }
 
-            case TGDB_QUIT:
+            case TGDB_QUIT_NORMAL:
+			case TGDB_QUIT_ABNORMAL:
                 cleanup();            
                 exit(0);
                 break;
