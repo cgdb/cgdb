@@ -365,7 +365,7 @@ static void commands_process_info_source(char a){
       return;
    }
 
-   if(info_source_nl == 2)
+   if(info_source_nl == 3)
       info_source_buf[info_source_buf_pos++] = a;
 }
 

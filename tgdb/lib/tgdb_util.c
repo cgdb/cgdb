@@ -90,7 +90,7 @@ int invoke_debugger(char *path, int argc, char *argv[], int *in, int *out, int c
     const char * const GDB               = "gdb";
     const char * const NW                = "--nw";
     const char * const X                 = "-x";
-    const char * const F                 = "/home/bob/.tgdb/gdb_init";
+    const char * const F                 = "~/.tgdb/gdb_init";
     char **local_argv;
     int i, j = 0, extra = 5;
     int pin[2] = { -1, -1 }, pout[2] = { -1, -1 };

@@ -7,6 +7,7 @@
     * Modified buffer package to take commands instead of char's: The buffer
     package now takes only full commands at a time.
     * Fixing gdbmi interface to work with new libtgdb interface.
+    * Fixing tgdb_util to use ~/.tgdb/gdb_init as the startup file
 
 02/23/2003 Bob Rossi <bob_rossi@cox.net>
 
