@@ -2458,7 +2458,7 @@ _ACEOF
 # Check whether --with-ncurses-prefix or --without-ncurses-prefix was given.
 if test "${with_ncurses_prefix+set}" = set; then
   withval="$with_ncurses_prefix"
-  LDFLAGS="-L$withval/lib $LDFLAGS" CFLAGS="-I$withval/include $CFLAGS"
+  LDFLAGS="-L$withval/lib $LDFLAGS" CFLAGS="-I$withval/include -I$withval/include/ncurses $CFLAGS"
 fi;
 
 

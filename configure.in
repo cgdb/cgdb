@@ -41,7 +41,7 @@ AC_PROG_INSTALL
 dnl Determines if the user asked to build user curses, the default is ncurses.
 dnl If the user asked for curses, ncurses is set to no. Otherwise ncurses is yes.
     AC_ARG_WITH(ncurses-prefix,
-        [  --with-ncurses-prefix=DIR  Prefix where ncurses is installed (optional)],LDFLAGS="-L$withval/lib $LDFLAGS" CFLAGS="-I$withval/include $CFLAGS")
+        [  --with-ncurses-prefix=DIR  Prefix where ncurses is installed (optional)],LDFLAGS="-L$withval/lib $LDFLAGS" CFLAGS="-I$withval/include -I$withval/include/ncurses $CFLAGS")
 
     AC_ARG_WITH(curses-prefix,
         [  --with-curses-prefix=DIR   Prefix where curses is installed (optional)],LDFLAGS="-L$withval/lib $LDFLAGS" CFLAGS="-I$withval/include $CFLAGS")
