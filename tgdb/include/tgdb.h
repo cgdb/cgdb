@@ -39,7 +39,7 @@ int tgdb_init(void);
  *
  * RETURNS: 0 on success or -1 on error
  */
-int tgdb_start(char *debugger, int argc, char **argv, int *gdb, int *child);
+int (*tgdb_start)(char *debugger, int argc, char **argv, int *gdb, int *child);
 
 /* tgdb_send: Sends a character to the debugger that the user typed.
  *
@@ -49,7 +49,7 @@ int tgdb_start(char *debugger, int argc, char **argv, int *gdb, int *child);
  *          that should be displayed by the GUI in the GDB pane.
  *          This string is statically allocated, so do not free it.
  */
-char *tgdb_send(char c);
+char *(*tgdb_send)(char c);
 
 /* tgdb_tty_send: Sends a character to the program being debugged by gdb.
  *
@@ -59,7 +59,7 @@ char *tgdb_send(char c);
  *          that should be displayed by the GUI in the GDB pane.
  *          This string is statically allocated, so do not free it.
  */
-char *tgdb_tty_send(char c);
+char *(*tgdb_tty_send)(char c);
 
 /* tgdb_recv: Gets output from the debugger and from the library.
  *      
@@ -73,7 +73,7 @@ char *tgdb_tty_send(char c);
  *          before the calling this function again. The first time
  *          the user can call this function without worrying.
  */
-size_t tgdb_recv(char *buf, size_t n, struct Command ***com); 
+size_t (*tgdb_recv)(char *buf, size_t n, struct Command ***com); 
 
 /* tgdb_tty_recv: 
  * 
@@ -83,7 +83,7 @@ size_t tgdb_recv(char *buf, size_t n, struct Command ***com);
  *
  * RETURNS: the amount of bytes in buf on success or -1 on error
  */
-size_t tgdb_tty_recv(char *buf, size_t n);
+size_t (*tgdb_tty_recv)(char *buf, size_t n);
 
 /* tgdb_new_tty:
  *
@@ -97,7 +97,7 @@ size_t tgdb_tty_recv(char *buf, size_t n);
  *      not whether gdb accepted the tty, since this can only be determined 
  *      when gdb responds, not when the command is given.
  */
-int tgdb_new_tty(void);
+int (*tgdb_new_tty)(void);
 
 /* tgdb_tty_name:
  *
@@ -105,12 +105,12 @@ int tgdb_new_tty(void);
  * to communicate with gdb in regards to the program being debugged.
  * It returns a string that is at most SLAVE_SIZE characters long.
  */
-char *tgdb_tty_name(void);
+char *(*tgdb_tty_name)(void);
 
 /* tgdb_run_command: Runs a command.
  * Returns: 0 on success, otherwise -1.
  */
-int tgdb_run_command(char *com);
+int (*tgdb_run_command)(char *com);
 
 /* tgdb_get_sources: Gets a list of source files that make up the program
  * being debugged.
@@ -121,9 +121,9 @@ int tgdb_run_command(char *com);
  *    Every struct with a header SOURCE_FILE will be a valid source file.
  *    That will continue until a SOURCES_END is returned.
  */
-int tgdb_get_sources(void);
+int (*tgdb_get_sources)(void);
 
-int tgdb_get_source_absolute_filename(char *file);
+int (*tgdb_get_source_absolute_filename)(char *file);
 
 /* tgdb_err_msg: Returns an error message from the last library call that
  *               generated an error message.
@@ -133,13 +133,13 @@ int tgdb_get_source_absolute_filename(char *file);
  * call. If the client desires to keep it they should copy it.
  * If there is no error message, NULL is returned.
  */
-char* tgdb_err_msg(void);
+char* (*tgdb_err_msg)(void);
 
 /*  tgdb_shutdown: Terminates tgdb's library support.
  *
  * RETURNS: 0 on success or -1 on error
  */
-int tgdb_shutdown(void);
+int (*tgdb_shutdown)(void);
 
 #ifdef __cplusplus
 }
