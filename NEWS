@@ -1,3 +1,14 @@
+cgdb-0.3.3
+
+	* Fixed tab bug, where tab spaces were being displayed incorrectly in 
+	the source window. Now cgdb can handle tabs in a file properly.
+
+	* Added VI-style page up/page down commands. Deprecated old Shift-J 
+	and Shift-K page up/page down style commands.
+
+	* Fixed bug in ada highlighter. The file would not be displayed correctly 
+	when trying to highlight an ada source file.
+
 cgdb-0.3.2
 
 	* Fast tokenizer replaces older hand written one. CGDB now can syntax
