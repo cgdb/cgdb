@@ -1,3 +1,11 @@
+03/01/2004 Bob Rossi <bob@brasko.net>
+
+    * inc/kui.h: second specification for libkui
+    * src/kui.c: a stubbed implementation that allows linking
+    * src/kui_driver.c: Doesn't test anything yet.
+	* src/Makefiel.am: update to build correctly
+	* src/Makefiel.in: Add for people with automake
+
 02/26/2004 Bob Rossi <bob@brasko.net>
 
     * inc: Added include directory.
