@@ -2,6 +2,11 @@ version 0.4.0 (10/28/2003):
 
 10/28/2003 Bob Rossi <bob@brasko.net>
 
+   * tgdb.c: tgdb_set_verbose_gui_command_output, remove call to err_verbose.
+   tgdb_set_verbose_error_handling, add call to err_verbose.
+
+10/28/2003 Bob Rossi <bob@brasko.net>
+
    * tgdb-base/src/Makefile.in: ran autoregen.sh
 
 10/27/2003 Bob Rossi <bob@brasko.net>

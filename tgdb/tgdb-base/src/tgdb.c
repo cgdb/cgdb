@@ -1239,10 +1239,8 @@ int tgdb_signal_notification ( struct tgdb *tgdb, int signum ) {
 }
 
 int tgdb_set_verbose_gui_command_output ( struct tgdb *tgdb, int value ) {
-	if ( (value == 0) || (value == 1) ) {
+	if ( (value == 0) || (value == 1) )
 		tgdb->show_gui_commands = value;
-		err_verbose ( value );
-	}
 
 	if ( tgdb->show_gui_commands == 1 )
 		return 1;
@@ -1254,8 +1252,10 @@ int tgdb_set_verbose_error_handling ( struct tgdb *tgdb, int value ) {
 	if ( value == -1 )
 		return tgdb->tgdb_verbose_error_handling;
 
-	if ( (value == 0) || (value == 1) )
+	if ( (value == 0) || (value == 1) ) {
 		tgdb->tgdb_verbose_error_handling = value;
+		err_verbose ( value );
+	}
 
 	return tgdb->tgdb_verbose_error_handling;
 }
