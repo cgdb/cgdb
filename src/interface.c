@@ -399,10 +399,11 @@ void if_draw( void )
     if ( get_gdb_height() > 0 )
         scr_refresh(gdb_win, focus == GDB);
 
-    if ( get_src_height() == 0 || get_gdb_height() == 0 ) {
-        curs_set(0);
-        wrefresh(status_win);
-    }
+    /* This check is here so that the curses goes to the 
+     * cgdb window. The cursor would stay in the gdb window 
+     * on cygwin */
+    if ( focus == CGDB ) 
+        wrefresh(src_win->win);
 }
 
 /* if_layout: Update the layout of the screen based on current terminal size.

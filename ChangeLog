@@ -1,3 +1,9 @@
+04/03/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * interface.c ( if_draw ): Removed a function that called refresh
+    on the status bar. Also, Added a check to refresh the cgdb window
+    if focus == cgdb.
+
 04/02/2003 Bob Rossi <bob_rossi@cox.net>
 
     * Removed filedlg's main loop: filedlg's main loop is gone. It is now
