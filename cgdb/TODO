@@ -15,9 +15,6 @@ Current To Do List (in no particular order)
       - Resize events don't occur while GDB (or debugged program) is
         outputting massive amounts of data.  Doing a CTRL+W causes a
         resize, however.  Is there ANY way to simulate input on stdin?
-	  - Resizing the terminal a lot sends a signal to cgdb to resize.
-	    CGDB should not buffer these signals like it does. If the user
-		sends multiple resizes, only the last one should be serviced.
       - Eventually... flicker reduction?
 
    o Support monochrome terminals (vt100, etc.)
@@ -56,6 +53,11 @@ Current To Do List (in no particular order)
 		removed.
       - Arrow keys still not working properly (left, right, CTRL+A/E, etc.)
       - TAB character messing up with horizontal scrolling (source window)
+
+		o Resizing issues:
+		  - Resizing the terminal a lot sends a signal to cgdb to resize.
+			CGDB should not buffer these signals like it does. If the user
+			sends multiple resizes, only the last one should be serviced.
 
 -------------
 Nice Features
