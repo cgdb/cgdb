@@ -181,6 +181,9 @@ static int tgdb_run_command(void){
     /* If a signal has been recieved, clear the queue and return */
     if(control_c) { 
         queue_free_list(gdb_input_queue, buffer_free_item);
+        /* TODO: Setting control_c here stops crashing, but it doesn't solve
+         * the problem. readline needs to know to reset the prompt. */
+        control_c = 0;
         return 2;
     } 
     
