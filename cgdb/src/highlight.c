@@ -440,11 +440,16 @@ int hl_regex(const char *regex, const char **hl_lines, const char **tlines,
         offset = *sel_col_rend;
         while(!success){
             for ( i = start; i < end; i++){
+                int local_cur_line_length;
                 local_cur_line = (char *)tlines[i];
+                local_cur_line_length = strlen ( local_cur_line );
                 
                 /* Add the position of the current line's last match */
-                if ( i == *sel_rline ) 
+                if ( i == *sel_rline )  {
+                    if ( offset >= local_cur_line_length )
+                        continue;
                     local_cur_line += offset;
+                }
     
                 /* Found a match */
                 if ( ( result = regexec(&t, local_cur_line, 1, pmatch, 0)) == 0 ) {
@@ -473,6 +478,8 @@ int hl_regex(const char *regex, const char **hl_lines, const char **tlines,
             for ( i = start; i >= end; i--){
                 local_cur_line = (char *)tlines[i];
                 pos = strlen(local_cur_line) - 1;
+                if ( pos < 0 )
+                    continue;
                 
                 if ( i == *sel_rline )
                     pos = offset - 1; 

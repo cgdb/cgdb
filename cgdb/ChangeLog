@@ -1,5 +1,10 @@
 03/31/2005 Bob Rossi <bob@brasko.net>
 
+	* highlight.c (hl_regex): Fix memory runtime errors.
+	* sources.c (source_del): Fix memory runtime errors.
+
+03/31/2005 Bob Rossi <bob@brasko.net>
+
 	* interface.c (set_up_signal): Catch the SIGCHLD signal now.
 	(signal_handler): Alert TGDB of SIGCHLD now.
 

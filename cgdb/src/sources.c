@@ -457,7 +457,10 @@ int source_del(struct sviewer *sview, const char *path)
     if (cur->buf.tlines){
         for (i = 0; i < cur->buf.length; i++) {
             free(cur->buf.tlines[i]);
-            free(cur->buf.cur_line);
+            if ( cur->buf.cur_line ) {
+                free(cur->buf.cur_line);
+                cur->buf.cur_line = NULL;
+            }
             free(cur->orig_buf.tlines[i]);
         }
     }
