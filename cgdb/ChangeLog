@@ -1,3 +1,7 @@
+11/05/2004 Bob Rossi <bob@brasko.net>
+
+   * sources.h: Add #include of time.h
+
 07/28/2004 Bob Rossi <bob@brasko.net>
 
     * helptext.h: Updated the README file.

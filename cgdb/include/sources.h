@@ -23,6 +23,11 @@
 #include <curses.h>
 #endif /* HAVE_CURSES_H */
 
+/* System Includes */
+#if HAVE_TIME_H
+#include <time.h>
+#endif /* HAVE_TIME_H */
+
 #include "tokenizer.h"
 
 /* ----------- */
