@@ -1,3 +1,7 @@
+CVS
+
+   * Fixed TGDB bug. Tab completion was broken during cgdb-0.4.0 release.
+
 cgdb-0.4.0 (10/28/2003)
    
    * Added 'wrapscan' option (abbreviated 'ws').  Note that this means that

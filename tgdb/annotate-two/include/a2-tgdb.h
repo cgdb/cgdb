@@ -351,20 +351,6 @@ int a2_get_inferior_sources ( void *ctx );
 int a2_change_prompt( void *ctx, const char *prompt);
 
 /** 
- * This is called when readline determines a command has been typed. 
- *
- * \param ctx
- * The annotate two context.
- *
- * \param command
- * The command the user typed without the '\n'.
- *
- * @return
- * 0 on success, otherwise -1 on error.
- */
-int a2_command_callback( void *ctx, const char *command);
-
-/** 
  * This is called when readline determines a command needs to be completed.
  *
  * \param ctx

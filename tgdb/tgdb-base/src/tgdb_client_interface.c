@@ -130,7 +130,7 @@ static struct tgdb_client_debugger_interfaces {
 		/* tgdb_client_change_debugger_prompt */
 		a2_change_prompt,
 		/* tgdb_client_completion_callback */
-		a2_command_callback,
+		a2_completion_callback,
 		/* tgdb_client_return_command*/
 		a2_return_client_command,
 		/* tgdb_client_modify_breakpoint */

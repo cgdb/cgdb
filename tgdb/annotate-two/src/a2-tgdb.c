@@ -363,13 +363,6 @@ int a2_change_prompt(
     return 0;
 }
 
-int a2_command_callback(
-		void *ctx,
-		const char *command) {
-	/* Unimplemented */
-	return -1;
-}
-
 char *a2_return_client_command ( void *ctx, enum tgdb_command_type c ) {
 	if ( c < TGDB_CONTINUE || c >= TGDB_ERROR )
 		return NULL;
