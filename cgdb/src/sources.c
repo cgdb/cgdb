@@ -52,6 +52,7 @@
 #include "sys_util.h"
 
 int sources_syntax_on = 1;
+int auto_source_reload = 1;
 
 /* --------------- */
 /* Local Functions */
@@ -197,6 +198,86 @@ static struct list_node *get_node(struct sviewer *sview, const char *path)
     return NULL; 
 }
 
+/**
+ * Get's the timestamp of a particular file.
+ *
+ * \param path
+ * The path to the file to get the timestamp of
+ *
+ * \param timestamp
+ * The timestamp of the file, or 0 on error.
+ * 
+ * \return
+ * 0 on success, -1 on error.
+ */
+static int get_timestamp ( const char *path, time_t *timestamp ) {
+	struct stat s;
+	int val;
+
+	if ( !path )
+		return -1;
+
+	if ( !timestamp )
+		return -1;
+
+	*timestamp = 0;
+
+	val = stat ( path, &s );
+
+	if ( val ) /* Error on timestamp */
+		return -1;
+
+	*timestamp = s.st_mtime;
+
+	return 0;
+}
+
+static int release_file_buffer ( struct buffer *buf ) {
+	int i;
+
+	/* Nothing to free */
+	if ( !buf ) 
+		return 0;
+
+	for ( i = 0; i < buf->length; ++i ) {
+		free ( buf->tlines[i] );
+		buf->tlines[i] = NULL;
+	}
+
+	free ( buf->tlines );
+	buf->tlines = NULL;
+	buf->length = 0;
+	buf->cur_line = NULL;	
+	buf->max_width = 0;
+	free ( buf->breakpts );
+	buf->breakpts = NULL;
+
+	return 0; 
+}
+
+/** 
+ * Remove's the memory related to a file.
+ *
+ * \param node
+ * The node who's file buffer data needs to be freed.
+ *
+ * \return
+ * 0 on success, or -1 on error.
+ */
+static int release_file_memory ( struct list_node *node ) {
+	if ( !node )
+		return -1;
+	
+	/* Free the buffer */
+	if ( release_file_buffer ( &node->buf ) == -1 )
+		return -1;
+
+	if ( release_file_buffer ( &node->orig_buf ) == -1 )
+		return -1;
+
+	return 0;
+}
+
 /* load_file:  Loads the file in the list_node into its memory buffer.
  * ----------
  *
@@ -223,6 +304,10 @@ static int load_file(struct list_node *node)
 	node->orig_buf.length = 0;
 	node->orig_buf.tlines = NULL;
 	node->orig_buf.max_width = 0;
+
+	/* Stat the file to get the timestamp */
+	if ( get_timestamp ( node->path, &(node->last_modification) ) == -1 )
+		return 2;
 
     if (!(file = fopen(node->path, "r")))
         return 1;
@@ -315,6 +400,7 @@ int source_add(struct sviewer *sview, const char *path)
     new_node->sel_col_rend = 0;
     new_node->sel_rline    = 0;
     new_node->exe_line     = 0;
+	new_node->last_modification = 0; /* No timestamp yet */
 
     if (sview->list_head == NULL){
         /* List is empty, this is the first node */
@@ -788,3 +874,35 @@ void source_clear_breaks(struct sviewer *sview)
         
 }
 
+int source_reload ( struct sviewer *sview, const char *path, int force ) {
+	time_t timestamp;
+    struct list_node *cur;
+    struct list_node *prev = NULL;
+
+	if ( !path )
+		return -1;
+
+	if ( get_timestamp ( path, &timestamp ) == -1 )
+		return -1;
+
+	/* Find the target node */
+	for (cur = sview->list_head; cur != NULL; cur = cur->next){
+		if (strcmp(path, cur->path) == 0)
+			break;
+		prev = cur;
+	}
+	
+	if (cur == NULL)
+		return 1;      /* Node not found */
+
+	if ( ( auto_source_reload || force ) && cur->last_modification < timestamp ) {
+
+		if ( release_file_memory ( sview->cur ) == -1)
+			return -1;
+
+		if ( load_file ( cur ) )
+			return -1;
+	}
+
+	return 0;
+}

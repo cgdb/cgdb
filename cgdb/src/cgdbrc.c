@@ -28,6 +28,7 @@ extern struct tgdb *tgdb;
  *
  */
 
+extern int auto_source_reload;
 extern int regex_icase ;
 extern int shortcut_option ;
 extern int line_coverage_option;
@@ -59,6 +60,7 @@ static struct ConfigVariable
     void *data;
 } VARIABLES[] = {
     // keep this stuff sorted! !sort
+	/* autosourcereload */  { "autosourcereload", "asr", CONFIG_TYPE_BOOL, &auto_source_reload },
     /* escdelay   */ 		{ "escdelay", "escdelay", CONFIG_TYPE_FUNC_INT, command_set_esc_sequence_timeout },
     /* focus      */ 		{ "focus", "fo", CONFIG_TYPE_FUNC_STRING, command_set_focus },
     /* ignorecase */ 		{ "ignorecase", "ic", CONFIG_TYPE_BOOL, &regex_icase },
@@ -85,6 +87,7 @@ static int command_do_quit_force( void );
 static int command_do_run( void );
 static int command_do_step( void );
 static int command_search_next( void );
+static int command_source_reload( void );
 static int command_start_tty( void );
 static int command_toggle_tty( void );
 
@@ -99,6 +102,7 @@ static struct commands
     action_t action;
 } COMMANDS[] = {
     // keep this stuff sorted, you can use !sort in vi
+	/* source_reload*/{ "source_reload", command_source_reload },
     /* continue    */ { "continue",    command_do_continue },
     /* finish      */ { "finish",      command_do_finish },
     /* help        */ { "help",        command_do_help },
@@ -300,6 +304,16 @@ int command_do_step( void )
 int command_search_next( void )
 {
     if_search_next();
+    return 0;
+}
+
+int command_source_reload( void )
+{
+	struct sviewer *sview = if_get_sview ();
+
+	if ( source_reload ( sview, sview->cur->path, 1 ) == -1 )
+		return -1;
+
     return 0;
 }
 

@@ -342,6 +342,9 @@ static void process_commands(struct tgdb *tgdb)
 
 				tfp = (struct tgdb_file_position *) item->data;
 
+				/* Update the file */
+				source_reload ( if_get_sview(), tfp->absolute_path, 0 );
+
                 if_show_file ( 
                     tfp->absolute_path, 
                     tfp->line_number);

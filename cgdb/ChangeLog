@@ -1,3 +1,17 @@
+07/28/2004 Bob Rossi <bob@brasko.net>
+
+    * helptext.h: Updated the README file.
+	* sources.h (struct list_node): add last_modification field
+	(source_reload): added function
+	* cgdb.c (process_commands): Call source_reload when
+	TGDB_UPDATE_FILE_POSITION recieved
+	* cgdbrc.c (VARIABLES): added autosourcereload
+	(COMMANDS): Added source_reload.
+	* sources.c
+	(get_timestamp,release_file_buffer,release_file_memory,source_reload):
+	new prototypes.
+
+
 07/25/2004 Bob Rossi <bob@brasko.net>
 
     * cgdb.c (process_commands): Add case for TGDB_INFERIOR_EXITED

@@ -1,5 +1,13 @@
 CVS
 
+   * Added 'set asr' or autosourcereload option to CGDB. It is on by default.
+   It is capable of reloading a source file when CGDB detects that a file has
+   been modified. To turn this feature of do ':set noasr'.
+
+   * The :source_reload colon command has been implemented. It forces CGDB to
+   reload the current file in the source viewer.
+
+
 cgdb-0.5.0 (07/14/2004)
 
    * "progs" directory is no longer installed in a potentially 

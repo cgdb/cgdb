@@ -76,6 +76,8 @@ struct list_node{
 
 	enum tokenizer_language_support language; /* The language type of this file */
 
+	time_t last_modification; /* timestamp of last modification */
+
     struct list_node *next;            /* Pointer to next link in list */
 };
 
@@ -292,5 +294,23 @@ void source_next(struct sviewer *sview);
  *   sview:  The source viewer object
  */
 void source_previous(struct sviewer *sview);
+
+/**
+ * Check's to see if the current source file has changed. If it has it loads
+ * the new source file up.
+ *
+ * \param sview
+ * The source viewer object
+ *
+ * \param path
+ * The path to the file to reload into memory
+ *
+ * \param force
+ * Force the file to be reloaded, even if autosourcereload option is off.
+ *
+ * \return
+ * 0 on success or -1 on error
+ */
+int source_reload ( struct sviewer *sview, const char *path, int force );
 
 #endif
