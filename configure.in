@@ -126,7 +126,6 @@ AC_CHECK_FUNCS(mkdir putenv select strdup strerror)
 AC_OUTPUT(Makefile \
 various/Makefile \
 various/util/Makefile various/util/src/Makefile \
-various/input/Makefile various/input/src/Makefile \
 various/adt/Makefile various/adt/src/Makefile \
 various/rlctx/Makefile various/rlctx/src/Makefile \
 tgdb/Makefile \

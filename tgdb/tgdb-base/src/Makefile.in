@@ -158,7 +158,6 @@ tgdb_driver_SOURCES = driver.c
 tgdb_driver_DEPENDENCIES = \
 $(top_srcdir)/various/util/src \
 $(top_srcdir)/various/adt/src \
-$(top_srcdir)/various/input/src \
 $(top_srcdir)/tgdb/annotate-two/src \
 $(top_srcdir)/tgdb/gdbmi/src \
 $(top_srcdir)/tgdb/tgdb-base/src

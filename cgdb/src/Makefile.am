@@ -38,7 +38,6 @@ cgdbrc.c
 cgdb_DEPENDENCIES = \
 $(top_srcdir)/various/util/src \
 $(top_srcdir)/various/adt/src \
-$(top_srcdir)/various/input/src \
 $(top_srcdir)/various/rlctx/src \
 $(top_srcdir)/cgdb/lib/kui/src \
 $(top_srcdir)/cgdb/tokenizer/src \

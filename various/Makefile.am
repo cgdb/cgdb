@@ -1,1 +1,1 @@
-SUBDIRS = util input adt rlctx
+SUBDIRS = util adt rlctx
