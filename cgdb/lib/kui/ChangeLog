@@ -1,3 +1,7 @@
+03/02/2004 Bob Rossi <bob@brasko.net>
+
+    * src/kui.c: Complying to doxygen standards
+
 03/01/2004 Bob Rossi <bob@brasko.net>
 
     * inc/kui.h: second specification for libkui

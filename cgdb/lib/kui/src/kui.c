@@ -2,15 +2,18 @@
 #include "error.h"
 #include "sys_util.h"
 
-/* This simply maintains a list of sequence/key pairs. */
+/** This simply maintains a list of sequence/key pairs. */
 struct kui_sequence_set {
 
 };
 
+/** Needs doco */
 struct kuictx {
+	/*
 	int stdinfd;
 	struct kui_sequence_set *kui_ss;
 	struct input *ictx;
+	*/
 };
 
 struct kuictx *kui_create(int stdinfd) {

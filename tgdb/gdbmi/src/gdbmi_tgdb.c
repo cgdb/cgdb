@@ -45,6 +45,9 @@
 #define PATH_MAX 4096
 #define TTY_NAME_SIZE 64
 
+/**
+ * This is the main context for the gdbmi subsytem.
+ */
 struct tgdb_gdbmi {
 	
 	/** 

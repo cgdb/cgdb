@@ -3,9 +3,9 @@
 #---------------------------------------------------------------------------
 # General configuration options
 #---------------------------------------------------------------------------
-PROJECT_NAME           = libtgdb
-PROJECT_NUMBER         = 0.4.0
-OUTPUT_DIRECTORY       = ../doc/htdocs
+PROJECT_NAME           = cgdb supporting libraries
+PROJECT_NUMBER         =
+OUTPUT_DIRECTORY       = ../../doc/htdocs
 OUTPUT_LANGUAGE        = English
 EXTRACT_ALL            = NO
 EXTRACT_PRIVATE        = NO
@@ -52,9 +52,8 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 # configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT                  = ./gdbmi \
-                         ./tgdb-base \
-                         ./annotate-two
+INPUT                  = ./kui \
+                         ./wm
 FILE_PATTERNS          = *.h \
                          *.c
 RECURSIVE              = YES
@@ -85,7 +84,7 @@ IGNORE_PREFIX          =
 #---------------------------------------------------------------------------
 GENERATE_HTML          = YES
 #HTML_OUTPUT            = html
-HTML_OUTPUT            = html-libtgdb
+HTML_OUTPUT            = html-libcgdbsupport
 HTML_FILE_EXTENSION    = .html
 HTML_HEADER            = 
 HTML_FOOTER            = 

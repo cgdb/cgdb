@@ -3,6 +3,15 @@
 
 #include "input.h"
 
+/*! 
+ * \file
+ * kui.h
+ *
+ * \brief
+ * This interface is intended to be the abstraction layer between an
+ * application wanting key input from a user and the user themselves.
+ */
+
 /**
  * A "Key User Interface" Context
  *

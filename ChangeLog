@@ -1,3 +1,8 @@
+03/02/2004 Bob Rossi <bob@brasko.net>
+	
+    * Makefile.am: Add doxygen rule for cgdb/lib
+	* Makefile.in: Update for people without auto tools
+
 02/27/2004 Bob Rossi <bob@brasko.net>
 
     * configure.in (AC_OUTPUT): Add cgdb/lib, cgdb/lib/kui and
