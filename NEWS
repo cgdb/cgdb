@@ -1,5 +1,9 @@
 CVS
 
+   * Added new logger interface. This traps all errors to a file or 
+   a file descriptor. There is now a mechanism to write warnings and 
+   errors to a file for inspection by the user.
+
    * Removed depricated libinput from the various subdirectory. It has been
    replaced by libkui.
 
