@@ -2,8 +2,6 @@ A lot of work to do for cgdb-0.4.0
 
 1. Add a dejagnu testsuite to the annotate_driver and gdbmi_driver
 
-2. Get configure to only build cgdb, and build the driver programs on request.
-
 3. Create a better interface to the front ends
 
 4. Integrate gdbmi into libtgdb
@@ -15,6 +13,8 @@ A lot of work to do for cgdb-0.4.0
    debbuger and through readline.
 
 Finished:
+
+2. Get configure to only build cgdb, and build the driver programs on request.
 
 7. Reorganize tgdb to have a separate low level lib for ADT's and for
    util calls like xmalloc. This is so all programs can use it without

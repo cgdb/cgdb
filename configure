@@ -308,7 +308,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO AMTAR install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM AWK SET_MAKE MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE RANLIB ac_ct_RANLIB LEX LEXLIB LEX_OUTPUT_ROOT CPP EGREP build build_cpu build_vendor build_os host host_cpu host_vendor host_os BUILD_DRIVER BUILD_INPUT_DRIVER LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO AMTAR install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM AWK SET_MAKE MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE RANLIB ac_ct_RANLIB LEX LEXLIB LEX_OUTPUT_ROOT CPP EGREP build build_cpu build_vendor build_os host host_cpu host_vendor host_os BUILD_DRIVERS BUILD_INPUT_DRIVERS LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -3121,6 +3121,7 @@ if test "$LEX" = :; then
   LEX=${am_missing_run}flex
 fi
 
+# Readline will kill configure if there isn't any available.
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -4035,6 +4036,7 @@ echo "$as_me: error:    *****************************************************
    { (exit 1); exit 1; }; }
     fi
 
+
 # determine if we are running in linux, cygwin, solaris, or freebsd
    # Make sure we can run config.sub.
 $ac_config_sub sun4 >/dev/null 2>&1 ||
@@ -4164,9 +4166,9 @@ fi;
 # Check whether --with-drivers or --without-drivers was given.
 if test "${with_drivers+set}" = set; then
   withval="$with_drivers"
-  BUILD_DRIVER=driver BUILD_INPUT_DRIVER="input_driver getch_driver"
+  BUILD_DRIVERS=tgdb_driver BUILD_INPUT_DRIVERS="input_driver getch_driver"
 else
-  BUILD_DRIVER= BUILD_INPUT_DRIVER=
+  BUILD_DRIVERS= BUILD_INPUT_DRIVERS=
 fi;
 
 
@@ -6835,8 +6837,8 @@ s,@host@,$host,;t t
 s,@host_cpu@,$host_cpu,;t t
 s,@host_vendor@,$host_vendor,;t t
 s,@host_os@,$host_os,;t t
-s,@BUILD_DRIVER@,$BUILD_DRIVER,;t t
-s,@BUILD_INPUT_DRIVER@,$BUILD_INPUT_DRIVER,;t t
+s,@BUILD_DRIVERS@,$BUILD_DRIVERS,;t t
+s,@BUILD_INPUT_DRIVERS@,$BUILD_INPUT_DRIVERS,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
 s,@LTLIBOBJS@,$LTLIBOBJS,;t t
 CEOF

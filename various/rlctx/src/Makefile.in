@@ -44,8 +44,8 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
-BUILD_DRIVER = @BUILD_DRIVER@
-BUILD_INPUT_DRIVER = @BUILD_INPUT_DRIVER@
+BUILD_DRIVERS = @BUILD_DRIVERS@
+BUILD_INPUT_DRIVERS = @BUILD_INPUT_DRIVERS@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
@@ -127,11 +127,7 @@ AM_CFLAGS = -g -Wall \
 -I../include
 
 
-#EXTRA_PROGRAMS=input_driver getch_driver
-#bin_PROGRAMS = @BUILD_INPUT_DRIVER@
-
 # create the input library
-# This depends on input
 noinst_LIBRARIES = librlctx.a
 librlctx_a_SOURCES = rlctx.c rlctx_main.c
 librlctx_a_DEPENDENCIES = ../../util/src ../../adt/src
@@ -381,21 +377,6 @@ uninstall-am: uninstall-info-am
 	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
 	uninstall-am uninstall-info-am
 
-
-#bin_PROGRAMS = rlctx_prog
-
-# This is the input driver
-#rlctx_prog_LDFLAGS = -L. -L../../util/src -L../../adt/src
-#rlctx_prog_LDADD = -lrlctx -ladt -lutil
-#rlctx_prog_SOURCES = rlctx_prog.c
-#rlctx_prog_DEPENDENCIES = ../../util/src ../../adt/src librlctx.a
-
-# This program provides tgdb with a readline interface
-# There should be a driver program to test the functionality of rlctx
-#getch_driver_LDFLAGS = -L ../../util/src
-#getch_driver_LDADD = -lutil
-#getch_driver_SOURCES = getch_driver.c
-#getch_driver_DEPENDENCIES = ../../util/src
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

@@ -44,8 +44,8 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
-BUILD_DRIVER = @BUILD_DRIVER@
-BUILD_INPUT_DRIVER = @BUILD_INPUT_DRIVER@
+BUILD_DRIVERS = @BUILD_DRIVERS@
+BUILD_INPUT_DRIVERS = @BUILD_INPUT_DRIVERS@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
@@ -123,16 +123,14 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 AM_CFLAGS = -g -Wall -I../../util/include -I../include
 
-#EXTRA_PROGRAMS=input_driver getch_driver
-#bin_PROGRAMS = @BUILD_INPUT_DRIVER@
-
 # create the input library
 # This depends on input
 noinst_LIBRARIES = libinput.a
 libinput_a_SOURCES = input.c
 libinput_a_DEPENDENCIES = ../../util/src
 
-bin_PROGRAMS = input_driver getch_driver
+EXTRA_PROGRAMS = input_driver getch_driver
+bin_PROGRAMS = @BUILD_INPUT_DRIVERS@
 
 # This is the input driver
 input_driver_LDFLAGS = -L. -L../../util/src
@@ -155,7 +153,8 @@ libinput_a_AR = $(AR) cru
 libinput_a_LIBADD =
 am_libinput_a_OBJECTS = input.$(OBJEXT)
 libinput_a_OBJECTS = $(am_libinput_a_OBJECTS)
-bin_PROGRAMS = input_driver$(EXEEXT) getch_driver$(EXEEXT)
+EXTRA_PROGRAMS = input_driver$(EXEEXT) getch_driver$(EXEEXT)
+bin_PROGRAMS = @BUILD_INPUT_DRIVERS@
 PROGRAMS = $(bin_PROGRAMS)
 
 am_getch_driver_OBJECTS = getch_driver.$(OBJEXT)

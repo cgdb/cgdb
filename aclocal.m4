@@ -928,5 +928,12 @@ AC_DEFUN([VL_LIB_READLINE], [
       AC_CHECK_HEADERS(history.h readline/history.h)
     fi
   fi
+
+dnl Here we need to quit if there is no readline available
+    if test $have_readline = no; then
+        AC_MSG_ERROR([   *****************************************************
+                     cgdb requires a readline compatible library to link!
+                     *****************************************************])
+    fi
 ])dnl
 

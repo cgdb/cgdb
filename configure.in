@@ -12,13 +12,8 @@ AC_PROG_INSTALL
 AC_PROG_RANLIB
 AM_PROG_LEX
 
+# Readline will kill configure if there isn't any available.
 VL_LIB_READLINE
-dnl Here we need to quit if there is no readline available
-    if test $have_readline = no; then
-        AC_MSG_ERROR([   *****************************************************
-                     cgdb requires a readline compatible library to link!
-                     *****************************************************])
-    fi
 
 # determine if we are running in linux, cygwin, solaris, or freebsd
    AC_CANONICAL_HOST
@@ -63,9 +58,9 @@ dnl If the user asked for curses, ncurses is set to no. Otherwise ncurses is yes
 dnl These 2 statements determine if the user wants the alternate driver program to be built
 dnl It is used to stimulate libtgdb with data. It is a simple interface to libtgdb
     AC_ARG_WITH(drivers,
-        [  --with-drivers          Build the driver programs to test libtgdb (optional)],BUILD_DRIVER=driver BUILD_INPUT_DRIVER="input_driver getch_driver",BUILD_DRIVER= BUILD_INPUT_DRIVER=)
-    AC_SUBST([BUILD_DRIVER])
-    AC_SUBST([BUILD_INPUT_DRIVER])
+        [  --with-drivers          Build the driver programs to test libtgdb (optional)],BUILD_DRIVERS=tgdb_driver BUILD_INPUT_DRIVERS="input_driver getch_driver",BUILD_DRIVERS= BUILD_INPUT_DRIVERS=)
+    AC_SUBST([BUILD_DRIVERS])
+    AC_SUBST([BUILD_INPUT_DRIVERS])
 
 dnl If the user want ncurses, Try to find it and add it to the linking library.
     if test $ncurses = yes; then

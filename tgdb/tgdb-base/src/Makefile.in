@@ -44,8 +44,8 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
-BUILD_DRIVER = @BUILD_DRIVER@
-BUILD_INPUT_DRIVER = @BUILD_INPUT_DRIVER@
+BUILD_DRIVERS = @BUILD_DRIVERS@
+BUILD_INPUT_DRIVERS = @BUILD_INPUT_DRIVERS@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
@@ -137,10 +137,8 @@ tgdb.c \
 types.c
 
 
-#EXTRA_PROGRAMS=driver
-#bin_PROGRAMS = @BUILD_DRIVER@ rlctx_prog
-#bin_PROGRAMS = driver rlctx_prog
-bin_PROGRAMS = tgdb_driver
+EXTRA_PROGRAMS = tgdb_driver
+bin_PROGRAMS = @BUILD_DRIVERS@
 
 tgdb_driver_LDFLAGS = \
 -L$(top_srcdir)/tgdb/tgdb-base/src \
@@ -173,7 +171,8 @@ libtgdb_a_AR = $(AR) cru
 libtgdb_a_LIBADD =
 am_libtgdb_a_OBJECTS = tgdb.$(OBJEXT) types.$(OBJEXT)
 libtgdb_a_OBJECTS = $(am_libtgdb_a_OBJECTS)
-bin_PROGRAMS = tgdb_driver$(EXEEXT)
+EXTRA_PROGRAMS = tgdb_driver$(EXEEXT)
+bin_PROGRAMS = @BUILD_DRIVERS@
 PROGRAMS = $(bin_PROGRAMS)
 
 am_tgdb_driver_OBJECTS = driver.$(OBJEXT)
