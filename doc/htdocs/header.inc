@@ -14,13 +14,21 @@
 
 <TABLE Width="100%">
 <TR>
-  <TD ColSpan=2>
+  <TD>
 
     <!-- Title -->
     <FONT Size="+2">CGDB</font><BR>
     <I>A curses debugger</i>
-    <HR>
 
+  </td>
+  <TD Align=Right>
+    <A Href="cgdb_guy.png"><IMG Src="cgdb_guy_tn.png" Alt="" Border=0></a>
+  </td>
+</tr>
+
+<TR>
+  <TD ColSpan=2>
+    <HR>
   </td>
 </tr>
     
