@@ -23,27 +23,31 @@
 struct kui_map {
 
 	/**
-	 * The key is the key strokes the user must type for this map
-	 * to work. However, there can be sequences of char's encoded in this 
-	 * string that represent another value. For example <ESC> would 
-	 * represent CGDB_KEY_ESC.
+	 * The user wants this map to be activated when he/she types this sequence.
+	 * This data representation is entirly in ascii, since the user has to 
+	 * be able to type the sequence on the keyboard.
 	 */
 	char *original_key;
 
 	/**
-	 * This is the literal list of keys the user must type for this map to
-	 * be activated. It is a list of int's because it can contain things like
-	 * CGDB_KEY_ESC, ..
+	 * This is the list of keys that must be matched, in order for this map
+	 * to be activated. The value of each item is either an ascii char typed 
+	 * by the user, or it is a high level terminal escape sequence.
+	 *
+	 * This is a NULL terminated list.
 	 */
 	int *literal_key;
 
 	/**
-	 * The value is the substitution data, if the key is typed.
+	 * The value is the substitution data, if the literal_key is typed.
 	 */
 	char *original_value;
 
 	/**
+	 * This data is passed in place of the key, if the user types the 
+	 * literal_key.
 	 *
+	 * This is a NULL terminated list.
 	 */
 	int *literal_value;
 };
@@ -125,11 +129,6 @@ int kui_map_destroy ( struct kui_map *map ) {
 	return 0;
 }
 
-static int kui_map_destroy_callback ( void *param ) {
-	struct kui_map *map = (struct kui_map *)param;
-	return kui_map_destroy ( map );
-}
-
 int kui_map_get_key ( struct kui_map *map, char **key ) { 
 
 	if ( !map )
@@ -187,16 +186,31 @@ int kui_map_print_cgdb_key_array ( struct kui_map *map ) {
 
 /* Kui map set */
 
+/** 
+ * The possible states of a kui_map_set.
+ */
 enum kui_map_state {
+	/**
+	 * A valid map is found
+	 */
 	KUI_MAP_FOUND,
+	/**
+	 * A valid map is being matched, but still trying to complete it.
+	 */
 	KUI_MAP_STILL_LOOKING,
+	/**
+	 * The current sequence can not match a mapping in this list.
+	 */
 	KUI_MAP_NOT_FOUND,
+	/**
+	 * There was an error.
+	 */
 	KUI_MAP_ERROR
 };
 
 /** 
- * This maintains a list of maps.
- * Basically, a key/value pair list.
+ * This maintains a list of maps. It also is capable of tracking if a user is 
+ * matching any map in this set with the current key strokes being typed.
  */
 struct kui_map_set {
 	/**
@@ -234,6 +248,11 @@ struct kui_map_set {
 	 */
 	std_list_iterator map_iter_found;
 };
+
+static int kui_map_destroy_callback ( void *param ) {
+	struct kui_map *map = (struct kui_map *)param;
+	return kui_map_destroy ( map );
+}
 
 struct kui_map_set *kui_ms_create ( void ) {
 

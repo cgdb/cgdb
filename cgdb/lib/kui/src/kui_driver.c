@@ -134,6 +134,11 @@ static int create_mappings ( struct kui_manager *kuim ) {
 		return -1;
 	}
 
+	if ( kui_ms_register_map ( map, "<Left><Right><F1><F1>", "<F2>" ) == -1 ) {
+		/* TODO: Free map and return */
+		return -1;
+	}
+
 	if ( kui_manager_add_map_set ( kuim, map ) == -1 )
 		return -1;
 
