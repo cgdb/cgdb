@@ -1,3 +1,9 @@
+03/02/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * Readline has been cleanly added with a pty: Now, cgdb opens a pty,
+    tells readline that that is its stdin, it also creates an ordinary pipe to
+    read from readline's ouput.
+
 02/26/2003 Bob Rossi <bob_rossi@cox.net>
 
     * Implemented new changes to the libtgdb interface to support readline:

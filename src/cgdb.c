@@ -482,7 +482,7 @@ static void readline_input(int fd){
     char buf[MAXLINE];
     ssize_t size, i;
     
-    if ( ( size = read( fd, &buf, MAXLINE)) == 1 ) 
+    if ( ( size = read( fd, &buf, MAXLINE)) == 0 ) 
         err_quit("%s:%d read error\n", __FILE__, __LINE__);
 
     for ( i = 0; i < size; i++ )
