@@ -1,4 +1,8 @@
-10/23/2003 Bob Rossi <bob@brasko.net>
+10/24/2003 Bob Rossi <bob@brasko.net>
+
+   * tgdb_types.h: update comments
+
+10/24/2003 Bob Rossi <bob@brasko.net>
 
    * TODO: Add a future task
    * tgdb.c: tgdb_deliver_command, add some code to print the commands being

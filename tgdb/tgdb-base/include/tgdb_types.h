@@ -82,6 +82,10 @@ enum INTERFACE_COMMANDS {
   	 * It happens when gdb failed to know what the absolute path to the relative
  	 * path asked for was.
      * This is a struct tgdb_source_file representing the absolute filename.
+     *
+     * NOTE: If this command is generated and the file is NULL, the command can
+     * be ignored. Currently, the annotate 2 subsytem uses this when trying to
+     * figure out the initial file.
      */
     TGDB_ABSOLUTE_SOURCE_DENIED,
 
