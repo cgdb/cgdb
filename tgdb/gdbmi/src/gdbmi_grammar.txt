@@ -120,3 +120,4 @@ stream_record 			-> stream_record_class C_STRING
 stream_record_class     -> "~" | "@" | "&"
 nl 						-> CR | LF | CR LF
 opt_token               -> epsilon | TOKEN 
+epsilon                 ->

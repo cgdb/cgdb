@@ -17,8 +17,6 @@ IDENTIFIER {L}+{T}*
 
 "^"                      { return CARROT; }
 ","                      { return COMMA; }
-"{"                      { return OPEN_BRACE; }
-"}"                      { return CLOSED_BRACE; }
 "+"                      { return ADD_OP; }
 "*"                      { return MULT_OP; }
 "="                      { return EQUAL_SIGN; }
@@ -27,18 +25,14 @@ IDENTIFIER {L}+{T}*
 "&"                      { return AMPERSAND; }
 "["                      { return OPEN_BRACKET; }
 "]"                      { return CLOSED_BRACKET; }
+"{"                      { return OPEN_BRACE; }
+"}"                      { return CLOSED_BRACE; }
+"("                      { return OPEN_PAREN; }
+")"                      { return CLOSED_PAREN; }
 
 \n                      { return NEWLINE; }
 \r\n                    { return NEWLINE; }
 \r                      { return NEWLINE; }
-
-stopped                 { return STOPPED; }
-done                    { return DONE; }
-running                 { return RUNNING; }
-connected               { return CONNECTED; }
-error                   { return ERROR; }
-exit                    { return EXIT; }
-\(gdb\)                 { return GDB; }
 
 {DIGIT}+                { return INTEGER_LITERAL; }
 

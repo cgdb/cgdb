@@ -2,19 +2,21 @@
 %defines
 
 %{
-#include <stdio.h>
 #include <string.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include "gdbmi_il.h"
 
 extern char *gdbmi_text;
 extern int gdbmi_lex ( void );
 void gdbmi_error (const char *s);
-output_ptr syntax_tree;
+output_ptr tree;
 %}
 
 %token OPEN_BRACE 		/* { */
 %token CLOSED_BRACE 	/* } */
+%token OPEN_PAREN 		/* ( */
+%token CLOSED_PAREN 	/* ) */
 %token ADD_OP 			/* + */
 %token MULT_OP 			/* * */
 %token EQUAL_SIGN 		/* = */
@@ -29,13 +31,6 @@ output_ptr syntax_tree;
 %token CSTRING 			/* "a string like \" this " */
 %token COMMA 			/* , */
 %token CARROT 			/* ^ */
-%token STOPPED 			/* stopped */
-%token DONE 			/* done */
-%token RUNNING 			/* running */
-%token CONNECTED 		/* connected */
-%token ERROR 			/* error */
-%token EXIT 			/* exit */
-%token GDB 				/* (gdb) */
 
 %union {
 	struct output *u_output;
@@ -85,10 +80,11 @@ output_ptr syntax_tree;
 
 
 opt_output_list: {
+	tree = NULL;
 };
 
 opt_output_list: output_list {
-	$$ = $1;	
+	tree = $1;	
 	printf ( "Parser passed\n" );
 };
 
@@ -97,14 +93,19 @@ output_list: output {
 };
 
 output_list: output_list output {
-	$$ = append_to_list ( $1, $2 );
+	$$ = append_output ( $1, $2 );
 };
 
-output: opt_oob_record_list opt_result_record GDB NEWLINE { 
-	syntax_tree = malloc ( sizeof ( struct output ) );
-	syntax_tree->oob_record = $1;
-	syntax_tree->result_record = $2;
-	printf ("VALID\n" ); 
+output: opt_oob_record_list opt_result_record OPEN_PAREN variable CLOSED_PAREN NEWLINE { 
+	$$ = create_output ();
+	$$->oob_record = $1;
+	$$->result_record = $2;
+
+	if ( strcmp ( "gdb", $4 ) != 0 ) {
+		gdbmi_error ( "Syntax error" );
+		printf ( "Expected 'gdb'\n" );
+	} else
+		printf ("VALID\n" ); 
 } ;
 
 opt_oob_record_list: {
@@ -112,7 +113,7 @@ opt_oob_record_list: {
 };
 
 opt_oob_record_list: opt_oob_record_list oob_record NEWLINE {
-	$$ = append_to_list ( $1, $2 );
+	$$ = append_oob_record ( $1, $2 );
 };
 
 opt_result_record: {
@@ -124,44 +125,44 @@ opt_result_record: result_record NEWLINE {
 };
 
 result_record: opt_token CARROT result_class {
-	$$ = malloc ( sizeof ( struct result_record ) );
+	$$ = create_result_record ();
 	$$->token = $1;
 	$$->result_class = $3;
 	$$->result = NULL;
 };
 
 result_record: opt_token CARROT result_class COMMA result_list {
-	$$ = malloc ( sizeof ( struct result_record ) );
+	$$ = create_result_record ();
 	$$->token = $1;
 	$$->result_class = $3;
 	$$->result = $5;
 };
 
 oob_record: async_record {
-	$$ = malloc ( sizeof ( struct oob_record ) );
+	$$ = create_oob_record();
 	$$->record = GDBMI_ASYNC;
 	$$->variant.async_record = $1;
 };
 
 oob_record: stream_record {
-	$$ = malloc ( sizeof ( struct oob_record ) );
+	$$ = create_oob_record();
 	$$->record = GDBMI_STREAM;
 	$$->variant.stream_record = $1;
 };
 
 async_record: opt_token async_record_class async_class {
-	$$ = malloc ( sizeof ( struct async_record ) );
+	$$ = create_async_record ();
 	$$->token = $1;
 	$$->async_record = $2;
 	$$->async_class = $3;
 };
 
 async_record: opt_token async_record_class async_class COMMA result_list {
-	$$ = malloc ( sizeof ( struct async_record ) );
+	$$ = create_async_record ();
 	$$->token = $1;
 	$$->async_record = $2;
 	$$->async_class = $3;
-	$$->result_ptr = $5;
+	$$->result = $5;
 };
 
 async_record_class: MULT_OP {
@@ -176,40 +177,41 @@ async_record_class: EQUAL_SIGN {
 	$$ = GDBMI_NOTIFY;	
 };
 
-result_class: DONE {
-	$$ = GDBMI_DONE;
+result_class: STRING_LITERAL {
+	if ( strcmp ( "done", gdbmi_text ) == 0 )
+		$$ = GDBMI_DONE;
+	else if ( strcmp ( "running", gdbmi_text ) == 0 )
+		$$ = GDBMI_RUNNING;
+	else if ( strcmp ( "connected", gdbmi_text ) == 0 )
+		$$ = GDBMI_CONNECTED;
+	else if ( strcmp ( "error", gdbmi_text ) == 0 )
+		$$ = GDBMI_ERROR;
+	else if ( strcmp ( "exit", gdbmi_text ) == 0 )
+		$$ = GDBMI_EXIT;
+	else {
+		gdbmi_error ( "Syntax error" );
+		printf ( "Expected 'done|running|connected|error|exit'\n" );
+	}
 };
 
-result_class: RUNNING {;
-	$$ = GDBMI_RUNNING;
-};
-
-result_class: CONNECTED {
-	$$ = GDBMI_CONNECTED;
-};
-
-result_class: ERROR {
-	$$ = GDBMI_ERROR;
-};
-
-result_class: EXIT {
-	$$ = GDBMI_EXIT;
-};
-
-async_class: STOPPED {
+async_class: STRING_LITERAL {
+	if ( strcmp ( "stopped", gdbmi_text ) != 0 ) {
+		gdbmi_error ( "Syntax error" );
+		printf ( "Expected 'stopped'\n" );
+	}
 	$$ = GDBMI_STOPPED;
 };
 
 result_list: result {
-	$$ = append_to_list ( NULL, $1 );	
+	$$ = append_result ( NULL, $1 );	
 };
 
 result_list: result_list COMMA result {
-	$$ = append_to_list ( $1, $3 );
+	$$ = append_result ( $1, $3 );
 };
 
 result: variable EQUAL_SIGN value {
-	$$ = malloc ( sizeof ( struct result ) );	
+	$$ = create_result ();
 	$$->variable = $1;
 	$$->value = $3;
 };
@@ -219,27 +221,27 @@ variable: STRING_LITERAL {
 };
 
 value_list: value {
-	$$ = append_to_list ( NULL, $1 );	
+	$$ = append_value ( NULL, $1 );	
 };
 
 value_list: value_list COMMA value {
-	$$ = append_to_list ( $1, $3 ); 
+	$$ = append_value ( $1, $3 ); 
 };
 
 value: CSTRING {
-	$$ = malloc ( sizeof ( struct value ) );
+	$$ = create_value ();
 	$$->value_kind = GDBMI_CSTRING;
 	$$->variant.cstring = strdup ( gdbmi_text ); 
 };
 
 value: tuple {
-	$$ = malloc ( sizeof ( struct value ) );
+	$$ = create_value ();
 	$$->value_kind = GDBMI_TUPLE;
 	$$->variant.tuple = $1;
 };
 
 value: list {
-	$$ = malloc ( sizeof ( struct value ) );
+	$$ = create_value ();
 	$$->value_kind = GDBMI_LIST;
 	$$->variant.list = $1;
 };
@@ -249,7 +251,7 @@ tuple: OPEN_BRACE CLOSED_BRACE {
 };
 
 tuple: OPEN_BRACE result_list CLOSED_BRACE {
-	$$ = malloc ( sizeof ( struct tuple ) );
+	$$ = create_tuple ();
 	$$->result = $2;
 };
 
@@ -258,19 +260,19 @@ list: OPEN_BRACKET CLOSED_BRACKET {
 };
 
 list: OPEN_BRACKET value_list CLOSED_BRACKET {
-	$$ = malloc ( sizeof ( struct list ) );
-	$$->list = GDBMI_VALUE;
+	$$ = create_list ();
+	$$->list_kind = GDBMI_VALUE;
 	$$->variant.value = $2;
 };
 
 list: OPEN_BRACKET result_list CLOSED_BRACKET {
-	$$ = malloc ( sizeof ( struct list ) );
-	$$->list = GDBMI_RESULT;
+	$$ = create_list ();
+	$$->list_kind = GDBMI_RESULT;
 	$$->variant.result = $2;
 };
 
 stream_record: stream_record_class CSTRING {
-	$$ = malloc ( sizeof ( struct stream_record ) );
+	$$ = create_stream_record ();
 	$$->stream_record = $1;
 	$$->cstring = strdup ( gdbmi_text );
 };

@@ -5,11 +5,9 @@ typedef struct output *output_ptr;
 typedef struct oob_record *oob_record_ptr;
 typedef struct result_record *result_record_ptr;
 typedef long token_t;
-enum result_class;
 typedef struct result *result_ptr;
 typedef struct async_record *async_record_ptr;
 typedef struct stream_record *stream_record_ptr;
-enum async_class;
 typedef struct value *value_ptr;
 typedef struct tuple *tuple_ptr;
 typedef struct list *list_ptr;
@@ -40,6 +38,9 @@ struct output {
 	 * list, otherwise NULL.
 	 */
 	result_record_ptr result_record;
+
+	/** A pointer to the next output */
+	struct output *next;
 };
 
 /**
@@ -159,7 +160,7 @@ struct async_record {
 
 	enum async_class async_class;
 
-	result_ptr result_ptr;
+	result_ptr result;
 };
 
 /**
@@ -206,7 +207,7 @@ enum list_kind {
 
 
 struct list {
-	enum list_kind list;
+	enum list_kind list_kind;
 	
 	union {
 		value_ptr value;
@@ -221,53 +222,67 @@ struct stream_record {
 	const char *cstring;
 };
 
+/* Print result class */
 int print_result_class ( enum result_class param );
 
+/* Creating, Destroying and printing output */
 output_ptr create_output ( void );
-int destory_output_ptr ( output_ptr param );
-int print_output_ptr ( output_ptr param );
+int destory_output ( output_ptr param );
+output_ptr append_output ( output_ptr list, output_ptr item );
+int print_output ( output_ptr param );
 
+/* Creating, Destroying and printing record */
 result_record_ptr create_result_record ( void );
 int destroy_result_record ( result_record_ptr param );
 int print_result_record ( result_record_ptr param );
 
+/* Creating, Destroying and printing result */
+result_ptr create_result ( void );
+int destroy_result ( result_ptr param );
+result_ptr append_result ( result_ptr list, result_ptr item );
+int print_result ( result_ptr param );
+
 int print_oob_record_kind ( enum oob_record_kind param );
 
+/* Creating, Destroying and printing oob_record */
 oob_record_ptr create_oob_record ( void );
 int destroy_oob_record ( oob_record_ptr param );
+oob_record_ptr append_oob_record ( oob_record_ptr list, oob_record_ptr item );
 int print_oob_record ( oob_record_ptr param );
 
 int print_async_record_kind ( enum async_record_kind param );
 
 int print_stream_record_kind ( enum stream_record_kind param );
 
+/* Creating, Destroying and printing async_record */
 async_record_ptr create_async_record ( void );
 int destroy_async_record ( async_record_ptr param );
 int print_async_record ( async_record_ptr param );
 
 int print_async_class ( enum async_class param );
 
-async_record_ptr create_async_record ( void );
-int destroy_record_output ( async_record_ptr param );
-int print_record_output ( async_record_ptr param );
-
 int print_value_kind ( enum value_kind param );
 
+/* Creating, Destroying and printing value */
 value_ptr create_value ( void );
 int destroy_value ( value_ptr param );
+value_ptr append_value ( value_ptr list, value_ptr item );
 int print_value ( value_ptr param );
 
+/* Creating, Destroying and printing tuple */
 tuple_ptr create_tuple ( void );
 int destroy_tuple ( tuple_ptr param );
 int print_tuple ( tuple_ptr param );
 
+/* Creating, Destroying and printing list */
 list_ptr create_list ( void );
 int destroy_list ( list_ptr param );
+list_ptr append_list ( list_ptr list, list_ptr item );
 int print_list ( list_ptr param );
 
-stream_record_ptr create_stream_record_ptr ( void );
-int destroy_stream_record_ptr ( stream_record_ptr param );
-int print_stream_record_ptr ( stream_record_ptr param );
+/* Creating, Destroying and printing stream_record */
+stream_record_ptr create_stream_record ( void );
+int destroy_stream_record ( stream_record_ptr param );
+int print_stream_record ( stream_record_ptr param );
 
-void* append_to_list ( void *list, void*item );
 #endif
