@@ -34,6 +34,55 @@ Some features offered by CGDB are:<P>
 <B>News</b><BR>
 <BLOCKQUOTE>
 
+  <I>May 6, 2004</i><BR>
+  <BLOCKQUOTE>
+  Well there is some great news for the CGDB project. It is under development 
+  again! The authors of CGDB have come up with 4 crucial pieces that should be
+  designed and implemented in order to make CGDB a robust, usable piece of 
+  software.
+  <BR><BR>
+     
+    <UL>
+     <LI>KUI (libkui)
+        This is the "Key User Interface". It is capable of reading in multibyte
+        sequences and either continuing to "match" a sequence, or determine 
+        when a sequence failed. In doing this, 2 things are accomplished. CGDB
+        will be able to read in terminal escape sequences (ESC,HOME,..) without
+        a problem. Also, CGDB will get the "map" functionality that vim has. 
+        This will be a very powerful feature to easily do many things with
+        just a tap of a button. This library has been designed and implemented,
+        it needs to be alpha tested.
+
+     <LI>WM (libwm)
+        This is the "Windowing Manager". This library is a low level library 
+        that is capable of controlling the terminal's screen. This abstracts 
+        away all of the windowing functionality like split, vsplit, make
+        window one line larger, ...
+        This library has been mostly designed but needs to be implemented.
+
+     <LI>This library is currently unnamed, it should sit on top of the KUI. 
+     It should be capable of determining what "high level" commands the user 
+     wants done. So, if the user hits '5C-wk", this library will relize a 
+     command was just issued to move the current window up 5 windows. However, 
+     if they type a garbage command, it will determine that also, and just 
+     pass all the key's to CGDB main loop, as if no command was called.
+
+     <LI>CEX (libcex)
+        This is the "CGDB ex" library. It is basically the core engine of CGDB.
+        This is because this library is capable of recieving any colon command,
+        (such as :next or :step or /lookforstring) and having CGDB execute the
+        command. The colon command can come from either the status bar, or it
+        can come from a startup file or script. This makes CGDB 100% 
+        scriptable. This library needs to be designed and implemented.
+     </UL>
+
+     So, basically, with these 4 libraries in place, a new version of CGDB will
+     be released, that removes us from the old school CGDB implementation. In
+     the long run, this will make CGDB much easier to develop and maintain. 
+     Also, CGDB is going to be much more featureful and powerful because of it.
+
+  </blockquote>
+
   <I>April 26, 2004</i><BR>
   <BLOCKQUOTE>
   CGDB v0.4.1 was released today, see the <A Href="download.shtml">download 
