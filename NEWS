@@ -1,3 +1,7 @@
+   * Temporarily fixed the ^c bug. The data at the console is now cleared when
+   the user hits ^c. A better fix will be arranged for when full signal handling
+   support is integrated.
+   
    * Fixed libinput bug. If the user held down '\n' for a long time, and then
    hit any other key, an extra '\n' would come out and then the other key.
    This was *very* annoying when holding down the '\n' key to continue nexting.
