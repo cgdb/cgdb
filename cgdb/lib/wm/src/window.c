@@ -1,3 +1,4 @@
+#if 0
 /* window.c:
  * ---------
  *
@@ -39,3 +40,5 @@ int window_destroy(wm_window window)
 
     return 0;
 }
+
+#endif

@@ -82,6 +82,7 @@ int test_resize(wm_widget widget)
 
 int main(int argc, char *argv[])
 {
+#if 0
     test_widget mywidget;
 
     mywidget.widget = (wm_widget) malloc(sizeof(struct wm_widget));
@@ -95,6 +96,7 @@ int main(int argc, char *argv[])
 
     /* Destroy the Window Manager context */
     wm_destroy(wm_ctx);
+#endif
 
     return 0;
 }

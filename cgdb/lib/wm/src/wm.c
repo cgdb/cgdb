@@ -1,3 +1,4 @@
+#if 0
 /* wm.c:
  * -----
  *
@@ -220,4 +221,6 @@ static int wm_row_destroy(wm_row row)
 
     return 0;
 }
+
+#endif
 

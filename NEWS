@@ -5,7 +5,8 @@ CVS
    top_srcdir.
 
    * Added libkui into CGDB. This is the fisrt of the 4 new libraries
-   designed to make CGDB flexible and modular.
+   designed to make CGDB flexible and modular. Because of this, the version 
+   number has been bumped up to .5.0.
 
    * Fixed crash in TGDB when buffering commands. If the user hit
    'n' <Enter> <Enter> ... fast, while GDB was not responding, or working
