@@ -1,7 +1,8 @@
 Steps for releasing a new CGDB version:
 
-1.  Update both ChangeLogs to have the new release date and version.
-    The ChangeLogs live in both cgdb, cgdb/tgdb and cgdb/input
+1.  Update all ChangeLogs to have the new release date and version.
+    The ChangeLogs live in many places currently.
+    find . -name ChangeLog
     
 2.  Change configure.in file to reflect new version number.
       * Run autoregen.sh
