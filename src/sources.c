@@ -211,7 +211,7 @@ static int load_file(struct list_node *node)
         return 1;
 
     node->buf.length    = 0;
-    node->buf.tlines     = NULL;
+    node->buf.tlines    = NULL;
     node->buf.breakpts  = NULL;
     node->buf.cur_line  = NULL;
     node->buf.max_width = 0;
@@ -227,16 +227,17 @@ static int load_file(struct list_node *node)
 
             /* Inefficient - Reallocates memory at each line */
             node->buf.length++;
-            node->buf.tlines    = realloc(node->buf.tlines, 
+            node->buf.tlines   = realloc(node->buf.tlines, 
                                          sizeof(char *) * node->buf.length);
             node->buf.tlines[node->buf.length-1] = strdup(line);
-            node->buf.breakpts = realloc(node->buf.breakpts,
-                                         sizeof(char) * node->buf.length);
-            node->buf.breakpts[node->buf.length-1] = 0;
         }
     }
-
     fclose(file);
+    
+    /* Allocate the breakpoints array */
+    node->buf.breakpts = malloc(sizeof(char) * node->buf.length);
+    for (i = 0; i < node->buf.length; i++)
+       node->buf.breakpts[i] = 0;
 
     /* Copy into original buffer for regex capabities */
     node->orig_buf.length = node->buf.length;
