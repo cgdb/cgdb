@@ -6,11 +6,6 @@
 #include <stdlib.h>
 #endif  /* HAVE_STDLIB_H */
 
-/* This is for PATH_MAX */
-#if HAVE_LIMITS_H
-#include <limits.h>
-#endif /* HAVE_LIMITS_H */
-
 #if HAVE_SIGNAL_H
 #include <signal.h> /* sig_atomic_t */
 #endif /* HAVE_SIGNAL_H */
@@ -315,7 +310,7 @@ static struct tgdb *initialize_tgdb_context ( void ) {
  *
  *  tgdb       - The tgdb context.
  *
- *  config_dir - Should be PATH_MAX in size on way in.
+ *  config_dir - Should be FSUTIL_PATH_MAX in size on way in.
  *               On way out, it will be the path to the config dir
  *
  *  Returns -1 on error, or 0 on success
@@ -342,7 +337,7 @@ struct tgdb* tgdb_initialize (
 	int *debugger_fd, int *inferior_fd, int *readline_fd ) {
 	/* Initialize the libtgdb context */
 	struct tgdb *tgdb = initialize_tgdb_context ();
-    char config_dir[PATH_MAX];
+    char config_dir[FSUTIL_PATH_MAX];
 
     /* Create config directory */
     if ( tgdb_initialize_config_dir ( tgdb, config_dir ) == -1 ) {

@@ -15,7 +15,7 @@
 #endif /* HAVE_CTYPE_H */
 
 #if HAVE_LIMITS_H
-#include <limits.h>
+#include <limits.h> /* CHAR_MAX */
 #endif /* HAVE_LIMITS_H */
 
 #if HAVE_STRING_H

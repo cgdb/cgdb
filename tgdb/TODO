@@ -27,13 +27,17 @@ tgdb 0.5.0
 tgdb 0.5.0 issues raised by developers
 ---------------------------------------
 
-* Robert Lemmen asked me to remove the config.* files from the releases.
+[ ] Robert Lemmen asked me to remove the config.* files from the releases.
   They are inappropriate to distribute to the user since they are machine 
   dependent.
 
-* I received a patch from Santiago Vila that made CGDB work on GNU/HURD.
+[x] I received a patch from Santiago Vila that made CGDB work on GNU/HURD.
   I have to remove all occurrences of PATH_MAX. I can apply the patch
   for know, or come up with a better all around approach.
+
+  I removed all occurences of PATH_MAX and replaced them with FSUTIL_PATH_MAX.
+  Ideally, CGDB/TGDB could dynamically create the strings like Santiago 
+  pointed out. This should be done eventually.
 	
 tgdb-0.4.0 and before
 

@@ -14,10 +14,6 @@
 #include <curses.h>
 #endif /* HAVE_CURSES_H */
 
-#if HAVE_LIMITS_H
-#include <limits.h>
-#endif /* HAVE_LIMITS_H */
-
 #if HAVE_SIGNAL_H
 #include <signal.h>
 #endif
@@ -62,6 +58,7 @@
 #include "cgdbrc.h"
 #include "input.h"
 #include "highlight.h"
+#include "fs_util.h"
 
 /* ----------- */
 /* Prototypes  */
@@ -295,7 +292,7 @@ static int get_gdb_width(void) {
 /* Updates the status bar */
 static void update_status_win(void) {
     int pos;
-    char filename[PATH_MAX];
+    char filename[FSUTIL_PATH_MAX];
 
     /* Update the tty status bar */
     if ( tty_win_on ) {

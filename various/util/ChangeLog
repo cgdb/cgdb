@@ -1,3 +1,10 @@
+01/29/2004 Bob Rossi <bob@brasko.net>
+
+   * fs_util.h: Changed PATH_MAX to FSUTIL_PATH_MAX and #include <limits.h> to
+   #include "fs_util.h"
+   * fs_util.c: ditto
+   * fork_util.c: ditto
+
 01/08/2004 Bob Rossi <bob@brasko.net>
 
    * Makefile.in: regenerated with documented autotools version

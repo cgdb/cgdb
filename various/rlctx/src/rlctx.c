@@ -26,10 +26,6 @@
 #include <stdio.h>
 #endif
 
-#if HAVE_LIMITS_H
-#include <limits.h>     /* This is for PATH_MAX */
-#endif /* HAVE_LIMITS_H */
-
 #include "rlctx.h"
 #include "rlctx_main.h"
 #include "sys_util.h"
@@ -69,7 +65,7 @@ struct rlctx *rlctx_init(const char *home_dir, const char *unique_id, void* p) {
     struct rlctx *n = (struct rlctx *)xmalloc(sizeof(struct rlctx));
     pid_t pid;
     struct stat st;
-    static char rlctx_filename[PATH_MAX];
+    static char rlctx_filename[FSUTIL_PATH_MAX];
 
     /* Check that file permisions are correct */
     if ( home_dir == NULL || unique_id == NULL )
@@ -78,7 +74,7 @@ struct rlctx *rlctx_init(const char *home_dir, const char *unique_id, void* p) {
         n->save_history = 1;
 
     if ( n->save_history ) {
-        n->config_file = (char *)xmalloc(sizeof(char)*PATH_MAX);
+        n->config_file = (char *)xmalloc(sizeof(char)*FSUTIL_PATH_MAX);
 
         strcpy ( rlctx_filename, "readline-" );
         strcat ( rlctx_filename, unique_id );

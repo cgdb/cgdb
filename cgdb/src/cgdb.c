@@ -49,11 +49,6 @@
 #include <errno.h>
 #endif /* HAVE_ERRNO_H */
 
-/* This is for PATH_MAX */
-#if HAVE_LIMITS_H
-#include <limits.h>
-#endif /* HAVE_LIMITS_H */
-
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
 #endif 
@@ -647,7 +642,7 @@ int main(int argc, char *argv[]) {
         err_quit("%s: init_resize_pipe error\n", my_name); 
 
     {
-        char config_file[ PATH_MAX ];
+        char config_file[ FSUTIL_PATH_MAX ];
         FILE *config;
         fs_util_get_path( cgdb_home_dir, "cgdbrc", config_file );
         config = fopen( config_file, "r" );

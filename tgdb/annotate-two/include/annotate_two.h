@@ -5,15 +5,12 @@
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
-#if HAVE_LIMITS_H
-#include <limits.h>
-#endif /* HAVE_LIMITS_H */
-
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif /* HAVE_SYS_TYPES_H */
 
 #include "tgdb_client_command.h"
+#include "fs_util.h"
 
 #define TTY_NAME_SIZE 64
 
@@ -65,12 +62,12 @@ struct annotate_two {
 	/** 
 	 * The config directory that this context can write too.
 	 */
-	char config_dir[PATH_MAX];
+	char config_dir[FSUTIL_PATH_MAX];
 
 	/**
 	 * The init file for the debugger.
 	 */
-	char a2_gdb_init_file[PATH_MAX];
+	char a2_gdb_init_file[FSUTIL_PATH_MAX];
 
 	/** 
 	 * This represents the data subsystem

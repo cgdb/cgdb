@@ -189,7 +189,7 @@ void* a2_create_context (
 	const char *config_dir ) {
 	
 	struct annotate_two *a2 = initialize_annotate_two ();
-    char a2_debug_file[PATH_MAX];
+    char a2_debug_file[FSUTIL_PATH_MAX];
 
     if ( !tgdb_setup_config_file( a2, config_dir ) ) {
         err_msg("%s:%d tgdb_init_config_file error", __FILE__, __LINE__);
