@@ -17,6 +17,7 @@
 #include "interface.h"
 #include "error.h"
 #include "tokenizer.h"
+#include "cgdb.h"
 
 /**
  * The general idea is that the configuration will read in the users ~/.cgdbrc
@@ -44,6 +45,7 @@ static int command_set_focus( const char *value );
 static int command_set_tabstop( int tab );
 static int command_set_winsplit( const char *value );
 static int command_set_syntax_type( const char *value );
+static int command_set_esc_sequence_timeout( int msec );
 
 static struct ConfigVariable
 {
@@ -52,6 +54,7 @@ static struct ConfigVariable
     void *data;
 } VARIABLES[] = {
     // keep this stuff sorted! !sort
+    /* escdelay   */ 	{ "escdelay", "escdelay", CONFIG_TYPE_FUNC_INT, command_set_esc_sequence_timeout },
     /* focus      */ 	{ "focus", "fo", CONFIG_TYPE_FUNC_STRING, command_set_focus },
     /* ignorecase */ 	{ "ignorecase", "ic", CONFIG_TYPE_BOOL, &regex_icase },
     /* line_coverage */ { "line_coverage", "lc", CONFIG_TYPE_BOOL, &line_coverage_option },
@@ -148,6 +151,14 @@ int command_set_focus( const char *value )
 int command_set_tabstop( int value )
 {
 	highlight_tabstop = value;
+    return 0;
+}
+
+int command_set_esc_sequence_timeout( int msec )
+{
+	if ( msec >= 0 && msec <= 10000)
+		cgdb_set_esc_sequence_timeout ( msec );
+
     return 0;
 }
 

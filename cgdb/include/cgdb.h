@@ -57,4 +57,6 @@
 
 #define CGDB_KEY_RESIZE KEY_MAX
 
+void cgdb_set_esc_sequence_timeout ( int msec );
+
 #endif

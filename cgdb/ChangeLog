@@ -1,5 +1,13 @@
 06/19/2003 Bob Rossi <bob_rossi@cox.net>
 
+	* cgdb.h: Added function cgdb_set_esc_sequence_timeout
+	* cgdb.c: Implemented function cgdb_set_esc_sequence_timeout
+	* commands.c: Added option escdelay that configures the input library
+	* input.h: Added input_set_escape_sequence_timeout_value
+	* input.c: Implemented input_set_escape_sequence_timeout_value
+
+06/19/2003 Bob Rossi <bob_rossi@cox.net>
+
 	* interface.h: Added if_highlight_viewer
 	* sources.h: Added a language to each list_node.
 	* commands.c: Added new command 'syntax' to highlight the current
@@ -10,6 +18,16 @@
 	* sources.c: load_file Set the default language of the new file
 	* tokenizer.h: add tokenizer_get_default_file_type
 	* tokenizer.c: implemented tokenizer_get_default_file_type
+
+06/17/2003 Ben Schomp <ben@benschomp.com>
+
+    * changed source window shrink and grow functions:
+    '-' shrinks source window 1 line
+    '=' grows source window 1 line
+    '_' shrinks source window 25%, or if tty window is visible
+        shrinks tty window 1 line
+    '+' grows source window 25%, or if tty window is visible,
+        grows tty window 1 line
 
 06/17/2003 Bob Rossi <bob_rossi@cox.net>
 

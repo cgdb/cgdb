@@ -144,6 +144,7 @@ struct input {
     char bad_esc_seq[MAX_SEQ_LIST_SIZE];
     int bad_esc_seq_counter;
     int bad_esc_seq_size;
+	unsigned int esc_seq_timeout_value;
 };
 
 /* insertIntoList: This should input in sorted order based on codes 
@@ -397,7 +398,7 @@ static void import_keyseqs(void) {
  *              0 if no data is ready
  *              or the char read.
  */
-int input_read(int fd) {
+int input_read(int fd, unsigned int esc_seq_timeout_value) {
     char c;
     int ret;
     int flag = 0;
@@ -424,7 +425,7 @@ int input_read(int fd) {
     /* This is a good value that causes Alt-o to be returned when it should
      * be and ESC, o when it should be.
      */
-    timeout.tv_usec =   40000;
+    timeout.tv_usec =   esc_seq_timeout_value*1000;
 
     ret = select (fd + 1, &readfds, (fd_set *)NULL, &exceptfds, &timeout);
 
@@ -485,7 +486,7 @@ static int input_get_seq(struct input *input) {
         
         /* non-blocking character read */ 
         if ( input_extra_char == -1 )
-            c = input_read(input->stdinfd);
+            c = input_read(input->stdinfd, input->esc_seq_timeout_value);
         else {
             c = input_extra_char;
             input_extra_char = -1;
@@ -574,6 +575,7 @@ struct input *input_init(int stdinfd) {
     i->last_entry = NULL;
     i->bad_esc_seq[0] = '\0';
     i->bad_esc_seq_counter = -1;
+	i->esc_seq_timeout_value = 40;
 
     import_keyseqs();
 
@@ -593,4 +595,10 @@ char *input_get_last_seq(struct input *i) {
 
 char *input_get_last_seq_name(struct input *i) {
     return i->last_entry->description;
+}
+
+void input_set_escape_sequence_timeout_value ( 
+			struct input * i, unsigned int msec ) {
+	
+	i->esc_seq_timeout_value = msec;
 }

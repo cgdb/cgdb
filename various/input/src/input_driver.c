@@ -35,6 +35,10 @@
 #include <errno.h>
 #endif /* HAVE_ERRNO_H */
 
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif /* HAVE_STDLIB_H */
+
 /* term.h prototypes */
 extern int tgetent();
 extern int tgetflag();
@@ -88,6 +92,11 @@ void main_loop(struct input *i) {
     }
 }
 
+static void usage ( void ) {
+	fprintf ( stderr, "input_driver [msec]\r\n" );
+	fprintf ( stderr, "msec is the amount of time to wait for more input\r\n" );
+}
+
 int main(int argc, char **argv){
     struct input *i;
     /* Initalize curses */
@@ -95,8 +104,12 @@ int main(int argc, char **argv){
     noecho();
     raw();
     refresh();
+	usage ();
 
     i = input_init(STDIN_FILENO);
+
+	if ( argc == 2 )
+		input_set_escape_sequence_timeout_value ( i, atoi (argv[1]) );
 
     main_loop(i);
 

@@ -668,3 +668,6 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
+void cgdb_set_esc_sequence_timeout ( int msec ) {
+	input_set_escape_sequence_timeout_value ( input, msec );
+}

@@ -177,4 +177,13 @@ char *input_get_last_seq(struct input *i);
 
 char *input_get_last_seq_name(struct input *i);
 
+/* input_set_escape_sequence_timeout_value
+ * ---------------------------------------
+ *
+ *  i       The context to determine the last sequence read.
+ *  msec 	Number of milliseconds to wait before ESC is returned.
+ */
+void input_set_escape_sequence_timeout_value ( 
+			struct input * i, unsigned int msec );
+
 #endif /* __INPUT_H__ */
