@@ -163,10 +163,10 @@ struct tgdb {
 };
 
 /* Temporary prototypes */
-static int tgdb_deliver_command ( struct tgdb *tgdb, int fd, struct command *command );
+static int tgdb_deliver_command ( struct tgdb *tgdb, int fd, struct tgdb_client_command *command );
 static int tgdb_run_command( struct tgdb *tgdb );
 static int tgdb_init_readline ( struct tgdb *tgdb, char *config_dir, int *fd );
-static int tgdb_dispatch_command ( struct tgdb *tgdb, struct command *com );
+static int tgdb_dispatch_command ( struct tgdb *tgdb, struct tgdb_client_command *com );
 
 static int tgdb_process_command_container ( struct tgdb *tgdb ) {
 	int i;
@@ -448,7 +448,7 @@ static int tgdb_handle_signals ( struct tgdb *tgdb ) {
  *  0 on success, or -1 on error.
  */
 static int tgdb_send(struct tgdb *tgdb, char *command, enum buffer_command_type bct) {
-    struct command *ncom;
+    struct tgdb_client_command *ncom;
     static char temp_command[MAXLINE];
     int temp_length = strlen ( command );
 
@@ -489,7 +489,7 @@ static int tgdb_send(struct tgdb *tgdb, char *command, enum buffer_command_type 
  *
  * return       - 0 on success or -1 on error
  */
-static int tgdb_dispatch_command ( struct tgdb *tgdb, struct command *com ) {
+static int tgdb_dispatch_command ( struct tgdb *tgdb, struct tgdb_client_command *com ) {
     int ret = 0;
 
     switch ( com->com_type ) {
@@ -543,7 +543,7 @@ static int tgdb_dispatch_command ( struct tgdb *tgdb, struct command *com ) {
  *  NOTE: This function assummes valid commands are being sent to it. 
  *        Error checking should be done before inserting into queue.
  */
-static int tgdb_deliver_command ( struct tgdb *tgdb, int fd, struct command *command ) {
+static int tgdb_deliver_command ( struct tgdb *tgdb, int fd, struct tgdb_client_command *command ) {
 
     if ( command->com_type == BUFFER_READLINE_COMMAND ) {
         /* A readline command handled by tgdb-base */
@@ -603,7 +603,7 @@ tgdb_run_command_tag:
      */
     if ( queue_size(tgdb->rlc_input_queue) > 0 ) {
         /* This runs commands through readline */
-        struct command *item = NULL;
+        struct tgdb_client_command *item = NULL;
         item = queue_pop(tgdb->rlc_input_queue);
         tgdb_deliver_command(tgdb, tgdb->debugger_stdin, item);
         tgdb_interface_free_command ( item );
@@ -614,13 +614,13 @@ tgdb_run_command_tag:
          * However, if an assumption is made that a misc
          * prompt can never be set while in this spot.
          */
-        struct command *item = NULL;
+        struct tgdb_client_command *item = NULL;
         item = queue_pop(tgdb->oob_input_queue);
         tgdb_deliver_command(tgdb, tgdb->debugger_stdin, item);
         tgdb_interface_free_command ( item );
     /* If the queue is not empty, run a command */
     } else if ( queue_size(tgdb->gdb_input_queue) > 0 ) {
-        struct command *item = NULL;
+        struct tgdb_client_command *item = NULL;
         item = queue_pop(tgdb->gdb_input_queue);
 
         /* TODO: The comment and code below is in only one of 2 spots.
@@ -645,7 +645,7 @@ tgdb_run_command_tag:
         if ( tgdb->tgdb_partially_run_command && 
              /* Don't redisplay the prompt for the redisplay prompt command :) */
              item->com_to_run != COMMANDS_REDISPLAY) {
-            struct command *ncom;
+            struct tgdb_client_command *ncom;
 
             ncom = tgdb_interface_new_command ( 
                     NULL,
@@ -664,7 +664,7 @@ tgdb_run_command_tag:
 
     /* If the user has typed a command, send it through readline */
     } else if ( queue_size(tgdb->raw_input_queue) > 0 ) { 
-        struct command *item = queue_pop(tgdb->raw_input_queue);
+        struct tgdb_client_command *item = queue_pop(tgdb->raw_input_queue);
         char *data = item->data;
         int i, j = strlen ( data );
 
@@ -709,7 +709,7 @@ static int tgdb_command_callback(void *p, const char *line) {
 }
 
 int tgdb_change_prompt ( struct tgdb *tgdb, const char *prompt ) {
-    struct command *ncom= tgdb_interface_new_command ( 
+    struct tgdb_client_command *ncom= tgdb_interface_new_command ( 
             prompt, 
             BUFFER_READLINE_COMMAND, 
             COMMANDS_HIDE_OUTPUT, 
@@ -725,7 +725,7 @@ int tgdb_change_prompt ( struct tgdb *tgdb, const char *prompt ) {
 }
 
 static int tgdb_completion_callback ( void *p, const char *line ) {
-    struct command *ncom;
+    struct tgdb_client_command *ncom;
 	struct tgdb *tgdb = (struct tgdb *)p;
 
     /* Allow the client to generate a command for tab completion */

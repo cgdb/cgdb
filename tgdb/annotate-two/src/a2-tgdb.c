@@ -404,7 +404,7 @@ int a2_user_ran_command ( struct annotate_two *a2, struct queue *command_contain
 	return commands_user_ran_command ( a2->c, command_container );
 }
 
-int a2_prepare_for_command ( struct annotate_two *a2, struct command *com ) {
+int a2_prepare_for_command ( struct annotate_two *a2, struct tgdb_client_command *com ) {
 	return commands_prepare_for_command ( a2, a2->c, com );
 }
 

@@ -1,3 +1,10 @@
+10/03/2003 Bob Rossi <bob@brasko.net>
+
+   * TODO: Add item
+   * a2-tgdb.h, commands.h, a2-tgdb.c, commands.c, tgdb_interface.h, tgdb.c, 
+   tgdb_interface.c: Change all occurences of 'struct command' to 'struct
+   tgdb_client_command'
+
 10/01/2003 Bob Rossi <bob@brasko.net>
 
    * driver.c: gdb_input, add call to tgdb_types_free_command

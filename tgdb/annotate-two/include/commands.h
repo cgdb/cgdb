@@ -70,7 +70,7 @@ void commands_set_field_num(struct commands *c, int field_num);
 enum COMMAND_STATE commands_get_state(struct commands *c);
 
 /* runs a simple command, output goes to user  */
-/*int commands_run_command(int fd, struct command *com);*/
+/*int commands_run_command(int fd, struct tgdb_client_command *com);*/
 
 
 /* commands_issue_command:
@@ -142,7 +142,7 @@ int commands_has_commnands_to_run(struct commands *c);
  *
  *  Returns: -1 if this command should not be run. 0 otherwise.
  */
-int commands_prepare_for_command ( struct annotate_two *a2, struct commands *c, struct command *com );
+int commands_prepare_for_command ( struct annotate_two *a2, struct commands *c, struct tgdb_client_command *com );
 
 /* commands_finalize_command:
  * --------------------------

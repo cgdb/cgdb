@@ -584,7 +584,7 @@ void commands_finalize_command ( struct commands *c, struct queue *q ) {
     }
 }
 
-int commands_prepare_for_command ( struct annotate_two *a2, struct commands *c, struct command *com ) {
+int commands_prepare_for_command ( struct annotate_two *a2, struct commands *c, struct tgdb_client_command *com ) {
     enum annotate_commands *a_com = ( enum annotate_commands *) com->client_data;
 
     /* Set the commands state to nothing */
@@ -744,7 +744,7 @@ int commands_issue_command (
 		const char *data, 
 		int oob) {
     const char *ncom = commands_create_command ( c, com, data );
-    struct command *command = NULL;
+    struct tgdb_client_command *command = NULL;
     enum annotate_commands *nacom = (enum annotate_commands *)xmalloc ( sizeof ( enum annotate_commands ) );
     
     *nacom = com;

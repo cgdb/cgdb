@@ -9,6 +9,7 @@ Pushed off for gdb 0.5.0
 	
 Work to do for cgdb-0.4.0
 
+> Change use of 'struct queue' for tgdb_get_command.
 > Fix tgdb to call the lower level subsystems in an independent way.
 > standardize the way TGDB returns paths to the front end.
    As of know, it returns the full path with the relative path. Then

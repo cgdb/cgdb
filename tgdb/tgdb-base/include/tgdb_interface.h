@@ -53,7 +53,7 @@ enum buffer_command_to_run {
 /* This is the type that is used to make up 1 complete request from a client 
  * to gdb. With this, tgdb can run a command, capture output and return values.
  */
-struct command {
+struct tgdb_client_command {
     char *data;
     enum buffer_command_type com_type;
     enum buffer_output_type out_type;
@@ -77,7 +77,7 @@ struct command {
  *
  *  Returns: Always is successfull, will call exit on failed malloc
  */
-struct command *tgdb_interface_new_command(    
+struct tgdb_client_command *tgdb_interface_new_command(    
         const char *data, 
         enum buffer_command_type    com_type, 
         enum buffer_output_type     out_type,

@@ -204,7 +204,7 @@ int a2_user_ran_command ( struct annotate_two *a2, struct queue *command_contain
  * @return
  * 	-1 on error, 0 on success
  */
-int a2_prepare_for_command ( struct annotate_two *a2, struct command *com );
+int a2_prepare_for_command ( struct annotate_two *a2, struct tgdb_client_command *com );
 
 /** 
  * a2_is_misc_prompt

@@ -21,25 +21,25 @@
 #include "sys_util.h"
 
 void tgdb_interface_free_command( void* item) {
-   struct command *com;
+   struct tgdb_client_command *com;
    if ( item == NULL ) 
       return;
    
-   com = (struct command *) item;
+   com = (struct tgdb_client_command *) item;
    free ( com->data );
    com->data = NULL;
    free ( com );
    com = NULL;
 }
 
-struct command *tgdb_interface_new_command(    
+struct tgdb_client_command *tgdb_interface_new_command(    
         const char *ndata, 
         enum buffer_command_type    ncom_type, 
         enum buffer_output_type     nout_type,
         enum buffer_command_to_run  ncom_to_run,
         void *client_data) {
 
-    struct command *command = ( struct command * ) xmalloc ( sizeof (struct command) );
+    struct tgdb_client_command *command = ( struct tgdb_client_command * ) xmalloc ( sizeof (struct tgdb_client_command) );
     if ( ndata != NULL ) {
         int length = strlen(ndata);
         command->data = ( char * ) xmalloc ( sizeof (char *) * ( length + 1 ));
@@ -57,7 +57,7 @@ struct command *tgdb_interface_new_command(
 
 
 void tgdb_interface_print_command ( void *item ) {
-    struct command *i = item;
+    struct tgdb_client_command *i = item;
     fprintf(stderr, "ITEM:\n");
     fprintf(stderr, "\tDATA(%s)\n", i->data);
 
