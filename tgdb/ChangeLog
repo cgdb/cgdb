@@ -1,3 +1,7 @@
+09/24/2003 Bob Rossi <bob@brasko.net>
+
+   * a2-tgdb.c: a2_initialize, add call to check for breakpoints on start up.
+
 09/21/2003 Bob Rossi <bob@brasko.net>
 
    * tgdb.h: tgb_recv_debugger_data, remove queue parameter.

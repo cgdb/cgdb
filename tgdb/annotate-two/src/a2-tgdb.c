@@ -226,7 +226,18 @@ int a2_initialize (
 
 	a2_open_new_tty ( a2, command_container, inferior_stdin, inferior_stdout );
 
-    a2->tgdb_initialized = 1;
+   /* gdb may already have some breakpoints when it starts. This could happen
+    * if the user puts breakpoints in there .gdbinit.
+    * This makes sure that TGDB asks for the breakpoints on start up.
+    */
+    if ( commands_issue_command ( 
+             a2->c, command_container, 
+             ANNOTATE_INFO_BREAKPOINTS, NULL, 0 ) == -1 ) {
+        err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
+        return -1;
+    }
+
+   a2->tgdb_initialized = 1;
 
     return 0;
 }
