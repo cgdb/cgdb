@@ -1,3 +1,7 @@
+08/18/2003 Bob Rossi <bob@brasko.net>
+
+	* annotate_two.h: adding 'struct annotate_two' context
+
 08/17/2003 Bob Rossi <bob@brasko.net>
 
 	* Doxyfile: Adding doxygen config file.
