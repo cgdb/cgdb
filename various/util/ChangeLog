@@ -1,4 +1,8 @@
 04/01/2005 Bob Rossi <bob@brasko.net>
+
+   * logger.c (logger_set_file): print message when couldn't open file
+
+04/01/2005 Bob Rossi <bob@brasko.net>
    
    * Makefile.in: Regenerated with documented autotools version.
 

@@ -138,8 +138,10 @@ int logger_set_file ( struct logger *log, const char *file ) {
 	log->fd = fopen ( file, "w" );
 
 	/* If the open failed, just return */
-	if ( !log->fd )
+	if ( !log->fd ) {
+        printf ( "Error: Could not open file %s for writing\n", file );
 		return -1;
+    }
 
 	log->log_file = strdup ( file );
 
