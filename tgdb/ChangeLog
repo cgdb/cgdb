@@ -1,3 +1,8 @@
+08/17/2003 Bob Rossi <bob@brasko.net>
+
+	* Doxyfile: Adding doxygen config file.
+	* a2-tgdb.h: modified comments to work with doxygen.
+
 08/16/2003 Bob Rossi <bob@brasko.net>
 
 	* a2-tgdb.h: added interface for a2_user_ran_command,

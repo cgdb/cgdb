@@ -516,6 +516,9 @@ uninstall-info: uninstall-info-recursive
 	uninstall-info-am uninstall-info-recursive uninstall-recursive
 
 
+doxygen:
+	cd tgdb; doxygen Doxyfile
+
 dist-hook:
 	rm -rf `find $(distdir) -name CVS`
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
