@@ -45,10 +45,7 @@ static void tgdb_print_item(void *item) {
 
 				fprintf ( fd, 
 					"\tFILE(%s) FUNCNAME(%s) LINE(%d) ENABLED(%d)\n",
-					string_get ( tb->file ), 
-					string_get ( tb->funcname ), 
-					tb->line, 
-					tb->enabled );
+					tb->file, tb->funcname, tb->line, tb->enabled );
 				
 				iterator = tgdb_list_next ( iterator );
 			}
@@ -118,9 +115,9 @@ static int tgdb_breakpoint_free ( void *data ) {
 	tb = (struct tgdb_breakpoint *)data;
 
 	/* Free the structure */
-	string_free ( tb->file );
+	free ( (char*)tb->file );
 	tb->file = NULL;
-	string_free ( tb->funcname );
+	free ( (char*)tb->funcname );
 	tb->funcname = NULL;
 	free ( tb );
 	tb = NULL;

@@ -1,3 +1,12 @@
+09/27/2003 Bob Rossi <bob@brasko.net>
+
+   * commands.c: parse_breakpoint, changed to use new 'struct tgdb_breakpoint'
+   * types.h: struct tgdb_breakpoint, changed members file and funcname from
+   'struct string' to 'char *'
+   * types.c: tgdb_print_command TGDB_UPDATE_BREAKPOINTS case, change to use
+   new 'struct tgdb_breakpoint'
+   tgdb_breakpoint_free, ditto
+
 09/26/2003 Bob Rossi <bob@brasko.net>
 
    * TODO: update todo stuff

@@ -250,10 +250,8 @@ static void parse_breakpoint(struct commands *c, struct queue *q){
     strcpy(file, cur);
 
     tb = ( struct tgdb_breakpoint*) xmalloc ( sizeof ( struct tgdb_breakpoint) );
-    tb->file = string_init ();
-    string_add ( tb->file, file );
-    tb->funcname = string_init ();
-    string_add ( tb->funcname, fname );
+    tb->file = strdup ( file );
+    tb->funcname = strdup ( fname );
     sscanf (line, "%d", &tb->line);
 
     if(c->breakpoint_enabled == TRUE)

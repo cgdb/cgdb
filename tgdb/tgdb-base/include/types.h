@@ -212,10 +212,10 @@ enum tgdb_breakpoint_action {
  *    0 if it is not enabled or 1 if it is enabled.
  */
 struct tgdb_breakpoint {
-   struct string *file;
-   struct string *funcname;
-   int line;
-   int enabled;
+	char *file;
+	char *funcname;
+	int line;
+	int enabled;
 };
 
 /* 
