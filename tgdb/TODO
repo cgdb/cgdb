@@ -30,7 +30,6 @@ tdb-0.4.0
 Non-technical
 -------------
 * Work on webpage for cgdb/tgdb
-* Make sure mueller's wrap searching feature gets documented.
 
 technical
 ---------
@@ -39,6 +38,7 @@ technical
 
 Finished:
 
+* Make sure mueller's wrap searching feature gets documented.
 * Standardize tgdb_interface. Maybe change its name. The clients should be
   able to generate and add commands to the command queue here. The commands
   should be made cleaner.
