@@ -310,18 +310,12 @@ int command_parse_syntax( void )
   } break;
   case BOOLEAN: 
   case IDENTIFIER: {
+    extern int sources_syntax_on;
     const char *value = get_token();
-    if( strcasecmp( value, "on" ) == 0 ||
-	strcasecmp( value, "yes") == 0 )
-    {
-      extern int sources_syntax_on;
-      sources_syntax_on = 1;
-    } else if ( strcasecmp( value, "no" ) == 0 ||
-		strcasecmp( value, "off") == 0 ) {
-      extern int sources_syntax_on;
-      if_highlight_sviewer ( TOKENIZER_LANGUAGE_UNKNOWN ); // force window to redraw properly
-      sources_syntax_on = 0;
-    }
+    if( strcasecmp( value, "on" ) == 0 || strcasecmp( value, "yes") == 0 )
+        sources_syntax_on = 1;
+    else if ( strcasecmp( value, "no" ) == 0 || strcasecmp( value, "off") == 0 )
+        sources_syntax_on = 0;
 
     if_draw(); 
   } break;

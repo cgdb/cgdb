@@ -1,5 +1,10 @@
 07/16/2003 Peter Kovacs <peter@kovax.org>
 
+	* commands.c: command_parse_syntax, don't set current file type. Just
+	set the syntax flag and then do a redraw.
+
+07/16/2003 Peter Kovacs <peter@kovax.org>
+
 	* commands.c: implement "syntax on|off" which sets the
 	  sources_syntax_on variable for all files.
 
