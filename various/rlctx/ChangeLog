@@ -1,0 +1,7 @@
+04/27/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * Reorganized the cvs tree
+    * Removed rlctx_prog: rlctx now interfaces by calling fork
+    and then doing all its work there ( instead of exec'ing also ).
+
+version 0.3.0 (04/11/2003):

@@ -1,3 +1,7 @@
+04/27/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * Reorganized the cvs tree
+
 04/13/2003 Bob Rossi <bob_rossi@cox.net>
 
     * Removed data_get_prompt() function.

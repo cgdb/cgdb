@@ -9,8 +9,13 @@ A lot of work to do for cgdb-0.4.0
 6. Rework tgdb to be able to support multiple types of debugging (annotate,mi)
    This involves making a better interface to running commands through the
    debbuger and through readline.
+
+Finished:
+
 7. Reorganize tgdb to have a separate low level lib for ADT's and for
    util calls like xmalloc. This is so all programs can use it without
    linking to libtgdb.
+
 8. Move rlctx_prog to another directory
+
 9. Figure out how to make rlctx not require another program to use.
