@@ -38,7 +38,7 @@ Some features offered by CGDB are:<P>
   <BLOCKQUOTE>
   CGDB v0.5.0 was released today, see the <A Href="download.shtml">download 
   page</a> to try it out. This contains many important bug fixes, including 
-  some that prevent CGDB from crasheing When the user would enter many commands,
+  some that prevent CGDB from crashing When the user would enter many commands,
   in the time it took GDB to respond to one, CGDB would get confused, and a
   crash could occur. This is now fixed. Also, there were some silly off by
   one crash's. 
