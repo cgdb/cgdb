@@ -1,3 +1,7 @@
+09/30/2003 Bob Rossi <bob@brasko.net>
+
+   * cgdb.c: process_commands, remove call to depricated tgdb_delete_command
+
 09/27/2003 Bob Rossi <bob@brasko.net>
 
    * cgdb.c: remove #include 'ibuf.h'

@@ -1,5 +1,5 @@
-#ifndef __TYPES_H__
-#define __TYPES_H__
+#ifndef __TGDB_TYPES_H__
+#define __TGDB_TYPES_H__
 
 /*
  * This interface is intended to declare and document the ADT's that TGDB 
@@ -22,20 +22,6 @@ extern "C" {
 #ifndef FALSE
 #define FALSE 0
 #endif
-
-#if HAVE_CONFIG_H
-#include "config.h"
-#endif /* HAVE_CONFIG_H */
-
-#if HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif /* HAVE_SYS_TYPES_H */
-
-#if HAVE_STDIO_H
-#include <stdio.h>
-#endif
-
-#include "queue.h"
 
 /* INTERFACE_COMMANDS
  * ------------------
@@ -126,41 +112,32 @@ enum INTERFACE_COMMANDS {
     TGDB_QUIT_NORMAL
 };
 
+/*
+ * A single TGDB command for the front end.
+ *
+ * header
+ *    This is the type of command.
+ *
+ * data
+ *    This is a particular structure, based off of header.
+ */
 struct tgdb_command {
    enum INTERFACE_COMMANDS header;
    void *data;
 };
 
-void tgdb_delete_command(void *item);
-
-/* tgdb_delete_command: Free's the memory from command com.
- *    
- *    NOTE: This functions MUST be called after tgdb_recv is called.  
+/*
+ * This will print a command to stderr.
+ * It is currently used for debugging purposes.
  */
-void tgdb_delete_commands(struct queue *q);
+void tgdb_types_print_command ( void *command );
 
-/* tgdb_append_command: 
- * --------------------
- *
- *  This appends a new command onto the com structure.
- *
- *  q:              
- *  new_header:      
- *  ndata:          
+/*
+ * This will free a command.
  */
-void tgdb_append_command(
-            struct queue *q, 
-            enum INTERFACE_COMMANDS new_header, 
-            void *ndata);
+void tgdb_types_free_command ( void *command );
 
-/* tgdb_traverse_command: Traverses com and outputs data to fd. 
- *    This is mainly used for debugging information.
- */
-void tgdb_traverse_command_queue (struct queue *q);
-
-/* tgdb_command
- * ------------
- *
+/* 
  *  The client can choose any of these as actions that libtgdb should take.
  */
 enum tgdb_command_type {
@@ -174,9 +151,7 @@ enum tgdb_command_type {
 	TGDB_ERROR
 };
 
-
-/* TGDB_MODIFY_BREAKPOINT:
- *
+/* 
  * This gives the client the ability to add or remove breakpoints.
  *
  * Currently, enable/disable are not supported.
@@ -250,4 +225,4 @@ struct tgdb_source_file {
 }
 #endif
 
-#endif
+#endif /* __TGDB_TYPES_H__ */

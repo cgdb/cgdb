@@ -6,7 +6,7 @@
 #include <string.h>
 #endif /* HAVE_STRING_H */
 
-#include "types.h"
+#include "tgdb_types.h"
 #include "globals.h"
 #include "sys_util.h"
 

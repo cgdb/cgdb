@@ -21,7 +21,7 @@ extern "C" {
 #include <sys/types.h>
 #endif /* HAVE_SYS_TYPES_H */
 
-#include "types.h"
+#include "tgdb_types.h"
 
 /* tgdb
  * ----
@@ -293,6 +293,18 @@ struct tgdb_command *tgdb_get_command ( struct tgdb *tgdb );
  *
  */
 void tgdb_traverse_commands ( struct tgdb *tgdb );
+
+/* tgdb_delete_commands
+ * --------------------
+ *
+ * This will free all of the memory used by the commands that tgdb returns.
+ *
+ * tgdb
+ * ----
+ *  An instance of the tgdb library to operate on.
+ *
+ */
+void tgdb_delete_commands ( struct tgdb *tgdb );
 
 /* These functions are for dealing with setting up the inferior program.
  * 

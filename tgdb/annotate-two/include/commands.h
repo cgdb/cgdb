@@ -1,7 +1,7 @@
 #ifndef __COMMANDS_H__
 #define __COMMANDS_H__
 
-#include "types.h"
+#include "tgdb_types.h"
 #include "tgdb_interface.h"
 #include "a2-tgdb.h"
 

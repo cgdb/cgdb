@@ -9,7 +9,8 @@
 #include <sys/types.h>
 #endif /* HAVE_SYS_TYPES_H */
 
-#include "types.h"
+#include "tgdb_types.h"
+#include "queue.h"
 
 int gdbmi_tgdb_init(int *readline);
 int gdbmi_tgdb_shutdown(void);

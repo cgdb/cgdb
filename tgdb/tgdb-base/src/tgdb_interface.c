@@ -10,8 +10,12 @@
 #include <string.h>
 #endif /* HAVE_STRING_H */
 
+#if HAVE_STDIO_H
+#include <stdio.h>
+#endif
+
 #include "tgdb_interface.h"
-#include "types.h"
+#include "tgdb_types.h"
 #include "queue.h"
 #include "error.h"
 #include "sys_util.h"
@@ -52,7 +56,7 @@ struct command *tgdb_interface_new_command(
 }
 
 
-void tgdb_interface_print_command ( struct command *item ) {
+void tgdb_interface_print_command ( void *item ) {
     struct command *i = item;
     fprintf(stderr, "ITEM:\n");
     fprintf(stderr, "\tDATA(%s)\n", i->data);

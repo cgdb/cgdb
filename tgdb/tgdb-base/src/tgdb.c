@@ -929,7 +929,7 @@ size_t tgdb_recv_debugger_data ( struct tgdb *tgdb, char *buf, size_t n ) {
     ssize_t size, buf_size;
 
     /* make the queue empty */
-    tgdb_delete_commands(tgdb->q);
+    tgdb_delete_commands(tgdb);
 
 	/* TODO: This is kind of a hack.
 	 * Since I know that I didn't do a read yet, the next select loop will
@@ -1092,5 +1092,9 @@ int tgdb_set_verbose_gui_command_output ( struct tgdb *tgdb, int value ) {
 }
 
 void tgdb_traverse_commands ( struct tgdb *tgdb ) {
-	tgdb_traverse_command_queue ( tgdb->q );
+    queue_traverse_list(tgdb->q, tgdb_types_print_command);
+}
+
+void tgdb_delete_commands ( struct tgdb *tgdb ) {
+    queue_free_list(tgdb->q, tgdb_types_free_command);
 }

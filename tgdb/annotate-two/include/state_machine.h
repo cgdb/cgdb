@@ -21,7 +21,7 @@
 #include <sys/types.h>
 #endif /* HAVE_SYS_TYPES_H */
 
-#include "types.h"
+#include "tgdb_types.h"
 #include "a2-tgdb.h"
 
 struct state_machine;

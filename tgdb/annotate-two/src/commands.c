@@ -14,7 +14,7 @@
 #include "commands.h"
 #include "data.h"
 #include "io.h"
-#include "types.h"
+#include "tgdb_types.h"
 #include "globals.h"
 #include "error.h"
 #include "sys_util.h"

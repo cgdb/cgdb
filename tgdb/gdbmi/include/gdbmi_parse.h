@@ -9,7 +9,8 @@
 #include <sys/types.h>
 #endif /* HAVE_SYS_TYPES_H */
 
-#include "types.h"
+#include "tgdb_types.h"
+#include "queue.h"
 
 int gdbmi_parse(char *data, size_t size, char *gui_data, size_t gui_size, struct queue *q);
 

@@ -9,7 +9,7 @@
 #include <sys/types.h>
 #endif /* HAVE_SYS_TYPES_H */
 
-#include "types.h"
+#include "tgdb_types.h"
 #include "tgdb_interface.h"
 
 /*! \file

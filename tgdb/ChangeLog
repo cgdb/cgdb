@@ -1,3 +1,28 @@
+09/30/2003 Bob Rossi <bob@brasko.net>
+
+   * TODO: Update tasks.
+   * a2-tgdb.h: changed include from 'types.h to 'tgdb_types.h'
+   * annotate.h: ditto
+   * commands.h: ditto
+   * data.h: ditto
+   * state_machine.h: ditto
+   * a2-tgdb.c: ditto
+   * commands.c: ditto
+   * globals.c: ditto
+   * gdbmi_parse.h: ditto, add include for queue.h
+   * gdbmi_tgdb.h: ditto, add include for queue.h
+   * tgdb.h: ditto, add tgdb_delete_commands prototype
+   * tgdb_interface.h: ditto, removed tgdb_interface_free_item and added
+   tgdb_interface_free_command. removed tgdb_interface_print_item and added
+   tgdb_interface_print_command. Added tgdb_append_command prototype.
+   * Makefile.am: Changed libtgdb_a_SOURCES. changed types.c to tgdb_types.c
+   * driver.c: removed call to depricated tgdb_delete_command function call.
+   * tgdb.c: tgdb_recv_debugger_data, changed call to tgdb_delete_commands.
+   tgdb_traverse_commands, change implementation.
+   Add definition of tgdb_delete_commands.
+   * tgdb_interface.c: ditto, add #include for stdio.h 
+   changed prototype of tgdb_interface_print_command signature.
+
 09/28/2003 Bob Rossi <bob@brasko.net>
 
    * annotate.c: handle_prompt, move call to commands_finalize_command to

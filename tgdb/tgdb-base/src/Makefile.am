@@ -10,7 +10,7 @@ noinst_LIBRARIES = libtgdb.a
 
 libtgdb_a_SOURCES = \
 tgdb.c \
-types.c \
+tgdb_types.c \
 tgdb_interface.c
 
 noinst_bin_PROGRAMS = tgdb_driver

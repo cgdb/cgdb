@@ -40,7 +40,7 @@
 #include "data.h"
 #include "commands.h"
 #include "globals.h"
-#include "types.h"
+#include "tgdb_types.h"
 #include "queue.h"
 #include "sys_util.h"
 #include "ibuf.h"

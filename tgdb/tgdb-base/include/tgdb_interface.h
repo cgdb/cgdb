@@ -10,7 +10,7 @@
  */
 
 #include "queue.h"
-#include "types.h"
+#include "tgdb_types.h"
 
 /* This type determines what type of command is next to be given to gdb.
  * BUFFER_GUI_COMMAND:      A command given by the gui.
@@ -84,15 +84,6 @@ struct command *tgdb_interface_new_command(
         enum buffer_command_to_run  com_to_run,
         void *client_data);
 
-/* tgdb_interface_free_item: 
- * -------------------------
- *
- *  Free a command 
- *
- *  item - The command to free
- */
-void tgdb_interface_free_command ( void* item);
-
 /* tgdb_interface_print_item: 
  * --------------------------
  *
@@ -100,6 +91,28 @@ void tgdb_interface_free_command ( void* item);
  *
  *  item - The command to print
  */
-void tgdb_interface_print_command ( struct command *item );
+void tgdb_interface_print_command ( void *item );
 
+/* tgdb_interface_free_command
+ * ---------------------------
+ *
+ *  Free a command 
+ *
+ *  item - The command to free
+ */
+void tgdb_interface_free_command ( void *item);
+
+/* tgdb_append_command: 
+ * --------------------
+ *
+ *  This appends a new command onto the com structure.
+ *
+ *  q:              
+ *  new_header:      
+ *  ndata:          
+ */
+void tgdb_append_command(
+            struct queue *q, 
+            enum INTERFACE_COMMANDS new_header, 
+            void *ndata);
 #endif

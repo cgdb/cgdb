@@ -2,6 +2,14 @@
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
+#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif /* HAVE_SYS_TYPES_H */
+
+#if HAVE_STDIO_H
+#include <stdio.h>
+#endif
+
 #if HAVE_STRING_H
 #include <string.h>
 #endif /* HAVE_STRING_H */
@@ -11,14 +19,15 @@
 #endif  /* HAVE_STDLIB_H */
 
 /* Local includes */
-#include "types.h"
+#include "tgdb_types.h"
 #include "error.h"
 #include "sys_util.h"
 #include "ibuf.h"
 #include "tgdb_list.h"
+#include "queue.h"
 
-static void tgdb_print_item(void *item) {
-    struct tgdb_command *com = (struct tgdb_command *)item;
+static void tgdb_types_print_item ( void *command ) {
+	struct tgdb_command *com = ( struct tgdb_command * ) command;
     FILE *fd = stderr;
 
     if ( !com ) {
@@ -112,7 +121,7 @@ static void tgdb_print_item(void *item) {
     }
 }
 
-static int tgdb_breakpoint_free ( void *data ) {
+static int tgdb_types_breakpoint_free ( void *data ) {
 	struct tgdb_breakpoint *tb;
 	tb = (struct tgdb_breakpoint *)data;
 
@@ -126,15 +135,15 @@ static int tgdb_breakpoint_free ( void *data ) {
 	return 0;
 }
 
-static int tgdb_source_files_free ( void *data ) {
+static int tgdb_types_source_files_free ( void *data ) {
 	char *s = (char*)data;
 	free ( s );
 	s = NULL;
 	return 0;
 }
 
-void tgdb_delete_command(void *item){
-    struct tgdb_command *com = (struct tgdb_command*) item;
+static void tgdb_types_delete_item ( void *command ){
+	struct tgdb_command *com = ( struct tgdb_command * ) command;
 
     if ( !com ) {
         return;
@@ -145,7 +154,7 @@ void tgdb_delete_command(void *item){
 		{
 			struct tgdb_list *list = (struct tgdb_list *)com->data;
 
-			tgdb_list_free ( list, tgdb_breakpoint_free );
+			tgdb_list_free ( list, tgdb_types_breakpoint_free );
 			break;
 		}
         case TGDB_UPDATE_FILE_POSITION:
@@ -165,7 +174,7 @@ void tgdb_delete_command(void *item){
         case TGDB_UPDATE_SOURCE_FILES:
 		{
 			struct tgdb_list *list = ( struct tgdb_list *) com->data;
-			tgdb_list_free ( list, tgdb_source_files_free );
+			tgdb_list_free ( list, tgdb_types_source_files_free );
 			break;
 		}
         case TGDB_SOURCES_DENIED:
@@ -197,8 +206,12 @@ void tgdb_delete_command(void *item){
     com = NULL;
 }
 
-void tgdb_delete_commands(struct queue *q) {
-    queue_free_list(q, tgdb_delete_command);
+void tgdb_types_print_command ( void *command ) {
+	tgdb_types_print_item ( ( void *) command );
+}
+
+void tgdb_types_free_command ( void *command ) {
+	tgdb_types_delete_item ( (void *) command );
 }
 
 void tgdb_append_command(
@@ -211,8 +224,4 @@ void tgdb_append_command(
     item->data = ndata;
     queue_append(q, item);
     /*err_msg("UPDATE(%s)", command);*/
-}
-
-void tgdb_traverse_command_queue(struct queue *q) {
-    queue_traverse_list(q, tgdb_print_item);
 }

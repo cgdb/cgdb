@@ -115,8 +115,6 @@ static int gdb_input(void) {
            fprintf(stderr, "%s:%d TGDB_QUIT_ABNORMAL\n", __FILE__, __LINE__);
            return -1;
 		}
-
-        tgdb_delete_command(item);
     }
 
 

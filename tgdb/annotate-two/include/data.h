@@ -15,7 +15,7 @@
 extern "C" {
 #endif 
 
-#include "types.h"
+#include "tgdb_types.h"
 #include "tgdb_interface.h"
 #include "annotate_two.h"
 

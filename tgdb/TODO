@@ -5,10 +5,10 @@ Pushed off for gdb 0.5.0
 3. Get tab completion to work through readline ?
    This is *very* difficult to do. I don't know if it is possible.
 4. Modify the readline library to be context driven.
+5. Add new structures to types.h that are intended to work with MI
 	
 Work to do for cgdb-0.4.0
 
-> Add new structures to types.h that are intended to work with MI
 > Fix tgdb to call the lower level subsystems in an independent way.
 > standardize the way TGDB returns paths to the front end.
    As of know, it returns the full path with the relative path. Then
