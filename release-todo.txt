@@ -1,0 +1,7 @@
+1.  change configure.in file to reflect new version number.
+2.  update both ChangeLog's to have the new release date and version.
+    The ChangeLog's lives in both cgdb and cgdb/tgdb 
+3.  update website cgdb.sourceforge.net
+4.  put a release on sourceforge.net/projects/cgdb
+5.  announce the release on freshmeat
+6.  announce the release on cgdb-announce@lists.sourceforge.net
