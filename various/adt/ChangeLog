@@ -1,5 +1,13 @@
 09/29/2003 Bob Rossi <bob@brasko.net>
 
+   * tgdb_list.h: Added tgdb_list_iterator_init, tgdb_list_iterator_free
+   * tgdb_list.c: ditto
+   tgdb_list_foreach, tgdb_list_free, changed to use new iterator
+
+
+
+09/29/2003 Bob Rossi <bob@brasko.net>
+
    * tgdb_list.h: global item_func, changed name to tgdb_list_func
    tgdb_list_foreach, tgdb_list_free, updateing for new typedef name
    tgdb_get_item, changed to tgdb_list_get_item

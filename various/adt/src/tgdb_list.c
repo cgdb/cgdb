@@ -18,6 +18,21 @@ struct tgdb_list_iterator {
 	struct tgdb_list_node *node;
 };
 
+struct tgdb_list_iterator *tgdb_list_iterator_init ( void ) {
+	struct tgdb_list_iterator *i = (struct tgdb_list_iterator *)
+		xmalloc ( sizeof ( struct tgdb_list_iterator ) );
+
+	i->node = NULL;
+
+	return i;
+}
+
+void tgdb_list_iterator_free ( struct tgdb_list_iterator *i ) {
+	i->node = NULL;
+	free ( i );
+	i = NULL;
+}
+
 struct tgdb_list *tgdb_list_init ( void ) {
 	struct tgdb_list *list;
 
@@ -232,30 +247,36 @@ void tgdb_list_insert_before (
 }
 
 void tgdb_list_foreach ( struct tgdb_list *tlist, tgdb_list_func func ) {
-	struct tgdb_list_iterator i;
+	struct tgdb_list_iterator *i = tgdb_list_iterator_init ();
 	int val;
 
-	val = tgdb_list_get_first ( tlist, &i );
+    val = tgdb_list_get_first ( tlist, i );
 
 	while ( val != 0 ) {
-		func ( i.node->data );
-		val = tgdb_list_next ( &i );
+		func ( i->node->data );
+		val = tgdb_list_next ( i );
 	}
+
+	tgdb_list_iterator_free ( i );
+	i = NULL;
 }
 
 
 
 void tgdb_list_free ( struct tgdb_list *tlist, tgdb_list_func func ) {
-	struct tgdb_list_iterator i;
+	struct tgdb_list_iterator *i = tgdb_list_iterator_init ();
 	int val;
 
-	val = tgdb_list_get_first ( tlist, &i );
+	val = tgdb_list_get_first ( tlist, i );
 
 	while ( val != 0 ) {
-		func ( i.node->data );
-		tgdb_list_delete ( tlist, i.node->data );
-		val = tgdb_list_next ( &i );
+		func ( i->node->data );
+		tgdb_list_delete ( tlist, i->node->data );
+		val = tgdb_list_next ( i );
 	}
+
+	tgdb_list_iterator_free ( i );
+	i = NULL;
 }
 
 int tgdb_list_size ( struct tgdb_list *tlist ) {

@@ -7,6 +7,21 @@ struct tgdb_list_iterator;
 typedef void (*tgdb_list_func)(void *item);
 
 /* 
+ * Allocates an iterator
+ *
+ * Returns a new iterator
+ */
+struct tgdb_list_iterator *tgdb_list_iterator_init ( void );
+
+/* 
+ * Destroys an iterator
+ *
+ * i
+ *    The iterator to free
+ */
+void tgdb_list_iterator_free ( struct tgdb_list_iterator *i );
+
+/* 
  * Initializes a new empty list.
  * 
  * Returns
