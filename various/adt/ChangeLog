@@ -1,0 +1,6 @@
+06/04/2003 Bob Rossi <bob_rossi@cox.net>
+   
+   * queue.h: Added queue_iterator_init,queue_iterator_free,
+   queue_iterator_reset,queue_iterator_forward,queue_iterator_end_of_list,
+   queue_iterator_get_item and struct queue_iterator
+   * queue.c: implemented functions above.

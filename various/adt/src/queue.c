@@ -2,6 +2,10 @@
 #include "error.h"
 #include "sys_util.h"
 
+struct queue_iterator {
+    struct node *node;
+};
+
 struct node {
    void *data;
    struct node *next;
@@ -95,4 +99,41 @@ int queue_size(struct queue *q) {
        return 0;
    else
       return q->size;
+}
+
+struct queue_iterator *queue_iterator_init(void) {
+   struct queue_iterator *i = (struct queue_iterator *)xmalloc(sizeof(struct queue_iterator));
+   i->node = NULL;
+   return i;
+}
+
+void queue_iterator_free ( struct queue_iterator *i ) {
+    free ( i );
+    i = NULL;
+}
+
+void queue_iterator_reset ( struct queue *q, struct queue_iterator *i ) {
+    i->node = NULL;
+
+    if ( q == NULL )
+        return;
+
+    i->node = q->head;
+}
+
+void queue_iterator_forward ( struct queue_iterator *i ) {
+    if ( i->node != NULL )
+        i-> node = i->node->next;
+
+}
+
+int queue_iterator_end_of_list ( struct queue_iterator *i ) {
+    if ( i->node == NULL )
+        return 1;
+    else
+        return 0;
+}
+
+void *queue_iterator_get_item ( struct queue_iterator *i ) {
+    return i->node->data;
 }
