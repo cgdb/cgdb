@@ -1,11 +1,12 @@
 #ifndef __TGDB_H__
 #define __TGDB_H__
 
-/* tgdb:
- * -----
+/* 
+ * This interface is intended to be the abstraction layer between a front end 
+ * and the low level debugger the front end is trying to communicate with.
  *
- *  This is the interface to the gui.
- *  The gui can call any functions in this interface.
+ * This interface to the front end defines the complete set of functionality 
+ * that the front end can invoke.
  */
 
 #ifdef __cplusplus

@@ -1,6 +1,15 @@
 #ifndef __TYPES_H__
 #define __TYPES_H__
 
+/*
+ * This interface is intended to declare and document the ADT's that TGDB 
+ * exports to the front ends.
+ *
+ * The front end can interrogate these data structures to discover what TGDB
+ * knows about the debugger. This is currently the only way the front end gets
+ * any information about the current debugging session.
+ */
+
 #ifdef __cplusplus
 extern "C" {
 #endif 

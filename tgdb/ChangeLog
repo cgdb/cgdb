@@ -1,5 +1,9 @@
 09/26/2003 Bob Rossi <bob@brasko.net>
 
+   * types.h: Added unit comment
+   * tgdb.h: ditto
+09/26/2003 Bob Rossi <bob@brasko.net>
+
    * types.h: Changed comments.
    * types.c: tgdb_print_item, changed case TGDB_UPDATE_FILE_POSITION,
    TGDB_UPDATE_SOURCE_FILES, TGDB_SOURCES_DENIED,
