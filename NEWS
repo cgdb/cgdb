@@ -1,3 +1,7 @@
+   * Fixed bug in cgdb. If the user hit 'o' in cgdb, then got out of the 
+   file dialog, the next time ^c was typed in the gdb window, the prompt
+   would not refresh itself properly.
+   
    * Fixed ada highlighting bug. String literals were not being highlighted.
    
    * Temporarily fixed the ^c bug. The data at the console is now cleared when

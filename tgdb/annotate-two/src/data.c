@@ -62,6 +62,14 @@ void data_set_state(enum internal_state state){
 		 command_completed_callback();
          global_set_signal_recieved(FALSE);
 
+		 /* This is important, because it resets the commands state.
+		  * With this line not here, if the user hits 'o' from cgdb,
+		  * then the commands state gets set to INFO_SOURCES, then the
+		  * user hits ^c from the gdb window, the error occurs because 
+		  * commands state is INFO_SOURCES instead of VOID.
+		  */
+		 commands_set_state ( VOID, NULL );
+
          break;
       case POST_PROMPT:    
             data_state = VOID;

@@ -1,5 +1,10 @@
 08/12/2003 Bob Rossi <bob@brasko.net>
 
+	* NEWS: Updating NEWS file with fix for prompt refresh problem after when
+	^c is recieved after the file dialog has been opened.
+
+08/12/2003 Bob Rossi <bob@brasko.net>
+
 	* NEWS: Updating NEWS file with ada highlighting string literal bug.
 
 08/11/2003 Bob Rossi <bob@brasko.net>

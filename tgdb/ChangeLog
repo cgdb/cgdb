@@ -1,3 +1,7 @@
+08/12/2003 Bob Rossi <bob@brasko.net>
+
+	* data.c: data_set_state, add call to commands_set_state ( VOID, NULL )
+
 08/11/2003 Bob Rossi <bob@brasko.net>
 	The basic purpose of this commit is to handle the control_c signal.
 
