@@ -32,10 +32,12 @@ Steps for releasing a new CGDB version:
       * Download link
       * Changelog link (point to the correct version in CVS)
     * Optionally, put a note in the index.shtml file (News section)
-    
-7.  Announce the release on freshmeat
 
-8.  Announce the release on cgdb-announce@lists.sourceforge.net
+7.  Test website by looking at it and attempting to download file.
+    
+8.  Announce the release on freshmeat
+
+9.  Announce the release on cgdb-announce@lists.sourceforge.net
 
 Subject:  CGDB (version) released
 Text of message:
