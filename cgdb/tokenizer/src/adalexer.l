@@ -103,6 +103,7 @@ L                       [a-zA-Z_]
 --([^\r\n\f\v])*        { return(TOKENIZER_COMMENT); }
 L?\"(\\.|[^\\"])*\"     { return(TOKENIZER_LITERAL); }
 {D}+						{ return(TOKENIZER_LITERAL); }
+'.'					   { return(TOKENIZER_LITERAL); }
 
 \n						{ return(TOKENIZER_NEWLINE); }
 \r\n 					{ return(TOKENIZER_NEWLINE); }
