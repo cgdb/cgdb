@@ -1,4 +1,13 @@
-   * Fixed bug in TGDB. It was not properly parsing the breakpoint information
+   * Fixed bug in TGDB/CGDB. TGDB would return TGDB_UPDATE_SOURCE_FILES when 
+   there was no source files in the list ( ex. if the inferior was compiled 
+   without debug).  This would cause CGDB to act buggy when the user tried to 
+   open the filedlg on a program that was not compiled with debug. The first 
+   time you would open the file dialog it would display a blank screen. The 
+   second time it would give you an error but it would put you in the file
+   dialog mode, even though it displayed the CGDB source window. Both of these
+   bugs should be fixed.
+   
+   * Fixed bug in TGDB/CGDB. It was not properly parsing the breakpoint information
    out of GDB. When using C++, GDB would output data that TGDB did not expect.
    TGDB can now parse the data properly. The result is that CGDB now displays
    all of the breakpoints in the source window. It used to not display them all.

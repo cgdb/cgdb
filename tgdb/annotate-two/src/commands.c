@@ -457,7 +457,11 @@ void commands_free(struct commands *c, void *item) {
 }
 
 void commands_send_gui_sources(struct commands *c, struct queue *q){
-    tgdb_append_command ( q, TGDB_UPDATE_SOURCE_FILES, c->source_files );
+	/* If the inferior program was not compiled with debug, then no sources
+	 * will be available. If no sources are available, do not return the
+	 * TGDB_UPDATE_SOURCE_FILES command. */
+	if ( queue_size ( c->source_files ) > 0 )
+		tgdb_append_command ( q, TGDB_UPDATE_SOURCE_FILES, c->source_files );
 }
 
 void commands_process(struct commands *c, char a, struct queue *q){

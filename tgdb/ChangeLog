@@ -1,3 +1,9 @@
+08/20/2003 Bob Rossi <bob@brasko.net>
+
+	* types.c: tgdb_print_item, knows how to print TGDB_SOURCES_DENIED.
+	* commands.c: commands_send_gui_sources, don't send
+	TGDB_UPDATE_SOURCE_FILES if there are no files in the list.
+
 08/19/2003 Bob Rossi <bob@brasko.net>
 
 	* a2-tgdb.h: a2_parse_io, change comment of return value.

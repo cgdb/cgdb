@@ -1,3 +1,8 @@
+08/20/2003 Bob Rossi <bob@brasko.net>
+
+	* NEWS: Fixed CGDB/TGDB bug. The file dialog window works when the inferior
+	was compiled without debug.
+
 08/19/2003 Bob Rossi <bob@brasko.net>
 
 	* NEWS: Fixed CGDB/TGDB bug. Breakpoints are now displayed in CGDB window.

@@ -44,6 +44,7 @@ static void tgdb_print_item(void *item) {
 
             break;
         case TGDB_SOURCES_DENIED:
+			fprintf ( stderr, "TGDB_SOURCES_DENIED\n" );
            break;
         case TGDB_ABSOLUTE_SOURCE_ACCEPTED:
            break;
