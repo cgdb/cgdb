@@ -454,6 +454,9 @@ s,@AUTOMAKE@,automake,;t t
 s,@AUTOHEADER@,autoheader,;t t
 s,@MAKEINFO@,makeinfo,;t t
 s,@SET_MAKE@,,;t t
+s,@MAINTAINER_MODE_TRUE@,#,;t t
+s,@MAINTAINER_MODE_FALSE@,,;t t
+s,@MAINT@,#,;t t
 s,@CC@,gcc,;t t
 s,@CFLAGS@,-g -O2,;t t
 s,@LDFLAGS@,,;t t
