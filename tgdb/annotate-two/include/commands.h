@@ -24,10 +24,7 @@ enum COMMAND_STATE {
    /* Related to the 'info source' command */
    INFO_LIST,
    INFO_SOURCE_ABSOLUTE,
-   INFO_SOURCE_RELATIVE,
-
-   /* Related to tab completion */
-   TAB_COMPLETE
+   INFO_SOURCE_RELATIVE
 };
 
 /* commands_initialize: Initialize the commands unit */

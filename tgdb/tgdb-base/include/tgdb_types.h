@@ -21,11 +21,6 @@ extern "C" {
 /**
  * This should be depricated and removed from TGDB.
  */
-#define MAXLINE 4096
-
-/**
- * This should be depricated and removed from TGDB.
- */
 #ifndef TRUE
 #define TRUE  1
 #endif

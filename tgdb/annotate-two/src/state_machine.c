@@ -21,6 +21,7 @@
 #include "globals.h"
 #include "annotate_two.h"
 #include "sys_util.h"
+#include "ibuf.h"
 
 
 /* This package looks for annotations coming from gdb's output.
@@ -54,12 +55,7 @@ struct state_machine {
 	/**
 	 * Annotations will be stored here.
 	 */
-	char tgdb_buffer[MAXLINE];
-
-	/**
-	 * The size of the annotation above.
-	 */
-	size_t tgdb_size;
+	struct string *tgdb_buffer;
 
 	/**
 	 * The state of the annotation parser ( current context ).
@@ -70,7 +66,7 @@ struct state_machine {
 struct state_machine *state_machine_initialize ( void ) {
 	struct state_machine *sm = (struct state_machine * ) xmalloc ( sizeof ( struct state_machine ) );	
 
-	sm->tgdb_size 	= 0;
+	sm->tgdb_buffer = string_init ();
 	sm->tgdb_state 	= DATA;
 
 	return sm;
@@ -86,6 +82,8 @@ int a2_handle_data(
 		struct state_machine *sm, const char *data, const size_t size,
         char *gui_data, size_t *gui_size, struct queue *q){
    int i, counter = 0;
+
+   string_clear ( sm->tgdb_buffer );
    
    /* track state to find next file and line number */
    for(i = 0; i < size; ++i){
@@ -109,9 +107,8 @@ int a2_handle_data(
                   break;
                case ANNOTATION:  /* Found an annotation */
                   sm->tgdb_state = NL_DATA;
-                  tgdb_parse_annotation(a2, sm->tgdb_buffer, sm->tgdb_size, q);
-                  sm->tgdb_size = 0;                               
-                  memset(sm->tgdb_buffer, '\0', MAXLINE);             
+                  tgdb_parse_annotation(a2, string_get ( sm->tgdb_buffer ), string_length ( sm->tgdb_buffer ), q);
+				  string_clear ( sm->tgdb_buffer );
                   break;
                case NL_DATA:     
                   sm->tgdb_state = NEW_LINE;
@@ -137,7 +134,7 @@ int a2_handle_data(
                   sm->tgdb_state = ANNOTATION;         
                   break;
                case ANNOTATION:  
-                  sm->tgdb_buffer[sm->tgdb_size++] = data[i];    
+				  string_addchar ( sm->tgdb_buffer, data[i] );
                   break;
                default:                                                       
                   err_msg("%s:%d -> Bad state transition", __FILE__, __LINE__);
@@ -165,7 +162,7 @@ int a2_handle_data(
                   data_process(a2, data[i], gui_data, &counter, q);                 
                   break;
                case ANNOTATION:  
-                  sm->tgdb_buffer[sm->tgdb_size++] = data[i];    
+				  string_addchar ( sm->tgdb_buffer, data[i] );
                   break;
                default:                                                       
                   err_msg("%s:%d -> Bad state transition", __FILE__, __LINE__);

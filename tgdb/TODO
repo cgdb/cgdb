@@ -19,11 +19,10 @@ Non-technical
 > Make sure mueller's wrap searching feature gets documented.
 
 technical
+> Change all use's of 'struct string' to the proper 'struct ibuf'.
 > Standardize tgdb_interface. Maybe change its name. The clients should be
   able to generate and add commands to the command queue here. The commands
   should be made cleaner.
-> Remove #defines in tgdb_types.h, there should be no hard coded constants
-  in TGDB.
 > Get in touch with 'Ronald Landheer-Cieslak' about Makefile.am patch to
   build CVS out of the source tree.
 > Change use of 'struct queue' for tgdb_get_command.
@@ -34,6 +33,8 @@ technical
 
 Finished:
 
+* Remove #define MAXLINE in tgdb_types.h, there should be no hard coded 
+  constants in TGDB.
 * Comment all tgdb-base headers to be complient with doxygen
 * Get testsuite to install with automake
 * Add the return value of gdb when returning with TGDB_QUIT_NORMAL

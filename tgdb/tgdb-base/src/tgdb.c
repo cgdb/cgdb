@@ -470,20 +470,23 @@ static int tgdb_handle_signals ( struct tgdb *tgdb ) {
  */
 static int tgdb_send(struct tgdb *tgdb, char *command, enum buffer_command_type bct) {
     struct tgdb_client_command *ncom;
-    static char temp_command[MAXLINE];
-    int temp_length = strlen ( command );
+	struct string *temp_command = string_init ();
+    int length = strlen ( command );
 
-    strncpy ( temp_command, command, temp_length + 1 );
+	string_add ( temp_command, command );
 
-    if ( temp_command[temp_length-1] != '\n' )
-        strcat ( temp_command, "\n" );
+    if ( command[length-1] != '\n' )
+		string_addchar ( temp_command, '\n' );
 
     ncom = tgdb_interface_new_command ( 
-            temp_command, 
+            string_get ( temp_command ), 
             bct, 
             COMMANDS_SHOW_USER_OUTPUT, 
             COMMANDS_VOID, 
             NULL );
+
+	string_free ( temp_command );
+	temp_command = NULL;
 
     if ( tgdb_dispatch_command ( tgdb, ncom ) == -1 ) {
         err_msg("%s:%d tgdb_dispatch_command error", __FILE__, __LINE__);
@@ -722,10 +725,13 @@ tgdb_run_command_tag:
  *  This is called when readline says it has recieved a full line.
  */
 static int tgdb_command_callback(void *p, const char *line) {
-    static char command[MAXLINE];
+	struct string *command = string_init ();
 	struct tgdb *tgdb = (struct tgdb *)p;
-    sprintf ( command, "%s\n", line );
-    tgdb_send(tgdb, command, BUFFER_USER_COMMAND);
+	string_add ( command, line );
+	string_addchar ( command, '\n' );
+    tgdb_send(tgdb, string_get ( command ), BUFFER_USER_COMMAND);
+	string_free ( command );
+	command = NULL;
     return 0;
 }
 
@@ -894,7 +900,7 @@ size_t tgdb_recv_inferior_data ( struct tgdb *tgdb, char *buf, size_t n ) {
 size_t tgdb_recv_readline_data ( struct tgdb *tgdb, char *buf, size_t n ) {
     int length, i;
 
-    if ( rlctx_recv ( tgdb->rl, buf, MAXLINE ) == -1 ) {
+    if ( rlctx_recv ( tgdb->rl, buf, n ) == -1 ) {
         err_msg("%s:%d rlctx_recv error", __FILE__, __LINE__);
         return -1;
     }

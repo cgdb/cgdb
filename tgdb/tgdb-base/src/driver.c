@@ -41,6 +41,8 @@
 #include "io.h"
 #include "terminal.h"
 
+#define MAXLINE 4096
+
 struct tgdb *tgdb;
 
 static void signal_handler(int signo) {

@@ -52,6 +52,8 @@
 
 #define CGDB_KEY_RESIZE KEY_MAX
 
+#define MAXLINE 4096
+
 void cgdb_set_esc_sequence_timeout ( int msec );
 
 #endif

@@ -1,3 +1,23 @@
+10/12/2003 Bob Rossi <bob@brasko.net>
+
+   * TODO: Updating appropriatly, .4.0 is almost ready.
+   * commands.h: removed TAB_COMPLETE from global enum COMMAND_STATE
+   * commands.c: changed member last_info_source_requested of 'struct
+   commands' to use a struct string instead of the MAXLINE constant.
+   removed member last_tab_completion_command from 'struct commands'.
+   commands_parse_source, parse_breakpoint, commands_list_command_finished,
+   commands_process, commands_prepare_tab_completion,
+   commands_finalize_command, commands_create_command, changed to use 'struct
+   string' structures instead of char array's of MAXLINE on the stack.
+   * state_machine.c: added #include of ibuf. Changed 'struct state machine',
+   now use a 'struct string'. tgdb_initialize, initialize new member.
+   a2_handle_data, implement to work with new data member.
+   * tgdb_types.h: Remove #define MAXLINE
+   * driver.c: Add #define of MAXLINE ( it used to be in TGDB )
+   * tgdb.c: tgdb_send, remove static buffer and use new data structure.
+   tgdb_command_callback, ditto
+   tgdb_recv_readline_data, pass the user's parameter, instead of MAXLINE.
+
 10/10/2003 Bob Rossi <bob@brasko.net>
 
    * Doxyfile: Make html output go to doc directory.

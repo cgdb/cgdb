@@ -105,7 +105,7 @@ struct commands {
 	/**
 	 * The name of the file requested to have 'info source' run on.
 	 */
-	char last_info_source_requested[MAXLINE];
+	struct string *last_info_source_requested;
 
 	//@}
 	
@@ -148,13 +148,6 @@ struct commands {
 	 * The length of the line above.
 	 */
 	int source_relative_prefix_length;
-
-	/** 
-	 * This is used to store all of the entries that are possible to
-	 * tab complete. It should be blasted each time the completion
-	 * is run, populated, and then parsed.
-	 */
-	char last_tab_completion_command[MAXLINE];
 };
 
 struct commands *commands_initialize(void) {
@@ -229,14 +222,22 @@ int commands_parse_source(
     int i = 0;
     char copy[n];
     char *cur = copy + n;
-    char file[MAXLINE], line[MAXLINE];
+	struct string *file = string_init (), *line = string_init ();
     strncpy(copy, buf, n); /* modify local copy */
    
     while(cur != copy && i <= 3){
         if(*cur == ':'){
-            if(i == 3)
-                if(sscanf(cur + 1, "%s", line) != 1)
+            if(i == 3) {
+				int length = strlen ( cur + 1 );
+				char *temp = xmalloc ( sizeof ( char ) * ( length + 1 ) );
+				
+                if(sscanf(cur + 1, "%s", temp) != 1) 
                     err_msg("%s:%d -> Could not get line number", __FILE__, __LINE__);
+
+				string_add ( line, temp );
+				free ( temp );
+				temp = NULL;
+			}
 
             *cur = '\0';
             ++i; 
@@ -247,13 +248,25 @@ int commands_parse_source(
 	/*TODO: I don't think this will work with filenames that contain spaces.
 	 * It should be changed. Look at the algorithm in the function below.
 	 */
-    if(sscanf(copy, "source %s", file) != 1)
+	{
+		int length = strlen ( copy );
+		char *temp = xmalloc ( sizeof ( char ) * ( length + 1 ) );
+
+		if(sscanf(copy, "source %s", temp) != 1)
         err_msg("%s:%d -> Could not get file name", __FILE__, __LINE__);
    
+		string_add ( file, temp );
+		free ( temp );
+		temp = NULL;
+	}
+   
     string_clear( c->absolute_path );
-    string_add ( c->absolute_path, file );
+    string_add ( c->absolute_path, string_get ( file ) );
     string_clear( c->line_number );
-    string_add ( c->line_number, line );
+    string_add ( c->line_number, string_get ( line ) );
+
+	string_free ( file );
+	string_free ( line );
 
     /* set up the info_source command to get the relative path */
     if ( commands_issue_command ( 
@@ -285,13 +298,13 @@ static void parse_breakpoint(struct commands *c, struct queue *q){
     unsigned long size = string_length(c->breakpoint_string);
     char copy[size + 1];
     char *cur = copy + size, *fcur;
-    char fname[MAXLINE + 2], file[MAXLINE], line[MAXLINE];
+	struct string *fname, *file, *line;
     static char *info_ptr; 
     struct tgdb_breakpoint *tb;
 
-    memset(fname, '\0', MAXLINE + 2);
-    memset(file, '\0', MAXLINE);
-    memset(line, '\0', MAXLINE);
+	fname = string_init ();
+	file  = string_init ();
+	line  = string_init ();
 
     info_ptr = string_get(c->breakpoint_string);
 
@@ -307,8 +320,15 @@ static void parse_breakpoint(struct commands *c, struct queue *q){
      * the ':'. Then, it knows the file number for sure. */
     while(cur != copy){
         if((*cur) == ':'){
-            if(sscanf(cur + 1, "%s", line) != 1)
+			int length = strlen ( cur + 1 );
+			char *temp = xmalloc ( sizeof ( char ) * ( length + 1 ) );
+
+            if(sscanf(cur + 1, "%s", temp) != 1)
                 err_msg("%s:%d -> Could not get line number", __FILE__, __LINE__);
+
+			string_add ( line, temp );
+			free ( temp );
+			temp = NULL;
 
             *cur = '\0';
             break; /* in case of multiple ':' in the line */
@@ -332,17 +352,17 @@ static void parse_breakpoint(struct commands *c, struct queue *q){
     }
 
     *cur='\0';
-    strcpy ( fname, fcur );
+	string_add ( fname, fcur );
 
     /* Assertion: The string to parse now looks like ' at .*'*/
     cur += 4;
     /* Assertion: The string to parse now looks like '.*' */
-    strcpy(file, cur);
+	string_add ( file, cur );
 
     tb = ( struct tgdb_breakpoint*) xmalloc ( sizeof ( struct tgdb_breakpoint) );
-    tb->file = strdup ( file );
-    tb->funcname = strdup ( fname );
-    sscanf (line, "%d", &tb->line);
+    tb->file = strdup ( string_get ( file ) );
+    tb->funcname = strdup ( string_get ( fname ) );
+    sscanf (string_get ( line ), "%d", &tb->line);
 
     if(c->breakpoint_enabled == TRUE)
         tb->enabled = 1;
@@ -350,6 +370,15 @@ static void parse_breakpoint(struct commands *c, struct queue *q){
         tb->enabled = 0;
 
     tgdb_list_append ( c->breakpoint_list, tb );
+
+	string_free ( fname );
+	fname = NULL;
+
+	string_free ( file );
+	file = NULL;
+
+	string_free ( line );
+	line = NULL;
 }
 
 
@@ -427,7 +456,12 @@ void commands_list_command_finished(struct commands *c, struct queue *q, int suc
    * So we return that information to the gui.  */
 	struct tgdb_source_file *rejected = (struct tgdb_source_file *)
 	  xmalloc ( sizeof ( struct tgdb_source_file ) );
-	rejected->absolute_path = strdup ( c->last_info_source_requested );
+
+	if ( c->last_info_source_requested == NULL ) 
+		rejected->absolute_path = NULL;
+	else
+		rejected->absolute_path = strdup ( string_get ( c->last_info_source_requested ) );
+
     tgdb_append_command(q, TGDB_ABSOLUTE_SOURCE_DENIED, rejected);
 }
 
@@ -443,7 +477,7 @@ void commands_send_source_absolute_source_file(struct commands *c, struct queue 
       char *path = info_ptr + c->source_prefix_length;
 
       /* requesting file */
-      if(c->last_info_source_requested[0] != '\0') {
+      if(c->last_info_source_requested == NULL) {
 		  struct tgdb_source_file *tsf = (struct tgdb_source_file *)
 			  xmalloc ( sizeof ( struct tgdb_source_file ) );
 		  tsf->absolute_path = strdup ( path );
@@ -458,7 +492,11 @@ void commands_send_source_absolute_source_file(struct commands *c, struct queue 
    } else {
 	  struct tgdb_source_file *rejected = (struct tgdb_source_file *)
 		  xmalloc ( sizeof ( struct tgdb_source_file ) );
-	  rejected->absolute_path = strdup ( c->last_info_source_requested );
+
+	  if ( c->last_info_source_requested == NULL )
+		  rejected->absolute_path = NULL;
+	  else
+		  rejected->absolute_path = strdup ( string_get ( c->last_info_source_requested ) );
       tgdb_append_command(q, TGDB_ABSOLUTE_SOURCE_DENIED, rejected);
    }
 }
@@ -594,8 +632,6 @@ void commands_process(struct commands *c, char a, struct queue *q){
             string_addchar(c->breakpoint_string, a);
     } else if(c->breakpoint_table && c->cur_command_state == FIELD && c->cur_field_num == 3 && a == 'y') {
         c->breakpoint_enabled = TRUE;
-    } else if ( commands_get_state(c) == TAB_COMPLETE ) {
-        /*commands_process_tab_completion ( c, a );*/
     }
 }
 
@@ -618,13 +654,6 @@ static void commands_prepare_info_breakpoints( struct commands *c ) {
  * This prepares the tab completion command
  */
 static void commands_prepare_tab_completion ( struct annotate_two *a2, struct commands *c ) {
-    /* TODO: Make tab completion work with readline */
-//    if ( tab_completion_entries != NULL ) {
-//        /* TODO: Free the old entries */
-//    }
-//        
-//    tab_completion_entries = queue_init();
-//    commands_set_state ( TAB_COMPLETE, NULL );
     data_set_state ( a2, USER_COMMAND );
 }
 
@@ -655,17 +684,16 @@ static void commands_prepare_list ( struct annotate_two *a2, struct commands *c,
 
 void commands_finalize_command ( struct commands *c, struct queue *q ) {
     switch ( commands_get_state (c) ) {
-        case TAB_COMPLETE:
-                /* TODO: Make tab completion work with readline */ 
-//            tgdb_complete_command ( tab_completion_entries, last_tab_completion_command ); 
-            break;
         case INFO_SOURCE_RELATIVE:
         case INFO_SOURCE_ABSOLUTE:
 
             if ( c->info_source_ready == 0 ) {
 				struct tgdb_source_file *rejected = (struct tgdb_source_file *)
 				  xmalloc ( sizeof ( struct tgdb_source_file ) );
-				rejected->absolute_path = strdup ( c->last_info_source_requested );
+				if ( c->last_info_source_requested == NULL )
+					rejected->absolute_path = NULL;
+				else
+					rejected->absolute_path = strdup ( string_get ( c->last_info_source_requested ) );
                 tgdb_append_command(q, TGDB_ABSOLUTE_SOURCE_DENIED, rejected );
             }
 
@@ -752,11 +780,11 @@ static const char *commands_create_command (
             break;
         case ANNOTATE_LIST:
             {
-                static char temp_file_name [MAXLINE];
-                if ( data == NULL )
-                    temp_file_name[0] = 0;
-                else
-                    strcpy ( temp_file_name, data );
+				struct string *temp_file_name = NULL;
+                if ( data != NULL ) {
+					temp_file_name = string_init ();
+					string_add ( temp_file_name, data );
+				}
 
                 if ( data == NULL )
                     ncom = (char *)xmalloc( sizeof ( char ) * ( 16 ));
@@ -765,17 +793,26 @@ static const char *commands_create_command (
                 strcpy ( ncom, "server list " );
 
                 /* This should only happen for the initial 'list' */
-                if ( temp_file_name[0] != '\0' ) {
-                    strcat ( ncom, temp_file_name );
+                if ( temp_file_name != NULL ) {
+                    strcat ( ncom, string_get ( temp_file_name ) );
                     strcat ( ncom, ":1" );
                 } 
 
-                if ( temp_file_name[0] == '\0' )
-                    c->last_info_source_requested[0] = '\0';
-                else
-                    strcpy ( c->last_info_source_requested, temp_file_name );
+                if ( temp_file_name == NULL ) {
+					string_free ( c->last_info_source_requested );
+					c->last_info_source_requested = NULL;
+				} else {
+					if ( c->last_info_source_requested == NULL )
+						c->last_info_source_requested = string_init ();
+
+					string_clear ( c->last_info_source_requested );
+					string_add ( c->last_info_source_requested, string_get ( temp_file_name ) );
+				}
 
                 strcat ( ncom, "\n" );
+
+				string_free ( temp_file_name );
+				temp_file_name = NULL;
                 break;
             }
         case ANNOTATE_INFO_SOURCE_RELATIVE:                         
@@ -789,12 +826,15 @@ static const char *commands_create_command (
             break;
         case ANNOTATE_TTY:
             {
-                static char temp_tty_name [MAXLINE];
-                strcpy ( temp_tty_name, data );
+				struct string *temp_tty_name = string_init ();
+				string_add ( temp_tty_name, data );
                 ncom = (char *)xmalloc( sizeof ( char ) * ( 13 + strlen( data )));
                 strcpy ( ncom, "server tty " );
-                strcat ( ncom, temp_tty_name );
+                strcat ( ncom, string_get  (temp_tty_name ) );
                 strcat ( ncom, "\n" );
+
+				string_free ( temp_tty_name );
+				temp_tty_name = NULL;
                 break;
             }
         case ANNOTATE_COMPLETE:
@@ -802,9 +842,6 @@ static const char *commands_create_command (
             strcpy ( ncom, "server complete " );
             strcat ( ncom, data );
             strcat ( ncom, "\n" );
-
-            /* A hack to save the last tab completion command */
-            strcpy ( c->last_tab_completion_command, data );
             break;
         case ANNOTATE_SET_PROMPT:
             ncom = strdup ( data );   
