@@ -190,7 +190,7 @@ int main(int argc, char **argv){
    
     int gdb_fd, child_fd, tgdb_rlctx;
 
-#if 1
+#if 0
    int c;
    read(0, &c ,1);
 #endif
