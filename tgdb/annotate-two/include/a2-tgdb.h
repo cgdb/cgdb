@@ -414,7 +414,7 @@ int a2_completion_callback(
  * @return
  *   	Command on success, otherwise NULL on error.
  */
-char *a2_return_client_command ( struct annotate_two *a2, enum tgdb_command c );
+char *a2_return_client_command ( struct annotate_two *a2, enum tgdb_command_type c );
 
 /** 
  * a2_client_modify_breakpoint

@@ -1,3 +1,14 @@
+09/21/2003 Bob Rossi <bob@brasko.net>
+
+   * a2-tgdb.h: a2_return_client_command, rename type tgdb_command to
+   tgdb_command_type.
+   * a2-tgdb.c: ditto
+   * gdbmi_tgdb.h: ditto for gdbmi_tgdb_return_client_command
+   * gdbmi_tgdb.c: ditto
+   * tgdb.h: ditto for tgdb_run_debugger_command
+   * tgdb.c: ditto and for tgdb_get_client_command
+   * types.h: tgdb_command, changed type name to tgdb_command_type
+
 09/17/2003 Bob Rossi <bob@brasko.net>
 
    * TODO: Update what I think needs to be done next.

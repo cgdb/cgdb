@@ -33,7 +33,7 @@ char *gdbmi_tgdb_err_msg(void);
  *
  *  It will return NULL on error, otherwise correct string on output.
  */
-char *gdbmi_tgdb_return_client_command ( enum tgdb_command c );
+char *gdbmi_tgdb_return_client_command ( enum tgdb_command_type c );
 char *gdbmi_tgdb_client_modify_breakpoint ( const char *file, int line, enum tgdb_breakpoint_action b );
 
 #endif /* __GDBMI_TGDB_H__ */

@@ -117,7 +117,7 @@ char *gdbmi_tgdb_err_msg(void) {
    return (char *)0;
 }
 
-char *gdbmi_tgdb_return_client_command ( enum tgdb_command c ) {
+char *gdbmi_tgdb_return_client_command ( enum tgdb_command_type c ) {
 	return (char *)0;
 }
 

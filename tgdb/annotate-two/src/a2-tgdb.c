@@ -353,7 +353,7 @@ int a2_command_callback(
 	return -1;
 }
 
-char *a2_return_client_command ( struct annotate_two *a2, enum tgdb_command c ) {
+char *a2_return_client_command ( struct annotate_two *a2, enum tgdb_command_type c ) {
 	if ( c < TGDB_CONTINUE || c >= TGDB_ERROR )
 		return NULL;
 

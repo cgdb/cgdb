@@ -325,7 +325,7 @@ void command_completion_callback ( struct tgdb *tgdb ) {
 	tgdb->HAS_USER_SENT_COMMAND = 0;
 }
 
-static char* tgdb_get_client_command(struct tgdb *tgdb, enum tgdb_command c) {
+static char* tgdb_get_client_command(struct tgdb *tgdb, enum tgdb_command_type c) {
 	return a2_return_client_command ( tgdb->a2, c );
 }
 
@@ -1034,7 +1034,7 @@ int tgdb_get_absolute_path ( struct tgdb *tgdb, const char *file ) {
 	return ret;
 }
 
-int tgdb_run_debugger_command ( struct tgdb *tgdb, enum tgdb_command c ) {
+int tgdb_run_debugger_command ( struct tgdb *tgdb, enum tgdb_command_type c ) {
  	return tgdb_send ( tgdb, tgdb_get_client_command (tgdb, c), BUFFER_GUI_COMMAND );
 }
 

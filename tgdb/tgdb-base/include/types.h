@@ -156,7 +156,7 @@ void tgdb_traverse_command(struct queue *q);
  *
  *  The client can choose any of these as actions that libtgdb should take.
  */
-enum tgdb_command {
+enum tgdb_command_type {
 	TGDB_CONTINUE = 0,
 	TGDB_FINISH,
 	TGDB_NEXT,

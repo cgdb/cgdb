@@ -371,7 +371,7 @@ int tgdb_get_absolute_path ( struct tgdb *tgdb, const char *file );
  * -------
  *  0 on success or -1 on error
  */
-int tgdb_run_debugger_command ( struct tgdb *tgdb, enum tgdb_command c );
+int tgdb_run_debugger_command ( struct tgdb *tgdb, enum tgdb_command_type c );
 
 /* tgdb_set_breakpoint_file_line
  * -----------------------------
