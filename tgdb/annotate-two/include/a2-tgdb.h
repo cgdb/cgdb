@@ -392,7 +392,7 @@ int a2_find_valid_debugger (
  *
  * Returns: -1 on error, 0 on success
  */
-int a2_tgdb_init( const char *inferior_tty_name );
+int a2_tgdb_init( const char *inferior_tty_name, command_completed ready_for_next_command );
 
 /* a2_tgdb_shutdown:
  * -----------------
@@ -453,12 +453,6 @@ int a2_tgdb_command_callback(const char *line);
  *      line - The command to be completed
  */
 int a2_tgdb_completion_callback(const char *line);
-
-/* a2_command_typed_at_prompt:
- *      This functions recieves the characters the user has typed.
- *      It only gets called if it is not busy ( the function above )
- */
-void a2_command_typed_at_prompt ( int i );
 
 /* a2_tgdb_is_debugger_ready:
  * --------------------------

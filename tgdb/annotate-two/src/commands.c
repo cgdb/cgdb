@@ -504,7 +504,6 @@ void commands_finalize_command ( struct queue *q ) {
 
 int commands_prepare_for_command ( struct command *com ) {
     enum annotate_commands *a_com = ( enum annotate_commands *) com->client_data;
-    extern int COMMAND_ALREADY_GIVEN; 
 
     /* Set the commands state to nothing */
     commands_set_state(VOID, NULL);
@@ -514,7 +513,6 @@ int commands_prepare_for_command ( struct command *com ) {
         return -1;
     }
 
-    COMMAND_ALREADY_GIVEN = 1;
     if ( a_com == NULL ) {
         data_set_state ( USER_COMMAND );
         return 0;

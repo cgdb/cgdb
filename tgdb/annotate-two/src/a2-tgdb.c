@@ -55,6 +55,7 @@ int masterfd = -1;                     /* master fd of the pseudo-terminal */
 static pid_t debugger_pid;             /* pid of child process */
 unsigned short tgdb_partially_run_command = 0;
 extern sig_atomic_t control_c;
+command_completed command_completed_callback;
 
 int a2_tgdb_completion_callback(const char *line) {
 
@@ -72,12 +73,11 @@ int a2_tgdb_completion_callback(const char *line) {
  *          TRUE  if gdb can currently recieve a command.
  */
 int a2_tgdb_is_debugger_ready(void) {
-    extern int COMMAND_ALREADY_GIVEN;
     if ( !tgdb_initialized )
         return FALSE;
 
-    /* If the user is at the prompt and the raw queue is empty */
-    if ( data_get_state() == USER_AT_PROMPT && !COMMAND_ALREADY_GIVEN)
+    /* If the user is at the prompt */
+    if ( data_get_state() == USER_AT_PROMPT )
         return TRUE;
 
     return FALSE;
@@ -195,7 +195,7 @@ int a2_set_inferior_tty ( const char *inferior_tty_name ) {
     return 0;
 }
 
-int a2_tgdb_init( const char *inferior_tty_name ){
+int a2_tgdb_init( const char *inferior_tty_name, command_completed ready_for_next_command ) {
     commands_init();
 
     tgdb_setup_signals();
@@ -210,6 +210,8 @@ int a2_tgdb_init( const char *inferior_tty_name ){
     }
 
     tgdb_initialized = 1;
+
+	command_completed_callback = ready_for_next_command;
 
     return 0;
 }
@@ -241,15 +243,6 @@ int a2_tgdb_get_sources(void){
     }
 
     return 0;
-}
-
-void a2_command_typed_at_prompt ( int i ) {
-    extern int COMMAND_TYPED_AT_PROMPT;
-    if ( i ) {
-        tgdb_partially_run_command = 0;
-        COMMAND_TYPED_AT_PROMPT = 1;
-    } else
-        tgdb_partially_run_command = 1;
 }
 
 char *a2_tgdb_err_msg(void) {

@@ -1,3 +1,7 @@
+08/01/2003 Bob Rossi <bob@brasko.net>
+	
+	* NEWS: Updating NEWS file with buffered control key libinput bug.
+
 07/16/2003 Bob Rossi <bob@brasko.net>
 
 	* NEWS: Updating NEWS file with 'string literal' bug.

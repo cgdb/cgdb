@@ -1,3 +1,6 @@
+   * Fixed libinput bug. If the user held down '\n' for a long time, and then
+   hit any other key, an extra '\n' would come out and then the other key.
+   This was *very* annoying when holding down the '\n' key to continue nexting.
 
    * Fixed highlighting bug. This ( '\"' ) would start a string literal 
    in C/C++.

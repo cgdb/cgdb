@@ -24,8 +24,7 @@ static char gdb_prompt[GDB_PROMPT_SIZE];
 static char gdb_prompt_last[GDB_PROMPT_SIZE];
 static int gdb_prompt_size = 0;
 
-int COMMAND_TYPED_AT_PROMPT = 0;
-int COMMAND_ALREADY_GIVEN = 0; 
+extern command_completed command_completed_callback;
 
 /* Used to determine if the car ret is from readline */
 static enum CAR_RET_STATE {
@@ -60,8 +59,7 @@ void data_set_state(enum internal_state state){
             a2_tgdb_change_prompt(gdb_prompt_last);
          }
 
-         COMMAND_TYPED_AT_PROMPT = 0;
-         COMMAND_ALREADY_GIVEN = 0;
+		 command_completed_callback();
          global_set_signal_recieved(FALSE);
 
          break;

@@ -124,4 +124,6 @@ int tgdb_run_command ( void );
  */
 int tgdb_complete_command ( struct queue *list, const char *target );
 
+typedef void (*command_completed)(void);
+
 #endif

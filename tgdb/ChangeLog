@@ -1,3 +1,25 @@
+08/01/2003 Bob Rossi <bob@brasko.net>
+	
+	* a2-tgdb.h: removed a2_command_typed_at_prompt interace function.
+	added parameter ready_for_next_command to function a2_tgdb_init.
+	* a2-tgdb.c: a2_tgdb_is_debugger_ready no longer depends on extern
+	variable from the data unit.
+    a2_tgdb_init, sets up function callback for when finishing a command.
+	a2_command_typed_at_prompt, remove implementation.
+	* annotate.c: extern's global command_completed_callback from data unit.
+	handle_misc_prompt, calls callback function now to say that the subsystem 
+	has finished a command.
+	* commands.c: commands_prepare_for_command, no longer sets a externed
+	varible COMMAND_ALREADY_GIVEN to 1.
+	* data.c: remove global variables COMMAND_TYPED_AT_PROMPT and
+	COMMAND_ALREADY_GIVEN. Instead, a callback to libtgdb is run when the
+	subsystem finishes a command.
+	* tgdb_interface.h: add typedef for callback function type.
+	* tgdb.c: add 2 global variabls IS_SUBSYSTEMJ_READY_FOR_NEXT_COMMAND and
+	HAS_USER_SENT_COMMAND. Added command_completion_callback. Modified the way
+	libtgdb determines if a command can be sent to the lower subsystem or a char 
+	can be sent to the readline context.
+
 07/27/2003 Bob Rossi <bob@brasko.net>
 
 	* a2-tgdb.h: Removed unused interface function. a2_is_ready.

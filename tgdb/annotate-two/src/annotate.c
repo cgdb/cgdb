@@ -14,6 +14,7 @@
 #include "io.h"
 
 extern int masterfd;
+extern command_completed command_completed_callback;
 
 static int handle_source(const char *buf,  size_t n, struct queue *q){
    return commands_parse_source(buf, n, q);
@@ -34,6 +35,7 @@ static int handle_misc_pre_prompt(const char *buf, size_t n, struct queue *q){
 static int handle_misc_prompt(const char *buf, size_t n, struct queue *q){
    globals_set_misc_prompt_command(TRUE);
    data_set_state(USER_AT_PROMPT);
+   command_completed_callback();
    return 0;
 }
 

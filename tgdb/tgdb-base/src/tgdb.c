@@ -103,6 +103,33 @@ static int (*tgdb_client_shutdown)(void);
 static char* (*tgdb_get_client_command)(enum tgdb_command c);
 static char* (*tgdb_client_modify_breakpoint_call)(const char *file, int line, enum tgdb_breakpoint_action b);
 
+/* These are 2 very important state variables.
+ *
+ * IS_SUBSYSTEM_READY_FOR_NEXT_COMMAND
+ * -----------------------------------
+ *  If set to 1, libtgdb thinks the lower level subsystem is capable of 
+ *  recieving another command. It needs this so that it doesn't send 2
+ *  commands to the lower level before it can say it can't recieve a command.
+ *  At some point, maybe this can be removed?
+ *  When its set to 0, libtgdb thinks it can not send the lower level another
+ *  command.
+ *
+ * HAS_USER_SENT_COMMAND
+ * ---------------------
+ *  This is set to 1 if the user types a full command, followed by the newline.
+ *  This is used so that all commands, until that command is finished by the 
+ *  lower level subsystem, are queued. That way, only 1 command is sent at a 
+ *  time. If it is 0, then the data typed by the user goes directly to the 
+ *  readline context, it is not queued.
+ */
+static int IS_SUBSYSTEM_READY_FOR_NEXT_COMMAND = 1;
+static int HAS_USER_SENT_COMMAND = 0;
+
+void command_completion_callback ( void ) {
+	IS_SUBSYSTEM_READY_FOR_NEXT_COMMAND = 1;
+	HAS_USER_SENT_COMMAND = 0;
+}
+
 static void init_annotate_two ( void ) {
     tgdb_get_sources                    = a2_tgdb_get_sources;
     tgdb_get_source_absolute_filename   = a2_tgdb_get_source_absolute_filename;
@@ -132,7 +159,9 @@ static void init_gdbmi ( void ) {
  * Returns: TRUE if can issue directly to gdb. Otherwise FALSE.
  */
 static int tgdb_can_issue_command(void) {
-    if ( a2_tgdb_is_debugger_ready() && queue_size(gdb_input_queue) == 0 )
+    if ( IS_SUBSYSTEM_READY_FOR_NEXT_COMMAND &&
+	     a2_tgdb_is_debugger_ready() && 
+		 (queue_size(gdb_input_queue) == 0) )
         return TRUE;
 
     return FALSE;
@@ -166,11 +195,14 @@ static int tgdb_has_command_to_run(void) {
  * Returns 1 if ready, or 0 if not ready
  */
 int is_ready ( void ) {
-    extern int COMMAND_TYPED_AT_PROMPT;
-
     /* tgdb is not busy, send the data to readline write away */
-    if( tgdb_can_issue_command() == TRUE && !COMMAND_TYPED_AT_PROMPT)
-        return 1;
+//    if( tgdb_can_issue_command() == TRUE )
+//        return 1;
+
+	if ( tgdb_can_issue_command() &&
+		(!HAS_USER_SENT_COMMAND)  &&
+		current_command == NULL )
+		return 1;
 
     return 0;
 }
@@ -343,6 +375,7 @@ int tgdb_dispatch_command ( struct command *com ) {
  *        Error checking should be done before inserting into queue.
  */
 static int tgdb_deliver_command ( int fd, struct command *command ) {
+
     if ( command->com_type == BUFFER_READLINE_COMMAND ) {
         /* A readline command handled by tgdb-base */
         switch ( command->com_to_run ) {
@@ -363,6 +396,7 @@ static int tgdb_deliver_command ( int fd, struct command *command ) {
                 return -1;
         }
     } else {
+		IS_SUBSYSTEM_READY_FOR_NEXT_COMMAND = 0;
 
         /* A command for the debugger */
         if ( commands_prepare_for_command ( command ) == -1 ) {
@@ -681,18 +715,19 @@ int tgdb_rl_send ( char c ) {
 }
 
 int tgdb_send_input ( char c ) {
-    if ( current_command == NULL )
-        current_command = string_init ( ) ;
-
     /* The debugger is ready for input. Send it */
     if ( is_ready() ) {
 
-        a2_command_typed_at_prompt( c == '\n');
+		if ( c == '\n' )
+			HAS_USER_SENT_COMMAND = 1;
 
         return tgdb_rl_send ( c );
 
     /* The debugger is not ready, save the input for later */
     } else {
+		if ( current_command == NULL )
+			current_command = string_init ( ) ;
+
         string_addchar ( current_command, c );
 
         if ( c == '\n' ) {
@@ -756,7 +791,7 @@ int tgdb_init (
     inferior_fd     = *child;
 
     if ( result == 1 ) {
-        a2_tgdb_init ( inferior_tty_name );
+        a2_tgdb_init ( inferior_tty_name, &command_completion_callback );
         init_annotate_two();
 
         /*a2_setup_io( );*/
