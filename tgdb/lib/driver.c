@@ -108,7 +108,7 @@ static void readline_input(int fd){
     tgdb_send_input(c);
 }
 
-static void gdb_input(void) {
+static int gdb_input(void) {
     char buf[MAXLINE];
     struct Command **com;
     size_t size;
@@ -125,16 +125,17 @@ static void gdb_input(void) {
        return;
     }
 
-    tgdb_traverse_command(stderr, &com);
-
+//    tgdb_traverse_command(stderr, &com);
+//
     { 
     size_t j;
     for(j = 0; com != NULL && com[j] != NULL ; ++j)
        if((*com)[j].header == QUIT)
-          return;
+           return -1;
     } 
 
     tgdb_delete_command(&com);
+    return 0;
 }
 
 static void tty_input(void) {
@@ -219,7 +220,8 @@ void mainLoop(int masterfd, int childfd, int readlinefd){
               
       /* gdb's output -> stdout */
       if(FD_ISSET(masterfd, &rfds))
-          gdb_input();
+          if ( gdb_input() == -1 )
+              return;
 
       if(FD_ISSET(childfd, &rfds))
           tty_input();
@@ -240,6 +242,8 @@ int main(int argc, char **argv){
    init_readline();
 
    mainLoop(gdb_fd, child_fd, tgdb_readline_fd);
+
+   rl_callback_handler_remove();
 
    if(tgdb_shutdown() == -1)
       err_msg("%s:%d -> could not shutdown\n", __FILE__, __LINE__);
