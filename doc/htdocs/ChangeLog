@@ -2,6 +2,10 @@ version 0.4.0 (10/28/2003):
 
 10/28/2003 Bob Rossi <bob@brasko.net>
 
+   * download.shtml: Change download link for cgdb-0.4.0
+
+10/28/2003 Bob Rossi <bob@brasko.net>
+
    * Add file documentation.shtml
    * Removed file help.shtml
    * download.shtml: Added bit about how to download from different
