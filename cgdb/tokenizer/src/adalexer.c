@@ -28,8 +28,7 @@
 #define YY_FLEX_MINOR_VERSION 5
 
 #include <stdio.h>
-#include <unistd.h>
-
+#include <errno.h>
 
 /* cfront 1.2 defines "c_plusplus" instead of "__cplusplus" */
 #ifdef c_plusplus
@@ -42,6 +41,15 @@
 #ifdef __cplusplus
 
 #include <stdlib.h>
+#ifndef _WIN32
+#include <unistd.h>
+#else
+#ifndef YY_ALWAYS_INTERACTIVE
+#ifndef YY_NEVER_INTERACTIVE
+extern int isatty YY_PROTO(( int ));
+#endif
+#endif
+#endif
 
 /* Use prototypes in function declarations. */
 #define YY_USE_PROTOS
@@ -616,7 +624,7 @@ char *yytext;
 #include <stdio.h>
 #include "tokenizer.h"
 
-#line 620 "adalexer.c"
+#line 628 "adalexer.c"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -716,9 +724,20 @@ YY_MALLOC_DECL
 			YY_FATAL_ERROR( "input in flex scanner failed" ); \
 		result = n; \
 		} \
-	else if ( ((result = fread( buf, 1, max_size, yyin )) == 0) \
-		  && ferror( yyin ) ) \
-		YY_FATAL_ERROR( "input in flex scanner failed" );
+	else \
+		{ \
+		errno=0; \
+		while ( (result = fread(buf, 1, max_size, yyin))==0 && ferror(yyin)) \
+			{ \
+			if( errno != EINTR) \
+				{ \
+				YY_FATAL_ERROR( "input in flex scanner failed" ); \
+				break; \
+				} \
+			errno=0; \
+			clearerr(yyin); \
+			} \
+		}
 #endif
 
 /* No semi-colon after return; correct usage is to write "yyterminate();" -
@@ -764,12 +783,12 @@ YY_MALLOC_DECL
 YY_DECL
 	{
 	register yy_state_type yy_current_state;
-	register char *yy_cp = NULL, *yy_bp = NULL;
+	register char *yy_cp, *yy_bp;
 	register int yy_act;
 
 #line 16 "adalexer.l"
 
-#line 773 "adalexer.c"
+#line 792 "adalexer.c"
 
 	if ( yy_init )
 		{
@@ -1327,7 +1346,7 @@ YY_RULE_SETUP
 #line 114 "adalexer.l"
 ECHO;
 	YY_BREAK
-#line 1331 "adalexer.c"
+#line 1350 "adalexer.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1891,6 +1910,15 @@ YY_BUFFER_STATE b;
 	}
 
 
+#ifndef _WIN32
+#include <unistd.h>
+#else
+#ifndef YY_ALWAYS_INTERACTIVE
+#ifndef YY_NEVER_INTERACTIVE
+extern int isatty YY_PROTO(( int ));
+#endif
+#endif
+#endif
 
 #ifdef YY_USE_PROTOS
 void yy_init_buffer( YY_BUFFER_STATE b, FILE *file )
@@ -2212,5 +2240,12 @@ int main()
 
 
 int ada_wrap ( void ) {
+	{
+		/* Silly impossible function call to stop warning of unused functions */
+		if ( 0 ) {
+			yyunput(0, "");
+		}
+	}
+
 	return 1;
 }

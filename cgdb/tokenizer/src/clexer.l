@@ -126,5 +126,12 @@ IDENTIFIER {L}+{T}*
 %%
 
 int c_wrap ( void ) {
+	{
+		/* Silly impossible function call to stop warning of unused functions */
+		if ( 0 ) {
+			yyunput(0, "");
+		}
+	}
+
     return 1;
 }

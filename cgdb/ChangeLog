@@ -1,3 +1,12 @@
+10/26/2003 Bob Rossi <bob@brasko.net>
+
+   * command_lexer.l: add impossible function call to stop compiler warning.
+   * command_lexer.c: generated from above file.
+   * adalexer.l: add impossible function call to stop compiler warning.
+   * adalexer.c: generated from above file.
+   * clexer.l: add impossible function call to stop compiler warning.
+   * clexer.c: generated from above file.
+
 10/24/2003 Bob Rossi <bob@brasko.net>
 
    * cgdb.c: process_commands, change to make sure absolute_path is not NULL :)
