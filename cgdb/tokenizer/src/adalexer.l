@@ -101,13 +101,13 @@ L                       [a-zA-Z_]
 "xor"                   { return(TOKENIZER_KEYWORD); }
  
 --([^\r\n\f\v])*        { return(TOKENIZER_COMMENT); }
-L?\"(\\.|[^\\"])*\"     { return(TOKENIZER_LITERAL); }
-{D}+						{ return(TOKENIZER_LITERAL); }
-'.'					   { return(TOKENIZER_LITERAL); }
+\"(\".|([^"]\"))*\"        { return(TOKENIZER_LITERAL); }
+{D}+						   { return(TOKENIZER_LITERAL); }
+'.'					      { return(TOKENIZER_LITERAL); }
 
-\n						{ return(TOKENIZER_NEWLINE); }
-\r\n 					{ return(TOKENIZER_NEWLINE); }
-\r 						{ return(TOKENIZER_NEWLINE); }
+\n						      { return(TOKENIZER_NEWLINE); }
+\r\n 					      { return(TOKENIZER_NEWLINE); }
+\r 						   { return(TOKENIZER_NEWLINE); }
 [ \t\v\f]               { return(TOKENIZER_TEXT);    }
 {L}+                    { return(TOKENIZER_TEXT); 	 }
 .                       { return(TOKENIZER_TEXT);    }
