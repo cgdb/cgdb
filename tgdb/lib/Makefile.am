@@ -34,7 +34,7 @@ bin_PROGRAMS = driver rlctx_prog
 driver_LDFLAGS = -L.
 driver_LDADD = -ltgdb
 driver_SOURCES = driver.c
-driver_DEPENDENCIES = -ltgdb
+driver_DEPENDENCIES = libtgdb.a
 
 # This program provides tgdb with a readline interface
 rlctx_prog_LDFLAGS = -L.
