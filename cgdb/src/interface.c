@@ -1044,15 +1044,15 @@ int if_init(void)
 }
 
 int internal_if_input(int key) {
-    /* The ESC Key, puts the debugger into command mode */
+	/* The ESC Key, puts the debugger into command mode */
     if ( focus != CGDB && key == CGDB_KEY_ESC) {
-       focus = CGDB;
-       if_draw();
-       return 0;
+    	focus = CGDB;
+       	if_draw();
+       	return 0;
     } else if ( key == CGDB_KEY_ESC )
-        return 0;
+    	return 0;
 
-    /* Check for global keystrokes */
+	/* Check for global keystrokes */
     switch ( focus ) {
         case CGDB:
             switch(key){
@@ -1075,13 +1075,15 @@ int internal_if_input(int key) {
                     capture_regex(src_win);
                     return 0;
                 case 'n':
-                     source_search_regex(src_win, regex_line, 2, regex_direction, regex_icase);
-                     if_draw();
-                     break;
+					if ( !shortcut_option ) {	
+						source_search_regex(src_win, regex_line, 2, regex_direction, regex_icase);
+						if_draw();
+					}
+                    break;
                 case 'N':
-                     source_search_regex(src_win, regex_line, 2, !regex_direction, regex_icase);
-                     if_draw();
-                     break;
+					source_search_regex(src_win, regex_line, 2, !regex_direction, regex_icase);
+					if_draw();
+                    break;
                 case 'T':
                      if ( tty_win_on ) {
                          tty_win_on = 0;

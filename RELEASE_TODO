@@ -12,6 +12,7 @@ o Make ws option receive a percent, so we can make it any size.
   However, making it take a percent does not solve the whole problem.
   The user needs to start at one of these offsets. How should this be done?
 o Make -/+ go to either full screen or 1 line off, on odd or even size.
-o Fix 'set sc' flicker problem. When user hits 'n', a flicker occurs.
 
 Closed:
+
+o Fix 'set sc' flicker problem. When user hits 'n', a flicker occurs.
