@@ -41,26 +41,43 @@
  * A window manager context, one is required for any window management
  * operations.
  */
-
 typedef struct wmctx *wmctx;
+
+/**
+ * Window identifier type (comparable to a file descriptor)
+ */
+typedef int wid_t;
+
 
 /**
  * Creates a new window management context.  This should be called before
  * attempting any other window management operations.  When done, call
  * wm_destroy() to deallocate the context.
  *
+ * @param  widget  The initial window which will occupy the entire space.
+ *
  * @return A new context is returned, or NULL on error.
  */
-wmctx wm_create();
+wmctx wm_create(wm_widget widget);
 
 /**
  * Deallocates the context, destroying all associated windows.
  *
- * @param  context  The context to destroy
+ * @param  context  The context to destroy.
  *
  * @return Zero on success, non-zero on failure.
  */
 int wm_destroy(wmctx context);
+
+/**
+ * Redraw all visible windows (because the display was damaged for some reason,
+ * or maybe the user hit C-l).
+ *
+ * @param  context  The context to redraw.
+ *
+ * @return Zero on success, non-zero on failure.
+ */
+int wm_redraw(wmctx context);
 
 /** 
  * Split the current window horizontally, creating a new window which will 
@@ -69,9 +86,9 @@ int wm_destroy(wmctx context);
  * @param  widget  The widget which will be bound to the new window.  If NULL
  *                 then the new window will be assigned the same widget as
  *                 the current window.
- * @param  size    Size of the new window (zero means even split)
+ * @param  size    Size of the new window (zero means even split).
  *
- * @return The window ID of the new window, or -1 on error.
+ * @return The window ID (win_id >= 0) of the new window, or -1 on error.
  */
 wid_t wm_hsplit(wm_widget widget, int size);
 
@@ -82,9 +99,9 @@ wid_t wm_hsplit(wm_widget widget, int size);
  * @param  widget  The widget which will be bound to the new window.  If NULL
  *                 then the new window will be assigned the same widget as
  *                 the current window.
- * @param  size    Size of the new window (zero means even split)
+ * @param  size    Size of the new window (zero means even split).
  *
- * @return The window ID of the new window, or -1 on error.
+ * @return The window ID (win_id >= 0) of the new window, or -1 on error.
  */
 wid_t wm_vsplit(wm_widget widget, int size);
 
@@ -92,7 +109,7 @@ wid_t wm_vsplit(wm_widget widget, int size);
  * Close the specified window.  Remaining windows will be shuffled to fill in
  * empty screen real estate.
  *
- * @param  win_id  The window ID of the window to close
+ * @param  win_id  The window ID of the window to close.
  *
  * @return Zero on success, non-zero on failure.
  */
@@ -110,7 +127,7 @@ int wm_close(wid_t win_id);
 //@{
     
 /**
- * Set of options that affect window manager behavior
+ * Set of options that affect window manager behavior.
  */
 typedef enum {
 
@@ -214,18 +231,19 @@ typedef struct {
 /**
  * Get the value of the specified option.
  *
- * @param   option  The option value to retrieve
+ * @param   option  The option value to retrieve.
  *
  * @return  The value of the specified option.  The type will be set
- *          to WM_UNKNOWN if an unknown option is specified.
+ *          to WM_UNKNOWN if an unknown option is specified, in which case
+ *          the variant is undefined.
  */
 wm_optval wm_option_get(wm_option option);
 
 /** 
  * Set the value of the specified option.
  *
- * @param   option  The option to set
- * @param   value   The value to set for the given option
+ * @param   option  The option to set.
+ * @param   value   The value to set for the given option.
  *
  * @return  Zero on success, non-zero on failure.
  */

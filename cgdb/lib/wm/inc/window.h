@@ -33,11 +33,6 @@
 //@{
 
 /**
- * Window identifier type (comparable to a file descriptor)
- */
-typedef int wid_t;
-
-/**
  * Window object 
  */
 typedef struct wm_window *wm_window;
@@ -121,7 +116,7 @@ struct wm_widget {
      * @param  widget  The widget receiving the resize event
      * @return Zero on success, non-zero on failure.
      */
-    int (*resize)(wm_widget widget, int height, int width);
+    int (*resize)(wm_widget widget);
 
     /**
      * The curses window assigned to the widget.  The widget should do all
@@ -135,23 +130,24 @@ struct wm_widget {
 };
 
 /**
- * Creates a new window with the specified widget.
+ * Creates a new window with the specified widget.  The user-defined constructor
+ * of the given widget is called after allocation.
  *
  * @param  widget  Widget to which the window is permanently bound
  *
- * @return The window identifier of the new window on success, or -1 on failure
+ * @return A newly allocated wm_window is returned, or NULL on error.
  */
-wid_t window_create(wm_widget widget);
+wm_window window_create(wm_widget widget);
  
 /**
  * Destroys the specified window.  Calls the destroy function of the associated
  * widget before deallocating.
  *
- * @param  win_id  Identifier of the window to destroy.
+ * @param  window  The window to destroy.
  *
  * @return Zero on success, non-zero on failure.
  */
-int window_destroy(wid_t win_id);
+int window_destroy(wm_window window);
 
 //@}
 
