@@ -150,6 +150,36 @@ void tgdb_append_command(
  */
 void tgdb_traverse_command(struct queue *q);
 
+/* tgdb_command
+ * ------------
+ *
+ *  The client can choose any of these as actions that libtgdb should take.
+ */
+enum tgdb_command {
+	TGDB_CONTINUE = 0,
+	TGDB_FINISH,
+	TGDB_NEXT,
+	TGDB_RUN,
+	TGDB_STEP,
+	TGDB_UP,
+	TGDB_DOWN,
+	TGDB_ERROR
+};
+
+
+/* TGDB_MODIFY_BREAKPOINT:
+ *
+ * This gives the client the ability to add or remove breakpoints.
+ *
+ * Currently, enable/disable are not supported.
+ */
+enum tgdb_breakpoint_action {
+	TGDB_BREAKPOINT_ADD,
+	TGDB_BREAKPOINT_DELETE,
+	TGDB_BREAKPOINT_DISABLE,
+	TGDB_BREAKPOINT_ENABLE
+};
+
 #ifdef __cplusplus
 }
 #endif

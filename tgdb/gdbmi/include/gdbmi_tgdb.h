@@ -26,4 +26,14 @@ int gdbmi_tgdb_new_tty(void);
 char *gdbmi_tgdb_tty_name(void);
 char *gdbmi_tgdb_err_msg(void);
 
+/* gdbmi_tgdb_return_client_command
+ * -----------------------------
+ *
+ *  This returns the command to send to gdb for the enum C.
+ *
+ *  It will return NULL on error, otherwise correct string on output.
+ */
+char *gdbmi_tgdb_return_client_command ( enum tgdb_command c );
+char *gdbmi_tgdb_client_modify_breakpoint ( const char *file, int line, enum tgdb_breakpoint_action b );
+
 #endif /* __GDBMI_TGDB_H__ */

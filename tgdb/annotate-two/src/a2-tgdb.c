@@ -265,3 +265,34 @@ int a2_tgdb_change_prompt(char *prompt) {
             
     return 0;
 }
+
+static char *a2_tgdb_commands[] = {
+	"continue",
+	"finish",
+	"next",
+	"run",
+	"step",
+	"up",
+	"down"
+};
+
+char *a2_tgdb_return_client_command ( enum tgdb_command c ) {
+	if ( c < TGDB_CONTINUE || c >= TGDB_ERROR )
+		return NULL;
+
+	return a2_tgdb_commands[c];
+}
+
+/* This is a real hack */
+char *a2_tgdb_client_modify_breakpoint ( const char *file, int line, enum tgdb_breakpoint_action b ) {
+	char *val = (char*)xmalloc ( sizeof(char)* ( strlen(file) + 128 ) );
+
+	if ( b == TGDB_BREAKPOINT_ADD ) {
+		sprintf ( val, "break %s:%d", file, line );	
+		return val;
+	} else if ( b == TGDB_BREAKPOINT_DELETE ) {
+		sprintf ( val, "clear %s:%d", file, line );	
+		return val;
+	} else 
+		return NULL;
+}

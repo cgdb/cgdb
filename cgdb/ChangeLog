@@ -1,3 +1,10 @@
+07/02/2003 Bob Rossi <bob@brasko.net>
+
+	* commands.c: Remove all calls tgdb_send to tgdb_run_client_command.
+	This no longer has hard coded references to gdb commands.
+	* interface.c: ditto
+
+
 version 0.3.2 (06/25/2003):
 
 06/25/2003 Bob Rossi <bob_rossi@cox.net>

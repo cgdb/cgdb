@@ -100,11 +100,16 @@ static int tgdb_deliver_command ( int fd, struct command *command );
 /* The client's shutdown routine. */ 
 static int (*tgdb_client_shutdown)(void);
 
+static char* (*tgdb_get_client_command)(enum tgdb_command c);
+static char* (*tgdb_client_modify_breakpoint_call)(const char *file, int line, enum tgdb_breakpoint_action b);
+
 static void init_annotate_two ( void ) {
     tgdb_get_sources                    = a2_tgdb_get_sources;
     tgdb_get_source_absolute_filename   = a2_tgdb_get_source_absolute_filename;
     tgdb_err_msg                        = a2_tgdb_err_msg;
     tgdb_client_shutdown                = a2_tgdb_shutdown;
+	tgdb_get_client_command             = a2_tgdb_return_client_command;
+	tgdb_client_modify_breakpoint_call  = a2_tgdb_client_modify_breakpoint;
 }
 
 static void init_gdbmi ( void ) {
@@ -112,6 +117,8 @@ static void init_gdbmi ( void ) {
     tgdb_get_source_absolute_filename   = gdbmi_tgdb_get_source_absolute_filename;
     tgdb_err_msg                        = gdbmi_tgdb_err_msg;
     tgdb_client_shutdown                = gdbmi_tgdb_shutdown;
+	tgdb_get_client_command             = gdbmi_tgdb_return_client_command;
+	tgdb_client_modify_breakpoint_call  = gdbmi_tgdb_client_modify_breakpoint;
 }
 
 /* These functions are used to determine the state of libtgdb */
@@ -225,7 +232,7 @@ size_t tgdb_recv(char *buf, size_t n, struct queue *q){
  *
  * tgdb_send - sends a commands from the gui to the debugger.
  */
-char *tgdb_send(char *command, int out_type) {
+static char *tgdb_send(char *command, int out_type) {
     static char buf[MAXLINE];
     struct command *ncom;
     static char temp_command[MAXLINE];
@@ -263,6 +270,10 @@ char *tgdb_send(char *command, int out_type) {
     }
 
     return buf;   
+}
+
+char* tgdb_run_client_command ( enum tgdb_command c ) {
+ 	return tgdb_send ( tgdb_get_client_command (c), 2 );
 }
 
 /* tgdb_dispatch_command:
@@ -823,4 +834,18 @@ int tgdb_new_tty(void) {
 
 char *tgdb_tty_name(void) {
     return inferior_tty_name;
+}
+
+char* tgdb_modify_breakpoint ( const char *file, int line, enum tgdb_breakpoint_action b ) {
+	char *val = tgdb_client_modify_breakpoint_call ( file, line, b );
+
+	if ( val == NULL )
+		return NULL;
+
+	if ( tgdb_send ( val, 2 ) == NULL )
+		return NULL;
+
+	free ( val );
+
+	return "\n";
 }

@@ -1,5 +1,20 @@
 07/02/2003 Bob Rossi <bob@brasko.net>
 
+	* tgdb.h: Adding commands tgdb_run_client_command
+	tgdb_set_breakpoint_file_line. Remove tgdb_send command. It is now a
+	static command internal to libtgdb. In place of it, all functions will be
+	exported.
+	* types.h: Added enum tgdb_command,enum tgdb_breakpoint_action
+	* tgdb.c: Implent functions above.
+	* gdbmi_tgdb.h: Add gdbmi_tgdb_return_client_command,
+	gdbmi_tgdb_client_modify_breakpoint
+	* gdbmi_tgdb.c: Implement above.
+	* a2-tgdb.h: Add a2_tgdb_client_modify_breakpoint,
+	a2_tgdb_return_client_command
+	* a2-tgdb.c: Implemented above.
+
+07/02/2003 Bob Rossi <bob@brasko.net>
+
 	* Added testsuite directory: No more regression!
 
 06/28/2003 Bob Rossi <bob@brasko.net>

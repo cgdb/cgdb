@@ -22,7 +22,7 @@ extern "C" {
 
 #include "types.h"
 
-/* tgdb_start: This starts up gdb and returns a fd to gdb's output and to
+/* tgdb_init: This starts up gdb and returns a fd to gdb's output and to
  *            the childs output. Both fd's should only be used by the library. 
  *            They are only returned so that the gui programmer can do some 
  *            sort of I/O multiplexing with them. This is the first call in the 
@@ -45,23 +45,6 @@ int tgdb_init(
             char *debugger, 
             int argc, char **argv, 
             int *gdb, int *child, int *readline);
-
-/* tgdb_send: 
- * ----------
- *
- *  Sends a command to the debugger
- *
- *  command  - The user typed command to send
- *             If line is null, then the '\n' command is assummed.
- *             The command should not have a '\n' at the end.
- *  out_type - if 1, the command will be shown before the output.
- *             if 2, the command will not be shown, just output.
- *
- * RETURNS: NULL on error else a pointer to a NULL-terminated string
- *          that should be displayed to the user.
- *          This string is statically allocated, so do not free it.
- */
-char *tgdb_send(char *command, int out_type);
 
 /* tgdb_send_input: 
  * ----------------
@@ -183,6 +166,27 @@ char* (*tgdb_err_msg)(void);
  * RETURNS: 0 on success or -1 on error
  */
 int tgdb_shutdown(void);
+
+/* tgdb_run_client_command
+ * -----------------------
+ *
+ * Will run the command C through the debugger.
+ *
+ */
+char* tgdb_run_client_command ( enum tgdb_command c );
+
+/* tgdb_set_breakpoint_file_line
+ * -----------------------------
+ *  
+ *  Modify's a breakpoint.
+ *
+ *  file 	The file to set the breakpoint in.
+ *  line 	The line in FILE to set the breakpoint in.
+ *  modify  Determines what the user wants to do with the breakpoint.
+ *
+ *  Returns NULL on error or message to print to terminal
+ */
+char *tgdb_modify_breakpoint ( const char *file, int line, enum tgdb_breakpoint_action b );
 
 #ifdef __cplusplus
 }

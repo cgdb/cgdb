@@ -152,4 +152,20 @@ void a2_command_typed_at_prompt ( int i );
  */
 int a2_tgdb_is_debugger_ready(void);
 
+/* a2_tgdb_return_client_command
+ * -----------------------------
+ *
+ *  This returns the command to send to gdb for the enum C.
+ *
+ *  It will return NULL on error, otherwise correct string on output.
+ */
+char *a2_tgdb_return_client_command ( enum tgdb_command c );
+
+/* a2_tgdb_client_modify_breakpoint
+ * --------------------------------
+ *
+ * Look at tgdb.h
+ */
+char *a2_tgdb_client_modify_breakpoint ( const char *file, int line, enum tgdb_breakpoint_action b );
+
 #endif /* __A2_TGDB_H__ */

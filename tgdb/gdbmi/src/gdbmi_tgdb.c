@@ -148,3 +148,12 @@ char *gdbmi_tgdb_tty_name(void) {
 char *gdbmi_tgdb_err_msg(void) {
    return (char *)0;
 }
+
+char *gdbmi_tgdb_return_client_command ( enum tgdb_command c ) {
+	return (char *)0;
+}
+
+char *gdbmi_tgdb_client_modify_breakpoint ( const char *file, int line, enum tgdb_breakpoint_action b ) {
+	return (char *)0;
+}
+
