@@ -11,7 +11,6 @@
 
 #include "tgdb_types.h"
 #include "tgdb_client_command.h"
-#include "queue.h"
 
 /*! \file
  * a2-tgdb.h

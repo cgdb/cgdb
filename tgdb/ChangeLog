@@ -1,3 +1,16 @@
+01/30/2004 Bob Rossi <bob@brasko.net>
+
+   * TODO: Updated list of things to do
+   * a2-tgdb.h: Remove include of "queue.h"
+   * gdbmi_tgdb.h: Remove includes of "queue.h" and "tgdb_client_command.h"
+   Add all new function declarations and comments
+   * gdbmi_tgdb.c: Create a non-working, compilable stub of the commands that
+   the mi needs to implement.
+   * driver.c: main_loop, protect select against invalid descriptors
+   * tgdb.c: Set's a call to test for annotate-two support 
+   * tgdb_client_interface.c: tgdb_client_debugger_interfaces, add initial
+   support for gdbmi support.
+
 01/29/2004 Bob Rossi <bob@brasko.net>
 
    * annotate-two.h: Changed PATH_MAX to FSUTIL_PATH_MAX and #include <limits.h> to

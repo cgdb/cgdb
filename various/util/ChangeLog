@@ -1,3 +1,7 @@
+01/30/2004 Bob Rossi <bob@brasko.net>
+
+   * fork_util.c: invoke_debugger, honors the choice parameter now.
+   
 01/29/2004 Bob Rossi <bob@brasko.net>
 
    * fs_util.h: Changed PATH_MAX to FSUTIL_PATH_MAX and #include <limits.h> to

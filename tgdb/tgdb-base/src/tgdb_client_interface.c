@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #endif /* HAVE_STDLIB_H */
 
+#include "gdbmi_tgdb.h"
 #include "a2-tgdb.h"
 #include "sys_util.h"
 #include "error.h"
@@ -147,23 +148,25 @@ static struct tgdb_client_debugger_interfaces {
 		TGDB_CLIENT_PROTOCOL_GNU_GDB_GDBMI,
 
 		/* tgdb_client_create_context */
-		NULL,
+		gdbmi_create_context,
 		/* tgdb_client_initialize_context */
-		NULL,
+		gdbmi_initialize,
 		/* tgdb_client_destroy_context */
-		NULL,
+		gdbmi_shutdown,
 		/* tgdb_client_err_msg */
 		NULL,
 		/* tgdb_client_is_client_ready */
-		NULL,
+		gdbmi_is_client_ready,
 	    /* tgdb_client_tgdb_ran_command */
-		NULL,
+		gdbmi_user_ran_command,
 		/* tgdb_client_prepare_for_command */
-		NULL,
+		gdbmi_prepare_for_command,
 		/* tgdb_client_can_tgdb_run_commands */
 		NULL,
 		/* tgdb_client_parse_io */
-		NULL,
+		gdbmi_parse_io,
+		/* tgdb_client_get_client_commands */
+		gdbmi_get_client_commands,
 		/* tgdb_client_get_absolute_path */
 		NULL,
 		/* tgdb_client_get_inferior_source_files */
@@ -177,7 +180,7 @@ static struct tgdb_client_debugger_interfaces {
 		/* tgdb_client_modify_breakpoint */
 		NULL,
 		/* tgdb_client_get_debugger_pid */
-		NULL,
+		gdbmi_get_debugger_pid,
 		/* tgdb_client_open_new_tty */
 		NULL,
 		/* tgdb_client_get_tty_name */
@@ -265,13 +268,21 @@ struct tgdb_client_context *tgdb_client_create_context (
 
 	/* Try to initialize the annotate 2 protocol */
 	if ( debugger == TGDB_CLIENT_DEBUGGER_GNU_GDB &&
-		 protocol == TGDB_CLIENT_PROTOCOL_GNU_GDB_ANNOTATE_TWO ) {
+		 ( 
+		  protocol == TGDB_CLIENT_PROTOCOL_GNU_GDB_ANNOTATE_TWO ||
+		  protocol == TGDB_CLIENT_PROTOCOL_GNU_GDB_GDBMI
+		 ) 
+	   ){
 
 		tcc = ( struct tgdb_client_context *) 
 			xmalloc ( sizeof ( struct tgdb_client_context) );
 		tcc->debugger = debugger;
 		tcc->protocol = protocol;
-		tcc->tgdb_client_interface = &tgdb_client_debugger_interfaces[0];
+
+		if ( protocol == TGDB_CLIENT_PROTOCOL_GNU_GDB_ANNOTATE_TWO )
+			tcc->tgdb_client_interface = &tgdb_client_debugger_interfaces[0];
+		else if ( protocol == TGDB_CLIENT_PROTOCOL_GNU_GDB_GDBMI )
+			tcc->tgdb_client_interface = &tgdb_client_debugger_interfaces[1];
 
 		tcc->tgdb_debugger_context =
 			tcc->tgdb_client_interface->tgdb_client_create_context (
@@ -282,6 +293,9 @@ struct tgdb_client_context *tgdb_client_create_context (
 			err_msg("%s:%d a2_create_instance error", __FILE__, __LINE__);
 			return NULL; 
 		}
+	} else {
+		err_msg("%s:%d tgdb_client_create_context protocol not recognized", 
+				__FILE__, __LINE__);
 	}
 
 	return tcc;

@@ -1,126 +1,460 @@
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
+#if HAVE_STDLIB_H 
 #include <stdlib.h>
+#endif  /* HAVE_STDLIB_H */
+
+#if HAVE_STRING_H
 #include <string.h>
-#include <stdio.h>
-#include <errno.h>
+#endif /* HAVE_STRING_H */
+
+#if HAVE_STDIO_H
+#include <stdio.h> 
+#endif /* HAVE_STDIO_H */
+
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif  /* HAVE_UNISTD_H */
+
+#if HAVE_SYS_STAT_H
 #include <sys/stat.h>
-#include <sys/types.h>
+#endif
+
+#if HAVE_SIGNAL_H
+//#include <sys/types.h>
 #include <signal.h>
+#endif /* HAVE_SIGNAL_H */
+
+#if HAVE_ERRNO_H
+#include <errno.h>
+#endif /* HAVE_ERRNO_H */
 
 #include "gdbmi_tgdb.h"
-#include "gdbmi_parse.h"
-#include "sys_util.h"
 #include "fork_util.h"
 #include "fs_util.h"
 #include "pseudo.h"
 #include "error.h"
 #include "io.h"
+#include "tgdb_types.h"
+#include "queue.h"
+#include "sys_util.h"
+#include "ibuf.h"
 
-//static int gdb_stdin = 0;   /* Writing to this writes to gdb's stdin */
-//static int gdb_stdout = 0;  /* Reading from this read's from gdb's stdout && stderr */
-//static pid_t gdb_pid = 0;
+#define PATH_MAX 4096
+#define TTY_NAME_SIZE 64
 
-static int master_tty_fd = -1, slave_tty_fd = -1;
-static char child_tty_name[SLAVE_SIZE];  /* the name of the slave psuedo-termainl */
+struct tgdb_gdbmi {
+	
+	/** 
+	 * This is set when this context has initialized itself
+	 */
+	int tgdb_initialized;
 
-int gdbmi_tgdb_init(int *readline){
-//    if(( gdb_pid = invoke_debugger(debugger, argc, argv, &gdb_stdin, &gdb_stdout, 1)) == -1 ) {
-//        err_msg("(%s:%d) invoke_debugger failed", __FILE__, __LINE__);
+	/** 
+	 * writing to this will write to the stdin of the debugger
+	 */
+	int debugger_stdin; 
+
+	/**
+     * Reading from reads the stdout/stderr of the debugger
+	 */
+	int debugger_out;
+	
+	/**
+     * writing to this will write to the stdin of the inferior
+	 */
+	int inferior_stdin;  
+
+	/**
+	 * Reading from reads the stdout/stderr of the inferior
+	 */
+	int inferior_out;
+
+	/**
+	 * Only kept around so it can be closed properly
+	 */
+	int inferior_slave_fd;
+
+	/** 
+	 * pid of child process.
+	 */
+	pid_t debugger_pid;
+
+	/** 
+	 * The config directory that this context can write too.
+	 */
+	char config_dir[PATH_MAX];
+
+	/**
+	 * The init file for the debugger.
+	 */
+	char gdbmi_gdb_init_file[PATH_MAX];
+
+	/**
+	 * The name of the inferior tty.
+	 */
+	char inferior_tty_name[TTY_NAME_SIZE];
+
+	/** 
+	 * This is a list of all the commands generated since in the last call. 
+	 */
+	struct tgdb_list *client_command_list;
+};
+
+//static int gdbmi_set_inferior_tty ( void *ctx ) {
+//	struct annotate_two *a2 = (struct annotate_two *)ctx;
+//
+//    if ( commands_issue_command ( 
+//				a2->c, 
+//				a2->client_command_list,
+//				ANNOTATE_TTY, 
+//				a2->inferior_tty_name, 
+//				0 ) == -1 ) {
+//        err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
 //        return -1;
 //    }
 //
-//   if ( util_new_tty(&master_tty_fd, &slave_tty_fd, child_tty_name) == -1){
-//      err_msg("%s:%d tgdb_util_new_tty error", __FILE__, __LINE__);
-//      return -1;
-//   }
+//    return 0;
+//}
 //
-//   *gdb       = gdb_stdout;
-//   *child     = master_tty_fd;
+///* This is ok as static, all references will use the same data. */
+//static char *gdbmi_tgdb_commands[] = {
+//	"continue",
+//	"finish",
+//	"next",
+//	"run",
+//	"step",
+//	"up",
+//	"down"
+//};
+//
+//
+//static int close_inferior_connection ( void *ctx ) {
+//	struct annotate_two *a2 = (struct annotate_two *)ctx;
+//
+//	if ( a2->inferior_stdin != -1 )
+//		xclose ( a2->inferior_stdin );
+//
+//	a2->inferior_stdin = -1;
+//	a2->inferior_out   = -1;
+//	
+//	/* close tty connection */
+//	if ( a2->inferior_slave_fd != -1 )
+//		xclose ( a2->inferior_slave_fd );
+//
+//	a2->inferior_slave_fd = -1;
+//
+//	if ( a2->inferior_tty_name[0] != '\0' )
+//		pty_release ( a2->inferior_tty_name );
+//
+//	return 0;
+//}
+//
+///* Here are the two functions that deal with getting tty information out
+// * of the annotate_two subsystem.
+// */
+//
+//int gdbmi_open_new_tty ( 
+//		void *ctx,
+//		int *inferior_stdin, 
+//		int *inferior_stdout ) {
+//	struct annotate_two *a2 = (struct annotate_two *)ctx;
+//
+//    close_inferior_connection(a2);
+//
+//	/* Open up the tty communication */
+//	if ( util_new_tty(&(a2->inferior_stdin), &(a2->inferior_slave_fd), a2->inferior_tty_name) == -1){
+//		err_msg("%s:%d -> Could not open child tty", __FILE__, __LINE__);
+//		return -1;
+//	}
+//
+//	*inferior_stdin     = a2->inferior_stdin;
+//	*inferior_stdout    = a2->inferior_stdin;
+//
+//    a2_set_inferior_tty ( a2 );
+//    
+//    return 0;
+//}
+//
+//char *a2_get_tty_name ( void *ctx ) {
+//	struct annotate_two *a2 = (struct annotate_two *)ctx;
+//	return a2->inferior_tty_name;
+//}
 
-   return 0;
+/* initialize_annotate_two
+ *
+ * initializes an annotate_two subsystem and sets up all initial values.
+ */
+static struct tgdb_gdbmi *initialize_tgdb_gdbmi ( void ) {
+	struct tgdb_gdbmi *gdbmi = (struct tgdb_gdbmi *)
+		xmalloc ( sizeof ( struct tgdb_gdbmi ) );
+
+	gdbmi->tgdb_initialized 	= 0;
+	gdbmi->debugger_stdin 		= -1;
+	gdbmi->debugger_out 		= -1;
+
+	gdbmi->inferior_stdin      = -1;
+	gdbmi->inferior_out 	    = -1;
+	gdbmi->inferior_slave_fd   = -1;
+	gdbmi->inferior_tty_name[0]= '\0';
+
+	/* null terminate */
+	gdbmi->config_dir[0] 		= '\0';
+	gdbmi->gdbmi_gdb_init_file[0] = '\0';
+
+	return gdbmi;
 }
 
-int gdbmi_tgdb_shutdown(void){
-   /* tty for gdb child */
-   xclose(master_tty_fd);
-   xclose(slave_tty_fd);
-   if ( pty_release(child_tty_name) == -1 ) {
-      err_msg("%s:%d pty_release error", __FILE__, __LINE__);
-      return -1;
-   }
+/* tgdb_setup_config_file: 
+ * -----------------------
+ *  Creates a config file for the user.
+ *
+ *  Pre: The directory already has read/write permissions. This should have
+ *       been checked by tgdb-base.
+ *
+ *  Return: 1 on success or 0 on error
+ */
+static int tgdb_setup_config_file ( struct tgdb_gdbmi *gdbmi, const char *dir ) {
+    FILE *fp;
 
-   return 0;
+    strncpy ( gdbmi->config_dir , dir , strlen ( dir ) + 1 );
+
+    fs_util_get_path ( dir, "gdbmi_gdb_init", gdbmi->gdbmi_gdb_init_file );
+
+    if ( (fp = fopen ( gdbmi->gdbmi_gdb_init_file, "w" )) ) {
+        fprintf( fp, 
+            "set height 0\n"
+            "set prompt (tgdbmi) \n");
+        fclose( fp );
+    } else {
+        err_msg("%s:%d fopen error '%s'", __FILE__, __LINE__, gdbmi->gdbmi_gdb_init_file);
+        return 0;
+    }
+
+    return 1;
 }
 
-int gdbmi_tgdb_run_command(char *com){
+void* gdbmi_create_context ( 
+	const char *debugger, 
+	int argc, char **argv,
+	const char *config_dir ) {
+	
+	struct tgdb_gdbmi *gdbmi = initialize_tgdb_gdbmi ();
+    char gdbmi_debug_file[PATH_MAX];
+
+    if ( !tgdb_setup_config_file( gdbmi, config_dir ) ) {
+        err_msg("%s:%d tgdb_init_config_file error", __FILE__, __LINE__);
+        return NULL;
+    }
+
+    /* Initialize the debug file that gdbmi_tgdb writes to */
+    fs_util_get_path ( config_dir, "gdbmi_tgdb_debug.txt", gdbmi_debug_file );
+
+    io_debug_init(gdbmi_debug_file);
+
+    gdbmi->debugger_pid = 
+		invoke_debugger(
+				debugger, argc, argv, 
+				&gdbmi->debugger_stdin, &gdbmi->debugger_out, 
+				1, gdbmi->gdbmi_gdb_init_file);
+
+	/* Couldn't invoke process */
+	if ( gdbmi->debugger_pid == -1 )
+		return NULL;
+
+	return gdbmi;
+}
+
+int gdbmi_initialize ( 
+	void *ctx,
+	int *debugger_stdin, int *debugger_stdout,
+	int *inferior_stdin, int *inferior_stdout) {
+	struct tgdb_gdbmi *gdbmi = (struct tgdb_gdbmi *)ctx;
+
+    struct tgdb_client_command *client_command = NULL;
+	
+	gdbmi->client_command_list = tgdb_list_init ();
+
+	*debugger_stdin 	= gdbmi->debugger_stdin;
+	*debugger_stdout 	= gdbmi->debugger_out;
+
+   	gdbmi->tgdb_initialized = 1;
+
+	client_command = tgdb_client_command_create ( 
+		"(tgdbmi) ",
+		TGDB_CLIENT_COMMAND_TGDB_BASE,
+		TGDB_CLIENT_COMMAND_DISPLAY_NOTHING,
+		TGDB_CLIENT_COMMAND_ACTION_CONSOLE_SET_PROMPT,
+		NULL ); 
+
+	tgdb_list_append ( gdbmi->client_command_list, client_command );
+
     return 0;
 }
 
-int gdbmi_tgdb_get_source_absolute_filename(char *file){
-    return 0;
+int gdbmi_shutdown ( void *ctx ) {
+	struct tgdb_gdbmi *gdbmi = (struct tgdb_gdbmi *)ctx;
+    xclose(gdbmi->debugger_stdin);
+	return 0;
 }
 
-int gdbmi_tgdb_get_sources(void){
-   return 0;
+/* TODO: Implement error messages. */
+//int a2_err_msg ( void *ctx ) {
+//	return -1;
+//}
+
+int gdbmi_is_client_ready(void *ctx) {
+    return TRUE;
 }
 
-size_t gdbmi_tgdb_recv(char *buf, size_t n, struct queue *q){
-   return n;
+int gdbmi_parse_io ( 
+		void *ctx,
+		const char *input_data, const size_t input_data_size,
+		char *debugger_output, size_t *debugger_output_size,
+		char *inferior_output, size_t *inferior_output_size,
+		struct tgdb_list *list ) {
+//	int val;
+
+//	val = gdbmi_handle_data ( gdbmi, gdbmi->sm, input_data, input_data_size,
+//		debugger_output, debugger_output_size, list );
+
+	strncpy ( debugger_output, input_data, input_data_size );
+	*debugger_output_size = input_data_size;
+
+	return 1;
 }
 
-char *gdbmi_tgdb_send(char *command, int out_type) {
-    static char buf[4];
-//    memset(buf, '\0', 4); 
-//    buf[0] = c;
+
+struct tgdb_list *gdbmi_get_client_commands ( void *ctx ) {
+	struct tgdb_gdbmi *gdbmi = (struct tgdb_gdbmi *)ctx;
+	return gdbmi->client_command_list;
+}
+
 //
-//    if(io_write_byte(gdb_stdin, c) == -1){
-//        err_ret("%s:%d io_write_byte error", __FILE__, __LINE__);
-//        return NULL;
+//int a2_get_source_absolute_filename ( 
+//		void *ctx,
+//		const char *file ) {
+//	struct annotate_two *a2 = (struct annotate_two *)ctx;
+//
+//    if ( commands_issue_command ( 
+//				a2->c, 
+//				a2->client_command_list,
+//				ANNOTATE_LIST, 
+//				file, 
+//				0 ) == -1 ) {
+//        err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
+//        return -1;
 //    }
 //
-//    /* Ask for the file name after every command */
-//    if ( c == '\n' ) {
-//        char *str = "-interpreter-exec console \"info source\"\n";
-//        io_writen(gdb_stdin, strlen(str) , str);
+//    if ( commands_issue_command ( 
+//				a2->c, 
+//				a2->client_command_list,
+//				ANNOTATE_INFO_SOURCE_ABSOLUTE, 
+//				file, 
+//				0 ) == -1 ) {
+//        err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
+//        return -1;
 //    }
-    
-    return buf;   
+//
+//	return 0;
+//}
+//
+//int a2_get_inferior_sources ( void *ctx) {
+//	struct annotate_two *a2 = (struct annotate_two *)ctx;
+//    if ( commands_issue_command ( 
+//				a2->c, 
+//				a2->client_command_list,
+//				ANNOTATE_INFO_SOURCES, 
+//				NULL, 
+//				0 ) == -1 ) {
+//        err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
+//        return -1;
+//    }
+//
+//	return 0;
+//}
+//
+//int a2_change_prompt(
+//		void *ctx,
+//		const char *prompt) {
+//	struct annotate_two *a2 = (struct annotate_two *)ctx;
+//
+//    /* Must call a callback to change the prompt */
+//    if ( commands_issue_command ( 
+//				a2->c, 
+//				a2->client_command_list,
+//				ANNOTATE_SET_PROMPT, 
+//				prompt, 
+//				2 ) == -1 ) {
+//        err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
+//        return -1;
+//    }
+//            
+//    return 0;
+//}
+//
+//int a2_command_callback(
+//		void *ctx,
+//		const char *command) {
+//	/* Unimplemented */
+//	return -1;
+//}
+//
+//char *a2_return_client_command ( void *ctx, enum tgdb_command_type c ) {
+//	if ( c < TGDB_CONTINUE || c >= TGDB_ERROR )
+//		return NULL;
+//
+//	return a2_tgdb_commands[c];
+//}
+//
+//char *a2_client_modify_breakpoint ( 
+//		void *ctx, 
+//		const char *file, 
+//		int line, 
+//		enum tgdb_breakpoint_action b ) {
+//	char *val = (char*)xmalloc ( sizeof(char)* ( strlen(file) + 128 ) );
+//
+//	if ( b == TGDB_BREAKPOINT_ADD ) {
+//		sprintf ( val, "break %s:%d", file, line );	
+//		return val;
+//	} else if ( b == TGDB_BREAKPOINT_DELETE ) {
+//		sprintf ( val, "clear %s:%d", file, line );	
+//		return val;
+//	} else 
+//		return NULL;
+//}
+
+pid_t gdbmi_get_debugger_pid ( void *ctx ) {
+	struct tgdb_gdbmi *gdbmi = (struct tgdb_gdbmi *)ctx;
+	return gdbmi->debugger_pid;
 }
 
-int gdbmi_tgdb_send_input(char c){
-    return 0;
+//int a2_completion_callback(
+//		void *ctx,
+//		const char *command) {
+//	struct annotate_two *a2 = (struct annotate_two *)ctx;
+//    if ( commands_issue_command ( 
+//				a2->c, 
+//				a2->client_command_list,
+//				ANNOTATE_COMPLETE, command, 4 ) == -1 ) {
+//        err_msg("%s:%d commands_issue_command error", __FILE__, __LINE__);
+//        return -1;
+//    }
+//
+//    return 0;
+//}
+
+int gdbmi_user_ran_command ( void *ctx ) {
+	return 0;
 }
 
-int gdbmi_tgdb_recv_input(char *buf){
-    return 0;
+int gdbmi_prepare_for_command ( void *ctx, struct tgdb_client_command *com ) {
+	return 0;
 }
 
-char *gdbmi_tgdb_tty_send(char c){
-    return (char *)0;
-}
-
-size_t gdbmi_tgdb_tty_recv(char *buf, size_t n){
-   return 0; 
-}
-
-int gdbmi_tgdb_new_tty(void) {
-   return 0;
-}
-
-char *gdbmi_tgdb_tty_name(void) {
-    return (char *)0;
-}
-
-
-char *gdbmi_tgdb_err_msg(void) {
-   return (char *)0;
-}
-
-char *gdbmi_tgdb_return_client_command ( enum tgdb_command_type c ) {
-	return (char *)0;
-}
-
-char *gdbmi_tgdb_client_modify_breakpoint ( const char *file, int line, enum tgdb_breakpoint_action b ) {
-	return (char *)0;
-}
-
+//int a2_is_misc_prompt ( void *ctx ) {
+//	struct annotate_two *a2 = (struct annotate_two *)ctx;
+//	return globals_is_misc_prompt ( a2->g );
+//}

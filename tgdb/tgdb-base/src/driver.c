@@ -186,7 +186,10 @@ void main_loop(int masterfd, int childfd, int readlinefd){
       
       FD_SET(STDIN_FILENO, &rfds);
       FD_SET(masterfd, &rfds);
-      FD_SET(childfd, &rfds);
+
+	  if ( childfd != -1 )
+		  FD_SET(childfd, &rfds);
+
       FD_SET(readlinefd, &rfds);
       
       result = select(max + 1, &rfds, NULL, NULL, NULL);
@@ -207,7 +210,7 @@ void main_loop(int masterfd, int childfd, int readlinefd){
               return;
 
       /* child's output -> stdout */
-      if(FD_ISSET(childfd, &rfds)) {
+      if(childfd != -1 && FD_ISSET(childfd, &rfds)) {
           tty_input();
           continue;
       }
@@ -236,7 +239,6 @@ int main(int argc, char **argv){
         goto driver_end;
     }
 
-	
 	/* Ask TGDB to print error messages */
 	if ( tgdb_set_verbose_gui_command_output ( tgdb, 1 ) != 1 ) {
 		err_msg("%s:%d driver error\n", __FILE__, __LINE__);

@@ -10,6 +10,10 @@ tgdb 0.6.0
 tgdb 0.5.0
 ----------
 
+* Change CGDB/TGDB to return to the user the appropriate error codes.
+  For instance, a user had "read-only" permission of a2_gdb_init instead
+  of saying why TGDB couldn't open the file, or showing the error stack
+  trace, CGDB/TGDB just died silently.
 * Integrate gdbmi stubs into libtgdb and get gdbmi integrated into tgdb
 * Get assembly language working.
 * Get tab completion to work through readline ?
