@@ -175,13 +175,14 @@ int command_set_winsplit( const char *value )
 int command_set_syntax_type ( const char *value )
 {
 	enum tokenizer_language_support l = TOKENIZER_LANGUAGE_UNKNOWN;
+
 	if( strcasecmp( value, "c" ) == 0 )
 		l = TOKENIZER_LANGUAGE_C;
-   	else if( strcasecmp( value, "ada" ) == 0 )
+	else if( strcasecmp( value, "ada" ) == 0 )
 		l = TOKENIZER_LANGUAGE_ADA;
-   	else if( strcasecmp( value, "off" ) == 0 )
+	else if( strcasecmp( value, "off" ) == 0 )
 		l = TOKENIZER_LANGUAGE_UNKNOWN;
-
+	
 	if_highlight_sviewer ( l );
 
    	return 0;

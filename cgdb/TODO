@@ -12,10 +12,12 @@ Current To Do List (in no particular order)
         GUI should be free to manipulate lines however it sees fit.
 
    o Resizing issues:
-      - Maximize followed by minimize -- does not redraw
       - Resize events don't occur while GDB (or debugged program) is
         outputting massive amounts of data.  Doing a CTRL+W causes a
         resize, however.  Is there ANY way to simulate input on stdin?
+	  - Resizing the terminal a lot sends a signal to cgdb to resize.
+	    CGDB should not buffer these signals like it does. If the user
+		sends multiple resizes, only the last one should be serviced.
       - Eventually... flicker reduction?
 
    o Support monochrome terminals (vt100, etc.)
@@ -32,20 +34,28 @@ Current To Do List (in no particular order)
 
    o Investigate removing log10 function calls from sources.c.
 
+   o Allow the user to open a new window for child input/output. Although
+     this is only useful in a windowing environment, it is much nicer. Most
+	 people probably only use it in a windowing environment anyways. The tty
+	 window will still stay supported.
+
 ------
  BUGS
 ------
 
    o Open:
       - CTRL+C can cause problems
-      - TAB character messing up with horizontal scrolling (source window)
       - Cursor vanishes when breakpoints are set/unset
 
    o Closed:
       - DOS source files make cgdb barf
       - Syntax highlighting for C breaks on '\\'
       - Pressing CTRL+SPACE crashes cgdb (see interface.c for fix)
+	    For some reason, cgdb no longer crashes, when the user hits CTRL+SPACE,
+		the last char the user typed is repeated. The fix to interface.c was 
+		removed.
       - Arrow keys still not working properly (left, right, CTRL+A/E, etc.)
+      - TAB character messing up with horizontal scrolling (source window)
 
 -------------
 Nice Features

@@ -51,6 +51,8 @@
 #include "logo.h"
 #include "sys_util.h"
 
+int sources_syntax_on = 1;
+
 /* --------------- */
 /* Local Functions */
 /* --------------- */
@@ -497,10 +499,18 @@ int source_display(struct sviewer *sview, int focus)
                 waddch(sview->win, '>');
                 wattroff(sview->win, COLOR_PAIR(CGDB_COLOR_GREEN));
                 wattroff(sview->win, A_BOLD);
-                if ( line == sview->cur->sel_line && sview->cur->buf.cur_line != NULL )
-                    hl_wprintw(sview->win, sview->cur->buf.cur_line, width-lwidth-2, sview->cur->sel_col);
-                else
-                    hl_wprintw(sview->win, sview->cur->buf.tlines[line], width-lwidth-2, sview->cur->sel_col);
+				/* I know this is rediculous, it needs to be reimplemented */
+				if ( sources_syntax_on ) {
+					if ( line == sview->cur->sel_line && sview->cur->buf.cur_line != NULL )
+						hl_wprintw(sview->win, sview->cur->buf.cur_line, width-lwidth-2, sview->cur->sel_col);
+					else
+						hl_wprintw(sview->win, sview->cur->buf.tlines[line], width-lwidth-2, sview->cur->sel_col);
+				} else {
+					if ( line == sview->cur->sel_line && sview->cur->buf.cur_line != NULL )
+						hl_wprintw(sview->win, sview->cur->orig_buf.cur_line, width-lwidth-2, sview->cur->sel_col);
+					else
+						hl_wprintw(sview->win, sview->cur->orig_buf.tlines[line], width-lwidth-2, sview->cur->sel_col);
+				}
             }
             /* Look for covered_lines */
             else if (line_coverage_option && sview->cur->covered_lines[line]){
@@ -515,10 +525,18 @@ int source_display(struct sviewer *sview, int focus)
                     wattroff(sview->win, A_BOLD);
                 waddch(sview->win, ' ');
 
-                if ( line == sview->cur->sel_line && sview->cur->buf.cur_line != NULL )
-                    hl_wprintw(sview->win, sview->cur->buf.cur_line, width-lwidth-2, sview->cur->sel_col);
-                else
-                    hl_wprintw(sview->win, sview->cur->buf.tlines[line], width-lwidth-2, sview->cur->sel_col);
+				/* I know this is rediculous, it needs to be reimplemented */
+				if ( sources_syntax_on ) {
+					if ( line == sview->cur->sel_line && sview->cur->buf.cur_line != NULL )
+						hl_wprintw(sview->win, sview->cur->buf.cur_line, width-lwidth-2, sview->cur->sel_col);
+					else
+						hl_wprintw(sview->win, sview->cur->buf.tlines[line], width-lwidth-2, sview->cur->sel_col);
+				} else {
+					if ( line == sview->cur->sel_line && sview->cur->buf.cur_line != NULL )
+						hl_wprintw(sview->win, sview->cur->orig_buf.cur_line, width-lwidth-2, sview->cur->sel_col);
+					else
+						hl_wprintw(sview->win, sview->cur->orig_buf.tlines[line], width-lwidth-2, sview->cur->sel_col);
+				}
             }
             /* Look for breakpoints */
             else if (sview->cur->buf.breakpts[line]){
@@ -539,10 +557,18 @@ int source_display(struct sviewer *sview, int focus)
                     wattroff(sview->win, A_BOLD);
                 waddch(sview->win, ' ');
 
-                if ( line == sview->cur->sel_line && sview->cur->buf.cur_line != NULL )
-                    hl_wprintw(sview->win, sview->cur->buf.cur_line, width-lwidth-2, sview->cur->sel_col);
-                else
-                    hl_wprintw(sview->win, sview->cur->buf.tlines[line], width-lwidth-2, sview->cur->sel_col);
+				/* I know this is rediculous, it needs to be reimplemented */
+				if ( sources_syntax_on ) {
+					if ( line == sview->cur->sel_line && sview->cur->buf.cur_line != NULL )
+						hl_wprintw(sview->win, sview->cur->buf.cur_line, width-lwidth-2, sview->cur->sel_col);
+					else
+						hl_wprintw(sview->win, sview->cur->buf.tlines[line], width-lwidth-2, sview->cur->sel_col);
+				} else {
+					if ( line == sview->cur->sel_line && sview->cur->buf.cur_line != NULL )
+						hl_wprintw(sview->win, sview->cur->orig_buf.cur_line, width-lwidth-2, sview->cur->sel_col);
+					else
+						hl_wprintw(sview->win, sview->cur->orig_buf.tlines[line], width-lwidth-2, sview->cur->sel_col);
+				}
             }
             /* Ordinary lines */
             else{
@@ -561,11 +587,20 @@ int source_display(struct sviewer *sview, int focus)
                     wattroff(sview->win, A_BOLD);
                 waddch(sview->win, ' ');
                 
-                /* No special line information */
-                if ( line == sview->cur->sel_line && sview->cur->buf.cur_line != NULL )
-                    hl_wprintw(sview->win, sview->cur->buf.cur_line, width-lwidth-2, sview->cur->sel_col);
-                else
-                    hl_wprintw(sview->win, sview->cur->buf.tlines[line], width-lwidth-2, sview->cur->sel_col);
+				/* I know this is rediculous, it needs to be reimplemented */
+				if ( sources_syntax_on ) {
+					/* No special line information */
+					if ( line == sview->cur->sel_line && sview->cur->buf.cur_line != NULL )
+						hl_wprintw(sview->win, sview->cur->buf.cur_line, width-lwidth-2, sview->cur->sel_col);
+					else
+						hl_wprintw(sview->win, sview->cur->buf.tlines[line], width-lwidth-2, sview->cur->sel_col);
+				} else {
+					/* No special line information */
+					if ( line == sview->cur->sel_line && sview->cur->buf.cur_line != NULL )
+						hl_wprintw(sview->win, sview->cur->orig_buf.cur_line, width-lwidth-2, sview->cur->sel_col);
+					else
+						hl_wprintw(sview->win, sview->cur->orig_buf.tlines[line], width-lwidth-2, sview->cur->sel_col);
+				}
             }
         }
         else{

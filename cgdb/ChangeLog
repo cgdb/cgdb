@@ -1,5 +1,13 @@
 06/22/2003 Bob Rossi <bob_rossi@cox.net>
 
+	* TODO: Update to best of my knowledge
+	* interface.c: Remove old cludge to fix CTRL+SPACE crash. The crash no
+	longer happens.
+	* sources.c: Add really ugly hack to get syntax highlighting on/off
+	functionality. This will be cleaned up when I re-write sources.c (soon).
+
+06/22/2003 Bob Rossi <bob_rossi@cox.net>
+
 	* include/helptext.h: updating using ht.pl.
 	* src/ht.pl: Make it generate include/helptext.h instead of src/helptext.h
 

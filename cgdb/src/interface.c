@@ -1056,9 +1056,6 @@ int internal_if_input(int key) {
     switch ( focus ) {
         case CGDB:
             switch(key){
-                case 0: 
-                    /* What is this? It happens when you hit CTRL+SPACE */
-                    return 0;
                 case 'i':
                     focus = GDB;
                     if_draw();
