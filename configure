@@ -270,7 +270,7 @@ PACKAGE_VERSION=
 PACKAGE_STRING=
 PACKAGE_BUGREPORT=
 
-ac_unique_file="src"
+ac_unique_file="cgdb"
 # Factoring default headers for most tests.
 ac_includes_default="\
 #include <stdio.h>
@@ -6120,7 +6120,8 @@ fi
 done
 
 
-                                                                                ac_config_files="$ac_config_files Makefile input/Makefile input/src/Makefile src/Makefile tgdb/Makefile tgdb/annotate-two-src/Makefile tgdb/gdbmi-src/Makefile tgdb/lib/Makefile"
+#tgdb/Makefile tgdb/annotate-two-src/Makefile tgdb/gdbmi-src/Makefile tgdb/lib/Makefile)
+                                                                                                                                                                                              ac_config_files="$ac_config_files Makefile various/Makefile various/util/Makefile various/util/src/Makefile various/input/Makefile various/input/src/Makefile various/adt/Makefile various/adt/src/Makefile various/rlctx/Makefile various/rlctx/src/Makefile tgdb/Makefile tgdb/annotate-two/Makefile tgdb/annotate-two/src/Makefile tgdb/gdbmi/Makefile tgdb/gdbmi/src/Makefile tgdb/tgdb-base/Makefile tgdb/tgdb-base/src/Makefile cgdb/Makefile cgdb/src/Makefile"
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -6677,13 +6678,24 @@ do
   case "$ac_config_target" in
   # Handling of arguments.
   "Makefile" ) CONFIG_FILES="$CONFIG_FILES Makefile" ;;
-  "input/Makefile" ) CONFIG_FILES="$CONFIG_FILES input/Makefile" ;;
-  "input/src/Makefile" ) CONFIG_FILES="$CONFIG_FILES input/src/Makefile" ;;
-  "src/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
+  "various/Makefile" ) CONFIG_FILES="$CONFIG_FILES various/Makefile" ;;
+  "various/util/Makefile" ) CONFIG_FILES="$CONFIG_FILES various/util/Makefile" ;;
+  "various/util/src/Makefile" ) CONFIG_FILES="$CONFIG_FILES various/util/src/Makefile" ;;
+  "various/input/Makefile" ) CONFIG_FILES="$CONFIG_FILES various/input/Makefile" ;;
+  "various/input/src/Makefile" ) CONFIG_FILES="$CONFIG_FILES various/input/src/Makefile" ;;
+  "various/adt/Makefile" ) CONFIG_FILES="$CONFIG_FILES various/adt/Makefile" ;;
+  "various/adt/src/Makefile" ) CONFIG_FILES="$CONFIG_FILES various/adt/src/Makefile" ;;
+  "various/rlctx/Makefile" ) CONFIG_FILES="$CONFIG_FILES various/rlctx/Makefile" ;;
+  "various/rlctx/src/Makefile" ) CONFIG_FILES="$CONFIG_FILES various/rlctx/src/Makefile" ;;
   "tgdb/Makefile" ) CONFIG_FILES="$CONFIG_FILES tgdb/Makefile" ;;
-  "tgdb/annotate-two-src/Makefile" ) CONFIG_FILES="$CONFIG_FILES tgdb/annotate-two-src/Makefile" ;;
-  "tgdb/gdbmi-src/Makefile" ) CONFIG_FILES="$CONFIG_FILES tgdb/gdbmi-src/Makefile" ;;
-  "tgdb/lib/Makefile" ) CONFIG_FILES="$CONFIG_FILES tgdb/lib/Makefile" ;;
+  "tgdb/annotate-two/Makefile" ) CONFIG_FILES="$CONFIG_FILES tgdb/annotate-two/Makefile" ;;
+  "tgdb/annotate-two/src/Makefile" ) CONFIG_FILES="$CONFIG_FILES tgdb/annotate-two/src/Makefile" ;;
+  "tgdb/gdbmi/Makefile" ) CONFIG_FILES="$CONFIG_FILES tgdb/gdbmi/Makefile" ;;
+  "tgdb/gdbmi/src/Makefile" ) CONFIG_FILES="$CONFIG_FILES tgdb/gdbmi/src/Makefile" ;;
+  "tgdb/tgdb-base/Makefile" ) CONFIG_FILES="$CONFIG_FILES tgdb/tgdb-base/Makefile" ;;
+  "tgdb/tgdb-base/src/Makefile" ) CONFIG_FILES="$CONFIG_FILES tgdb/tgdb-base/src/Makefile" ;;
+  "cgdb/Makefile" ) CONFIG_FILES="$CONFIG_FILES cgdb/Makefile" ;;
+  "cgdb/src/Makefile" ) CONFIG_FILES="$CONFIG_FILES cgdb/src/Makefile" ;;
   "depfiles" ) CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
   "config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5

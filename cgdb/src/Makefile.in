@@ -20,7 +20,7 @@ VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkglibdir = $(libdir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
-top_builddir = ..
+top_builddir = ../..
 
 am__cd = CDPATH="$${ZSH_VERSION+.}$(PATH_SEPARATOR)" && cd
 INSTALL = @INSTALL@
@@ -121,23 +121,54 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-AM_CFLAGS = -Wall
+AM_CFLAGS = -g -Wall \
+-I$(top_srcdir)/tgdb/tgdb-base/include \
+-I$(top_srcdir)/tgdb/annotate-two/include \
+-I$(top_srcdir)/tgdb/gdbmi/include \
+-I$(top_srcdir)/various/adt/include \
+-I$(top_srcdir)/various/util/include \
+-I$(top_srcdir)/various/rlctx/include \
+-I$(top_srcdir)/various/input/include \
+-I$(top_srcdir)/cgdb/include
+
+
 bin_PROGRAMS = cgdb
-cgdb_LDFLAGS = -L../tgdb/lib
-cgdb_LDADD = -ltgdb
-cgdb_SOURCES = cgdb.c highlight.c interface.c filedlg.c \
-               scroller.c sources.c logo.c command_lexer.l commands.c \
-               ../input/src/input.c
+
+cgdb_LDFLAGS = \
+-L$(top_srcdir)/various/util/src \
+-L$(top_srcdir)/various/adt/src \
+-L$(top_srcdir)/various/input/src \
+-L$(top_srcdir)/various/rlctx/src \
+-L$(top_srcdir)/tgdb/tgdb-base/src \
+-L$(top_srcdir)/tgdb/annotate-two/src \
+-L$(top_srcdir)/tgdb/gdbmi/src
 
 
-EXTRA_DIST = cgdb.h highlight.h interface.h scroller.h sources.h \
-filedlg.h helptext.h logo.h command_lexer.h commands.h
+cgdb_LDADD = -ltgdb -lannotate_two -lgdbmi -lrlctx -linput -ladt -lutil
+
+cgdb_SOURCES = \
+cgdb.c \
+highlight.c \
+interface.c \
+filedlg.c \
+scroller.c \
+sources.c \
+logo.c \
+command_lexer.l \
+commands.c
 
 
 # links cgdb if common is changed
-cgdb_DEPENDENCIES = ../tgdb/lib
-INCLUDES = -I../tgdb/include -I../input/include
-subdir = src
+cgdb_DEPENDENCIES = \
+$(top_srcdir)/various/util/src \
+$(top_srcdir)/various/adt/src \
+$(top_srcdir)/various/input/src \
+$(top_srcdir)/various/rlctx/src \
+$(top_srcdir)/tgdb/annotate-two/src \
+$(top_srcdir)/tgdb/gdbmi/src \
+$(top_srcdir)/tgdb/tgdb-base/src
+
+subdir = cgdb/src
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
@@ -146,8 +177,7 @@ PROGRAMS = $(bin_PROGRAMS)
 
 am_cgdb_OBJECTS = cgdb.$(OBJEXT) highlight.$(OBJEXT) interface.$(OBJEXT) \
 	filedlg.$(OBJEXT) scroller.$(OBJEXT) sources.$(OBJEXT) \
-	logo.$(OBJEXT) command_lexer.$(OBJEXT) commands.$(OBJEXT) \
-	input.$(OBJEXT)
+	logo.$(OBJEXT) command_lexer.$(OBJEXT) commands.$(OBJEXT)
 cgdb_OBJECTS = $(am_cgdb_OBJECTS)
 
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
@@ -155,16 +185,16 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
 @AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/cgdb.Po ./$(DEPDIR)/command_lexer.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/commands.Po ./$(DEPDIR)/filedlg.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/highlight.Po ./$(DEPDIR)/input.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/interface.Po ./$(DEPDIR)/logo.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/scroller.Po ./$(DEPDIR)/sources.Po
+@AMDEP_TRUE@	./$(DEPDIR)/highlight.Po ./$(DEPDIR)/interface.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/logo.Po ./$(DEPDIR)/scroller.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/sources.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 LEXCOMPILE = $(LEX) $(LFLAGS) $(AM_LFLAGS)
 DIST_SOURCES = $(cgdb_SOURCES)
-DIST_COMMON = Makefile.am Makefile.in TODO command_lexer.c
+DIST_COMMON = Makefile.am Makefile.in command_lexer.c
 SOURCES = $(cgdb_SOURCES)
 
 all: all-am
@@ -173,7 +203,7 @@ all: all-am
 .SUFFIXES: .c .l .o .obj
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu  src/Makefile
+	  $(AUTOMAKE) --gnu  cgdb/src/Makefile
 Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe)
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
@@ -200,7 +230,6 @@ uninstall-binPROGRAMS:
 
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
-input.$(OBJEXT): ../input/src/input.c
 cgdb$(EXEEXT): $(cgdb_OBJECTS) $(cgdb_DEPENDENCIES) 
 	@rm -f cgdb$(EXEEXT)
 	$(LINK) $(cgdb_LDFLAGS) $(cgdb_OBJECTS) $(cgdb_LDADD) $(LIBS)
@@ -216,7 +245,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/commands.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/filedlg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/highlight.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/input.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/interface.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/logo.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/scroller.Po@am__quote@
@@ -246,28 +274,6 @@ distclean-depend:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(COMPILE) -c `if test -f '$<'; then $(CYGPATH_W) '$<'; else $(CYGPATH_W) '$(srcdir)/$<'`
-
-input.o: ../input/src/input.c
-@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT input.o -MD -MP -MF "$(DEPDIR)/input.Tpo" \
-@am__fastdepCC_TRUE@	  -c -o input.o `test -f '../input/src/input.c' || echo '$(srcdir)/'`../input/src/input.c; \
-@am__fastdepCC_TRUE@	then mv "$(DEPDIR)/input.Tpo" "$(DEPDIR)/input.Po"; \
-@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/input.Tpo"; exit 1; \
-@am__fastdepCC_TRUE@	fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../input/src/input.c' object='input.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/input.Po' tmpdepfile='$(DEPDIR)/input.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o input.o `test -f '../input/src/input.c' || echo '$(srcdir)/'`../input/src/input.c
-
-input.obj: ../input/src/input.c
-@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT input.obj -MD -MP -MF "$(DEPDIR)/input.Tpo" \
-@am__fastdepCC_TRUE@	  -c -o input.obj `if test -f '../input/src/input.c'; then $(CYGPATH_W) '../input/src/input.c'; else $(CYGPATH_W) '$(srcdir)/../input/src/input.c'`; \
-@am__fastdepCC_TRUE@	then mv "$(DEPDIR)/input.Tpo" "$(DEPDIR)/input.Po"; \
-@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/input.Tpo"; exit 1; \
-@am__fastdepCC_TRUE@	fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../input/src/input.c' object='input.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/input.Po' tmpdepfile='$(DEPDIR)/input.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o input.obj `if test -f '../input/src/input.c'; then $(CYGPATH_W) '../input/src/input.c'; else $(CYGPATH_W) '$(srcdir)/../input/src/input.c'`
 
 .l.c:
 	$(LEXCOMPILE) `test -f $< || echo '$(srcdir)/'`$<
@@ -330,7 +336,7 @@ distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 
-top_distdir = ..
+top_distdir = ../..
 distdir = $(top_distdir)/$(PACKAGE)-$(VERSION)
 
 distdir: $(DISTFILES)

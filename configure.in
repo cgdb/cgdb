@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(src)
+AC_INIT(cgdb)
 AC_CONFIG_AUX_DIR(config)
 AM_CONFIG_HEADER(config.h)
 AM_INIT_AUTOMAKE(cgdb, 0.3.0-cvs)
@@ -132,4 +132,15 @@ AC_TYPE_SIGNAL
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(mkdir putenv select strdup strerror)
 
-AC_OUTPUT(Makefile input/Makefile input/src/Makefile src/Makefile tgdb/Makefile tgdb/annotate-two-src/Makefile tgdb/gdbmi-src/Makefile tgdb/lib/Makefile)
+#tgdb/Makefile tgdb/annotate-two-src/Makefile tgdb/gdbmi-src/Makefile tgdb/lib/Makefile)
+AC_OUTPUT(Makefile \
+various/Makefile \
+various/util/Makefile various/util/src/Makefile \
+various/input/Makefile various/input/src/Makefile \
+various/adt/Makefile various/adt/src/Makefile \
+various/rlctx/Makefile various/rlctx/src/Makefile \
+tgdb/Makefile \
+tgdb/annotate-two/Makefile tgdb/annotate-two/src/Makefile \
+tgdb/gdbmi/Makefile tgdb/gdbmi/src/Makefile \
+tgdb/tgdb-base/Makefile tgdb/tgdb-base/src/Makefile \
+cgdb/Makefile cgdb/src/Makefile)
