@@ -1,4 +1,4 @@
-SUBDIRS = src
+SUBDIRS = annotate-two-src gdb-mi-src
 EXTRA_DIST = include
 
 dist-hook:
