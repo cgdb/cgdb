@@ -12,12 +12,6 @@
 /* Local Includes */
 #include "config.h"
 
-/* ----------- */
-/* Definitions */
-/* ----------- */
-
-#define GDB_WINDOW_NAME "cgdb v" VERSION
-
 /* --------------- */
 /* Data Structures */
 /* --------------- */
