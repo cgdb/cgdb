@@ -25,11 +25,6 @@
 
 static int tgdb_initialized = 0;
 
-static int tgdb_setup_buffer_command_to_run(char *com, 
-               enum buffer_command_type com_type,      /* Who is running this command */
-               enum buffer_output_type out_type,       /* Where should the output go */
-               enum buffer_command_to_run com_to_run);   /* What command to run */
-
 int masterfd = -1;                     /* master fd of the pseudo-terminal */
 int gdb_stdout = -1;
 static int readline_fd[2] = { -1, -1 };
@@ -41,12 +36,37 @@ static char child_tty_name[SLAVE_SIZE];  /* the name of the slave psuedo-termain
 static pid_t debugger_pid;             /* pid of child process */
 
 /*static struct buffer users_commands;   users commands buffered */
-static struct node *head = NULL;
+static struct queue *gdb_input_queue;
 static sig_atomic_t control_c = 0;              /* If control_c was hit by user */
 
-
+/* The current user command */
 static char user_cur_command[MAXLINE];
 static int user_cur_command_pos = 0;
+
+/* tgdb_setup_buffer_command_to_run: This sets up a command to run.
+ *    It runs it right away if no other commands are being run. 
+ *    Otherwise, it puts it in the queue and will run it in turn.
+ *    
+ *    com         - command to run
+ *    Returns: -1 on error, 0 on success.
+ */
+static int tgdb_setup_buffer_command_to_run(
+      char *com, 
+      enum buffer_command_type com_type,        /* Who is running this command */
+      enum buffer_output_type out_type,         /* Where should the output go */
+      enum buffer_command_to_run com_to_run){   /* What command to run */
+
+   struct command *item = buffer_new_item(com, com_type, out_type, com_to_run);
+   
+   /*fprintf(stderr, "SIZE_OF_BUFFER(%d)\n", buffer_size(head));*/
+   if(global_can_issue_command() == TRUE && tgdb_can_issue_command()) {
+      commands_run_command(masterfd, item);
+      buffer_free_item(item);
+   } else /* writing the command for later execution */
+      queue_append( gdb_input_queue, item );
+
+   return 0;
+}
 
 /* signal_catcher: Is called when a signal is sent to this process. 
  *    It passes the signal along to gdb. Thats what the user intended.
@@ -93,7 +113,7 @@ int a2_tgdb_init(char *debugger, int argc, char **argv, int *gdb, int *child, in
    io_debug_init(config_file);
    
    /* initialize users circular buffer */
-   head = NULL;
+   gdb_input_queue = queue_init();
 
    if(( debugger_pid = invoke_debugger(debugger, argc, argv, &masterfd, &gdb_stdout, 0)) == -1 ) {
       err_msg("(%s:%d) invoke_debugger failed", __FILE__, __LINE__);
@@ -142,88 +162,26 @@ int a2_tgdb_shutdown(void){
 }
 
 static int tgdb_run_users_buffered_commands(char *buf, int *buf_size){
-   static char buffered_cmd[2000+1];
-   extern int DATA_AT_PROMPT;
-   int buf_ret_val = 0, recv_sig = 0;
-   enum buffer_command_type com_type = BUFFER_VOID;
-   enum buffer_output_type out_type  = COMMANDS_SHOW_USER_OUTPUT;
-   enum buffer_command_to_run com_to_run = COMMANDS_VOID;
+    extern int DATA_AT_PROMPT;
+    int recv_sig = 0;
+    struct command *item = NULL;
 
-   /* TODO: Put signal blocking code here so that ^c is not pressed while 
-    * checking for it */
+    /* TODO: Put signal blocking code here so that ^c is not pressed while 
+     * checking for it */
 
-   if(!control_c) { /* only check for data if signal has not been recieved */
-      if ( queue_size(head) > 0 ) {
-          struct command *item; 
+    /* If a signal has been recieved, clear the queue and return */
+    if(control_c) { 
+        queue_free_list(gdb_input_queue, buffer_free_item);
+        return 0;
+    } else if ( queue_size(gdb_input_queue) == 0 )
+       return -2;
+    else
+        item = queue_pop(gdb_input_queue);
 
-          head = queue_pop(head, (void **)&item);
-
-         if ( item->data != NULL ) 
-            strcpy(buffered_cmd, item->data);
-         else
-            buffered_cmd[0] = 0;
-
-         com_type   = item->com_type;
-         out_type   = item->out_type;
-         com_to_run = item->com_to_run;
-
-         buffer_free_command(item);
-         buf_ret_val = 1;
-
-      } else {
-          return -2;
-      }
-   }
-
-   /* A SIGINT has not been recieved yet, continue on as normal 
-    * If a SIGINT is recieved between now and when the command is passed to gdb
-    *    then the user will still have that command run.
-    */
-   if(buf_ret_val >= 0) {
-      int length = strlen(buffered_cmd);
-      if(length > 0 || buf_ret_val == 1) {
-         DATA_AT_PROMPT = 0;
-         
-         switch(com_type){
-            case BUFFER_GUI_COMMAND:
-               /* Gui commands only care about where the output goes. */
-               return commands_run_command(masterfd, buffered_cmd, com_type);
-            case BUFFER_TGDB_COMMAND:
-               /* tgdb is running a command */
-               if(com_to_run == COMMANDS_INFO_SOURCES)
-                  return commands_run_info_sources(masterfd);
-               else if(com_to_run == COMMANDS_INFO_LIST){
-                  if ( length > 0 )
-                      buffered_cmd[--length] = '\0'; /* remove new line */
-                  if ( buffered_cmd[0] == 0 )
-                     return commands_run_list(NULL, masterfd);
-
-                  return commands_run_list(buffered_cmd, masterfd);
-               } else if(com_to_run == COMMANDS_INFO_BREAKPOINTS){
-                  commands_run_info_breakpoints(masterfd);
-               } else if(com_to_run == COMMANDS_TTY){
-                  return commands_run_tty(buffered_cmd, masterfd);
-               } else
-                  err_msg("%s:%d -> could not run tgdb command(%s)", __FILE__, __LINE__, buffered_cmd);
-               break;
-            case BUFFER_USER_COMMAND:
-               
-               /* running user command */
-               if(io_writen(masterfd, buffered_cmd, length) != length)
-                  err_msg("%s:%d -> could not write messge(%s)", __FILE__, __LINE__, buffered_cmd);
-               return commands_run_command(masterfd, buffered_cmd, com_type);
-               break;
-            default:
-               err_msg("%s:%d -> could not run command(%s)", __FILE__, __LINE__, buffered_cmd);
-               err_msg("%s:%d -> GOT(%d)", __FILE__, __LINE__, ((buffered_cmd[0])));
-               break;
-         } /* end switch */
-
-         memset(buffered_cmd, '\0', 2000);
-      }
-   }
-
-   return 0;
+    DATA_AT_PROMPT = 0;
+    commands_run_command(masterfd, item);
+    buffer_free_item(item);
+    return 0;
 }
 
 /* tgdb_can_issue_command:
@@ -239,66 +197,10 @@ static int tgdb_can_issue_command(void) {
       /* This line boiles down to:
        * If the buffered list is empty or the user is at the misc prompt 
        */
-      ( queue_size(head) == 0 || global_can_issue_command() == FALSE))
+      ( queue_size(gdb_input_queue) == 0 || global_can_issue_command() == FALSE))
       return TRUE;
    else 
       return FALSE;
-}
-
-/* tgdb_setup_buffer_command_to_run: This runs a command for the gui or for tgdb.
- *    It runs it right away if no other commands are being run or are in the
- *    queue to run. Otherwise, it puts it into the queue and it will run when 
- *    gdb is ready.
- *    
- *    com   -> command to run
- *    type  -> what to do with the output. (hide or show to user).
- *
- *    Returns: -1 on error, 0 on success.
- */
-static int tgdb_setup_buffer_command_to_run(char *com, 
-               enum buffer_command_type com_type,      /* Who is running this command */
-               enum buffer_output_type out_type,       /* Where should the output go */
-               enum buffer_command_to_run com_to_run){   /* What command to run */
-   struct command *command;
-
-   /*fprintf(stderr, "SIZE_OF_BUFFER(%d)\n", buffer_size(head));*/
-    
-   if(global_can_issue_command() == TRUE && tgdb_can_issue_command()){
-      /* set up commands to run from tgdb */
-      if(com_type == BUFFER_TGDB_COMMAND && com_to_run == COMMANDS_INFO_SOURCES)
-         return commands_run_info_sources(masterfd);
-      else if(com_type == BUFFER_TGDB_COMMAND && com_to_run == COMMANDS_INFO_LIST)
-         return commands_run_list(com, masterfd);
-      else if(com_type == BUFFER_TGDB_COMMAND && com_to_run == COMMANDS_INFO_BREAKPOINTS)
-         return commands_run_info_breakpoints(masterfd);
-      else if(com_type == BUFFER_TGDB_COMMAND && com_to_run == COMMANDS_TTY)
-         return commands_run_tty(com, masterfd);
-      else if(com_type == BUFFER_GUI_COMMAND) 
-         return commands_run_command(masterfd, com, com_type);
-      else if( com_type == BUFFER_USER_COMMAND )
-         return commands_run_command(masterfd, com, com_type);
-      else {
-         err_msg("%s:%d Unknown command type", __FILE__, __LINE__);
-         return -1;
-      }
-   }else{ /* writing the command for later execution */
-      
-      /* Append the command to the end of the queue */
-      command = ( struct command * ) xmalloc ( sizeof (struct command) );
-      if ( com != NULL ) {
-         command->data = ( char * ) xmalloc ( sizeof (char *) * ( strlen ( com ) + 1 ));
-         strcpy( command->data, com );
-      } else 
-         command->data = NULL;
-
-      command->com_type   = com_type;
-      command->out_type   = out_type;
-      command->com_to_run = com_to_run;
-      
-      head = queue_append( head, command );
-   }
-
-   return 0;
 }
 
 int a2_tgdb_get_source_absolute_filename(char *file){
@@ -371,7 +273,7 @@ size_t a2_tgdb_recv(char *buf, size_t n, struct Command ***com){
    /* 4. runs the users buffered command if any exists */
    if( global_can_issue_command() == TRUE && 
        data_get_state() == USER_AT_PROMPT && 
-        DATA_AT_PROMPT) { /* Only one command at a time */
+       DATA_AT_PROMPT) { /* Only one command at a time */
        int result = tgdb_run_users_buffered_commands(buf, &buf_size);
 
         /* There are no more command to run,

@@ -2,72 +2,103 @@
 #include "types.h"
 #include "error.h"
 
-struct node *queue_append(struct node *head, void *item) {
-    struct node *cur = head, *node;
+struct node {
+   void *data;
+   struct node *next;
+};
 
+struct queue {
+   int size;
+   struct node *head;
+};
+
+struct queue *queue_init(void) {
+   struct queue *q = (struct queue *)xmalloc(sizeof(struct queue));
+   q->size = 0;
+   q->head = NULL;
+   return q;
+}
+
+void queue_append(struct queue *q, void *item) {
+    struct node *cur = q->head, *node;
+
+    /* Allocate the new node */
     node = (struct node *)xmalloc(sizeof(struct node));
     node->data = item;
     node->next = NULL;
 
-    if ( cur == NULL )
-        return node;
-
-    while ( cur -> next != NULL )
-        cur = cur -> next;
-    
-    cur->next = node;
-    return head;
+    if ( q->head == NULL )
+        q->head = node;   
+    else {
+       while ( cur -> next != NULL )
+           cur = cur -> next;
+       
+       cur->next = node;
+    }
+    q->size = q->size + 1;
 }
 
-struct node *queue_pop(struct node *head, void **item) {
-    struct node *cur = head;
+void *queue_pop(struct queue *q) {
+    struct node *cur = q->head;
+    void *d;
 
-    if ( head == NULL ) 
-        return NULL;
+    if ( cur == NULL )
+        return (void *)NULL;
 
-    head = head->next;
+    /* Move the head of the queue forward */
+    q->head = q->head->next;
     
     /* Assertion: cur is the leftover node that needs to be freed */
-    *item = cur->data;
+    d = cur->data;
     free(cur);
     cur = NULL;
 
-    return head;
+    q->size = q->size - 1;
+
+    return d;
 }
 
-void queue_free_list(struct node *item, item_free_func func) {
-   struct node *prev, *cur = item;
+void queue_free_list(struct queue *q, item_func func) {
+    struct node *prev, *cur = q->head;
    
-   if ( cur == NULL )
-      return;
+    if ( cur == NULL )
+        return;
 
-   while ( cur != NULL ) {
-      prev = cur;
-      cur = cur->next;
-      if ( func )
-	 func ( prev->data );
-      free ( prev );
-      prev = NULL; 
-   }
+    while ( cur != NULL ) {
+        prev = cur;
+        cur = cur->next;
+        if ( func )
+            func ( prev->data );
+        
+        free ( prev );
+        prev = NULL; 
+    }
 
-   if ( func )
-     func ( cur->data );
-   free ( cur );
-   prev = NULL; 
+    if ( func )
+        func ( cur->data );
+    free ( cur );
+    cur = NULL; 
+    q->size = 0;
 }
 
-int queue_size(struct node *head) {
-   struct node *cur = head;
+void queue_traverse_list(struct queue *q, item_func func) {
+    struct node *cur = q->head;  
+
+    if ( !func )
+       return;
+
+    while ( cur != NULL ) {
+        func ( cur->data );
+        cur = cur->next;
+    }
+}
+
+int queue_size(struct queue *q) {
    int size = 0;
 
    /* This list is empty */
-   if ( cur == NULL )
+   if ( q->head == NULL )
        return 0;
-
-   while ( cur != NULL ) {
-      cur = cur -> next;
-      size += 1; 
-   }
-
-   return size;
+   else
+      return q->size;
 }

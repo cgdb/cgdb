@@ -56,7 +56,7 @@ void commands_set_field_num(int field_num);
 enum COMMAND_STATE commands_get_state(void);
 
 /* runs a simple command, output goes to user  */
-int commands_run_command(int fd, char *com, enum buffer_command_type com_type);
+int commands_run_command(int fd, struct command *com);
 
 /* commands_process: This function recieves the output from gdb when gdb
  *                   is running a command on behalf of this package.
@@ -65,31 +65,6 @@ int commands_run_command(int fd, char *com, enum buffer_command_type com_type);
  *    com   -> commands to give back to gdb.
  */
 void commands_process(char a, struct Command ***com);
-
-/* commands_run_info_breakpoints: This runs the command 'info breakpoints' and prepares tgdb
- *                            by setting certain variables.
- * 
- *    fd -> The file descriptor to write the command to.
- */
-int commands_run_info_breakpoints(int fd);
-
-/* commands_run_info_sources: This runs the command 'info sources' and prepares tgdb
- *                            by setting certain variables.
- * 
- *    fd -> The file descriptor to write the command to.
- */
-int commands_run_info_sources(int fd);
-
-/* commands_run_info_source:  This runs the command 'list filename:1' and then runs
- *                            'info source' to find out what the absolute path to 
- *                            filename is.
- * 
- *    filename -> The name of the file to check the absolute path of.
- *    fd -> The file descriptor to write the command to.
- */
-int commands_run_list(char *filename, int fd);
-
-int commands_run_tty(char *tty, int fd);
 
 /* commands_list_command_finished: Returns to the gui the absolute path of
  *                                  the filename requested.

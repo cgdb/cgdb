@@ -15,8 +15,8 @@
 static FILE *dfd = NULL;
 static int debug_on = 0;
 
-static const char *debug_begin = "<";
-static const char *debug_end   = ">";
+static const char *debug_begin = "";
+static const char *debug_end   = "";
 
 static void process_error(void) {
    if(errno == EINTR)
@@ -46,6 +46,9 @@ int io_debug_init(const char *filename){
       err_msg("%s:%d -> could not open debug file", __FILE__, __LINE__);
       return -1;
    }
+
+   /* A nifty trick to have debug dump to the terminal
+    * dfd = stderr;*/
 
    debug_on = 1;
 

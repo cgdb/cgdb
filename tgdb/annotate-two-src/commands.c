@@ -209,56 +209,50 @@ enum COMMAND_STATE commands_get_state(void){
    return cur_command_state;
 }
 
-static int commands_run_server_command(int fd, char *com){
-   data_prepare_run_command();
+/* If type is non-zero, server is prepended to com */
+static int commands_run_com(int fd, char *com, int type){
+   int length;
 
-   io_writen(fd, "server ", 7);
-   io_writen(fd, com, strlen(com));
-   io_writen(fd, "\n", 1);
-
-   return 0;
-}
-
-static int commands_run_user_command(int fd, char *com){
-   data_prepare_run_command();
-
-   io_writen(fd, com, strlen(com));
-   io_writen(fd, "\n", 1);
-
-   return 0;
-}
-
-int commands_run_command(int fd, char *com, enum buffer_command_type com_type){
-   if(com_type == BUFFER_TGDB_COMMAND ) 
-      data_set_state(INTERNAL_COMMAND);
-   else if ( com_type == BUFFER_GUI_COMMAND )
-      data_set_state(GUI_COMMAND);
-   else if ( com_type == BUFFER_USER_COMMAND )
-      data_set_state(USER_COMMAND);
-
-   if ( com_type == BUFFER_USER_COMMAND )
-      return commands_run_user_command(fd, com);
+   if ( com == NULL )
+      length = 0;
    else
-      return commands_run_server_command(fd, com);
+      length = strlen(com);
+
+   data_prepare_run_command();
+
+   if ( type )
+      io_writen(fd, "server ", 7);
+
+   if ( length > 0 )
+      io_writen(fd, com, length);
+   io_writen(fd, "\n", 1);
+   return 0;
 }
 
-int commands_run_info_breakpoints( int fd ) {
-   return commands_run_command(fd, "info breakpoints", BUFFER_TGDB_COMMAND);
+/* commands_run_info_breakpoints: This runs the command 'info breakpoints' and prepares tgdb
+ *                            by setting certain variables.
+ * 
+ *    fd -> The file descriptor to write the command to.
+ */
+static int commands_run_info_breakpoints( int fd ) {
+   return commands_run_com(fd, "info breakpoints", 1);
 }
 
-int commands_run_tty(char *tty, int fd){
+static int commands_run_tty(char *tty, int fd){
    char line[MAXLINE];
    memset(line, '\0', MAXLINE);
    strcat(line, "tty ");
    strcat(line, tty);
-   return commands_run_command(fd, line, BUFFER_TGDB_COMMAND);
+   return commands_run_com(fd, line, 1);
 }
 
-/* commands_run_info_sources: runs 'info sources'.
- *
+/* commands_run_info_sources: This runs the command 'info sources' and prepares tgdb
+ *                            by setting certain variables.
+ * 
+ *    fd -> The file descriptor to write the command to.
  *    Returns: -1 on error, 0 on sucess.
  */
-int commands_run_info_sources(int fd){
+static int commands_run_info_sources(int fd){
    sources_ready = 0;
    sources_buf_pos = 0; 
 
@@ -271,10 +265,17 @@ int commands_run_info_sources(int fd){
 
    commands_set_state(INFO_SOURCES, NULL);
    global_set_start_info_sources();
-   return commands_run_command(fd, "info sources", BUFFER_TGDB_COMMAND);
+   return commands_run_com(fd, "info sources", 1);
 }
 
-int commands_run_list(char *filename, int fd){
+/* commands_run_info_source:  This runs the command 'list filename:1' and then runs
+ *                            'info source' to find out what the absolute path to 
+ *                            filename is.
+ * 
+ *    filename -> The name of the file to check the absolute path of.
+ *    fd -> The file descriptor to write the command to.
+ */
+static int commands_run_list(char *filename, int fd){
    char local_com[MAXLINE];
 
    memset(local_com, '\0', MAXLINE);
@@ -291,17 +292,47 @@ int commands_run_list(char *filename, int fd){
    
    commands_set_state(INFO_LIST, NULL);
    global_set_start_list();
-   return commands_run_command(fd, local_com, BUFFER_TGDB_COMMAND);
+   return commands_run_com(fd, local_com, 1);
 }
 
 static int commands_run_info_source(int fd){
+   data_set_state(INTERNAL_COMMAND);
    info_source_buf_pos = 0;
    memset(info_source_buf, '\0', MAXLINE);
    
    commands_set_state(INFO_SOURCE, NULL);
    global_set_start_info_source();
-   return commands_run_command(fd, "info source", BUFFER_TGDB_COMMAND);
+   return commands_run_com(fd, "info source", 1);
 }
+
+int commands_run_command(int fd, struct command *com){
+    /* Set up data to know the current state */
+    switch(com->com_type) {
+        case BUFFER_TGDB_COMMAND: data_set_state(INTERNAL_COMMAND);           break;
+        case BUFFER_GUI_COMMAND:  data_set_state(GUI_COMMAND);                break;
+        case BUFFER_USER_COMMAND: data_set_state(USER_COMMAND);               break;
+        case BUFFER_VOID: err_msg("%s:%d switch error", __FILE__, __LINE__);  break;
+        default: err_msg("%s:%d switch error", __FILE__, __LINE__);           break;
+    }
+
+    /* Run the current command */
+    switch(com->com_to_run) {
+        case COMMANDS_INFO_SOURCES: 
+            return commands_run_info_sources(fd);                   break;
+        case COMMANDS_INFO_LIST:
+            return commands_run_list(NULL, fd);                     break;
+        case COMMANDS_INFO_SOURCE:                                  break;
+        case COMMANDS_INFO_BREAKPOINTS:
+            return commands_run_info_breakpoints(fd);               break;
+        case COMMANDS_TTY:
+            return commands_run_tty(com->data, fd);                 break;
+        case COMMANDS_VOID:                                         break;
+        default: err_msg("%s:%d switch error", __FILE__, __LINE__); break;
+    }
+
+    return commands_run_com(fd, com->data, 0);
+}
+
 
 void commands_list_command_finished(struct Command ***com, int success){
    /* The file was accepted, lets see if we can get the 
