@@ -32,6 +32,7 @@
 /*@{*/
 
 struct logger;
+typedef struct logger *logger_ptr;
 
 /**
  * Create a logger context.

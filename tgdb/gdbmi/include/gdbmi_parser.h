@@ -99,13 +99,17 @@ int gdbmi_parser_parse_string (
  *
  * The user is responsible for freeing this data structure on there own.
  *
+ * \param parse_failed
+ * 1 if the parser failed to parse the command, otherwise 0
+ *
  * \return
  * 0 on succes, or -1 on error.
  */
 int gdbmi_parser_parse_file ( 
 	gdbmi_parser_ptr parser_ptr, 
 	const char *mi_command_file,
-    gdbmi_output_ptr *pt );
+    gdbmi_output_ptr *pt,
+    int *parse_failed );
 
 /**
  * Get the last error in text format.
@@ -120,7 +124,7 @@ int gdbmi_parser_parse_file (
  * \return
  * 0 on succes, or -1 on error.
  */
-int gdbmi_parser_error ( gdbmi_parser_ptr parser, char **parser_error );
+int gdbmi_parser_get_error ( gdbmi_parser_ptr parser, char **parser_error );
 
 /*@}*/
 

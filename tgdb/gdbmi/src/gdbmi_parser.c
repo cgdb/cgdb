@@ -80,13 +80,19 @@ int gdbmi_parser_parse_string (
 int gdbmi_parser_parse_file ( 
 	gdbmi_parser_ptr parser, 
 	const char *mi_command_file,
-    gdbmi_output_ptr *pt ) {
+    gdbmi_output_ptr *pt,
+    int *parse_failed ) {
 
 	if ( !parser )
 		return -1;
 
 	if ( !mi_command_file )
 		return -1;
+
+	if ( !parse_failed )
+		return -1;
+
+	*parse_failed = 0;
 
 	/* Initialize data */
 	gdbmi_in = fopen ( mi_command_file, "r" );
@@ -96,16 +102,27 @@ int gdbmi_parser_parse_file (
 		return -1;
 	}
 
-	gdbmi_parse ();
+	if ( gdbmi_parse () == 1 )
+		*parse_failed = 1;
+	else
+		*parse_failed = 0;
 
-	*pt = tree;
+	if ( *parse_failed == 0 )
+		*pt = tree;
+	else {
+		if ( destroy_gdbmi_output ( tree ) == -1 ) {
+			logger_write_pos ( logger, __FILE__, __LINE__, "free failed" );
+			return -1;
+		}
+	}
+
 
 	fclose ( gdbmi_in );
 
 	return 0;
 }
 
-int gdbmi_parser_error ( gdbmi_parser_ptr parser, char **parser_error ) {
+int gdbmi_parser_get_error ( gdbmi_parser_ptr parser, char **parser_error ) {
 	return -1;
 }
 
