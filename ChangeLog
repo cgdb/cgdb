@@ -1,3 +1,5 @@
+version 0.2.3 (01/30/2003):
+
 01/29/2003  Bob Rossi  <bob_rossi@cox.net>
 
     * Fixed the resize problem on solaris by not calling signal:
