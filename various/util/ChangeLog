@@ -1,3 +1,5 @@
+version 0.3.2 (06/25/2003):
+
 06/23/2003 Bob Rossi <bob_rossi@cox.net>
 
 	* io.h: Added io_data_ready function. Checks to see if data is 

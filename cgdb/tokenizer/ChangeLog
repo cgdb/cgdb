@@ -1,3 +1,5 @@
+version 0.3.2 (06/25/2003):
+
 06/17/2003 Bob Rossi <bob_rossi@cox.net>
    
    * clexer.l: returns TOKENIZER_LITERAL for charachters.

@@ -35,7 +35,9 @@
 
 2. What dependencies does cgdb have?
 	cgdb could not have been written without the use of other libraries.
-	1. cgdb depends on readline-4.2 or greater.
+	1. cgdb depends on readline-development-4.2 or greater.
+	   If you don't have this, you might get a link error that looks something
+	   like this, 'undefined symbol, rl_set_prompt'.
 	2. cgdb depends on ncurses/curses.  The version number is not known.
 	   I have used libncurses.so.5 successfully.
 	3. If you decide to modify the tokenizer library or the config
