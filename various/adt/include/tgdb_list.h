@@ -2,24 +2,10 @@
 #define __TGDB_LIST_H__
 
 struct tgdb_list;
-struct tgdb_list_iterator;
+struct tgdb_list_node;
+typedef struct tgdb_list_node* tgdb_list_iterator;
 
 typedef void (*tgdb_list_func)(void *item);
-
-/* 
- * Allocates an iterator
- *
- * Returns a new iterator
- */
-struct tgdb_list_iterator *tgdb_list_iterator_init ( void );
-
-/* 
- * Destroys an iterator
- *
- * i
- *    The iterator to free
- */
-void tgdb_list_iterator_free ( struct tgdb_list_iterator *i );
 
 /* 
  * Initializes a new empty list.
@@ -65,7 +51,7 @@ void tgdb_list_prepend ( struct tgdb_list *tlist, void *item );
  */
 void tgdb_list_insert_after ( 
 		struct tgdb_list *tlist, 
-		struct tgdb_list_iterator *i, 
+		tgdb_list_iterator i, 
 		void *item );
 
 /* 
@@ -82,7 +68,7 @@ void tgdb_list_insert_after (
  */
 void tgdb_list_insert_before ( 
 		struct tgdb_list *tlist,
-		struct tgdb_list_iterator *i, 
+		tgdb_list_iterator i, 
 		void *item );
 
 /* Traversing the tree */
@@ -138,7 +124,7 @@ int tgdb_list_size ( struct tgdb_list *tlist );
  * Returns
  * 	  1 if was available, 0 otherwise
  */
-int tgdb_list_get_first ( struct tgdb_list *tlist, struct tgdb_list_iterator *i );
+tgdb_list_iterator tgdb_list_get_first ( struct tgdb_list *tlist );
 
 /*
  * Gets a hold of the last iterator in the list
@@ -152,7 +138,7 @@ int tgdb_list_get_first ( struct tgdb_list *tlist, struct tgdb_list_iterator *i 
  * Returns
  * 	  1 if was available, 0 otherwise
  */
-int tgdb_list_get_last ( struct tgdb_list *tlist, struct tgdb_list_iterator *i );
+int tgdb_list_get_last ( struct tgdb_list *tlist, tgdb_list_iterator i );
 
 /* 
  * Moves the iterator one step forward through the list
@@ -163,7 +149,7 @@ int tgdb_list_get_last ( struct tgdb_list *tlist, struct tgdb_list_iterator *i )
  * Returns
  *    1 if successful, otherwise 0
  */
-int tgdb_list_next ( struct tgdb_list_iterator *i );
+tgdb_list_iterator tgdb_list_next ( tgdb_list_iterator i );
 
 /* 
  * Moves the iterator one step backwards through the list
@@ -174,7 +160,7 @@ int tgdb_list_next ( struct tgdb_list_iterator *i );
  * Returns
  *    1 if successful, otherwise 0
  */
-int tgdb_list_previous ( struct tgdb_list_iterator *i );
+tgdb_list_iterator tgdb_list_previous ( tgdb_list_iterator i );
 
 /*
  * Gets the data at the iterator's position.
@@ -185,6 +171,6 @@ int tgdb_list_previous ( struct tgdb_list_iterator *i );
  * return
  *    The item at the iterator, or NULL on error
  */
-void *tgdb_list_get_item ( struct tgdb_list_iterator *i );
+void *tgdb_list_get_item ( tgdb_list_iterator i );
 
 #endif /* __TGDB_LIST_H__ */
