@@ -13,8 +13,6 @@ Pushed off for gdb 0.5.0
 	
 Work to do for cgdb-0.4.0
 
-1. Add a dejagnu testsuite to the annotate_driver and gdbmi_driver
-
 2. Create a better interface to the front ends
 
 Finished:
@@ -37,3 +35,6 @@ linking to libtgdb.
 Move rlctx_prog to another directory
 
 Figure out how to make rlctx not require another program to use.
+
+Add a dejagnu testsuite to the annotate_driver and gdbmi_driver
+	This needs to include many more tests.
