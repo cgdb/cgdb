@@ -1,0 +1,43 @@
+# Load the tgdb library
+load_lib tgdb.exp 	
+
+# Don't wait for more than 10 seconds
+set timeout 10 	
+
+# Some basic constants
+set tgdb_dir "tgdb.base"
+set source_file_name "basic"
+set file "$tgdb_dir/$source_file_name"
+set source_file "$source_file_name.c"
+
+# Load the program to test into gdb
+set test "load file"
+if [gdb_file_cmd ${file}] then {
+	fail "crap"
+	exit 1
+}
+
+#
+# Lists a file
+#
+set test "list"
+send "list\n"
+expect {
+	-re ".*$tgdb_prompt" { }
+	timeout {
+		fail "timeout $test"
+	}
+}
+
+#
+# Runs the 'info source' command
+#
+set test "source file"
+send "info source\n"
+expect {
+	-re "No current source file."	{ fail "$test" }
+	-re "Current source file is $source_file.*$tgdb_prompt" { pass "$test" }
+	timeout {
+		fail "timeout $test"
+	}
+}

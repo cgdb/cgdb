@@ -1,0 +1,7 @@
+07/02/2003 Bob Rossi <bob@brasko.net>
+
+	* Added testsuite: new file AUTHORS,COPYING,ChangLog,INSTALL,Makefile.am,
+	Makefile.in,NEWS,README,configure.in,config/unix.exp,lib/tgdb.exp,
+	tgdb.base/Makefile.am,tgdb.base/Makefile.in,tgdb.base/_sanity.exp,
+	tgdb.base/basic.c,tgdb.base/basic.exp,tgdb.base/overloaded.cpp,
+	tgdb.base/overloaded.exp,autoregen.sh

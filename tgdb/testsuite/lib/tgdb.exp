@@ -1,0 +1,166 @@
+#
+# load a file into the debugger.
+# return a -1 if anything goes wrong.
+#
+proc gdb_file_cmd { arg } {
+    global verbose
+    global loadpath
+    global loadfile
+    global TGDB_DRIVER
+    global tgdb_prompt
+    upvar timeout timeout
+
+    send "file $arg\n"
+    expect {
+        -re "Reading symbols from.*done.*$tgdb_prompt" {
+            verbose "\t\tLoaded $arg into the $TGDB_DRIVER"
+            return 0
+        }
+        -re "has no symbol-table.*$tgdb_prompt" {
+            perror "$arg wasn't compiled with \"-g\""
+            return -1
+        }
+        -re "A program is being debugged already.*Kill it.*y or n." {
+            send "y\n"
+                verbose "\t\tKilling previous program being debugged"
+            exp_continue
+        }
+        -re "Load new symbol table from \".*\".*y or n." {
+            send "y\n"
+            expect 120 {
+                -re "Reading symbols from.*done.*$tgdb_prompt" {
+                    verbose "\t\tLoaded $arg with new symbol table into $TGDB_DRIVER"
+                    return 0
+                }
+                timeout {
+                    perror "(timeout) Couldn't load $arg, other program already loaded."
+                    return -1
+                }
+            }
+		}
+        -re "No such file or directory.*$tgdb_prompt" {
+            perror "($arg) No such file or directory\n"
+            return -1
+        }
+        -re "$tgdb_prompt" {
+            perror "couldn't load $arg into $TGDB_DRIVER."
+            return -1
+            }
+        timeout {
+            perror "couldn't load $arg into $TGDB_DRIVER (timed out)."
+            return -1
+        }
+        eof {
+            # This is an attempt to detect a core dump, but seems not to
+            # work.  Perhaps we need to match .* followed by eof, in which
+            # gdb_expect does not seem to have a way to do that.
+            perror "couldn't load $arg into $TGDB_DRIVER (end of file)."
+            return -1
+        }
+    }
+}
+
+proc gdb_breakpoint { function } {
+    global tgdb_prompt
+
+    send "break $function\n"
+
+    # The first two regexps are what we get with -g, the third is without -g.
+    expect {
+		-re "Breakpoint \[0-9\]* at .*: file .*, line .*$tgdb_prompt" { return 0}
+		-re "Breakpoint \[0-9\]*: file .*, line .*$tgdb_prompt" { return 0}
+		-re "Breakpoint \[0-9\]* at .*$tgdb_prompt" { return 0}
+		-re "$tgdb_prompt" { fail "setting breakpoint at $function" ; return 1 }
+		timeout { 
+			fail "setting breakpoint at $function (timeout)" ; 
+			return 1 
+		}
+    }
+    return 1;
+}
+
+proc gdb_overloaded_breakpoint { number } {
+    global tgdb_prompt
+
+    send "$number\n"
+
+    # The first two regexps are what we get with -g, the third is without -g.
+    expect {
+		-re "Breakpoint \[0-9\]* at .*: file .*, line .*$tgdb_prompt" { return 0}
+		-re "Breakpoint \[0-9\]*: file .*, line .*$tgdb_prompt" { return 0}
+		-re "Breakpoint \[0-9\]* at .*$tgdb_prompt" { return 0}
+		-re "$tgdb_prompt" { fail "setting breakpoint at $number" ; return 1 }
+		timeout { 
+			fail "setting breakpoint at $number (timeout)" ; 
+			return 1 
+		}
+    }
+    return 1;
+}
+
+# Many of the tests depend on setting breakpoints at various places and
+# running until that breakpoint is reached.  At times, we want to start
+# with a clean-slate with respect to breakpoints, so this utility proc 
+# lets us do this without duplicating this code everywhere.
+#
+
+proc delete_breakpoints {} {
+    global tgdb_prompt
+
+    # we need a larger timeout value here or this thing just confuses
+    # itself.  May need a better implementation if possible. - guo
+    #
+    send "delete breakpoints\n"
+    expect {
+		-re "Delete all breakpoints.*y or n.*" {
+			send "y\n";
+			exp_continue
+		}
+		
+		-re "$tgdb_prompt" { # This happens if there were no breakpoints
+			return 0;
+		}
+		timeout { 
+			perror "Delete all breakpoints in delete_breakpoints (timeout)" ; 
+		}
+    }
+
+    send "info breakpoints\n"
+    expect {
+		-re "No breakpoints or watchpoints..*$tgdb_prompt" { return 0}
+		-re "$tgdb_prompt" { perror "breakpoints not deleted" ; return 1}
+		-re "Delete all breakpoints.*or n.*" {
+			send "y\n";
+			exp_continue
+		}
+
+		timeout { 
+			perror "info breakpoints (timeout)" ; return 1
+		}
+    }
+}
+
+#proc gdb_unload {} {
+#    global verbose
+#    global TGDB_PROMPT
+#    global tgdb_prompt
+#    send "file\n"
+#    expect 60 {
+#		-re "No executable file now\[^\r\n\]*\[\r\n\]" { exp_continue }
+#		-re "No symbol file now\[^\r\n\]*\[\r\n\]" { exp_continue }
+#		-re "A program is being debugged already..*Kill it.*y or n." { 
+#			send "y\n"
+#        		verbose "\t\tKilling previous program being debugged"
+#        		exp_continue
+#    		}
+#    	-re "Discard symbol table from .*y or n.*$" {
+#        	send "y\n"
+#        	exp_continue
+#    	}
+#    	-re "$tgdb_prompt" {}
+#    	timeout {
+#        	perror "couldn't unload file in $GDB (timed out)."
+#        	return -1
+#    	}
+#    }
+#}

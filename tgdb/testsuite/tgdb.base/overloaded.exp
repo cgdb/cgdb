@@ -1,0 +1,78 @@
+# Load the tgdb library
+load_lib tgdb.exp 	
+
+# Don't wait for more than 10 seconds
+set timeout 10
+
+# Some basic constants
+set tgdb_dir "tgdb.base"
+set source_file_name "overloaded"
+set file "$tgdb_dir/$source_file_name"
+set source_file "$source_file_name.cpp"
+
+# Load the program
+set test "load file"
+if [gdb_file_cmd ${file}] then {
+	exit 1
+}
+
+# Change this into a function call
+proc set_overload_breakpoint { function } {
+	global tgdb_prompt
+	global source_file
+
+	send "break $function\n"
+
+	expect {
+		-re "\\\[0\\\] cancel.*\\\[1\\\] all.*\\\[2\\\] $function\[(\].*\[)\] at $source_file:.*\\\[3\\\] $function\[(\].*\[)\] at $source_file:.*> " { 
+			pass "overloaded breakpoint $function"
+		}
+		timeout { 
+			fail "setting breakpoint at $function \[(\]timeout\[)\]" ; 
+		}
+	}
+}
+
+	
+
+# Check that overloading function breakpoints work
+set test "Cancel choice"
+set function "A::func"
+set_overload_breakpoint ${function}
+send "0\n"
+
+expect {
+	-re ".*canceled.*$tgdb_prompt" {
+		pass "$test"
+	}
+
+	timeout {
+		fail "Failed Test: $test \[(\]timeout\[)\]"
+	}
+}
+
+set test "All choice"
+set_overload_breakpoint ${function}
+send "1\n"
+
+expect {
+	-re ".*Breakpoint.*\[0-9\]*.*Breakpoint.*\[0-9\].*$tgdb_prompt" {
+		pass "$test"
+	}
+
+	timeout {
+		fail "Failed Test: $test \[(\]timeout\[)\]"
+	}
+}
+
+delete_breakpoints
+#
+## Set a breakpoint at second choice
+set number "2"
+set_overload_breakpoint ${function}
+gdb_overloaded_breakpoint ${number}
+#
+### Set a breakpoint at third choice
+set number "3"
+set_overload_breakpoint ${function}
+gdb_overloaded_breakpoint ${number}
