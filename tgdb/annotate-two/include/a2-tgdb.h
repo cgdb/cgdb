@@ -454,9 +454,6 @@ int a2_tgdb_command_callback(const char *line);
  */
 int a2_tgdb_completion_callback(const char *line);
 
-/* Returns 1 if ready to recieve data, otherwise 0 */
-int a2_is_ready ( void );
-
 /* a2_command_typed_at_prompt:
  *      This functions recieves the characters the user has typed.
  *      It only gets called if it is not busy ( the function above )
