@@ -45,39 +45,39 @@ struct tlist {
     char *ticodes;
     enum cgdb_key macro;
 } seqlist[] = {
-  { "@7", "kend",   "End Key",                  NULL, NULL, CGDB_KEY_END },
-  { "kh", "khome",  "Home key",                 NULL, NULL, CGDB_KEY_HOME },
-  { "kH", "kll",    "Home down",                NULL, NULL, CGDB_KEY_HOME },
-  { "dc", "dch1",   "Delete",                   NULL, NULL, CGDB_KEY_DC },
-  { "kD", "kdch1",  "Delete",                   NULL, NULL, CGDB_KEY_DC },
-  { "ic", "ich1",   "Insert",                   NULL, NULL, CGDB_KEY_IC },
-  { "kI", "kich1",  "Insert",                   NULL, NULL, CGDB_KEY_IC },
-  { "kN", "knp",    "next page",                NULL, NULL, CGDB_KEY_NPAGE },
-  { "kP", "kpp",    "previous page",            NULL, NULL, CGDB_KEY_PPAGE },
+  { "@7", "kend",   "<End>",       NULL, NULL, CGDB_KEY_END },
+  { "kh", "khome",  "<Home>",      NULL, NULL, CGDB_KEY_HOME },
+  { "kH", "kll",    "<Home>",      NULL, NULL, CGDB_KEY_HOME },
+  { "dc", "dch1",   "<Del>",       NULL, NULL, CGDB_KEY_DC },
+  { "kD", "kdch1",  "<Del>",       NULL, NULL, CGDB_KEY_DC },
+  { "ic", "ich1",   "<Insert>",    NULL, NULL, CGDB_KEY_IC },
+  { "kI", "kich1",  "<Insert>",    NULL, NULL, CGDB_KEY_IC },
+  { "kN", "knp",    "<PageDown>",  NULL, NULL, CGDB_KEY_NPAGE },
+  { "kP", "kpp",    "<PageUp>",    NULL, NULL, CGDB_KEY_PPAGE },
 
   /* For arrow keys */
-  { "kd", "kcud1",  "Down arrow key",           NULL, NULL, CGDB_KEY_DOWN },
-  { "kl", "kcub1",  "Left arrow key",           NULL, NULL, CGDB_KEY_LEFT },
-  { "kr", "kcuf1",  "Right arrow key",          NULL, NULL, CGDB_KEY_RIGHT },
-  { "ku", "kcuu1",  "Up arrow key",             NULL, NULL, CGDB_KEY_UP },
-  { "le", "cub1",   "Move left one space",      NULL, NULL, CGDB_KEY_LEFT },
-  { "nd", "cuf1",   "Move right one space",     NULL, NULL, CGDB_KEY_RIGHT },
-  { "up", "cuu1",   "Up one line",              NULL, NULL, CGDB_KEY_UP },
+  { "kd", "kcud1",  "<Down>",      NULL, NULL, CGDB_KEY_DOWN },
+  { "kl", "kcub1",  "<Left>",      NULL, NULL, CGDB_KEY_LEFT },
+  { "kr", "kcuf1",  "<Right>",     NULL, NULL, CGDB_KEY_RIGHT },
+  { "ku", "kcuu1",  "<Up>",        NULL, NULL, CGDB_KEY_UP },
+  { "le", "cub1",   "<Left>",      NULL, NULL, CGDB_KEY_LEFT },
+  { "nd", "cuf1",   "<Right>",     NULL, NULL, CGDB_KEY_RIGHT },
+  { "up", "cuu1",   "<Up>",        NULL, NULL, CGDB_KEY_UP },
 
   /* Function keys */
-  { "k1", "kf1",    "F1 function key",          NULL, NULL, CGDB_KEY_F1 },
-  { "k2", "kf2",    "F2 function key",          NULL, NULL, CGDB_KEY_F2 },
-  { "k3", "kf3",    "F3 function key",          NULL, NULL, CGDB_KEY_F3 },
-  { "k4", "kf4",    "F4 function key",          NULL, NULL, CGDB_KEY_F4 },
-  { "k5", "kf5",    "F5 function key",          NULL, NULL, CGDB_KEY_F5 },
-  { "k6", "kf6",    "F6 function key",          NULL, NULL, CGDB_KEY_F6 },
-  { "k7", "kf7",    "F7 function key",          NULL, NULL, CGDB_KEY_F7 },
-  { "k8", "kf8",    "F8 function key",          NULL, NULL, CGDB_KEY_F8 },
-  { "k9", "kf9",    "F9 function key",          NULL, NULL, CGDB_KEY_F9 },
-  { "k;", "kf10",   "F10 function key",         NULL, NULL, CGDB_KEY_F10 },
-  { "F1", "kf11",   "F11 function key",         NULL, NULL, CGDB_KEY_F11 },
-  { "F2", "kf12",   "F12 function key",         NULL, NULL, CGDB_KEY_F12 },
-  { NULL, NULL,     NULL,                       NULL, NULL, CGDB_KEY_ERROR }
+  { "k1", "kf1",    "<F1>",        NULL, NULL, CGDB_KEY_F1 },
+  { "k2", "kf2",    "<F2>",        NULL, NULL, CGDB_KEY_F2 },
+  { "k3", "kf3",    "<F3>",        NULL, NULL, CGDB_KEY_F3 },
+  { "k4", "kf4",    "<F4>",        NULL, NULL, CGDB_KEY_F4 },
+  { "k5", "kf5",    "<F5>",        NULL, NULL, CGDB_KEY_F5 },
+  { "k6", "kf6",    "<F6>",        NULL, NULL, CGDB_KEY_F6 },
+  { "k7", "kf7",    "<F7>",        NULL, NULL, CGDB_KEY_F7 },
+  { "k8", "kf8",    "<F8>",        NULL, NULL, CGDB_KEY_F8 },
+  { "k9", "kf9",    "<F9>",        NULL, NULL, CGDB_KEY_F9 },
+  { "k;", "kf10",   "<F10>",       NULL, NULL, CGDB_KEY_F10 },
+  { "F1", "kf11",   "<F11>",       NULL, NULL, CGDB_KEY_F11 },
+  { "F2", "kf12",   "<F12>",       NULL, NULL, CGDB_KEY_F12 },
+  { NULL, NULL,     NULL,          NULL, NULL, CGDB_KEY_ERROR }
 };
 
 /** 
