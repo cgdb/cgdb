@@ -4,10 +4,13 @@ A lot of work to do for cgdb-0.4.0
 
 2. Create a better interface to the front ends
 
+Pushed off for gdb 0.5.0
+
 3. Integrate gdbmi stubs into libtgdb
     The actual integration of gdbmi will be done by 0.5.0
 
 4. Get tab completion to work through readline ?
+	
 
 Finished:
 
