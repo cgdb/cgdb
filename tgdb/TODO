@@ -18,6 +18,7 @@ Work to do for cgdb-0.4.0
    As of know, it returns the full path with the relative path. Then
    it returns a relative path for breakpoints and source files. The front end 
    then needs to look up the full path from the relative path.
+4. Add the return value of gdb when returning with TGDB_QUIT_NORMAL
 
 Finished:
 
