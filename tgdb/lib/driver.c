@@ -67,7 +67,7 @@ static int gdb_input(void) {
            return;
         }
 
-    tgdb_traverse_command(q);
+    /*tgdb_traverse_command(q);*/
 
     while ( queue_size(q) > 0 ) {
         item = queue_pop(q);
