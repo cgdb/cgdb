@@ -110,9 +110,9 @@ static void err_doit(int errnoflag, const char *fmt, va_list ap) {
     * Change to see on stdout
     *************************/
     /* in case stdout and stderr are the same */
-   fflush(stdout);      
+   /*fflush(stdout);      
    fputs(buf, stderr);
-   fflush(stderr);
+   fflush(stderr);*/
 
    return;
 }
