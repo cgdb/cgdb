@@ -2,6 +2,8 @@
 
     * Changed tgdb to parse annotations in a new way: tgdb now accepts 
     annotations from gdb in this form '\r+\n\032\032annotation\r+\n'
+    This also removes all '\r' from the output that commands parses.
+    * Fixed commands.c where it was removing a \r that no longer exists.
 
 04/02/2003 Bob Rossi <bob_rossi@cox.net>
 

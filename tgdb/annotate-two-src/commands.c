@@ -409,7 +409,6 @@ static void commands_process_sources(char a){
     string_addchar(info_sources_string, a);
    
     if(a == '\n'){
-        string_delchar(info_sources_string);     /* remove '\r' and null terminate */
         string_delchar(info_sources_string);     /* remove '\n' and null terminate */
         /* valid lines are 
          * 1. after the first line,
