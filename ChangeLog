@@ -1,3 +1,7 @@
+04/09/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * If start_gdb fails, then cgdb exits cleanly.
+
 04/05/2003 Bob Rossi <bob_rossi@cox.net>
 
     * Changed CGDB_ESC_KEY to 27 for the several spots still calling wgetch

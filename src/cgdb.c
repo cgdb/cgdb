@@ -625,8 +625,11 @@ int main(int argc, char *argv[]) {
         err_quit("%s: Unable to create help file\n", my_name); 
 
     /* Start GDB */
-    if (start_gdb(argc, argv) == -1)
-        err_quit("%s: Unable to invoke GDB\n", my_name); 
+    if (start_gdb(argc, argv) == -1) {
+        err_msg("%s: Unable to invoke GDB\n", my_name); 
+        cleanup();
+        exit(-1);
+    }
 
     commandq = queue_init();
 
