@@ -1,3 +1,7 @@
+10/01/2003 Bob Rossi <bob@brasko.net>
+
+   * driver.c: gdb_input, add call to tgdb_types_free_command
+
 09/30/2003 Bob Rossi <bob@brasko.net>
 
    * TODO: Update tasks.

@@ -1,3 +1,7 @@
+10/01/2003 Bob Rossi <bob@brasko.net>
+
+   * cgdb.c: process_commands, add call to tgdb_types_free_command.
+
 09/30/2003 Bob Rossi <bob@brasko.net>
 
    * cgdb.c: process_commands, remove call to depricated tgdb_delete_command
