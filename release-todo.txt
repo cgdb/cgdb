@@ -1,7 +1,31 @@
-1.  change configure.in file to reflect new version number.
-2.  update both ChangeLog's to have the new release date and version.
+1.  Update both ChangeLog's to have the new release date and version.
     The ChangeLog's lives in both cgdb and cgdb/tgdb 
-3.  update website cgdb.sourceforge.net
+2.  change configure.in file to reflect new version number.
+    now run, autoregen.sh.
+    automake -> aclocal (GNU automake) 1.4-p4
+    autoconf -> autoconf (GNU Autoconf) 2.53
+3.  Test doing make dist then untar, ./configure && make
+    and run ./cgdb --version to check version number.
+
 4.  put a release on sourceforge.net/projects/cgdb
+    * ftp upload.sourceforge.net
+    * user=anonymous, passwd=email
+    * type bin
+    * cd incoming
+    * put the file up
+
+    * go to sourceforge.net/projects/cgdb
+    * go to admin, then edit/release files
+
+5.  update website cgdb.sourceforge.net, just announce a new release
+    and change download page.
+    * ssh cgdb.sourceforge.net
+    * goto /home/groups/c/cg/cgdb/htdocs
+    * download page -> download.shtml
+    *  dowload link
+    *  changelog link
+    *  put note on index page
+    
 5.  announce the release on freshmeat
+
 6.  announce the release on cgdb-announce@lists.sourceforge.net
