@@ -42,7 +42,6 @@ enum ConfigType
 };
 
 static int command_set_focus( const char *value );
-static int command_set_tabstop( int tab );
 static int command_set_winsplit( const char *value );
 static int command_set_syntax_type( const char *value );
 static int command_set_esc_sequence_timeout( int msec );
@@ -60,7 +59,7 @@ static struct ConfigVariable
     /* line_coverage */ { "line_coverage", "lc", CONFIG_TYPE_BOOL, &line_coverage_option },
     /* shortcut   */ 	{ "shortcut", "sc", CONFIG_TYPE_BOOL, &shortcut_option },
     /* syntax */      	{ "syntax", "syn", CONFIG_TYPE_FUNC_STRING, command_set_syntax_type }, 
-    /* tabstop   */     { "tabstop", "ts", CONFIG_TYPE_FUNC_INT, command_set_tabstop },
+    /* tabstop   */     { "tabstop", "ts", CONFIG_TYPE_INT, &highlight_tabstop },
     /* winsplit */      { "winsplit", "ws", CONFIG_TYPE_FUNC_STRING, command_set_winsplit }, 
 };
 
@@ -145,12 +144,6 @@ int command_set_focus( const char *value )
         return 1;
     }
 
-    return 0;
-}
-
-int command_set_tabstop( int value )
-{
-	highlight_tabstop = value;
     return 0;
 }
 
@@ -302,6 +295,9 @@ int command_parse_set( void )
     const char * value = NULL;
     
     switch ( (rv = yylex()) ) {
+    case EOL: {
+        /* TODO: Print out all the variables that have been set. */
+    } break;
     case IDENTIFIER: {
         const char *token = get_token();
         int length = strlen( token );
@@ -410,53 +406,57 @@ int command_parse_string( const char *buffer )
     typedef struct yy_buffer_state* YY_BUFFER_STATE;
     extern YY_BUFFER_STATE yy_scan_string( const char *yy_str );
     extern void yy_delete_buffer( YY_BUFFER_STATE state );
-    int rv = 0;
+    int rv = 1;
     YY_BUFFER_STATE state = yy_scan_string( (char*)buffer );
-    do {
-        switch ( (rv = yylex()) ) {
-        case SET:
-            /* get the next token */
-            rv = command_parse_set();
-            break;
 
-        case UNSET:
-        case BIND:
-        case MACRO:
-            /* ignore this stuff for now. */
-            rv = 1;
-            break;
-        case NUMBER: {
-            const char *number = get_token();
-            if ( number[0] == '+' ) {
-               source_vscroll( if_get_sview(), atoi( number+1 ));
-               rv = 0;
-            } else if ( number[0] == '-' ) {
-               source_vscroll( if_get_sview(), -atoi( number+1 ));
-               rv = 0;
-            } else {
-               source_set_sel_line(if_get_sview(), atoi( number ));
-               rv = 0;
-            }
-            if_draw();
-        } break;
-        case IDENTIFIER: {
-            action_t action = get_command( get_token() );
-            if ( action ) {
-                action();
-                rv = 0;
-            } else {
-                rv = 1;
-            }
-            goto bail;
-        } break;
-        default:
-            rv = 1;
-            goto bail;
+    switch ( yylex() ) {
+    case SET:
+        /* get the next token */
+        rv = command_parse_set();
+        break;
+
+    case UNSET:
+    case BIND:
+    case MACRO:
+        /* ignore this stuff for now. */
+        rv = 1;
+        break;
+
+    case NUMBER: {
+        const char *number = get_token();
+        if ( number[0] == '+' ) {
+            source_vscroll( if_get_sview(), atoi( number+1 ));
+            rv = 0;
+        } else if ( number[0] == '-' ) {
+            source_vscroll( if_get_sview(), -atoi( number+1 ));
+            rv = 0;
+        } else {
+            source_set_sel_line(if_get_sview(), atoi( number ));
+            rv = 0;
         }
-    } while( rv );
-    rv = 0;
+        if_draw();
+    } break;
 
-bail:
+    case IDENTIFIER: {
+        action_t action = get_command( get_token() );
+        if ( action ) {
+            action();
+            rv = 0;
+        } else {
+            rv = 1;
+        }
+    } break;
+
+    case EOL: 
+        /* basically just an empty line, don't do nothin. */
+        rv = 0;
+        break;
+
+    default:
+        rv = 1;
+        break;
+    }
+
     yy_delete_buffer( state );
     return rv;
 }
@@ -464,15 +464,28 @@ bail:
 int command_parse_file( FILE *fp )
 {
     char buffer[4096];
-    extern int yylinenumber;
+    char *p = buffer;
+    int linenumber = 0;
 
-    while( fgets( buffer, sizeof(buffer), fp ) )
+    while( linenumber++, fgets( p, sizeof(buffer) - ( p - buffer ), fp ) )
     {
-       if( command_parse_string( buffer ) )
-       {
-           if_print_message ("Error parsing line %d: %s\n", yylinenumber, buffer );
-		   return -1;
-       }
+        int bufferlen = strlen( buffer );
+        if( buffer[bufferlen - 2] == '\\' ) 
+        {
+            /* line continuation character, read another line into the buffer */
+            linenumber--;
+            p = buffer + bufferlen - 2;
+            continue;
+        }
+
+        if( command_parse_string( buffer ) )
+        {
+            /* buffer already has an \n */
+            if_print_message ("Error parsing line %d: %s", linenumber, buffer );
+            /* return -1; don't return, lets keep parsing the file. */
+        }
+
+        p = buffer;
     }
 
     return 0;

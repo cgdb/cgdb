@@ -1,3 +1,9 @@
+06/21/2003 Peter Kovacs <peter@kovax.org>
+
+    * command_lexer.l: Return EOL token when scanning \n\r combinations
+    * commands.c: Handle line counting, line-continuation characters.  Don't
+      bomb out when parsing empty lines.
+
 06/19/2003 Bob Rossi <bob_rossi@cox.net>
 
 	* cgdb.h: Added function cgdb_set_esc_sequence_timeout

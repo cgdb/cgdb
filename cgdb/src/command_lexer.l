@@ -24,33 +24,26 @@ const char * get_token( void )
 
 %%
 
-#[^\n]*                                                    { count(); /* ignore comments */ }
-"unset"                                                    { count(); return UNSET; }
-"set"                                                      { count(); return SET; }
-"bind"                                                     { count(); return BIND; } 
-"macro"                                                    { count(); return MACRO; } 
+#[^\n]*                                                    { /* ignore comments */ }
+"unset"                                                    { return UNSET; }
+"set"                                                      { return SET; }
+"bind"                                                     { return BIND; } 
+"macro"                                                    { return MACRO; } 
 
-(yes|YES|Yes|Y|y|no|NO|No|n|N)                             { count(); return BOOLEAN; }
-((<({L}|{D}|[^>])*>)|({L}({L}|{D})*))\!?                   { count(); return IDENTIFIER; }
-[+-]?{D}+                                                       { count(); return NUMBER; }
-\"(\\.|[^\\"])*\"                                          { count(); return STRING; }
+(yes|YES|Yes|Y|y|no|NO|No|n|N)                             { return BOOLEAN; }
+((<({L}|{D}|[^>])*>)|({L}({L}|{D})*))\!?                   { return IDENTIFIER; }
+[+-]?{D}+                                                  { return NUMBER; }
+\"(\\.|[^\\"])*\"                                          { return STRING; }
 
-"="                                                        { count(); return '='; }
-";"                                                        { count(); return ';'; }
+"="                                                        { return '='; }
+";"                                                        { return ';'; }
 
 
-[ \t\v\r\n\f]                                              { count(); /* ignore white-space */ }
-.                                                          { count(); /* ignore bad-characters */ }
+(\r\n|\n\r|\n|\r)                                          { return EOL; }
+[ \t\v\f]                                                  { /* ignore white-space */ }
+.                                                          { /* ignore bad-characters */ }
 
 %%
-
-void count( void )
-{
-    if ( yytext[0] == '\n' || 
-         yytext[0] == '\r' ) {
-         ++yylinenumber;
-    }
-}
 
 int yywrap( void )
 {
