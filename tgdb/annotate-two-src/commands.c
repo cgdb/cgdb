@@ -43,6 +43,10 @@ static int sources_buf_pos = 0;
 static char *sources[MAXLINE];
 static int sources_pos = 0;
 
+/* String that is output by gdb to get the absolute path to a file */
+static char *source_prefix = "Located in ";
+static int source_prefix_length = 11;
+
 static int buf_add(char **buf, char c, int *pos, int *blocksize) {
     if(*pos == MAXLINE*(*blocksize)){
         *buf = (char *)realloc(*buf, (++(*blocksize))*MAXLINE);
@@ -301,9 +305,7 @@ void commands_list_command_finished(struct Command ***com, int success){
 }
 
 void commands_send_source_absolute_source_file(struct Command ***com){
-   static char *source_prefix = "Located in ";
-   static int source_prefix_length = 11;
-   /*err_msg("(%s:%d)\r\n", info_source_buf, info_source_buf_pos);*/
+   /*err_msg("Whats up(%s:%d)\r\n", info_source_buf, info_source_buf_pos);*/
 
    /* found */
    if(info_source_buf_pos >= source_prefix_length && 
@@ -355,19 +357,28 @@ static void commands_process_source_line(struct Command  ***com){
 }
 
 static void commands_process_info_source(char a){
-   if ( a == '\r' ) {
-      /*fprintf(stderr, "CAR_RETURN\n");*/
+   static char internal_info_source_buf[MAXLINE];
+   static int  internal_info_source_buf_pos = 0;
+
+   if ( a == '\r' )
       return;
-   }
 
    if(a == '\n'){ 
-      /*fprintf(stderr, "NEW_LINE\n");*/
-      info_source_nl += 1;
+      internal_info_source_buf[internal_info_source_buf_pos] = '\0';
+
+      /* This is the line */
+      if ( strncmp(internal_info_source_buf, source_prefix, source_prefix_length) == 0 ) {
+         strncpy(info_source_buf, internal_info_source_buf, internal_info_source_buf_pos);
+         info_source_buf_pos = internal_info_source_buf_pos;
+      }
+
+      /* Delete the old line */
+      internal_info_source_buf_pos = 0;
+      internal_info_source_buf[0] = '\0';
       return;
    }
 
-   if(info_source_nl == 3)
-      info_source_buf[info_source_buf_pos++] = a;
+   internal_info_source_buf[internal_info_source_buf_pos++] = a;
 }
 
 /* process's source files */

@@ -125,7 +125,7 @@ static int gdb_input(void) {
        return;
     }
 
-    tgdb_traverse_command(stderr, &com);
+    /*tgdb_traverse_command(stderr, &com);*/
 
     { 
     size_t j;

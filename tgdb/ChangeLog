@@ -1,3 +1,11 @@
+02/27/2003 Bob Rossi <bob_rossi@cox.net>
+
+   * Fix parse bug, looking for 'Located in': when tgdb switch to starting
+   gdb from a tty to a regular pipe, gdb now sometimes outputs the command
+   that was typed, and sometimes it doesn't ( depending on version ).
+   So, instead of counting lines, tgdb looks for 'Located in' after a 
+   the 'info source' command.
+
 02/26/2003 Bob Rossi <bob_rossi@cox.net>
 
     * Added extra parameter to tgdb_start: A new fd is returned from 
