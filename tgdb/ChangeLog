@@ -1,3 +1,8 @@
+03/28/2003 Bob Rossi <bob_rossi@cox.net>
+
+   * Reversed decision to change BUFFER_USER_COMMAND -> BUFFER_GUI_COMMAND:
+   All commands were being outputted back to the user.
+
 03/27/2003 Bob Rossi <bob_rossi@cox.net>
 
     * Stop adding the enter command to readline's history.

@@ -409,7 +409,7 @@ char *a2_tgdb_send(char *command, int out_type) {
        buf[0] = '\0';
 
    /* tgdb always requests breakpoints because of buggy gdb annotations */
-   tgdb_setup_buffer_command_to_run ( command, BUFFER_GUI_COMMAND, COMMANDS_SHOW_USER_OUTPUT, COMMANDS_VOID );
+   tgdb_setup_buffer_command_to_run ( command, BUFFER_USER_COMMAND, COMMANDS_SHOW_USER_OUTPUT, COMMANDS_VOID );
    tgdb_setup_buffer_command_to_run ( NULL, BUFFER_TGDB_COMMAND, COMMANDS_HIDE_OUTPUT, COMMANDS_INFO_BREAKPOINTS );
    return buf;   
 }
