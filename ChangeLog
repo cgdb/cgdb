@@ -1,3 +1,7 @@
+07/12/2004 Bob Rossi <bob@brasko.net>
+
+    * NEWS: Fixed a crash in TGDB (buffering commands). Added libkui to CGDB.
+
 06/14/2004 Bob Rossi <bob@brasko.net>
 
     * NEWS: A fixed crash when parsing the CLI.

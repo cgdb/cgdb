@@ -525,10 +525,10 @@ static int tgdb_send (
 		char *command, 
 		enum tgdb_command_choice command_choice) {
 
-    struct tgdb_client_command *tcc;
+   struct tgdb_client_command *tcc;
 	struct tgdb_queue_command *tc;
 	struct ibuf *temp_command = ibuf_init ();
-    int length = strlen ( command );
+   int length = strlen ( command );
 
 	/* Add a newline to the end of the command if it doesn't exist */
 	ibuf_add ( temp_command, command );
@@ -539,7 +539,7 @@ static int tgdb_send (
 	/* Create the client command */
     tcc = tgdb_client_command_create ( 
             ibuf_get ( temp_command ), 
-			TGDB_CLIENT_COMMAND_NORMAL,
+			   TGDB_CLIENT_COMMAND_NORMAL,
             TGDB_CLIENT_COMMAND_DISPLAY_COMMAND_AND_RESULTS, 
             TGDB_CLIENT_COMMAND_ACTION_NONE, 
             NULL );
@@ -601,7 +601,7 @@ static int tgdb_dispatch_command (
             if ( tgdb_can_issue_command(tgdb) )
                 ret = tgdb_deliver_command ( tgdb, tgdb->debugger_stdin, command );
             else
-                queue_append ( tgdb->raw_input_queue, command );
+                queue_append ( tgdb->raw_input_queue, command);
             break;
         
         case TGDB_COMMAND_READLINE:
@@ -785,7 +785,7 @@ tgdb_run_command_tag:
     /* If the user has typed a command, send it through readline */
     } else if ( queue_size(tgdb->raw_input_queue) > 0 ) { 
         struct tgdb_queue_command *item = queue_pop(tgdb->raw_input_queue);
-        char *data = item->tgdb_command_data;
+        char *data = item->client_command->tgdb_client_command_data;
         int i, j = strlen ( data );
 
         for ( i = 0; i < j; i++ ) {
@@ -795,7 +795,8 @@ tgdb_run_command_tag:
             }
         }
 
-        free ( item->tgdb_command_data ); 
+        tgdb_command_destroy ( item );
+        item = NULL;
     /* Send the partially typed command through readline */
     } else if ( tgdb->current_command != NULL ) {
         int i,j = ibuf_length(tgdb->current_command);
@@ -821,14 +822,14 @@ tgdb_run_command_tag:
  *  This is called when readline says it has recieved a full line.
  */
 static int tgdb_command_callback(void *p, const char *line) {
-	struct ibuf *command = ibuf_init ();
-	struct tgdb *tgdb = (struct tgdb *)p;
-	ibuf_add ( command, line );
-	ibuf_addchar ( command, '\n' );
-    tgdb_send(tgdb, ibuf_get ( command ), TGDB_COMMAND_CONSOLE);
-	ibuf_free ( command );
-	command = NULL;
-    return 0;
+   struct ibuf *command = ibuf_init ();
+   struct tgdb *tgdb = (struct tgdb *)p;
+   ibuf_add ( command, line );
+   ibuf_addchar ( command, '\n' );
+   tgdb_send(tgdb, ibuf_get ( command ), TGDB_COMMAND_CONSOLE);
+   ibuf_free ( command );
+   command = NULL;
+   return 0;
 }
 
 int tgdb_change_prompt ( struct tgdb *tgdb, const char *prompt ) {
@@ -931,8 +932,23 @@ int tgdb_send_debugger_char ( struct tgdb *tgdb, char c ) {
         ibuf_addchar ( tgdb->current_command, c );
 
         if ( c == '\n' ) {
-            queue_append ( tgdb->raw_input_queue, tgdb->current_command );
-            tgdb->current_command = NULL;
+          struct tgdb_client_command *tcc;
+          struct tgdb_queue_command *tc;
+          tcc = tgdb_client_command_create ( 
+                  ibuf_get ( tgdb->current_command ), 
+                  TGDB_CLIENT_COMMAND_NORMAL,
+                  TGDB_CLIENT_COMMAND_DISPLAY_COMMAND_AND_RESULTS, 
+                  TGDB_CLIENT_COMMAND_ACTION_NONE, 
+                  NULL );
+           tc = tgdb_command_create ( 
+              NULL,
+              TGDB_COMMAND_CONSOLE,
+              TGDB_COMMAND_ACTION_NONE,
+              tcc );
+
+           queue_append ( tgdb->raw_input_queue, tc );
+           ibuf_free ( tgdb->current_command );
+           tgdb->current_command = NULL;
         }
     }
 

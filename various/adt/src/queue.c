@@ -39,9 +39,13 @@ void queue_append(struct queue *q, void *item) {
 }
 
 void *queue_pop(struct queue *q) {
-    struct node *cur = q->head;
+    struct node *cur;
     void *d;
 
+    if ( !q )
+       return (void*)NULL;
+
+    cur = q->head;
     if ( cur == NULL )
         return (void *)NULL;
 
@@ -50,6 +54,7 @@ void *queue_pop(struct queue *q) {
     
     /* Assertion: cur is the leftover node that needs to be freed */
     d = cur->data;
+    cur->next = NULL;
     free(cur);
     cur = NULL;
 

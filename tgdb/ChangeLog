@@ -1,3 +1,11 @@
+07/12/2004 Bob Rossi <bob@brasko.net>
+
+    * tgdb.c (tgdb_run_command): Used correct field for data in
+    raw_input_queue section and free queue 'item'
+    (tgdb_send_debugger_char): Append a 'command' to raw_input_queue,
+    instead of just adding the 'char*'
+
+
 version 0.4.2 (05/10/2004):
 version 0.4.1 (04/26/2004):
 

@@ -1,6 +1,14 @@
 CVS
 
-    Fix crash in CGDB when parsing command line parameters. I think this crash 
+   * Added libkui into CGDB. This is the fisrt of the 4 new libraries
+   designed to make CGDB flexible and modular.
+
+   * Fixed crash in TGDB when buffering commands. If the user hit
+   'n' <Enter> <Enter> ... fast, while GDB was not responding, or working
+   on a command, the buffering code in TGDB would enter a bad command into
+   a queue, causing it to crash when it tries to execute the command.
+
+   * Fix crash in CGDB when parsing command line parameters. I think this crash 
 	showed up when I starting compiling CGDB with 3.3 instead of 2.95. It would
 	crash when trying to pass the --pid argument to GDB through CGDB.
 
