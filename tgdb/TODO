@@ -1,8 +1,8 @@
 1.0 Proposol 
-
-stack window
+* stack window
 
 Pushed off for gdb 0.5.0
+------------------------
 
 > Integrate gdbmi stubs into libtgdb and get gdbmi integrated into tgdb
 > Get assembly language working.
@@ -17,22 +17,25 @@ Pushed off for gdb 0.5.0
    then needs to look up the full path from the relative path.
 	
 Work to do for cgdb-0.4.0
+-------------------------
 
 Non-technical
-> Work on webpage for cgdb/tgdb
-> Make sure mueller's wrap searching feature gets documented.
+-------------
+* Work on webpage for cgdb/tgdb
+* Make sure mueller's wrap searching feature gets documented.
 
 technical
-> Change all use's of 'struct string' to the proper 'struct ibuf'.
-> Standardize tgdb_interface. Maybe change its name. The clients should be
+---------
+* Standardize tgdb_interface. Maybe change its name. The clients should be
   able to generate and add commands to the command queue here. The commands
   should be made cleaner.
-> Get in touch with 'Ronald Landheer-Cieslak' about Makefile.am patch to
+* Get in touch with 'Ronald Landheer-Cieslak' about Makefile.am patch to
   build CVS out of the source tree.
-> Change use of 'struct queue' for tgdb_get_command.
+* Change use of 'struct queue' for tgdb_get_command.
 
 Finished:
 
+* Change all use's of 'struct string' to the proper 'struct ibuf'.
 * Remove #define MAXLINE in tgdb_types.h, there should be no hard coded 
   constants in TGDB.
 * Comment all tgdb-base headers to be complient with doxygen
@@ -50,27 +53,19 @@ Finished:
 * Have a tgdb function that can traverse the commands, printing either
    all of them.
 * Have a tgdb function that will free all of the memory returned.
-
-Fix interface to have all functions return an 'int'
-
-Rework tgdb to be able to support multiple types of debugging (annotate,mi)
-This involves making a better interface to running commands through the
-debbuger and through readline.
-
-Make annotate-two use the new architecture. This way, gdbmi will integrate 
-easier. This is done, however, there is still no clear interface between
-annotate and tgdb-base. This needs to be clearly defined before going 
-trying to add gdbmi.
-
-Get configure to only build cgdb, and build the driver programs on request.
-
-Reorganize tgdb to have a separate low level lib for ADT's and for
-util calls like xmalloc. This is so all programs can use it without
-linking to libtgdb.
-
-Move rlctx_prog to another directory
-
-Figure out how to make rlctx not require another program to use.
-
-Add a dejagnu testsuite to the annotate_driver and gdbmi_driver
-	This needs to include many more tests.
+* Fix interface to have all functions return an 'int'
+* Rework tgdb to be able to support multiple types of debugging 
+  (annotate,mi). This involves making a better interface to running 
+  commands through the debbuger and through readline.
+* Make annotate-two use the new architecture. This way, gdbmi will integrate 
+  easier. This is done, however, there is still no clear interface between
+  annotate and tgdb-base. This needs to be clearly defined before going 
+  trying to add gdbmi.
+* Get configure to only build cgdb, and build the driver programs on request.
+* Reorganize tgdb to have a separate low level lib for ADT's and for
+  util calls like xmalloc. This is so all programs can use it without
+  linking to libtgdb.
+* Move rlctx_prog to another directory
+* Figure out how to make rlctx not require another program to use.
+* Add a dejagnu testsuite to the annotate_driver and gdbmi_driver
+  This needs to include many more tests.
