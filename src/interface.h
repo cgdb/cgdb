@@ -35,9 +35,16 @@ int if_init(void);
  * Return Value:  0 if internal key was used, 
  *                1 if input to gdb,
  *                2 if input to tty or ...
- *                -1        : Error resizing terminal -- terminal too small
- *                -2        : Quit cgdb
+ *                -1        : Quit cgdb
  */
+
+/* if_resize_term: Resizes the application to the current term size.
+ * --------------
+ *
+ * Return Value: -1 on error, 0 on success
+ */
+int if_resize_term(void);
+
 int if_input(int key);
 
 /* if_print: Prints data to the GDB input/output window.

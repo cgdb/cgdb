@@ -39,6 +39,7 @@
 #include "tgdb.h"
 #include "helptext.h"
 #include "queue.h"
+#include "input.h"
 
 /* --------------- */
 /* Local Variables */
@@ -54,6 +55,10 @@ static int tgdb_readline_fd = -1; /* tgdb returns the 'at prompt' data */
 
 static char *debugger_path = NULL;  /* Path to debugger to use */
 struct queue *commandq;
+
+struct input *input = NULL;         /* Initialize the input package */
+
+int resize_pipe[2] = { -1, -1 };
 
 /* ------------------------ */
 /* Initialization functions */
@@ -235,77 +240,52 @@ static int start_gdb(int argc, char *argv[]) {
     return 0;
 }
 
-static int cread(char *c, int *size, int fd ) {
-    int ret_val;
-
-    /* Get input for readline */
-    while(1) {
-        if( ( ret_val = read(fd, c, *size)) == 0)  /* EOF */
-            return -1;
-        else if ( ret_val == -1 && errno == EINTR)
-            continue;
-        else if ( ret_val == -1 ){
-            err_msg("%s:%d -> I/O error", __FILE__, __LINE__);
-            return -1;
-        } else
-            break;
-   }
-
-   *size = ret_val;
-
-   return 0;
+static void send_key(int focus, int key) {
+    if ( focus == 1 ) {
+        if ( key == '\r' )
+            tgdb_send_input('\n');
+        else
+            tgdb_send_input(key);
+    } else if ( focus == 2 ) {
+        tgdb_tty_send(key);
+    }
 }
 
-static void user_input() {
-    static char buf[MAXLINE];
-    static int size;
-    static int key, i, val;
-    Focus focus = if_get_focus();
+/* user_input: This function will get a key from the user and process it.
+ *
+ *  Returns:  -1 on error, 0 on success
+ */
+static int user_input(void) {
+    static int key, val;
+    
+    key = input_getkey(input);
 
-    /* Send input to GDB or to the TTY */
-    if ( focus == GDB || focus == TTY) {
-        size = MAXLINE;
-        if ( cread(buf, &size, STDIN_FILENO) == -1 ) {
-            err_msg("%s:%d cread error\n", __FILE__, __LINE__);
-            return; 
-        }
+    /* Process the key */
+    switch ( ( val = if_input(key)) ) {
+        case 1:
+        case 2:
+            if ( key >= CGDB_KEY_UP && key < CGDB_KEY_ERROR ) {
+                    char *seqbuf = input_get_last_seq(input);
 
-        /* Find out if user typed only ESC */
-        if ( (size == 1 && buf[0] == CGDB_ESC)) {
-             if_set_focus(CGDB); 
-             return;
-        }
-
-        for ( i = 0; i < size; i++) {
-           switch ( focus ) {
-               case GDB:    /* Send input to readline */
-                   /* tgdb_send_input expects termination of commands to be 
-                    * '\n' not '\r'. */
-                   if ( buf[i] == '\r' )
-                       tgdb_send_input('\n');
-                    else
-                       tgdb_send_input(buf[i]);
-                   break;
-               case TTY:    /* Send input to tty */
-                    tgdb_tty_send(buf[i]);
-                    break;
-              default: break;
-           }
-        }
-        return;
-    }
-
-    /* Grab a character from the user */
-    while (( key = getch()) != ERR){
-        /* Process Key */
-        if ( (val = if_input(key)) == -1 )
-            err_quit("%s: Unreasonable terminal size\n", my_name);
-        else if ( val == -2 ) {
-            cleanup();
-            exit(0);
+                    if ( seqbuf == NULL ) {
+                        err_msg("%s:%d input_get_last_seq error\n", __FILE__, __LINE__);
+                        return -1;
+                    } else {
+                        int length = strlen(seqbuf), i;
+                        for ( i = 0; i < length; i++ )
+                            send_key(val, seqbuf[i]);
+                    }
+            } else
+                send_key(val, key);
+    
             break;
-        }
+        case -1:
+            return -1;
+        default:
+            break;
     }
+
+    return 0;
 }
 
 static void process_commands(struct queue *q)
@@ -409,7 +389,11 @@ static void process_commands(struct queue *q)
     }
 }
 
-static void gdb_input()
+/* gdb_input: Recieves data from tgdb:
+ *
+ *  Returns:  -1 on error, 0 on success
+ */
+static int gdb_input()
 {
     char *buf = malloc(GDB_MAXBUF+1);
     int size;
@@ -417,18 +401,25 @@ static void gdb_input()
     /* Read from GDB */
     size = tgdb_recv(buf, GDB_MAXBUF, commandq);
     if (size == -1){
-        err_quit("%s: Error while reading from GDB\n", my_name);
-        return;
+        err_msg("%s:%d tgdb_recv error \n", __FILE__, __LINE__);
+        return -1;
     }
+
     buf[size] = 0;
 
     process_commands(commandq);
 
     /* Display GDB output */
     if_print(buf);
+
+    return 0;
 }
 
-static void child_input()
+/* child_input: Recieves data from the child application:
+ *
+ *  Returns:  -1 on error, 0 on success
+ */
+static int child_input()
 {
     char *buf = malloc(GDB_MAXBUF+1);
     int size;
@@ -436,13 +427,14 @@ static void child_input()
     /* Read from GDB */
     size = tgdb_tty_recv(buf, GDB_MAXBUF);
     if (size == -1){
-        err_quit("%s: Error while reading from GDB\n", my_name);
-        return;
+        err_msg("%s:%d tgdb_tty_recv error \n", __FILE__, __LINE__);
+        return -1;
     }
     buf[size] = 0;
 
     /* Display CHILD output */
     if_tty_print(buf);
+    return 0;
 }
 
 static int tgdb_readline_input(void){
@@ -455,13 +447,24 @@ static int tgdb_readline_input(void){
     return 0;
 }
 
+static int cgdb_resize_term(int fd) {
+    int c;
+    read(resize_pipe[0], &c, sizeof(int) );
+
+    if ( if_resize_term() == -1 ) {
+        err_msg("%s:%d %s: Unreasonable terminal size\n", __FILE__, __LINE__, my_name);
+        return -1;
+    }
+}
+
 static void main_loop(void) {
-    fd_set set;
+    fd_set rset;
     int max;
     
     max = (gdb_fd > STDIN_FILENO) ? gdb_fd : STDIN_FILENO;
     max = (max > tty_fd) ? max : tty_fd;
     max = (max > tgdb_readline_fd) ? max : tgdb_readline_fd;
+    max = (max > resize_pipe[0]) ? max : resize_pipe[0];
 
     /* Main (infinite) loop:
      *   Sits and waits for input on either stdin (user input) or the
@@ -472,41 +475,54 @@ static void main_loop(void) {
     for (;;){
 
         /* Reset the fd_set, and watch for input from GDB or stdin */
-        FD_ZERO(&set);
+        FD_ZERO(&rset);
         
-        FD_SET(STDIN_FILENO, &set);
-        FD_SET(gdb_fd, &set);
-        FD_SET(tty_fd, &set);
-        FD_SET(tgdb_readline_fd, &set);
-    
+        FD_SET(STDIN_FILENO, &rset);
+        FD_SET(gdb_fd, &rset);
+        FD_SET(tty_fd, &rset);
+        FD_SET(tgdb_readline_fd, &rset);
+        FD_SET(resize_pipe[0], &rset);
+
         /* Wait for input */
-        if (select(max + 1, &set, NULL, NULL, NULL) == -1){
-            if (errno == EINTR){
-                user_input();
+        if (select(max + 1, &rset, NULL, NULL, NULL) == -1){
+            if (errno == EINTR)
                 continue;
-            }
             else
                 err_dump("%s: select failed: %s\n", my_name, strerror(errno));
         }
 
         /* Input received:  Handle it */
-        if (FD_ISSET(STDIN_FILENO, &set))
-            user_input();
+        if (FD_ISSET(STDIN_FILENO, &rset))
+            if ( user_input() == -1 ) {
+                err_msg("%s:%d user_input failed\n", __FILE__, __LINE__);
+                return;
+            }
 
-        /* gdb's output -> terminal out ( triggered from readline input ) */
-        if (FD_ISSET(tgdb_readline_fd, &set))
+        /* gdb's output -> stdout ( triggered from readline input ) */
+        if (FD_ISSET(tgdb_readline_fd, &rset))
             if ( tgdb_readline_input() == -1 )
                 return;
 
-        /* child's ouptut -> stdout */
-        if (FD_ISSET(tty_fd, &set)) {
-            child_input();
+        /* child's ouptut -> stdout
+         * The continue is important I think. It allows all of the child
+         * output to get written to stdout before tgdb's next command.
+         * This is because sometimes they are both ready.
+         */
+        if (FD_ISSET(tty_fd, &rset)) {
+            if ( child_input() == -1 )
+                return;
             continue;
         }
 
         /* gdb's output -> stdout */
-        if (FD_ISSET(gdb_fd, &set))
-            gdb_input();
+        if (FD_ISSET(gdb_fd, &rset))
+            if ( gdb_input() == -1 )
+                return;
+
+        /* A resize signal occured */
+        if (FD_ISSET(resize_pipe[0], &rset))
+            if ( cgdb_resize_term(resize_pipe[0]) == -1)
+                return;
     }
 }
 
@@ -535,6 +551,15 @@ void cleanup()
     tgdb_shutdown();
 }
 
+int init_resize_pipe(void) {
+    if ( pipe(resize_pipe) == -1 ) {
+        err_msg("%s:%d pipe error\n", __FILE__, __LINE__);
+        return -1;
+    }
+
+    return 0;
+}
+
 int main(int argc, char *argv[]) {
 /* Uncomment to debug and attach */
 #if 0
@@ -559,6 +584,9 @@ int main(int argc, char *argv[]) {
 
     commandq = queue_init();
 
+    if ( (input = input_init(STDIN_FILENO) ) == NULL )
+        err_quit("%s: Unable to initialize input library\n", my_name); 
+
     /* Initialize the display */
     switch (if_init()){
         case 1:
@@ -570,6 +598,10 @@ int main(int argc, char *argv[]) {
         case 4:
             err_quit("%s: New GDB window failed -- out of memory?\n", my_name);
     }
+
+    /* Initialize the pipe that is used for resize */
+    if( init_resize_pipe() == -1 )
+        err_quit("%s: init_resize_pipe error\n", my_name); 
 
     /* Enter main loop */
     main_loop();

@@ -27,6 +27,7 @@
 #include "tgdb.h"
 #include "filedlg.h"
 #include "commands.h"
+#include "input.h"
 
 /* ----------- */
 /* Prototypes  */
@@ -47,12 +48,6 @@ static int tty_win_height_shift = 0;
 /* Height and width of the terminal */
 #define HEIGHT      (screen_size.ws_row)
 #define WIDTH       (screen_size.ws_col)
-
-/* If the system doesn't offer KEY_RESIZE, just set it to a decent value
- * so that we can pass it around internally when SIGWINCH arrives. */
-#ifndef KEY_RESIZE
-#define KEY_RESIZE  KEY_MAX
-#endif
 
 /* --------------- */
 /* Data Structures */
@@ -469,6 +464,14 @@ static int if_resize()
     return 0;
 }
 
+int if_resize_term(void) {
+    if (if_resize())
+        return -1;
+
+    resize = 0;
+    return 0;
+}
+
 /* increase_low_win: Makes gdb source window larger and source window smaller 
  * -----------------
  */ 
@@ -527,12 +530,14 @@ static void decrease_tty_win(void){
 /* signal_handler: Handles the WINCH signal (xterm resize).
  * ---------------
  */
-static void signal_handler(int signo)
-{
+static void signal_handler(int signo) {
+    extern int resize_pipe[2];
     if (signo == SIGWINCH){
-        if (resize == 0)
-            ungetch(KEY_RESIZE);
-        resize = 1;
+        if (resize == 0) {
+            int c = CGDB_KEY_RESIZE;
+            write( resize_pipe[1], &c, sizeof(int));
+            resize = 1;
+        }
     }
 }
 
@@ -560,7 +565,7 @@ static void if_get_command(struct sviewer *sview) {
       }
 
       /* If the user hit enter, then a successful regex has been recieved */
-      if ( c == KEY_ENTER  || c == '\r' || c == '\n') {
+      if ( c == '\r' || c == '\n') {
          cur_com_line[cur_com_pos] = '\0';
          display_command = 0;
          return;
@@ -645,7 +650,7 @@ static int capture_regex(struct sviewer *sview) {
       }
 
       /* If the user hit enter, then a successful regex has been recieved */
-      if ( c == KEY_ENTER  || c == '\r' || c == '\n') {
+      if ( c == '\r' || c == '\n') {
          regex_line[regex_line_pos] = '\0';
          regex_search = 0;
          source_search_regex(sview, regex_line, 2, regex_direction, regex_icase);
@@ -694,16 +699,16 @@ static int tty_input(int key)
 
     /* Handle special keys */
     switch (key){
-        case KEY_PPAGE:
+        case CGDB_KEY_PPAGE:
             scr_up(tty_win, get_tty_height()-1);
             break;
-        case KEY_NPAGE:
+        case CGDB_KEY_NPAGE:
             scr_down(tty_win, get_tty_height()-1);
             break;
-        case KEY_F(11):
+        case CGDB_KEY_F11:
             scr_home(tty_win);
             break;
-        case KEY_F(12):
+        case CGDB_KEY_F12:
             scr_end(tty_win);
             break;
         /* Shift-arrow key support -- portable? */
@@ -751,16 +756,16 @@ static int gdb_input(int key)
 
     /* Handle special keys */
     switch (key){
-        case KEY_PPAGE:
+        case CGDB_KEY_PPAGE:
             scr_up(gdb_win, get_gdb_height()-1);
             break;
-        case KEY_NPAGE:
+        case CGDB_KEY_NPAGE:
             scr_down(gdb_win, get_gdb_height()-1);
             break;
-        case KEY_F(11):
+        case CGDB_KEY_F11:
             scr_home(gdb_win);
             break;
-        case KEY_F(12):
+        case CGDB_KEY_F12:
             scr_end(gdb_win);
             break;
         /* Shift-arrow key support -- portable? */
@@ -804,27 +809,27 @@ static void source_input(struct sviewer *sview, int key)
     static enum { NORMAL, ESCAPE, ESCAPE2 } state = NORMAL;
     
     switch (key){
-        case KEY_UP:
+        case CGDB_KEY_UP:
         case 'k':                            /* VI-style up-arrow */
             source_vscroll(sview, -1);
             break;
-        case KEY_DOWN:
+        case CGDB_KEY_DOWN:
         case 'j':                            /* VI-style down-arrow */
             source_vscroll(sview, 1);
             break;
-        case KEY_LEFT:
+        case CGDB_KEY_LEFT:
         case 'h':
             source_hscroll(sview, -1);
             break;
-        case KEY_RIGHT:
+        case CGDB_KEY_RIGHT:
         case 'l':
             source_hscroll(sview, 1);
             break;
-        case KEY_PPAGE:
+        case CGDB_KEY_PPAGE:
         case 'K':
             source_vscroll(sview, -(get_src_height() - 1));
             break;
-        case KEY_NPAGE:
+        case CGDB_KEY_NPAGE:
         case 'J':
             source_vscroll(sview, get_src_height() - 1);
             break;
@@ -992,16 +997,8 @@ int internal_if_input(int key) {
        focus = CGDB;
        if_draw();
        return 0;
-    } else if ( key == 27 ) 
+    } else if ( key == 27 )
         return 0;
-   
-    /* This happens no matter what the focus */
-    if ( key == KEY_RESIZE ) {
-        if (if_resize())
-            return -1;
-        resize = 0;
-        return 0;
-    }
 
     /* Check for global keystrokes */
     switch ( focus ) {
@@ -1058,26 +1055,26 @@ int internal_if_input(int key) {
                      }
 
                      break;
-                case KEY_F(1):
+                case CGDB_KEY_F1:
                      if_display_help();
                      return 0;
-                case KEY_F(5):
+                case CGDB_KEY_F5:
                     /* Issue GDB run command */
                     if_print(tgdb_send("run", 2));
                     return 0;
-                case KEY_F(6):
+                case CGDB_KEY_F6:
                     /* Issue GDB continue command */
                     if_print(tgdb_send("continue", 2));
                     return 0;
-                case KEY_F(7):
+                case CGDB_KEY_F7:
                     /* Issue GDB finish command */
                     if_print(tgdb_send("finish", 2));
                     return 0;
-                case KEY_F(8):
+                case CGDB_KEY_F8:
                     /* Issue GDB next command */
                     if_print(tgdb_send("next", 2));
                     return 0;
-                case KEY_F(10):
+                case CGDB_KEY_F10:
                     /* Issue GDB step command */
                     if_print(tgdb_send("step", 2));
                     return 0;

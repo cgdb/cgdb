@@ -5,6 +5,7 @@
 #include "filedlg.h"
 #include "cgdb.h"
 #include "highlight.h"
+#include "input.h"
 
 static char regex_line[MAX_LINE];       /* The regex the user enters */
 static int regex_line_pos;              /* The index into the current regex */
@@ -380,7 +381,7 @@ static int capture_regex(struct filedlg *fd) {
       }
 
       /* If the user hit enter, then a successful regex has been recieved */
-      if ( c == KEY_ENTER  || c == '\r' || c == '\n') {
+      if ( c == '\r' || c == '\n') {
          regex_line[regex_line_pos] = '\0';
          regex_search = 0;
          filedlg_search_regex(fd, regex_line, 2, regex_direction, 1);
@@ -389,7 +390,7 @@ static int capture_regex(struct filedlg *fd) {
       }
 
       /* If the user hit backspace or delete remove a char */
-      if ( c == 8 || c == 127 || c == KEY_BACKSPACE) {
+      if ( c == 8 || c == 127 ) {
          if (regex_line_pos > 0)
             --regex_line_pos;
 
@@ -428,28 +429,28 @@ int filedlg_choose(struct filedlg *fd, char *file) {
         case 'q':
             goto quit;
         /* Vertical scrolling */
-        case KEY_DOWN:
+        case CGDB_KEY_DOWN:
         case 'j':
             filedlg_vscroll(fd, 1);
             break;
-        case KEY_NPAGE:
+        case CGDB_KEY_NPAGE:
         case 'J':
             filedlg_vscroll(fd, height - 1);
             break;
-        case KEY_UP:
+        case CGDB_KEY_UP:
         case 'k':
             filedlg_vscroll(fd, -1);
             break;
-        case KEY_PPAGE:
+        case CGDB_KEY_PPAGE:
         case 'K':
             filedlg_vscroll(fd, -(height - 1));
             break;
         /* Horizontal scrolling */
-        case KEY_RIGHT:
+        case CGDB_KEY_RIGHT:
         case 'l':
             filedlg_hscroll(fd, 1);
             break;
-        case KEY_LEFT:
+        case CGDB_KEY_LEFT:
         case 'h':
             filedlg_hscroll(fd, -1);
             break;

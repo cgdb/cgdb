@@ -58,4 +58,6 @@
 #define CONTROL_T 20
 #define CONTROL_U 21
 
+#define CGDB_KEY_RESIZE KEY_MAX
+
 #endif

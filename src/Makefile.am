@@ -3,11 +3,12 @@ bin_PROGRAMS = cgdb
 cgdb_LDFLAGS = -L../tgdb/lib
 cgdb_LDADD = -ltgdb
 cgdb_SOURCES = cgdb.c highlight.c interface.c filedlg.c \
-               scroller.c sources.c logo.c command_lexer.l commands.c
+               scroller.c sources.c logo.c command_lexer.l commands.c \
+               ../input/src/input.c
 
 EXTRA_DIST = cgdb.h highlight.h interface.h scroller.h sources.h \
 filedlg.h helptext.h logo.h command_lexer.h commands.h
 
 # links cgdb if common is changed
 cgdb_DEPENDENCIES = ../tgdb/lib
-INCLUDES = -I../tgdb/include
+INCLUDES = -I../tgdb/include -I../input/include

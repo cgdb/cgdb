@@ -1,3 +1,19 @@
+03/26/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * Fixed resizing with new input library: cgdb now writes to a pipe in the
+    signal handler that gets triggered in the select loop which does the
+    resize. It used to do ungetch.
+    * Fixed return values of _input functions in cgdb.c: These functions would
+    quit on there own. They have no right to do so, they should report an
+    error and have cgdb quit in some common location
+
+03/25/2003 Bob Rossi <bob_rossi@cox.net>
+
+    * Integrated new input unit into cgdb: cgdb no longer uses getch to get
+    input from the terminal. This is useful because now cgdb can know the high
+    level characters ( CGDB_KEY_UP ) and it can also know the esc seq
+    associated with them. So it can send them to readline.
+
 03/23/2003 Bob Rossi <bob_rossi@cox.net>
 
     * Fixed interface to tgdb to allow the new readline support: This fixes

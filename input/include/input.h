@@ -24,6 +24,32 @@ enum cgdb_input_macro {
     CGDB_KEY_F10,
     CGDB_KEY_F11,
     CGDB_KEY_F12,
+    CGDB_KEY_ALT_A,
+    CGDB_KEY_ALT_B,
+    CGDB_KEY_ALT_C,
+    CGDB_KEY_ALT_D,
+    CGDB_KEY_ALT_E,
+    CGDB_KEY_ALT_F,
+    CGDB_KEY_ALT_G,
+    CGDB_KEY_ALT_H,
+    CGDB_KEY_ALT_I,
+    CGDB_KEY_ALT_J,
+    CGDB_KEY_ALT_K,
+    CGDB_KEY_ALT_L,
+    CGDB_KEY_ALT_M,
+    CGDB_KEY_ALT_N,
+    CGDB_KEY_ALT_O,
+    CGDB_KEY_ALT_P,
+    CGDB_KEY_ALT_Q,
+    CGDB_KEY_ALT_R,
+    CGDB_KEY_ALT_S,
+    CGDB_KEY_ALT_T,
+    CGDB_KEY_ALT_U,
+    CGDB_KEY_ALT_V,
+    CGDB_KEY_ALT_W,
+    CGDB_KEY_ALT_X,
+    CGDB_KEY_ALT_Y,
+    CGDB_KEY_ALT_Z,
     CGDB_KEY_ERROR
 };
 
@@ -55,6 +81,7 @@ struct input *input_init(int stdinfd);
  *      CGDB_KEY_F2
  *      ...
  *      CGDB_KEY_F12
+ *      CGDB_KEY_ALT_D
  */
 int input_getkey(struct input *i);
 

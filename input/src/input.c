@@ -160,6 +160,34 @@ static void add_keybindings(void) {
     insertIntoList ("Left arrow",   "Left arrow",   "\033OD", CGDB_KEY_LEFT);
     insertIntoList ("Home",         "Home",         "\033OH", CGDB_KEY_HOME);
     insertIntoList ("End",          "End",          "\033OF", CGDB_KEY_END);
+
+    /* Alt bindings */
+    insertIntoList ("Alt-A",        "Alt-A",        "\033a", CGDB_KEY_ALT_A);
+    insertIntoList ("Alt-B",        "Alt-B",        "\033b", CGDB_KEY_ALT_B);
+    insertIntoList ("Alt-C",        "Alt-C",        "\033c", CGDB_KEY_ALT_C);
+    insertIntoList ("Alt-D",        "Alt-D",        "\033d", CGDB_KEY_ALT_D);
+    insertIntoList ("Alt-E",        "Alt-E",        "\033e", CGDB_KEY_ALT_E);
+    insertIntoList ("Alt-F",        "Alt-F",        "\033f", CGDB_KEY_ALT_F);
+    insertIntoList ("Alt-G",        "Alt-G",        "\033g", CGDB_KEY_ALT_G);
+    insertIntoList ("Alt-H",        "Alt-H",        "\033h", CGDB_KEY_ALT_H);
+    insertIntoList ("Alt-I",        "Alt-I",        "\033i", CGDB_KEY_ALT_I);
+    insertIntoList ("Alt-J",        "Alt-J",        "\033j", CGDB_KEY_ALT_J);
+    insertIntoList ("Alt-K",        "Alt-K",        "\033k", CGDB_KEY_ALT_K);
+    insertIntoList ("Alt-L",        "Alt-L",        "\033l", CGDB_KEY_ALT_L);
+    insertIntoList ("Alt-M",        "Alt-M",        "\033m", CGDB_KEY_ALT_M);
+    insertIntoList ("Alt-N",        "Alt-N",        "\033n", CGDB_KEY_ALT_N);
+    insertIntoList ("Alt-O",        "Alt-O",        "\033o", CGDB_KEY_ALT_O);
+    insertIntoList ("Alt-P",        "Alt-P",        "\033p", CGDB_KEY_ALT_P);
+    insertIntoList ("Alt-Q",        "Alt-Q",        "\033q", CGDB_KEY_ALT_Q);
+    insertIntoList ("Alt-R",        "Alt-R",        "\033r", CGDB_KEY_ALT_R);
+    insertIntoList ("Alt-S",        "Alt-S",        "\033s", CGDB_KEY_ALT_S);
+    insertIntoList ("Alt-T",        "Alt-T",        "\033t", CGDB_KEY_ALT_T);
+    insertIntoList ("Alt-U",        "Alt-U",        "\033u", CGDB_KEY_ALT_U);
+    insertIntoList ("Alt-V",        "Alt-V",        "\033v", CGDB_KEY_ALT_V);
+    insertIntoList ("Alt-W",        "Alt-W",        "\033w", CGDB_KEY_ALT_W);
+    insertIntoList ("Alt-X",        "Alt-X",        "\033x", CGDB_KEY_ALT_X);
+    insertIntoList ("Alt-Y",        "Alt-Y",        "\033y", CGDB_KEY_ALT_Y);
+    insertIntoList ("Alt-Z",        "Alt-Z",        "\033z", CGDB_KEY_ALT_Z);
 }
 
 /* Puts list into a searchable database */
