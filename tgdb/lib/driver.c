@@ -26,7 +26,7 @@
 #include "io.h"
 #include "terminal.h"
 
-void mainLoop(int masterfd, int childfd){
+void mainLoop(int masterfd, int childfd, int readlinefd){
   int    max;
   fd_set rfds;
   int result;
@@ -34,6 +34,7 @@ void mainLoop(int masterfd, int childfd){
    /* get max fd  for select loop */
    max = (masterfd > STDIN_FILENO) ? masterfd : STDIN_FILENO;
    max = (max > childfd) ? max : childfd;
+   max = (max > readlinefd) ? max : readlinefd;
    
    while(1){
       /* Clear the set and 
@@ -49,6 +50,7 @@ void mainLoop(int masterfd, int childfd){
       FD_SET(STDIN_FILENO, &rfds);
       FD_SET(masterfd, &rfds);
       FD_SET(childfd, &rfds);
+      FD_SET(readlinefd, &rfds);
       
       result = select(max + 1, &rfds, NULL, NULL, NULL);
       
@@ -60,19 +62,36 @@ void mainLoop(int masterfd, int childfd){
 
       /* stdin -> gdb's input */
       if(STDIN_FILENO != -1 && FD_ISSET(STDIN_FILENO, &rfds)){
-         char byte;
-         static char *result;
+         static char cur_com[MAXLINE];
+         static int cur_com_pos = 0;
 
-         if( io_read_byte(&byte, STDIN_FILENO) == -1){
+         static char command[MAXLINE + 1];
+         static char *result;
+         ssize_t size;
+         int i;
+
+         if( ( size = io_read(STDIN_FILENO, &command, MAXLINE)) < 0 ){
             err_msg("%s:%d -> could not read byte\n", __FILE__, __LINE__);
             return;
          } /* end if */
-
-         if( (result = tgdb_send(byte)) == NULL){
-             err_msg("%s:%d -> file descriptor closed\n", __FILE__, __LINE__);
-             return;
-         } else
-             fprintf(stderr, "%s", result);
+            
+         for ( i = 0; i < size; i++ ) {
+            if ( command[i] == '\n' ) {
+                 cur_com[cur_com_pos] = '\0';
+                 if( (result = tgdb_send(cur_com)) == NULL){
+                     err_msg("%s:%d -> file descriptor closed\n", __FILE__, __LINE__);
+                     return;
+                 } else
+                     fprintf(stderr, "%s", result);
+                 cur_com_pos = 0;
+            } else {
+                 cur_com[cur_com_pos++] = command[i];
+                 if ( tgdb_send_input(command[i])  == -1 ) {
+                     err_msg("%s:%d -> tgdb_send_input error\n", __FILE__, __LINE__);
+                     return;
+                 }
+            }
+         }
       } /* end if */
               
       /* gdb's output -> stdout */
@@ -123,21 +142,39 @@ void mainLoop(int masterfd, int childfd){
                return;
             }
       } /* end if */
+
+      if(readlinefd != -1 && FD_ISSET(readlinefd, &rfds)){
+         char buf[MAXLINE];
+         size_t size;
+         size_t i;
+         
+         if( (size = tgdb_tty_recv(buf, MAXLINE)) == -1){
+            err_msg("%s:%d -> file descriptor closed\n", __FILE__, __LINE__);
+            return;
+         } /* end if */
+
+         for(i = 0; i < size; ++i)
+            /*fprintf(stderr, "<%c>", buf[i]);*/
+            if(write(STDOUT_FILENO, &(buf[i]), 1) != 1 ){
+               err_msg("%s:%d -> could not write byte\n", __FILE__, __LINE__);
+               return;
+            }
+      } /* end if */
    }
 }
 
 int main(int argc, char **argv){
    
-   int gdb_fd, child_fd;
+   int gdb_fd, child_fd, readline_fd;
    
    if(tty_cbreak(STDIN_FILENO) < 0)
       fprintf(stderr, "tty_cbreak error\n");   
    
    tgdb_init();
-   if ( tgdb_start(NULL, argc-1, argv+1, &gdb_fd, &child_fd) == -1 )
+   if ( tgdb_start(NULL, argc-1, argv+1, &gdb_fd, &child_fd, &readline_fd) == -1 )
       err_msg("%s:%d -> could not init\n", __FILE__, __LINE__);
 
-   mainLoop(gdb_fd, child_fd);
+   mainLoop(gdb_fd, child_fd, readline_fd);
 
    if(tgdb_shutdown() == -1)
       err_msg("%s:%d -> could not shutdown\n", __FILE__, __LINE__);

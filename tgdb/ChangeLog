@@ -10,6 +10,7 @@
     to the terminal.
     * Updated gdbmi branch to compile with new interface
     * Implemented new interface in annotate-two-src
+    * Getting driver to compile with new interface and moving to lib
 
 02/24/2003 Bob Rossi <bob_rossi@cox.net>
 
