@@ -461,8 +461,11 @@ int filedlg_choose(struct filedlg *fd, char *file) {
             filedlg_search_regex_init(fd);
             capture_regex(fd);
             break;
-        case '.':
+        case 'n':
             filedlg_search_regex(fd, regex_line, 2, regex_direction, 1); 
+            break;
+        case 'N':
+            filedlg_search_regex(fd, regex_line, 2, !regex_direction, 1);
             break;
         /* User selected a file */
         case '\n':

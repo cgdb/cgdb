@@ -122,10 +122,11 @@ static int init_curses()
     noecho();                        /* Do not echo characters typed by user */
     keypad(stdscr, TRUE);            /* Translate arrow keys, Fn keys, etc. */
     timeout(0);                      /* Use non-blocking I/O */
-    refresh();                       /* Refresh the initial window once */
 
     if ((curses_colors = has_colors())){
         start_color();
+        bkgdset(0);
+        bkgd(CGDB_COLOR_WHITE);
         init_pair(CGDB_COLOR_GREEN, COLOR_GREEN, COLOR_BLACK);
         init_pair(CGDB_COLOR_RED, COLOR_RED, COLOR_BLACK);
         init_pair(CGDB_COLOR_CYAN, COLOR_CYAN, COLOR_BLACK);
@@ -143,7 +144,9 @@ static int init_curses()
         init_pair(CGDB_COLOR_STATUS_BAR, COLOR_BLACK, COLOR_WHITE);
     }
 
+    refresh();                       /* Refresh the initial window once */
     curses_initialized = 1;
+
     return 0;
 }
 
