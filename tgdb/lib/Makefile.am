@@ -40,4 +40,4 @@ driver_DEPENDENCIES = libtgdb.a
 rlctx_prog_LDFLAGS = -L.
 rlctx_prog_LDADD = -ltgdb
 rlctx_prog_SOURCES = rlctx_prog.c
-rlctx_prog_DEPENDENCIES = -ltgdb
+rlctx_prog_DEPENDENCIES = libtgdb.a

@@ -9,10 +9,11 @@ dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_INSTALL
 
-
-VL_LIB_READLINE
 AC_PROG_RANLIB
 AM_PROG_LEX
+
+dnl Here we need to quit if there is no readline available
+VL_LIB_READLINE
 
 # determine if we are running in linux, cygwin, solaris, or freebsd
    AC_CANONICAL_HOST
