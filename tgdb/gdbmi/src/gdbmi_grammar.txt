@@ -64,3 +64,32 @@ stream_record_class     -> "~" | "@" | "&"
 nl 						-> CR | CR_LF
 opt_token               -> token | epsilon
 token 					-> any sequence of digits.
+
+Some more changes
+
+opt_output_list         -> epsilon | output_list
+output_list             -> output | output_list output
+output 					-> opt_oob_record_list opt_result_record "(gdb)" nl
+opt_oob_record_list 	-> epsilon | opt_oob_record_list oob_record nl 
+opt_result_record       -> epsilon | result_record nl
+result_record 			-> opt_token "^" result_class 
+result_record 			-> opt_token "^" result_class "," opt_result_list
+oob_record 				-> async_record | stream_record
+async_record 			-> opt_token async_record_class async_output
+async_record_class      -> "*" | "+" | "="
+async_output 			-> async_class "," opt_result_list
+result_class 			-> "done" | "running" | "connected" | "error" | "exit"
+async_class 			-> "stopped" 
+opt_result_list 		-> epsilon | result_list
+result_list             -> result | result_list "," result
+result 					-> variable "=" value
+variable 				-> string
+value_list              -> value | value_list "," value
+value 					-> c_string | tuple | list
+tuple 					-> "{}" | "{" result_list "}"
+list 					-> "[]" | "[" value_list "]" | "[" result_list "]"
+stream_record 			-> stream_record_class c_string
+stream_record_class     -> "~" | "@" | "&"
+nl 						-> CR | LF | CR LF
+opt_token               -> epsilon | token 
+token 					-> any sequence of digits.
