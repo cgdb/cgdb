@@ -1,5 +1,3 @@
-AM_CFLAGS = -g -Wall
-
 noinst_PROGRAMS = basic overloaded
 
 # This program provides tgdb with a readline interface

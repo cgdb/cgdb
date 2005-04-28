@@ -36,7 +36,7 @@ expect {
 
 # Test out buffering of commands
 set test "buffering commands"
-send "n\n\n\n\n"
+send "n\n\n\n\n\n\n"
 expect {
 	-re ".*$tgdb_prompt.*ABCDEFGHI.*$tgdb_prompt.*ABCDEFGH.*$tgdb_prompt.*ABCDEFG.*$tgdb_prompt" { pass "$test" }
 
