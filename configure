@@ -860,6 +860,7 @@ Optional Packages:
   --with-ncurses-prefix=DIR  Prefix where ncurses is installed (optional)
   --with-curses-prefix=DIR   Prefix where curses is installed (optional)
   --with-curses           Use curses library: not ncurses (optional)
+  --with-readline-prefix=DIR  Prefix where readline is installed (optional)
 
 Some influential environment variables:
   CC          C compiler command
@@ -4388,6 +4389,13 @@ if test "${with_curses+set}" = set; then
   ncurses=no
 else
   ncurses=yes
+fi;
+
+
+# Check whether --with-readline-prefix or --without-readline-prefix was given.
+if test "${with_readline_prefix+set}" = set; then
+  withval="$with_readline_prefix"
+  LDFLAGS="-L$withval/lib $LDFLAGS" CFLAGS="-I$withval/include -I$withval/include/readline $CFLAGS"
 fi;
 
     if test $ncurses = yes; then

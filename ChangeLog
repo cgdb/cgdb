@@ -1,3 +1,9 @@
+05/16/2005 Bob Rossi <bob@brasko.net>
+
+	* RELEASE_TODO: Add some todo stuff before the next release.
+	* configure: Add --with-readline-prefix option.
+	* configure.in: Auto generated.
+
 04/03/2005 Bob Rossi <bob@brasko.net>
 
 	* RELEASE_TODO: Add sf.net bug to be fixed for next release

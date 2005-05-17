@@ -53,9 +53,13 @@ dnl If the user asked for curses, ncurses is set to no. Otherwise ncurses is yes
 
     AC_ARG_WITH(curses-prefix,
         [  --with-curses-prefix=DIR   Prefix where curses is installed (optional)],LDFLAGS="-L$withval/lib $LDFLAGS" CFLAGS="-I$withval/include $CFLAGS")
-    
+
     AC_ARG_WITH(curses,
         [  --with-curses           Use curses library: not ncurses (optional)],ncurses=no,ncurses=yes)
+
+dnl Allow the user to say where the readline root installation is.
+    AC_ARG_WITH(readline-prefix,
+        [  --with-readline-prefix=DIR  Prefix where readline is installed (optional)],LDFLAGS="-L$withval/lib $LDFLAGS" CFLAGS="-I$withval/include -I$withval/include/readline $CFLAGS")
 
 dnl If the user want ncurses, Try to find it and add it to the linking library.
     if test $ncurses = yes; then
