@@ -1,4 +1,9 @@
 05/17/2005 Bob Rossi <bob@brasko.net>
+	
+	* interface.c (init_curses): Remove call to noecho and timeout.
+	(if_shutdown): Remove call to echo();
+
+05/17/2005 Bob Rossi <bob@brasko.net>
 
 	* cgdb.c (include): Add include terminal.h.
 	(cleanup): Add call to reset the terminal to original settings.

@@ -152,8 +152,6 @@ static int init_curses()
        fprintf(stderr, "(%s:%d) putenv failed\r\n", __FILE__, __LINE__);
 
     initscr();                       /* Start curses mode */
-    noecho();                        /* Do not echo characters typed by user */
-    timeout(0);                      /* Use non-blocking I/O */
 
     if ((curses_colors = has_colors())){
         start_color();
@@ -1294,10 +1292,8 @@ void if_filedlg_display_message(char *message) {
 void if_shutdown(void)
 {
     /* Shut down curses cleanly */
-    if (curses_initialized){
-        echo();
+    if (curses_initialized)
         endwin();
-    }
 
     if ( status_win != NULL )
         delwin(status_win);
