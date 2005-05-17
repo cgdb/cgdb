@@ -152,9 +152,7 @@ static int init_curses()
        fprintf(stderr, "(%s:%d) putenv failed\r\n", __FILE__, __LINE__);
 
     initscr();                       /* Start curses mode */
-    cbreak();                        /* Line buffering disabled */
     noecho();                        /* Do not echo characters typed by user */
-    keypad(stdscr, TRUE);            /* Translate arrow keys, Fn keys, etc. */
     timeout(0);                      /* Use non-blocking I/O */
 
     if ((curses_colors = has_colors())){
@@ -1297,8 +1295,6 @@ void if_shutdown(void)
 {
     /* Shut down curses cleanly */
     if (curses_initialized){
-        /*nocbreak(); */
-        keypad(stdscr, FALSE); 
         echo();
         endwin();
     }

@@ -67,6 +67,7 @@
 #include "cgdbrc.h"
 #include "io.h"
 #include "tgdb_list.h"
+#include "terminal.h"
 
 /* --------------- */
 /* Local Variables */
@@ -632,6 +633,8 @@ void cleanup()
     /* Shut down debugger */
     tgdb_shutdown( tgdb );
 
+    tty_reset(STDIN_FILENO);
+
 	if ( has_recv_data )
 		fprintf ( stderr, "CGDB had unexpected results, see %s for details.\n", log_file );
 
@@ -674,6 +677,12 @@ int main(int argc, char *argv[]) {
 
     if ( create_help_file() == -1 ) {
         logger_write_pos ( logger, __FILE__, __LINE__,  "Unable to create help file"); 
+        cleanup();
+        exit(-1);
+	}
+
+    if ( tty_cbreak(STDIN_FILENO) == -1 ) {
+        logger_write_pos ( logger, __FILE__, __LINE__, "tty_cbreak error");
         cleanup();
         exit(-1);
 	}

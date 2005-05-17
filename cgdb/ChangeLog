@@ -1,3 +1,11 @@
+05/17/2005 Bob Rossi <bob@brasko.net>
+
+	* cgdb.c (include): Add include terminal.h.
+	(cleanup): Add call to reset the terminal to original settings.
+	(main): Add call to setup the terminal to the cbreak mode.
+	* interface.c (init_curses): Remove call to cbreak and keypad.
+	(if_shutdown): Remove call to keypad. Remove comment.
+
 version 0.5.1 (04/02/2005):
 
 04/02/2005 Bob Rossi <bob@brasko.net>
