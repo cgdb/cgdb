@@ -1,3 +1,7 @@
+05/19/2005 Bob Rossi <bob@brasko.net>
+
+   * pseudo.c: Changed function name from strlcpy to strlcpy_local.
+
 version 0.5.1 (04/02/2005):
 
 04/02/2005 Bob Rossi <bob@brasko.net>

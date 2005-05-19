@@ -1,3 +1,7 @@
+05/19/2005 Bob Rossi <bob@brasko.net>
+
+   * scroller.c (parse): Cast parameter to isprint and isspace to int.
+
 05/17/2005 Bob Rossi <bob@brasko.net>
 	
 	* interface.c (init_curses): Remove call to noecho and timeout.

@@ -88,7 +88,7 @@
 #define set_errno(errnum) (errno = (errnum), -1)
 
 
-/* strlcpy: Used instead of strcpy. Copies src into dst size bytes long.
+/* strlcpy_local: Used instead of strcpy. Copies src into dst size bytes long.
  *
  * dst: destination
  * src: source
@@ -102,7 +102,7 @@
  * (If this is >= size, truncation occurred).
  */
 
-static size_t strlcpy(char *dst, const char *src, size_t size) {
+static size_t strlcpy_local(char *dst, const char *src, size_t size) {
     const char *s = src;
     char *d = dst;
     size_t n = size;
@@ -211,7 +211,7 @@ int pty_open(int *masterfd, int *slavefd, char *slavename, size_t slavenamesize,
 
 	/* Return it to the caller */
 
-	if (strlcpy(slavename, name, slavenamesize) >= slavenamesize)
+	if (strlcpy_local(slavename, name, slavenamesize) >= slavenamesize)
 	{
 		close(*masterfd);
 		close(*slavefd);
@@ -238,7 +238,7 @@ int pty_open(int *masterfd, int *slavefd, char *slavename, size_t slavenamesize,
 
 	/* Return it to the caller */
 
-	if (strlcpy(slavename, name, slavenamesize) >= slavenamesize)
+	if (strlcpy_local(slavename, name, slavenamesize) >= slavenamesize)
 	{
 		close(*masterfd);
 		return set_errno(ENOSPC);
@@ -309,7 +309,7 @@ int pty_open(int *masterfd, int *slavefd, char *slavename, size_t slavenamesize,
 
 	/* Return it to the caller */
 
-	if (strlcpy(slavename, name, slavenamesize) >= slavenamesize)
+	if (strlcpy_local(slavename, name, slavenamesize) >= slavenamesize)
 	{
 		close(*masterfd);
 		return set_errno(ENOSPC);
@@ -394,7 +394,7 @@ int pty_open(int *masterfd, int *slavefd, char *slavename, size_t slavenamesize,
 
 	/* Return it to the caller */
 
-	if (strlcpy(slavename, name, slavenamesize) >= slavenamesize)
+	if (strlcpy_local(slavename, name, slavenamesize) >= slavenamesize)
 	{
 		close(*masterfd);
 		return set_errno(ENOSPC);

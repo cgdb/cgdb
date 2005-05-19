@@ -93,7 +93,7 @@ static char *parse(struct scroller *scr, const char *orig, const char *buf)
                 break;
             /* Default case -> Only keep printable characters */
             default:
-                if (isprint(buf[j])){
+                if (isprint((int)buf[j])){
                     rv[i] = buf[j];
                     i++;
                 }
@@ -103,7 +103,7 @@ static char *parse(struct scroller *scr, const char *orig, const char *buf)
     
     scr->current.pos = i;
     /* Remove trailing space from the line */
-    for (j = strlen(rv)-1; j > i && isspace(rv[j]); j--);
+    for (j = strlen(rv)-1; j > i && isspace((int)rv[j]); j--);
     rv[j+1] = 0;
            
     return realloc(rv, strlen(rv)+1);
