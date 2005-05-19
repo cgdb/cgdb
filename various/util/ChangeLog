@@ -1,5 +1,9 @@
 05/19/2005 Bob Rossi <bob@brasko.net>
 
+	* io.c (io_data_ready): Modified timeout.tv_usec value.
+
+05/19/2005 Bob Rossi <bob@brasko.net>
+
 	* io.h (io_data_ready): Add new return value in comment.
 	* io.c (io_data_ready): Add new return value.
 

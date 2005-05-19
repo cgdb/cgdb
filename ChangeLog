@@ -1,3 +1,8 @@
+05/19/2005 Bob Rossi <bob@brasko.net>
+
+	* NEWS: Fixed a bug in CGDB that prevented it from working on several
+	platforms.
+
 05/16/2005 Bob Rossi <bob@brasko.net>
 
 	* RELEASE_TODO: Add some todo stuff before the next release.

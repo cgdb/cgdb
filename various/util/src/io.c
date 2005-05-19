@@ -245,7 +245,7 @@ int io_data_ready ( int fd, int ms ) {
     FD_SET (fd, &exceptfds);
     
     timeout.tv_sec = 0;
-    timeout.tv_usec = 1000*ms;
+    timeout.tv_usec = ms/1000;
 
     ret = select (fd + 1, &readfds, (fd_set *)NULL, &exceptfds, &timeout);
     if (ret == -1) {

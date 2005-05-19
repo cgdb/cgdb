@@ -1,3 +1,9 @@
+   * Fixed major bug in CGDB-0.5.1 that prevented it from running on Solaris 9, 
+   FreeBSD 5.2.1 and probably many others. CGDB would hang when trying to read
+   input. This bug made it impossible to use CGDB on those platforms. libkui is
+   the cause of this problem and was a replacement input library for CGDB in 
+   cgdb-0.5.1. The bug is now fixed.
+
 cgdb-0.5.1 (04/02/2005)
 
    * fixed crash when user tries to set a breakpoint on a file that's not 
