@@ -1,3 +1,7 @@
+05/19/2005 Bob Rossi <bob@brasko.net>
+
+	* src/kui.c (kui_callback): Check new return val of io_data_ready.
+
 version 0.5.1 (04/02/2005):
 version 0.5.0 (07/14/2004):
 

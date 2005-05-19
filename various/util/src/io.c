@@ -248,6 +248,10 @@ int io_data_ready ( int fd, int ms ) {
     timeout.tv_usec = 1000*ms;
 
     ret = select (fd + 1, &readfds, (fd_set *)NULL, &exceptfds, &timeout);
+    if (ret == -1) {
+      logger_write_pos ( logger, __FILE__, __LINE__, "Errno(%d)\n", errno);
+      return -1;
+    }
 
     if (ret <= 0)
         return 0;   /* Nothing to read. */
@@ -260,6 +264,7 @@ int io_getchar ( int fd, unsigned int ms ) {
     char c;
     int ret;
     int flag = 0;
+    int val;
 
     /* This is the timeout that readline uses, so it must be good.
      * However, when I hit ESC and then o from the gdb window, the input lib 
@@ -271,7 +276,13 @@ int io_getchar ( int fd, unsigned int ms ) {
     /* This is a good value that causes Alt-o to be returned when it should
      * be and ESC, o when it should be.
      */
-	if ( io_data_ready ( fd, ms ) == 0 )
+	val = io_data_ready ( fd, ms );
+    if (val == -1) {
+      logger_write_pos ( logger, __FILE__, __LINE__, "Errno(%d)\n", errno);
+      return -1;
+    }
+
+    if (val == 0)
         return 0;   /* Nothing to read. */
 
     /* Set nonblocking */

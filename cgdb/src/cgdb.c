@@ -508,14 +508,20 @@ static int tgdb_readline_input(void){
 }
 
 static int cgdb_resize_term(int fd) {
-    int c;
+    int c, result;
     read(resize_pipe[0], &c, sizeof(int) );
 
 	/* If there is more input in the pipe, that means another resize has
 	 * been recieved, and we still have not handled this one. So, skip this
 	 * one and only handle the next one.
 	 */
-	if ( io_data_ready( resize_pipe[0], 0 ) ) {
+	result = io_data_ready( resize_pipe[0], 0 );
+    if (result == -1) {
+        logger_write_pos ( logger, __FILE__, __LINE__, "io_data_ready");
+        return -1;
+    }
+
+    if (result) {
 		if_print ( "skip signal\n" );
 		return 0;
 	}

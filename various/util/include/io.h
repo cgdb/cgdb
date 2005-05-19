@@ -84,7 +84,7 @@ void io_display_char(FILE *fd, char c);
  * This function checks to see if data is ready on FD.
  * If this function returns 1 then at least one byte can be read.
  *
- * Return: 1 if data is ready, otherwise 0
+ * Return: 1 if data is ready, 0 if it's not, or -1 on error
  */
 int io_data_ready ( int fd, int ms );
 

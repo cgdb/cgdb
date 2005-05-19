@@ -1,5 +1,10 @@
 05/19/2005 Bob Rossi <bob@brasko.net>
 
+	* io.h (io_data_ready): Add new return value in comment.
+	* io.c (io_data_ready): Add new return value.
+
+05/19/2005 Bob Rossi <bob@brasko.net>
+
    * pseudo.c: Changed function name from strlcpy to strlcpy_local.
 
 version 0.5.1 (04/02/2005):

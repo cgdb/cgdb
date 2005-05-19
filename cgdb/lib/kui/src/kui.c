@@ -1110,8 +1110,12 @@ int kui_callback (
 		return kui_getkey ( kctx );
 
 	if ( result == 0 ) {
-		if ( io_data_ready ( kctx->fd, ms ) == 1 )
-			return kui_getkey ( kctx );	
+        result = io_data_ready (kctx->fd, ms);
+        if (result == -1)
+          return -1;
+
+		if (result == 1)
+	      return kui_getkey ( kctx );	
 	}
 
 	return 0;
