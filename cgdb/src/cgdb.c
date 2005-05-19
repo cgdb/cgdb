@@ -271,6 +271,10 @@ static int user_input(void) {
     static int key, val;
     
 	key = kui_manager_getkey ( kui_ctx );
+    if (key == -1) {
+        logger_write_pos ( logger, __FILE__, __LINE__, "kui_manager_getkey error");
+        return -1;
+    }
 
     /* Process the key */
     switch ( ( val = if_input(key)) ) {

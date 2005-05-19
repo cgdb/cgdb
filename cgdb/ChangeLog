@@ -1,5 +1,9 @@
 05/19/2005 Bob Rossi <bob@brasko.net>
 
+	* cgdb.c (user_input): Fail gracefully when kui_manager_getkey fails.
+
+05/19/2005 Bob Rossi <bob@brasko.net>
+
 	* cgdb.c (cgdb_resize_term): Check new return value of io_data_ready.
 
 05/19/2005 Bob Rossi <bob@brasko.net>
