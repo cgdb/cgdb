@@ -3411,14 +3411,14 @@ _ACEOF
 # Check whether --with-ncurses-prefix or --without-ncurses-prefix was given.
 if test "${with_ncurses_prefix+set}" = set; then
   withval="$with_ncurses_prefix"
-  LDFLAGS="-L$withval/lib $LDFLAGS" CFLAGS="-I$withval/include -I$withval/include/ncurses $CFLAGS"
+  LDFLAGS="-L$withval/lib $LDFLAGS" CFLAGS="-I$withval/include -I$withval/include/ncurses $CFLAGS" CPPFLAGS="-I$withval/include -I$withval/include/ncurses $CPPFLAGS"
 fi;
 
 
 # Check whether --with-curses-prefix or --without-curses-prefix was given.
 if test "${with_curses_prefix+set}" = set; then
   withval="$with_curses_prefix"
-  LDFLAGS="-L$withval/lib $LDFLAGS" CFLAGS="-I$withval/include $CFLAGS"
+  LDFLAGS="-L$withval/lib $LDFLAGS" CFLAGS="-I$withval/include $CFLAGS" CPPFLAGS="-I$withval/include $CPPFLAGS"
 fi;
 
 
@@ -3434,7 +3434,7 @@ fi;
 # Check whether --with-readline-prefix or --without-readline-prefix was given.
 if test "${with_readline_prefix+set}" = set; then
   withval="$with_readline_prefix"
-  LDFLAGS="-L$withval/lib $LDFLAGS" CFLAGS="-I$withval/include -I$withval/include/readline $CFLAGS"
+  LDFLAGS="-L$withval/lib $LDFLAGS" CFLAGS="-I$withval/include -I$withval/include/readline $CFLAGS" CPPFLAGS="-I$withval/include -I$withval/include/readline $CPPFLAGS"
 fi;
 
     if test $ncurses = yes; then

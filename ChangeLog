@@ -1,7 +1,14 @@
 05/20/2005 Bob Rossi <bob@brasko.net>
 
-	* configure (VL_LIB_READLINE): Moved below --with-readline-prefix option.
-	* configure.in: Auto generated.
+	* configure.in (--with-ncurses-prefix): Add CPPFLAGS.
+	(--with-curses-prefix): Ditto.
+	(--with-readline-prefix): Ditto.
+	* configure: Auto generated.
+
+05/20/2005 Bob Rossi <bob@brasko.net>
+
+	* configure.in (VL_LIB_READLINE): Moved below --with-readline-prefix option.
+	* configure: Auto generated.
 
 05/19/2005 Bob Rossi <bob@brasko.net>
 
@@ -11,8 +18,8 @@
 05/16/2005 Bob Rossi <bob@brasko.net>
 
 	* RELEASE_TODO: Add some todo stuff before the next release.
-	* configure: Add --with-readline-prefix option.
-	* configure.in: Auto generated.
+	* configure.in: Add --with-readline-prefix option.
+	* configure: Auto generated.
 
 04/03/2005 Bob Rossi <bob@brasko.net>
 

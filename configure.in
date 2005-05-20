@@ -46,17 +46,17 @@ AC_PROG_YACC
 dnl Determines if the user asked to build user curses, the default is ncurses.
 dnl If the user asked for curses, ncurses is set to no. Otherwise ncurses is yes.
     AC_ARG_WITH(ncurses-prefix,
-        [  --with-ncurses-prefix=DIR  Prefix where ncurses is installed (optional)],LDFLAGS="-L$withval/lib $LDFLAGS" CFLAGS="-I$withval/include -I$withval/include/ncurses $CFLAGS")
+        [  --with-ncurses-prefix=DIR  Prefix where ncurses is installed (optional)],LDFLAGS="-L$withval/lib $LDFLAGS" CFLAGS="-I$withval/include -I$withval/include/ncurses $CFLAGS" CPPFLAGS="-I$withval/include -I$withval/include/ncurses $CPPFLAGS")
 
     AC_ARG_WITH(curses-prefix,
-        [  --with-curses-prefix=DIR   Prefix where curses is installed (optional)],LDFLAGS="-L$withval/lib $LDFLAGS" CFLAGS="-I$withval/include $CFLAGS")
+        [  --with-curses-prefix=DIR   Prefix where curses is installed (optional)],LDFLAGS="-L$withval/lib $LDFLAGS" CFLAGS="-I$withval/include $CFLAGS" CPPFLAGS="-I$withval/include $CPPFLAGS")
 
     AC_ARG_WITH(curses,
         [  --with-curses           Use curses library: not ncurses (optional)],ncurses=no,ncurses=yes)
 
 dnl Allow the user to say where the readline root installation is.
     AC_ARG_WITH(readline-prefix,
-        [  --with-readline-prefix=DIR  Prefix where readline is installed (optional)],LDFLAGS="-L$withval/lib $LDFLAGS" CFLAGS="-I$withval/include -I$withval/include/readline $CFLAGS")
+        [  --with-readline-prefix=DIR  Prefix where readline is installed (optional)],LDFLAGS="-L$withval/lib $LDFLAGS" CFLAGS="-I$withval/include -I$withval/include/readline $CFLAGS" CPPFLAGS="-I$withval/include -I$withval/include/readline $CPPFLAGS")
 
 dnl If the user want ncurses, Try to find it and add it to the linking library.
     if test $ncurses = yes; then
