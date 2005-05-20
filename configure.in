@@ -14,9 +14,6 @@ AC_PROG_RANLIB
 AM_PROG_LEX
 AC_PROG_YACC
 
-# Readline will kill configure if there isn't any available.
-VL_LIB_READLINE
-
 # determine if we are running in linux, cygwin, solaris, or freebsd
    AC_CANONICAL_HOST
 
@@ -84,6 +81,9 @@ dnl If the user want curses, Warn them that cgdb does not run perfect against it
     You can try --with-curses-prefix=/foo/curses to tell configure where curses is.]))
         LIBS="-lcurses  $LIBS"
     fi
+
+# Readline will kill configure if there isn't any available.
+VL_LIB_READLINE
 
 dnl Checking for log10 function in math - I would like to remove this
 AC_CHECK_LIB(m, log10)

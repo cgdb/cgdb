@@ -1,3 +1,8 @@
+05/20/2005 Bob Rossi <bob@brasko.net>
+
+	* configure (VL_LIB_READLINE): Moved below --with-readline-prefix option.
+	* configure.in: Auto generated.
+
 05/19/2005 Bob Rossi <bob@brasko.net>
 
 	* NEWS: Fixed a bug in CGDB that prevented it from working on several

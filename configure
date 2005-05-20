@@ -309,7 +309,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO AMTAR install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM AWK SET_MAKE am__leading_dot MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE RANLIB ac_ct_RANLIB LEX LEXLIB LEX_OUTPUT_ROOT YACC CPP EGREP build build_cpu build_vendor build_os host host_cpu host_vendor host_os LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO AMTAR install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM AWK SET_MAKE am__leading_dot MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE RANLIB ac_ct_RANLIB LEX LEXLIB LEX_OUTPUT_ROOT YACC build build_cpu build_vendor build_os host host_cpu host_vendor host_os CPP EGREP LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -3305,6 +3305,312 @@ done
 test -n "$YACC" || YACC="yacc"
 
 
+# determine if we are running in linux, cygwin, solaris, or freebsd
+   # Make sure we can run config.sub.
+$ac_config_sub sun4 >/dev/null 2>&1 ||
+  { { echo "$as_me:$LINENO: error: cannot run $ac_config_sub" >&5
+echo "$as_me: error: cannot run $ac_config_sub" >&2;}
+   { (exit 1); exit 1; }; }
+
+echo "$as_me:$LINENO: checking build system type" >&5
+echo $ECHO_N "checking build system type... $ECHO_C" >&6
+if test "${ac_cv_build+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_cv_build_alias=$build_alias
+test -z "$ac_cv_build_alias" &&
+  ac_cv_build_alias=`$ac_config_guess`
+test -z "$ac_cv_build_alias" &&
+  { { echo "$as_me:$LINENO: error: cannot guess build type; you must specify one" >&5
+echo "$as_me: error: cannot guess build type; you must specify one" >&2;}
+   { (exit 1); exit 1; }; }
+ac_cv_build=`$ac_config_sub $ac_cv_build_alias` ||
+  { { echo "$as_me:$LINENO: error: $ac_config_sub $ac_cv_build_alias failed" >&5
+echo "$as_me: error: $ac_config_sub $ac_cv_build_alias failed" >&2;}
+   { (exit 1); exit 1; }; }
+
+fi
+echo "$as_me:$LINENO: result: $ac_cv_build" >&5
+echo "${ECHO_T}$ac_cv_build" >&6
+build=$ac_cv_build
+build_cpu=`echo $ac_cv_build | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\1/'`
+build_vendor=`echo $ac_cv_build | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\2/'`
+build_os=`echo $ac_cv_build | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\3/'`
+
+
+echo "$as_me:$LINENO: checking host system type" >&5
+echo $ECHO_N "checking host system type... $ECHO_C" >&6
+if test "${ac_cv_host+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_cv_host_alias=$host_alias
+test -z "$ac_cv_host_alias" &&
+  ac_cv_host_alias=$ac_cv_build_alias
+ac_cv_host=`$ac_config_sub $ac_cv_host_alias` ||
+  { { echo "$as_me:$LINENO: error: $ac_config_sub $ac_cv_host_alias failed" >&5
+echo "$as_me: error: $ac_config_sub $ac_cv_host_alias failed" >&2;}
+   { (exit 1); exit 1; }; }
+
+fi
+echo "$as_me:$LINENO: result: $ac_cv_host" >&5
+echo "${ECHO_T}$ac_cv_host" >&6
+host=$ac_cv_host
+host_cpu=`echo $ac_cv_host | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\1/'`
+host_vendor=`echo $ac_cv_host | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\2/'`
+host_os=`echo $ac_cv_host | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\3/'`
+
+
+
+   case $host in
+     *-*-linux*)
+       SYSTEM=LINUX
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_LINUX 1
+_ACEOF
+
+       ;;
+     *-*-cygwin*)
+       SYSTEM=CYGWIN
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_CYGWIN 1
+_ACEOF
+
+       ;;
+     *-*-solaris*)
+       SYSTEM=SOLARIS
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_SOLARIS 1
+_ACEOF
+
+       ;;
+     *-*-freebsd*)
+       SYSTEM=FREEBSD
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_FREEBSD 1
+_ACEOF
+
+       ;;
+     *-*-hp*)
+       SYSTEM=HP
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_HP 1
+_ACEOF
+
+       ;;
+     *)
+       SYSTEM=UNKNOWN
+       ;;
+   esac
+
+
+# Check whether --with-ncurses-prefix or --without-ncurses-prefix was given.
+if test "${with_ncurses_prefix+set}" = set; then
+  withval="$with_ncurses_prefix"
+  LDFLAGS="-L$withval/lib $LDFLAGS" CFLAGS="-I$withval/include -I$withval/include/ncurses $CFLAGS"
+fi;
+
+
+# Check whether --with-curses-prefix or --without-curses-prefix was given.
+if test "${with_curses_prefix+set}" = set; then
+  withval="$with_curses_prefix"
+  LDFLAGS="-L$withval/lib $LDFLAGS" CFLAGS="-I$withval/include $CFLAGS"
+fi;
+
+
+# Check whether --with-curses or --without-curses was given.
+if test "${with_curses+set}" = set; then
+  withval="$with_curses"
+  ncurses=no
+else
+  ncurses=yes
+fi;
+
+
+# Check whether --with-readline-prefix or --without-readline-prefix was given.
+if test "${with_readline_prefix+set}" = set; then
+  withval="$with_readline_prefix"
+  LDFLAGS="-L$withval/lib $LDFLAGS" CFLAGS="-I$withval/include -I$withval/include/readline $CFLAGS"
+fi;
+
+    if test $ncurses = yes; then
+        echo "$as_me:$LINENO: checking for initscr in -lncurses" >&5
+echo $ECHO_N "checking for initscr in -lncurses... $ECHO_C" >&6
+if test "${ac_cv_lib_ncurses_initscr+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lncurses  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char initscr ();
+int
+main ()
+{
+initscr ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_lib_ncurses_initscr=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_cv_lib_ncurses_initscr=no
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+echo "$as_me:$LINENO: result: $ac_cv_lib_ncurses_initscr" >&5
+echo "${ECHO_T}$ac_cv_lib_ncurses_initscr" >&6
+if test $ac_cv_lib_ncurses_initscr = yes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_NCURSES 1
+_ACEOF
+
+else
+  { { echo "$as_me:$LINENO: error: cgdb needs ncurses/curses to build. ncurses is strongly recommended.
+    If your system does not have ncurses get it!
+    If that is not an option try 'configure --with-curses.'
+    You can try --with-ncurses-prefix=/foo/ncurses to tell configure where ncurses is." >&5
+echo "$as_me: error: cgdb needs ncurses/curses to build. ncurses is strongly recommended.
+    If your system does not have ncurses get it!
+    If that is not an option try 'configure --with-curses.'
+    You can try --with-ncurses-prefix=/foo/ncurses to tell configure where ncurses is." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
+        LIBS="-lncurses  $LIBS"
+    fi
+
+    if test $ncurses = no; then
+        { echo "$as_me:$LINENO: WARNING:  *****************************************************
+                     cgdb may not run properly when linked against curses!
+                     *****************************************************" >&5
+echo "$as_me: WARNING:  *****************************************************
+                     cgdb may not run properly when linked against curses!
+                     *****************************************************" >&2;}
+        echo "$as_me:$LINENO: checking for initscr in -lcurses" >&5
+echo $ECHO_N "checking for initscr in -lcurses... $ECHO_C" >&6
+if test "${ac_cv_lib_curses_initscr+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lcurses  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char initscr ();
+int
+main ()
+{
+initscr ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_lib_curses_initscr=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_cv_lib_curses_initscr=no
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+echo "$as_me:$LINENO: result: $ac_cv_lib_curses_initscr" >&5
+echo "${ECHO_T}$ac_cv_lib_curses_initscr" >&6
+if test $ac_cv_lib_curses_initscr = yes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_CURSES 1
+_ACEOF
+
+else
+  { { echo "$as_me:$LINENO: error: cgdb needs ncurses/curses to build. ncurses is strongly recommended.
+    If your system does not have ncurses get it!
+    You can try --with-curses-prefix=/foo/curses to tell configure where curses is." >&5
+echo "$as_me: error: cgdb needs ncurses/curses to build. ncurses is strongly recommended.
+    If your system does not have ncurses get it!
+    You can try --with-curses-prefix=/foo/curses to tell configure where curses is." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
+        LIBS="-lcurses  $LIBS"
+    fi
+
 # Readline will kill configure if there isn't any available.
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
@@ -4265,312 +4571,6 @@ echo "$as_me: error:    *****************************************************
    { (exit 1); exit 1; }; }
     fi
 
-
-# determine if we are running in linux, cygwin, solaris, or freebsd
-   # Make sure we can run config.sub.
-$ac_config_sub sun4 >/dev/null 2>&1 ||
-  { { echo "$as_me:$LINENO: error: cannot run $ac_config_sub" >&5
-echo "$as_me: error: cannot run $ac_config_sub" >&2;}
-   { (exit 1); exit 1; }; }
-
-echo "$as_me:$LINENO: checking build system type" >&5
-echo $ECHO_N "checking build system type... $ECHO_C" >&6
-if test "${ac_cv_build+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_cv_build_alias=$build_alias
-test -z "$ac_cv_build_alias" &&
-  ac_cv_build_alias=`$ac_config_guess`
-test -z "$ac_cv_build_alias" &&
-  { { echo "$as_me:$LINENO: error: cannot guess build type; you must specify one" >&5
-echo "$as_me: error: cannot guess build type; you must specify one" >&2;}
-   { (exit 1); exit 1; }; }
-ac_cv_build=`$ac_config_sub $ac_cv_build_alias` ||
-  { { echo "$as_me:$LINENO: error: $ac_config_sub $ac_cv_build_alias failed" >&5
-echo "$as_me: error: $ac_config_sub $ac_cv_build_alias failed" >&2;}
-   { (exit 1); exit 1; }; }
-
-fi
-echo "$as_me:$LINENO: result: $ac_cv_build" >&5
-echo "${ECHO_T}$ac_cv_build" >&6
-build=$ac_cv_build
-build_cpu=`echo $ac_cv_build | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\1/'`
-build_vendor=`echo $ac_cv_build | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\2/'`
-build_os=`echo $ac_cv_build | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\3/'`
-
-
-echo "$as_me:$LINENO: checking host system type" >&5
-echo $ECHO_N "checking host system type... $ECHO_C" >&6
-if test "${ac_cv_host+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_cv_host_alias=$host_alias
-test -z "$ac_cv_host_alias" &&
-  ac_cv_host_alias=$ac_cv_build_alias
-ac_cv_host=`$ac_config_sub $ac_cv_host_alias` ||
-  { { echo "$as_me:$LINENO: error: $ac_config_sub $ac_cv_host_alias failed" >&5
-echo "$as_me: error: $ac_config_sub $ac_cv_host_alias failed" >&2;}
-   { (exit 1); exit 1; }; }
-
-fi
-echo "$as_me:$LINENO: result: $ac_cv_host" >&5
-echo "${ECHO_T}$ac_cv_host" >&6
-host=$ac_cv_host
-host_cpu=`echo $ac_cv_host | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\1/'`
-host_vendor=`echo $ac_cv_host | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\2/'`
-host_os=`echo $ac_cv_host | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\3/'`
-
-
-
-   case $host in
-     *-*-linux*)
-       SYSTEM=LINUX
-
-cat >>confdefs.h <<\_ACEOF
-#define HAVE_LINUX 1
-_ACEOF
-
-       ;;
-     *-*-cygwin*)
-       SYSTEM=CYGWIN
-
-cat >>confdefs.h <<\_ACEOF
-#define HAVE_CYGWIN 1
-_ACEOF
-
-       ;;
-     *-*-solaris*)
-       SYSTEM=SOLARIS
-
-cat >>confdefs.h <<\_ACEOF
-#define HAVE_SOLARIS 1
-_ACEOF
-
-       ;;
-     *-*-freebsd*)
-       SYSTEM=FREEBSD
-
-cat >>confdefs.h <<\_ACEOF
-#define HAVE_FREEBSD 1
-_ACEOF
-
-       ;;
-     *-*-hp*)
-       SYSTEM=HP
-
-cat >>confdefs.h <<\_ACEOF
-#define HAVE_HP 1
-_ACEOF
-
-       ;;
-     *)
-       SYSTEM=UNKNOWN
-       ;;
-   esac
-
-
-# Check whether --with-ncurses-prefix or --without-ncurses-prefix was given.
-if test "${with_ncurses_prefix+set}" = set; then
-  withval="$with_ncurses_prefix"
-  LDFLAGS="-L$withval/lib $LDFLAGS" CFLAGS="-I$withval/include -I$withval/include/ncurses $CFLAGS"
-fi;
-
-
-# Check whether --with-curses-prefix or --without-curses-prefix was given.
-if test "${with_curses_prefix+set}" = set; then
-  withval="$with_curses_prefix"
-  LDFLAGS="-L$withval/lib $LDFLAGS" CFLAGS="-I$withval/include $CFLAGS"
-fi;
-
-
-# Check whether --with-curses or --without-curses was given.
-if test "${with_curses+set}" = set; then
-  withval="$with_curses"
-  ncurses=no
-else
-  ncurses=yes
-fi;
-
-
-# Check whether --with-readline-prefix or --without-readline-prefix was given.
-if test "${with_readline_prefix+set}" = set; then
-  withval="$with_readline_prefix"
-  LDFLAGS="-L$withval/lib $LDFLAGS" CFLAGS="-I$withval/include -I$withval/include/readline $CFLAGS"
-fi;
-
-    if test $ncurses = yes; then
-        echo "$as_me:$LINENO: checking for initscr in -lncurses" >&5
-echo $ECHO_N "checking for initscr in -lncurses... $ECHO_C" >&6
-if test "${ac_cv_lib_ncurses_initscr+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lncurses  $LIBS"
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any gcc2 internal prototype to avoid an error.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-/* We use char because int might match the return type of a gcc2
-   builtin and then its argument prototype would still apply.  */
-char initscr ();
-int
-main ()
-{
-initscr ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  ac_cv_lib_ncurses_initscr=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-ac_cv_lib_ncurses_initscr=no
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-echo "$as_me:$LINENO: result: $ac_cv_lib_ncurses_initscr" >&5
-echo "${ECHO_T}$ac_cv_lib_ncurses_initscr" >&6
-if test $ac_cv_lib_ncurses_initscr = yes; then
-
-cat >>confdefs.h <<\_ACEOF
-#define HAVE_NCURSES 1
-_ACEOF
-
-else
-  { { echo "$as_me:$LINENO: error: cgdb needs ncurses/curses to build. ncurses is strongly recommended.
-    If your system does not have ncurses get it!
-    If that is not an option try 'configure --with-curses.'
-    You can try --with-ncurses-prefix=/foo/ncurses to tell configure where ncurses is." >&5
-echo "$as_me: error: cgdb needs ncurses/curses to build. ncurses is strongly recommended.
-    If your system does not have ncurses get it!
-    If that is not an option try 'configure --with-curses.'
-    You can try --with-ncurses-prefix=/foo/ncurses to tell configure where ncurses is." >&2;}
-   { (exit 1); exit 1; }; }
-fi
-
-        LIBS="-lncurses  $LIBS"
-    fi
-
-    if test $ncurses = no; then
-        { echo "$as_me:$LINENO: WARNING:  *****************************************************
-                     cgdb may not run properly when linked against curses!
-                     *****************************************************" >&5
-echo "$as_me: WARNING:  *****************************************************
-                     cgdb may not run properly when linked against curses!
-                     *****************************************************" >&2;}
-        echo "$as_me:$LINENO: checking for initscr in -lcurses" >&5
-echo $ECHO_N "checking for initscr in -lcurses... $ECHO_C" >&6
-if test "${ac_cv_lib_curses_initscr+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lcurses  $LIBS"
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any gcc2 internal prototype to avoid an error.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-/* We use char because int might match the return type of a gcc2
-   builtin and then its argument prototype would still apply.  */
-char initscr ();
-int
-main ()
-{
-initscr ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  ac_cv_lib_curses_initscr=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-ac_cv_lib_curses_initscr=no
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-echo "$as_me:$LINENO: result: $ac_cv_lib_curses_initscr" >&5
-echo "${ECHO_T}$ac_cv_lib_curses_initscr" >&6
-if test $ac_cv_lib_curses_initscr = yes; then
-
-cat >>confdefs.h <<\_ACEOF
-#define HAVE_CURSES 1
-_ACEOF
-
-else
-  { { echo "$as_me:$LINENO: error: cgdb needs ncurses/curses to build. ncurses is strongly recommended.
-    If your system does not have ncurses get it!
-    You can try --with-curses-prefix=/foo/curses to tell configure where curses is." >&5
-echo "$as_me: error: cgdb needs ncurses/curses to build. ncurses is strongly recommended.
-    If your system does not have ncurses get it!
-    You can try --with-curses-prefix=/foo/curses to tell configure where curses is." >&2;}
-   { (exit 1); exit 1; }; }
-fi
-
-        LIBS="-lcurses  $LIBS"
-    fi
 
 
 echo "$as_me:$LINENO: checking for log10 in -lm" >&5
@@ -7222,8 +7222,6 @@ s,@LEX@,$LEX,;t t
 s,@LEXLIB@,$LEXLIB,;t t
 s,@LEX_OUTPUT_ROOT@,$LEX_OUTPUT_ROOT,;t t
 s,@YACC@,$YACC,;t t
-s,@CPP@,$CPP,;t t
-s,@EGREP@,$EGREP,;t t
 s,@build@,$build,;t t
 s,@build_cpu@,$build_cpu,;t t
 s,@build_vendor@,$build_vendor,;t t
@@ -7232,6 +7230,8 @@ s,@host@,$host,;t t
 s,@host_cpu@,$host_cpu,;t t
 s,@host_vendor@,$host_vendor,;t t
 s,@host_os@,$host_os,;t t
+s,@CPP@,$CPP,;t t
+s,@EGREP@,$EGREP,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
 s,@LTLIBOBJS@,$LTLIBOBJS,;t t
 CEOF
