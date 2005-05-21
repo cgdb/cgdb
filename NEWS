@@ -1,3 +1,9 @@
+   * Attempt to get autoconf/automake machinery working with command,
+   make DESTDIR=... install. This should simplify the job of package maintainers.
+
+   * Added the --with-readline-prefix autoconf option. This makes configuring CGDB
+   much easier when readline is in a non standard place.
+   
    * Fixed major bug in CGDB-0.5.1 that prevented it from running on Solaris 9, 
    FreeBSD 5.2.1 and probably many others. CGDB would hang when trying to read
    input. This bug made it impossible to use CGDB on those platforms. libkui is

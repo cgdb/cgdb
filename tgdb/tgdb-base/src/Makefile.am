@@ -15,8 +15,7 @@ tgdb_command.c \
 tgdb_client_command.c \
 tgdb_client_interface.c
 
-noinst_bin_PROGRAMS = tgdb_driver
-noinst_bindir = $(top_builddir)/progs
+noinst_PROGRAMS = tgdb_driver
 
 tgdb_driver_LDFLAGS = \
 -L$(top_builddir)/tgdb/tgdb-base/src \
@@ -31,8 +30,8 @@ tgdb_driver_LDADD = -ltgdb -lannotate_two -lgdbmi -lrlctx -ladt -lutil
 tgdb_driver_SOURCES = driver.c
 
 tgdb_driver_DEPENDENCIES = \
-$(top_srcdir)/various/util/src \
-$(top_srcdir)/various/adt/src \
-$(top_srcdir)/tgdb/annotate-two/src \
-$(top_srcdir)/tgdb/gdbmi/src \
-$(top_srcdir)/tgdb/tgdb-base/src
+$(top_builddir)/various/util/src \
+$(top_builddir)/various/adt/src \
+$(top_builddir)/tgdb/annotate-two/src \
+$(top_builddir)/tgdb/gdbmi/src \
+$(top_builddir)/tgdb/tgdb-base/src

@@ -121,19 +121,18 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-AM_CFLAGS = -g -Wall -I$(srcdir)/../../../../various/util/include -I$(srcdir)/../../../../various/adt/include -I$(srcdir)/../inc
+AM_CFLAGS = -g -Wall -I$(top_srcdir)/various/util/include -I$(top_srcdir)/various/adt/include -I$(srcdir)/../inc
 
 # create the input library
 noinst_LIBRARIES = libkui.a
 libkui_a_SOURCES = kui.c kui_term.c kui_tree.c
-libkui_a_DEPENDENCIES = ../../../../various/util/src/libutil.a
+libkui_a_DEPENDENCIES = $(top_builddir)/various/util/src/libutil.a
 
 # Installs the driver programs into progs directory
-noinst_bin_PROGRAMS = kui_driver
-noinst_bindir = $(top_builddir)/progs
+noinst_PROGRAMS = kui_driver
 
 # This is the kui driver
-kui_driver_LDFLAGS = -L. -L../../../../various/util/src -L../../../../various/adt/src
+kui_driver_LDFLAGS = -L. -L$(top_builddir)/various/util/src -L$(top_builddir)/various/adt/src
 kui_driver_LDADD = -lkui -lutil -ladt
 kui_driver_SOURCES = kui_driver.c
 kui_driver_DEPENDENCIES = ./libkui.a
@@ -150,8 +149,8 @@ libkui_a_LIBADD =
 am_libkui_a_OBJECTS = kui.$(OBJEXT) kui_term.$(OBJEXT) \
 	kui_tree.$(OBJEXT)
 libkui_a_OBJECTS = $(am_libkui_a_OBJECTS)
-noinst_bin_PROGRAMS = kui_driver$(EXEEXT)
-PROGRAMS = $(noinst_bin_PROGRAMS)
+noinst_PROGRAMS = kui_driver$(EXEEXT)
+PROGRAMS = $(noinst_PROGRAMS)
 
 am_kui_driver_OBJECTS = kui_driver-kui_driver.$(OBJEXT)
 kui_driver_OBJECTS = $(am_kui_driver_OBJECTS)
@@ -188,30 +187,9 @@ libkui.a: $(libkui_a_OBJECTS) $(libkui_a_DEPENDENCIES)
 	-rm -f libkui.a
 	$(libkui_a_AR) libkui.a $(libkui_a_OBJECTS) $(libkui_a_LIBADD)
 	$(RANLIB) libkui.a
-noinst_binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
-install-noinst_binPROGRAMS: $(noinst_bin_PROGRAMS)
-	@$(NORMAL_INSTALL)
-	$(mkinstalldirs) $(DESTDIR)$(noinst_bindir)
-	@list='$(noinst_bin_PROGRAMS)'; for p in $$list; do \
-	  p1=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
-	  if test -f $$p \
-	  ; then \
-	    f=`echo "$$p1" | sed 's,^.*/,,;$(transform);s/$$/$(EXEEXT)/'`; \
-	   echo " $(INSTALL_PROGRAM_ENV) $(noinst_binPROGRAMS_INSTALL) $$p $(DESTDIR)$(noinst_bindir)/$$f"; \
-	   $(INSTALL_PROGRAM_ENV) $(noinst_binPROGRAMS_INSTALL) $$p $(DESTDIR)$(noinst_bindir)/$$f || exit 1; \
-	  else :; fi; \
-	done
 
-uninstall-noinst_binPROGRAMS:
-	@$(NORMAL_UNINSTALL)
-	@list='$(noinst_bin_PROGRAMS)'; for p in $$list; do \
-	  f=`echo "$$p" | sed 's,^.*/,,;s/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/'`; \
-	  echo " rm -f $(DESTDIR)$(noinst_bindir)/$$f"; \
-	  rm -f $(DESTDIR)$(noinst_bindir)/$$f; \
-	done
-
-clean-noinst_binPROGRAMS:
-	-test -z "$(noinst_bin_PROGRAMS)" || rm -f $(noinst_bin_PROGRAMS)
+clean-noinstPROGRAMS:
+	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
 kui_driver$(EXEEXT): $(kui_driver_OBJECTS) $(kui_driver_DEPENDENCIES) 
 	@rm -f kui_driver$(EXEEXT)
 	$(LINK) $(kui_driver_LDFLAGS) $(kui_driver_OBJECTS) $(kui_driver_LDADD) $(LIBS)
@@ -362,7 +340,6 @@ check: check-am
 all-am: Makefile $(LIBRARIES) $(PROGRAMS)
 
 installdirs:
-	$(mkinstalldirs) $(DESTDIR)$(noinst_bindir)
 install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
@@ -389,7 +366,7 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-noinstLIBRARIES clean-noinst_binPROGRAMS \
+clean-am: clean-generic clean-noinstLIBRARIES clean-noinstPROGRAMS \
 	mostlyclean-am
 
 distclean: distclean-am
@@ -406,7 +383,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-noinst_binPROGRAMS
+install-data-am:
 
 install-exec-am:
 
@@ -433,19 +410,18 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-info-am uninstall-noinst_binPROGRAMS
+uninstall-am: uninstall-info-am
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
-	clean-noinstLIBRARIES clean-noinst_binPROGRAMS ctags distclean \
+	clean-noinstLIBRARIES clean-noinstPROGRAMS ctags distclean \
 	distclean-compile distclean-generic distclean-tags distdir dvi \
 	dvi-am info info-am install install-am install-data \
 	install-data-am install-exec install-exec-am install-info \
-	install-info-am install-man install-noinst_binPROGRAMS \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-compile mostlyclean-generic pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-info-am \
-	uninstall-noinst_binPROGRAMS
+	install-info-am install-man install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
+	uninstall-am uninstall-info-am
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

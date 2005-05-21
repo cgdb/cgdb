@@ -8,12 +8,11 @@ AM_CFLAGS = -g -Wall -I$(srcdir)/../include \
 noinst_LIBRARIES = libtokenizer.a
 libtokenizer_a_SOURCES = tokenizer.c clexer.l adalexer.l
 libtokenizer_a_DEPENDENCIES= \
-$(top_srcdir)/various/adt/src \
-$(top_srcdir)/various/util/src
+$(top_builddir)/various/adt/src \
+$(top_builddir)/various/util/src
 
 # Installs the driver programs into progs directory
-noinst_bin_PROGRAMS = tokenizer_driver
-noinst_bindir = $(top_builddir)/progs
+noinst_PROGRAMS = tokenizer_driver
 
 # This is the input driver
 tokenizer_driver_LDFLAGS = -L. \

@@ -121,7 +121,7 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-AM_CFLAGS = -g -Wall -I$(srcdir)/../../util/include -I$(srcdir)/../include
+AM_CFLAGS = -g -Wall -I$(top_srcdir)/various/util/include -I$(srcdir)/../include
 
 noinst_LIBRARIES = libadt.a
 
@@ -136,37 +136,36 @@ std_list.c
 
 
 # Installs the driver programs into progs directory
-noinst_bin_PROGRAMS = std_hash_driver std_list_driver \
+noinst_PROGRAMS = std_hash_driver std_list_driver \
                       std_btree_driver std_bbtree_driver
 
-noinst_bindir = $(top_builddir)/progs
 
 # This is the hash table driver
 std_hash_driver_LDFLAGS = -L.
 std_hash_driver_LDADD = -ladt
 std_hash_driver_SOURCES = std_hash_driver.c
-std_hash_driver_DEPENDENCIES = ../../adt/src
+std_hash_driver_DEPENDENCIES = $(top_builddir)/various/adt/src
 std_hash_driver_CFLAGS = $(AM_CFLAGS)
 
 # This is the linked list driver
 std_list_driver_LDFLAGS = -L.
 std_list_driver_LDADD = -ladt
 std_list_driver_SOURCES = std_list_driver.c
-std_list_driver_DEPENDENCIES = ../../adt/src
+std_list_driver_DEPENDENCIES = $(top_builddir)/various/adt/src
 std_list_driver_CFLAGS = $(AM_CFLAGS)
 
 # This is the binary tree driver
 std_btree_driver_LDFLAGS = -L.
 std_btree_driver_LDADD = -ladt
 std_btree_driver_SOURCES = std_btree_driver.c
-std_btree_driver_DEPENDENCIES = ../../adt/src
+std_btree_driver_DEPENDENCIES = $(top_builddir)/various/adt/src
 std_btree_driver_CFLAGS = $(AM_CFLAGS)
 
 # This is the balanced binary tree driver
 std_bbtree_driver_LDFLAGS = -L.
 std_bbtree_driver_LDADD = -ladt
 std_bbtree_driver_SOURCES = std_bbtree_driver.c
-std_bbtree_driver_DEPENDENCIES = ../../adt/src
+std_bbtree_driver_DEPENDENCIES = $(top_builddir)/various/adt/src
 std_bbtree_driver_CFLAGS = $(AM_CFLAGS)
 subdir = various/adt/src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -181,9 +180,9 @@ am_libadt_a_OBJECTS = ibuf.$(OBJEXT) queue.$(OBJEXT) tgdb_list.$(OBJEXT) \
 	std_bbtree.$(OBJEXT) std_btree.$(OBJEXT) std_hash.$(OBJEXT) \
 	std_list.$(OBJEXT)
 libadt_a_OBJECTS = $(am_libadt_a_OBJECTS)
-noinst_bin_PROGRAMS = std_hash_driver$(EXEEXT) std_list_driver$(EXEEXT) \
+noinst_PROGRAMS = std_hash_driver$(EXEEXT) std_list_driver$(EXEEXT) \
 	std_btree_driver$(EXEEXT) std_bbtree_driver$(EXEEXT)
-PROGRAMS = $(noinst_bin_PROGRAMS)
+PROGRAMS = $(noinst_PROGRAMS)
 
 am_std_bbtree_driver_OBJECTS = \
 	std_bbtree_driver-std_bbtree_driver.$(OBJEXT)
@@ -237,30 +236,9 @@ libadt.a: $(libadt_a_OBJECTS) $(libadt_a_DEPENDENCIES)
 	-rm -f libadt.a
 	$(libadt_a_AR) libadt.a $(libadt_a_OBJECTS) $(libadt_a_LIBADD)
 	$(RANLIB) libadt.a
-noinst_binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
-install-noinst_binPROGRAMS: $(noinst_bin_PROGRAMS)
-	@$(NORMAL_INSTALL)
-	$(mkinstalldirs) $(DESTDIR)$(noinst_bindir)
-	@list='$(noinst_bin_PROGRAMS)'; for p in $$list; do \
-	  p1=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
-	  if test -f $$p \
-	  ; then \
-	    f=`echo "$$p1" | sed 's,^.*/,,;$(transform);s/$$/$(EXEEXT)/'`; \
-	   echo " $(INSTALL_PROGRAM_ENV) $(noinst_binPROGRAMS_INSTALL) $$p $(DESTDIR)$(noinst_bindir)/$$f"; \
-	   $(INSTALL_PROGRAM_ENV) $(noinst_binPROGRAMS_INSTALL) $$p $(DESTDIR)$(noinst_bindir)/$$f || exit 1; \
-	  else :; fi; \
-	done
 
-uninstall-noinst_binPROGRAMS:
-	@$(NORMAL_UNINSTALL)
-	@list='$(noinst_bin_PROGRAMS)'; for p in $$list; do \
-	  f=`echo "$$p" | sed 's,^.*/,,;s/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/'`; \
-	  echo " rm -f $(DESTDIR)$(noinst_bindir)/$$f"; \
-	  rm -f $(DESTDIR)$(noinst_bindir)/$$f; \
-	done
-
-clean-noinst_binPROGRAMS:
-	-test -z "$(noinst_bin_PROGRAMS)" || rm -f $(noinst_bin_PROGRAMS)
+clean-noinstPROGRAMS:
+	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
 std_bbtree_driver$(EXEEXT): $(std_bbtree_driver_OBJECTS) $(std_bbtree_driver_DEPENDENCIES) 
 	@rm -f std_bbtree_driver$(EXEEXT)
 	$(LINK) $(std_bbtree_driver_LDFLAGS) $(std_bbtree_driver_OBJECTS) $(std_bbtree_driver_LDADD) $(LIBS)
@@ -493,7 +471,6 @@ check: check-am
 all-am: Makefile $(LIBRARIES) $(PROGRAMS)
 
 installdirs:
-	$(mkinstalldirs) $(DESTDIR)$(noinst_bindir)
 install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
@@ -520,7 +497,7 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-noinstLIBRARIES clean-noinst_binPROGRAMS \
+clean-am: clean-generic clean-noinstLIBRARIES clean-noinstPROGRAMS \
 	mostlyclean-am
 
 distclean: distclean-am
@@ -537,7 +514,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-noinst_binPROGRAMS
+install-data-am:
 
 install-exec-am:
 
@@ -564,19 +541,18 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-info-am uninstall-noinst_binPROGRAMS
+uninstall-am: uninstall-info-am
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
-	clean-noinstLIBRARIES clean-noinst_binPROGRAMS ctags distclean \
+	clean-noinstLIBRARIES clean-noinstPROGRAMS ctags distclean \
 	distclean-compile distclean-generic distclean-tags distdir dvi \
 	dvi-am info info-am install install-am install-data \
 	install-data-am install-exec install-exec-am install-info \
-	install-info-am install-man install-noinst_binPROGRAMS \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-compile mostlyclean-generic pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-info-am \
-	uninstall-noinst_binPROGRAMS
+	install-info-am install-man install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
+	uninstall-am uninstall-info-am
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

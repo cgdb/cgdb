@@ -11,5 +11,5 @@ noinst_LIBRARIES = libgdbmi.a
 libgdbmi_a_SOURCES = gdbmi_tgdb.c
 
 libgdbmi_a_DEPENDENCIES = \
-$(top_srcdir)/various/util/src \
-$(top_srcdir)/various/adt/src
+$(top_builddir)/various/util/src \
+$(top_builddir)/various/adt/src

@@ -18,6 +18,6 @@ globals.c \
 state_machine.c
 
 libannotate_two_a_DEPENDENCIES = \
-$(top_srcdir)/various/util/src \
-$(top_srcdir)/various/adt/src \
-$(top_srcdir)/various/rlctx/src
+$(top_builddir)/various/util/src \
+$(top_builddir)/various/adt/src \
+$(top_builddir)/various/rlctx/src

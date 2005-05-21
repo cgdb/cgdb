@@ -132,13 +132,12 @@ AM_CFLAGS = -g -Wall -I$(srcdir)/../include \
 noinst_LIBRARIES = libtokenizer.a
 libtokenizer_a_SOURCES = tokenizer.c clexer.l adalexer.l
 libtokenizer_a_DEPENDENCIES = \
-$(top_srcdir)/various/adt/src \
-$(top_srcdir)/various/util/src
+$(top_builddir)/various/adt/src \
+$(top_builddir)/various/util/src
 
 
 # Installs the driver programs into progs directory
-noinst_bin_PROGRAMS = tokenizer_driver
-noinst_bindir = $(top_builddir)/progs
+noinst_PROGRAMS = tokenizer_driver
 
 # This is the input driver
 tokenizer_driver_LDFLAGS = -L. \
@@ -161,8 +160,8 @@ libtokenizer_a_LIBADD =
 am_libtokenizer_a_OBJECTS = tokenizer.$(OBJEXT) clexer.$(OBJEXT) \
 	adalexer.$(OBJEXT)
 libtokenizer_a_OBJECTS = $(am_libtokenizer_a_OBJECTS)
-noinst_bin_PROGRAMS = tokenizer_driver$(EXEEXT)
-PROGRAMS = $(noinst_bin_PROGRAMS)
+noinst_PROGRAMS = tokenizer_driver$(EXEEXT)
+PROGRAMS = $(noinst_PROGRAMS)
 
 am_tokenizer_driver_OBJECTS = tokenizer_driver.$(OBJEXT)
 tokenizer_driver_OBJECTS = $(am_tokenizer_driver_OBJECTS)
@@ -201,30 +200,9 @@ libtokenizer.a: $(libtokenizer_a_OBJECTS) $(libtokenizer_a_DEPENDENCIES)
 	-rm -f libtokenizer.a
 	$(libtokenizer_a_AR) libtokenizer.a $(libtokenizer_a_OBJECTS) $(libtokenizer_a_LIBADD)
 	$(RANLIB) libtokenizer.a
-noinst_binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
-install-noinst_binPROGRAMS: $(noinst_bin_PROGRAMS)
-	@$(NORMAL_INSTALL)
-	$(mkinstalldirs) $(DESTDIR)$(noinst_bindir)
-	@list='$(noinst_bin_PROGRAMS)'; for p in $$list; do \
-	  p1=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
-	  if test -f $$p \
-	  ; then \
-	    f=`echo "$$p1" | sed 's,^.*/,,;$(transform);s/$$/$(EXEEXT)/'`; \
-	   echo " $(INSTALL_PROGRAM_ENV) $(noinst_binPROGRAMS_INSTALL) $$p $(DESTDIR)$(noinst_bindir)/$$f"; \
-	   $(INSTALL_PROGRAM_ENV) $(noinst_binPROGRAMS_INSTALL) $$p $(DESTDIR)$(noinst_bindir)/$$f || exit 1; \
-	  else :; fi; \
-	done
 
-uninstall-noinst_binPROGRAMS:
-	@$(NORMAL_UNINSTALL)
-	@list='$(noinst_bin_PROGRAMS)'; for p in $$list; do \
-	  f=`echo "$$p" | sed 's,^.*/,,;s/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/'`; \
-	  echo " rm -f $(DESTDIR)$(noinst_bindir)/$$f"; \
-	  rm -f $(DESTDIR)$(noinst_bindir)/$$f; \
-	done
-
-clean-noinst_binPROGRAMS:
-	-test -z "$(noinst_bin_PROGRAMS)" || rm -f $(noinst_bin_PROGRAMS)
+clean-noinstPROGRAMS:
+	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
 tokenizer_driver$(EXEEXT): $(tokenizer_driver_OBJECTS) $(tokenizer_driver_DEPENDENCIES) 
 	@rm -f tokenizer_driver$(EXEEXT)
 	$(LINK) $(tokenizer_driver_LDFLAGS) $(tokenizer_driver_OBJECTS) $(tokenizer_driver_LDADD) $(LIBS)
@@ -356,7 +334,6 @@ check: check-am
 all-am: Makefile $(LIBRARIES) $(PROGRAMS)
 
 installdirs:
-	$(mkinstalldirs) $(DESTDIR)$(noinst_bindir)
 install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
@@ -385,7 +362,7 @@ maintainer-clean-generic:
 	-rm -f clexer.c
 clean: clean-am
 
-clean-am: clean-generic clean-noinstLIBRARIES clean-noinst_binPROGRAMS \
+clean-am: clean-generic clean-noinstLIBRARIES clean-noinstPROGRAMS \
 	mostlyclean-am
 
 distclean: distclean-am
@@ -402,7 +379,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-noinst_binPROGRAMS
+install-data-am:
 
 install-exec-am:
 
@@ -429,19 +406,18 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-info-am uninstall-noinst_binPROGRAMS
+uninstall-am: uninstall-info-am
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
-	clean-noinstLIBRARIES clean-noinst_binPROGRAMS ctags distclean \
+	clean-noinstLIBRARIES clean-noinstPROGRAMS ctags distclean \
 	distclean-compile distclean-generic distclean-tags distdir dvi \
 	dvi-am info info-am install install-am install-data \
 	install-data-am install-exec install-exec-am install-info \
-	install-info-am install-man install-noinst_binPROGRAMS \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-compile mostlyclean-generic pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-info-am \
-	uninstall-noinst_binPROGRAMS
+	install-info-am install-man install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
+	uninstall-am uninstall-info-am
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

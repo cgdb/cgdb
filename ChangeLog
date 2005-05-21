@@ -1,5 +1,9 @@
 05/20/2005 Bob Rossi <bob@brasko.net>
 
+	* NEWS: Autoconf/Automake changes.
+
+05/20/2005 Bob Rossi <bob@brasko.net>
+
 	* configure.in (--with-ncurses-prefix): Add CPPFLAGS.
 	(--with-curses-prefix): Ditto.
 	(--with-readline-prefix): Ditto.
