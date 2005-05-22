@@ -34,6 +34,17 @@ Some features offered by CGDB are:<P>
 <B>News</b><BR>
 <BLOCKQUOTE>
 
+  <I>May 21, 2005</i><BR>
+  <BLOCKQUOTE>
+  CGDB v0.5.2 was released today, see the <A Href="download.shtml">download 
+  page</a> to try it out. This contains a very important bug fix for almost
+  every OS except for Linux. CGDB would hang on startup, in an infinate loop
+  while waiting for input from STDIN. This bug has been fixed, and works as
+  far as I can tell. Hopefully I'll have more time to work on CGDB related 
+  tasks over the next few months. Please let us know if there are any features
+  you think could be useful in CGDB. Enjoy.
+  </blockquote>
+
   <I>April 2, 2005</i><BR>
   <BLOCKQUOTE>
   CGDB v0.5.1 was released today, see the <A Href="download.shtml">download 

@@ -1,3 +1,10 @@
+version 0.5.2 (05/21/2005):
+
+05/21/2005 Bob Rossi <bob@brasko.net>
+
+    * download.shtml: Change download directorly link
+    * index.shtml: Added a release note
+
 version 0.5.1 (04/02/2005):
 
 04/02/2005 Bob Rossi <bob@brasko.net>

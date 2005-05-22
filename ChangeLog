@@ -1,3 +1,9 @@
+version 0.5.2 (05/21/2005):
+
+05/21/2005 Bob Rossi <bob@brasko.net>
+
+	* FAQ: Change autotool versions.
+
 05/20/2005 Bob Rossi <bob@brasko.net>
 
 	* configure.in (AM_INIT_AUTOMAKE): Version update.

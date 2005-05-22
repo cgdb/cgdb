@@ -1,3 +1,5 @@
+cgdb-0.5.2 (05/21/2005)
+
    * Attempt to get autoconf/automake machinery working with command,
    make DESTDIR=... install. This should simplify the job of package maintainers.
 

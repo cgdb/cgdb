@@ -1,3 +1,5 @@
+version 0.5.2 (05/21/2005):
+
 05/21/2005 Bob Rossi <bob@brasko.net>
 
 	* src/Makefile.am (AM_CFLAGS): Changed relative paths to use $top_srcdir.

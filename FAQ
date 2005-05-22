@@ -45,10 +45,10 @@
 	   I have used flex 2.5.4 to build cgdb.
 	4. cgdb uses autoconf/automake to build its configure scripts and 
 	   makefiles. At the time of this writing, cgdb was using
-          * aclocal  (GNU automake)   1.7
-          * autoconf (GNU Autoconf)   2.57
-          * libtool  (GNU libtool)    1.4.3
-          * m4       (GNU m4)         1.4
+          * aclocal  (GNU automake)   1.7.9
+          * autoconf (GNU Autoconf)   2.59
+          * libtool  (GNU libtool)    1.5.6
+          * m4       (GNU m4)         1.4.2
 
 							Section III Problems
 

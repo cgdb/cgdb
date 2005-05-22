@@ -1,3 +1,5 @@
+version 0.5.2 (05/21/2005):
+
 05/21/2005 Bob Rossi <bob@brasko.net>
 
 	* annotate-two/src/Makefile.am (libannotate_two_a_DEPENDENCIES): Changed
