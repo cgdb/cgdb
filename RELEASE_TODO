@@ -2,10 +2,13 @@ Bug fixes for cgdb-0.5.2
 
 - Make DESTDIR work in Makefile for installing CGDB
     http://sourceforge.net/mailarchive/forum.php?thread_id=6966700&forum_id=26100
+- Get ^L to refresh the screen
+
+Closed:
+
+- Make the autoconf stuff check for version .5.1 of readline
 - Fix bug on sf.net. It is a compile error that happens to show up as a warning in
   cygwin. Fix the warning and the error might go away.
-- Get ^L to refresh the screen
-- Make the autoconf stuff check for version .5.1 of readline
 
 Bug fixes for cgdb-0.5.1
 
