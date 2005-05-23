@@ -4402,7 +4402,9 @@ rm -f conftest.err conftest.$ac_objext \
 fi
 echo "$as_me:$LINENO: result: $vl_cv_lib_readline_history" >&5
 echo "${ECHO_T}$vl_cv_lib_readline_history" >&6
+    have_history=no
     if test "$vl_cv_lib_readline_history" = "yes"; then
+      have_history=yes
 
 cat >>confdefs.h <<\_ACEOF
 #define HAVE_READLINE_HISTORY 1
@@ -4563,10 +4565,20 @@ done
 
     if test $have_readline = no; then
         { { echo "$as_me:$LINENO: error:    *****************************************************
-                     cgdb requires a readline compatible library to link!
+                     cgdb requires the GNU readline library to link!
                      *****************************************************" >&5
 echo "$as_me: error:    *****************************************************
-                     cgdb requires a readline compatible library to link!
+                     cgdb requires the GNU readline library to link!
+                     *****************************************************" >&2;}
+   { (exit 1); exit 1; }; }
+    fi
+
+    if test $have_history = no; then
+        { { echo "$as_me:$LINENO: error:    *****************************************************
+                     cgdb requires the GNU readline history library to link!
+                     *****************************************************" >&5
+echo "$as_me: error:    *****************************************************
+                     cgdb requires the GNU readline history library to link!
                      *****************************************************" >&2;}
    { (exit 1); exit 1; }; }
     fi

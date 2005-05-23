@@ -39,7 +39,9 @@ AC_DEFUN([VL_LIB_READLINE], [
       vl_cv_lib_readline_history="no"
       AC_TRY_LINK_FUNC(add_history, vl_cv_lib_readline_history="yes")
     ])
+    have_history=no
     if test "$vl_cv_lib_readline_history" = "yes"; then
+      have_history=yes
       AC_DEFINE(HAVE_READLINE_HISTORY, 1,
                 [Define if your readline library has \`add_history'])
       AC_CHECK_HEADERS(history.h readline/history.h)
@@ -49,7 +51,14 @@ AC_DEFUN([VL_LIB_READLINE], [
 dnl Here we need to quit if there is no readline available
     if test $have_readline = no; then
         AC_MSG_ERROR([   *****************************************************
-                     cgdb requires a readline compatible library to link!
+                     cgdb requires the GNU readline library to link!
+                     *****************************************************])
+    fi
+
+dnl Here we need to quit if there is no history available
+    if test $have_history = no; then
+        AC_MSG_ERROR([   *****************************************************
+                     cgdb requires the GNU readline history library to link!
                      *****************************************************])
     fi
 ])dnl

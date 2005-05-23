@@ -1,3 +1,7 @@
+   * It is now required to have the GNU history library in order
+   to configure CGDB successfully. This was always the case, but the
+   configure checks wouldn't catch it.
+
    * Get readline configure check to only look for libreadline. Not libedit, ...
    Future version of CGDB will depend on functionality that only readline will
    contains.
