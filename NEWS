@@ -1,3 +1,7 @@
+   * Get readline configure check to only look for libreadline. Not libedit, ...
+   Future version of CGDB will depend on functionality that only readline will
+   contains.
+
 cgdb-0.5.2 (05/21/2005)
 
    * Attempt to get autoconf/automake machinery working with command,
