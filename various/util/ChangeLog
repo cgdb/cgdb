@@ -1,3 +1,8 @@
+05/23/2005 Bob Rossi <bob@brasko.net>
+
+	* fork_util.h (invoke_pty_process): Removed.
+	* fork_util.c (invoke_pty_process): Ditto.
+
 version 0.5.2 (05/21/2005):
 
 05/19/2005 Bob Rossi <bob@brasko.net>
