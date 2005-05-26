@@ -1164,6 +1164,9 @@ int internal_if_input(int key) {
                     /* Issue GDB step command */
                     tgdb_run_debugger_command (tgdb, TGDB_STEP);
                     return 0;
+                case CGDB_KEY_CTRL_L:
+                    if_layout();
+                    return 0;
             }
             source_input(src_win, key);
             return 0;

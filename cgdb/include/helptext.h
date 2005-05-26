@@ -43,6 +43,7 @@ static char *cgdb_help_text[] = {
 "                (or, shrink tty window 1 line, if visible)",
 "  +             Grow source window 25% ",
 "                (or, grow tty window 1 line, if visible)",
+"  ^l            Clear and redraw the screen",
 "",
 "  Shortcut Commands",
 "  ------------------",

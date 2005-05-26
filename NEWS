@@ -1,3 +1,6 @@
+   * Add the ^l command to the Source window. CGDB will now clear and redraw
+   the screen when this command is received.
+   
    * It is now required to have the GNU history library in order
    to configure CGDB successfully. This was always the case, but the
    configure checks wouldn't catch it.
