@@ -1171,7 +1171,8 @@ static int tgdb_get_quit_command ( struct tgdb *tgdb, int *tgdb_will_quit ) {
 
 size_t tgdb_recv_debugger_data ( struct tgdb *tgdb, char *buf, size_t n ) {
     char local_buf[10*n];
-    ssize_t size, buf_size = 0;
+    ssize_t size;
+    size_t buf_size = 0;
 
     /* make the queue empty */
     tgdb_delete_commands(tgdb);

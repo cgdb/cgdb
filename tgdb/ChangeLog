@@ -1,3 +1,8 @@
+05/26/2005 Bob Rossi <bob@brasko.net>
+
+	* tgdb.c (tgdb_recv_debugger_data): Change buf_size from ssize_t to 
+	size_t to fix compiler warning on OSX.
+
 version 0.5.2 (05/21/2005):
 
 05/21/2005 Bob Rossi <bob@brasko.net>
