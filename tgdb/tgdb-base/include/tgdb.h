@@ -14,6 +14,7 @@
 extern "C" {
 #endif 
 
+// includes {{{
 #if HAVE_CONFIG_H
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
@@ -23,6 +24,9 @@ extern "C" {
 #endif /* HAVE_SYS_TYPES_H */
 
 #include "tgdb_types.h"
+// }}}
+
+// Createing and Destroying a libtgdb context. {{{
 
 /**
  *  This struct is a reference to a libtgdb instance.
@@ -85,7 +89,9 @@ struct tgdb* tgdb_initialize (
 int tgdb_shutdown ( struct tgdb *tgdb );
 
 //@}
+// }}}
 
+// Status Commands {{{
 /******************************************************************************/
 /**
  * @name Status Commands
@@ -108,7 +114,9 @@ int tgdb_shutdown ( struct tgdb *tgdb );
 char *tgdb_err_msg ( struct tgdb *tgdb );
 
 //@}
+// }}}
 
+// Input/Output commands {{{
 /******************************************************************************/
 /**
  * @name Input/Output commands
@@ -235,7 +243,9 @@ size_t tgdb_recv_readline_data ( struct tgdb *tgdb, char *buf, size_t n );
 size_t tgdb_recv_debugger_data ( struct tgdb *tgdb, char *buf, size_t n );
 
 //@}
+// }}}
 
+// Getting Data out of TGDB {{{
 /******************************************************************************/
 /**
  * @name Getting Data out of TGDB
@@ -276,7 +286,9 @@ void tgdb_traverse_commands ( struct tgdb *tgdb );
 void tgdb_delete_commands ( struct tgdb *tgdb );
 
 //@}
+// }}}
 
+// Inferior tty commands {{{
 /******************************************************************************/
 /**
  * @name Inferior tty commands
@@ -321,7 +333,9 @@ int tgdb_tty_new ( struct tgdb *tgdb );
 const char *tgdb_tty_name ( struct tgdb *tgdb );
 
 //@}
+// }}}
 
+// Functional commands {{{
 /******************************************************************************/
 /**
  * @name Functional commands
@@ -410,7 +424,9 @@ int tgdb_modify_breakpoint (
 		enum tgdb_breakpoint_action b );
 
 //@}
+// }}}
 
+// Signal Handling Support {{{
 /******************************************************************************/
 /**
  * @name Signal Handling Support
@@ -480,7 +496,9 @@ int tgdb_catch_signals ( struct tgdb *tgdb, int catch_signals );
 #endif
 
 //@}
+// }}}
 
+// Config Options {{{
 /******************************************************************************/
 /**
  * @name TGDB Config Options
@@ -530,6 +548,7 @@ int tgdb_set_verbose_gui_command_output ( struct tgdb *tgdb, int value );
 int tgdb_set_verbose_error_handling ( struct tgdb *tgdb, int value );
 
 //@}
+// }}}
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,9 @@
 05/26/2005 Bob Rossi <bob@brasko.net>
 
+	* tgdb.h: Add vim folding markers.
+
+05/26/2005 Bob Rossi <bob@brasko.net>
+
 	* tgdb.c (tgdb_recv_debugger_data): Change buf_size from ssize_t to 
 	size_t to fix compiler warning on OSX.
 
