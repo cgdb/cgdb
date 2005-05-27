@@ -1,5 +1,7 @@
 Bug fixes for cgdb-0.5.3
 
+- Strip readline out of TGDB and put it into CGDB. This is in preparation for removing the
+  rlctx code.
 - Update FAQ, it's wrong.
 - Look into Crash on Mac (OSX Jaguar).
 - Think about how to handle MAC formatted files on unix.

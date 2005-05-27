@@ -1,5 +1,9 @@
 05/26/2005 Bob Rossi <bob@brasko.net>
 
+	* RELEASE_TODO (cgdb-0.5.3): Add new task for .5.3
+
+05/26/2005 Bob Rossi <bob@brasko.net>
+
 	* NEWS: Add new command to news file.
 	* README (At Source Window): Add the ^l command.
 	* RELEASE_TODO: Modify todo.
