@@ -18,4 +18,10 @@ int command_parse_string( const char *buffer );
 
 int command_parse_file( FILE *fp );
 
+enum ArrowStyle {
+    ARROWSTYLE_SHORT,
+    ARROWSTYLE_LONG,
+    ARROWSTYLE_HIGHLIGHT
+};
+
 #endif /* __CGDBRC_H__ */

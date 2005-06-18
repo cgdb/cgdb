@@ -50,9 +50,11 @@
 #include "cgdb.h"
 #include "logo.h"
 #include "sys_util.h"
+#include "cgdbrc.h"
 
 int sources_syntax_on = 1;
 int auto_source_reload = 0;
+enum ArrowStyle config_arrowstyle = ARROWSTYLE_SHORT;
 
 /* --------------- */
 /* Local Functions */
@@ -80,8 +82,9 @@ static int verify_file_exists(const char *path) {
  *
  * Return Value:  Pointer to the matching node, or NULL if not found.
  */
-static struct list_node *get_relative_node(struct sviewer *sview, const char *lpath)
-{
+static struct list_node *get_relative_node(
+        struct sviewer *sview, const char *lpath) {
+
     struct list_node *cur;
     
     for (cur = sview->list_head; cur != NULL; cur = cur->next)
@@ -124,48 +127,48 @@ static struct list_node *get_node(struct sviewer *sview, const char *path)
  * 0 on success, -1 on error.
  */
 static int get_timestamp ( const char *path, time_t *timestamp ) {
-	struct stat s;
-	int val;
+    struct stat s;
+    int val;
 
-	if ( !path )
-		return -1;
+    if ( !path )
+        return -1;
 
-	if ( !timestamp )
-		return -1;
+    if ( !timestamp )
+        return -1;
 
-	*timestamp = 0;
+    *timestamp = 0;
 
-	val = stat ( path, &s );
+    val = stat ( path, &s );
 
-	if ( val ) /* Error on timestamp */
-		return -1;
+    if ( val ) /* Error on timestamp */
+        return -1;
 
-	*timestamp = s.st_mtime;
+    *timestamp = s.st_mtime;
 
-	return 0;
+    return 0;
 }
 
 static int release_file_buffer ( struct buffer *buf ) {
-	int i;
+    int i;
 
-	/* Nothing to free */
-	if ( !buf ) 
-		return 0;
+    /* Nothing to free */
+    if ( !buf ) 
+        return 0;
 
-	for ( i = 0; i < buf->length; ++i ) {
-		free ( buf->tlines[i] );
-		buf->tlines[i] = NULL;
-	}
+    for ( i = 0; i < buf->length; ++i ) {
+        free ( buf->tlines[i] );
+        buf->tlines[i] = NULL;
+    }
 
-	free ( buf->tlines );
-	buf->tlines = NULL;
-	buf->length = 0;
-	buf->cur_line = NULL;	
-	buf->max_width = 0;
+    free ( buf->tlines );
+    buf->tlines = NULL;
+    buf->length = 0;
+    buf->cur_line = NULL;   
+    buf->max_width = 0;
     free ( buf->breakpts );
-	buf->breakpts = NULL;
+    buf->breakpts = NULL;
 
-	return 0; 
+    return 0; 
 }
 
 /** 
@@ -178,17 +181,17 @@ static int release_file_buffer ( struct buffer *buf ) {
  * 0 on success, or -1 on error.
  */
 static int release_file_memory ( struct list_node *node ) {
-	if ( !node )
-		return -1;
-	
-	/* Free the buffer */
-	if ( release_file_buffer ( &node->buf ) == -1 )
-		return -1;
+    if ( !node )
+        return -1;
+    
+    /* Free the buffer */
+    if ( release_file_buffer ( &node->buf ) == -1 )
+        return -1;
 
-	if ( release_file_buffer ( &node->orig_buf ) == -1 )
-		return -1;
+    if ( release_file_buffer ( &node->orig_buf ) == -1 )
+        return -1;
 
-	return 0;
+    return 0;
 }
 
 /* load_file:  Loads the file in the list_node into its memory buffer.
@@ -210,25 +213,25 @@ static int load_file(struct list_node *node)
     node->buf.cur_line  = NULL;
     node->buf.max_width = 0;
 
-	/* Open file and save in original buffer.
-	 * I am not sure if this should be done this way in the future.
-	 * Maybe this data should be recieved from flex.
-	 */
-	node->orig_buf.length = 0;
-	node->orig_buf.tlines = NULL;
+    /* Open file and save in original buffer.
+     * I am not sure if this should be done this way in the future.
+     * Maybe this data should be recieved from flex.
+     */
+    node->orig_buf.length = 0;
+    node->orig_buf.tlines = NULL;
     node->orig_buf.breakpts  = NULL;
     node->orig_buf.cur_line  = NULL;
-	node->orig_buf.max_width = 0;
+    node->orig_buf.max_width = 0;
 
-	/* Stat the file to get the timestamp */
-	if ( get_timestamp ( node->path, &(node->last_modification) ) == -1 )
-		return 2;
+    /* Stat the file to get the timestamp */
+    if ( get_timestamp ( node->path, &(node->last_modification) ) == -1 )
+        return 2;
 
     if (!(file = fopen(node->path, "r")))
         return 1;
 
-	while (!feof(file)){
-		if (fgets(line, MAX_LINE, file)){
+    while (!feof(file)){
+        if (fgets(line, MAX_LINE, file)){
             int length = strlen ( line );
             if ( length > 0 ) {
                 if (line[length-1] == '\n')
@@ -236,34 +239,34 @@ static int load_file(struct list_node *node)
                 if (line[length-1] == '\r')
                     line[length-1] = 0;
             }
-			if (strlen(line) > node->orig_buf.max_width)
-				node->orig_buf.max_width = strlen(line);
+            if (strlen(line) > node->orig_buf.max_width)
+                node->orig_buf.max_width = strlen(line);
 
-			/* Inefficient - Reallocates memory at each line */
-			node->orig_buf.length++;
-			node->orig_buf.tlines   = realloc(node->orig_buf.tlines, 
-										 sizeof(char *) * node->orig_buf.length);
-			node->orig_buf.tlines[node->orig_buf.length-1] = strdup(line);
-		}
-	}
+            /* Inefficient - Reallocates memory at each line */
+            node->orig_buf.length++;
+            node->orig_buf.tlines = realloc(node->orig_buf.tlines, 
+                sizeof(char *) * node->orig_buf.length);
+            node->orig_buf.tlines[node->orig_buf.length-1] = strdup(line);
+        }
+    }
 
-	fclose(file);
+    fclose(file);
 
-	node->language = tokenizer_get_default_file_type ( strrchr(node->path, '.') );
+    node->language = tokenizer_get_default_file_type(strrchr(node->path, '.'));
     
-	/* Add the highlighted lines */
-	if (has_colors())
+    /* Add the highlighted lines */
+    if (has_colors()) {
         highlight(node);
-	else {
-		/* Just copy the lines from the original buffer if no highlighting 
-		 * is possible */
-		int i;
-		node->buf.length = node->orig_buf.length;
-		node->buf.max_width = node->orig_buf.max_width;
-		node->buf.tlines = xmalloc ( sizeof ( char * ) * node->orig_buf.length );
-		for ( i = 0; i < node->orig_buf.length; i++ )
-			node->buf.tlines[i] = xstrdup ( node->orig_buf.tlines[i] );
-	}
+    } else {
+        /* Just copy the lines from the original buffer if no highlighting 
+         * is possible */
+        int i;
+        node->buf.length = node->orig_buf.length;
+        node->buf.max_width = node->orig_buf.max_width;
+        node->buf.tlines = xmalloc(sizeof(char *) * node->orig_buf.length);
+        for ( i = 0; i < node->orig_buf.length; i++ )
+            node->buf.tlines[i] = xstrdup ( node->orig_buf.tlines[i] );
+    }
 
     /* Allocate the breakpoints array */
     node->buf.breakpts = malloc(sizeof(char) * node->buf.length);
@@ -271,6 +274,99 @@ static int load_file(struct list_node *node)
        node->buf.breakpts[i] = 0;
 
     return 0;
+}
+
+/* draw_current_line:  Draws the currently executing source line on the screen
+ * ------------------  including the user-selected marker (arrow, highlight,
+ *                     etc) indicating this is the executing line.
+ *
+ *   sview:  The current source viewer
+ *   line:   The line number
+ *   lwidth: The width of the line number, used to limit printing to the width
+ *           of the screen.  Kinda ugly.
+ */
+static void draw_current_line(struct sviewer *sview, int line, int lwidth) {
+
+    int height = 0;                     /* Height of curses window */
+    int width = 0;                      /* Width of curses window */
+    int i = 0;                          /* Iterator */
+    struct buffer *buf = NULL;          /* Pointer to the source buffer */
+    char *text = NULL;                  /* The current line (highlighted) */
+    char *otext = NULL;                 /* The current line (unhighlighted) */
+    unsigned int length = 0;            /* Length of the line */
+    int column_offset = 0;              /* Text to skip due to arrow */
+
+    /* Initialize height and width */
+    getmaxyx(sview->win, height, width);
+
+    /* If syntax highlighting is on, point to the colored buffer. */
+    if (sources_syntax_on) {
+        buf = &(sview->cur->buf);
+    } else {
+        buf = &(sview->cur->orig_buf);
+    }
+
+    /* If the current selected line is the line executing, use cur_line */
+    if (line == sview->cur->sel_line && buf->cur_line != NULL) {
+        text = buf->cur_line;
+        otext = sview->cur->orig_buf.cur_line;
+    } else {
+        text = buf->tlines[line];
+        otext = sview->cur->orig_buf.tlines[line];
+    }
+    length = strlen(otext);
+
+    /* Draw the appropriate arrow, if applicable */
+    switch (config_arrowstyle) {
+
+        case ARROWSTYLE_SHORT:
+
+            wattron(sview->win, A_BOLD);
+            wattron(sview->win, COLOR_PAIR(CGDB_COLOR_GREEN));
+            waddch(sview->win, ACS_LTEE);
+            waddch(sview->win, '>');
+            wattroff(sview->win, COLOR_PAIR(CGDB_COLOR_GREEN));
+            wattroff(sview->win, A_BOLD);
+            break;
+
+        case ARROWSTYLE_LONG:
+
+            wattron(sview->win, A_BOLD);
+            wattron(sview->win, COLOR_PAIR(CGDB_COLOR_GREEN));
+            waddch(sview->win, ACS_LTEE);
+            if (length > 0 && otext[0] == ' ') {
+                for (i = 0; i < length-1 && otext[i+1] == ' '; i++) {
+                    waddch(sview->win, ACS_HLINE);
+                    column_offset++;
+                }
+            }
+            waddch(sview->win, '>');
+            wattroff(sview->win, COLOR_PAIR(CGDB_COLOR_GREEN));
+            wattroff(sview->win, A_BOLD);
+            break;
+
+        case ARROWSTYLE_HIGHLIGHT:
+            waddch(sview->win, VERT_LINE);
+            waddch(sview->win, ' ');
+
+            wattron(sview->win, A_BOLD);
+            wattron(sview->win, COLOR_PAIR(CGDB_COLOR_INVERSE_GREEN));
+            for (i = 0; i < width-lwidth-2; i++) {
+                if (i < length) {
+                    waddch(sview->win, otext[i]);
+                } else {
+                    waddch(sview->win, ' ');
+                }
+            }
+            wattroff(sview->win, COLOR_PAIR(CGDB_COLOR_INVERSE_GREEN));
+            wattroff(sview->win, A_BOLD);
+
+            return;
+    }
+
+    /* Finally, print the source line */
+    hl_wprintw(sview->win, text, width-lwidth-2, 
+        sview->cur->sel_col + column_offset);
 }
 
 /* --------- */
@@ -312,7 +408,7 @@ int source_add(struct sviewer *sview, const char *path)
     new_node->sel_col_rend = 0;
     new_node->sel_rline    = 0;
     new_node->exe_line     = 0;
-	new_node->last_modification = 0; /* No timestamp yet */
+    new_node->last_modification = 0; /* No timestamp yet */
 
     if (sview->list_head == NULL){
         /* List is empty, this is the first node */
@@ -468,9 +564,9 @@ int source_display(struct sviewer *sview, int focus)
                     wattroff(sview->win, A_BOLD);
                 for (j = 2+lwidth; j < width; j++)
                     waddch(sview->win, ' ');
-            }
+
             /* Mark the current line with an arrow */
-            else if (line == sview->cur->exe_line){
+            } else if (line == sview->cur->exe_line) {
                 switch(sview->cur->buf.breakpts[line]){
                     case 0:
                         wattron(sview->win, COLOR_PAIR(CGDB_COLOR_GREEN));
@@ -485,6 +581,9 @@ int source_display(struct sviewer *sview, int focus)
                 wattron(sview->win, A_BOLD);
                 wprintw(sview->win, fmt, line+1);
                 switch(sview->cur->buf.breakpts[line]){
+                    case 0:
+                        wattroff(sview->win, COLOR_PAIR(CGDB_COLOR_GREEN));
+                        break;
                     case 1:
                         wattroff(sview->win, COLOR_PAIR(CGDB_COLOR_RED));
                         break;
@@ -492,26 +591,12 @@ int source_display(struct sviewer *sview, int focus)
                         wattroff(sview->win, COLOR_PAIR(CGDB_COLOR_YELLOW));
                         break;
                 }
-                wattron(sview->win, COLOR_PAIR(CGDB_COLOR_GREEN));
-                waddch(sview->win, ACS_LTEE);
-                waddch(sview->win, '>');
-                wattroff(sview->win, COLOR_PAIR(CGDB_COLOR_GREEN));
                 wattroff(sview->win, A_BOLD);
-				/* I know this is rediculous, it needs to be reimplemented */
-				if ( sources_syntax_on ) {
-					if ( line == sview->cur->sel_line && sview->cur->buf.cur_line != NULL )
-						hl_wprintw(sview->win, sview->cur->buf.cur_line, width-lwidth-2, sview->cur->sel_col);
-					else
-						hl_wprintw(sview->win, sview->cur->buf.tlines[line], width-lwidth-2, sview->cur->sel_col);
-				} else {
-					if ( line == sview->cur->sel_line && sview->cur->buf.cur_line != NULL )
-						hl_wprintw(sview->win, sview->cur->orig_buf.cur_line, width-lwidth-2, sview->cur->sel_col);
-					else
-						hl_wprintw(sview->win, sview->cur->orig_buf.tlines[line], width-lwidth-2, sview->cur->sel_col);
-				}
-            }
+
+                draw_current_line(sview, line, lwidth);
+
             /* Look for breakpoints */
-            else if (sview->cur->buf.breakpts[line]){
+            } else if (sview->cur->buf.breakpts[line]){
                 if (sview->cur->buf.breakpts[line] == 1)
                     wattron(sview->win, COLOR_PAIR(CGDB_COLOR_RED));
                 else
@@ -529,18 +614,29 @@ int source_display(struct sviewer *sview, int focus)
                     wattroff(sview->win, A_BOLD);
                 waddch(sview->win, ' ');
 
-				/* I know this is rediculous, it needs to be reimplemented */
-				if ( sources_syntax_on ) {
-					if ( line == sview->cur->sel_line && sview->cur->buf.cur_line != NULL )
-						hl_wprintw(sview->win, sview->cur->buf.cur_line, width-lwidth-2, sview->cur->sel_col);
-					else
-						hl_wprintw(sview->win, sview->cur->buf.tlines[line], width-lwidth-2, sview->cur->sel_col);
-				} else {
-					if ( line == sview->cur->sel_line && sview->cur->buf.cur_line != NULL )
-						hl_wprintw(sview->win, sview->cur->orig_buf.cur_line, width-lwidth-2, sview->cur->sel_col);
-					else
-						hl_wprintw(sview->win, sview->cur->orig_buf.tlines[line], width-lwidth-2, sview->cur->sel_col);
-				}
+                /* I know this is rediculous, it needs to be reimplemented */
+                if (sources_syntax_on) {
+                    if (line == sview->cur->sel_line &&
+                            sview->cur->buf.cur_line != NULL) {
+                        hl_wprintw(sview->win, sview->cur->buf.cur_line, 
+                                   width-lwidth-2, sview->cur->sel_col);
+
+                    } else {
+                        hl_wprintw(sview->win, sview->cur->buf.tlines[line], 
+                                   width-lwidth-2, sview->cur->sel_col);
+                    }
+                } else {
+                    if (line == sview->cur->sel_line && 
+                            sview->cur->buf.cur_line != NULL) {
+                        hl_wprintw(sview->win, sview->cur->orig_buf.cur_line, 
+                                   width-lwidth-2, sview->cur->sel_col);
+
+                    } else {
+                        hl_wprintw(sview->win, 
+                                   sview->cur->orig_buf.tlines[line], 
+                                   width-lwidth-2, sview->cur->sel_col);
+                    }
+                }
             }
             /* Ordinary lines */
             else{
@@ -559,23 +655,33 @@ int source_display(struct sviewer *sview, int focus)
                     wattroff(sview->win, A_BOLD);
                 waddch(sview->win, ' ');
                 
-				/* I know this is rediculous, it needs to be reimplemented */
-				if ( sources_syntax_on ) {
-					/* No special line information */
-					if ( line == sview->cur->sel_line && sview->cur->buf.cur_line != NULL )
-						hl_wprintw(sview->win, sview->cur->buf.cur_line, width-lwidth-2, sview->cur->sel_col);
-					else
-						hl_wprintw(sview->win, sview->cur->buf.tlines[line], width-lwidth-2, sview->cur->sel_col);
-				} else {
-					/* No special line information */
-					if ( line == sview->cur->sel_line && sview->cur->buf.cur_line != NULL )
-						hl_wprintw(sview->win, sview->cur->orig_buf.cur_line, width-lwidth-2, sview->cur->sel_col);
-					else
-						hl_wprintw(sview->win, sview->cur->orig_buf.tlines[line], width-lwidth-2, sview->cur->sel_col);
-				}
+                /* I know this is rediculous, it needs to be reimplemented */
+                if ( sources_syntax_on ) {
+                    /* No special line information */
+                    if (line == sview->cur->sel_line && 
+                            sview->cur->buf.cur_line != NULL) {
+                        hl_wprintw(sview->win, sview->cur->buf.cur_line, 
+                                   width-lwidth-2, sview->cur->sel_col);
+
+                    } else {
+                        hl_wprintw(sview->win, sview->cur->buf.tlines[line], 
+                                   width-lwidth-2, sview->cur->sel_col);
+                    }
+                } else {
+                    /* No special line information */
+                    if (line == sview->cur->sel_line && 
+                            sview->cur->buf.cur_line != NULL) {
+                        hl_wprintw(sview->win, sview->cur->orig_buf.cur_line, 
+                                   width-lwidth-2, sview->cur->sel_col);
+
+                    } else {
+                        hl_wprintw(sview->win, 
+                                   sview->cur->orig_buf.tlines[line], 
+                                   width-lwidth-2, sview->cur->sel_col);
+                    }
+                }
             }
-        }
-        else{
+        } else {
             wprintw(sview->win, "%s\n", sview->cur->buf.tlines[line]);
         }
     }
@@ -755,34 +861,34 @@ void source_clear_breaks(struct sviewer *sview)
 }
 
 int source_reload ( struct sviewer *sview, const char *path, int force ) {
-	time_t timestamp;
+    time_t timestamp;
     struct list_node *cur;
     struct list_node *prev = NULL;
 
-	if ( !path )
-		return -1;
+    if ( !path )
+        return -1;
 
-	if ( get_timestamp ( path, &timestamp ) == -1 )
-		return -1;
+    if ( get_timestamp ( path, &timestamp ) == -1 )
+        return -1;
 
-	/* Find the target node */
-	for (cur = sview->list_head; cur != NULL; cur = cur->next){
-		if (strcmp(path, cur->path) == 0)
-			break;
-		prev = cur;
-	}
-	
-	if (cur == NULL)
-		return 1;      /* Node not found */
+    /* Find the target node */
+    for (cur = sview->list_head; cur != NULL; cur = cur->next){
+        if (strcmp(path, cur->path) == 0)
+            break;
+        prev = cur;
+    }
+    
+    if (cur == NULL)
+        return 1;      /* Node not found */
 
-	if ( ( auto_source_reload || force ) && cur->last_modification < timestamp ) {
+    if ( ( auto_source_reload || force ) && cur->last_modification < timestamp ) {
 
-		if ( release_file_memory ( sview->cur ) == -1)
-			return -1;
+        if ( release_file_memory ( sview->cur ) == -1)
+            return -1;
 
-		if ( load_file ( cur ) )
-			return -1;
-	}
+        if ( load_file ( cur ) )
+            return -1;
+    }
 
-	return 0;
+    return 0;
 }

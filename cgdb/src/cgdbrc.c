@@ -32,6 +32,7 @@ extern int regex_icase ;
 extern int shortcut_option ;
 extern int highlight_tabstop;
 extern int config_wrapscan;
+extern enum ArrowStyle config_arrowstyle;
 
 enum ConfigType
 {
@@ -44,6 +45,7 @@ enum ConfigType
     CONFIG_TYPE_FUNC_STRING,
 };
 
+static int command_set_arrowstyle( const char *value );
 static int command_set_focus( const char *value );
 static int command_set_winsplit( const char *value );
 static int command_set_winminheight( int value );
@@ -58,17 +60,42 @@ static struct ConfigVariable
     void *data;
 } VARIABLES[] = {
     // keep this stuff sorted! !sort
-	/* autosourcereload */  { "autosourcereload", "asr", CONFIG_TYPE_BOOL, &auto_source_reload },
-    /* escdelay   */ 		{ "escdelay", "escdelay", CONFIG_TYPE_FUNC_INT, command_set_esc_sequence_timeout },
-    /* focus      */ 		{ "focus", "fo", CONFIG_TYPE_FUNC_STRING, command_set_focus },
-    /* ignorecase */ 		{ "ignorecase", "ic", CONFIG_TYPE_BOOL, &regex_icase },
-    /* shortcut   */ 		{ "shortcut", "sc", CONFIG_TYPE_BOOL, &shortcut_option },
-	/* showtgdbcommands */ 	{ "showtgdbcommands", "stc", CONFIG_TYPE_FUNC_BOOL, &command_set_stc },
-    /* syntax */      		{ "syntax", "syn", CONFIG_TYPE_FUNC_STRING, command_set_syntax_type }, 
-    /* tabstop   */     	{ "tabstop", "ts", CONFIG_TYPE_INT, &highlight_tabstop },
-    /* winminheight */  	{ "winminheight", "wmh", CONFIG_TYPE_FUNC_INT, &command_set_winminheight },
-    /* winsplit */      	{ "winsplit", "winsplit", CONFIG_TYPE_FUNC_STRING, command_set_winsplit }, 
-    /* wrapscan */          { "wrapscan", "ws", CONFIG_TYPE_BOOL, &config_wrapscan },
+    /* arrowstyle */
+    { "arrowstyle", "as", CONFIG_TYPE_FUNC_STRING, command_set_arrowstyle},
+
+    /* autosourcereload */  
+    { "autosourcereload", "asr", CONFIG_TYPE_BOOL, &auto_source_reload },
+
+    /* escdelay   */
+    { "escdelay", "escdelay", CONFIG_TYPE_FUNC_INT, 
+      command_set_esc_sequence_timeout },
+
+    /* focus      */
+    { "focus", "fo", CONFIG_TYPE_FUNC_STRING, command_set_focus },
+
+    /* ignorecase */
+    { "ignorecase", "ic", CONFIG_TYPE_BOOL, &regex_icase },
+
+    /* shortcut   */
+    { "shortcut", "sc", CONFIG_TYPE_BOOL, &shortcut_option },
+
+    /* showtgdbcommands */
+    { "showtgdbcommands", "stc", CONFIG_TYPE_FUNC_BOOL, &command_set_stc },
+
+    /* syntax */
+    { "syntax", "syn", CONFIG_TYPE_FUNC_STRING, command_set_syntax_type }, 
+
+    /* tabstop   */
+    { "tabstop", "ts", CONFIG_TYPE_INT, &highlight_tabstop },
+
+    /* winminheight */
+    { "winminheight", "wmh", CONFIG_TYPE_FUNC_INT, &command_set_winminheight },
+
+    /* winsplit */
+    { "winsplit", "winsplit", CONFIG_TYPE_FUNC_STRING, command_set_winsplit }, 
+
+    /* wrapscan */
+    { "wrapscan", "ws", CONFIG_TYPE_BOOL, &config_wrapscan },
 };
 
 static int command_focus_cgdb( void );
@@ -146,6 +173,21 @@ struct ConfigVariable* get_variable( const char *variable )
     return NULL;
 }
 
+int command_set_arrowstyle( const char *value ) {
+
+    if (strcasecmp(value, "short") == 0) {
+        config_arrowstyle = ARROWSTYLE_SHORT;
+    } else if (strcasecmp(value, "long") == 0) {
+        config_arrowstyle = ARROWSTYLE_LONG;
+    } else if (strcasecmp(value, "highlight") == 0) {
+        config_arrowstyle = ARROWSTYLE_HIGHLIGHT;
+    } else {
+        return 1;
+    }
+
+    return 0;
+}
+
 int command_set_focus( const char *value )
 {
     if( strcasecmp( value, "cgdb" ) == 0 ) {
@@ -162,18 +204,18 @@ int command_set_focus( const char *value )
 }
 
 static int command_set_stc ( int value ) {
-	if ( (value == 0) || (value == 1) ) 
-		tgdb_set_verbose_gui_command_output ( tgdb, value );
-	else
-		return 1;
+    if ( (value == 0) || (value == 1) ) 
+        tgdb_set_verbose_gui_command_output ( tgdb, value );
+    else
+        return 1;
 
-	return 0;
+    return 0;
 }
 
 int command_set_esc_sequence_timeout( int msec )
 {
-	if ( msec >= 0 && msec <= 10000)
-		return cgdb_set_esc_sequence_timeout ( msec );
+    if ( msec >= 0 && msec <= 10000)
+        return cgdb_set_esc_sequence_timeout ( msec );
 
     return 0;
 }
@@ -204,19 +246,19 @@ static int command_set_winminheight( int value ) {
 
 int command_set_syntax_type ( const char *value )
 {
-	enum tokenizer_language_support l = TOKENIZER_LANGUAGE_UNKNOWN;
+    enum tokenizer_language_support l = TOKENIZER_LANGUAGE_UNKNOWN;
 
-	if( strcasecmp( value, "c" ) == 0 ) {
-		l = TOKENIZER_LANGUAGE_C;
-	} else if( strcasecmp( value, "ada" ) == 0 ) {
-		l = TOKENIZER_LANGUAGE_ADA;
-	} else if( strcasecmp( value, "off" ) == 0 ) {
-		l = TOKENIZER_LANGUAGE_UNKNOWN;
-	}
-	
-	if_highlight_sviewer ( l );
+    if( strcasecmp( value, "c" ) == 0 ) {
+        l = TOKENIZER_LANGUAGE_C;
+    } else if( strcasecmp( value, "ada" ) == 0 ) {
+        l = TOKENIZER_LANGUAGE_ADA;
+    } else if( strcasecmp( value, "off" ) == 0 ) {
+        l = TOKENIZER_LANGUAGE_UNKNOWN;
+    }
+    
+    if_highlight_sviewer ( l );
 
-   	return 0;
+    return 0;
 }
 
 int command_focus_cgdb( void )
@@ -240,7 +282,7 @@ int command_focus_tty( void )
 int command_do_continue( void )
 {
     if ( tgdb_run_debugger_command ( tgdb, TGDB_CONTINUE ) == -1 ) 
-		return -1;
+        return -1;
 
     return 0;
 }
@@ -248,7 +290,7 @@ int command_do_continue( void )
 int command_do_finish( void )
 {
     if ( tgdb_run_debugger_command ( tgdb, TGDB_FINISH ) == -1 )
-		return -1;
+        return -1;
 
     return 0;
 }
@@ -262,7 +304,7 @@ int command_do_help( void )
 int command_do_next( void )
 {
     if ( tgdb_run_debugger_command  ( tgdb, TGDB_NEXT ) == -1 )
-		return -1;
+        return -1;
 
     return 0;
 }
@@ -286,7 +328,7 @@ int command_do_run( void )
 {
     /* FIXME: see if there are any other arguments to pass to the run command */
     if ( tgdb_run_debugger_command  ( tgdb, TGDB_RUN ) == -1 )
-		return -1;
+        return -1;
 
     return 0;
 }
@@ -294,7 +336,7 @@ int command_do_run( void )
 int command_do_step( void )
 {
     if ( tgdb_run_debugger_command  ( tgdb, TGDB_STEP ) == -1 )
-		return -1;
+        return -1;
 
     return 0;
 }
@@ -307,10 +349,10 @@ int command_search_next( void )
 
 int command_source_reload( void )
 {
-	struct sviewer *sview = if_get_sview ();
+    struct sviewer *sview = if_get_sview ();
 
-	if ( source_reload ( sview, sview->cur->path, 1 ) == -1 )
-		return -1;
+    if ( source_reload ( sview, sview->cur->path, 1 ) == -1 )
+        return -1;
 
     return 0;
 }
