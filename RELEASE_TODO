@@ -1,11 +1,15 @@
 Bug fixes for cgdb-0.5.3
 
-- Strip readline out of TGDB and put it into CGDB. This is in preparation for removing the
-  rlctx code.
+- Strip readline out of TGDB and put it into CGDB. 
+  This is in preparation for removing the rlctx code.
 - Update FAQ, it's wrong.
 - Look into Crash on Mac (OSX Jaguar).
 - Think about how to handle MAC formatted files on unix.
 - Should package readline with CGDB?
+- Fix ACS_VLINE problem. This char is not available everywhere and 
+  should be a runtime option. Check with jonathon to make sure this problem
+  is fixed.
+- Make sure arrowstyle option is commented.
 
 Closed:
 
