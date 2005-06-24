@@ -44,6 +44,10 @@
 #include <unistd.h>
 #endif  /* HAVE_UNISTD_H */
 
+#if HAVE_CTYPE_H
+#include <ctype.h>
+#endif
+
 /* Local Includes */
 #include "highlight.h"
 #include "sources.h"
@@ -55,6 +59,7 @@
 int sources_syntax_on = 1;
 int auto_source_reload = 0;
 enum ArrowStyle config_arrowstyle = ARROWSTYLE_SHORT;
+extern int highlight_tabstop;
 
 /* --------------- */
 /* Local Functions */
@@ -289,7 +294,7 @@ static void draw_current_line(struct sviewer *sview, int line, int lwidth) {
 
     int height = 0;                     /* Height of curses window */
     int width = 0;                      /* Width of curses window */
-    int i = 0;                          /* Iterator */
+    int i = 0, j = 0;                   /* Iterators */
     struct buffer *buf = NULL;          /* Pointer to the source buffer */
     char *text = NULL;                  /* The current line (highlighted) */
     char *otext = NULL;                 /* The current line (unhighlighted) */
@@ -334,12 +339,28 @@ static void draw_current_line(struct sviewer *sview, int line, int lwidth) {
             wattron(sview->win, A_BOLD);
             wattron(sview->win, COLOR_PAIR(CGDB_COLOR_GREEN));
             waddch(sview->win, ACS_LTEE);
-            if (length > 0 && otext[0] == ' ') {
-                for (i = 0; i < length-1 && otext[i+1] == ' '; i++) {
-                    waddch(sview->win, ACS_HLINE);
-                    column_offset++;
+
+            // Compute the length of the arrow, respecting tab stops, etc.
+            for (i = 0; i < length-1 && isspace(otext[i]); i++) {
+
+                // Oh so cryptic
+                int offset = otext[i] == '\t' ? highlight_tabstop : 1;;
+                if (!isspace(otext[i+1])) {
+                    offset--;
                 }
+
+                column_offset += offset;
             }
+            column_offset -= sview->cur->sel_col;
+            if (column_offset < 0) {
+                column_offset = 0;
+            }
+
+            // Now actually draw the arrow
+            for (j = 0; j < column_offset; j++) {
+                waddch(sview->win, ACS_HLINE);
+            }
+
             waddch(sview->win, '>');
             wattroff(sview->win, COLOR_PAIR(CGDB_COLOR_GREEN));
             wattroff(sview->win, A_BOLD);

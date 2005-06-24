@@ -75,37 +75,13 @@ Quick Reference
         :set noignorecase
     turns on case-sensitive searching.
 
-  :set ignorecase (:set ic)
-    Sets searching case insensitive
-  :set shortcut  (:set sc)
-    Enables shortcut commands typed in source window
-  :set winsplit 
-    Set the split point between source and gdb window
-    (especially useful as an init setting in cgdbrc)
-    values={top_full, top_big, even, bottom_big, bottom_full}
-  :set winminheight (:set wmh)
-    The minimal height of a window. Windows will never 
-    become smaller than this value.
-  :set tabstop 
-    Number of spaces that a <Tab> in the file counts for.
-  :set syntax (:set syn)
-    Sets the current highlighting mode of the current file.
-    values={c,ada,off}
-  :set escdelay 
-    Set the length of time to wait before timing out and treating the ESC 
-    keystroke as the ESC character rather than combining it with other 
-    characters in the buffer to create a key sequence. The variable is 
-    measured in milli seconds. If ESCDELAY is 0, the system immediately 
-    composes the ESCAPE response without waiting for more information 
-    from the buffer. The user may choose any value between 0 and 10000, 
-    inclusive. The default setting for the ESCDELAY environment variable is 
-    40 (forty tenths of a second).
-  :set showtgdbcommands (:set stc)
-    If this is on, CGDB will show all of the commands that it sends to GDB. 
-    If it is off, CGDB will not show the commands that it gives to GDB. 
-    The default is off. 
-  :set wrapscan (:set ws)
-    Searches wrap around the end of file.
+  :set arrowstyle (:set as)
+    values={short, long, highlight}
+    Changes the style of the arrow that is used to indicate the currently
+    executing line in the source viewer.  The default value is short.  A
+    longer arrow is available, for easier readability.  Finally, the
+    'highlight' option draws no arrow at all, instead drawing the entire
+    line in inverse video.
   :set autosourcereload (:set asr)
     If this is on, CGDB will automatically reload a source file if it has 
     changed since CGDB has opened it.  If it is off, the file will never be 
@@ -116,6 +92,37 @@ Quick Reference
     the timestamp of the source file to determine if it has changed. So if 
     you modify the source file, and didn't recompile yet, CGDB will still 
     pick up on the changes.
+  :set escdelay 
+    Set the length of time to wait before timing out and treating the ESC 
+    keystroke as the ESC character rather than combining it with other 
+    characters in the buffer to create a key sequence. The variable is 
+    measured in milli seconds. If ESCDELAY is 0, the system immediately 
+    composes the ESCAPE response without waiting for more information 
+    from the buffer. The user may choose any value between 0 and 10000, 
+    inclusive. The default setting for the ESCDELAY environment variable is 
+    40 (forty tenths of a second).
+  :set ignorecase (:set ic)
+    Sets searching case insensitive
+  :set shortcut  (:set sc)
+    Enables shortcut commands typed in source window
+  :set showtgdbcommands (:set stc)
+    If this is on, CGDB will show all of the commands that it sends to GDB. 
+    If it is off, CGDB will not show the commands that it gives to GDB. 
+    The default is off. 
+  :set syntax (:set syn)
+    Sets the current highlighting mode of the current file.
+    values={c,ada,off}
+  :set tabstop 
+    Number of spaces that should be rendered on screen for TAB characters (\t)
+  :set winminheight (:set wmh)
+    The minimal height of a window. Windows will never become smaller than 
+    this value.
+  :set winsplit 
+    Set the split point between source and gdb window
+    (especially useful as an init setting in cgdbrc)
+    values={top_full, top_big, even, bottom_big, bottom_full}
+  :set wrapscan (:set ws)
+    Searches wrap around the end of file.
 
 2. At gdb and tty window
 ------------------------

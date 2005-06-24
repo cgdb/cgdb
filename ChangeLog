@@ -1,6 +1,18 @@
+06/24/2005 Mike Mueller <mike@subfocal.net>
+
+    * Fixed arrowstyle bugs:
+        1. Tabs were broken, not treated as whitespace (results in short arrow)
+        2. Arrow drawn on top of code when horizontally scrolled
+    * RELEASE_TODO (cgdb-0.5.3): Updated arrow and ACS issues
+    * README: Added documentation for the arrowstyle option
+
 06/20/2005 Bob Rossi <bob@brasko.net>
 
-        * RELEASE_TODO (cgdb-0.5.3): Add new task for .5.3.
+    * RELEASE_TODO (cgdb-0.5.3): Add new task for .5.3.
+
+06/18/2005 Mike Mueller <mike@subfocal.net>
+
+    * NEWS: Added a new 'arrowstyle' option at a user's request
 
 05/26/2005 Bob Rossi <bob@brasko.net>
 
