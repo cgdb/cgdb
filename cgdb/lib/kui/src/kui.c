@@ -503,14 +503,21 @@ int kui_add_map_set (
  * \param kctx
  * The kui context to operate on.
  *
+ * \param key
+ * The key that was read
+ *
  * @return
- * 0 on success, or -1 on error.
+ * 1 on success,
+ * 0 if no more input, 
+ * or -1 on error.
  */
-static int kui_findchar ( struct kuictx *kctx ) {
-	int key;
+static int kui_findchar (struct kuictx *kctx, int *key) {
 	int length;
 	void *data;
 	std_list_iterator iter;
+
+   if (!key)
+     return -1;
 
 	/* Use the buffer first. */
 	length = std_list_length ( kctx->buffer );
@@ -529,18 +536,19 @@ static int kui_findchar ( struct kuictx *kctx ) {
 			return -1;
 
 		/* Get the char */
-		key = *(int*)data;
+		*key = *(int*)data;
 
 		/* Delete the item */
 		if ( std_list_remove ( kctx->buffer, iter ) == NULL )
 			return -1;
 		
 	} else {
-		/* otherwise, look to read in a char */
-		key = kctx->callback ( kctx->fd, kctx->ms, kctx->state_data );
+		/* Otherwise, look to read in a char,
+       * This function called returns the same conditions as this function*/
+		return kctx->callback (kctx->fd, kctx->ms, kctx->state_data, key);
 	}
 
-	return key;
+	return 1;
 }
 
 /**
@@ -915,7 +923,7 @@ static int kui_findkey (
 		struct kuictx *kctx,
 	    int *was_map_found ) {
 
-	int key;
+	int key, retval;
 	int should_continue;
 	struct kui_map *the_map_found;
 	int *val;
@@ -945,10 +953,12 @@ static int kui_findkey (
 
 	/* Start the main loop */
 	while ( 1 ) {
-		key = kui_findchar ( kctx );
+		retval = kui_findchar (kctx, &key);
+      if (retval == -1)
+        return -1;
 
 		/* If there is no more data ready, stop. */
-		if ( key == 0 )
+		if ( retval == 0 )
 			break; 
 
 		/* Append to the list */
@@ -1088,37 +1098,51 @@ static int create_terminal_mappings ( struct kui_manager *kuim, struct kuictx *i
 int char_callback ( 
 		const int fd, 
 		const unsigned int ms,
-		const void *obj ) {
+		const void *obj,
+      int *key ) {
 
-	return io_getchar ( fd, ms );
+	return io_getchar (fd, ms, key);
 }
 
 int kui_callback (
 		const int fd, 
 		const unsigned int ms,
-		const void *obj ) {
+		const void *obj,
+      int *key) {
 
 	struct kuictx *kctx = (struct kuictx *)obj;
 	int result;
 
-	result = kui_cangetkey ( kctx );
+   if (!key)
+     return -1;
 
-	if ( result == -1 )
+	result = kui_cangetkey (kctx);
+	if (result == -1)
 		return -1;
+   
+   if (result == 1) {
+      *key = kui_getkey (kctx);
+      if (*key == -1)
+         return -1;
+   }
+   
+   /* If there is no data ready, check the I/O */
+   if (result == 0) {
+     result = io_data_ready (kctx->fd, ms);
+     if (result == -1)
+       return -1;
 
-	if ( result == 1 )
-		return kui_getkey ( kctx );
+     if (result == 1) {
+       *key = kui_getkey (kctx);
+       if (*key == -1)
+         return -1;
+     }
 
-	if ( result == 0 ) {
-        result = io_data_ready (kctx->fd, ms);
-        if (result == -1)
-          return -1;
-
-		if (result == 1)
-	      return kui_getkey ( kctx );	
+     if (result == 0)
+       return 0;
 	}
 
-	return 0;
+	return 1;
 }
 
 struct kui_manager *kui_manager_create(int stdinfd ) {
@@ -1141,7 +1165,6 @@ struct kui_manager *kui_manager_create(int stdinfd ) {
 		kui_manager_destroy ( man );
 		return NULL;
 	}
-
 
 	man->normal_keys = kui_create ( -1, kui_callback, 1000, man->terminal_keys );
 

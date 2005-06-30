@@ -1,3 +1,13 @@
+06/30/2005 Bob Rossi <bob@brasko.net>
+
+   * inc/kui.h (kui_getkey_callback): Added parameter. Change return semantics.
+   (kui_manager_get_raw_data): Add NOTE in comment.
+   * src/kui.c (kui_findchar): Added parameter. Change return semantics.
+   (kui_findkey): Add local.
+   (char_callback): Add parameter, use it in call to function in body.
+   (kui_callback): Add parameter.
+   * src/kui_driver.c (main_loop): Check for null to prevent crash.
+
 version 0.5.2 (05/21/2005):
 
 05/21/2005 Bob Rossi <bob@brasko.net>

@@ -1,3 +1,8 @@
+06/30/2005 Bob Rossi <bob@brasko.net>
+
+   * io.h (io_getchar): Add parameter and return value semantics.
+   * io.c (io_getchar): Ditto.
+
 05/23/2005 Bob Rossi <bob@brasko.net>
 
 	* fork_util.h (invoke_pty_process): Removed.

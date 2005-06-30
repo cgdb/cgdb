@@ -260,15 +260,19 @@ struct kuictx;
  * \param obj
  * A piece of state data to pass along
  *
+ * \param key
+ * The key read
+ *
  * Must return 
- * -1 on error.
- *  0 if no data is ready.
- *  the char read.
+ * 1 on success,
+ * 0 if no more input, 
+ * or -1 on error.
  */
 typedef int (*kui_getkey_callback)( 
 		const int fd, 
 		const unsigned int ms,
-		const void *obj );
+		const void *obj,
+      int *key);
 
 /**
  * Initializes the Key User Interface unit
@@ -518,6 +522,10 @@ int kui_manager_getkey ( struct kui_manager *kuim );
  * CGDB_KEY_*
  * Basically, if CGDB_KEY_PPAGE is returned, this will give back the 
  * characters that made that happen. 
+ *
+ * NOTE: If the user mapped abc to F4, then there currently is no
+ * raw data. There is only raw data when the actual terminal key is
+ * read. This could potentially be a feature enhancement when needed.
  *
  * \param kuim
  * The kui context.

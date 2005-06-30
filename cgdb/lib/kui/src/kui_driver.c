@@ -86,14 +86,15 @@ void main_loop(struct kui_manager *i) {
 
 						val = (char*)kui_term_get_string_from_cgdb_key ( c );
 
-						fprintf ( stderr, "%s\r\n", val );
+						fprintf ( stderr, "%s", val );
 
 						/* Print out the sequence recieved */
 						sequence = (char*)kui_manager_get_raw_data ( i );
-						while ( sequence[0] ) {
-							fprintf ( stderr, "[%d:%c]\r\n", sequence[0], sequence[0] );
+						while ( sequence && sequence[0] ) {
+							fprintf ( stderr, "[%d]", sequence[0]);
 							sequence = sequence+1;
 						}
+						fprintf ( stderr, "\r\n");
 
 					} else
 						fprintf(stderr, "%c\r\n", c);

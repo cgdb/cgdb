@@ -1,3 +1,6 @@
+   * It was reported that the "Windows" Key would cause CGDB to shut down.
+   This has been fixed.
+   
    * Added a new 'arrowstyle' option, see README for documentation
 
    * Add the ^l command to the Source window. CGDB will now clear and redraw

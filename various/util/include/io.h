@@ -104,11 +104,12 @@ int io_data_ready ( int fd, int ms );
  * The The amount of time in milliseconds to wait for input.
  * Pass 0, if you do not want to wait.
  *
+ * \param key
+ * The character read if the return value is successful
+ *
  * @return
- * -1 on error.
- *  0 if no data is ready.
- *  the char read.
+ * -1 on error, 0 if no data is ready, 1 on success
  */
-int io_getchar ( int fd, unsigned int ms );
+int io_getchar (int fd, unsigned int ms, int *key);
 
 #endif // __IO_H__

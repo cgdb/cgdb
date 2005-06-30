@@ -260,11 +260,14 @@ int io_data_ready ( int fd, int ms ) {
 #endif
 }
 
-int io_getchar ( int fd, unsigned int ms ) {
+int io_getchar (int fd, unsigned int ms, int *key) {
     char c;
     int ret;
     int flag = 0;
     int val;
+
+    if (!key)
+      return -1;
 
     /* This is the timeout that readline uses, so it must be good.
      * However, when I hit ESC and then o from the gdb window, the input lib 
@@ -313,5 +316,6 @@ read_again:
     if ( ret == -1 )
         return -1;
 
-    return c;
+    *key = c;
+    return 1;
 }
