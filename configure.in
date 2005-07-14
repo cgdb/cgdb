@@ -14,52 +14,77 @@ AC_PROG_RANLIB
 AM_PROG_LEX
 AC_PROG_YACC
 
-# determine if we are running in linux, cygwin, solaris, or freebsd
-   AC_CANONICAL_HOST
+dnl determine if we are running in linux, cygwin, solaris, or freebsd
+AC_CANONICAL_HOST
 
-   case $host in
-     *-*-linux*)
-       SYSTEM=LINUX
-       AC_DEFINE(HAVE_LINUX, 1,  Linux environment)
-       ;;
-     *-*-cygwin*)
-       SYSTEM=CYGWIN
-       AC_DEFINE(HAVE_CYGWIN, 1,  Cygwin environment)
-       ;;
-     *-*-solaris*)
-       SYSTEM=SOLARIS
-       AC_DEFINE(HAVE_SOLARIS, 1,  Solaris environment)
-       ;;
-     *-*-freebsd*)
-       SYSTEM=FREEBSD
-       AC_DEFINE(HAVE_FREEBSD, 1,  Freebsd environment)
-       ;;
-     *-*-hp*)
-       SYSTEM=HP
-       AC_DEFINE(HAVE_HP, 1,  Hp environment)
-       ;;
-     *)
-       SYSTEM=UNKNOWN
-       ;;
-   esac
+case $host in
+ *-*-linux*)
+   SYSTEM=LINUX
+   AC_DEFINE(HAVE_LINUX, 1,  Linux environment)
+   ;;
+ *-*-cygwin*)
+   SYSTEM=CYGWIN
+   AC_DEFINE(HAVE_CYGWIN, 1,  Cygwin environment)
+   ;;
+ *-*-solaris*)
+   SYSTEM=SOLARIS
+   AC_DEFINE(HAVE_SOLARIS, 1,  Solaris environment)
+   ;;
+ *-*-freebsd*)
+   SYSTEM=FREEBSD
+   AC_DEFINE(HAVE_FREEBSD, 1,  Freebsd environment)
+   ;;
+ *-*-hp*)
+   SYSTEM=HP
+   AC_DEFINE(HAVE_HP, 1,  Hp environment)
+   ;;
+ *)
+   SYSTEM=UNKNOWN
+   ;;
+esac
 
-dnl Determines if the user asked to build user curses, the default is ncurses.
-dnl If the user asked for curses, ncurses is set to no. Otherwise ncurses is yes.
-    AC_ARG_WITH(ncurses-prefix,
-        [  --with-ncurses-prefix=DIR  Prefix where ncurses is installed (optional)],LDFLAGS="-L$withval/lib $LDFLAGS" CFLAGS="-I$withval/include -I$withval/include/ncurses $CFLAGS" CPPFLAGS="-I$withval/include -I$withval/include/ncurses $CPPFLAGS")
+dnl Default variables
+dnl If ncurses is yes after arguments, than use ncurses. Otherwise, use curses
+use_ncurses_library=yes
+opt_with_ncurses_prefix=no
+opt_with_curses_prefix=no
+opt_with_readline_prefix=no
 
-    AC_ARG_WITH(curses-prefix,
-        [  --with-curses-prefix=DIR   Prefix where curses is installed (optional)],LDFLAGS="-L$withval/lib $LDFLAGS" CFLAGS="-I$withval/include $CFLAGS" CPPFLAGS="-I$withval/include $CPPFLAGS")
+dnl argument to configure
+AC_ARG_WITH(ncurses, AC_HELP_STRING([--with-ncurses=PREFIX], [Use system installed ncurses library]), opt_with_ncurses_prefix=$withval)
+AC_ARG_WITH(curses, AC_HELP_STRING([--with-curses=PREFIX], [Use system installed curses library]), opt_with_curses_prefix=$withval use_ncurses_library=no)
+AC_ARG_WITH(readline, AC_HELP_STRING([--with-readline=PREFIX], [Use system installed readline library]), opt_with_readline_prefix=$withval)
 
-    AC_ARG_WITH(curses,
-        [  --with-curses           Use curses library: not ncurses (optional)],ncurses=no,ncurses=yes)
+#dnl Used for debugging to look at the config options
+#dnl echo "OPT_WITH_NCURSES_PREFIX=$opt_with_ncurses_prefix"
+#dnl echo "OPT_WITH_CURSES_PREFIX=$opt_with_curses_prefix"
+#dnl echo "OPT_WITH_READLINE_PREFIX=$opt_with_readline_prefix"
+#dnl echo "WITH_NCURSES=$use_ncurses_library"
 
-dnl Allow the user to say where the readline root installation is.
-    AC_ARG_WITH(readline-prefix,
-        [  --with-readline-prefix=DIR  Prefix where readline is installed (optional)],LDFLAGS="-L$withval/lib $LDFLAGS" CFLAGS="-I$withval/include -I$withval/include/readline $CFLAGS" CPPFLAGS="-I$withval/include -I$withval/include/readline $CPPFLAGS")
+dnl ncurses-prefix argument
+if test "$opt_with_ncurses_prefix" != "no"; then
+  # If set to "yes", it is on the compilers include path.
+  if test "$opt_with_curses_prefix" != "yes"; then
+    LDFLAGS="-L$opt_with_ncurses_prefix/lib $LDFLAGS" CFLAGS="-I$opt_with_ncurses_prefix/include -I$opt_with_ncurses_prefix/include/ncurses $CFLAGS" CPPFLAGS="-I$opt_with_ncurses_prefix/include -I$opt_with_ncurses_prefix/include/ncurses $CPPFLAGS"
+  fi
+fi
+
+if test "$opt_with_curses_prefix" != "no"; then
+  # If set to "yes", it is on the compilers include path.
+  if test "$opt_with_curses_prefix" != "yes"; then
+    LDFLAGS="-L$opt_with_curses_prefix/lib $LDFLAGS" CFLAGS="-I$opt_with_curses_prefix/include $CFLAGS" CPPFLAGS="-I$opt_with_curses_prefix/include $CPPFLAGS"
+  fi
+fi
+
+if test "$opt_with_readline_prefix" != "no"; then
+  # If set to "yes", it is on the compilers include path.
+  if test "$opt_with_readline_prefix" != "yes"; then
+    LDFLAGS="-L$opt_with_readline_prefix/lib $LDFLAGS" CFLAGS="-I$opt_with_readline_prefix/include -I$opt_with_readline_prefix/include/readline $CFLAGS" CPPFLAGS="-I$opt_with_readline_prefix/include -I$opt_with_readline_prefix/include/readline $CPPFLAGS"
+  fi
+fi
 
 dnl If the user want ncurses, Try to find it and add it to the linking library.
-    if test $ncurses = yes; then
+if test "$use_ncurses_library" = "yes"; then
         AC_CHECK_LIB(ncurses, initscr,
             [AC_DEFINE(HAVE_NCURSES, 1, ncurses library)],
             AC_MSG_ERROR([cgdb needs ncurses/curses to build. ncurses is strongly recommended.
@@ -67,10 +92,10 @@ dnl If the user want ncurses, Try to find it and add it to the linking library.
     If that is not an option try 'configure --with-curses.'
     You can try --with-ncurses-prefix=/foo/ncurses to tell configure where ncurses is.]))
         LIBS="-lncurses  $LIBS"
-    fi
+fi
 
 dnl If the user want curses, Warn them that cgdb does not run perfect against it.
-    if test $ncurses = no; then
+if test "$use_ncurses_library" = "no"; then
         AC_MSG_WARN([ *****************************************************
                      cgdb may not run properly when linked against curses!
                      *****************************************************])
@@ -80,10 +105,7 @@ dnl If the user want curses, Warn them that cgdb does not run perfect against it
     If your system does not have ncurses get it!
     You can try --with-curses-prefix=/foo/curses to tell configure where curses is.]))
         LIBS="-lcurses  $LIBS"
-    fi
-
-# Readline will kill configure if there isn't any available.
-VL_LIB_READLINE
+fi
 
 dnl Checking for log10 function in math - I would like to remove this
 AC_CHECK_LIB(m, log10)
@@ -91,6 +113,23 @@ AC_CHECK_LIB(m, log10)
 dnl Checks for header files.
 AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
+
+dnl If using the internal readline package, tell the Makefile.am's
+AM_CONDITIONAL(USE_PACKAGED_READLINE, test "$opt_with_readline_prefix" = "no")
+
+# If using system readline, then configure for it
+if test "$opt_with_readline_prefix" = "no"; then
+AC_CONFIG_SUBDIRS(readline-5.0)
+AC_SUBST(READLINE_DIR,readline-5.0)
+AC_SUBST(READLINE_LIBRARY,1)
+AC_DEFINE(HAVE_LIBREADLINE, 1, [internal readline package])
+AC_DEFINE(HAVE_READLINE_HISTORY, 1, [internal  history package])
+AC_DEFINE(HAVE_READLINE_H, 1, [readline history header])
+AC_DEFINE(HAVE_HISTORY_H, 1, [readline history header])
+AC_DEFINE(READLINE_LIBRARY, 1, [internal readline define])
+else
+VL_LIB_READLINE
+fi
 
 dnl determine if terminal headers are available for tgdb
 AC_CHECK_HEADERS(pty.h sys/stropts.h termios.h sys/select.h)
@@ -126,7 +165,6 @@ AC_TYPE_SIGNAL
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(mkdir putenv select strdup strerror)
 
-#tgdb/Makefile tgdb/annotate-two-src/Makefile tgdb/gdbmi-src/Makefile tgdb/lib/Makefile)
 AC_OUTPUT(Makefile \
 various/Makefile \
 various/util/Makefile various/util/src/Makefile \

@@ -81,9 +81,13 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 RANLIB = @RANLIB@
+READLINE_DIR = @READLINE_DIR@
+READLINE_LIBRARY = @READLINE_LIBRARY@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
+USE_PACKAGED_READLINE_FALSE = @USE_PACKAGED_READLINE_FALSE@
+USE_PACKAGED_READLINE_TRUE = @USE_PACKAGED_READLINE_TRUE@
 VERSION = @VERSION@
 YACC = @YACC@
 ac_ct_CC = @ac_ct_CC@
@@ -119,10 +123,16 @@ prefix = @prefix@
 program_transform_name = @program_transform_name@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
+subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-SUBDIRS = various tgdb cgdb
-EXTRA_DIST = config
+
+# The difference between SUBDIRS and DIST_SUBDIRS is that the
+# readline directory simply needs to be copied as is, where as
+# the rest of the directories have a make dist rule run on them
+SUBDIRS = $(READLINE_DIR) various tgdb cgdb
+DIST_SUBDIRS = various tgdb cgdb
+EXTRA_DIST = config $(READLINE_DIR)
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
@@ -141,7 +151,6 @@ DIST_COMMON = README $(srcdir)/Makefile.in $(srcdir)/configure AUTHORS \
 	config/config.sub config/depcomp config/install-sh \
 	config/ltmain.sh config/missing config/mkinstalldirs \
 	config/ylwrap configure configure.in
-DIST_SUBDIRS = $(SUBDIRS)
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -348,7 +357,7 @@ distdir: $(DISTFILES)
 	    || exit 1; \
 	  fi; \
 	done
-	list='$(SUBDIRS)'; for subdir in $$list; do \
+	list='$(DIST_SUBDIRS)'; for subdir in $$list; do \
 	  if test "$$subdir" = .; then :; else \
 	    test -d $(distdir)/$$subdir \
 	    || mkdir $(distdir)/$$subdir \

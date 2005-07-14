@@ -26,6 +26,9 @@ tgdb_driver_LDFLAGS = \
 -L$(top_builddir)/various/rlctx/src
 
 tgdb_driver_LDADD = -ltgdb -lannotate_two -lgdbmi -lrlctx -ladt -lutil
+if USE_PACKAGED_READLINE
+tgdb_driver_LDADD+=$(top_builddir)/readline-5.0/libreadline.a $(top_builddir)/readline-5.0/libhistory.a
+endif
 
 tgdb_driver_SOURCES = driver.c
 

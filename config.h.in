@@ -180,6 +180,9 @@
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
+/* internal readline define */
+#undef READLINE_LIBRARY
+
 /* Define as the return type of signal handlers (`int' or `void'). */
 #undef RETSIGTYPE
 

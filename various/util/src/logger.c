@@ -2,7 +2,7 @@
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
-#if HAVE_STRINGS_H
+#if HAVE_STRING_H
 #include <string.h>
 #endif /* HAVE_STRING_H */
 
