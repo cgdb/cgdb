@@ -1,3 +1,8 @@
+07/23/2005 Mike Mueller <mike@subfocal.net>
+
+    * cgdb/src/sources.c: Fixed crash and better respect of tabs in
+    draw_current_line (the new arrowstyle method).
+
 07/14/2005 Bob Rossi <bob@brasko.net>
 
 	* README: Added documentation for packaged readline

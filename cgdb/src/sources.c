@@ -314,11 +314,10 @@ static void draw_current_line(struct sviewer *sview, int line, int lwidth) {
     /* If the current selected line is the line executing, use cur_line */
     if (line == sview->cur->sel_line && buf->cur_line != NULL) {
         text = buf->cur_line;
-        otext = sview->cur->orig_buf.cur_line;
     } else {
         text = buf->tlines[line];
-        otext = sview->cur->orig_buf.tlines[line];
     }
+    otext = sview->cur->orig_buf.tlines[line];
     length = strlen(otext);
 
     /* Draw the appropriate arrow, if applicable */
@@ -344,7 +343,9 @@ static void draw_current_line(struct sviewer *sview, int line, int lwidth) {
             for (i = 0; i < length-1 && isspace(otext[i]); i++) {
 
                 // Oh so cryptic
-                int offset = otext[i] == '\t' ? highlight_tabstop : 1;;
+                int offset = otext[i] != '\t' ? 1 :
+                        highlight_tabstop - (column_offset % highlight_tabstop);
+
                 if (!isspace(otext[i+1])) {
                     offset--;
                 }
