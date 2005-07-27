@@ -1,6 +1,6 @@
 							Section I General Information
 
-1. What is cgdb?
+1. What is CGDB?
 	CGDB is a curses-based interface to the GNU Debugger (GDB).
 	The goal of CGDB is to be lightweight and responsive; not encumbered with 
 	unnecessary features. The interface is designed to deliver the familiar 
@@ -8,13 +8,13 @@
 	The UI is modeled on the classic Unix text editor, vi. Those familiar with 
 	vi should feel right at home using CGDB.
 
-2. Where can I get cgdb?
-	The cgdb project is hosted on http://sourceforge.net/. You can view the 
+2. Where can I get CGDB?
+	The CGDB project is hosted on http://sourceforge.net/. You can view the 
 	project by going to http://sourceforge.net/projects/cgdb/. Alternatively, 
-	cgdb's home-page is at http://cgdb.sourceforge.net/.
+	CGDB's home-page is at http://cgdb.sourceforge.net/.
 
-3. What OS does cgdb work on?
-	cgdb is used daily on
+3. What OS does CGDB work on?
+	CGDB is used daily on
 		Linux 2.4.18
 		Cygwin 1.3.22 (NT,2000,XP)
 		Solaris 5.7,5.8,5.9
@@ -22,29 +22,33 @@
 	it has been reported to work on 
 	 	AIX
 		FreeBSD
+		NetBSD
+		and more
 
-
-	If you have ported or just got cgdb to compile on another OS,
+	If you have ported or just got CGDB to compile on another OS,
 	please let us know.
 
-							Section II Installing cgdb
+							Section II Installing CGDB
 
-1. How do I install cgdb?
-	For now, cgdb can only be installed by compiling it from sources.
-	Goto cgdb's home page to get them.
+1. How do I install CGDB?
+	CGDB can be installed by compiling it from sources. Goto CGDB's home 
+	page to get them. Also, there is binary release's of CGDB for different
+	distrobutions.
 
-2. What dependencies does cgdb have?
-	cgdb could not have been written without the use of other libraries.
-	1. cgdb depends on readline-development-4.2 or greater.
+	Look at http://cgdb.sourceforge.net/download.shtml for more information.
+
+2. What dependencies does CGDB have?
+	CGDB could not have been written without the use of other libraries.
+	1. CGDB depends on readline-development-4.2 or greater.
 	   If you don't have this, you might get a link error that looks something
 	   like this, 'undefined symbol, rl_set_prompt'.
-	2. cgdb depends on ncurses/curses.  The version number is not known.
+	2. CGDB depends on ncurses/curses.  The version number is not known.
 	   I have used libncurses.so.5 successfully.
 	3. If you decide to modify the tokenizer library or the config
 	   file module, you will need to have flex installed.
-	   I have used flex 2.5.4 to build cgdb.
-	4. cgdb uses autoconf/automake to build its configure scripts and 
-	   makefiles. At the time of this writing, cgdb was using
+	   I have used flex 2.5.4 to build CGDB.
+	4. CGDB uses autoconf/automake to build its configure scripts and 
+	   makefiles. At the time of this writing, CGDB was using
           * aclocal  (GNU automake)   1.7.9
           * autoconf (GNU Autoconf)   2.59
           * libtool  (GNU libtool)    1.5.6
@@ -52,8 +56,8 @@
 
 							Section III Problems
 
-1. Why do some keys not work properly for me in cgdb?
-	cgdb is proud of its custom key input library. This is because
+1. Why do some keys not work properly for me in CGDB?
+	CGDB is proud of its custom key input library. This is because
 	it *can* use the ESC key, without having problems understanding
 	escape sequences that are generated when certain keys are hit.
 	Some of the keys that generate escape sequences are the arrow keys,
@@ -64,7 +68,7 @@
 	the value of escdelay. Please look at the README file for more 
 	information on escdelay.
 
-2. Why does cgdb not work when a tty can not be opened?
+2. Why does CGDB not work when a tty can not be opened?
     There are 2 problems with this. 
 	
 	a) The annotate 2 communication protocol used between CGDB and GDB is 
@@ -85,9 +89,9 @@
 		start the program from the terminal and attach to it using GDB.
 		2) Readline will not work.
 
-							Section IV Using cgdb
+							Section IV Using CGDB
 
 1. How do I automate colon commands using the cgdbrc file?
-	cgdb looks at the file $HOME/.cgdb/cgdbrc. It executes each of the lines
+	CGDB looks at the file $HOME/.cgdb/cgdbrc. It executes each of the lines
 	in that file in order as if they were typed into the status bar. This is
 	a very useful way of automating commands.

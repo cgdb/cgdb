@@ -1,4 +1,9 @@
-07/26/2005 Marcel Lanz <marcel.lanz@ds9.ch>
+07/26/2005 Bob Rossi <bob@brasko.net>
+
+	* FAQ: Update.
+	* RELEASE_TODO: Update todo for next release.
+
+07/26/2005 Bob Rossi <bob@brasko.net>
 
 	* NEWS: Add note about new temporary breakpoint functionality.
 
