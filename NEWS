@@ -1,3 +1,10 @@
+   * CGDB has changed it's user interface in a way that is not backwards compatible.
+   The 't' key, now sets a temporary breakpoint. The 't' key used to put CGDB into 
+   insert mode in the TTY window. Now 'I' does that.
+   
+   * CGDB is now capable of setting a temporary breakpoint thanks to Marcel Lanz.
+   He sent in a patch with the functionality. Hitting 't' set's a temporary breakpoint.
+   
    * CGDB now packages readline internally. By default it uses the 
    packaged readline and links against it statically. This should greatly
    ease the installation burden when readline is not installed on a system.

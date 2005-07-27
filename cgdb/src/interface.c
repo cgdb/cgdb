@@ -887,6 +887,41 @@ static int gdb_input(int key)
     return 0;
 }
 
+/**
+ * toggle a breakpoint
+ * 
+ * \param sview
+ * The source view
+ *
+ * \param t
+ * The action to take
+ *
+ * \return
+ * 0 on success, -1 on error.
+ */
+static int 
+toggle_breakpoint(struct sviewer *sview, enum tgdb_breakpoint_action t)
+{
+  char *path;
+  int   line;
+
+  if (!sview || !sview->cur || !sview->cur->path)
+    return 0;
+
+  line = sview->cur->sel_line;
+
+  /* Get filename (strip path off -- GDB is dumb) */
+  path = strrchr(sview->cur->path, '/') + 1;
+  if ((int) path == 1)
+    path = sview->cur->path;
+    
+  /* delete an existing breakpoint */
+  if ( sview->cur->buf.breakpts[line] )
+    t = TGDB_BREAKPOINT_DELETE;
+
+  return tgdb_modify_breakpoint ( tgdb, path, line + 1, t );
+}
+
 /* source_input: Handles user input to the source window.
  * -------------
  *
@@ -958,33 +993,17 @@ static void source_input(struct sviewer *sview, int key)
            if_run_command(sview);
            return;
         case ' ':
-            {
-                char *path;
-                int   line;
-                char *command;
-				enum tgdb_breakpoint_action t;
-
-                if (!sview || !sview->cur || !sview->cur->path)
-                    return;
-
-                line = sview->cur->sel_line;
-
-                /* Get filename (strip path off -- GDB is dumb) */
-                path = strrchr(sview->cur->path, '/') + 1;
-                if ((int) path == 1)
-                    path = sview->cur->path;
-                    
-                command = (char *) malloc(strlen(path) + 20);
-				
-				if ( sview->cur->buf.breakpts[line] )
-					t = TGDB_BREAKPOINT_DELETE;
-				else
-					t = TGDB_BREAKPOINT_ADD;
-				
-				tgdb_modify_breakpoint ( tgdb, path, line + 1, t );
-                free(command);
-            }
-            break;
+           {
+               enum tgdb_breakpoint_action t = TGDB_BREAKPOINT_ADD;
+               toggle_breakpoint(sview, t);
+           }
+           break;
+        case 't':
+           {
+               enum tgdb_breakpoint_action t = TGDB_TBREAKPOINT_ADD;
+               toggle_breakpoint(sview, t);
+           }
+           break;
         default:
             break;
     }
@@ -1095,7 +1114,7 @@ int internal_if_input(int key) {
                     focus = GDB;
                     if_draw();
                     return 0;
-                case 't':
+                case 'I':
                     if ( tty_win_on ) {
                        focus = TTY;
                        if_draw();

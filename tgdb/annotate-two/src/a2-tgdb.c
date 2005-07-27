@@ -384,6 +384,9 @@ char *a2_client_modify_breakpoint (
 	} else if ( b == TGDB_BREAKPOINT_DELETE ) {
 		sprintf ( val, "clear %s:%d", file, line );	
 		return val;
+	} else if ( b == TGDB_TBREAKPOINT_ADD ) {
+		sprintf ( val, "tbreak %s:%d", file, line );	
+		return val;
 	} else 
 		return NULL;
 }

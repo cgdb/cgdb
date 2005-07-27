@@ -237,6 +237,11 @@ enum tgdb_breakpoint_action {
 	TGDB_BREAKPOINT_ADD,
 
 	/**
+	 * Add a temporary breakpoint
+	 */
+	TGDB_TBREAKPOINT_ADD, 
+
+	/**
 	 * Delete a breakpoint.
 	 */
 	TGDB_BREAKPOINT_DELETE,

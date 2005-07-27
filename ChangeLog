@@ -1,3 +1,12 @@
+07/26/2005 Marcel Lanz <marcel.lanz@ds9.ch>
+
+	* NEWS: Add note about new temporary breakpoint functionality.
+
+07/26/2005 Marcel Lanz <marcel.lanz@ds9.ch>
+
+	* README (Source Window): Changed 't' key to be the 'I' key.
+	(Source Window): Added new documentation for the 't' key.
+
 07/23/2005 Mike Mueller <mike@subfocal.net>
 
     * cgdb/src/sources.c: Fixed crash and better respect of tabs in
