@@ -1,5 +1,9 @@
 07/27/2005 Bob Rossi <bob@brasko.net>
 
+	* RELEASE_TODO: Update todo task for release after .5.3.
+
+07/27/2005 Bob Rossi <bob@brasko.net>
+
 	* RELEASE_TODO: Move final task for .5.3.
 	* readline-5.0/configure (opt_shared_libs): Modified default value
 	from yes to no.
