@@ -132,7 +132,7 @@ target_alias = @target_alias@
 # the rest of the directories have a make dist rule run on them
 SUBDIRS = $(READLINE_DIR) various tgdb cgdb
 DIST_SUBDIRS = various tgdb cgdb
-EXTRA_DIST = config $(READLINE_DIR)
+EXTRA_DIST = config $(top_srcdir)/$(READLINE_DIR)
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
@@ -330,7 +330,7 @@ distcleancheck_listfiles = find . -type f -print
 distdir: $(DISTFILES)
 	$(am__remove_distdir)
 	mkdir $(distdir)
-	$(mkinstalldirs) $(distdir)/config
+	$(mkinstalldirs) $(distdir)/$(top_srcdir) $(distdir)/config
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \
