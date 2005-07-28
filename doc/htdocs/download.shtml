@@ -55,10 +55,10 @@
 	      makefiles. So, if you change any of the autoconf/automake files, you 
          will need this software installed.
          <UL>
-            <LI> aclocal  (GNU automake)   1.7  </li>
-            <LI> autoconf (GNU Autoconf)   2.57 </li>
-            <LI> libtool  (GNU libtool)    1.4.3</li>
-            <LI> m4       (GNU m4)         1.4  </li>
+            <LI> aclocal  (GNU automake)   1.7.9</li>
+            <LI> autoconf (GNU Autoconf)   2.59</li>
+            <LI> libtool  (GNU libtool)    1.5.6</li>
+            <LI> m4       (GNU m4)         1.4.2</li>
          </ul>
       </ol>
     

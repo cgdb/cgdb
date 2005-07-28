@@ -6,7 +6,7 @@
         <TABLE Width="100%">
         <TR>
           <TD Width="60%" Align=Center VAlign=Middle>
-            <I>&copy;2002, 2003 CGDB development team.</i>
+            <I>&copy;2002, 2003, 2004, 2005 CGDB development team.</i>
           </td>
           <TD Align=Right>
             <A Href="http://validator.w3.org/check/referer">
