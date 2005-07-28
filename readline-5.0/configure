@@ -1388,7 +1388,7 @@ fi
 
 opt_multibyte=yes
 opt_static_libs=yes
-opt_shared_libs=yes
+opt_shared_libs=no
 
 # Check whether --enable-multibyte or --disable-multibyte was given.
 if test "${enable_multibyte+set}" = set; then

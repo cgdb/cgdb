@@ -8,10 +8,9 @@
 
 Bug fixes for cgdb-0.5.3
 
-- Get readline library to only build the static library.
-
 Closed:
 
+- Get readline library to only build the static library.
 - Update FAQ, it's wrong.
 - Fix runtime error with arrow style long and regex searching.
 - Should package readline with CGDB?  Yes!
