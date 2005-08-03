@@ -36,7 +36,6 @@ NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
 host_triplet = @host@
-@USE_PACKAGED_READLINE_TRUE@am__append_1 = $(top_builddir)/readline-5.0/libreadline.a $(top_builddir)/readline-5.0/libhistory.a
 ACLOCAL = @ACLOCAL@
 AMDEP_FALSE = @AMDEP_FALSE@
 AMDEP_TRUE = @AMDEP_TRUE@
@@ -82,13 +81,9 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 RANLIB = @RANLIB@
-READLINE_DIR = @READLINE_DIR@
-READLINE_LIBRARY = @READLINE_LIBRARY@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
-USE_PACKAGED_READLINE_FALSE = @USE_PACKAGED_READLINE_FALSE@
-USE_PACKAGED_READLINE_TRUE = @USE_PACKAGED_READLINE_TRUE@
 VERSION = @VERSION@
 YACC = @YACC@
 ac_ct_CC = @ac_ct_CC@
@@ -124,7 +119,6 @@ prefix = @prefix@
 program_transform_name = @program_transform_name@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
-subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 AM_CFLAGS = -g -Wall \
@@ -157,7 +151,7 @@ tgdb_driver_LDFLAGS = \
 -L$(top_builddir)/various/rlctx/src
 
 
-tgdb_driver_LDADD = -ltgdb -lannotate_two -lgdbmi -lrlctx -ladt -lutil $(am__append_1)
+tgdb_driver_LDADD = -ltgdb -lannotate_two -lgdbmi -lrlctx -ladt -lutil
 
 tgdb_driver_SOURCES = driver.c
 

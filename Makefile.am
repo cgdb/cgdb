@@ -1,9 +1,9 @@
 # The difference between SUBDIRS and DIST_SUBDIRS is that the
 # readline directory simply needs to be copied as is, where as
 # the rest of the directories have a make dist rule run on them
-SUBDIRS=$(READLINE_DIR) various tgdb cgdb
+SUBDIRS=various tgdb cgdb
 DIST_SUBDIRS=various tgdb cgdb
-EXTRA_DIST=config $(READLINE_DIR)
+EXTRA_DIST=config
 
 # The order is important here.
 # various is the lowest level, so it must be done first.

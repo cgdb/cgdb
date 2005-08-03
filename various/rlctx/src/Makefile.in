@@ -36,8 +36,6 @@ NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
 host_triplet = @host@
-@USE_PACKAGED_READLINE_TRUE@am__append_1 = -I$(top_srcdir)/readline-5.0
-@USE_PACKAGED_READLINE_TRUE@am__append_2 = $(top_builddir)/readline-5.0/libreadline.a $(top_builddir)/readline-5.0/libhistory.a
 ACLOCAL = @ACLOCAL@
 AMDEP_FALSE = @AMDEP_FALSE@
 AMDEP_TRUE = @AMDEP_TRUE@
@@ -83,13 +81,9 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 RANLIB = @RANLIB@
-READLINE_DIR = @READLINE_DIR@
-READLINE_LIBRARY = @READLINE_LIBRARY@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
-USE_PACKAGED_READLINE_FALSE = @USE_PACKAGED_READLINE_FALSE@
-USE_PACKAGED_READLINE_TRUE = @USE_PACKAGED_READLINE_TRUE@
 VERSION = @VERSION@
 YACC = @YACC@
 ac_ct_CC = @ac_ct_CC@
@@ -125,14 +119,13 @@ prefix = @prefix@
 program_transform_name = @program_transform_name@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
-subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 AM_CFLAGS = -g -Wall \
 -I$(top_srcdir)/various/util/include \
 -I$(top_srcdir)/various/adt/include \
--I$(srcdir)/../include\
-$(am__append_1)
+-I$(srcdir)/../include
+
 
 # create the input library
 noinst_LIBRARIES = librlctx.a
@@ -145,7 +138,7 @@ noinst_PROGRAMS = rlctx_driver
 
 # This is the input driver
 rlctx_driver_LDFLAGS = -L. -L$(top_builddir)/various/util/src -L$(top_builddir)/various/rlctx/src -L$(top_builddir)/various/adt/src
-rlctx_driver_LDADD = -lrlctx -ladt -lutil $(am__append_2)
+rlctx_driver_LDADD = -lrlctx -ladt -lutil
 rlctx_driver_SOURCES = rlctx_driver.c
 rlctx_driver_DEPENDENCIES = $(top_builddir)/various/util/src $(top_builddir)/various/rlctx/src $(top_builddir)/various/adt/src
 rlctx_driver_CFLAGS = $(AM_CFLAGS)

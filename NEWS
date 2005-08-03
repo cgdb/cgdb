@@ -5,12 +5,6 @@
    * CGDB is now capable of setting a temporary breakpoint thanks to Marcel Lanz.
    He sent in a patch with the functionality. Hitting 't' set's a temporary breakpoint.
    
-   * CGDB now packages readline internally. By default it uses the 
-   packaged readline and links against it statically. This should greatly
-   ease the installation burden when readline is not installed on a system.
-   Alternativly, you can still use the system readline with the configure
-   --with-readline[=PREFIX] option.
-   
    * It was reported that the "Windows" Key would cause CGDB to shut down.
    This has been fixed.
    

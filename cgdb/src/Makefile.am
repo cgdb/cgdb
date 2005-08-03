@@ -22,9 +22,6 @@ cgdb_LDFLAGS = \
 -L$(top_builddir)/tgdb/gdbmi/src
 
 cgdb_LDADD = -ltgdb -lannotate_two -lgdbmi -ltokenizer -lrlctx -lkui -ladt -lutil
-if USE_PACKAGED_READLINE
-cgdb_LDADD+=$(top_builddir)/readline-5.0/libreadline.a $(top_builddir)/readline-5.0/libhistory.a
-endif
 
 cgdb_SOURCES = \
 cgdb.c \

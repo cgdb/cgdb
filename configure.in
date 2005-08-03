@@ -55,12 +55,6 @@ AC_ARG_WITH(ncurses, AC_HELP_STRING([--with-ncurses=PREFIX], [Use system install
 AC_ARG_WITH(curses, AC_HELP_STRING([--with-curses=PREFIX], [Use system installed curses library]), opt_with_curses_prefix=$withval use_ncurses_library=no)
 AC_ARG_WITH(readline, AC_HELP_STRING([--with-readline=PREFIX], [Use system installed readline library]), opt_with_readline_prefix=$withval)
 
-#dnl Used for debugging to look at the config options
-#dnl echo "OPT_WITH_NCURSES_PREFIX=$opt_with_ncurses_prefix"
-#dnl echo "OPT_WITH_CURSES_PREFIX=$opt_with_curses_prefix"
-#dnl echo "OPT_WITH_READLINE_PREFIX=$opt_with_readline_prefix"
-#dnl echo "WITH_NCURSES=$use_ncurses_library"
-
 dnl ncurses-prefix argument
 if test "$opt_with_ncurses_prefix" != "no"; then
   # If set to "yes", it is on the compilers include path.
@@ -114,22 +108,25 @@ dnl Checks for header files.
 AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
 
+dnl The code below is in case we want to package readline with CGDB
 dnl If using the internal readline package, tell the Makefile.am's
-AM_CONDITIONAL(USE_PACKAGED_READLINE, test "$opt_with_readline_prefix" = "no")
+dnl AM_CONDITIONAL(USE_PACKAGED_READLINE, test "$opt_with_readline_prefix" = "no")
+dnl # If using system readline, then configure for it
+dnl if test "$opt_with_readline_prefix" = "no"; then
+dnl AC_CONFIG_SUBDIRS(readline-5.0)
+dnl AC_SUBST(READLINE_DIR,readline-5.0)
+dnl AC_SUBST(READLINE_LIBRARY,1)
+dnl AC_DEFINE(HAVE_LIBREADLINE, 1, [internal readline package])
+dnl AC_DEFINE(HAVE_READLINE_HISTORY, 1, [internal  history package])
+dnl AC_DEFINE(HAVE_READLINE_H, 1, [readline history header])
+dnl AC_DEFINE(HAVE_HISTORY_H, 1, [readline history header])
+dnl AC_DEFINE(READLINE_LIBRARY, 1, [internal readline define])
+dnl else
+dnl VL_LIB_READLINE
+dnl fi
 
-# If using system readline, then configure for it
-if test "$opt_with_readline_prefix" = "no"; then
-AC_CONFIG_SUBDIRS(readline-5.0)
-AC_SUBST(READLINE_DIR,readline-5.0)
-AC_SUBST(READLINE_LIBRARY,1)
-AC_DEFINE(HAVE_LIBREADLINE, 1, [internal readline package])
-AC_DEFINE(HAVE_READLINE_HISTORY, 1, [internal  history package])
-AC_DEFINE(HAVE_READLINE_H, 1, [readline history header])
-AC_DEFINE(HAVE_HISTORY_H, 1, [readline history header])
-AC_DEFINE(READLINE_LIBRARY, 1, [internal readline define])
-else
+dnl Configure readline
 VL_LIB_READLINE
-fi
 
 dnl determine if terminal headers are available for tgdb
 AC_CHECK_HEADERS(pty.h sys/stropts.h termios.h sys/select.h)
