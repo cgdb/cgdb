@@ -1,3 +1,7 @@
+   * CGDB now can detect the version of readline that it is going to link against.
+   By doing this, it can alert the user at configure time if the readline version
+   is OK to build CGDB with. If it is not OK, configure will fail.
+   
    * CGDB has changed it's user interface in a way that is not backwards compatible.
    The 't' key, now sets a temporary breakpoint. The 't' key used to put CGDB into 
    insert mode in the TTY window. Now 'I' does that.

@@ -183,6 +183,15 @@
 /* Define as the return type of signal handlers (`int' or `void'). */
 #undef RETSIGTYPE
 
+/* encoded version of the installed readline library */
+#undef RL_READLINE_VERSION
+
+/* major version of installed readline library */
+#undef RL_VERSION_MAJOR
+
+/* minor version of installed readline library */
+#undef RL_VERSION_MINOR
+
 /* Define to 1 if the `setpgrp' function takes no argument. */
 #undef SETPGRP_VOID
 

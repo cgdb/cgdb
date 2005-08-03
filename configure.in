@@ -128,6 +128,14 @@ dnl fi
 dnl Configure readline
 VL_LIB_READLINE
 
+dnl Make sure there is a version of readline that CGDB supports.
+RL_LIB_READLINE_VERSION
+case "$ac_cv_rl_version" in
+4.2|4.3|5*|6*|7*|8*|9*) ;;
+*)      AC_MSG_ERROR([CGDB requires GNU readline 4.2 or greater to link])
+	;;
+esac
+
 dnl determine if terminal headers are available for tgdb
 AC_CHECK_HEADERS(pty.h sys/stropts.h termios.h sys/select.h)
 
