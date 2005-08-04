@@ -785,18 +785,20 @@ int commands_prepare_for_command (
     return 0;
 }
 
-/* commands_create_command:
- * ------------------------
- *
+/** 
  * This is responsible for creating a command to run through the debugger.
  *
- * com  - The annotate command to run
- * data - Information that may be needed to create the command
+ * \param com 
+ * The annotate command to run
  *
- * Returns - A command ready to be run through the debugger.
- *           NULL on error
+ * \param data 
+ * Information that may be needed to create the command
+ *
+ * \return
+ * A command ready to be run through the debugger or NULL on error.
+ * The memory is malloc'd, and must be freed.
  */
-static const char *commands_create_command ( 
+static char *commands_create_command ( 
 	struct commands *c,
     enum annotate_commands com,
     const char *data) {
@@ -904,7 +906,7 @@ int commands_issue_command (
 		enum annotate_commands com, 
 		const char *data, 
 		int oob) {
-    const char *ncom = commands_create_command ( c, com, data );
+    char *ncom = commands_create_command ( c, com, data );
     struct tgdb_client_command *client_command = NULL;
     enum annotate_commands *nacom = (enum annotate_commands *)xmalloc ( sizeof ( enum annotate_commands ) );
     
@@ -944,6 +946,11 @@ int commands_issue_command (
                 TGDB_CLIENT_COMMAND_DISPLAY_COMMAND_AND_RESULTS,
                 TGDB_CLIENT_COMMAND_ACTION_NONE,
                 (void*) nacom ); 
+    }
+
+    if (ncom) {
+      free (ncom);
+      ncom = NULL;
     }
 
 	/* Append to the command_container the commands */
