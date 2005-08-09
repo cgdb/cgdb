@@ -34,11 +34,44 @@ Some features offered by CGDB are:<P>
 <B>News</b><BR>
 <BLOCKQUOTE>
 
+  <I>Aug 8, 2005</i><BR>
+  <BLOCKQUOTE>
+  CGDB v0.5.3 was released today, see the <A Href="download.shtml">download 
+  page</a> to try it out. This contains many new fixes and several features.
+  <BR>
+  The configure script now checks the version of readline on the system to ensure
+  that there is a new enough version of readline for CGDB to link against. This
+  could potentially simplify the install process of CGDB.
+  <BR>
+  <BR>
+  However, more importantly, CGDB has slightly changed its user interface, even
+  though the change is not backwards compatible. The 't' key in the source 
+  window now sets a temporary breakpoint at that line. The 't' key used to
+  put CGDB into insert mode in the TTY window, now 'I' does that. Hopefully this
+  change will not effect to many people. If this change bothers you, please let
+  us know on the cgdb-users mailing list. Marcel Lanz added the temporary 
+  breakpoint functionality.
+  <BR>
+  Unfortunately, the "Windows" key would cause CGDB to shut down, this is now
+  fixed. Why does anyone hit that key anyways?
+  <BR>
+  A new feature has been added to CGDB that is very nice. It is the arrowsytle 
+  configuration option. CGDB now supports several ways of displaying the current
+  line in CGDB. You can choose short, long or hightlight. The default value is
+  short, which is what you are used to if you have been using CGDB.
+  A longer arrow is available for easier readability. This is my personal favorite.
+  Also, there is the highlight option, which draws no arrow at all. Instead it
+  draws the entire line in inverse video.
+  <BR>
+  The CGDB Team hopes you enjoy the new release. As usual, thanks for reporting
+  bugs and sending in contributions.
+  </blockquote>
+
   <I>May 21, 2005</i><BR>
   <BLOCKQUOTE>
   CGDB v0.5.2 was released today, see the <A Href="download.shtml">download 
   page</a> to try it out. This contains a very important bug fix for almost
-  every OS except for Linux. CGDB would hang on startup, in an infinate loop
+  every OS except for Linux. CGDB would hang on startup, in an infinite loop
   while waiting for input from STDIN. This bug has been fixed, and works as
   far as I can tell. Hopefully I'll have more time to work on CGDB related 
   tasks over the next few months. Please let us know if there are any features
@@ -74,14 +107,14 @@ Some features offered by CGDB are:<P>
   some that prevent CGDB from crashing When the user would enter many commands,
   in the time it took GDB to respond to one, CGDB would get confused, and a
   crash could occur. This is now fixed. Also, there were some silly off by
-  one crash's. 
+  one crashes. 
   <BR>
   <BR>
   Finally, the reason CGDB is bumped up to .5.0 is because libkui has been
   successfully implemented. This was 1 out of the 4 libraries that were 
   necessary in order to make CGDB a very usable, configurable curses front
   end. There is more info below on the four libraries that are going to be 
-  devleloped for CGDB. The new library removes a few keystroke bugs that used 
+  developed for CGDB. The new library removes a few keystroke bugs that used 
   to bother me that I could never track down in the old code. Also, in the 
   near future, vim style 'map' commands should be easy to implement. After 
   all, that was one of the whole points of libkui.

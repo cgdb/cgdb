@@ -1,3 +1,5 @@
+version 0.5.3 (08/08/2005):
+
 08/03/2005 Bob Rossi <bob@brasko.net>
 
 	* annotate-two/src/commands.c (commands_create_command): Take const
