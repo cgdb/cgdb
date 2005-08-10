@@ -1,3 +1,8 @@
+   * Ben Schomp reported that the new autoconf macro that detects the 
+     version of readline is slightly incorrect. It would not understand
+     that the version 4.2a is OK. The match has been changed from 4.2 to
+     4.2*. This should resolve that problem.
+
 cgdb-0.5.3 (08/08/2005)
 
    * CGDB now can detect the version of readline that it is going to link against.

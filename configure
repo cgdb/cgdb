@@ -1585,7 +1585,7 @@ fi
 
 # Define the identity of the package.
  PACKAGE=cgdb
- VERSION=0.5.3
+ VERSION=0.5.3-cvs
 
 
 cat >>confdefs.h <<_ACEOF
@@ -5305,7 +5305,7 @@ echo "${ECHO_T}$ac_cv_rl_version" >&6
 fi
 
 case "$ac_cv_rl_version" in
-4.2|4.3|5*|6*|7*|8*|9*) ;;
+4.2*|4.3*|5*|6*|7*|8*|9*) ;;
 *)      { { echo "$as_me:$LINENO: error: CGDB requires GNU readline 4.2 or greater to link" >&5
 echo "$as_me: error: CGDB requires GNU readline 4.2 or greater to link" >&2;}
    { (exit 1); exit 1; }; }
