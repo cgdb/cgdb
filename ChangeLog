@@ -1,3 +1,7 @@
+08/12/2005 Bob Rossi <bob@brasko.net>
+
+	* RELEASE_TODO: Add item for next release.
+
 08/10/2005 Bob Rossi <bob@brasko.net>
 
 	* configure.in (RL_LIB_READLINE_VERSION): Detect 4.2a as OK.

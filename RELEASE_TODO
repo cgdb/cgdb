@@ -6,6 +6,9 @@
   should be a runtime option. Check with jonathon to make sure this problem
   is fixed.  (Actually, check on ALL ACS characters, we use several of them.)
 - Use valgrind to get rid of most memory leaks.
+- Add documentation to CGDB. I think texinfo is the prefered way to do this,
+  it generates info and html pages. For man pages, looking at help2man might
+  be a good idea.
 
 Bug fixes for cgdb-0.5.3
 
