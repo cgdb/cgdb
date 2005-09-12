@@ -10,6 +10,8 @@
  * rjklfd
  */
 
+char *string_literal_bugfix = "\\";
+
 #include <stdio.h>
 
 #define TEST 1

@@ -1,3 +1,7 @@
+   * Fix a bug in the c/c++ syntax highlighter. If a file had "\\" as a 
+   string literal, the CGDB syntax tokenizer would be built incorrectly
+   resulting in incorret file highlighting.
+   
    * Ben Schomp reported that the new autoconf macro that detects the 
      version of readline is slightly incorrect. It would not understand
      that the version 4.2a is OK. The match has been changed from 4.2 to
