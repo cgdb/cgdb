@@ -524,7 +524,7 @@ int tgdb_client_open_new_tty (
  * @return
  * tty name on success, otherwise NULL on error.
  */
-char *tgdb_client_get_tty_name ( struct tgdb_client_context *tcc );
+const char *tgdb_client_get_tty_name ( struct tgdb_client_context *tcc );
 
 //@}
 

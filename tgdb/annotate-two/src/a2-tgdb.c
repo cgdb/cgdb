@@ -46,14 +46,20 @@
 #include "ibuf.h"
 #include "annotate_two.h"
 
-static int a2_set_inferior_tty ( void *ctx ) {
-	struct annotate_two *a2 = (struct annotate_two *)ctx;
+static int 
+a2_set_inferior_tty (void *ctx)
+{
+  struct annotate_two *a2 = (struct annotate_two *)ctx;
+  if (!a2) {
+    logger_write_pos (logger, __FILE__, __LINE__, "a2_set_inferior_tty error");
+    return -1;
+  }
 
     if ( commands_issue_command ( 
 				a2->c, 
 				a2->client_command_list,
 				ANNOTATE_TTY, 
-				a2->inferior_tty_name, 
+				pty_pair_get_slavename (a2->pty_pair), 
 				0 ) == -1 ) {
         logger_write_pos ( logger, __FILE__, __LINE__, "commands_issue_command error");
         return -1;
@@ -74,25 +80,19 @@ static char *a2_tgdb_commands[] = {
 };
 
 
-static int close_inferior_connection ( void *ctx ) {
-	struct annotate_two *a2 = (struct annotate_two *)ctx;
+static int 
+close_inferior_connection (void *ctx)
+{
+  struct annotate_two *a2 = (struct annotate_two *)ctx;
+  if (!a2) {
+    logger_write_pos (logger, __FILE__, __LINE__, "close_inferior_connection error");
+    return -1;
+  }
 
-	if ( a2->inferior_stdin != -1 )
-		xclose ( a2->inferior_stdin );
+  if (a2->pty_pair)
+    pty_pair_destroy (a2->pty_pair);
 
-	a2->inferior_stdin = -1;
-	a2->inferior_out   = -1;
-	
-	/* close tty connection */
-	if ( a2->inferior_slave_fd != -1 )
-		xclose ( a2->inferior_slave_fd );
-
-	a2->inferior_slave_fd = -1;
-
-	if ( a2->inferior_tty_name[0] != '\0' )
-		pty_release ( a2->inferior_tty_name );
-
-	return 0;
+  return 0;
 }
 
 /* Here are the two functions that deal with getting tty information out
@@ -105,25 +105,32 @@ int a2_open_new_tty (
 		int *inferior_stdout ) {
 	struct annotate_two *a2 = (struct annotate_two *)ctx;
 
-    close_inferior_connection(a2);
+  close_inferior_connection(a2);
 
-	/* Open up the tty communication */
-	if ( util_new_tty(&(a2->inferior_stdin), &(a2->inferior_slave_fd), a2->inferior_tty_name) == -1){
-		logger_write_pos ( logger, __FILE__, __LINE__, "Could not open child tty");
-		return -1;
-	}
+  a2->pty_pair = pty_pair_create ();
+  if (!a2->pty_pair) {
+    logger_write_pos ( logger, __FILE__, __LINE__, "pty_pair_create failed");
+    return -1;
+  }
 
-	*inferior_stdin     = a2->inferior_stdin;
-	*inferior_stdout    = a2->inferior_stdin;
+  *inferior_stdin = pty_pair_get_masterfd (a2->pty_pair);
+  *inferior_stdout = pty_pair_get_masterfd (a2->pty_pair);
 
-    a2_set_inferior_tty ( a2 );
+  a2_set_inferior_tty (a2);
     
-    return 0;
+  return 0;
 }
 
-char *a2_get_tty_name ( void *ctx ) {
-	struct annotate_two *a2 = (struct annotate_two *)ctx;
-	return a2->inferior_tty_name;
+const char *
+a2_get_tty_name (void *ctx)
+{
+  struct annotate_two *a2 = (struct annotate_two *)ctx;
+  if (!a2) {
+    logger_write_pos ( logger, __FILE__, __LINE__, "a2_get_tty_name failed");
+    return NULL;
+  }
+
+  return pty_pair_get_slavename (a2->pty_pair);
 }
 
 /* initialize_annotate_two
@@ -138,10 +145,7 @@ static struct annotate_two *initialize_annotate_two ( void ) {
 	a2->debugger_stdin 		= -1;
 	a2->debugger_out 		= -1;
 
-	a2->inferior_stdin      = -1;
-	a2->inferior_out 	    = -1;
-	a2->inferior_slave_fd   = -1;
-	a2->inferior_tty_name[0]= '\0';
+	a2->pty_pair = NULL;
 
 	/* null terminate */
 	a2->config_dir[0] 		= '\0';

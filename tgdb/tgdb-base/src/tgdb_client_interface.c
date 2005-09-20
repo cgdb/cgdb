@@ -96,7 +96,7 @@ static struct tgdb_client_debugger_interfaces {
 			int *inferior_stdin, 
 			int *inferior_stdout );
 
-	char *(*tgdb_client_get_tty_name) ( 
+	const char *(*tgdb_client_get_tty_name) ( 
 			void *ctx );
 
 } tgdb_client_debugger_interfaces[] = {
@@ -498,7 +498,7 @@ int tgdb_client_open_new_tty (
 			inferior_stdin, inferior_stdout );
 }
 
-char *tgdb_client_get_tty_name ( struct tgdb_client_context *tcc ) {
+const char *tgdb_client_get_tty_name ( struct tgdb_client_context *tcc ) {
 	if ( tcc == NULL || tcc->tgdb_client_interface == NULL ) {
 		logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_client_get_tty_name unimplemented" );
 		return NULL;

@@ -18,7 +18,7 @@ void short_func(void){
 
 void long_func(void){
    int k = 0;
-   sleep(3);
+   sleep(5);
    k = 1;
    k = 2;
 }

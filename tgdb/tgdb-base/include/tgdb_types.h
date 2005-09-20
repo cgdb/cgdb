@@ -34,6 +34,9 @@ extern "C" {
 
 #include "tgdb_list.h"
 
+/* A reference to a command that has been created by TGDB */
+struct tgdb_command;
+
 /**
  *  This is the commands interface used between the front end and TGDB.
  *  When TGDB is responding to a request or when an event is being generated
@@ -102,6 +105,14 @@ enum INTERFACE_COMMANDS {
 	TGDB_INFERIOR_EXITED,
 
  	/**
+	 * This returns a list of all the completions.
+	 *
+	 * This is a 'struct tgdb_list *'
+	 * It contains a const char* for each completion.
+	 */
+	TGDB_UPDATE_COMPLETIONS,
+
+ 	/**
 	 * This happens when gdb quits.
      * libtgdb is done. 
      * You will get no more responses after this one.
@@ -111,14 +122,14 @@ enum INTERFACE_COMMANDS {
 };
 
 /**
- * A single TGDB command for the front end.
+ * A single TGDB response for the front end.
  * This is the smallest unit of information that TGDB can return to the front 
  * end.
  */
-struct tgdb_command {
+struct tgdb_response {
 
  	/** 
- 	 * This is the type of command.
+ 	 * This is the type of response.
  	 */
    enum INTERFACE_COMMANDS header;
 
@@ -131,7 +142,7 @@ struct tgdb_command {
 /******************************************************************************/
 /**
  * @name Utilitly commands to run on a command.
- * These functions take a 'struct tgdb_command' as a parameter.
+ * These functions take a 'struct tgdb_response' as a parameter.
  */
 /******************************************************************************/
 
@@ -143,7 +154,7 @@ struct tgdb_command {
  * It is currently used for debugging purposes.
  *
  * \param command
- * The command to print. It should be of type 'struct tgdb_command'
+ * The command to print. It should be of type 'struct tgdb_response'
  *
  * @return
  * Will return -1 if the print command failed. Otherwise, 0.
@@ -155,7 +166,7 @@ int tgdb_types_print_command ( void *command );
  * These are the commands that are returned to the front end.
  *
  * \param command
- * The command to print. It should be of type 'struct tgdb_command'
+ * The command to print. It should be of type 'struct tgdb_response'
  * 
  * @return
  * Will return -1 if free'ing failed. Otherwise, 0.

@@ -24,7 +24,7 @@ proc set_overload_breakpoint { function } {
 	send "break $function\n"
 
 	expect {
-		-re "\\\[0\\\] cancel.*\\\[1\\\] all.*\\\[2\\\] $function\[(\].*\[)\] at $source_file:.*\\\[3\\\] $function\[(\].*\[)\] at $source_file:.*> " { 
+		-re "\\\[0\\\] cancel.*\\\[1\\\] all.*\\\[2\\\] $function\[(\].*\[)\] at .*$source_file:.*\\\[3\\\] $function\[(\].*\[)\] at .*$source_file:.*> " { 
 			pass "overloaded breakpoint $function"
 		}
 		timeout { 

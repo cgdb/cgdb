@@ -21,7 +21,6 @@
 #include "queue.h"
 #include "ibuf.h"
 #include "a2-tgdb.h"
-#include "rlctx.h"
 #include "queue.h"
 #include "tgdb_list.h"
 #include "annotate_two.h"
@@ -109,7 +108,7 @@ struct commands {
 
 	//@}
 	
-	/** 'info sources' information */
+	// info sources information {{{
 	//@{
 
 	/** 
@@ -128,6 +127,28 @@ struct commands {
 	struct tgdb_list *inferior_source_files;
 
 	//@}
+	// }}}
+	
+	// tab completion information {{{
+	//@{
+
+	/** 
+	 * ??? Finished parsing the data being looked for.
+	 */
+	int tab_completion_ready;
+
+	/**
+	 * A tab completion item
+	 */
+	struct ibuf *tab_completion_string;
+
+	/**
+	 * All of the tab completion items, parsed in put in a list, 1 at a time.
+	 */
+	struct tgdb_list *tab_completions;
+
+	//@}
+	// }}}
 
 	/** 
 	 * The absolute path prefix output by GDB when 'info source' is given
@@ -175,6 +196,10 @@ struct commands *commands_initialize(void) {
     c->info_sources_string 	= ibuf_init();
 	c->inferior_source_files= tgdb_list_init ();
 
+	c->tab_completion_ready 		= 0;
+    c->tab_completion_string 	= ibuf_init();
+	c->tab_completions= tgdb_list_init ();
+
 	c->source_prefix 		= "Located in ";
 	c->source_prefix_length = 11;
 
@@ -182,6 +207,33 @@ struct commands *commands_initialize(void) {
 	c->source_relative_prefix_length 	= 23;
 
 	return c;
+}
+
+int free_breakpoint (void *item) {
+  struct tgdb_breakpoint *bp = (struct tgdb_breakpoint *)item;
+  if (bp->file) {
+    free (bp->file);
+    bp->file = NULL;
+  }
+
+  if (bp->funcname) {
+    free (bp->funcname);
+    bp->funcname = NULL;
+  }
+
+  free (bp);
+  bp = NULL;
+
+  return 0;
+}
+
+int free_char_star (void *item) {
+  char *s = (char *)item;
+
+  free (s);
+  s = NULL;
+
+  return 0;
 }
 
 void commands_shutdown ( struct commands *c ) {
@@ -194,13 +246,20 @@ void commands_shutdown ( struct commands *c ) {
 	ibuf_free ( c->line_number );
 	c->line_number = NULL;
 
-	/* TODO: free breakpoint queue */
+	tgdb_list_free (c->breakpoint_list, free_breakpoint);
+	tgdb_list_destroy (c->breakpoint_list);
 
 	ibuf_free ( c->breakpoint_string );
 	c->breakpoint_string = NULL;
 
+	ibuf_free ( c->info_source_string );
+	c->info_source_string = NULL;
+
 	ibuf_free ( c->info_sources_string );
 	c->info_sources_string = NULL;
+
+	tgdb_list_free (c->inferior_source_files, free_char_star);
+	tgdb_list_destroy (c->inferior_source_files);
 	
 	/* TODO: free source_files queue */
 
@@ -622,6 +681,28 @@ static void commands_process_sources(struct commands *c, char a){
     }
 }
 
+static void 
+commands_process_completion(struct commands *c ){
+  const char *ptr = ibuf_get (c->tab_completion_string);
+  tgdb_list_append (c->tab_completions, strdup (ptr));
+}
+
+/* process's source files */
+static void 
+commands_process_complete (struct commands *c, char a)
+{
+  ibuf_addchar(c->tab_completion_string, a);
+   
+  if(a == '\n'){
+    ibuf_delchar(c->tab_completion_string); /* remove '\n' and null terminate */
+
+    if (ibuf_length (c->tab_completion_string) > 0)
+      commands_process_completion(c); 
+
+    ibuf_clear(c->tab_completion_string);
+  }
+}
+
 void commands_free(struct commands *c, void *item) {
     free((char*)item);
 }
@@ -629,16 +710,29 @@ void commands_free(struct commands *c, void *item) {
 void commands_send_gui_sources (
 		struct commands *c, 
 		struct tgdb_list *list){
-	/* If the inferior program was not compiled with debug, then no sources
-	 * will be available. If no sources are available, do not return the
-	 * TGDB_UPDATE_SOURCE_FILES command. */
-	if ( tgdb_list_size ( c->inferior_source_files ) > 0 )
-		tgdb_types_append_command ( list, TGDB_UPDATE_SOURCE_FILES, c->inferior_source_files );
+  /* If the inferior program was not compiled with debug, then no sources
+   * will be available. If no sources are available, do not return the
+   * TGDB_UPDATE_SOURCE_FILES command. */
+  if (tgdb_list_size ( c->inferior_source_files ) > 0)
+    tgdb_types_append_command (list, TGDB_UPDATE_SOURCE_FILES, c->inferior_source_files);
+}
+
+
+void commands_send_gui_completions (
+		struct commands *c, 
+		struct tgdb_list *list){
+  /* If the inferior program was not compiled with debug, then no sources
+   * will be available. If no sources are available, do not return the
+   * TGDB_UPDATE_SOURCE_FILES command. */
+//  if (tgdb_list_size ( c->tab_completions ) > 0)
+    tgdb_types_append_command (list, TGDB_UPDATE_COMPLETIONS, c->tab_completions);
 }
 
 void commands_process ( struct commands *c, char a, struct tgdb_list *list){
     if(commands_get_state(c) == INFO_SOURCES){
         commands_process_sources(c, a);     
+    } else if(commands_get_state(c) == COMPLETE){
+        commands_process_complete(c, a);     
     } else if(commands_get_state(c) == INFO_LIST){
         /* do nothing with data */
     } else if(commands_get_state(c) == INFO_SOURCE_ABSOLUTE 
@@ -674,7 +768,10 @@ static void commands_prepare_info_breakpoints( struct commands *c ) {
  * This prepares the tab completion command
  */
 static void commands_prepare_tab_completion ( struct annotate_two *a2, struct commands *c ) {
-    data_set_state ( a2, USER_COMMAND );
+  c->tab_completion_ready = 0;
+  ibuf_clear(c->tab_completion_string);
+  commands_set_state(c, COMPLETE, NULL);
+  global_set_start_completion ( a2->g );
 }
 
 /* commands_prepare_info_sources: 
@@ -768,10 +865,9 @@ int commands_prepare_for_command (
         case ANNOTATE_COMPLETE:
             commands_prepare_tab_completion ( a2, c );
             io_debug_write_fmt("<%s\n>", com->tgdb_client_command_data);
-            return 0;
             break;  /* Nothing to do */
-		case ANNOTATE_INFO_SOURCE:
-		case ANNOTATE_SET_PROMPT:
+	case ANNOTATE_INFO_SOURCE:
+	case ANNOTATE_SET_PROMPT:
         case ANNOTATE_VOID:
 			break;
         default:
@@ -943,7 +1039,7 @@ int commands_issue_command (
         client_command = tgdb_client_command_create ( 
                 ncom,
                 TGDB_CLIENT_COMMAND_NORMAL,
-                TGDB_CLIENT_COMMAND_DISPLAY_COMMAND_AND_RESULTS,
+                TGDB_CLIENT_COMMAND_DISPLAY_NOTHING,
                 TGDB_CLIENT_COMMAND_ACTION_NONE,
                 (void*) nacom ); 
     }

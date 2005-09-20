@@ -36,7 +36,7 @@ set test "source file"
 send "info source\n"
 expect {
 	-re "No current source file."	{ fail "$test" }
-	-re "Current source file is $source_file.*$tgdb_prompt" { pass "$test" }
+	-re "Current source file is .*$source_file.*$tgdb_prompt$" { pass "$test" }
 	timeout {
 		fail "timeout $test"
 	}

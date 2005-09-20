@@ -495,8 +495,21 @@ int source_del(struct sviewer *sview, const char *path)
     free(cur->buf.tlines);
     free(cur->orig_buf.tlines);
 
+    /* Release the breakpoints */
+    if (cur->buf.breakpts) {
+      free (cur->buf.breakpts);
+      cur->buf.breakpts = NULL;
+    }
+
     /* Release file name */
     free(cur->path);
+    cur->path = NULL;
+
+    /* Release local file name */
+    if (cur->lpath) {
+	free(cur->lpath);
+	cur->lpath = NULL;
+    }
         
     /* Remove link from list */
     if (cur == sview->list_head)

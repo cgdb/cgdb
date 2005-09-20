@@ -18,6 +18,10 @@ void global_set_start_info_sources(struct globals *g);
 int global_has_info_sources_started(struct globals *g);
 void global_reset_info_sources_started(struct globals *g);
 
+void global_set_start_completion(struct globals *g);
+int global_has_completion_started(struct globals *g);
+void global_reset_completion_started(struct globals *g);
+
  /* Lists a file */
 void global_set_start_list(struct globals *g);
 int global_has_list_started(struct globals *g);

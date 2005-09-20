@@ -22,71 +22,107 @@ if [gdb_file_cmd ${file}] then {
 	exit 1
 }
 
-# testing the ^c signal
+# testing the ^c signal, "abc^c"
 set test "priming for signal"
 send "abc"
-
 expect {
-	-re "abc" { }
-	timeout {
-		fail "timeout $test"
-	}
+  -re "^abc$" { }
+  timeout {
+    fail "timeout $test"
+  }
 }
 
 send "\3"
-
 expect {
-	-re "Quit.*$tgdb_prompt" { pass "control_c passed" } 
-
-	timeout {
-		fail "timeout $test"
-	}
+  -re "^Quit\[\r\n\]+$tgdb_prompt$" { pass "control_c passed" } 
+  timeout {
+    fail "timeout $test"
+  }
 }
 
+# Make sure a following signal also works.
 send "\3"
-
 expect {
-	-re "Quit.*$tgdb_prompt" { pass "control_c passed" }
-
-	timeout {
-		fail "timeout $test"
-	}
+  -re "^Quit\[\r\n\]+$tgdb_prompt$" { pass "control_c passed" }
+  timeout {
+    fail "timeout $test"
+  }
 }
 
+# Test that 'b main^c' will work. Also, make sure the data didn't go 
+# into the history.
 send "b main"
-
 expect {
-	-re "b main" { }
-	timeout {
-		fail "timeout $test"
-	}
+  -re "^b main$" { }
+  timeout {
+    fail "timeout $test"
+  }
 }
 
 send "\3"
-
 expect {
-	-re "Quit.*$tgdb_prompt" { pass "control_c passed"}
-
-	timeout {
-		fail "timeout $test"
-	}
+  -re "^Quit\[\r\n\]+$tgdb_prompt$" { pass "control_c passed"}
+  timeout {
+    fail "timeout $test"
+  }
 }
-
 
 # Set a breakpoint at main and run
-#set function "main"
-#if [gdb_breakpoint ${function}] then {
-#	exit 1
-#}
-#
-## Run the program
-#set test "run"
-#send "r\n"
-#expect {
-#	-re "Starting program.*$source_file_name.*$tgdb_prompt" { pass "$test" }
-#
-#	-re ".*No executable file specified.*$tgdb_prompt" { fail "$test" }
-#	timeout {
-#		fail "timeout $test"
-#	}
-#}
+set function "main"
+if [gdb_breakpoint ${function}] then {
+	exit 1
+}
+
+# Run the program
+set test "run"
+send "r\n"
+expect {
+  -re "Starting program.*$source_file_name.*$tgdb_prompt" { pass "$test" }
+
+  -re ".*No executable file specified.*$tgdb_prompt" { fail "$test" }
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+# The next few test are to make sure that if you 
+# 1. run a command
+# 2. type another command, but interupt it with ^c
+# 3. Run "\n" to make sure the original command is the command run,
+#    The command that was interuppted should go away forever.
+
+# Run "info address" 
+send "info address\n";
+expect {
+  -re "info address\[\r\n\]+Argument required\.\[\r\n\]+$tgdb_prompt$" {}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+# Send "b nex^c", make sure it doesn't go into history.
+send "b nex"
+expect {
+  -re "^b nex$" { }
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+send "\3"
+expect {
+  -re "^Quit\[\r\n\]+$tgdb_prompt$" {}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+# This makes sure that the previous command that was interupted by a signal did
+# not make it into readline's history
+send "\n"
+expect {
+    -re "\[\r\n\]+Argument required\.\[\r\n\]+$tgdb_prompt$" { pass "interuppted command did not enter history" }
+    timeout {
+	fail "timeout $test"
+    }
+}

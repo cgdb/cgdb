@@ -73,6 +73,7 @@ struct state_machine *state_machine_initialize ( void ) {
 }
 
 void state_machine_shutdown ( struct state_machine *sm ) {
+    ibuf_free (sm->tgdb_buffer);
 	free ( sm );
 	sm = NULL;
 }
