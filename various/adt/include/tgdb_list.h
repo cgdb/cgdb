@@ -15,6 +15,17 @@ typedef int (*tgdb_list_func)(void *item);
  */
 struct tgdb_list *tgdb_list_init ( void );
 
+/*
+ * Destory a list
+ *
+ * \param list
+ * The list to destroy
+ *
+ * \return
+ * 0 on success or -1 on error.
+ */
+int tgdb_list_destroy (struct tgdb_list *list);
+
 /* 
  * Appends item to the end of the list.
  * 

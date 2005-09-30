@@ -1,3 +1,7 @@
+09/30/2005 Bob Rossi <bob@brasko.net>
+
+	* kui_term.c (kui_term_print_cgdb_key_array): Fixed code typo.
+
 version 0.5.3 (08/08/2005):
 
 08/02/2005 Bob Rossi <bob@brasko.net>

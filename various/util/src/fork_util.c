@@ -40,95 +40,80 @@
 #include "pseudo.h"
 #include "logger.h"
 
-/* free_memory: utility function that frees up memory.
- *
- * s:       if NULL, left alone, otherwise pty_release is called on it
- * fd:      if -1, left alone, otherwise close is called on it
- * argc:    The number of items in argv
- * argv:    free is called on each of these
- *
- * Returns -1 if any call fails, otherwise 0
- */
-static int pty_free_memory(char *s, int fd, int argc, char *argv[]) {
-    int error = 0, i;
+struct pty_pair {
+  int masterfd;
+  int slavefd;
+  char slavename[SLAVE_SIZE];
+};
 
-    if ( s && pty_release(s) == -1) {
-        logger_write_pos ( logger, __FILE__, __LINE__, "pty_release failed");
-        error = -1;
-    }
+pty_pair_ptr 
+pty_pair_create (void)
+{
+  int val;
+  static char local_slavename[SLAVE_SIZE];
+  pty_pair_ptr ptr = (pty_pair_ptr)xmalloc (sizeof (struct pty_pair));
+  if (!ptr)
+    return NULL;
 
-    if ( fd != -1 && close(fd) == -1) {
-        logger_write_pos ( logger, __FILE__, __LINE__, "close failed");
-        error = -1;
-    }
+  ptr->masterfd = -1;
+  ptr->slavefd = -1;
+  ptr->slavename[0] = 0;
 
-    /* Free the local list */
-    for (i = 0; i < argc; i++)
-        free(argv[i]);
+  val = pty_open (&(ptr->masterfd), &(ptr->slavefd), local_slavename, SLAVE_SIZE, NULL, NULL);
+  if (val == -1) {
+    logger_write_pos ( logger, __FILE__, __LINE__, "PTY open");
+    return NULL;   
+  }
 
-    free(argv);
+  strncpy(ptr->slavename, local_slavename, SLAVE_SIZE);
 
-    return error;
+  return ptr;
 }
 
-int invoke_pty_process_function( 
-            char *slavename, int *masterfd, int *extra_input,
-            int (*entry)(int)) {
+int 
+pty_pair_destroy (pty_pair_ptr pty_pair)
+{
+  if (!pty_pair)
+    return -1;
 
-    pid_t pid;          /* PID of child process (gdb) to be returned */
-    int pin[2] = { -1, -1 };
+  xclose(pty_pair->masterfd);
+  xclose(pty_pair->slavefd);
 
-    /* Create an input pipe to the child program */
-    if ( pipe(pin) == -1 ) {
-        logger_write_pos ( logger, __FILE__, __LINE__, "pipe failed");
-        return -1;
-    }
-        
-    /* Fork into two processes with a shared pty pipe */
-    pid = pty_fork(masterfd, slavename, SLAVE_SIZE, NULL, NULL);
-   
-    if ( pid == -1 ) {          /* error, free memory and return  */
-        logger_write_pos ( logger, __FILE__, __LINE__, "pty_fork failed");
-        pty_free_memory(slavename, *masterfd, 0, NULL);
-        return -1;
-    } else if ( pid == 0 ) {    /* child */
-        xclose(pin[1]);
+  if (pty_release (pty_pair->slavename) == -1) {
+    logger_write_pos ( logger, __FILE__, __LINE__, "pty_release error");
+    return -1;   
+  }
 
-        /* Call entry point to new program */
-        entry(pin[0]);
-        
-        exit(-1);
-    }
+  free (pty_pair);
 
-    xclose(pin[0]);
-    *extra_input = pin[1];
-
-    return pid;
+  return 0;
 }
 
-int util_new_tty(int *masterfd, int *slavefd, char *sname) {
-   static char local_slavename[SLAVE_SIZE];
+int 
+pty_pair_get_masterfd (pty_pair_ptr pty_pair)
+{
+  if (!pty_pair)
+    return -1;
 
-   if ( pty_open(masterfd, slavefd, local_slavename, SLAVE_SIZE, NULL, NULL) == -1){
-      logger_write_pos ( logger, __FILE__, __LINE__, "PTY open");
-      return -1;   
-   }
-
-   strncpy(sname, local_slavename, SLAVE_SIZE);
-   return 0;
+  return pty_pair->masterfd;
 }
 
-int util_free_tty(int *masterfd, int *slavefd, const char *sname) {
+int 
+pty_pair_get_slavefd (pty_pair_ptr pty_pair)
+{
+  if (!pty_pair)
+    return -1;
 
-   xclose(*masterfd);
-   xclose(*slavefd);
+  return pty_pair->slavefd;
+}
 
-   if ( pty_release(sname) == -1 ) {
-      logger_write_pos ( logger, __FILE__, __LINE__, "pty_release error");
-      return -1;   
-   }
-   
-   return 0;
+const char *
+pty_pair_get_slavename (pty_pair_ptr pty_pair)
+{
+  if (!pty_pair)
+    return NULL;
+
+  return pty_pair->slavename;
 }
 
 int pty_free_process(int *masterfd, char *sname) {
@@ -143,6 +128,15 @@ int pty_free_process(int *masterfd, char *sname) {
    return 0;
 }
 
+/** 
+ * Utility function that frees up memory.
+ *
+ * \param argc
+ * The number of items in argv
+ *
+ * \param argv
+ * free is called on each of these
+ */
 void free_memory(int argc, char *argv[]) {
     int i;
 
@@ -168,10 +162,11 @@ int invoke_debugger(
     char **local_argv;
     int i, j = 0, extra = 6;
     int pin[2] = { -1, -1 }, pout[2] = { -1, -1 };
+    int malloc_size = argc + extra;
 
     /* Copy the argv into the local_argv, and NULL terminate it.
      * sneak in the path name, the user did not type that */
-    local_argv = (char **) xmalloc((argc+extra) * sizeof(char *));
+    local_argv = (char **) xmalloc((malloc_size) * sizeof(char *));
     if ( path )
         local_argv[j++] = xstrdup(path);
     else
@@ -200,13 +195,13 @@ int invoke_debugger(
 
     if ( pipe(pin) == -1 ) {
         logger_write_pos ( logger, __FILE__, __LINE__, "pipe failed");
-        free_memory(argc, local_argv);
+        free_memory(malloc_size, local_argv);
         return -1;
     }
 
     if ( pipe(pout) == -1 ) {
         logger_write_pos ( logger, __FILE__, __LINE__, "pipe failed");
-        free_memory(argc, local_argv);
+        free_memory(malloc_size, local_argv);
         return -1;
     }
 
@@ -224,7 +219,7 @@ int invoke_debugger(
         /* Make the stdout and stderr go to this pipe */
         if ( (dup2(pout[1], STDOUT_FILENO)) == -1) {
             logger_write_pos ( logger, __FILE__, __LINE__, "dup failed");
-            free_memory(argc, local_argv);
+            free_memory(malloc_size, local_argv);
             return -1;
         }
         xclose(pout[1]);
@@ -232,14 +227,14 @@ int invoke_debugger(
         /* Make stdout and stderr go to the same fd */
         if ( dup2(STDOUT_FILENO, STDERR_FILENO) == -1 ) {
             logger_write_pos ( logger, __FILE__, __LINE__, "dup2 failed");
-            free_memory(argc, local_argv);
+            free_memory(malloc_size, local_argv);
             return -1;
         }
 
         /* Make programs stdin be this pipe */
         if ( (dup2(pin[0], STDIN_FILENO)) == -1) {
             logger_write_pos ( logger, __FILE__, __LINE__, "dup failed");
-            free_memory(argc, local_argv);
+            free_memory(malloc_size, local_argv);
             return -1;
         }
 
@@ -259,6 +254,6 @@ int invoke_debugger(
     xclose(pin[0]);
     *out = pout[0];
     xclose(pout[1]);
-    free_memory(argc, local_argv);
+    free_memory(malloc_size, local_argv);
     return pid;
 }

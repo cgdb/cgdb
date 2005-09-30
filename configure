@@ -5305,9 +5305,15 @@ echo "${ECHO_T}$ac_cv_rl_version" >&6
 fi
 
 case "$ac_cv_rl_version" in
-4.2*|4.3*|5*|6*|7*|8*|9*) ;;
-*)      { { echo "$as_me:$LINENO: error: CGDB requires GNU readline 4.2 or greater to link" >&5
-echo "$as_me: error: CGDB requires GNU readline 4.2 or greater to link" >&2;}
+5.1*|5.2*|5.3*|5.4*|5.5*|5.6*|5.7*|5.8*|5.9*|6*|7*|8*|9*) ;;
+*)      { { echo "$as_me:$LINENO: error: CGDB requires GNU readline 5.1 or greater to link.
+  If you used --with-readline instead of using the system readline library,
+  make sure to set the correct readline library on the linker search path
+  via LD_LIBRARY_PATH or some other facility." >&5
+echo "$as_me: error: CGDB requires GNU readline 5.1 or greater to link.
+  If you used --with-readline instead of using the system readline library,
+  make sure to set the correct readline library on the linker search path
+  via LD_LIBRARY_PATH or some other facility." >&2;}
    { (exit 1); exit 1; }; }
 	;;
 esac
@@ -6939,7 +6945,7 @@ fi
 done
 
 
-                                                                                                                                                                                                                                                ac_config_files="$ac_config_files Makefile various/Makefile various/util/Makefile various/util/src/Makefile various/adt/Makefile various/adt/src/Makefile various/rlctx/Makefile various/rlctx/src/Makefile tgdb/Makefile tgdb/annotate-two/Makefile tgdb/annotate-two/src/Makefile tgdb/gdbmi/Makefile tgdb/gdbmi/src/Makefile tgdb/tgdb-base/Makefile tgdb/tgdb-base/src/Makefile cgdb/Makefile cgdb/src/Makefile cgdb/lib/Makefile cgdb/lib/kui/Makefile cgdb/lib/kui/src/Makefile cgdb/lib/wm/Makefile cgdb/lib/wm/src/Makefile cgdb/tokenizer/Makefile cgdb/tokenizer/src/Makefile"
+                                                                                                                                                                                                                                                ac_config_files="$ac_config_files Makefile various/Makefile various/util/Makefile various/util/src/Makefile various/adt/Makefile various/adt/src/Makefile various/rline/Makefile various/rline/src/Makefile tgdb/Makefile tgdb/annotate-two/Makefile tgdb/annotate-two/src/Makefile tgdb/gdbmi/Makefile tgdb/gdbmi/src/Makefile tgdb/tgdb-base/Makefile tgdb/tgdb-base/src/Makefile cgdb/Makefile cgdb/src/Makefile cgdb/lib/Makefile cgdb/lib/kui/Makefile cgdb/lib/kui/src/Makefile cgdb/lib/wm/Makefile cgdb/lib/wm/src/Makefile cgdb/tokenizer/Makefile cgdb/tokenizer/src/Makefile"
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -7502,8 +7508,8 @@ do
   "various/util/src/Makefile" ) CONFIG_FILES="$CONFIG_FILES various/util/src/Makefile" ;;
   "various/adt/Makefile" ) CONFIG_FILES="$CONFIG_FILES various/adt/Makefile" ;;
   "various/adt/src/Makefile" ) CONFIG_FILES="$CONFIG_FILES various/adt/src/Makefile" ;;
-  "various/rlctx/Makefile" ) CONFIG_FILES="$CONFIG_FILES various/rlctx/Makefile" ;;
-  "various/rlctx/src/Makefile" ) CONFIG_FILES="$CONFIG_FILES various/rlctx/src/Makefile" ;;
+  "various/rline/Makefile" ) CONFIG_FILES="$CONFIG_FILES various/rline/Makefile" ;;
+  "various/rline/src/Makefile" ) CONFIG_FILES="$CONFIG_FILES various/rline/src/Makefile" ;;
   "tgdb/Makefile" ) CONFIG_FILES="$CONFIG_FILES tgdb/Makefile" ;;
   "tgdb/annotate-two/Makefile" ) CONFIG_FILES="$CONFIG_FILES tgdb/annotate-two/Makefile" ;;
   "tgdb/annotate-two/src/Makefile" ) CONFIG_FILES="$CONFIG_FILES tgdb/annotate-two/src/Makefile" ;;

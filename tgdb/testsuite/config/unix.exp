@@ -6,7 +6,8 @@ set timeout 3
 global TGDB_DRIVER
 
 if ![info exists TGDB_DRIVER] {
-	set TGDB_DRIVER [findfile $base_dir/../../progs/tgdb_driver "$base_dir/../../progs/tgdb_driver"]
+#	set TGDB_DRIVER [findfile $base_dir/../../../objdir "tgdb_driver"]
+	set TGDB_DRIVER "../../tgdb/tgdb-base/src/tgdb_driver"
 }
 
 if ![info exists tgdb_prompt] then {

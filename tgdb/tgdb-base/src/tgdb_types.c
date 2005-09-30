@@ -27,7 +27,7 @@
 #include "queue.h"
 
 static int tgdb_types_print_item ( void *command ) {
-	struct tgdb_command *com = ( struct tgdb_command * ) command;
+	struct tgdb_response *com = ( struct tgdb_response * ) command;
     FILE *fd = stderr;
 
     if ( !com ) {
@@ -118,6 +118,23 @@ static int tgdb_types_print_item ( void *command ) {
 				fprintf ( fd, "TGDB_INFERIOR_EXITED(%d)\n", *status );
 				break;
 			}
+        case TGDB_UPDATE_COMPLETIONS:
+            {
+				struct tgdb_list *list = ( struct tgdb_list *) com->data;
+				tgdb_list_iterator *i;
+                char *s;
+
+				fprintf ( fd, "completions start\n" );
+				i = tgdb_list_get_first ( list );
+
+                while ( i ) {
+					s = (char*)tgdb_list_get_item ( i );
+                    fprintf ( fd, "TGDB_UPDATE_COMPLETION (%s)\n", s );
+					i = tgdb_list_next ( i );
+                }
+				fprintf ( fd, "completions end\n" );
+            	break;
+            }
         case TGDB_QUIT:
 			{
 				struct tgdb_debugger_exit_status *status = 
@@ -147,13 +164,13 @@ static int tgdb_types_breakpoint_free ( void *data ) {
 
 static int tgdb_types_source_files_free ( void *data ) {
 	char *s = (char*)data;
-	free ( s );
+	free (s);
 	s = NULL;
 	return 0;
 }
 
 static int tgdb_types_delete_item ( void *command ){
-	struct tgdb_command *com = ( struct tgdb_command * ) command;
+	struct tgdb_response *com = ( struct tgdb_response * ) command;
 
     if ( !com )
         return -1;
@@ -210,6 +227,12 @@ static int tgdb_types_delete_item ( void *command ){
 				status = NULL;
 			}
            	break;
+        case TGDB_UPDATE_COMPLETIONS:
+		{
+			struct tgdb_list *list = ( struct tgdb_list *) com->data;
+			tgdb_list_free ( list, tgdb_types_source_files_free );
+			break;
+		}
         case TGDB_QUIT:
 		{
 			struct tgdb_debugger_exit_status *status = 
@@ -237,8 +260,8 @@ void tgdb_types_append_command(
 	struct tgdb_list *command_list, 
 	enum INTERFACE_COMMANDS new_header, 
 	void *ndata){
-    struct tgdb_command *item = (struct tgdb_command *)
-			xmalloc(sizeof(struct tgdb_command));
+    struct tgdb_response *item = (struct tgdb_response *)
+			xmalloc(sizeof(struct tgdb_response));
     item->header = new_header;
     item->data = ndata;
 	tgdb_list_append ( command_list, item );

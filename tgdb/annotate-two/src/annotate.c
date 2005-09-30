@@ -18,8 +18,7 @@
 #include "io.h"
 
 static int handle_source(struct annotate_two *a2, const char *buf,  size_t n, struct tgdb_list *list){
-   int ret = commands_parse_source(
-		   a2->c, a2->client_command_list, buf, n, list);
+   int ret = commands_parse_source(a2->c, a2->client_command_list, buf, n, list);
 
    /* This tells the annotate subsystem if the source annotation has been
 	* reached. This is important because if the source annotation has been 
@@ -76,6 +75,13 @@ static int handle_prompt(struct annotate_two *a2, const char *buf, size_t n, str
    if(global_has_info_sources_started(a2->g) == TRUE){
       global_reset_info_sources_started(a2->g);
       commands_send_gui_sources(a2->c, list);
+      return 0;
+   } 
+
+   /* 'complete' is done, return the completions to the gui */
+   if(global_has_completion_started(a2->g) == TRUE){
+      global_reset_completion_started(a2->g);
+      commands_send_gui_completions(a2->c, list);
       return 0;
    } 
 

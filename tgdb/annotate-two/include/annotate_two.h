@@ -11,6 +11,7 @@
 
 #include "tgdb_client_command.h"
 #include "fs_util.h"
+#include "fork_util.h" /* For pty_pair_ptr */
 
 #define TTY_NAME_SIZE 64
 
@@ -33,22 +34,10 @@ struct annotate_two {
      * Reading from reads the stdout/stderr of the debugger
 	 */
 	int debugger_out;
+
+	/** The master, slave and slavename of the pty device */
+	pty_pair_ptr pty_pair;
 	
-	/**
-     * writing to this will write to the stdin of the inferior
-	 */
-	int inferior_stdin;  
-
-	/**
-	 * Reading from reads the stdout/stderr of the inferior
-	 */
-	int inferior_out;
-
-	/**
-	 * Only kept around so it can be closed properly
-	 */
-	int inferior_slave_fd;
-
 	/** 
 	 * pid of child process.
 	 */
@@ -89,11 +78,6 @@ struct annotate_two {
 	 * This module is used for keeping shared global data
 	 */
 	struct globals *g;
-
-	/**
-	 * The name of the inferior tty.
-	 */
-	char inferior_tty_name[TTY_NAME_SIZE];
 
 	/** 
 	 * This is a list of all the commands generated since in the last call. 

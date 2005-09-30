@@ -444,7 +444,7 @@ int a2_open_new_tty ( void *ctx, int *inferior_stdin, int *inferior_stdout );
  * @return
  * tty name on success, otherwise NULL on error.
  */
-char *a2_get_tty_name ( void *ctx );
+const char *a2_get_tty_name ( void *ctx );
 
 //@}
 

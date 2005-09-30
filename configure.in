@@ -129,10 +129,14 @@ dnl Configure readline
 VL_LIB_READLINE
 
 dnl Make sure there is a version of readline that CGDB supports.
+dnl Simply putting 5.1* -> 5.9* just to take into accout future versions.
 RL_LIB_READLINE_VERSION
 case "$ac_cv_rl_version" in
-4.2*|4.3*|5*|6*|7*|8*|9*) ;;
-*)      AC_MSG_ERROR([CGDB requires GNU readline 4.2 or greater to link])
+5.1*|5.2*|5.3*|5.4*|5.5*|5.6*|5.7*|5.8*|5.9*|6*|7*|8*|9*) ;;
+*)      AC_MSG_ERROR([CGDB requires GNU readline 5.1 or greater to link.
+  If you used --with-readline instead of using the system readline library, 
+  make sure to set the correct readline library on the linker search path 
+  via LD_LIBRARY_PATH or some other facility.])
 	;;
 esac
 
@@ -174,7 +178,7 @@ AC_OUTPUT(Makefile \
 various/Makefile \
 various/util/Makefile various/util/src/Makefile \
 various/adt/Makefile various/adt/src/Makefile \
-various/rlctx/Makefile various/rlctx/src/Makefile \
+various/rline/Makefile various/rline/src/Makefile \
 tgdb/Makefile \
 tgdb/annotate-two/Makefile tgdb/annotate-two/src/Makefile \
 tgdb/gdbmi/Makefile tgdb/gdbmi/src/Makefile \

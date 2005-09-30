@@ -19,15 +19,16 @@
 #include "tgdb_client_command.h"
 #include "sys_util.h"
 
-struct tgdb_queue_command *tgdb_command_create (    
+struct tgdb_command *tgdb_command_create (    
 		const char *tgdb_command_data,
         enum tgdb_command_choice command_choice, 
         enum tgdb_command_action_choice action_choice,
-		struct tgdb_client_command *tcc ) {
+		struct tgdb_client_command *tcc,
+       int is_buffered_console_command) {
 
-	struct tgdb_queue_command *tc;
+	struct tgdb_command *tc;
 
-	tc = (struct tgdb_queue_command *)xmalloc ( sizeof ( struct tgdb_queue_command ) );
+	tc = (struct tgdb_command *)xmalloc ( sizeof ( struct tgdb_command ) );
 
 	if ( tgdb_command_data )
 		tc->tgdb_command_data = strdup ( tgdb_command_data );
@@ -37,12 +38,13 @@ struct tgdb_queue_command *tgdb_command_create (
 	tc->command_choice = command_choice;
 	tc->action_choice  = action_choice;
 	tc->client_command = tcc;
+	tc->is_buffered_console_command = is_buffered_console_command;
 
 	return tc;
 }
         
 void tgdb_command_destroy ( void *item) {
-	struct tgdb_queue_command *tc = (struct tgdb_queue_command *) item;
+	struct tgdb_command *tc = (struct tgdb_command *) item;
 	
 	tgdb_client_command_destroy ( tc->client_command );
 	tc->client_command = NULL;

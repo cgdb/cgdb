@@ -20,6 +20,8 @@ enum COMMAND_STATE {
 
    /* Related to the 'info sources' command */
    INFO_SOURCES,
+   /* Related to the 'server complete' command for tab completion */
+   COMPLETE,
 
    /* Related to the 'info source' command */
    INFO_LIST,
@@ -116,6 +118,14 @@ void commands_list_command_finished (
  *    com   -> commands to give back to gdb.
  */
 void commands_send_gui_sources (
+		struct commands *c, 
+		struct tgdb_list *list);
+
+/* This gives the gui all of the completions that were just read from gdb 
+ * through a 'complete' command.
+ *
+ */
+void commands_send_gui_completions (
 		struct commands *c, 
 		struct tgdb_list *list);
 

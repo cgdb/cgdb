@@ -35,22 +35,33 @@ expect {
 }
 
 # Test out buffering of commands
+# This is kind of crazy, look at the command to see what is sent. It makes sure that
+# each of the commands were buffered and sent in order. It also makes sure that
+# when the proper command was run, the correct command was put on the GDB prompt.
+# Also, it leaves the nex, at the end.
 set test "buffering commands"
-send "n\n\n\n\n\n\n"
+send "n\n\n\n\n\nnext\nn\n\n\nnex"
 expect {
-	-re ".*$tgdb_prompt.*ABCDEFGHI.*$tgdb_prompt.*ABCDEFGH.*$tgdb_prompt.*ABCDEFG.*$tgdb_prompt" { pass "$test" }
+  -re "^n\[\r\n\]+next\[\r\n\]+n\[\r\n\]+nex$tgdb_prompt\[\r\n\]+$tgdb_prompt\[\r\n\]+$tgdb_prompt\[\r\n\]+ABCDEFGHI\[\r\n\]+$tgdb_prompt\[\r\n\]+ABCDEFGH\[\r\n\]+${tgdb_prompt}next\[\r\n\]+ABCDEFG\[\r\n\]+${tgdb_prompt}n\[\r\n\]+ABCDEF\[\r\n\]+$tgdb_prompt\[\r\n\]+ABCDE\[\r\n\]+$tgdb_prompt\[\r\n\]+ABCD\[\r\n\]+${tgdb_prompt}nex$" { pass $test }
 
-	timeout {
-		fail "timeout $test"
-	}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+send "t\n"
+expect {
+  -re "t\[\r\n\]+ABC\[\r\n\]+$tgdb_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
 }
 
 set test "sink_after_buffered_commands"
 send "next\n"
 expect {
-	-re ".*ABCDEF.*$tgdb_prompt" { pass "$test" }
-
-	timeout {
-		fail "timeout $test"
-	}
+  -re "next\[\r\n\]+AB\[\r\n\]+$tgdb_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
 }

@@ -22,6 +22,8 @@ struct globals {
 	 */
 	unsigned short info_sources_started;
 
+	unsigned short completion_started;
+
 	/** 
 	 * Has the 'list' command been started.
 	 */
@@ -42,6 +44,7 @@ struct globals *globals_initialize ( void ) {
 	struct globals *g = (struct globals *)xmalloc ( sizeof ( struct globals ) );
 
 	g->info_sources_started = FALSE;
+	g->completion_started = FALSE;
 	g->list_started 		= FALSE;
 	g->list_had_error 		= FALSE;
 	g->misc_prompt_command  = FALSE;
@@ -76,6 +79,18 @@ int global_has_info_sources_started(struct globals *g){
 
 void global_reset_info_sources_started(struct globals *g){
    g->info_sources_started = FALSE;
+}
+
+void global_set_start_completion( struct globals *g){
+   g->completion_started = TRUE;
+}
+
+int global_has_completion_started(struct globals *g){
+   return g->completion_started;
+}
+
+void global_reset_completion_started(struct globals *g){
+   g->completion_started = FALSE;
 }
 
 /* For list_started */

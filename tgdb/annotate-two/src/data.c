@@ -86,51 +86,53 @@ static int tgdb_initialize_annotation_state ( struct annotate_two *a2 ) {
 }
 
 void data_set_state ( struct annotate_two *a2, enum internal_state state ) {
-   /* if tgdb is at an internal command, than nothing changes that
-    * state unless tgdb gets to the prompt annotation. This means that
-    * the internal command is done */
-   if(a2->data->data_state == INTERNAL_COMMAND && state != USER_AT_PROMPT )
-       return;
+  /* if tgdb is at an internal command, than nothing changes that
+   * state unless tgdb gets to the prompt annotation. This means that
+   * the internal command is done */
+  if(a2->data->data_state == INTERNAL_COMMAND && state != USER_AT_PROMPT )
+    return;
 
-   a2->data->data_state = state;
-   switch(a2->data->data_state){
-      case VOID:              break;
-      case AT_PROMPT:         
-         a2->data->gdb_prompt_size = 0;
+  a2->data->data_state = state;
 
-		 if ( !a2->first_prompt_reached ) {
-			 tgdb_initialize_annotation_state ( a2 );
-			a2->first_prompt_reached = 1;	
-		 }
-         break;
-      case USER_AT_PROMPT:    
-         /* Null-Terminate the prompt */
-         a2->data->gdb_prompt[a2->data->gdb_prompt_size] = '\0';  
+  switch(a2->data->data_state){
+    case VOID:
+      break;
+    case AT_PROMPT:         
+      a2->data->gdb_prompt_size = 0;
 
-         if ( strcmp(a2->data->gdb_prompt, a2->data->gdb_prompt_last) != 0 ) {
-            strcpy(a2->data->gdb_prompt_last, a2->data->gdb_prompt);
-            /* Update the prompt */
-            a2_change_prompt(a2, a2->data->gdb_prompt_last);
-         }
+      if ( !a2->first_prompt_reached ) {
+	tgdb_initialize_annotation_state ( a2 );
+	a2->first_prompt_reached = 1;	
+      }
+      break;
+    case USER_AT_PROMPT:    
+      /* Null-Terminate the prompt */
+      a2->data->gdb_prompt[a2->data->gdb_prompt_size] = '\0';  
 
-		 a2->command_finished = 1;
+      if ( strcmp(a2->data->gdb_prompt, a2->data->gdb_prompt_last) != 0 ) {
+	strcpy(a2->data->gdb_prompt_last, a2->data->gdb_prompt);
+	/* Update the prompt */
+	a2_change_prompt(a2, a2->data->gdb_prompt_last);
+      }
 
-		 /* This is important, because it resets the commands state.
-		  * With this line not here, if the user hits 'o' from cgdb,
-		  * then the commands state gets set to INFO_SOURCES, then the
-		  * user hits ^c from the gdb window, the error occurs because 
-		  * commands state is INFO_SOURCES instead of VOID.
-		  */
-		 commands_set_state ( a2->c, VOID, NULL );
+      a2->command_finished = 1;
 
-         break;
-      case POST_PROMPT:    
-            a2->data->data_state = VOID;
-            break;
-      case GUI_COMMAND:    break;
-      case INTERNAL_COMMAND: break;
-      case USER_COMMAND: break;
-   } /* end switch */
+      /* This is important, because it resets the commands state.
+       * With this line not here, if the user hits 'o' from cgdb,
+       * then the commands state gets set to INFO_SOURCES, then the
+       * user hits ^c from the gdb window, the error occurs because 
+       * commands state is INFO_SOURCES instead of VOID.
+       */
+      commands_set_state ( a2->c, VOID, NULL );
+
+      break;
+    case POST_PROMPT:    
+      a2->data->data_state = VOID;
+      break;
+    case GUI_COMMAND:    break;
+    case INTERNAL_COMMAND: break;
+    case USER_COMMAND: break;
+  } /* end switch */
 }
 
 void data_process (
@@ -141,7 +143,7 @@ void data_process (
         case VOID:    buf[(*n)++] = a;   break;
         case AT_PROMPT:         
             a2->data->gdb_prompt[a2->data->gdb_prompt_size++] = a;  
-            buf[(*n)++] = a;
+//            buf[(*n)++] = a;
             break;
         case USER_AT_PROMPT:             break;
         case GUI_COMMAND:

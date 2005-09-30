@@ -27,12 +27,6 @@ extern "C" {
 // }}}
 
 // Createing and Destroying a libtgdb context. {{{
-
-/**
- *  This struct is a reference to a libtgdb instance.
- */
-struct tgdb;
-
 /******************************************************************************/
 /**
  * @name Createing and Destroying a libtgdb context.
@@ -41,6 +35,11 @@ struct tgdb;
 /******************************************************************************/
 
 //@{
+
+/**
+ *  This struct is a reference to a libtgdb instance.
+ */
+struct tgdb;
 
 /**
  * This initializes a tgdb library instance. It starts up the debugger and 
@@ -65,16 +64,13 @@ struct tgdb;
  * \param inferior_fd
  * The descriptor to the I/O of the program being debugged.
  *
- * \param readline_fd
- * The descriptor to the readline I/O library
- *
  * @return
  * NULL on error, a valid context on success.
  */
 struct tgdb* tgdb_initialize ( 
 	const char *debugger, 
 	int argc, char **argv,
-	int *debugger_fd, int *inferior_fd, int *readline_fd );
+	int *debugger_fd, int *inferior_fd );
 
 /**
  * This will terminate a libtgdb session. No functions should be called on
@@ -87,6 +83,72 @@ struct tgdb* tgdb_initialize (
  * 0 on success or -1 on error
  */
 int tgdb_shutdown ( struct tgdb *tgdb );
+
+//@}
+// }}}
+
+// Callbacks {{{
+/******************************************************************************/
+/**
+ * @name Callbacks Commands
+ * These are functions that TGDB will call when it has data to give to the
+ * front end. If the front end set's this data up, TGDB will call the 
+ * functions when the data becomes available.
+ */
+/******************************************************************************/
+
+//@{
+    typedef void (*prompt_change) (const char *new_prompt);
+
+    /**
+     * This tell's TGDB what function to call when it has detected that
+     * the the user changed the prompt or if it wants to set the prompt.
+     * The front end can choose any prompt that it wants, and can ignore
+     * this callback if it is not interested in 100% GDB compatibility.
+     *
+     * \param tgdb
+     * An instance of the tgdb library to operate on.
+     *
+     * \param callback
+     * The function to call when TGDB detectst that the prompt has changed.
+     *
+     * \return
+     * 0 on success, or -1 on error
+     */
+    int tgdb_set_prompt_change_callback (struct tgdb *tgdb, prompt_change callback);
+
+    /**
+     * This is the callback interface used below.
+     *
+     * \param command
+     * The console command that was issued by the user to send to the debugger.
+     *
+     * \param is_buffered_console_command
+     * If this command was buffered when it was issued. This is useful because
+     * if the command was buffered, some front ends did not yet have a chance
+     * to put there prompt and command (ie (gdb) b next) for the buffered
+     * command. However, if the command was not buffered, the data could have
+     * already been presented to the user.
+     */
+    typedef void (*prompt_update) (const char *command, const int is_buffered_console_command);
+
+    /**
+     * This is useful when the client needs to print the prompt between 
+     * commands run from the console. It is possible that TGDB buffers many
+     * console commands sent from the front end. If this is the case, before
+     * the next command is sent to the debugger, this callback will be called
+     * so the front end can output the prompt and the command. 
+     *
+     * \param tgdb
+     * An instance of the tgdb library to operate on.
+     *
+     * \param callback
+     * The function to call when TGDB detects that the prompt could be output.
+     *
+     * \return
+     * 0 on success, or -1 on error
+     */
+    int tgdb_set_prompt_update_callback (struct tgdb *tgdb, prompt_update callback);
 
 //@}
 // }}}
@@ -113,6 +175,20 @@ int tgdb_shutdown ( struct tgdb *tgdb );
  */
 char *tgdb_err_msg ( struct tgdb *tgdb );
 
+/**
+ * This will check to see if TGDB is currently capable of receiving another command.
+ * 
+ * \param tgdb
+ * An instance of the tgdb library to operate on.
+ *
+ * \param is_busy
+ * Will return as 1 if tgdb is busy, otherwise 0.
+ *
+ * \return
+ * 0 on success, or -1 on error
+ */
+int tgdb_is_busy (struct tgdb *tgdb, int *is_busy);
+
 //@}
 // }}}
 
@@ -125,20 +201,6 @@ char *tgdb_err_msg ( struct tgdb *tgdb );
 /******************************************************************************/
 
 //@{
-
-/** 
- * This sends a byte of data to the debugger.
- *
- * \param tgdb
- * An instance of the tgdb library to operate on.
- *
- * \param c
- * The character to pass to the debugger.
- *
- * @return
- * 0 on success or -1 on error
- */
-int tgdb_send_debugger_char ( struct tgdb *tgdb, char c );
 
 /**
  * This sends a string of data to the debugger.
@@ -206,23 +268,6 @@ int tgdb_send_inferior_data ( struct tgdb *tgdb, const char *buf, const size_t n
 size_t tgdb_recv_inferior_data ( struct tgdb *tgdb, char *buf, size_t n );
 
 /**
- * Data returned from the command line is returned here.
- * 
- * \param tgdb
- * An instance of the tgdb library to operate on.
- *
- * \param buf
- * The output of the debugger will be returned in this buffer.
- *
- * \param n
- * Tells libtgdb how large the buffer BUF is.
- *
- * @return
- * The number of valid bytes in BUF on success, or -1 on error.
- */
-size_t tgdb_recv_readline_data ( struct tgdb *tgdb, char *buf, size_t n );
-
-/**
  * Gets output from the debugger.
  * Also, at this point, libtgdb returns a list of commands the client 
  * can use.
@@ -256,34 +301,34 @@ size_t tgdb_recv_debugger_data ( struct tgdb *tgdb, char *buf, size_t n );
 //@{
 
 /**
- * Gets a command from TGDB.
+ * Gets a response from TGDB.
  * This should be called after tgdb_recv_debugger_data
  *
  * \param tgdb
  * An instance of the tgdb library to operate on.
  *
  * @return
- * A valid command if commands still exist.
- * Null if no more commands exist.
+ * A valid response if responses still exist.
+ * Null if no more responses exist.
  */
-struct tgdb_command *tgdb_get_command ( struct tgdb *tgdb );
+struct tgdb_response *tgdb_get_response ( struct tgdb *tgdb );
 
 /**
- * This will traverse all of the commands that the context tgdb currently
+ * This will traverse all of the responses that the context tgdb currently
  * has and will print them. It is currently used for debugging purposes.
  *
  * \param tgdb
  * An instance of the tgdb library to operate on.
  */
-void tgdb_traverse_commands ( struct tgdb *tgdb );
+void tgdb_traverse_responses ( struct tgdb *tgdb );
 
 /**
- * This will free all of the memory used by the commands that tgdb returns.
+ * This will free all of the memory used by the responses that tgdb returns.
  *
  * \param tgdb
  * An instance of the tgdb library to operate on.
  */
-void tgdb_delete_commands ( struct tgdb *tgdb );
+void tgdb_delete_responses ( struct tgdb *tgdb );
 
 //@}
 // }}}
@@ -344,7 +389,6 @@ const char *tgdb_tty_name ( struct tgdb *tgdb );
 /******************************************************************************/
 
 //@{
-
 
 /**
  * Gets a list of source files that make up the program being debugged.
@@ -423,6 +467,20 @@ int tgdb_modify_breakpoint (
 		int line, 
 		enum tgdb_breakpoint_action b );
 
+/**
+ * Used to get all of the possible tab completion options for LINE.
+ *
+ * \param tgdb
+ * An instance of the tgdb library to operate on.
+ *
+ * \param line
+ * The line to tab complete.
+ *
+ * \return
+ * 0 on success or -1 on error.
+ */
+int tgdb_complete (struct tgdb *tgdb, const char *line);
+
 //@}
 // }}}
 
@@ -452,48 +510,6 @@ int tgdb_modify_breakpoint (
  * 0 on success or -1 on error
  */
 int tgdb_signal_notification ( struct tgdb *tgdb, int signum );
-
-#if 0
-
-This is not currently supported.
-
-/* Needless to say, libtgdb needs to be able to know when asynchonous events
- * occur. It depends on knowing when certain signals are sent by the user.
- * This happens when the user hits ^c or ^\.
- *
- * To deal with these issues. libtgdb provides two solutions.
- *  1. libtgdb can handle the signals it has interest in.
- *     SIGINT,SIGTERM,SIGQUIT
- *  2. libtgdb can recieve signal notification from the front end.
- *     it will only do special processing on the signals it is interested in.
- *
- *  The default value for libtgdb is too catch signals. So, if this is 
- *  unacceptable for the front end's environment call TGDB_CATCH_SIGNALS.
- */
-
-/* tgdb_catch_signals
- * ------------------
- *
- *  This function tells libtgdb if it should be catching signals or not.
- *  This will return if tgdb was catching signals.
- *
- * tgdb
- * ----
- *  An instance of the tgdb library to operate on.
- *
- * catch_signals
- * -------------
- *  If non-zero, libtgdb will install signals handlers for asynchronous 
- *  events. If 0, libtgdb will depend on notification of signals.
- *
- * Returns
- * -------
- *   non-zero if libtgdb was previously installing custom signal handlers,
- *   otherwise returns 0 if libtgdb is depending on signal notification.
- */
-int tgdb_catch_signals ( struct tgdb *tgdb, int catch_signals );
-
-#endif
 
 //@}
 // }}}

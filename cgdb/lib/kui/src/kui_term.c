@@ -1250,7 +1250,7 @@ int kui_term_print_cgdb_key_array ( int *cgdb_key_array ) {
 	/* Display output buffer */
 	fprintf ( stderr, "CGDB_KEY_ARRAY(");
 
-	for ( i = 0; i < cgdb_key_array[i] != 0; i++ ) {
+	for ( i = 0; cgdb_key_array[i] != 0; i++ ) {
 		int is_ckey;
 
 		is_ckey = kui_term_is_cgdb_key ( cgdb_key_array[i] );

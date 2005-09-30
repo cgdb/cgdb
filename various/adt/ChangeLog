@@ -1,3 +1,8 @@
+09/30/2005 Bob Rossi <bob@brasko.net>
+
+	* include/tgdb_list.h (tgdb_list_destroy): Add function.
+	* src/tgdb_list.c (tgdb_list_destroy): Ditto.
+
 version 0.5.3 (08/08/2005):
 
 08/02/2005 Bob Rossi <bob@brasko.net>

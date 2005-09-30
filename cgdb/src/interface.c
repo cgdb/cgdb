@@ -659,6 +659,8 @@ static void decrease_win_height( int jump_or_tty ) {
 /* signal_handler: Handles the WINCH signal (xterm resize).
  * ---------------
  */
+
+void rl_sigint_recved (void);
 static void signal_handler(int signo) {
     extern int resize_pipe[2];
     if (signo == SIGWINCH){
@@ -668,8 +670,10 @@ static void signal_handler(int signo) {
             resize = 1;
         }
     } else if ( signo == SIGINT || signo == SIGTERM || 
-                signo == SIGQUIT || signo == SIGCHLD )
+                signo == SIGQUIT || signo == SIGCHLD ) {
+      rl_sigint_recved ();
 		tgdb_signal_notification ( tgdb, signo );
+    }
 }
 
 /* if_get_command: Gets a command from the user

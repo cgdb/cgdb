@@ -1,7 +1,6 @@
 AM_CFLAGS = -g -Wall \
 -I$(top_srcdir)/various/util/include \
 -I$(top_srcdir)/various/adt/include \
--I$(top_srcdir)/various/rlctx/include \
 -I$(top_srcdir)/tgdb/tgdb-base/include \
 -I$(srcdir)/../include
 
@@ -19,5 +18,4 @@ state_machine.c
 
 libannotate_two_a_DEPENDENCIES = \
 $(top_builddir)/various/util/src \
-$(top_builddir)/various/adt/src \
-$(top_builddir)/various/rlctx/src
+$(top_builddir)/various/adt/src

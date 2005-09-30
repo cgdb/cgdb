@@ -1,3 +1,11 @@
+09/30/2005 Bob Rossi <bob@brasko.net>
+
+	* unix.exp (TGDB_DRIVER): Select the program to find.
+	* _sanity.exp: Match output.
+	* basic.exp: Check buffering and readline support.
+	* overloaded.exp: Make sure .* is before source file.
+	* signals.exp: Add support for signals.
+
 version 0.5.3 (08/08/2005):
 version 0.5.2 (05/21/2005):
 version 0.5.1 (04/02/2005):

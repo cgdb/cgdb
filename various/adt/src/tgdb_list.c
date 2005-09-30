@@ -26,6 +26,18 @@ struct tgdb_list *tgdb_list_init ( void ) {
 	return list;
 }
 
+int 
+tgdb_list_destroy (struct tgdb_list *list)
+{
+  if (!list)
+    return -1;
+
+  free (list);
+  list = NULL;
+
+  return 0;
+}
+
 /*
  * Can insert any node between 2 other nodes.
  *

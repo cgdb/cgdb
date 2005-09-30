@@ -1,6 +1,16 @@
+   * CGDB now depends on readline 5.1.
+
+   * CGDB no longer needs to do a fork to communicate data back and forth to 
+     readline, it runs readline in it's own process context. This is a huge
+     improvement because it means that when you run CGDB you should only see 1 
+     process executing instead of the usual 2.
+
+   * CGDB now supports tab completion. This has been a long awaited missing feature
+     of CGDB.
+
    * Fix a bug in the c/c++ syntax highlighter. If a file had "\\" as a 
-   string literal, the CGDB syntax tokenizer would be built incorrectly
-   resulting in incorret file highlighting.
+     string literal, the CGDB syntax tokenizer would be built incorrectly
+     resulting in incorret file highlighting.
    
    * Ben Schomp reported that the new autoconf macro that detects the 
      version of readline is slightly incorrect. It would not understand
@@ -8,7 +18,7 @@
      4.2*. This should resolve that problem.
 
 cgdb-0.5.3 (08/08/2005)
-
+   
    * CGDB now can detect the version of readline that it is going to link against.
    By doing this, it can alert the user at configure time if the readline version
    is OK to build CGDB with. If it is not OK, configure will fail.

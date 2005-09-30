@@ -1,3 +1,10 @@
+09/30/2005 Bob Rossi <bob@brasko.net>
+
+	* include/fork_util.h (invoke_process,pty_free_process): Remove
+	functions.
+	(pty_pair_*): Add interface for pty's.
+	* src/fork_util.c: Implement above interface.
+
 version 0.5.3 (08/08/2005):
 
 08/02/2005 Bob Rossi <bob@brasko.net>
