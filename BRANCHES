@@ -1,5 +1,5 @@
 - rl branch
-  Currently in use to get readline removed from TGDB and put into both the 
+  Was in use to get readline removed from TGDB and put into both the 
   driver and CGDB nativly.
 
   DONE
