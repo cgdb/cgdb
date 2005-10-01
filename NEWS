@@ -2,8 +2,6 @@
      purposes. GDB handles this and now CGDB also handles this. Before this,
      CGDB would break if the user attempted to do line continuation.
    
-   * CGDB now depends on readline 5.1.
-
    * CGDB no longer needs to do a fork to communicate data back and forth to 
      readline, it runs readline in it's own process context. This is a huge
      improvement because it means that when you run CGDB you should only see 1 
@@ -11,6 +9,8 @@
 
    * CGDB now supports tab completion. This has been a long awaited missing feature
      of CGDB.
+
+   * CGDB now depends on readline 5.1.
 
    * Fix a bug in the c/c++ syntax highlighter. If a file had "\\" as a 
      string literal, the CGDB syntax tokenizer would be built incorrectly
