@@ -925,7 +925,7 @@ static int kui_findkey (
 
 	int key, retval;
 	int should_continue;
-	struct kui_map *the_map_found;
+	struct kui_map *the_map_found = NULL;
 	int *val;
 	int map_found;
 

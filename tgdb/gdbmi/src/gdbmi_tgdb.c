@@ -437,7 +437,7 @@ int gdbmi_parse_io (
 		struct tgdb_list *list ) {
 	struct tgdb_gdbmi *gdbmi = (struct tgdb_gdbmi *)ctx;
 	int found_command = 0;
-	enum newlinestyle style;
+	enum newlinestyle style = GDBMI_NL;
 
 	ibuf_add ( gdbmi->tgdb_cur_output_command, input_data );
 

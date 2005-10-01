@@ -1,5 +1,9 @@
 09/30/2005 Bob Rossi <bob@brasko.net>
 
+	* gdbmi/src/gdbmi_tgdb.c (gdbmi_parse_io): Initialize sytle variable.
+
+09/30/2005 Bob Rossi <bob@brasko.net>
+
 	* a2-tgdb.h (a2_get_tty_name): Add const qualifier to return val.
 	* annotate_two.h (#include): fork_util.h
 	(struct annotate_two): Replaced fields with pty_pair structure.
