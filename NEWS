@@ -7,8 +7,8 @@
      improvement because it means that when you run CGDB you should only see 1 
      process executing instead of the usual 2.
 
-   * CGDB now supports tab completion. This has been a long awaited missing feature
-     of CGDB.
+   * CGDB now supports tab completion. This has been a long awaited missing 
+     feature of CGDB.
 
    * CGDB now depends on readline 5.1.
 
