@@ -71,6 +71,7 @@
 #include "terminal.h"
 #include "queue.h"
 #include "rline.h"
+#include "ibuf.h"
 
 /* --------------- */
 /* Local Variables */
@@ -103,21 +104,95 @@ char last_relative_file[MAX_LINE];
 static struct rline *rline;
 static int is_tab_completing = 0;
 
+/* Current readline line. If the user enters 'b ma\<NL>in<NL>', where 
+ * NL is the same as the user hitting the enter key, then 2 commands are
+ * received by readline. The first is 'b ma\' and the second is 'in'.
+ *
+ * In general, the user can put a \ as the last char on the line and GDB
+ * accepts this as meaning, "allow me to enter more data on the next line".
+ * The trailing \, does not belong in the command to GDB, it is purely there
+ * to tell GDB that the user wants to enter more data on the next line.
+ *
+ * For this reason, CGDB keeps this buffer. It adds the command the user
+ * is typeing to this buffer. When a line comes that does not end in a \,
+ * then the command is sent to GDB.
+ */
+static struct ibuf *current_line = NULL;
+
+/**
+ * When the user is entering a multi-line command in the GDB window
+ * via the \ char at the end of line, the prompt get's set to "". This
+ * variable is used to remember what the previous prompt was so that it
+ * can be set back when the user has finished entering the line.
+ */
+static char *rline_last_prompt = NULL;
+
 // readline code {{{
+
+/* Please forgive me for adding all the comment below. This function
+ * has some strange bahaviors that I thought should be well explained.
+ */
 void 
 rlctx_send_user_command (char *line)
 {
+  char *cline;
+  int length;
+  char *rline_prompt;
+
   /* This happens when rl_callback_read_char gets EOF */
-  if ( line == NULL )
+  if (line == NULL)
     return;
 
-  /* Don't add the enter command */
-  if ( line && *line != '\0' )
-    rline_add_history (rline, line);
+  /* Add the line passed in to the current line */
+  ibuf_add (current_line, line);
+
+  /* Get current line, and current line length */
+  cline = ibuf_get (current_line);
+  length = ibuf_length (current_line);
+  
+  /* Check to see if the user is escaping the line, to use a 
+   * multi line command. If so, return so that the user can
+   * continue the command. This data should not go into the history
+   * buffer, or be sent to gdb yet. 
+   *
+   * Also, notice the length > 0 condition. (length == 0) can happen 
+   * when the user simply hits Enter on the keyboard. */
+  if (length > 0 && cline[length-1] == '\\') {
+    /* The \ char is for continuation only, it is not meant to be sent
+     * to GDB as a character. */
+    ibuf_delchar (current_line);
+
+    /* Only need to change the prompt the first time the \ char is used.
+     * Doing it a second time would erase the real rline_last_prompt,
+     * since the prompt has already been set to "".
+     */
+    if (!rline_last_prompt) {
+      rline_get_prompt (rline, &rline_prompt);
+      rline_last_prompt = strdup (rline_prompt);
+      /* GDB set's the prompt to nothing when doing continuation.
+       * This is here just for compatibility. */
+      rline_set_prompt (rline, "");
+    }
+
+    return;
+  }
+
+  /* If here, a full command has been sent. Restore the prompt. */
+  if (rline_last_prompt) {
+    rline_set_prompt (rline, rline_last_prompt);
+    free (rline_last_prompt);
+    rline_last_prompt = NULL;
+  }
+
+  /* Don't add the enter command to the history */
+  if (length > 0)
+    rline_add_history (rline, cline);
 
   /* Send this command to TGDB */
-  if ( tgdb_send_debugger_data ( tgdb, line, strlen (line) ) == -1 )
+  if ( tgdb_send_debugger_data ( tgdb, cline, length) == -1 )
     logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_send_user_command\n"); 
+
+  ibuf_clear (current_line);
 }
 
 static int 
@@ -804,6 +879,8 @@ void cleanup()
 	char *log_file, *tmp_log_file;
 	int has_recv_data;
 
+    ibuf_free (current_line);
+
     /* Cleanly scroll the screen up for a prompt */
     scrl(1);
     move(LINES-1, 0);
@@ -880,6 +957,9 @@ int main(int argc, char *argv[]) {
 
     parse_long_options(&argc, &argv);
 
+
+    current_line = ibuf_init ();
+    
     pty_pair = pty_pair_create ();
     if (!pty_pair) {
         fprintf ( stderr, "%s:%d Unable to create PTY pair", __FILE__, __LINE__); 

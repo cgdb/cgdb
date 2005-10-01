@@ -1,5 +1,14 @@
 09/30/2005 Bob Rossi <bob@brasko.net>
 
+	* cgdb.c (#include): Add ibuf.h.
+	(current_line): Add global.
+	(rline_last_prompt): Add global.
+	(rlctx_send_user_command): Update for line continuation.
+	(cleanup): Init current_line buffer.
+
+
+09/30/2005 Bob Rossi <bob@brasko.net>
+
 	* Makefile.am (AM_CFLAGS): Remove rlctx and add rline.
 	(cgdb_LDFLAGS): Ditto.
 	(cgdb_LDADD): Ditto.

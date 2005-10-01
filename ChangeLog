@@ -1,5 +1,9 @@
 09/30/2005 Bob Rossi <bob@brasko.net>
 
+	* NEWS: Update for line continuation compatibility.
+
+09/30/2005 Bob Rossi <bob@brasko.net>
+
 	* NEWS: Update for linking diretly to readline.
 	* configure.in: Only allow readline version 5.1.
 	Remove the rlctx interface and add the rline interface.
