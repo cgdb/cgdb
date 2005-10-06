@@ -1,5 +1,11 @@
-- Strip readline out of TGDB and put it into CGDB. 
-  This is in preparation for removing the rlctx code.
+- What happens if there is no matches for tab completion and you hit
+  tab twice?
+- If you hit 'o', an extra prompt appears at the console. If you set a 
+  breakpoint from the GUI, this doesn't happen. That's because TGDB hacks
+  an extra "\n" into the output stream. This hack needs to go away.
+  Also, the update_prompt callback should go away. TGDB should return the
+  command that it just ran when it's done. The GUI can determine what to
+  do from that command.
 - Look into Crash on Mac (OSX Jaguar).
 - Think about how to handle MAC formatted files on unix.
 - Fix ACS_VLINE problem. This char is not available everywhere and 
@@ -11,6 +17,9 @@
   be a good idea.
 
 Bug fixes for cgdb-0.5.3
+
+- Strip readline out of TGDB and put it into CGDB. 
+  This is in preparation for removing the rlctx code.
 
 Closed:
 
