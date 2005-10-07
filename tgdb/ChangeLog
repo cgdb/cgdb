@@ -1,3 +1,11 @@
+10/06/2005 Bob Rossi <bob@brasko.net>
+
+	* tgdb-base/src/driver.c (term_attributes): Add global.
+	(main): Call tty_get_attributes to get terminal attributes.
+	(main): Call tty_off_xon_xoff on readline's masterfd.
+	(main): Changed call from tty_reset to tty_set_attributes.
+
+
 09/30/2005 Bob Rossi <bob@brasko.net>
 
 	* gdbmi/src/gdbmi_tgdb.c (gdbmi_parse_io): Initialize sytle variable.

@@ -59,6 +59,9 @@ static pty_pair_ptr pty_pair;
 static struct rline *rline;
 static int is_tab_completing = 0;
 
+/* Original terminal attributes */
+static struct termios term_attributes;
+
 static void change_prompt(char *prompt) {
     rline_set_prompt (rline, prompt);
 }
@@ -396,12 +399,16 @@ int main_loop(int gdbfd, int childfd){
 
 int main(int argc, char **argv){
    
-    int gdb_fd, child_fd, slavefd;
+    int gdb_fd, child_fd, slavefd, masterfd;
 
 #if 0
    int c;
    read(0, &c ,1);
 #endif
+   if (tty_get_attributes (STDIN_FILENO, &term_attributes) == -1) {
+     logger_write_pos ( logger, __FILE__, __LINE__, "tty_get_attributes error");
+     return -1;
+   }
 
     if ( tty_cbreak(STDIN_FILENO) == -1 )
         logger_write_pos ( logger, __FILE__, __LINE__, "tty_cbreak error");
@@ -419,6 +426,16 @@ int main(int argc, char **argv){
         fprintf ( stderr, "%s:%d Unable to get slavefd", __FILE__, __LINE__); 
         exit(-1);
       }
+
+    masterfd = pty_pair_get_masterfd (pty_pair);
+    if (masterfd == -1)
+      {
+        fprintf ( stderr, "%s:%d Unable to get masterfd", __FILE__, __LINE__); 
+        exit(-1);
+      }
+
+    if (tty_off_xon_xoff (masterfd) == -1)
+     exit(-1);
       
     rline = rline_initialize (slavefd, rlctx_send_user_command, tab_completion);
 
@@ -459,8 +476,8 @@ int main(int argc, char **argv){
 
 driver_end:
 
-    if ( tty_reset(STDIN_FILENO) == -1 )
-        logger_write_pos ( logger, __FILE__, __LINE__, "tty_reset error");
+    if (tty_set_attributes (STDIN_FILENO, &term_attributes) == -1)
+        logger_write_pos (logger, __FILE__, __LINE__, "tty_reset error");
 
     return 0;
 }

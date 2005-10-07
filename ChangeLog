@@ -1,3 +1,8 @@
+10/06/2005 Bob Rossi <bob@brasko.net>
+
+	* README: Added a small description about control flow.
+	* NEWS: Add note about control flow being supported.
+
 09/30/2005 Bob Rossi <bob@brasko.net>
 
 	* NEWS: Update for line continuation compatibility.

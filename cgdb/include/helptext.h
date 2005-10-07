@@ -195,6 +195,18 @@ static char *cgdb_help_text[] = {
 "",
 "Eventually this file will be used to create macros and high level key ",
 "bindings. Until then, it is a very usefull way to automate simple commands.",
+"",
+"Using Terminal Control Flow in CGDB:",
+"------------------------------------",
+"",
+"A user can typically set there control flow behavior by using the stty ",
+"command like so 'stty -ixon -ixoff'. This will disable control flow on",
+"the terminal where CGDB is started. If you want to turn control flow back ",
+"on you can type 'stty ixon ixoff'. If flow control is on, when the user ",
+"types ^s, the terminal stops. When the user types ^q, the terminal",
+"restarts. When using readline, the ^s character usually does a forward",
+"search. So, if you want to get this, or other functionality out of readline,",
+"simply turn off control flow and start CGDB.",
 NULL
 };
 

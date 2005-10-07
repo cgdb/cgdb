@@ -127,6 +127,9 @@ static struct ibuf *current_line = NULL;
  */
 static char *rline_last_prompt = NULL;
 
+/* Original terminal attributes */
+static struct termios term_attributes;
+
 // readline code {{{
 
 /* Please forgive me for adding all the comment below. This function
@@ -912,7 +915,8 @@ void cleanup()
     /* Shut down debugger */
     tgdb_shutdown( tgdb );
 
-    tty_reset(STDIN_FILENO);
+    if (tty_set_attributes (STDIN_FILENO, &term_attributes) == -1)
+      logger_write_pos (logger, __FILE__, __LINE__, "tty_reset error");
 
 	if ( has_recv_data )
 		fprintf ( stderr, "CGDB had unexpected results, see %s for details.\n", log_file );
@@ -933,9 +937,16 @@ int init_resize_pipe(void) {
 int
 init_readline (void)
 {
-  int slavefd;
+  int slavefd, masterfd;
   slavefd = pty_pair_get_slavefd (pty_pair);
   if (slavefd == -1)
+    return -1;
+
+  masterfd = pty_pair_get_masterfd (pty_pair);
+  if (masterfd == -1)
+    return -1;
+
+  if (tty_off_xon_xoff (masterfd) == -1)
     return -1;
     
   /* The 16 is because I don't know how many char's the directory separator 
@@ -957,6 +968,10 @@ int main(int argc, char *argv[]) {
 
     parse_long_options(&argc, &argv);
 
+   if (tty_get_attributes (STDIN_FILENO, &term_attributes) == -1) {
+     logger_write_pos ( logger, __FILE__, __LINE__, "tty_get_attributes error");
+     return -1;
+   }
 
     current_line = ibuf_init ();
     

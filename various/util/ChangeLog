@@ -1,3 +1,10 @@
+10/06/2005 Bob Rossi <bob@brasko.net>
+  
+	* include/terminal.h (tty_reset): Removed.
+	(tty_get_attributes, tty_set_attributes, tty_off_xon_xoff): Added.
+	* src/terminal.c (tty_reset): Removed.
+	(tty_get_attributes, tty_set_attributes, tty_off_xon_xoff): Added.
+
 09/30/2005 Bob Rossi <bob@brasko.net>
 
 	* include/fork_util.h (invoke_process,pty_free_process): Remove
