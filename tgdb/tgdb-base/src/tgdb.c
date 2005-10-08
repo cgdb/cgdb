@@ -3,12 +3,12 @@
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
-#if HAVE_STDLIB_H 
+#if HAVE_STDLIB_H
 #include <stdlib.h>
-#endif  /* HAVE_STDLIB_H */
+#endif /* HAVE_STDLIB_H */
 
 #if HAVE_SIGNAL_H
-#include <signal.h> /* sig_atomic_t */
+#include <signal.h>		/* sig_atomic_t */
 #endif /* HAVE_SIGNAL_H */
 
 #if HAVE_STRING_H
@@ -32,7 +32,7 @@
 #include "io.h"
 #include "queue.h"
 
-#include "pseudo.h" /* SLAVE_SIZE constant */
+#include "pseudo.h"		/* SLAVE_SIZE constant */
 #include "fork_util.h"
 #include "sys_util.h"
 #include "tgdb_list.h"
@@ -45,143 +45,122 @@ static int num_loggers = 0;
 /**
  * The TGDB context data structure.
  */
-struct tgdb {
+struct tgdb
+{
 
-	/**
-	 * A client context to abstract the debugger.
-	 */
-	struct tgdb_client_context *tcc;
+  /** A client context to abstract the debugger.  */
+  struct tgdb_client_context *tcc;
 
-	/** 
-	 * Reading from this will read from the debugger's output
-	 */
-	int debugger_stdout;
+  /** Reading from this will read from the debugger's output */
+  int debugger_stdout;
 
-	/** 
-	 * Writing to this will write to the debugger's stdin
-	 */
-	int debugger_stdin;
+  /** Writing to this will write to the debugger's stdin */
+  int debugger_stdin;
 
-	/** 
-	 * Reading from this will read the stdout from the program being debugged
-	 */
-	int inferior_stdout;
+  /** Reading from this will read the stdout from the program being debugged */
+  int inferior_stdout;
 
-	/** 
-	 * Writing to this will write to the stdin of the program being debugged 
-	 */
-	int inferior_stdin;
+  /** Writing to this will write to the stdin of the program being debugged */
+  int inferior_stdin;
 
-	/***************************************************************************
-	 * All the queue's the clients can run commands through
-	 **************************************************************************/
+  /***************************************************************************
+   * All the queue's the clients can run commands through
+   **************************************************************************/
 
-	/**
-	 * The commands that need to be run through gdb. 
-	 * Examples are 'b main', 'run', ...
-	 */
-	struct queue *gdb_input_queue;
+  /**
+   The commands that need to be run through gdb. 
+   Examples are 'b main', 'run', ...  */
+  struct queue *gdb_input_queue;
 
-	/** 
-	 * The out of band input queue. 
-	 * These commands should *always* be run first 
-	 * This is a list of commands that TGDB needs to run in order to satisfy itself.
-	 */ 
-	struct queue *oob_input_queue;
+  /** 
+   * The out of band input queue. 
+   * These commands should *always* be run first 
+   * This is a list of commands that TGDB needs to run in order to satisfy itself.
+   */
+  struct queue *oob_input_queue;
 
-	/** 
-	 * This variable needs to be removed from libannotate 
-	 * I don't really know if its usefull anymore.
-	 */
-	unsigned short tgdb_partially_run_command;
+  /** 
+   * This variable needs to be removed from libannotate 
+   * I don't really know if its usefull anymore.  */
+  unsigned short tgdb_partially_run_command;
 
-	/** 
-	 * These are 2 very important state variables.
-	 */
-	 
-	/**
-	 * If set to 1, libtgdb thinks the lower level subsystem is capable of 
-	 * recieving another command. It needs this so that it doesn't send 2
-	 * commands to the lower level before it can say it can't recieve a command.
-	 * At some point, maybe this can be removed?
-	 * When its set to 0, libtgdb thinks it can not send the lower level another
-	 * command.
-	 */
-	int IS_SUBSYSTEM_READY_FOR_NEXT_COMMAND;
+  /** These are 2 very important state variables.  */
 
-	/**
-	 * If ^c was hit by user
-	 */
-	sig_atomic_t control_c; 
+  /**
+   * If set to 1, libtgdb thinks the lower level subsystem is capable of 
+   * recieving another command. It needs this so that it doesn't send 2
+   * commands to the lower level before it can say it can't recieve a command.
+   * At some point, maybe this can be removed?
+   * When its set to 0, libtgdb thinks it can not send the lower level another
+   * command.  */
+  int IS_SUBSYSTEM_READY_FOR_NEXT_COMMAND;
 
-	/**
-	 * This is the last GUI command that has been run.
-	 * It is used to display to the client the GUI commands.
-	 *
-	 * It will either be NULL when it is not set or it should be
-	 * the last GUI command run. If it is non-NULL it should be from the heap.
-	 * As anyone is allowed to call xfree on it.
-	 */
-	char *last_gui_command;
+  /** If ^c was hit by user */
+  sig_atomic_t control_c;
 
-	/**
-	 * This is a TGDB option.
-	 * It determines if the user wants to see the commands the GUI is running.
-	 * 
-	 * If it is 0, the user does not want to see the commands the GUI is 
-	 * running. Otherwise, if it is 1, it does.
-	 */
-	int show_gui_commands;
+  /**
+   * This is the last GUI command that has been run.
+   * It is used to display to the client the GUI commands.
+   *
+   * It will either be NULL when it is not set or it should be
+   * the last GUI command run. If it is non-NULL it should be from the heap.
+   * As anyone is allowed to call xfree on it.  */
+  char *last_gui_command;
 
-	/**
-	 * This is the queue of commands TGDB has currently made to give to the 
-	 * front end.
-	 */
-	struct tgdb_list *command_list;
+  /**
+   * This is a TGDB option.
+   * It determines if the user wants to see the commands the GUI is running.
+   * 
+   * If it is 0, the user does not want to see the commands the GUI is 
+   * running. Otherwise, if it is 1, it does.  */
+  int show_gui_commands;
 
-	/**
-	 * An iterator into command_list.
-	 */
-	tgdb_list_iterator *command_list_iterator;
+  /**
+   * This is the queue of commands TGDB has currently made to give to the 
+   * front end.  */
+  struct tgdb_list *command_list;
 
-    /**
-     * When GDB dies (purposely or not), the SIGCHLD is sent to the application controlling TGDB.
-     * This data structure represents the fact that SIGCHLD has been sent.
-     *
-     * This currently does not need to track if more than 1 SIGCHLD has been received. So
-     * no matter how many are receieved, this will only be 1. Otherwise if none have been
-     * received this will be 0.
-     */
-    int has_sigchld_recv;
+  /** An iterator into command_list. */
+  tgdb_list_iterator *command_list_iterator;
 
-    /**
-     * This is the function that should be called when TGDB has determined
-     * that the prompt has changed.
-     *
-     * If this is NULL, there is no need to call the function.
-     */
-    prompt_change prompt_change_callback;
+  /**
+   * When GDB dies (purposely or not), the SIGCHLD is sent to the application controlling TGDB.
+   * This data structure represents the fact that SIGCHLD has been sent.
+   *
+   * This currently does not need to track if more than 1 SIGCHLD has been received. So
+   * no matter how many are receieved, this will only be 1. Otherwise if none have been
+   * received this will be 0.  */
+  int has_sigchld_recv;
 
-    /**
-     * This is the function that should be called when TGDB has determined
-     * that the prompt could be updated in the FE. It's called right when a 
-     * buffered command is sent.
-     *
-     * If this is NULL, there is no need to call the function.
-     */
-    prompt_update prompt_update_callback;
+  /**
+   * This is the function that should be called when TGDB has determined
+   * that the prompt has changed.
+   *
+   * If this is NULL, there is no need to call the function.  */
+  prompt_change prompt_change_callback;
+
+  /**
+   * This is the function that should be called when TGDB has determined
+   * that the prompt could be updated in the FE. It's called right when a 
+   * buffered command is sent.
+   *
+   * If this is NULL, there is no need to call the function.  */
+  prompt_update prompt_update_callback;
 };
 
 /* Temporary prototypes */
-static int tgdb_deliver_command ( struct tgdb *tgdb, int fd, struct tgdb_command *command );
-static int tgdb_run_command( struct tgdb *tgdb );
-static int tgdb_dispatch_command ( struct tgdb *tgdb, struct tgdb_command *com );
+static int tgdb_deliver_command (struct tgdb *tgdb, int fd,
+				 struct tgdb_command *command);
+static int tgdb_run_command (struct tgdb *tgdb);
+static int tgdb_dispatch_command (struct tgdb *tgdb,
+				  struct tgdb_command *com);
 
-int tgdb_set_prompt_change_callback (struct tgdb *tgdb, prompt_change callback)
+int
+tgdb_set_prompt_change_callback (struct tgdb *tgdb, prompt_change callback)
 {
-  if (!tgdb) 
+  if (!tgdb)
     {
-      logger_write_pos ( logger, __FILE__, __LINE__, "tgdb context is NULL" );
+      logger_write_pos (logger, __FILE__, __LINE__, "tgdb context is NULL");
       return -1;
     }
 
@@ -190,12 +169,12 @@ int tgdb_set_prompt_change_callback (struct tgdb *tgdb, prompt_change callback)
   return 0;
 }
 
-int 
+int
 tgdb_set_prompt_update_callback (struct tgdb *tgdb, prompt_update callback)
 {
-  if (!tgdb) 
+  if (!tgdb)
     {
-      logger_write_pos ( logger, __FILE__, __LINE__, "tgdb context is NULL" );
+      logger_write_pos (logger, __FILE__, __LINE__, "tgdb context is NULL");
       return -1;
     }
 
@@ -210,10 +189,10 @@ tgdb_set_prompt_update_callback (struct tgdb *tgdb, prompt_update callback)
  * \param tgdb
  * The TGDB context
  *
- * @return
+ * \return
  * -1 on error, 0 on success
  */
-static int 
+static int
 tgdb_process_client_commands (struct tgdb *tgdb)
 {
   struct tgdb_list *client_command_list;
@@ -223,50 +202,58 @@ tgdb_process_client_commands (struct tgdb *tgdb)
   char *command_data = NULL;
   int add_command;
 
-  client_command_list = tgdb_client_get_client_commands ( tgdb->tcc );
-  iterator = tgdb_list_get_first ( client_command_list );
+  client_command_list = tgdb_client_get_client_commands (tgdb->tcc);
+  iterator = tgdb_list_get_first (client_command_list);
 
-  while (iterator) {
-    enum tgdb_command_choice command_choice;
-    enum tgdb_command_action_choice action_choice = TGDB_COMMAND_ACTION_NONE;
+  while (iterator)
+    {
+      enum tgdb_command_choice command_choice;
+      enum tgdb_command_action_choice action_choice =
+	TGDB_COMMAND_ACTION_NONE;
 
-    client_command = ( struct tgdb_client_command *) tgdb_list_get_item ( iterator );
-    add_command = 0;
+      client_command =
+	(struct tgdb_client_command *) tgdb_list_get_item (iterator);
+      add_command = 0;
 
-    switch (client_command->command_choice) {
-      case TGDB_CLIENT_COMMAND_NORMAL:
-	command_choice = TGDB_COMMAND_TGDB_CLIENT;
-	add_command = 1;
-	break;
-      case TGDB_CLIENT_COMMAND_PRIORITY:
-	command_choice = TGDB_COMMAND_TGDB_CLIENT_PRIORITY;
-	add_command = 1;
-	break;
-      case TGDB_CLIENT_COMMAND_TGDB_BASE:
-	if (tgdb->prompt_change_callback)
-	  tgdb->prompt_change_callback (client_command->tgdb_client_command_data);
-	break;
-      default:
-	logger_write_pos (logger, __FILE__, __LINE__, "unknown switch case");
-	return -1;
+      switch (client_command->command_choice)
+	{
+	case TGDB_CLIENT_COMMAND_NORMAL:
+	  command_choice = TGDB_COMMAND_TGDB_CLIENT;
+	  add_command = 1;
+	  break;
+	case TGDB_CLIENT_COMMAND_PRIORITY:
+	  command_choice = TGDB_COMMAND_TGDB_CLIENT_PRIORITY;
+	  add_command = 1;
+	  break;
+	case TGDB_CLIENT_COMMAND_TGDB_BASE:
+	  if (tgdb->prompt_change_callback)
+	    tgdb->prompt_change_callback (client_command->
+					  tgdb_client_command_data);
+	  break;
+	default:
+	  logger_write_pos (logger, __FILE__, __LINE__,
+			    "unknown switch case");
+	  return -1;
+	}
+
+      if (add_command)
+	{
+	  command = tgdb_command_create (command_data,
+					 command_choice,
+					 action_choice,
+					 client_command,
+					 0 /* No CONSOLE commands here */ );
+
+	  if (tgdb_dispatch_command (tgdb, command) == -1)
+	    {
+	      logger_write_pos (logger, __FILE__, __LINE__,
+				"tgdb_dispatch_command failed");
+	      return -1;
+	    }
+	}
+
+      iterator = tgdb_list_next (iterator);
     }
-
-    if (add_command) {
-      command = tgdb_command_create (
-		command_data,
-		command_choice,
-		action_choice,
-		client_command,
-	        0 /* No CONSOLE commands here */);
-
-      if (tgdb_dispatch_command (tgdb, command) == -1) {
-	logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_dispatch_command failed" );
-	return -1;
-      }
-    }
-
-    iterator = tgdb_list_next (iterator);
-  }
 
   /* free the list of client commands */
   tgdb_list_clear (client_command_list);
@@ -274,37 +261,38 @@ tgdb_process_client_commands (struct tgdb *tgdb)
   return 0;
 }
 
-static struct tgdb *initialize_tgdb_context ( void ) {
-	struct tgdb *tgdb = 
-		(struct tgdb *)xmalloc ( sizeof ( struct tgdb ) );
-	
-	tgdb->tcc 			  = NULL;
-	tgdb->control_c 	  = 0;
+static struct tgdb *
+initialize_tgdb_context (void)
+{
+  struct tgdb *tgdb = (struct tgdb *) xmalloc (sizeof (struct tgdb));
 
-	tgdb->debugger_stdout = -1;
-	tgdb->debugger_stdin  = -1;
+  tgdb->tcc = NULL;
+  tgdb->control_c = 0;
 
-	tgdb->inferior_stdout = -1;
-	tgdb->inferior_stdin  = -1;
+  tgdb->debugger_stdout = -1;
+  tgdb->debugger_stdin = -1;
 
-	tgdb->gdb_input_queue = NULL;
-	tgdb->oob_input_queue = NULL;
+  tgdb->inferior_stdout = -1;
+  tgdb->inferior_stdin = -1;
 
-	tgdb->tgdb_partially_run_command = 0;
+  tgdb->gdb_input_queue = NULL;
+  tgdb->oob_input_queue = NULL;
 
-	tgdb->IS_SUBSYSTEM_READY_FOR_NEXT_COMMAND = 1;
+  tgdb->tgdb_partially_run_command = 0;
 
-	tgdb->last_gui_command = NULL;
-	tgdb->show_gui_commands = 0;
+  tgdb->IS_SUBSYSTEM_READY_FOR_NEXT_COMMAND = 1;
 
-	tgdb->command_list = tgdb_list_init();
-    tgdb->has_sigchld_recv = 0;
-    tgdb->prompt_change_callback = NULL;
-    tgdb->prompt_update_callback = NULL;
+  tgdb->last_gui_command = NULL;
+  tgdb->show_gui_commands = 0;
 
-	logger = NULL;
-	
-	return tgdb;
+  tgdb->command_list = tgdb_list_init ();
+  tgdb->has_sigchld_recv = 0;
+  tgdb->prompt_change_callback = NULL;
+  tgdb->prompt_update_callback = NULL;
+
+  logger = NULL;
+
+  return tgdb;
 }
 
 /*******************************************************************************
@@ -312,253 +300,293 @@ static struct tgdb *initialize_tgdb_context ( void ) {
  ******************************************************************************/
 
 /* 
- * tgdb_initialize_config_dir
+ * Gets the users home dir and creates the config directory.
  *
- *  Gets the users home dir and creates the config directory.
+ * \param tgdb
+ * The tgdb context.
  *
- *  tgdb       - The tgdb context.
+ * \param config_dir 
+ * Should be FSUTIL_PATH_MAX in size on way in.
+ * On way out, it will be the path to the config dir
  *
- *  config_dir - Should be FSUTIL_PATH_MAX in size on way in.
- *               On way out, it will be the path to the config dir
- *
- *  Returns -1 on error, or 0 on success
+ * \return
+ * -1 on error, or 0 on success
  */
-static int tgdb_initialize_config_dir ( struct tgdb *tgdb, char *config_dir ) {
-    /* Get the home directory */
-    char *home_dir = getenv("HOME");
-    const char *tgdb_dir = ".tgdb";
+static int
+tgdb_initialize_config_dir (struct tgdb *tgdb, char *config_dir)
+{
+  /* Get the home directory */
+  char *home_dir = getenv ("HOME");
+  const char *tgdb_dir = ".tgdb";
 
-    /* Create the config directory */
-    if ( ! fs_util_create_dir_in_base ( home_dir, tgdb_dir ) ) {
-        logger_write_pos ( logger, __FILE__, __LINE__, "fs_util_create_dir_in_base error");
-        return -1; 
+  /* Create the config directory */
+  if (!fs_util_create_dir_in_base (home_dir, tgdb_dir))
+    {
+      logger_write_pos (logger, __FILE__, __LINE__,
+			"fs_util_create_dir_in_base error");
+      return -1;
     }
 
-    fs_util_get_path ( home_dir, tgdb_dir, config_dir );
+  fs_util_get_path (home_dir, tgdb_dir, config_dir);
 
-    return 0;
+  return 0;
 }
 
 /**
  * Knowing the user's home directory, TGDB can initialize the logger interface
  *
- *  \param tgdb
- *  The tgdb context.
+ * \param tgdb
+ * The tgdb context.
  *
- *  \param config_dir 
- *  The path to the user's config directory
+ * \param config_dir 
+ * The path to the user's config directory
  *
- *  \return
- *  -1 on error, or 0 on success
+ * \return
+ * -1 on error, or 0 on success
  */
-static int tgdb_initialize_logger_interface ( 
-		struct tgdb *tgdb, 
-		char *config_dir ) {
+static int
+tgdb_initialize_logger_interface (struct tgdb *tgdb, char *config_dir)
+{
 
-    /* Get the home directory */
-    const char *tgdb_log_file = "tgdb_log.txt";
-	char tgdb_log_path[FSUTIL_PATH_MAX];
+  /* Get the home directory */
+  const char *tgdb_log_file = "tgdb_log.txt";
+  char tgdb_log_path[FSUTIL_PATH_MAX];
 
-    fs_util_get_path ( config_dir, tgdb_log_file, tgdb_log_path );
+  fs_util_get_path (config_dir, tgdb_log_file, tgdb_log_path);
 
-	/* Initialize the logger */
-	if ( num_loggers == 0 ) {
-		logger = logger_create ();
+  /* Initialize the logger */
+  if (num_loggers == 0)
+    {
+      logger = logger_create ();
 
-		if ( !logger ) {
-			printf ( "Error: Could not create log file\n" );
-			return -1;
-		}
+      if (!logger)
+	{
+	  printf ("Error: Could not create log file\n");
+	  return -1;
 	}
-
-	++num_loggers;
-
-	if ( logger_set_file ( logger, tgdb_log_path ) == -1 ) {
-        printf ( "Error: Could not open log file\n" );
-		return -1;	
-	}
-
-    return 0;
-}
-
-struct tgdb* tgdb_initialize ( 
-	const char *debugger, 
-	int argc, char **argv,
-	int *debugger_fd, int *inferior_fd ) {
-	/* Initialize the libtgdb context */
-	struct tgdb *tgdb = initialize_tgdb_context ();
-    char config_dir[FSUTIL_PATH_MAX];
-
-    /* Create config directory */
-    if ( tgdb_initialize_config_dir ( tgdb, config_dir ) == -1 ) {
-        logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_initialize error");
-		return NULL;
     }
 
-	if ( tgdb_initialize_logger_interface ( tgdb, config_dir ) == -1 ) {
-        printf ( "Could not initialize logger interface\n" );
-		return NULL;
-	}
+  ++num_loggers;
 
-    /* Initialize the command queue's */
-
-    /* initialize users buffer */
-    tgdb->gdb_input_queue = queue_init();
-
-    /* initialize the out of band queue */
-    tgdb->oob_input_queue = queue_init();
-
-	tgdb->tcc = tgdb_client_create_context ( 
-			debugger, argc, argv, config_dir,
-			TGDB_CLIENT_DEBUGGER_GNU_GDB,
-//			TGDB_CLIENT_PROTOCOL_GNU_GDB_GDBMI,
-			TGDB_CLIENT_PROTOCOL_GNU_GDB_ANNOTATE_TWO,
-		    logger	);
-
-	/* create an instance and initialize a tgdb_client_context */
-	if ( tgdb->tcc == NULL ) {
-		logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_client_create_context failed" );
-        return NULL; 
-	}
-
-	if ( tgdb_client_initialize_context ( 
-				tgdb->tcc,
-				&(tgdb->debugger_stdin), &(tgdb->debugger_stdout), 
-				&(tgdb->inferior_stdin), &(tgdb->inferior_stdout)) == -1 ) {
-		logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_client_initialize failed" );
-        return NULL; 
-	}
-
-	tgdb_process_client_commands ( tgdb );
-
-	*debugger_fd = tgdb->debugger_stdout;
-	*inferior_fd = tgdb->inferior_stdout;
-
-    if ( 1 ) {
-
-        /*a2_setup_io( );*/
-    } else {
-        /*init_gdbmi ();*/
-		logger_write_pos ( logger, __FILE__, __LINE__, "GDB does not support annotations" );
-        return NULL;
+  if (logger_set_file (logger, tgdb_log_path) == -1)
+    {
+      printf ("Error: Could not open log file\n");
+      return -1;
     }
 
-	return tgdb;
+  return 0;
 }
 
-int tgdb_shutdown ( struct tgdb *tgdb ) {
-	/* Free the logger */	
-	if ( num_loggers == 1 ) {
-		if ( logger_destroy ( logger ) == -1 ) {
-			printf ( "Could not destroy logger interface\n" );
-			return -1;
-		}
+struct tgdb *
+tgdb_initialize (const char *debugger,
+		 int argc, char **argv, int *debugger_fd, int *inferior_fd)
+{
+  /* Initialize the libtgdb context */
+  struct tgdb *tgdb = initialize_tgdb_context ();
+  char config_dir[FSUTIL_PATH_MAX];
+
+  /* Create config directory */
+  if (tgdb_initialize_config_dir (tgdb, config_dir) == -1)
+    {
+      logger_write_pos (logger, __FILE__, __LINE__, "tgdb_initialize error");
+      return NULL;
+    }
+
+  if (tgdb_initialize_logger_interface (tgdb, config_dir) == -1)
+    {
+      printf ("Could not initialize logger interface\n");
+      return NULL;
+    }
+
+  /* Initialize the command queue's */
+
+  /* initialize users buffer */
+  tgdb->gdb_input_queue = queue_init ();
+
+  /* initialize the out of band queue */
+  tgdb->oob_input_queue = queue_init ();
+
+  tgdb->tcc = tgdb_client_create_context (debugger, argc, argv, config_dir,
+					  TGDB_CLIENT_DEBUGGER_GNU_GDB,
+//                      TGDB_CLIENT_PROTOCOL_GNU_GDB_GDBMI,
+					  TGDB_CLIENT_PROTOCOL_GNU_GDB_ANNOTATE_TWO,
+					  logger);
+
+  /* create an instance and initialize a tgdb_client_context */
+  if (tgdb->tcc == NULL)
+    {
+      logger_write_pos (logger, __FILE__, __LINE__,
+			"tgdb_client_create_context failed");
+      return NULL;
+    }
+
+  if (tgdb_client_initialize_context (tgdb->tcc,
+				      &(tgdb->debugger_stdin),
+				      &(tgdb->debugger_stdout),
+				      &(tgdb->inferior_stdin),
+				      &(tgdb->inferior_stdout)) == -1)
+    {
+      logger_write_pos (logger, __FILE__, __LINE__,
+			"tgdb_client_initialize failed");
+      return NULL;
+    }
+
+  tgdb_process_client_commands (tgdb);
+
+  *debugger_fd = tgdb->debugger_stdout;
+  *inferior_fd = tgdb->inferior_stdout;
+
+  if (1)
+    {
+
+      /*a2_setup_io( ); */
+    }
+  else
+    {
+      /*init_gdbmi (); */
+      logger_write_pos (logger, __FILE__, __LINE__,
+			"GDB does not support annotations");
+      return NULL;
+    }
+
+  return tgdb;
+}
+
+int
+tgdb_shutdown (struct tgdb *tgdb)
+{
+  /* Free the logger */
+  if (num_loggers == 1)
+    {
+      if (logger_destroy (logger) == -1)
+	{
+	  printf ("Could not destroy logger interface\n");
+	  return -1;
 	}
+    }
 
-	--num_loggers;
-	
-	return tgdb_client_destroy_context ( tgdb->tcc );
+  --num_loggers;
+
+  return tgdb_client_destroy_context (tgdb->tcc);
 }
 
-char* tgdb_err_msg(struct tgdb *tgdb) {
-	return NULL;
+char *
+tgdb_err_msg (struct tgdb *tgdb)
+{
+  return NULL;
 }
 
-void command_completion_callback ( struct tgdb *tgdb ) {
-	tgdb->IS_SUBSYSTEM_READY_FOR_NEXT_COMMAND = 1;
+void
+command_completion_callback (struct tgdb *tgdb)
+{
+  tgdb->IS_SUBSYSTEM_READY_FOR_NEXT_COMMAND = 1;
 }
 
-static char* tgdb_get_client_command(struct tgdb *tgdb, enum tgdb_command_type c) {
-	return tgdb_client_return_command ( tgdb->tcc, c );
+static char *
+tgdb_get_client_command (struct tgdb *tgdb, enum tgdb_command_type c)
+{
+  return tgdb_client_return_command (tgdb->tcc, c);
 }
 
-static char* tgdb_client_modify_breakpoint_call(struct tgdb *tgdb, const char *file, int line, enum tgdb_breakpoint_action b) {
-	return tgdb_client_modify_breakpoint ( tgdb->tcc, file, line , b );
+static char *
+tgdb_client_modify_breakpoint_call (struct tgdb *tgdb, const char *file,
+				    int line, enum tgdb_breakpoint_action b)
+{
+  return tgdb_client_modify_breakpoint (tgdb->tcc, file, line, b);
 }
 
 
 /* These functions are used to determine the state of libtgdb */
 
-/* tgdb_can_issue_command: 
- * -----------------------
+/**
+ * Determines if tgdb should send data to gdb or put it in a buffer. This 
+ * is when the debugger is ready and there are no commands to run.
  *
- *  Determines if tgdb should send data to gdb or put it in a buffer. This 
- *  is when the debugger is ready and there are no commands to run.
- *
- * Returns: TRUE if can issue directly to gdb. Otherwise FALSE.
+ * \return
+ * TRUE if can issue directly to gdb. Otherwise FALSE.
  */
-static int tgdb_can_issue_command(struct tgdb *tgdb) {
-    if ( tgdb->IS_SUBSYSTEM_READY_FOR_NEXT_COMMAND &&
-	     tgdb_client_is_client_ready( tgdb->tcc ) && 
-		 (queue_size(tgdb->gdb_input_queue) == 0) )
-        return TRUE;
+static int
+tgdb_can_issue_command (struct tgdb *tgdb)
+{
+  if (tgdb->IS_SUBSYSTEM_READY_FOR_NEXT_COMMAND &&
+      tgdb_client_is_client_ready (tgdb->tcc) &&
+      (queue_size (tgdb->gdb_input_queue) == 0))
+    return TRUE;
 
-    return FALSE;
+  return FALSE;
 }
 
-/* tgdb_can_run_command: 
- * ---------------------
+/**
+ * Determines if tgdb has commands it needs to run.
  *
- *  Determines if tgdb has commands it needs to run.
- *
- * Returns: TRUE if can issue directly to gdb. Otherwise FALSE.
+ * \return
+ * TRUE if can issue directly to gdb. Otherwise FALSE.
  */
-static int tgdb_has_command_to_run(struct tgdb *tgdb ) {
-    if ( tgdb_client_is_client_ready(tgdb->tcc) && (
-           (queue_size(tgdb->gdb_input_queue) > 0) || 
-           (queue_size(tgdb->oob_input_queue) > 0))
-       )
-        return TRUE;
+static int
+tgdb_has_command_to_run (struct tgdb *tgdb)
+{
+  if (tgdb_client_is_client_ready (tgdb->tcc) && ((queue_size
+						   (tgdb->gdb_input_queue) >
+						   0)
+						  ||
+						  (queue_size
+						   (tgdb->oob_input_queue) >
+						   0)))
+    return TRUE;
 
-    return FALSE;
+  return FALSE;
 }
 
-/* a2_is_ready:
- * ------------
+/**
+ * As of now, I don't know what this is used for.
  *
- *  As of now, I don't know what this is used for.
- *
- * Returns 1 if ready, or 0 if not ready
+ * \return
+ * 1 if ready, or 0 if not ready
  */
-int is_ready ( struct tgdb *tgdb ) {
-	if ( tgdb_can_issue_command(tgdb))
-		return 1;
+int
+is_ready (struct tgdb *tgdb)
+{
+  if (tgdb_can_issue_command (tgdb))
+    return 1;
 
-    return 0;
+  return 0;
 }
 
-int tgdb_is_busy (struct tgdb *tgdb, int *is_busy)
+int
+tgdb_is_busy (struct tgdb *tgdb, int *is_busy)
 {
   /* Validate parameters */
   if (!tgdb)
     {
-	  logger_write_pos (logger, __FILE__, __LINE__, "tgdb_is_busy failed" );
+      logger_write_pos (logger, __FILE__, __LINE__, "tgdb_is_busy failed");
       return -1;
     }
 
   if (!is_busy)
     {
 
-	  logger_write_pos (logger, __FILE__, __LINE__, "tgdb_is_busy failed" );
+      logger_write_pos (logger, __FILE__, __LINE__, "tgdb_is_busy failed");
       return -1;
     }
 
-  if (tgdb_can_issue_command(tgdb) == TRUE)
-     *is_busy = 0;
+  if (tgdb_can_issue_command (tgdb) == TRUE)
+    *is_busy = 0;
   else
-     *is_busy = 1;
+    *is_busy = 1;
 
   return 0;
 }
 
 /* tgdb_handle_signals
  */
-static int 
-tgdb_handle_signals (struct tgdb *tgdb) {
-  if ( tgdb->control_c ) {
-    queue_free_list(tgdb->gdb_input_queue, tgdb_command_destroy);
-    tgdb->control_c = 0;
-  } 
+static int
+tgdb_handle_signals (struct tgdb *tgdb)
+{
+  if (tgdb->control_c)
+    {
+      queue_free_list (tgdb->gdb_input_queue, tgdb_command_destroy);
+      tgdb->control_c = 0;
+    }
 
   return 0;
 }
@@ -581,57 +609,55 @@ tgdb_handle_signals (struct tgdb *tgdb) {
  * gets a command from the user, it calls this function. Also, this function
  * gets called usually when the GUI tries to run a command.
  *
- * @return
+ * \return
  * 0 on success, or -1 on error.
  */
-static int tgdb_send (
-		struct tgdb *tgdb, 
-		char *command, 
-		enum tgdb_command_choice command_choice) {
+static int
+tgdb_send (struct tgdb *tgdb,
+	   char *command, enum tgdb_command_choice command_choice)
+{
 
-   struct tgdb_client_command *tcc;
-	struct tgdb_command *tc;
-	struct ibuf *temp_command = ibuf_init ();
-   int length = strlen ( command );
+  struct tgdb_client_command *tcc;
+  struct tgdb_command *tc;
+  struct ibuf *temp_command = ibuf_init ();
+  int length = strlen (command);
 
-	/* Add a newline to the end of the command if it doesn't exist */
-	ibuf_add ( temp_command, command );
+  /* Add a newline to the end of the command if it doesn't exist */
+  ibuf_add (temp_command, command);
 
-    if ( command[length-1] != '\n' )
-		ibuf_addchar ( temp_command, '\n' );
+  if (command[length - 1] != '\n')
+    ibuf_addchar (temp_command, '\n');
 
-	/* Create the client command */
-    tcc = tgdb_client_command_create ( 
-            ibuf_get ( temp_command ), 
-			   TGDB_CLIENT_COMMAND_NORMAL,
-            TGDB_CLIENT_COMMAND_DISPLAY_COMMAND_AND_RESULTS, 
-            TGDB_CLIENT_COMMAND_ACTION_NONE, 
-            NULL );
+  /* Create the client command */
+  tcc = tgdb_client_command_create (ibuf_get (temp_command),
+				    TGDB_CLIENT_COMMAND_NORMAL,
+				    TGDB_CLIENT_COMMAND_DISPLAY_COMMAND_AND_RESULTS,
+				    TGDB_CLIENT_COMMAND_ACTION_NONE, NULL);
 
-	ibuf_free ( temp_command );
-	temp_command = NULL;
+  ibuf_free (temp_command);
+  temp_command = NULL;
 
-	/* Create the TGDB command */
-	tc = tgdb_command_create ( 
-			NULL,
-			command_choice, 
-			TGDB_COMMAND_ACTION_NONE,
-			tcc,
-	                0);
+  /* Create the TGDB command */
+  tc = tgdb_command_create (NULL,
+			    command_choice, TGDB_COMMAND_ACTION_NONE, tcc, 0);
 
-    if ( tgdb_dispatch_command ( tgdb, tc ) == -1 ) {
-		logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_dispatch_command failed" );
-        return -1;
-    }
-    
-    if ( tgdb_client_tgdb_ran_command ( tgdb->tcc ) == -1 ) {
-		logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_client_tgdb_ran_command failed" );
-        return -1;
+  if (tgdb_dispatch_command (tgdb, tc) == -1)
+    {
+      logger_write_pos (logger, __FILE__, __LINE__,
+			"tgdb_dispatch_command failed");
+      return -1;
     }
 
-	tgdb_process_client_commands ( tgdb );
+  if (tgdb_client_tgdb_ran_command (tgdb->tcc) == -1)
+    {
+      logger_write_pos (logger, __FILE__, __LINE__,
+			"tgdb_client_tgdb_ran_command failed");
+      return -1;
+    }
 
-	return 0;
+  tgdb_process_client_commands (tgdb);
+
+  return 0;
 }
 
 /**
@@ -644,45 +670,47 @@ static int tgdb_send (
  * \param command
  * The command to dispatch
  *
- * @return
+ * \return
  * 0 on success or -1 on error
  */
-static int tgdb_dispatch_command ( 
-		struct tgdb *tgdb, 
-		struct tgdb_command *command ) {
+static int
+tgdb_dispatch_command (struct tgdb *tgdb, struct tgdb_command *command)
+{
 
-    int ret = 0;
+  int ret = 0;
 
-    switch ( command->command_choice ) {
-        case TGDB_COMMAND_FRONT_END:
-		case TGDB_COMMAND_TGDB_CLIENT:
-            if ( tgdb_can_issue_command(tgdb) )
-                ret = tgdb_deliver_command ( tgdb, tgdb->debugger_stdin, command );
-            else
-                queue_append ( tgdb->gdb_input_queue, command );
-            break;
+  switch (command->command_choice)
+    {
+    case TGDB_COMMAND_FRONT_END:
+    case TGDB_COMMAND_TGDB_CLIENT:
+      if (tgdb_can_issue_command (tgdb))
+	ret = tgdb_deliver_command (tgdb, tgdb->debugger_stdin, command);
+      else
+	queue_append (tgdb->gdb_input_queue, command);
+      break;
 
-        case TGDB_COMMAND_CONSOLE:
-            if ( tgdb_can_issue_command(tgdb) )
-                ret = tgdb_deliver_command ( tgdb, tgdb->debugger_stdin, command );
-            else
-                return -3;
-            break;
-        
-        case TGDB_COMMAND_TGDB_CLIENT_PRIORITY:
-            if ( tgdb_can_issue_command(tgdb) )
-                ret = tgdb_deliver_command ( tgdb, tgdb->debugger_stdin, command );
-            else
-                queue_append ( tgdb->oob_input_queue, command ); break; 
-        default:
-			logger_write_pos ( logger, __FILE__, __LINE__, "unimplemented command" );
-            return -1;
+    case TGDB_COMMAND_CONSOLE:
+      if (tgdb_can_issue_command (tgdb))
+	ret = tgdb_deliver_command (tgdb, tgdb->debugger_stdin, command);
+      else
+	return -3;
+      break;
+
+    case TGDB_COMMAND_TGDB_CLIENT_PRIORITY:
+      if (tgdb_can_issue_command (tgdb))
+	ret = tgdb_deliver_command (tgdb, tgdb->debugger_stdin, command);
+      else
+	queue_append (tgdb->oob_input_queue, command);
+      break;
+    default:
+      logger_write_pos (logger, __FILE__, __LINE__, "unimplemented command");
+      return -1;
     }
 
-    if ( ret == -2 )
-        return -2;
+  if (ret == -2)
+    return -2;
 
-    return 0;
+  return 0;
 }
 
 /** 
@@ -700,185 +728,206 @@ static int tgdb_dispatch_command (
  *  NOTE: This function assummes valid commands are being sent to it. 
  *        Error checking should be done before inserting into queue.
  */
-static int 
+static int
 tgdb_deliver_command (struct tgdb *tgdb, int fd, struct tgdb_command *command)
 {
   struct tgdb_client_command *client_command = command->client_command;
 
   tgdb->IS_SUBSYSTEM_READY_FOR_NEXT_COMMAND = 0;
-    
-    /* Here is where the command is actually given to the debugger.
-     * Before this is done, if the command is a GUI command, we save it,
-     * so that later, it can be printed to the client. Its for debugging
-     * purposes only, or for people who want to know the commands there
-     * debugger is being given.
-     */
-    if ( command->command_choice == TGDB_COMMAND_FRONT_END ) 
-       tgdb->last_gui_command = xstrdup ( client_command->tgdb_client_command_data );
 
-    /* In this case, give the FE a chance to update the prompt if necessary */
-    if (command->command_choice == TGDB_COMMAND_CONSOLE) {
+  /* Here is where the command is actually given to the debugger.
+   * Before this is done, if the command is a GUI command, we save it,
+   * so that later, it can be printed to the client. Its for debugging
+   * purposes only, or for people who want to know the commands there
+   * debugger is being given.
+   */
+  if (command->command_choice == TGDB_COMMAND_FRONT_END)
+    tgdb->last_gui_command =
+      xstrdup (client_command->tgdb_client_command_data);
+
+  /* In this case, give the FE a chance to update the prompt if necessary */
+  if (command->command_choice == TGDB_COMMAND_CONSOLE)
+    {
       /* If there is at least 1 more console command currently in the queue, 
        * then send the update prompt */
       if (tgdb->prompt_update_callback)
-	tgdb->prompt_update_callback (client_command->tgdb_client_command_data, command->is_buffered_console_command);
+	tgdb->prompt_update_callback (client_command->
+				      tgdb_client_command_data,
+				      command->is_buffered_console_command);
     }
 
-    /* A command for the debugger */
-    if ( tgdb_client_prepare_for_command ( tgdb->tcc, client_command ) == -1 ) {
-        return -2;
-    }
-
-    /* A regular command from the client */
-    io_debug_write_fmt ( "<%s>", client_command->tgdb_client_command_data );
-
-    io_writen ( 
-            fd, 
-            client_command->tgdb_client_command_data, 
-            strlen ( client_command->tgdb_client_command_data ) );
-
-    /* Uncomment this if you wish to see all of the commands, that are 
-     * passed to GDB. */
-#if 0
+  /* A command for the debugger */
+  if (tgdb_client_prepare_for_command (tgdb->tcc, client_command) == -1)
     {
-        char *s = strdup ( client_command->tgdb_client_command_data );
-        int length = strlen ( s );
-        s[length-1] = '\0';
-        fprintf ( stderr, "[%s]\n", s );  
-        s[length-1] = ' ';
-        free ( s );
-        s = NULL;
+      return -2;
     }
+
+  /* A regular command from the client */
+  io_debug_write_fmt ("<%s>", client_command->tgdb_client_command_data);
+
+  io_writen (fd,
+	     client_command->tgdb_client_command_data,
+	     strlen (client_command->tgdb_client_command_data));
+
+  /* Uncomment this if you wish to see all of the commands, that are 
+   * passed to GDB. */
+#if 0
+  {
+    char *s = strdup (client_command->tgdb_client_command_data);
+    int length = strlen (s);
+    s[length - 1] = '\0';
+    fprintf (stderr, "[%s]\n", s);
+    s[length - 1] = ' ';
+    free (s);
+    s = NULL;
+  }
 #endif
 
-    return 0;
+  return 0;
 }
 
-/* tgdb_run_buffered_command: Sends to gdb the next command.
+/**
+ * Sends to gdb the next command.
  *
- * return:  0 on normal termination ( command was run )
- *          2 if the queue was cleared because of ^c
+ * \return
+ * 0 on normal termination ( command was run )
+ * 2 if the queue was cleared because of ^c
  */
-static int tgdb_run_command( struct tgdb *tgdb ){
+static int
+tgdb_run_command (struct tgdb *tgdb)
+{
 tgdb_run_command_tag:
 
-    /* This will redisplay the prompt when a command is run
-     * through the gui with data on the console.
-     */
-    /* The out of band commands should always be run first */
-    if ( queue_size(tgdb->oob_input_queue) > 0 ) {
-        /* These commands are always run. 
-         * However, if an assumption is made that a misc
-         * prompt can never be set while in this spot.
-         */
-        struct tgdb_command *item = NULL;
-        item = queue_pop(tgdb->oob_input_queue);
-        tgdb_deliver_command(tgdb, tgdb->debugger_stdin, item);
-        tgdb_command_destroy ( item );
-    /* If the queue is not empty, run a command */
-    } else if ( queue_size(tgdb->gdb_input_queue) > 0 ) {
-        struct tgdb_command *item = NULL;
-        item = queue_pop(tgdb->gdb_input_queue);
+  /* This will redisplay the prompt when a command is run
+   * through the gui with data on the console.
+   */
+  /* The out of band commands should always be run first */
+  if (queue_size (tgdb->oob_input_queue) > 0)
+    {
+      /* These commands are always run. 
+       * However, if an assumption is made that a misc
+       * prompt can never be set while in this spot.
+       */
+      struct tgdb_command *item = NULL;
+      item = queue_pop (tgdb->oob_input_queue);
+      tgdb_deliver_command (tgdb, tgdb->debugger_stdin, item);
+      tgdb_command_destroy (item);
+      /* If the queue is not empty, run a command */
+    }
+  else if (queue_size (tgdb->gdb_input_queue) > 0)
+    {
+      struct tgdb_command *item = NULL;
+      item = queue_pop (tgdb->gdb_input_queue);
 
-        /* If at the misc prompt, don't run the internal tgdb commands,
-         * In fact throw them out for now, since they are only 
-         * 'info breakpoints' */
-        if ( tgdb_client_can_tgdb_run_commands(tgdb->tcc) == TRUE ) {
-            if ( item->command_choice != TGDB_COMMAND_CONSOLE ) {
-                tgdb_command_destroy ( item );
-                goto tgdb_run_command_tag;
-            }
-        }
+      /* If at the misc prompt, don't run the internal tgdb commands,
+       * In fact throw them out for now, since they are only 
+       * 'info breakpoints' */
+      if (tgdb_client_can_tgdb_run_commands (tgdb->tcc) == TRUE)
+	{
+	  if (item->command_choice != TGDB_COMMAND_CONSOLE)
+	    {
+	      tgdb_command_destroy (item);
+	      goto tgdb_run_command_tag;
+	    }
+	}
 
-        /* This happens when a command was skipped because the client no longer
-         * needs the command to be run */
-        if ( tgdb_deliver_command(tgdb, tgdb->debugger_stdin, item) == -2 )
-            goto tgdb_run_command_tag;
+      /* This happens when a command was skipped because the client no longer
+       * needs the command to be run */
+      if (tgdb_deliver_command (tgdb, tgdb->debugger_stdin, item) == -2)
+	goto tgdb_run_command_tag;
 
-        tgdb_command_destroy ( item );
-    } 
+      tgdb_command_destroy (item);
+    }
 
-    return 0;
+  return 0;
 }
 
-/* tgdb_command_callback:
- * ----------------------
- *
- *  This is called when readline says it has recieved a full line.
+/**
+ * This is called when readline says it has recieved a full line.
  */
-static int tgdb_command_callback(struct tgdb *tgdb, const char *line) {
-   struct ibuf *command = ibuf_init ();
-   ibuf_add ( command, line );
-   ibuf_addchar ( command, '\n' );
-   tgdb_send(tgdb, ibuf_get ( command ), TGDB_COMMAND_CONSOLE);
-   ibuf_free ( command );
-   command = NULL;
-   return 0;
+static int
+tgdb_command_callback (struct tgdb *tgdb, const char *line)
+{
+  struct ibuf *command = ibuf_init ();
+  ibuf_add (command, line);
+  ibuf_addchar (command, '\n');
+  tgdb_send (tgdb, ibuf_get (command), TGDB_COMMAND_CONSOLE);
+  ibuf_free (command);
+  command = NULL;
+  return 0;
 }
 
-int 
+int
 tgdb_send_debugger_console_command (struct tgdb *tgdb, const char *command)
 {
   /* The debugger is ready for input. Send it */
-  if (is_ready (tgdb)) {
-    int ret = tgdb_command_callback (tgdb, command);
-    if (ret ==-1) {
-      logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_send_debugger_data" );
-      return -1;
+  if (is_ready (tgdb))
+    {
+      int ret = tgdb_command_callback (tgdb, command);
+      if (ret == -1)
+	{
+	  logger_write_pos (logger, __FILE__, __LINE__,
+			    "tgdb_send_debugger_data");
+	  return -1;
+	}
+      /* The debugger is not ready, the user wants to buffer this command */
     }
-  /* The debugger is not ready, the user wants to buffer this command */
-  } else {
-    struct ibuf *icommand = ibuf_init ();
-    struct tgdb_client_command *tcc;
-    struct tgdb_command *tc;
-    ibuf_add (icommand, command);
-    ibuf_addchar (icommand, '\n');
+  else
+    {
+      struct ibuf *icommand = ibuf_init ();
+      struct tgdb_client_command *tcc;
+      struct tgdb_command *tc;
+      ibuf_add (icommand, command);
+      ibuf_addchar (icommand, '\n');
 
-    tcc = tgdb_client_command_create ( 
-           ibuf_get (icommand), 
-           TGDB_CLIENT_COMMAND_NORMAL,
-           TGDB_CLIENT_COMMAND_DISPLAY_COMMAND_AND_RESULTS, 
-           TGDB_CLIENT_COMMAND_ACTION_NONE, 
-           NULL );
-    tc = tgdb_command_create ( 
-           NULL,
-           TGDB_COMMAND_CONSOLE,
-           TGDB_COMMAND_ACTION_NONE,
-           tcc,
-	   1 );
-    ibuf_free (icommand);
-    command = NULL;
-    queue_append ( tgdb->gdb_input_queue, tc );
-  }
+      tcc = tgdb_client_command_create (ibuf_get (icommand),
+					TGDB_CLIENT_COMMAND_NORMAL,
+					TGDB_CLIENT_COMMAND_DISPLAY_COMMAND_AND_RESULTS,
+					TGDB_CLIENT_COMMAND_ACTION_NONE,
+					NULL);
+      tc = tgdb_command_create (NULL,
+				TGDB_COMMAND_CONSOLE,
+				TGDB_COMMAND_ACTION_NONE, tcc, 1);
+      ibuf_free (icommand);
+      command = NULL;
+      queue_append (tgdb->gdb_input_queue, tc);
+    }
 
   return 0;
 }
 
 /* These functions are used to communicate with the inferior */
-int tgdb_send_inferior_char ( struct tgdb *tgdb, char c ) {
-   if(io_write_byte(tgdb->inferior_stdout, c) == -1){
-	  logger_write_pos ( logger, __FILE__, __LINE__, "io_write_byte failed" );
+int
+tgdb_send_inferior_char (struct tgdb *tgdb, char c)
+{
+  if (io_write_byte (tgdb->inferior_stdout, c) == -1)
+    {
+      logger_write_pos (logger, __FILE__, __LINE__, "io_write_byte failed");
       return -1;
-   }
-   
-   return 0;
+    }
+
+  return 0;
 }
 
 /* tgdb_tty_recv: returns to the caller data from the child */
-size_t tgdb_recv_inferior_data ( struct tgdb *tgdb, char *buf, size_t n ) {
-   char local_buf[n + 1];
-   ssize_t size;
+size_t
+tgdb_recv_inferior_data (struct tgdb * tgdb, char *buf, size_t n)
+{
+  char local_buf[n + 1];
+  ssize_t size;
 
-   /* read all the data possible from the child that is ready. */
-   if( (size = io_read(tgdb->inferior_stdin, local_buf, n)) < 0){
-      logger_write_pos ( logger, __FILE__, __LINE__, "inferior_fd read failed");
+  /* read all the data possible from the child that is ready. */
+  if ((size = io_read (tgdb->inferior_stdin, local_buf, n)) < 0)
+    {
+      logger_write_pos (logger, __FILE__, __LINE__,
+			"inferior_fd read failed");
       return -1;
-   } 
-   
-   strncpy(buf, local_buf, size); 
-   buf[size] = '\0';
+    }
 
-   return size; 
+  strncpy (buf, local_buf, size);
+  buf[size] = '\0';
+
+  return size;
 }
 
 /**
@@ -890,22 +939,24 @@ size_t tgdb_recv_inferior_data ( struct tgdb *tgdb, char *buf, size_t n ) {
  * \return
  * 0 on success or -1 on error
  */
-static int tgdb_add_quit_command ( struct tgdb *tgdb ) {
-	struct tgdb_debugger_exit_status *tstatus;
+static int
+tgdb_add_quit_command (struct tgdb *tgdb)
+{
+  struct tgdb_debugger_exit_status *tstatus;
 
-    tstatus = (struct tgdb_debugger_exit_status *) 
-         xmalloc ( sizeof ( struct tgdb_debugger_exit_status ) );
+  tstatus = (struct tgdb_debugger_exit_status *)
+    xmalloc (sizeof (struct tgdb_debugger_exit_status));
 
-    /* Child did not exit normally */
-    tstatus->exit_status  = -1;
-    tstatus->return_value = 0;
+  /* Child did not exit normally */
+  tstatus->exit_status = -1;
+  tstatus->return_value = 0;
 
-	tgdb_types_append_command ( tgdb->command_list, TGDB_QUIT, tstatus );
+  tgdb_types_append_command (tgdb->command_list, TGDB_QUIT, tstatus);
 
-	return 0;
+  return 0;
 }
 
-/* 
+/**
  * This is called when GDB has finished.
  * Its job is to add the type of QUIT command that is appropriate.
  *
@@ -918,230 +969,271 @@ static int tgdb_add_quit_command ( struct tgdb *tgdb ) {
  * \return
  * 0 on success or -1 on error
  */
-static int tgdb_get_quit_command ( struct tgdb *tgdb, int *tgdb_will_quit ) {
-	pid_t pid 	= tgdb_client_get_debugger_pid ( tgdb->tcc );
-	int status 	= 0;
-	pid_t ret;
-	struct tgdb_debugger_exit_status *tstatus;
+static int
+tgdb_get_quit_command (struct tgdb *tgdb, int *tgdb_will_quit)
+{
+  pid_t pid = tgdb_client_get_debugger_pid (tgdb->tcc);
+  int status = 0;
+  pid_t ret;
+  struct tgdb_debugger_exit_status *tstatus;
 
-    if ( !tgdb_will_quit )
-        return -1;
+  if (!tgdb_will_quit)
+    return -1;
 
-    *tgdb_will_quit = 0;
-   
-    tstatus = (struct tgdb_debugger_exit_status *) 
-         xmalloc ( sizeof ( struct tgdb_debugger_exit_status ) );
+  *tgdb_will_quit = 0;
 
-	ret = waitpid ( pid, &status, WNOHANG );
+  tstatus = (struct tgdb_debugger_exit_status *)
+    xmalloc (sizeof (struct tgdb_debugger_exit_status));
 
-	if ( ret == -1 ) {
-		logger_write_pos ( logger, __FILE__, __LINE__, "waitpid error" );
-		return -1;
-	} else if ( ret == 0 ) {
-		/* This SIGCHLD wasn't for GDB */
-		return 0;
-	}
+  ret = waitpid (pid, &status, WNOHANG);
 
-	if ( (WIFEXITED(status)) == 0 ) {
-		/* Child did not exit normally */
-		tstatus->exit_status  = -1;
-		tstatus->return_value = 0;
-	} else {
-		tstatus->exit_status  = 0;
-		tstatus->return_value = WEXITSTATUS(status);
-	}
+  if (ret == -1)
+    {
+      logger_write_pos (logger, __FILE__, __LINE__, "waitpid error");
+      return -1;
+    }
+  else if (ret == 0)
+    {
+      /* This SIGCHLD wasn't for GDB */
+      return 0;
+    }
 
-	tgdb_types_append_command ( tgdb->command_list, TGDB_QUIT, tstatus );
-    *tgdb_will_quit = 1;
+  if ((WIFEXITED (status)) == 0)
+    {
+      /* Child did not exit normally */
+      tstatus->exit_status = -1;
+      tstatus->return_value = 0;
+    }
+  else
+    {
+      tstatus->exit_status = 0;
+      tstatus->return_value = WEXITSTATUS (status);
+    }
 
-	return 0;
+  tgdb_types_append_command (tgdb->command_list, TGDB_QUIT, tstatus);
+  *tgdb_will_quit = 1;
+
+  return 0;
 }
 
-size_t 
-tgdb_recv_debugger_console_data (struct tgdb *tgdb, char *buf, size_t n) {
-    char local_buf[10*n];
-    ssize_t size;
-    size_t buf_size = 0;
+size_t
+tgdb_recv_debugger_console_data (struct tgdb * tgdb, char *buf, size_t n)
+{
+  char local_buf[10 * n];
+  ssize_t size;
+  size_t buf_size = 0;
 
-    /* make the queue empty */
-    tgdb_delete_responses(tgdb);
+  /* make the queue empty */
+  tgdb_delete_responses (tgdb);
 
-	/* TODO: This is kind of a hack.
-	 * Since I know that I didn't do a read yet, the next select loop will
-	 * get me back here. This probably shouldn't return, however, I have to
-	 * re-write a lot of this function. Also, I think this function should
-	 * return a malloc'd string, not a static buffer.
-	 *
-	 * Currently, I see it as a bigger hack to try to just append this to the
-	 * beggining of buf.
-	 */
-	if ( tgdb->last_gui_command != NULL ) {
-		int ret;
-		if ( tgdb->show_gui_commands ) {
-			strcpy ( buf, tgdb->last_gui_command );
-			ret = strlen ( tgdb->last_gui_command );
-		} else {
-			strcpy ( buf, "\n" );
-			ret = 1;
-		}
-
-		free ( tgdb->last_gui_command );
-		tgdb->last_gui_command = NULL;
-		return ret;
-	}
-
-    if ( tgdb->has_sigchld_recv ) {
-        int tgdb_will_quit;
-        /* tgdb_get_quit_command will return right away, it's asynchrounous.
-         * We call it to determine if it was GDB that died.
-         * If GDB didn't die, things will work like normal. ignore this.
-         * If GDB did die, this get's the quit command and add's it to the list. It's
-         * OK that the rest of this function get's executed, since the read will simply
-         * return EOF.
-         */
-        int val = tgdb_get_quit_command ( tgdb, &tgdb_will_quit );
-	    if ( val == -1 ) {
-            logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_get_quit_command error" );
-		    return -1;
-        }
-        tgdb->has_sigchld_recv = 0;
-        if ( tgdb_will_quit )
-            goto tgdb_finish;
-    }
-
-    /* set buf to null for debug reasons */
-    memset(buf,'\0', n);
-
-    /* 1. read all the data possible from gdb that is ready. */
-    if( (size = io_read(tgdb->debugger_stdout, local_buf, n)) < 0){
-        logger_write_pos ( logger, __FILE__, __LINE__, "could not read from masterfd");
-        buf_size = -1;
-        tgdb_add_quit_command ( tgdb );
-        goto tgdb_finish;
-    } else if ( size == 0 ) {/* EOF */ 
-        tgdb_add_quit_command ( tgdb );
-        goto tgdb_finish;
-    }
-
-    local_buf[size] = '\0';
-
-    /* 2. At this point local_buf has everything new from this read.
-     * Basically this function is responsible for seperating the annotations
-     * that gdb writes from the data. 
-     *
-     * buf and buf_size are the data to be returned from the user.
-     */
+  /* TODO: This is kind of a hack.
+   * Since I know that I didn't do a read yet, the next select loop will
+   * get me back here. This probably shouldn't return, however, I have to
+   * re-write a lot of this function. Also, I think this function should
+   * return a malloc'd string, not a static buffer.
+   *
+   * Currently, I see it as a bigger hack to try to just append this to the
+   * beggining of buf.
+   */
+  if (tgdb->last_gui_command != NULL)
+    {
+      int ret;
+      if (tgdb->show_gui_commands)
 	{
-		/* unused for now */
-		char *infbuf = NULL;
-		size_t infbuf_size;
-		int result;
-		result = tgdb_client_parse_io ( 
-				tgdb->tcc, 
-				local_buf, size, 
-				buf, &buf_size, 
-				infbuf, &infbuf_size, 
-				tgdb->command_list );
-
-		tgdb_process_client_commands ( tgdb );
-
-		if ( result == 0 ) {
-			/* success, and more to parse, ss isn't done */
-		} else if ( result == 1 ) {
-			/* success, and finished command */
-			command_completion_callback(tgdb);
-		} else if ( result == -1 ) { 
-			logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_client_parse_io failed" );
-		}
+	  strcpy (buf, tgdb->last_gui_command);
+	  ret = strlen (tgdb->last_gui_command);
+	}
+      else
+	{
+	  strcpy (buf, "\n");
+	  ret = 1;
 	}
 
-	/* 3. if ^c has been sent, clear the buffers.
-     * 	  If a signal has been recieved, clear the queue and return
-     */
-	if ( tgdb_handle_signals (tgdb) == -1 ) {
-		logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_handle_signals failed" );
-		return -1;
+      free (tgdb->last_gui_command);
+      tgdb->last_gui_command = NULL;
+      return ret;
+    }
+
+  if (tgdb->has_sigchld_recv)
+    {
+      int tgdb_will_quit;
+      /* tgdb_get_quit_command will return right away, it's asynchrounous.
+       * We call it to determine if it was GDB that died.
+       * If GDB didn't die, things will work like normal. ignore this.
+       * If GDB did die, this get's the quit command and add's it to the list. It's
+       * OK that the rest of this function get's executed, since the read will simply
+       * return EOF.
+       */
+      int val = tgdb_get_quit_command (tgdb, &tgdb_will_quit);
+      if (val == -1)
+	{
+	  logger_write_pos (logger, __FILE__, __LINE__,
+			    "tgdb_get_quit_command error");
+	  return -1;
 	}
+      tgdb->has_sigchld_recv = 0;
+      if (tgdb_will_quit)
+	goto tgdb_finish;
+    }
 
-    /* 4. runs the users buffered command if any exists */
-    if ( tgdb_has_command_to_run(tgdb))
-        tgdb_run_command(tgdb);
+  /* set buf to null for debug reasons */
+  memset (buf, '\0', n);
 
-    tgdb_finish:
+  /* 1. read all the data possible from gdb that is ready. */
+  if ((size = io_read (tgdb->debugger_stdout, local_buf, n)) < 0)
+    {
+      logger_write_pos (logger, __FILE__, __LINE__,
+			"could not read from masterfd");
+      buf_size = -1;
+      tgdb_add_quit_command (tgdb);
+      goto tgdb_finish;
+    }
+  else if (size == 0)
+    {				/* EOF */
+      tgdb_add_quit_command (tgdb);
+      goto tgdb_finish;
+    }
 
-	/* Set the iterator to the beggining. So when the user
-	 * calls tgdb_get_command it, it will be in the right spot.
-	 */
-	tgdb->command_list_iterator = tgdb_list_get_first ( tgdb->command_list );
+  local_buf[size] = '\0';
 
-    return buf_size;
+  /* 2. At this point local_buf has everything new from this read.
+   * Basically this function is responsible for seperating the annotations
+   * that gdb writes from the data. 
+   *
+   * buf and buf_size are the data to be returned from the user.
+   */
+  {
+    /* unused for now */
+    char *infbuf = NULL;
+    size_t infbuf_size;
+    int result;
+    result = tgdb_client_parse_io (tgdb->tcc,
+				   local_buf, size,
+				   buf, &buf_size,
+				   infbuf, &infbuf_size, tgdb->command_list);
+
+    tgdb_process_client_commands (tgdb);
+
+    if (result == 0)
+      {
+	/* success, and more to parse, ss isn't done */
+      }
+    else if (result == 1)
+      {
+	/* success, and finished command */
+	command_completion_callback (tgdb);
+      }
+    else if (result == -1)
+      {
+	logger_write_pos (logger, __FILE__, __LINE__,
+			  "tgdb_client_parse_io failed");
+      }
+  }
+
+  /* 3. if ^c has been sent, clear the buffers.
+   *        If a signal has been recieved, clear the queue and return
+   */
+  if (tgdb_handle_signals (tgdb) == -1)
+    {
+      logger_write_pos (logger, __FILE__, __LINE__,
+			"tgdb_handle_signals failed");
+      return -1;
+    }
+
+  /* 4. runs the users buffered command if any exists */
+  if (tgdb_has_command_to_run (tgdb))
+    tgdb_run_command (tgdb);
+
+tgdb_finish:
+
+  /* Set the iterator to the beggining. So when the user
+   * calls tgdb_get_command it, it will be in the right spot.
+   */
+  tgdb->command_list_iterator = tgdb_list_get_first (tgdb->command_list);
+
+  return buf_size;
 }
 
-struct tgdb_response *tgdb_get_response ( struct tgdb *tgdb ) {
-	struct tgdb_response *command;
+struct tgdb_response *
+tgdb_get_response (struct tgdb *tgdb)
+{
+  struct tgdb_response *command;
 
-	if ( tgdb->command_list_iterator == NULL )
-		return NULL;
+  if (tgdb->command_list_iterator == NULL)
+    return NULL;
 
-	command = (struct tgdb_response *) tgdb_list_get_item ( 
-			tgdb->command_list_iterator );
+  command =
+    (struct tgdb_response *) tgdb_list_get_item (tgdb->command_list_iterator);
 
-	tgdb->command_list_iterator = tgdb_list_next ( 
-			tgdb->command_list_iterator );
+  tgdb->command_list_iterator = tgdb_list_next (tgdb->command_list_iterator);
 
-	return command;
+  return command;
 }
 
-int tgdb_tty_new ( struct tgdb *tgdb ) {
-	int ret =
-    tgdb_client_open_new_tty ( 
-			tgdb->tcc, 
-			&tgdb->inferior_stdin, &tgdb->inferior_stdout );
+int
+tgdb_tty_new (struct tgdb *tgdb)
+{
+  int ret = tgdb_client_open_new_tty (tgdb->tcc,
+				      &tgdb->inferior_stdin,
+				      &tgdb->inferior_stdout);
 
-	tgdb_process_client_commands ( tgdb );
+  tgdb_process_client_commands (tgdb);
 
-	return ret;
+  return ret;
 }
 
-const char *tgdb_tty_name ( struct tgdb *tgdb ) {
-	return tgdb_client_get_tty_name ( tgdb->tcc );
+const char *
+tgdb_tty_name (struct tgdb *tgdb)
+{
+  return tgdb_client_get_tty_name (tgdb->tcc);
 }
 
 /* Functional commands {{{ */
 
-int tgdb_get_inferiors_source_files ( struct tgdb *tgdb ) {
-	int ret = tgdb_client_get_inferior_source_files ( tgdb->tcc );
-	tgdb_process_client_commands ( tgdb );
-	return ret;
+int
+tgdb_get_inferiors_source_files (struct tgdb *tgdb)
+{
+  int ret = tgdb_client_get_inferior_source_files (tgdb->tcc);
+  tgdb_process_client_commands (tgdb);
+  return ret;
 }
 
-int tgdb_get_absolute_path ( struct tgdb *tgdb, const char *file ) {
-	int ret = tgdb_client_get_absolute_path ( tgdb->tcc, file );
-	tgdb_process_client_commands ( tgdb );
-	return ret;
+int
+tgdb_get_absolute_path (struct tgdb *tgdb, const char *file)
+{
+  int ret = tgdb_client_get_absolute_path (tgdb->tcc, file);
+  tgdb_process_client_commands (tgdb);
+  return ret;
 }
 
-int tgdb_run_debugger_command ( struct tgdb *tgdb, enum tgdb_command_type c ) {
- 	return tgdb_send ( tgdb, tgdb_get_client_command (tgdb, c), TGDB_COMMAND_FRONT_END );
+int
+tgdb_run_debugger_command (struct tgdb *tgdb, enum tgdb_command_type c)
+{
+  return tgdb_send (tgdb, tgdb_get_client_command (tgdb, c),
+		    TGDB_COMMAND_FRONT_END);
 }
 
-int tgdb_modify_breakpoint ( struct tgdb *tgdb, const char *file, int line, enum tgdb_breakpoint_action b ) {
-	char *val = tgdb_client_modify_breakpoint_call ( tgdb, file, line, b );
+int
+tgdb_modify_breakpoint (struct tgdb *tgdb, const char *file, int line,
+			enum tgdb_breakpoint_action b)
+{
+  char *val = tgdb_client_modify_breakpoint_call (tgdb, file, line, b);
 
-	if ( val == NULL )
-		return -1;
+  if (val == NULL)
+    return -1;
 
-	if ( tgdb_send ( tgdb, val, TGDB_COMMAND_FRONT_END ) == -1 ) {
-		logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_send failed" );
-		return -1;
-	}
+  if (tgdb_send (tgdb, val, TGDB_COMMAND_FRONT_END) == -1)
+    {
+      logger_write_pos (logger, __FILE__, __LINE__, "tgdb_send failed");
+      return -1;
+    }
 
-	free ( val );
+  free (val);
 
-	return 0;
+  return 0;
 }
 
-int 
+int
 tgdb_complete (struct tgdb *tgdb, const char *line)
 {
   int ret;
@@ -1156,55 +1248,72 @@ tgdb_complete (struct tgdb *tgdb, const char *line)
 
 /* }}} */
 
-int tgdb_signal_notification ( struct tgdb *tgdb, int signum ) {
-    pid_t pid; 
+int
+tgdb_signal_notification (struct tgdb *tgdb, int signum)
+{
+  pid_t pid;
 
-    pid = tgdb_client_get_debugger_pid( tgdb->tcc );
+  pid = tgdb_client_get_debugger_pid (tgdb->tcc);
 
-    if ( pid == -1 )
-       return -1;
+  if (pid == -1)
+    return -1;
 
-    if ( signum == SIGINT ) {               /* ^c */
-        tgdb->control_c = 1;
-        kill(pid, SIGINT);
-    } else if ( signum == SIGTERM ) { 
-        kill(pid, SIGTERM);
-    } else if ( signum == SIGQUIT ) {       /* ^\ */
-        kill(pid, SIGQUIT);
-    } else if ( signum == SIGCHLD ) {
-        tgdb->has_sigchld_recv = 1;
+  if (signum == SIGINT)
+    {				/* ^c */
+      tgdb->control_c = 1;
+      kill (pid, SIGINT);
+    }
+  else if (signum == SIGTERM)
+    {
+      kill (pid, SIGTERM);
+    }
+  else if (signum == SIGQUIT)
+    {				/* ^\ */
+      kill (pid, SIGQUIT);
+    }
+  else if (signum == SIGCHLD)
+    {
+      tgdb->has_sigchld_recv = 1;
     }
 
-	return 0;
+  return 0;
 }
 
-int tgdb_set_verbose_gui_command_output ( struct tgdb *tgdb, int value ) {
-	if ( (value == 0) || (value == 1) )
-		tgdb->show_gui_commands = value;
+int
+tgdb_set_verbose_gui_command_output (struct tgdb *tgdb, int value)
+{
+  if ((value == 0) || (value == 1))
+    tgdb->show_gui_commands = value;
 
-	if ( tgdb->show_gui_commands == 1 )
-		return 1;
-	
-	return 0;
+  if (tgdb->show_gui_commands == 1)
+    return 1;
+
+  return 0;
 }
 
-int tgdb_set_verbose_error_handling ( struct tgdb *tgdb, int value ) {
-	if ( value == -1 )
-		return logger_is_recording ( logger );
+int
+tgdb_set_verbose_error_handling (struct tgdb *tgdb, int value)
+{
+  if (value == -1)
+    return logger_is_recording (logger);
 
-	if ( value == 1 || value == 0)
-		logger_set_record ( logger, value );
+  if (value == 1 || value == 0)
+    logger_set_record (logger, value);
 
-	if ( value == 1 )
-		logger_set_fd ( logger, stderr );
+  if (value == 1)
+    logger_set_fd (logger, stderr);
 
-	return logger_is_recording ( logger );
+  return logger_is_recording (logger);
 }
 
-void tgdb_traverse_responses ( struct tgdb *tgdb ) {
-    tgdb_list_foreach ( tgdb->command_list, tgdb_types_print_command);
+void
+tgdb_traverse_responses (struct tgdb *tgdb)
+{
+  tgdb_list_foreach (tgdb->command_list, tgdb_types_print_command);
 }
 
-void tgdb_delete_responses ( struct tgdb *tgdb ) {
-    tgdb_list_free (tgdb->command_list, tgdb_types_free_command);
+void
+tgdb_delete_responses (struct tgdb *tgdb)
+{
+  tgdb_list_free (tgdb->command_list, tgdb_types_free_command);
 }

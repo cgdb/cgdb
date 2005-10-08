@@ -1,5 +1,10 @@
 10/07/2005 Bob Rossi <bob@brasko.net>
 
+	* tgdb-base/include/tgdb.h, tgdb-base/src/tgdb.c: Update coding style
+	with indent to GNU coding style.
+
+10/07/2005 Bob Rossi <bob@brasko.net>
+
 	* tgdb-base/src/driver.c (gdb_input): TGDB interface changed. 
 	Update driver.
 	* tgdb-base/include/tgdb.h, tgdb-base/src/tgdb.c
