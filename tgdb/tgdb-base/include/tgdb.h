@@ -230,23 +230,6 @@ int tgdb_send_debugger_console_command (struct tgdb *tgdb, const char *command);
  */
 int tgdb_send_inferior_char ( struct tgdb *tgdb, char c );
 
-/** 
- * This sends a string of data to the program being debugged.
- *
- * \param tgdb
- * An instance of the tgdb library to operate on.
- *
- * \param buf
- * The string to pass to the program being debugged.
- *
- * \param n
- * The number of bytes in BUF to send to the program being debugged.
- *
- * @return
- * 0 on success or -1 on error
- */
-int tgdb_send_inferior_data ( struct tgdb *tgdb, const char *buf, const size_t n );
-
 /**
  * Gets the ouput from the program being debugged.
  * 

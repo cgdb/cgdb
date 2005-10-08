@@ -864,20 +864,6 @@ int tgdb_send_inferior_char ( struct tgdb *tgdb, char c ) {
    return 0;
 }
 
-/* Maybe this could be optimized, but for now, it just calls 
- * tgdb_send_inferior_char */
-int tgdb_send_inferior_data ( struct tgdb *tgdb, const char *buf, const size_t n ) {
-	int i;
-	for ( i = 0; i < n; i++ ) {
-		if ( tgdb_send_inferior_char ( tgdb, buf[i] ) == -1 ) {
-			logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_send_inferior_char failed" );
-			return -1;
-		}
-	}
-
-	return 0;
-}
-
 /* tgdb_tty_recv: returns to the caller data from the child */
 size_t tgdb_recv_inferior_data ( struct tgdb *tgdb, char *buf, size_t n ) {
    char local_buf[n + 1];

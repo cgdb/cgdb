@@ -1,5 +1,10 @@
 10/07/2005 Bob Rossi <bob@brasko.net>
 
+	* tgdb-base/include/tgdb.h, tgdb-base/src/tgdb.c
+	(tgdb_send_inferior_data): Removed unused function.
+
+10/07/2005 Bob Rossi <bob@brasko.net>
+
 	* tgdb-base/include/tgdb.h, tgdb-base/src/tgdb.c 
 	(tgdb_send_debugger_data): Replaced by 
 	tgdb_send_debugger_console_command function.
