@@ -203,21 +203,18 @@ int tgdb_is_busy (struct tgdb *tgdb, int *is_busy);
 //@{
 
 /**
- * This sends a string of data to the debugger.
+ * This sends a console command to the debugger (GDB).
  *
  * \param tgdb
  * An instance of the tgdb library to operate on.
  *
- * \param buf
- * The string to pass to the debugger.
- *
- * \param n
- * The number of bytes in BUF to send to debugger.
+ * \param command
+ * The null terminated command to pass to GDB as a console command.
  *
  * @return
  * 0 on success or -1 on error
  */
-int tgdb_send_debugger_data ( struct tgdb *tgdb, const char *buf, const size_t n );
+int tgdb_send_debugger_console_command (struct tgdb *tgdb, const char *command);
 
 /**
  * This sends a byte of data to the program being debugged.

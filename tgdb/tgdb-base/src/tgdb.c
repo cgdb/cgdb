@@ -817,25 +817,25 @@ static int tgdb_command_callback(struct tgdb *tgdb, const char *line) {
 }
 
 int 
-tgdb_send_debugger_data (struct tgdb *tgdb, const char *buf, const size_t n)
+tgdb_send_debugger_console_command (struct tgdb *tgdb, const char *command)
 {
   /* The debugger is ready for input. Send it */
   if (is_ready (tgdb)) {
-    int ret = tgdb_command_callback (tgdb, buf);
+    int ret = tgdb_command_callback (tgdb, command);
     if (ret ==-1) {
       logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_send_debugger_data" );
       return -1;
     }
   /* The debugger is not ready, the user wants to buffer this command */
   } else {
-    struct ibuf *command = ibuf_init ();
+    struct ibuf *icommand = ibuf_init ();
     struct tgdb_client_command *tcc;
     struct tgdb_command *tc;
-    ibuf_add (command, buf);
-    ibuf_addchar (command, '\n');
+    ibuf_add (icommand, command);
+    ibuf_addchar (icommand, '\n');
 
     tcc = tgdb_client_command_create ( 
-           ibuf_get (command), 
+           ibuf_get (icommand), 
            TGDB_CLIENT_COMMAND_NORMAL,
            TGDB_CLIENT_COMMAND_DISPLAY_COMMAND_AND_RESULTS, 
            TGDB_CLIENT_COMMAND_ACTION_NONE, 
@@ -846,7 +846,7 @@ tgdb_send_debugger_data (struct tgdb *tgdb, const char *buf, const size_t n)
            TGDB_COMMAND_ACTION_NONE,
            tcc,
 	   1 );
-    ibuf_free (command);
+    ibuf_free (icommand);
     command = NULL;
     queue_append ( tgdb->gdb_input_queue, tc );
   }

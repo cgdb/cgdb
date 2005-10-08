@@ -89,7 +89,7 @@ rlctx_send_user_command(char *line)
     rline_add_history(rline, line);
 
   /* Send this command to TGDB */
-  if ( tgdb_send_debugger_data ( tgdb, line, strlen (line) ) == -1 )
+  if ( tgdb_send_debugger_console_command ( tgdb, line) == -1 )
     logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_send_user_command\n"); 
 }
 

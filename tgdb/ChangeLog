@@ -1,3 +1,12 @@
+10/07/2005 Bob Rossi <bob@brasko.net>
+
+	* tgdb-base/include/tgdb.h, tgdb-base/src/tgdb.c 
+	(tgdb_send_debugger_data): Replaced by 
+	tgdb_send_debugger_console_command function.
+	(tgdb_send_debugger_console_command): Replaced the above function.
+	* tgdb-base/src/driver.c (rlctx_send_user_command): TGDB interface
+	changed. Update driver.
+
 10/06/2005 Bob Rossi <bob@brasko.net>
 
 	* tgdb-base/src/driver.c (term_attributes): Add global.
