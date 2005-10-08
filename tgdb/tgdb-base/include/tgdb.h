@@ -217,6 +217,24 @@ int tgdb_is_busy (struct tgdb *tgdb, int *is_busy);
 int tgdb_send_debugger_console_command (struct tgdb *tgdb, const char *command);
 
 /**
+ * Gets output from the debugger.
+ * 
+ * \param tgdb
+ * An instance of the tgdb library to operate on.
+ *
+ * \param buf
+ * The output of the debugger will be returned in this buffer.
+ * The buffer passed back will not exceed N in size.
+ *
+ * \param n
+ * Tells libtgdb how large the buffer BUF is that the client passed in.
+ *
+ * @return
+ * The number of valid bytes in BUF on success, or -1 on error.
+ */
+size_t tgdb_recv_debugger_console_data (struct tgdb *tgdb, char *buf, size_t n);
+
+/**
  * This sends a byte of data to the program being debugged.
  *
  * \param tgdb
@@ -228,7 +246,7 @@ int tgdb_send_debugger_console_command (struct tgdb *tgdb, const char *command);
  * @return
  * 0 on success or -1 on error
  */
-int tgdb_send_inferior_char ( struct tgdb *tgdb, char c );
+int tgdb_send_inferior_char (struct tgdb *tgdb, char c);
 
 /**
  * Gets the ouput from the program being debugged.
@@ -245,27 +263,7 @@ int tgdb_send_inferior_char ( struct tgdb *tgdb, char c );
  * @return
  * The number of valid bytes in BUF on success, or 0 on error.
  */
-size_t tgdb_recv_inferior_data ( struct tgdb *tgdb, char *buf, size_t n );
-
-/**
- * Gets output from the debugger.
- * Also, at this point, libtgdb returns a list of commands the client 
- * can use.
- * 
- * \param tgdb
- * An instance of the tgdb library to operate on.
- *
- * \param buf
- * The output of the debugger will be returned in this buffer.
- * The buffer passed back will not exceed N in size.
- *
- * \param n
- * Tells libtgdb how large the buffer BUF is that the client passed in.
- *
- * @return
- * The number of valid bytes in BUF on success, or -1 on error.
- */
-size_t tgdb_recv_debugger_data ( struct tgdb *tgdb, char *buf, size_t n );
+size_t tgdb_recv_inferior_data (struct tgdb *tgdb, char *buf, size_t n);
 
 //@}
 // }}}

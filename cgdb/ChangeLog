@@ -1,5 +1,9 @@
 10/06/2005 Bob Rossi <bob@brasko.net>
 
+	* src/cgdb.c (gdb_input): TGDB interface changed. Update CGDB.
+
+10/06/2005 Bob Rossi <bob@brasko.net>
+
 	* src/cgdb.c (rlctx_send_user_command): TGDB interface changed. 
 	Update CGDB.
 

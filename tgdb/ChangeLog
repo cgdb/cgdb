@@ -1,5 +1,12 @@
 10/07/2005 Bob Rossi <bob@brasko.net>
 
+	* tgdb-base/src/driver.c (gdb_input): TGDB interface changed. 
+	Update driver.
+	* tgdb-base/include/tgdb.h, tgdb-base/src/tgdb.c
+	(tgdb_recv_debugger_data): Renamed to tgdb_recv_debugger_console_data.
+       
+10/07/2005 Bob Rossi <bob@brasko.net>
+
 	* tgdb-base/include/tgdb.h, tgdb-base/src/tgdb.c
 	(tgdb_send_inferior_data): Removed unused function.
 
