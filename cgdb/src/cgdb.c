@@ -484,147 +484,136 @@ static int user_input(void) {
     return 0;
 }
 
-static void process_commands(struct tgdb *tgdb)
+static void 
+process_commands(struct tgdb *tgdb)
 {
-    struct tgdb_response *item;
+  struct tgdb_response *item;
 
-    while ( ( item = tgdb_get_response (tgdb )) != NULL ) {
-        
-        switch (item -> header){
-            /* This updates all the breakpoints */
-            case TGDB_UPDATE_BREAKPOINTS:
-            {
-                struct sviewer *sview = if_get_sview();
-                char *file; 
-				struct tgdb_list *list = (struct tgdb_list *)item->data;
-				tgdb_list_iterator *iterator;
-				struct tgdb_breakpoint *tb;
+  while ( (item = tgdb_get_response (tgdb)) != NULL) {
+    switch (item -> header){
+      /* This updates all the breakpoints */
+      case TGDB_UPDATE_BREAKPOINTS:
+      {
+	struct sviewer *sview = if_get_sview();
+	char *file; 
+	struct tgdb_list *list = item->choice.update_breakpoints.breakpoint_list;
+	tgdb_list_iterator *iterator;
+	struct tgdb_breakpoint *tb;
 
-                source_clear_breaks(if_get_sview());
+	source_clear_breaks(if_get_sview());
+	iterator = tgdb_list_get_first ( list );
 
-				iterator = tgdb_list_get_first ( list );
+	while (iterator) {
+	  /* For each breakpoint */
+	  tb = (struct tgdb_breakpoint *)tgdb_list_get_item ( iterator );
 
-            	while ( iterator ) {
-					/* For each breakpoint */
-                	tb = (struct tgdb_breakpoint *)tgdb_list_get_item ( iterator );
+	  file = strdup ( tb->file );
 
-                    file = strdup ( tb->file );
+	  if (tb->enabled)
+	    source_enable_break(sview, file, tb->line);
+	  else
+	    source_disable_break(sview, file, tb->line);
 
-                    if ( tb->enabled )
-                        source_enable_break(sview, file, tb->line);
-                    else
-                        source_disable_break(sview, file, tb->line);
+	  iterator = tgdb_list_next ( iterator );
+	}
 
-					iterator = tgdb_list_next ( iterator );
-                }
+	if_show_file(NULL, 0);
+	break;
+      }
 
-                if_show_file(NULL, 0);
-                break;
-            }
+      /* This means a source file or line number changed */
+      case TGDB_UPDATE_FILE_POSITION:
+      {
+	struct tgdb_file_position *tfp;
+	tfp = item->choice.update_file_position.file_position;
 
-            /* This means a source file or line number changed */
-            case TGDB_UPDATE_FILE_POSITION:
-            {
-				struct tgdb_file_position *tfp;
+	/* Update the file */
+	source_reload (if_get_sview(), tfp->absolute_path, 0);
 
-				tfp = (struct tgdb_file_position *) item->data;
+	if_show_file (tfp->absolute_path, tfp->line_number);
 
-				/* Update the file */
-				source_reload ( if_get_sview(), tfp->absolute_path, 0 );
-
-                if_show_file ( 
-                    tfp->absolute_path, 
-                    tfp->line_number);
-
-                source_set_relative_path ( 
+	source_set_relative_path ( 
                     if_get_sview(), 
                     tfp->absolute_path, 
                     tfp->relative_path);
 
-                break;
-            }
+	break;
+      }
                 
-            /* This is a list of all the source files */
-            case TGDB_UPDATE_SOURCE_FILES:
-            {
-				struct tgdb_list *list =
-					(struct tgdb_list *) item->data;
-				tgdb_list_iterator *i = tgdb_list_get_first ( list );
-                char *s;
+      /* This is a list of all the source files */
+      case TGDB_UPDATE_SOURCE_FILES:
+      {
+	struct tgdb_list *list = item->choice.update_source_files.source_files;
+	tgdb_list_iterator *i = tgdb_list_get_first ( list );
+	char *s;
 
-                if_clear_filedlg();
+	if_clear_filedlg();
 
-                while ( i ) {
-					s = tgdb_list_get_item ( i );
+	while (i) {
+	  s = tgdb_list_get_item ( i );
+	  if_add_filedlg_choice( s );
+	  i = tgdb_list_next ( i );
+	}
 
-                    if_add_filedlg_choice( s );
-
-					i = tgdb_list_next ( i );
-                }
-
-                if_set_focus(FILE_DLG);
-                break;
-            }
+	if_set_focus(FILE_DLG);
+	break;
+      }
                 
-            /* The user is trying to get a list of source files that make up
-             * the debugged program but libtgdb is claiming that gdb knows
-             * none. */
-            case TGDB_SOURCES_DENIED:
-                if_display_message("Error:", 0,  
+      /* The user is trying to get a list of source files that make up
+       * the debugged program but libtgdb is claiming that gdb knows
+       * none. */
+      case TGDB_SOURCES_DENIED:
+	if_display_message("Error:", 0,  
                        " No sources available! Was the program compiled with debug?");
-                break;
+	break;
 
-            /* This is the absolute path to the last file the user requested */
-            case TGDB_ABSOLUTE_SOURCE_ACCEPTED:
-             {
-				struct tgdb_source_file *file = 
-						( struct tgdb_source_file *) item->data;
-                if_show_file( file->absolute_path, 1);
-                source_set_relative_path(if_get_sview(), file->absolute_path, last_relative_file);
-                break;
-             }
+      /* This is the absolute path to the last file the user requested */
+      case TGDB_ABSOLUTE_SOURCE_ACCEPTED:
+      {
+	struct tgdb_source_file *file = item->choice.absolute_source_accepted.source_file;
+	if_show_file( file->absolute_path, 1);
+	source_set_relative_path(if_get_sview(), file->absolute_path, last_relative_file);
+	break;
+      }
 
-            /* The source file requested does not exist */
-            case TGDB_ABSOLUTE_SOURCE_DENIED:
-             {
-				struct tgdb_source_file *file = 
-						( struct tgdb_source_file *) item->data;
-                if_show_file(NULL, 0 );
-                /* com can be NULL when tgdb orig requests main file */
-                if ( file->absolute_path != NULL )
-                    if_display_message("No such file:", 0, " %s", file->absolute_path);
+      /* The source file requested does not exist */
+      case TGDB_ABSOLUTE_SOURCE_DENIED:
+      {
+	struct tgdb_source_file *file = item->choice.absolute_source_denied.source_file;
+	if_show_file(NULL, 0 );
+	/* com can be NULL when tgdb orig requests main file */
+	if (file->absolute_path != NULL)
+	  if_display_message("No such file:", 0, " %s", file->absolute_path);
+	break;
+      }
+      case TGDB_INFERIOR_EXITED:
+      {
+	/*
+	 * int *status = item->data;
+	 * This could eventually go here, but for now, the update breakpoint 
+	 * display function makes the status bar go back to the name of the file.
+	 *
+	 * if_display_message ( "Program exited with value", 0, " %d", *status );
+	 */
 
-                break;
-             }
-			case TGDB_INFERIOR_EXITED:
-			 {
-				 /*
-				  * int *status = item->data;
-				  * This could eventually go here, but for now, the update breakpoint 
-				  * display function makes the status bar go back to the name of the file.
-				  *
-				  * if_display_message ( "Program exited with value", 0, " %d", *status );
-				  */
-
-				 /* Clear the cache */
-				 break;
-			 }
-            case TGDB_UPDATE_COMPLETIONS:
-            {
-				struct tgdb_list *list =
-					(struct tgdb_list *) item->data;
-		do_tab_completion (list);
-                break;
-            }
-            case TGDB_QUIT:
-                cleanup();            
-                exit(0);
-                break;
-            /* Default */
-            default:
-                break;
-        }
+	/* Clear the cache */
+	break;
+      }
+      case TGDB_UPDATE_COMPLETIONS:
+      {
+	struct tgdb_list *list = item->choice.update_completions.completion_list;
+	do_tab_completion (list);
+	break;
+      }
+      case TGDB_QUIT:
+	cleanup();            
+	exit(0);
+	break;
+      /* Default */
+      default:
+	break;
     }
+  }
 }
 
 /* gdb_input: Recieves data from tgdb:

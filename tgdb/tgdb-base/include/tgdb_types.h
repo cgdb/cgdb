@@ -46,11 +46,7 @@ extern "C"
   enum INTERFACE_COMMANDS
   {
 
-    /** 
-     * All breakpoints that are set.
-     * This is a 'struct tgdb_list *'.
-     * It contains a 'struct tgdb_breakpoint *' for each breakpoint.
-     */
+    /** All breakpoints that are set.  */
     TGDB_UPDATE_BREAKPOINTS,
 
     /**
@@ -63,30 +59,25 @@ extern "C"
     /**
      * This returns a list of all the source files that make up the 
      * inferior program.
-     * This is a 'struct tgdb_list *'
-     * It contains a const char* for each filename. The filename may
-     * be represented as a relative or absolute path. 
      */
     TGDB_UPDATE_SOURCE_FILES,
 
     /**
      * This is a response to the tgdb_get_sources function call.
      * If the sources can not be recieved you will get this response.
-     * The data will be NULL.
      */
     TGDB_SOURCES_DENIED,
 
     /** 
      * This is a response to the function call tgdb_get_source_absolute_filename.
      * It returns the absolute path to the relative path asked for.
-     * This is a struct tgdb_source_file representing the absolute filename.
      */
     TGDB_ABSOLUTE_SOURCE_ACCEPTED,
 
-    /** This is a response to the function call tgdb_get_source_absolute_filename.
+    /** 
+     * This is a response to the function call tgdb_get_source_absolute_filename.
      * It happens when gdb failed to know what the absolute path to the relative
      * path asked for was.
-     * This is a struct tgdb_source_file representing the absolute filename.
      *
      * NOTE: If this command is generated and the file is NULL, the command can
      * be ignored. Currently, the annotate 2 subsytem uses this when trying to
@@ -94,23 +85,17 @@ extern "C"
      */
     TGDB_ABSOLUTE_SOURCE_DENIED,
 
-    /**      Currently not used. */
-    TGDB_DISPLAY_UPDATE,
-
     /**
      * This happens when the program being debugged by GDB exits. 
      * It can be used be the front end to clear any cache that it might have
-     * obtained by debugging the last program.
-     *
-     * The data will be an int pointer, which represents the exit status.
+     * obtained by debugging the last program. The data represents the exit
+     * status.
      */
     TGDB_INFERIOR_EXITED,
 
     /**
      * This returns a list of all the completions.
      *
-     * This is a 'struct tgdb_list *'
-     * It contains a const char* for each completion.
      */
     TGDB_UPDATE_COMPLETIONS,
 
@@ -123,23 +108,71 @@ extern "C"
     TGDB_QUIT
   };
 
-/**
- * A single TGDB response for the front end.
- * This is the smallest unit of information that TGDB can return to the front 
- * end.
- */
+ /**
+  * A single TGDB response for the front end.
+  * This is the smallest unit of information that TGDB can return to the front 
+  * end.
+  */
   struct tgdb_response
   {
-
     /** 
      * This is the type of response.
      */
     enum INTERFACE_COMMANDS header;
 
-    /**
-     * This is a particular structure, based off of the header.
-     */
-    void *data;
+    union {
+      /* header == TGDB_UPDATE_BREAKPOINTS */
+      struct {
+	/* This list has elements of 'struct tgdb_breakpoint *' 
+	 * representing each breakpoint. */
+	struct tgdb_list *breakpoint_list;
+      } update_breakpoints;
+
+      /* header == TGDB_UPDATE_FILE_POSITION */
+      struct {
+	struct tgdb_file_position *file_position;
+      } update_file_position;
+
+      /* header == TGDB_UPDATE_SOURCE_FILES*/
+      struct {
+	/* This list has elements of 'const char *' representing each 
+	 * filename. The filename may be relative or absolute. */
+	struct tgdb_list *source_files;
+      } update_source_files;
+
+      /* header == TGDB_SOURCES_DENIED */
+      struct {
+      } sources_denied;
+      
+      /* header == TGDB_ABSOLUTE_SOURCE_ACCEPTED */
+      struct {
+        struct tgdb_source_file *source_file;
+      } absolute_source_accepted;
+
+      /* header == TGDB_ABSOLUTE_SOURCE_DENIED */
+      struct {
+        struct tgdb_source_file *source_file;
+      } absolute_source_denied;
+
+      /* header == TGDB_INFERIOR_EXITED */
+      struct {
+        int *exit_status;
+      } inferior_exited;
+
+      /* header == TGDB_UPDATE_COMPLETIONS */
+      struct {
+	/* This list has elements of 'const char *' 
+	 * representing each possible completion. */
+	struct tgdb_list *completion_list;
+      } update_completions;
+
+      /* header == TGDB_QUIT */
+      struct {
+        struct tgdb_debugger_exit_status *exit_status;
+      } quit;
+
+    } choice;
+
   };
 
 /******************************************************************************/
@@ -181,12 +214,10 @@ extern "C"
   * This will append a new command into TGDB's queue.
   *
   * \param command_list
-  * \param new_header
-  * \param ndata
+  * \param response
   */
   void tgdb_types_append_command (struct tgdb_list *command_list,
-				  enum INTERFACE_COMMANDS new_header,
-				  void *ndata);
+				  struct tgdb_response *response);
 
 //@}
 

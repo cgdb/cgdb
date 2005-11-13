@@ -1,3 +1,7 @@
+10/12/2005 Bob Rossi <bob@brasko.net>
+
+	* src/cgdb.c (process_commands): Update for TGDB interface change.
+
 10/06/2005 Bob Rossi <bob@brasko.net>
 
 	* src/cgdb.c (gdb_input): TGDB interface changed. Update CGDB.

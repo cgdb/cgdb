@@ -461,13 +461,16 @@ void commands_set_state(
         case BREAKPOINT_TABLE_END:  
             if(ibuf_length(c->breakpoint_string) > 0)
                 parse_breakpoint ( c );
+	    {
+		struct tgdb_response *response = (struct tgdb_response *)
+		  xmalloc (sizeof (struct tgdb_response));
+		response->header = TGDB_UPDATE_BREAKPOINTS;
+		response->choice.update_breakpoints.breakpoint_list = c->breakpoint_list;
 
-            /* At this point, annotate needs to send the breakpoints to the gui.
-             * All of the valid breakpoints are stored in breakpoint_queue. */
-            tgdb_types_append_command ( 
-						list, 
-						TGDB_UPDATE_BREAKPOINTS, 
-						c->breakpoint_list );
+		/* At this point, annotate needs to send the breakpoints to the gui.
+		 * All of the valid breakpoints are stored in breakpoint_queue. */
+	        tgdb_types_append_command (list, response);
+	    }
 
             ibuf_clear(c->breakpoint_string);
             c->breakpoint_enabled = FALSE;
@@ -525,54 +528,70 @@ void commands_list_command_finished (
 	int success){
   /* The file does not exist and it can not be opened.
    * So we return that information to the gui.  */
-	struct tgdb_source_file *rejected = (struct tgdb_source_file *)
-	  xmalloc ( sizeof ( struct tgdb_source_file ) );
+  struct tgdb_source_file *rejected = (struct tgdb_source_file *)
+    xmalloc ( sizeof ( struct tgdb_source_file ) );
+  struct tgdb_response *response = (struct tgdb_response *)
+    xmalloc (sizeof (struct tgdb_response));
 
-	if ( c->last_info_source_requested == NULL ) 
-		rejected->absolute_path = NULL;
-	else
-		rejected->absolute_path = strdup ( ibuf_get ( c->last_info_source_requested ) );
+  if ( c->last_info_source_requested == NULL ) 
+    rejected->absolute_path = NULL;
+  else
+    rejected->absolute_path = strdup ( ibuf_get ( c->last_info_source_requested ) );
 
-    tgdb_types_append_command ( list, TGDB_ABSOLUTE_SOURCE_DENIED, rejected);
+  response->header = TGDB_ABSOLUTE_SOURCE_DENIED;
+  response->choice.absolute_source_denied.source_file = rejected;
+
+  tgdb_types_append_command (list, response);
 }
 
-void commands_send_source_absolute_source_file (
-	struct commands *c, 
-	struct tgdb_list *list){
-   /*err_msg("Whats up(%s:%d)\r\n", info_source_buf, info_source_buf_pos);*/
-    unsigned long length = ibuf_length(c->info_source_string);
-    static char *info_ptr; 
-    info_ptr = ibuf_get(c->info_source_string);
+void 
+commands_send_source_absolute_source_file (
+  struct commands *c, 
+  struct tgdb_list *list)
+{
+  /*err_msg("Whats up(%s:%d)\r\n", info_source_buf, info_source_buf_pos);*/
+  unsigned long length = ibuf_length(c->info_source_string);
+  static char *info_ptr; 
+  info_ptr = ibuf_get(c->info_source_string);
 
-   /* found */
-   if(length >= c->source_prefix_length && 
-      (strncmp(info_ptr, c->source_prefix, c->source_prefix_length) == 0)){
-      char *path = info_ptr + c->source_prefix_length;
+  /* found */
+  if(length >= c->source_prefix_length && 
+    (strncmp(info_ptr, c->source_prefix, c->source_prefix_length) == 0)){
+    char *path = info_ptr + c->source_prefix_length;
 
-      /* requesting file */
-      if(c->last_info_source_requested == NULL) {
-		  	/* This happens only when libtgdb starts */
-            ibuf_clear( c->absolute_path );
-            ibuf_add ( c->absolute_path, path );
-            ibuf_clear( c->line_number );
-            ibuf_add ( c->line_number, "1" );
-      } else { 
-		  struct tgdb_source_file *tsf = (struct tgdb_source_file *)
-			  xmalloc ( sizeof ( struct tgdb_source_file ) );
-		  tsf->absolute_path = strdup ( path );
-          tgdb_types_append_command(list, TGDB_ABSOLUTE_SOURCE_ACCEPTED, tsf);
-      }
-   /* not found */
-   } else {
-	  struct tgdb_source_file *rejected = (struct tgdb_source_file *)
-		  xmalloc ( sizeof ( struct tgdb_source_file ) );
+    /* requesting file */
+    if(c->last_info_source_requested == NULL) {
+      /* This happens only when libtgdb starts */
+      ibuf_clear( c->absolute_path );
+      ibuf_add ( c->absolute_path, path );
+      ibuf_clear( c->line_number );
+      ibuf_add ( c->line_number, "1" );
+    } else { 
+      struct tgdb_source_file *tsf = (struct tgdb_source_file *)
+	xmalloc ( sizeof ( struct tgdb_source_file ) );
+      tsf->absolute_path = strdup ( path );
+      struct tgdb_response *response = (struct tgdb_response *)
+	xmalloc (sizeof (struct tgdb_response));
+      response->header = TGDB_ABSOLUTE_SOURCE_ACCEPTED;
+      response->choice.absolute_source_accepted.source_file = tsf;
+      tgdb_types_append_command(list, response);
+    }
+  /* not found */
+  } else {
+    struct tgdb_source_file *rejected = (struct tgdb_source_file *)
+      xmalloc ( sizeof ( struct tgdb_source_file ) );
+    struct tgdb_response *response = (struct tgdb_response *)
+      xmalloc (sizeof (struct tgdb_response));
+    response->header = TGDB_ABSOLUTE_SOURCE_DENIED;
 
-	  if ( c->last_info_source_requested == NULL )
-		  rejected->absolute_path = NULL;
-	  else
-		  rejected->absolute_path = strdup ( ibuf_get ( c->last_info_source_requested ) );
-      tgdb_types_append_command(list, TGDB_ABSOLUTE_SOURCE_DENIED, rejected);
-   }
+    if (c->last_info_source_requested == NULL)
+      rejected->absolute_path = NULL;
+    else
+      rejected->absolute_path = strdup ( ibuf_get ( c->last_info_source_requested ) );
+
+    response->choice.absolute_source_denied.source_file = rejected;
+    tgdb_types_append_command(list, response);
+  }
 }
 
 static void commands_process_source_line(struct commands *c ){
@@ -601,57 +620,58 @@ static void commands_process_source_line(struct commands *c ){
  * This function is capable of parsing the output of 'info source'.
  * It can get both the absolute and relative path to the source file.
  */
-static void commands_process_info_source (
-		struct commands *c, 
-		struct tgdb_list *list, 
-		char a){
-    unsigned long length;
-    static char *info_ptr;
+static void 
+commands_process_info_source (
+  struct commands *c, 
+  struct tgdb_list *list, 
+  char a)
+{
+  unsigned long length;
+  static char *info_ptr;
 
-    if ( c->info_source_ready  ) /* Already found */
-        return;
+  if (c->info_source_ready) /* Already found */
+    return;
     
-    info_ptr = ibuf_get(c->info_source_string);
-    length   = ibuf_length(c->info_source_string);
+  info_ptr = ibuf_get(c->info_source_string);
+  length   = ibuf_length(c->info_source_string);
 
-    if ( a == '\r' )
-        return;
+  if (a == '\r')
+    return;
 
-    if(a == '\n'){ 
-        /* This is the line containing the absolute path to the source file */
-        if ( commands_get_state(c) == INFO_SOURCE_ABSOLUTE && 
-             length >= c->source_prefix_length && 
-             strncmp(info_ptr, c->source_prefix, c->source_prefix_length) == 0 ) {
+  if(a == '\n'){ 
+    /* This is the line containing the absolute path to the source file */
+    if (commands_get_state(c) == INFO_SOURCE_ABSOLUTE && 
+	length >= c->source_prefix_length && 
+	strncmp(info_ptr, c->source_prefix, c->source_prefix_length) == 0 ) {
+      commands_send_source_absolute_source_file ( c, list );
+      c->info_source_ready = 1;
+    /* This is the line contatining the relative path to the source file */
+    } else if (commands_get_state(c) == INFO_SOURCE_RELATIVE && 
+	       length >= c->source_relative_prefix_length && 
+	       strncmp(info_ptr, c->source_relative_prefix, c->source_relative_prefix_length) == 0 ) {
+      /* So far, INFO_SOURCE_RELATIVE is only used when a 
+       * TGDB_UPDATE_FILE_POSITION is needed.
+       */
+      /* This section allocates a new structure to add into the queue 
+       * All of its members will need to be freed later.
+       */
+      struct tgdb_file_position *tfp = (struct tgdb_file_position *)
+	xmalloc ( sizeof ( struct tgdb_file_position ) );
+      struct tgdb_response *response = (struct tgdb_response *)
+	xmalloc (sizeof (struct tgdb_response));
+      tfp->absolute_path = strdup ( ibuf_get ( c->absolute_path ) );
+      tfp->relative_path = strdup ( info_ptr + c->source_relative_prefix_length );
+      tfp->line_number   = atoi ( ibuf_get ( c->line_number ) );
+  
+      response->header = TGDB_UPDATE_FILE_POSITION;
+      response->choice.update_file_position.file_position = tfp;
 
-             commands_send_source_absolute_source_file ( c, list );
-
-            c->info_source_ready = 1;
-        } else if ( /* This is the line contatining the relative path to the source file */
-            commands_get_state(c) == INFO_SOURCE_RELATIVE && 
-            length >= c->source_relative_prefix_length && 
-            strncmp(info_ptr, c->source_relative_prefix, c->source_relative_prefix_length) == 0 ) {
-
-            /* So far, INFO_SOURCE_RELATIVE is only used when a 
-             * TGDB_UPDATE_FILE_POSITION is needed.
-             */
-            {
-				/* This section allocates a new structure to add into the queue 
-				 * All of its members will need to be freed later.
-				 */
-				struct tgdb_file_position *tfp = (struct tgdb_file_position *)
-					xmalloc ( sizeof ( struct tgdb_file_position ) );
-				tfp->absolute_path = strdup ( ibuf_get ( c->absolute_path ) );
-				tfp->relative_path = strdup ( info_ptr + c->source_relative_prefix_length );
-				tfp->line_number   = atoi ( ibuf_get ( c->line_number ) );
-
-                tgdb_types_append_command(list, TGDB_UPDATE_FILE_POSITION, tfp );
-            }
-
-            c->info_source_ready = 1;
-        } else
-            ibuf_clear(c->info_source_string);
+      tgdb_types_append_command(list, response);
+      c->info_source_ready = 1;
     } else
-        ibuf_addchar(c->info_source_string, a);
+      ibuf_clear(c->info_source_string);
+  } else
+    ibuf_addchar(c->info_source_string, a);
 }
 
 /* process's source files */
@@ -713,8 +733,13 @@ void commands_send_gui_sources (
   /* If the inferior program was not compiled with debug, then no sources
    * will be available. If no sources are available, do not return the
    * TGDB_UPDATE_SOURCE_FILES command. */
-  if (tgdb_list_size ( c->inferior_source_files ) > 0)
-    tgdb_types_append_command (list, TGDB_UPDATE_SOURCE_FILES, c->inferior_source_files);
+  if (tgdb_list_size ( c->inferior_source_files ) > 0) {
+    struct tgdb_response *response = (struct tgdb_response *)
+      xmalloc (sizeof (struct tgdb_response));
+    response->header = TGDB_UPDATE_SOURCE_FILES;
+    response->choice.update_source_files.source_files = c->inferior_source_files;
+    tgdb_types_append_command (list, response);
+  }
 }
 
 
@@ -725,7 +750,11 @@ void commands_send_gui_completions (
    * will be available. If no sources are available, do not return the
    * TGDB_UPDATE_SOURCE_FILES command. */
 //  if (tgdb_list_size ( c->tab_completions ) > 0)
-    tgdb_types_append_command (list, TGDB_UPDATE_COMPLETIONS, c->tab_completions);
+    struct tgdb_response *response = (struct tgdb_response *)
+      xmalloc (sizeof (struct tgdb_response));
+    response->header = TGDB_UPDATE_COMPLETIONS;
+    response->choice.update_completions.completion_list = c->tab_completions;
+    tgdb_types_append_command (list, response);
 }
 
 void commands_process ( struct commands *c, char a, struct tgdb_list *list){
@@ -799,26 +828,32 @@ static void commands_prepare_list ( struct annotate_two *a2, struct commands *c,
    c->info_source_ready = 0;
 }
 
-void commands_finalize_command ( 
-		struct commands *c, 
-		struct tgdb_list *list ) {
-    switch ( commands_get_state (c) ) {
-        case INFO_SOURCE_RELATIVE:
-        case INFO_SOURCE_ABSOLUTE:
+void 
+commands_finalize_command ( 
+  struct commands *c, 
+  struct tgdb_list *list )
+{
+  switch ( commands_get_state (c) ) {
+    case INFO_SOURCE_RELATIVE:
+    case INFO_SOURCE_ABSOLUTE:
+      if ( c->info_source_ready == 0 ) {
+	struct tgdb_source_file *rejected = (struct tgdb_source_file *)
+	  xmalloc ( sizeof ( struct tgdb_source_file ) );
+	struct tgdb_response *response = (struct tgdb_response *)
+	  xmalloc (sizeof (struct tgdb_response));
+	if (c->last_info_source_requested == NULL)
+	  rejected->absolute_path = NULL;
+	else
+	  rejected->absolute_path = strdup ( ibuf_get ( c->last_info_source_requested ) );
 
-            if ( c->info_source_ready == 0 ) {
-				struct tgdb_source_file *rejected = (struct tgdb_source_file *)
-				  xmalloc ( sizeof ( struct tgdb_source_file ) );
-				if ( c->last_info_source_requested == NULL )
-					rejected->absolute_path = NULL;
-				else
-					rejected->absolute_path = strdup ( ibuf_get ( c->last_info_source_requested ) );
-                tgdb_types_append_command(list, TGDB_ABSOLUTE_SOURCE_DENIED, rejected );
-            }
-
-            break;
-        default: break;
-    }
+	response->header = TGDB_ABSOLUTE_SOURCE_DENIED;
+	response->choice.absolute_source_denied.source_file = rejected;
+	tgdb_types_append_command(list, response);
+      }
+      break;
+    default: 
+      break;
+  }
 }
 
 int commands_prepare_for_command ( 

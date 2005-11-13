@@ -1,3 +1,23 @@
+11/12/2005 Bob Rossi <bob@brasko.net>
+
+	* annotate-two/src/annotate.c (#include sys_util.h): Add include.
+	(handle_error_begin,handle_exited): Update for tgdb_response
+	interface change.
+	* annotate-two/src/commands.c (commands_set_state,
+	commands_list_command_finished,
+	commands_send_source_absolute_source_file,
+	commands_process_source_line, commands_process_info_source,
+	commands_process_complete, commands_send_gui_sources): Ditto.
+	* tgdb-base/src/driver.c (gdb_input): Ditto.
+	* tgdb-base/src/tgdb.c (tgdb_add_quit_command, tgdb_get_quit_command):
+	Ditto.
+	* tgdb-base/src/tgdb_types.c (tgdb_types_print_item,
+	tgdb_types_delete_item): Ditto.
+	* tgdb-base/include/tgdb_types.h (INTERFACE_COMMANDS): Update
+	documentation for these values. 
+	(tgdb_response): Change void* to a union with specific return values.
+
+
 11/08/2005 Bob Rossi <bob@brasko.net>
 
 	* tgdb-base/include/tgdb_types.h: Update coding style with indent to

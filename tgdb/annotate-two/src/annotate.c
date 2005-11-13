@@ -11,6 +11,7 @@
 #endif /* HAVE_STDLIB_H */
 
 #include "annotate.h"
+#include "sys_util.h"
 #include "logger.h"
 #include "data.h"
 #include "commands.h"
@@ -137,7 +138,10 @@ static int handle_error_begin(struct annotate_two *a2, const char *buf, size_t n
     * annotate error ( usually meaning that gdb can not find the symbols
     * for the debugged program ) then send a denied response. */
    if ( commands_get_state(a2->c) == INFO_SOURCES ) {
-        tgdb_types_append_command(list, TGDB_SOURCES_DENIED, NULL );
+        struct tgdb_response *response = (struct tgdb_response *)
+     	  xmalloc (sizeof (struct tgdb_response));
+	response->header = TGDB_SOURCES_DENIED;
+        tgdb_types_append_command (list, response);
         return 0;
    }
 
@@ -189,14 +193,18 @@ static int handle_display_value(struct annotate_two *a2, const char *buf, size_t
 }
 
 static int handle_exited(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list){
-	char *tmp = (char*)malloc ( sizeof ( char )*(n+1));
-	int *i = (int *)malloc ( sizeof ( int ) );
-	sprintf ( tmp, buf + 7 ); /* Skip the 'exited ' part */
-	*i = atoi ( tmp ) ;
-	free ( tmp );
-	tmp = NULL;
-    tgdb_types_append_command(list, TGDB_INFERIOR_EXITED, i );
-   return 0;
+  char *tmp = (char*)malloc ( sizeof ( char )*(n+1));
+  int *i = (int *)malloc ( sizeof ( int ) );
+  sprintf ( tmp, buf + 7 ); /* Skip the 'exited ' part */
+  *i = atoi ( tmp ) ;
+  free ( tmp );
+  tmp = NULL;
+  struct tgdb_response *response = (struct tgdb_response *)
+    xmalloc (sizeof (struct tgdb_response));
+  response->header = TGDB_INFERIOR_EXITED;
+  response->choice.inferior_exited.exit_status = i;
+  tgdb_types_append_command(list, response);
+  return 0;
 }
 
 static int NOT_SUPPORTED(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list){

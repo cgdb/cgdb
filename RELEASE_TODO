@@ -16,10 +16,13 @@
   it generates info and html pages. For man pages, looking at help2man might
   be a good idea.
 
-Bug fixes for cgdb-0.5.3
+Bug fixes/improvement for cgdb-0.5.3
 
 - Strip readline out of TGDB and put it into CGDB. 
   This is in preparation for removing the rlctx code.
+- revamp the tgdb_response data structure to simply be a union with an
+  enum, which selects the appropriate values. This would be a self
+  documenting data structure.
 
 Closed:
 
