@@ -100,7 +100,7 @@ if test "$use_ncurses_library" = "yes"; then
     If your system does not have ncurses get it!
     If that is not an option try 'configure --with-curses.'
     You can try --with-ncurses-prefix=/foo/ncurses to tell configure where ncurses is.]))
-        LIBS="-lncurses  $LIBS"
+        LIBS="$LIBS -lncurses"
 fi
 
 dnl If the user want curses, Warn them that cgdb does not run perfect against it.
@@ -113,7 +113,7 @@ if test "$use_ncurses_library" = "no"; then
             AC_MSG_ERROR([cgdb needs ncurses/curses to build. ncurses is strongly recommended.
     If your system does not have ncurses get it!
     You can try --with-curses-prefix=/foo/curses to tell configure where curses is.]))
-        LIBS="-lcurses  $LIBS"
+        LIBS="$LIBS -lcurses"
 fi
 
 dnl Checking for log10 function in math - I would like to remove this

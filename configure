@@ -5080,7 +5080,7 @@ echo "$as_me: error: cgdb needs ncurses/curses to build. ncurses is strongly rec
    { (exit 1); exit 1; }; }
 fi
 
-        LIBS="-lncurses  $LIBS"
+        LIBS="$LIBS -lncurses"
 fi
 
 if test "$use_ncurses_library" = "no"; then
@@ -5169,7 +5169,7 @@ echo "$as_me: error: cgdb needs ncurses/curses to build. ncurses is strongly rec
    { (exit 1); exit 1; }; }
 fi
 
-        LIBS="-lcurses  $LIBS"
+        LIBS="$LIBS -lcurses"
 fi
 
 
