@@ -45,15 +45,22 @@ esac
 
 dnl Default variables
 dnl If ncurses is yes after arguments, than use ncurses. Otherwise, use curses
+opt_with_readline_prefix=no
 use_ncurses_library=yes
 opt_with_ncurses_prefix=no
 opt_with_curses_prefix=no
-opt_with_readline_prefix=no
 
 dnl argument to configure
+AC_ARG_WITH(readline, AC_HELP_STRING([--with-readline=PREFIX], [Use system installed readline library]), opt_with_readline_prefix=$withval)
 AC_ARG_WITH(ncurses, AC_HELP_STRING([--with-ncurses=PREFIX], [Use system installed ncurses library]), opt_with_ncurses_prefix=$withval)
 AC_ARG_WITH(curses, AC_HELP_STRING([--with-curses=PREFIX], [Use system installed curses library]), opt_with_curses_prefix=$withval use_ncurses_library=no)
-AC_ARG_WITH(readline, AC_HELP_STRING([--with-readline=PREFIX], [Use system installed readline library]), opt_with_readline_prefix=$withval)
+
+if test "$opt_with_readline_prefix" != "no"; then
+  # If set to "yes", it is on the compilers include path.
+  if test "$opt_with_readline_prefix" != "yes"; then
+    LDFLAGS="-L$opt_with_readline_prefix/lib $LDFLAGS" CFLAGS="-I$opt_with_readline_prefix/include -I$opt_with_readline_prefix/include/readline $CFLAGS" CPPFLAGS="-I$opt_with_readline_prefix/include -I$opt_with_readline_prefix/include/readline $CPPFLAGS"
+  fi
+fi
 
 dnl ncurses-prefix argument
 if test "$opt_with_ncurses_prefix" != "no"; then
@@ -70,12 +77,8 @@ if test "$opt_with_curses_prefix" != "no"; then
   fi
 fi
 
-if test "$opt_with_readline_prefix" != "no"; then
-  # If set to "yes", it is on the compilers include path.
-  if test "$opt_with_readline_prefix" != "yes"; then
-    LDFLAGS="-L$opt_with_readline_prefix/lib $LDFLAGS" CFLAGS="-I$opt_with_readline_prefix/include -I$opt_with_readline_prefix/include/readline $CFLAGS" CPPFLAGS="-I$opt_with_readline_prefix/include -I$opt_with_readline_prefix/include/readline $CPPFLAGS"
-  fi
-fi
+dnl Configure readline
+VL_LIB_READLINE
 
 dnl If the user want ncurses, Try to find it and add it to the linking library.
 if test "$use_ncurses_library" = "yes"; then
@@ -124,9 +127,6 @@ dnl AC_DEFINE(READLINE_LIBRARY, 1, [internal readline define])
 dnl else
 dnl VL_LIB_READLINE
 dnl fi
-
-dnl Configure readline
-VL_LIB_READLINE
 
 dnl Make sure there is a version of readline that CGDB supports.
 dnl Simply putting 5.1* -> 5.9* just to take into accout future versions.
