@@ -80,6 +80,18 @@ fi
 dnl Configure readline
 VL_LIB_READLINE
 
+dnl Make sure there is a version of readline that CGDB supports.
+dnl Simply putting 5.1* -> 5.9* just to take into accout future versions.
+RL_LIB_READLINE_VERSION
+case "$ac_cv_rl_version" in
+5.1*|5.2*|5.3*|5.4*|5.5*|5.6*|5.7*|5.8*|5.9*|6*|7*|8*|9*) ;;
+*)      AC_MSG_ERROR([CGDB requires GNU readline 5.1 or greater to link.
+  If you used --with-readline instead of using the system readline library, 
+  make sure to set the correct readline library on the linker search path 
+  via LD_LIBRARY_PATH or some other facility.])
+	;;
+esac
+
 dnl If the user want ncurses, Try to find it and add it to the linking library.
 if test "$use_ncurses_library" = "yes"; then
         AC_CHECK_LIB(ncurses, initscr,
@@ -127,18 +139,6 @@ dnl AC_DEFINE(READLINE_LIBRARY, 1, [internal readline define])
 dnl else
 dnl VL_LIB_READLINE
 dnl fi
-
-dnl Make sure there is a version of readline that CGDB supports.
-dnl Simply putting 5.1* -> 5.9* just to take into accout future versions.
-RL_LIB_READLINE_VERSION
-case "$ac_cv_rl_version" in
-5.1*|5.2*|5.3*|5.4*|5.5*|5.6*|5.7*|5.8*|5.9*|6*|7*|8*|9*) ;;
-*)      AC_MSG_ERROR([CGDB requires GNU readline 5.1 or greater to link.
-  If you used --with-readline instead of using the system readline library, 
-  make sure to set the correct readline library on the linker search path 
-  via LD_LIBRARY_PATH or some other facility.])
-	;;
-esac
 
 dnl determine if terminal headers are available for tgdb
 AC_CHECK_HEADERS(pty.h sys/stropts.h termios.h sys/select.h)
