@@ -118,41 +118,6 @@ extern "C"
   int tgdb_set_prompt_change_callback (struct tgdb *tgdb,
 				       prompt_change callback);
 
-  /**
-   * This is the callback interface used below.
-   *
-   * \param command
-   * The console command that was issued by the user to send to the debugger.
-   *
-   * \param is_buffered_console_command
-   * If this command was buffered when it was issued. This is useful because
-   * if the command was buffered, some front ends did not yet have a chance
-   * to put there prompt and command (ie (gdb) b next) for the buffered
-   * command. However, if the command was not buffered, the data could have
-   * already been presented to the user.
-   */
-  typedef void (*prompt_update) (const char *command,
-				 const int is_buffered_console_command);
-
-  /**
-   * This is useful when the client needs to print the prompt between 
-   * commands run from the console. It is possible that TGDB buffers many
-   * console commands sent from the front end. If this is the case, before
-   * the next command is sent to the debugger, this callback will be called
-   * so the front end can output the prompt and the command. 
-   *
-   * \param tgdb
-   * An instance of the tgdb library to operate on.
-   *
-   * \param callback
-   * The function to call when TGDB detects that the prompt could be output.
-   *
-   * \return
-   * 0 on success, or -1 on error
-   */
-  int tgdb_set_prompt_update_callback (struct tgdb *tgdb,
-				       prompt_update callback);
-
 //@}
 // }}}
 
@@ -206,20 +171,19 @@ extern "C"
 //@{
 
   /**
-   * This sends a console command to the debugger (GDB).
-   *
+   * Have TGDB process a command.
+   * 
    * \param tgdb
    * An instance of the tgdb library to operate on.
+   * 
+   * \param request
+   * The requested command to have TGDB process.
    *
-   * \param command
-   * The null terminated command to pass to GDB as a console command.
-   *
-   * @return
+   * \return
    * 0 on success or -1 on error
    */
-  int tgdb_send_debugger_console_command (struct tgdb *tgdb,
-					  const char *command);
-
+  int tgdb_process_command (struct tgdb *tgdb, struct tgdb_request *request);
+  
   /**
    * Gets output from the debugger.
    * 
@@ -374,6 +338,24 @@ extern "C"
 //@{
 
   /**
+   * This sends a console command to the debugger (GDB).
+   *
+   * \param tgdb
+   * An instance of the tgdb library to operate on.
+   *
+   * \param command
+   * The null terminated command to pass to GDB as a console command.
+   * 
+   * \param request
+   * Will return as a tgdb request command on success, otherwise invalid.
+   *
+   * @return
+   * 0 on success or -1 on error
+   */
+  int tgdb_request_run_console_command (struct tgdb *tgdb, const char *command,
+				    struct tgdb_request **request);
+
+  /**
    * Gets a list of source files that make up the program being debugged.
    *
    * This function does not actually do anything but put a command in the 
@@ -391,7 +373,7 @@ extern "C"
    * @return
    * 0 on success or -1 on error
    */
-  int tgdb_get_inferiors_source_files (struct tgdb *tgdb);
+  int tgdb_request_inferiors_source_files (struct tgdb *tgdb, struct tgdb_request **request);
 
   /**
    * This gets the absolute path from FILE. FILE must have been returned
@@ -410,7 +392,7 @@ extern "C"
    * @return
    * 0 on success or -1 on error
    */
-  int tgdb_get_absolute_path (struct tgdb *tgdb, const char *file);
+  int tgdb_request_absolute_path (struct tgdb *tgdb, const char *file, struct tgdb_request **request);
 
   /**
    * This tells libtgdb to run a command through the debugger.
@@ -424,7 +406,7 @@ extern "C"
    * @return
    * 0 on success or -1 on error
    */
-  int tgdb_run_debugger_command (struct tgdb *tgdb, enum tgdb_command_type c);
+  int tgdb_request_run_debugger_command (struct tgdb *tgdb, enum tgdb_command_type c, struct tgdb_request **request);
 
   /**
    * Modify's a breakpoint.
@@ -444,9 +426,11 @@ extern "C"
    * @return
    * 0 on success or -1 on error
    */
-  int tgdb_modify_breakpoint (struct tgdb *tgdb,
+  int tgdb_request_modify_breakpoint (struct tgdb *tgdb,
 			      const char *file,
-			      int line, enum tgdb_breakpoint_action b);
+			      int line, 
+			      enum tgdb_breakpoint_action b,
+			      struct tgdb_request **request);
 
   /**
    * Used to get all of the possible tab completion options for LINE.
@@ -460,9 +444,61 @@ extern "C"
    * \return
    * 0 on success or -1 on error.
    */
-  int tgdb_complete (struct tgdb *tgdb, const char *line);
+  int tgdb_request_complete (struct tgdb *tgdb, const char *line, struct tgdb_request **request);
 
 //@}
+// }}}
+
+// TGDB Queue commands {{{
+/******************************************************************************/
+/**
+ * @name Queuing of TGDB commands
+ * These functinos are used to allow clients to queue multiple commands for 
+ * TGDB to be able to run.
+ */
+/******************************************************************************/
+
+  /**
+   * Have TGDB append a command to it's list of commands it needs to run.
+   * 
+   * \param tgdb
+   * An instance of the tgdb library to operate on.
+   * 
+   * \param request
+   * The requested command to have TGDB process.
+   *
+   * \return
+   * 0 on success or -1 on error
+   */
+  int tgdb_queue_append (struct tgdb *tgdb, struct tgdb_request *request);
+
+  /**
+   * Get a tgdb_request command back from TGDB.
+   *
+   * \param tgdb
+   * An instance of the tgdb library to operate on.
+   *
+   * \return
+   * The requested command at the top of the stack, or NULL on error.
+   * Popping a command when the queue is empty is also considered an error,
+   * and NULL will be returned.
+   */
+  struct tgdb_request *tgdb_queue_pop (struct tgdb *tgdb);
+
+  /**
+   * Get's the number of items that are in the queue for TGDB to run.
+   *
+   * \param tgdb
+   * An instance of the tgdb library to operate on.
+   *
+   * \size
+   * The number of items in the list.
+   *
+   * \return
+   * 0 on success or -1 on error
+   */
+  int tgdb_queue_size (struct tgdb *tgdb, int *size);
+
 // }}}
 
 // Signal Handling Support {{{

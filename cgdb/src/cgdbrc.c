@@ -281,16 +281,20 @@ int command_focus_tty( void )
 
 int command_do_continue( void )
 {
-    if ( tgdb_run_debugger_command ( tgdb, TGDB_CONTINUE ) == -1 ) 
+    struct tgdb_request *request;
+    if ( tgdb_request_run_debugger_command ( tgdb, TGDB_CONTINUE, &request ) == -1 ) 
         return -1;
+    handle_request (tgdb, request);
 
     return 0;
 }
 
 int command_do_finish( void )
 {
-    if ( tgdb_run_debugger_command ( tgdb, TGDB_FINISH ) == -1 )
+    struct tgdb_request *request;
+    if ( tgdb_request_run_debugger_command ( tgdb, TGDB_FINISH, &request ) == -1 )
         return -1;
+    handle_request (tgdb, request);
 
     return 0;
 }
@@ -303,8 +307,10 @@ int command_do_help( void )
 
 int command_do_next( void )
 {
-    if ( tgdb_run_debugger_command  ( tgdb, TGDB_NEXT ) == -1 )
+    struct tgdb_request *request;
+    if ( tgdb_request_run_debugger_command  ( tgdb, TGDB_NEXT, &request ) == -1 )
         return -1;
+    handle_request (tgdb, request);
 
     return 0;
 }
@@ -327,16 +333,20 @@ int command_do_quit_force( void )
 int command_do_run( void )
 {
     /* FIXME: see if there are any other arguments to pass to the run command */
-    if ( tgdb_run_debugger_command  ( tgdb, TGDB_RUN ) == -1 )
+    struct tgdb_request *request;
+    if ( tgdb_request_run_debugger_command  ( tgdb, TGDB_RUN, &request ) == -1 )
         return -1;
+    handle_request (tgdb, request);
 
     return 0;
 }
 
 int command_do_step( void )
 {
-    if ( tgdb_run_debugger_command  ( tgdb, TGDB_STEP ) == -1 )
+    struct tgdb_request *request;
+    if ( tgdb_request_run_debugger_command  ( tgdb, TGDB_STEP, &request ) == -1 )
         return -1;
+    handle_request (tgdb, request);
 
     return 0;
 }

@@ -78,6 +78,7 @@
 /* --------------- */
 
 struct tgdb *tgdb; 			  /* The main TGDB context */
+struct tgdb_request *last_request = NULL;
 
 char cgdb_home_dir[MAXLINE];  /* Path to home directory with trailing slash */
 char cgdb_help_file[MAXLINE]; /* Path to home directory with trailing slash */
@@ -130,6 +131,41 @@ static char *rline_last_prompt = NULL;
 /* Original terminal attributes */
 static struct termios term_attributes;
 
+/**
+ * If the TGDB instance is not busy, it will run the requested command.
+ * Otherwise, the command will get queued to run later.
+ *
+ * \param tgdb
+ * An instance of the tgdb library to operate on.
+ *
+ * \param request
+ * The requested command to have TGDB process.
+ *
+ * \return
+ * 0 on success or -1 on error
+ */
+int
+handle_request (struct tgdb *tgdb, struct tgdb_request *request)
+{
+  int val, is_busy;
+
+  if (!tgdb || !request)
+    return -1;
+
+  val = tgdb_is_busy (tgdb, &is_busy);
+  if (val == -1)
+    return -1;
+
+  if (is_busy)
+    tgdb_queue_append (tgdb, request);
+  else {
+    last_request = request;
+    tgdb_process_command (tgdb, request);
+  }
+
+  return 0;
+}
+
 // readline code {{{
 
 /* Please forgive me for adding all the comment below. This function
@@ -141,6 +177,7 @@ rlctx_send_user_command (char *line)
   char *cline;
   int length;
   char *rline_prompt;
+  struct tgdb_request *request;
 
   /* This happens when rl_callback_read_char gets EOF */
   if (line == NULL)
@@ -192,8 +229,10 @@ rlctx_send_user_command (char *line)
     rline_add_history (rline, cline);
 
   /* Send this command to TGDB */
-  if ( tgdb_send_debugger_console_command (tgdb, cline) == -1 )
+  if ( tgdb_request_run_console_command (tgdb, cline, &request) == -1 )
     logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_send_user_command\n"); 
+
+  handle_request (tgdb, request);
 
   ibuf_clear (current_line);
 }
@@ -203,6 +242,7 @@ tab_completion (int a, int b)
 {
   char *cur_line;
   int ret;
+  struct tgdb_request *request;
 
   is_tab_completing = 1;
 
@@ -210,7 +250,8 @@ tab_completion (int a, int b)
   if (ret == -1)
     logger_write_pos ( logger, __FILE__, __LINE__, "rline_get_current_line error\n"); 
 
-  tgdb_complete (tgdb, cur_line);
+  tgdb_request_complete (tgdb, cur_line, &request);
+  handle_request (tgdb, request);
   return 0;
 }
 
@@ -250,17 +291,6 @@ static void
 change_prompt (const char *new_prompt)
 {
   rline_set_prompt (rline, new_prompt);
-}
-
-static void 
-update_prompt (const char *command, const int is_buffered_console_command)
-{
-  char *prompt;
-  if (is_buffered_console_command) {
-    rline_get_prompt (rline, &prompt);
-    if_print (prompt);
-    if_print (command);
-  }
 }
 
 // }}}
@@ -420,12 +450,27 @@ static int create_help_file(void) {
 /* start_gdb: Starts up libtgdb
  *  Returns:  -1 on error, 0 on success
  */
-static int start_gdb(int argc, char *argv[]) {
+static int 
+start_gdb(int argc, char *argv[]) {
+  //struct tgdb_request *request;
+  //int val;
 
-    if ( ( tgdb = tgdb_initialize(debugger_path, argc, argv, &gdb_fd, &tty_fd)) == NULL )
-        return -1;
+  tgdb = tgdb_initialize(debugger_path, argc, argv, &gdb_fd, &tty_fd);
+  if (tgdb == NULL)
+    return -1;
 
-    return 0;
+  /* Run some initialize commands */
+
+  /* gdb may already have some breakpoints when it starts. This could happen
+   * if the user puts breakpoints in there .gdbinit.
+   * This makes sure that TGDB asks for the breakpoints on start up.
+   */
+
+  /**
+   * Get the filename GDB defaults to. 
+   */ 
+
+  return 0;
 }
 
 static void send_key(int focus, char key) {
@@ -616,6 +661,50 @@ process_commands(struct tgdb *tgdb)
   }
 }
 
+/**
+ * This function looks at the request that CGDB has made and determines if it 
+ * effects the GDB console window. For instance, if the request makes output go
+ * to that window, then the user would like to see another prompt there when the 
+ * command finishes. However, if the command is 'o', to get all the sources and 
+ * display them, then this doesn't effect the GDB console window and the window
+ * should not redisplay the prompt.
+ *
+ * \param request
+ * The request to analysize
+ *
+ * \param update
+ * Will return as 1 if the console window should be updated, or 0 otherwise
+ *
+ * \return
+ * 0 on success or -1 on error
+ */
+static int
+does_request_require_console_update (struct tgdb_request *request, int *update)
+{
+  if (!request || !update)
+    return -1;
+
+  switch (request->header)
+    {
+      case TGDB_REQUEST_CONSOLE_COMMAND:
+        *update = 1;
+	break;
+      case TGDB_REQUEST_INFO_SOURCES:
+      case TGDB_REQUEST_ABSOLUTE_PATH:
+	*update = 0;
+	break;
+      case TGDB_REQUEST_DEBUGGER_COMMAND:
+      case TGDB_REQUEST_MODIFY_BREAKPOINT:
+      case TGDB_REQUEST_COMPLETE:
+	*update = 1;
+	break;
+      default:
+	return -1;
+    }
+
+  return 0;
+}
+
 /* gdb_input: Recieves data from tgdb:
  *
  *  Returns:  -1 on error, 0 on success
@@ -673,7 +762,37 @@ gdb_input()
     if (val == -1)
       return -1;
     if (!is_busy) {
-	rline_rl_forced_update_display(rline);
+      int size;
+
+      tgdb_queue_size (tgdb, &size);
+      /* This is the second case, this command was queued. */
+      if (size > 0) {
+	struct tgdb_request *request = tgdb_queue_pop (tgdb);
+	char *prompt;
+	rline_get_prompt (rline, &prompt);
+	if_print (prompt);
+
+	if (request->header == TGDB_REQUEST_CONSOLE_COMMAND) {
+	  if_print (request->choice.console_command.command);
+	  if_print ("\n");
+	}
+
+	last_request = request;
+	tgdb_process_command (tgdb, request);
+      /* This is the first case */
+      } else {
+	int update = 1, ret_val;
+	
+	if (last_request) {
+	  ret_val = does_request_require_console_update (last_request, &update);
+	  if (ret_val == -1)
+	    return -1;
+	  last_request = NULL;
+	}
+	  
+	if (update)
+          rline_rl_forced_update_display(rline);
+      }
     }
   }
 
@@ -993,13 +1112,6 @@ int main(int argc, char *argv[]) {
 
     /* Set the tgdb callback */
     if (tgdb_set_prompt_change_callback (tgdb, change_prompt) == -1) {
-        logger_write_pos ( logger, __FILE__, __LINE__,  "Unable to set tgdb callback"); 
-        cleanup();
-        exit(-1);
-    }
-
-    /* Set the tgdb callback */
-    if (tgdb_set_prompt_update_callback (tgdb, update_prompt) == -1) {
         logger_write_pos ( logger, __FILE__, __LINE__,  "Unable to set tgdb callback"); 
         cleanup();
         exit(-1);

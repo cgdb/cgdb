@@ -1,3 +1,13 @@
+11/20/2005 Bob Rossi <bob@brasko.net>
+
+	* src/cgdb.h (handle_request): Added temporary prototype.
+	* src/cgdb.c (last_request): Added global.
+	(handle_request, does_request_require_console_update): Added new function.
+	(update_prompt): Removed function.
+	Add handle_request calls.
+	* src/cgdbrc.c: Add handle_request calls.
+	* src/interface.c: Ditto.
+
 10/12/2005 Bob Rossi <bob@brasko.net>
 
 	* src/cgdb.c (process_commands): Update for TGDB interface change.

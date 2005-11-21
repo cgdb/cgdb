@@ -62,24 +62,35 @@ static int is_tab_completing = 0;
 /* Original terminal attributes */
 static struct termios term_attributes;
 
+/* Run or queue a TGDB command */
+static int
+handle_request (struct tgdb *tgdb, struct tgdb_request *request)
+{
+  int val, is_busy;
+
+  if (!tgdb || !request)
+    return -1;
+
+  val = tgdb_is_busy (tgdb, &is_busy);
+  if (val == -1)
+    return -1;
+
+  if (is_busy)
+    tgdb_queue_append (tgdb, request);
+  else
+    tgdb_process_command (tgdb, request);
+
+  return 0;
+}
+
 static void change_prompt(char *prompt) {
     rline_set_prompt (rline, prompt);
 }
 
 static void 
-update_prompt (const char *command, const int is_buffered_console_command)
-{
-  char *prompt;
-  if (is_buffered_console_command) {
-    rline_get_prompt (rline, &prompt);
-    printf (prompt);
-    printf (command);
-  }
-}
-
-static void 
 rlctx_send_user_command(char *line) 
 {
+  struct tgdb_request *request;
   /* This happens when rl_callback_read_char gets EOF */
   if ( line == NULL )
     return;
@@ -89,14 +100,17 @@ rlctx_send_user_command(char *line)
     rline_add_history(rline, line);
 
   /* Send this command to TGDB */
-  if ( tgdb_send_debugger_console_command ( tgdb, line) == -1 )
+  if ( tgdb_request_run_console_command ( tgdb, line, &request) == -1 )
     logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_send_user_command\n"); 
+
+  handle_request (tgdb, request);
 }
 
 
 static int tab_completion(int a, int b) {
   char *cur_line;
   int ret;
+  struct tgdb_request *request;
 
   is_tab_completing = 1;
 
@@ -104,7 +118,9 @@ static int tab_completion(int a, int b) {
   if (ret == -1)
     logger_write_pos ( logger, __FILE__, __LINE__, "rline_get_current_line error\n"); 
 
-  tgdb_complete (tgdb, cur_line);
+  tgdb_request_complete (tgdb, cur_line, &request);
+
+  handle_request (tgdb, request);
   return 0;
 }
 
@@ -218,8 +234,26 @@ static int gdb_input(void) {
     int val = tgdb_is_busy (tgdb, &is_busy);
     if (val == -1)
       return -1;
-    if (!is_busy)
-      rline_rl_forced_update_display(rline);
+
+    if (!is_busy) {
+      int size;
+
+      tgdb_queue_size (tgdb, &size);
+      if (size > 0) {
+	struct tgdb_request *request = tgdb_queue_pop (tgdb);
+	char *prompt;
+	rline_get_prompt (rline, &prompt);
+	printf (prompt);
+
+	if (request->header == TGDB_REQUEST_CONSOLE_COMMAND) {
+	  printf (request->choice.console_command.command);
+	  printf ("\n");
+	}
+
+	tgdb_process_command (tgdb, request);
+      } else
+        rline_rl_forced_update_display(rline);
+    }
   }
 
     return 0;
@@ -458,12 +492,6 @@ int main(int argc, char **argv){
     /* Set up prompt callback function */
     if (tgdb_set_prompt_change_callback (tgdb, driver_prompt_change) == -1) {
       logger_write_pos ( logger, __FILE__, __LINE__, "driver error");
-      goto driver_end;
-    }
-
-    /* Set the tgdb callback */
-    if (tgdb_set_prompt_update_callback (tgdb, update_prompt) == -1) {
-      logger_write_pos ( logger, __FILE__, __LINE__,  "Unable to set tgdb callback"); 
       goto driver_end;
     }
 

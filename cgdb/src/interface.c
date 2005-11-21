@@ -908,6 +908,8 @@ toggle_breakpoint(struct sviewer *sview, enum tgdb_breakpoint_action t)
 {
   char *path;
   int   line;
+  struct tgdb_request *request;
+  int val;
 
   if (!sview || !sview->cur || !sview->cur->path)
     return 0;
@@ -923,7 +925,10 @@ toggle_breakpoint(struct sviewer *sview, enum tgdb_breakpoint_action t)
   if ( sview->cur->buf.breakpts[line] )
     t = TGDB_BREAKPOINT_DELETE;
 
-  return tgdb_modify_breakpoint ( tgdb, path, line + 1, t );
+  val = tgdb_request_modify_breakpoint ( tgdb, path, line + 1, t, &request );
+  handle_request (tgdb, request);
+  
+  return val;
 }
 
 /* source_input: Handles user input to the source window.
@@ -990,7 +995,11 @@ static void source_input(struct sviewer *sview, int key)
            break;
         case 'o':
            /* Causes file dialog to be opened */
-           tgdb_get_inferiors_source_files (tgdb);
+	   {
+	     struct tgdb_request *request;
+             tgdb_request_inferiors_source_files (tgdb, &request);
+	     handle_request (tgdb, request);
+	   }
            break;
         case ':':
            /* Allows user to go to a line number */ 
@@ -1014,16 +1023,19 @@ static void source_input(struct sviewer *sview, int key)
 
     /* Some extended features that are set by :set sc */
     if ( shortcut_option ) {
+	struct tgdb_request *request = NULL;
         switch ( key ) {
-            case 'r': tgdb_run_debugger_command (tgdb, TGDB_RUN); 		break;
-            case 'n': tgdb_run_debugger_command (tgdb, TGDB_NEXT);  	break;
-            case 's': tgdb_run_debugger_command (tgdb, TGDB_STEP);  	break;
-            case 'c': tgdb_run_debugger_command (tgdb, TGDB_CONTINUE);	break;
-            case 'f': tgdb_run_debugger_command (tgdb, TGDB_FINISH);  	break;
-            case 'u': tgdb_run_debugger_command (tgdb, TGDB_UP);      	break;
-            case 'd': tgdb_run_debugger_command (tgdb, TGDB_DOWN);    	break;
+            case 'r': tgdb_request_run_debugger_command (tgdb, TGDB_RUN, &request); 		break;
+            case 'n': tgdb_request_run_debugger_command (tgdb, TGDB_NEXT, &request);		break;
+            case 's': tgdb_request_run_debugger_command (tgdb, TGDB_STEP, &request);		break;
+            case 'c': tgdb_request_run_debugger_command (tgdb, TGDB_CONTINUE, &request);	break;
+            case 'f': tgdb_request_run_debugger_command (tgdb, TGDB_FINISH, &request);  	break;
+            case 'u': tgdb_request_run_debugger_command (tgdb, TGDB_UP, &request);      	break;
+            case 'd': tgdb_request_run_debugger_command (tgdb, TGDB_DOWN, &request);    	break;
             default:                                    				break;
         }
+	if (request)
+	  handle_request (tgdb, request);
     }
 
     if_draw();
@@ -1169,23 +1181,43 @@ int internal_if_input(int key) {
                      return 0;
                 case CGDB_KEY_F5:
                     /* Issue GDB run command */
-                    tgdb_run_debugger_command ( tgdb, TGDB_RUN);
+		    {
+		      struct tgdb_request *request;
+                      tgdb_request_run_debugger_command ( tgdb, TGDB_RUN, &request);
+		      handle_request (tgdb, request);
+		    }
                     return 0;
                 case CGDB_KEY_F6:
                     /* Issue GDB continue command */
-                    tgdb_run_debugger_command (tgdb, TGDB_CONTINUE);
+		    {
+		      struct tgdb_request *request;
+                      tgdb_request_run_debugger_command (tgdb, TGDB_CONTINUE, &request);
+		      handle_request (tgdb, request);
+		    }
                     return 0;
                 case CGDB_KEY_F7:
                     /* Issue GDB finish command */
-                    tgdb_run_debugger_command (tgdb, TGDB_FINISH);
+		    {
+		      struct tgdb_request *request;
+                      tgdb_request_run_debugger_command (tgdb, TGDB_FINISH, &request);
+		      handle_request (tgdb, request);
+		    }
                     return 0;
                 case CGDB_KEY_F8:
                     /* Issue GDB next command */
-                    tgdb_run_debugger_command (tgdb, TGDB_NEXT);
+		    {
+		      struct tgdb_request *request;
+                      tgdb_request_run_debugger_command (tgdb, TGDB_NEXT, &request);
+		      handle_request (tgdb, request);
+		    }
                     return 0;
                 case CGDB_KEY_F10:
                     /* Issue GDB step command */
-                    tgdb_run_debugger_command (tgdb, TGDB_STEP);
+		    {
+		      struct tgdb_request *request;
+                      tgdb_request_run_debugger_command (tgdb, TGDB_STEP, &request);
+		      handle_request (tgdb, request);
+		    }
                     return 0;
                 case CGDB_KEY_CTRL_L:
                     if_layout();
@@ -1211,7 +1243,9 @@ int internal_if_input(int key) {
                 return 0;
             /* The user picked a file */
             } else if ( ret == 1 ) {
-                tgdb_get_absolute_path ( tgdb, filedlg_file);
+		struct tgdb_request *request;
+                tgdb_request_absolute_path ( tgdb, filedlg_file, &request);
+		handle_request (tgdb, request);
                 strcpy(last_relative_file, filedlg_file);
                 if_set_focus(CGDB);
                 return 0;

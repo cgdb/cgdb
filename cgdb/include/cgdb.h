@@ -56,6 +56,13 @@
 
 int cgdb_set_esc_sequence_timeout ( int msec );
 
+/* TODO: Remove the below 3 lines. This is a reorganization effort to allow 
+ * TGDB to understand the new request/response mechanism that TGDB supports.
+ */
+struct tgdb;
+struct tgdb_request;
+int handle_request (struct tgdb *tgdb, struct tgdb_request *request);
+
 void cleanup();
 
 #endif

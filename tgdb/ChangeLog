@@ -1,3 +1,15 @@
+11/20/2005 Bob Rossi <bob@brasko.net>
+
+	* tgdb-base/include/tgdb.h (prompt_update,
+	tgdb_set_prompt_update_callback): Removed.
+	(tgdb_process_command): Added.
+	Renamed several commands to have request in them.
+	(tgdb_queue_append, tgdb_queue_pop, tgdb_queue_size): Added.
+	* tgdb-base/include/tgdb_types.h (INTERFACE_REQUEST_COMMANDS): Add.
+	(struct tgdb_request): Added.
+	* driver.c: Updated for new TGDB interface.
+	* tgdb-base/src/tgdb.c: Updated for new interface.
+
 11/12/2005 Bob Rossi <bob@brasko.net>
 
 	* annotate-two/src/annotate.c (#include sys_util.h): Add include.

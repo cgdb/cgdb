@@ -67,6 +67,9 @@ struct tgdb
    * All the queue's the clients can run commands through
    **************************************************************************/
 
+  /** The commands that the client has requested to run */
+  struct queue *gdb_client_request_queue;
+
   /**
    The commands that need to be run through gdb. 
    Examples are 'b main', 'run', ...  */
@@ -138,14 +141,6 @@ struct tgdb
    *
    * If this is NULL, there is no need to call the function.  */
   prompt_change prompt_change_callback;
-
-  /**
-   * This is the function that should be called when TGDB has determined
-   * that the prompt could be updated in the FE. It's called right when a 
-   * buffered command is sent.
-   *
-   * If this is NULL, there is no need to call the function.  */
-  prompt_update prompt_update_callback;
 };
 
 /* Temporary prototypes */
@@ -165,20 +160,6 @@ tgdb_set_prompt_change_callback (struct tgdb *tgdb, prompt_change callback)
     }
 
   tgdb->prompt_change_callback = callback;
-
-  return 0;
-}
-
-int
-tgdb_set_prompt_update_callback (struct tgdb *tgdb, prompt_update callback)
-{
-  if (!tgdb)
-    {
-      logger_write_pos (logger, __FILE__, __LINE__, "tgdb context is NULL");
-      return -1;
-    }
-
-  tgdb->prompt_update_callback = callback;
 
   return 0;
 }
@@ -275,6 +256,7 @@ initialize_tgdb_context (void)
   tgdb->inferior_stdout = -1;
   tgdb->inferior_stdin = -1;
 
+  tgdb->gdb_client_request_queue = NULL;
   tgdb->gdb_input_queue = NULL;
   tgdb->oob_input_queue = NULL;
 
@@ -288,7 +270,6 @@ initialize_tgdb_context (void)
   tgdb->command_list = tgdb_list_init ();
   tgdb->has_sigchld_recv = 0;
   tgdb->prompt_change_callback = NULL;
-  tgdb->prompt_update_callback = NULL;
 
   logger = NULL;
 
@@ -399,6 +380,9 @@ tgdb_initialize (const char *debugger,
     }
 
   /* Initialize the command queue's */
+
+  /* initialize client request buffer */
+  tgdb->gdb_client_request_queue = queue_init ();
 
   /* initialize users buffer */
   tgdb->gdb_input_queue = queue_init ();
@@ -745,17 +729,6 @@ tgdb_deliver_command (struct tgdb *tgdb, int fd, struct tgdb_command *command)
     tgdb->last_gui_command =
       xstrdup (client_command->tgdb_client_command_data);
 
-  /* In this case, give the FE a chance to update the prompt if necessary */
-  if (command->command_choice == TGDB_COMMAND_CONSOLE)
-    {
-      /* If there is at least 1 more console command currently in the queue, 
-       * then send the update prompt */
-      if (tgdb->prompt_update_callback)
-	tgdb->prompt_update_callback (client_command->
-				      tgdb_client_command_data,
-				      command->is_buffered_console_command);
-    }
-
   /* A command for the debugger */
   if (tgdb_client_prepare_for_command (tgdb->tcc, client_command) == -1)
     {
@@ -854,45 +827,6 @@ tgdb_command_callback (struct tgdb *tgdb, const char *line)
   tgdb_send (tgdb, ibuf_get (command), TGDB_COMMAND_CONSOLE);
   ibuf_free (command);
   command = NULL;
-  return 0;
-}
-
-int
-tgdb_send_debugger_console_command (struct tgdb *tgdb, const char *command)
-{
-  /* The debugger is ready for input. Send it */
-  if (is_ready (tgdb))
-    {
-      int ret = tgdb_command_callback (tgdb, command);
-      if (ret == -1)
-	{
-	  logger_write_pos (logger, __FILE__, __LINE__,
-			    "tgdb_send_debugger_data");
-	  return -1;
-	}
-      /* The debugger is not ready, the user wants to buffer this command */
-    }
-  else
-    {
-      struct ibuf *icommand = ibuf_init ();
-      struct tgdb_client_command *tcc;
-      struct tgdb_command *tc;
-      ibuf_add (icommand, command);
-      ibuf_addchar (icommand, '\n');
-
-      tcc = tgdb_client_command_create (ibuf_get (icommand),
-					TGDB_CLIENT_COMMAND_NORMAL,
-					TGDB_CLIENT_COMMAND_DISPLAY_COMMAND_AND_RESULTS,
-					TGDB_CLIENT_COMMAND_ACTION_NONE,
-					NULL);
-      tc = tgdb_command_create (NULL,
-				TGDB_COMMAND_CONSOLE,
-				TGDB_COMMAND_ACTION_NONE, tcc, 1);
-      ibuf_free (icommand);
-      command = NULL;
-      queue_append (tgdb->gdb_input_queue, tc);
-    }
-
   return 0;
 }
 
@@ -1026,7 +960,7 @@ tgdb_get_quit_command (struct tgdb *tgdb, int *tgdb_will_quit)
 }
 
 size_t
-tgdb_recv_debugger_console_data (struct tgdb * tgdb, char *buf, size_t n)
+tgdb_recv_debugger_console_data (struct tgdb *tgdb, char *buf, size_t n)
 {
   char local_buf[10 * n];
   ssize_t size;
@@ -1163,6 +1097,8 @@ tgdb_finish:
   return buf_size;
 }
 
+// Getting Data out of TGDB {{{
+
 struct tgdb_response *
 tgdb_get_response (struct tgdb *tgdb)
 {
@@ -1178,6 +1114,22 @@ tgdb_get_response (struct tgdb *tgdb)
 
   return command;
 }
+
+void
+tgdb_traverse_responses (struct tgdb *tgdb)
+{
+  tgdb_list_foreach (tgdb->command_list, tgdb_types_print_command);
+}
+
+void
+tgdb_delete_responses (struct tgdb *tgdb)
+{
+  tgdb_list_free (tgdb->command_list, tgdb_types_free_command);
+}
+
+// }}}
+
+// Inferior tty commands {{{
 
 int
 tgdb_tty_new (struct tgdb *tgdb)
@@ -1197,36 +1149,198 @@ tgdb_tty_name (struct tgdb *tgdb)
   return tgdb_client_get_tty_name (tgdb->tcc);
 }
 
+// }}}
+
 /* Functional commands {{{ */
 
+// Request {{{
+
 int
-tgdb_get_inferiors_source_files (struct tgdb *tgdb)
+tgdb_request_run_console_command (struct tgdb *tgdb, const char *command,
+			      struct tgdb_request **request)
 {
-  int ret = tgdb_client_get_inferior_source_files (tgdb->tcc);
+  if (!tgdb || !request)
+    return -1;
+
+  *request = (struct tgdb_request *)
+    xmalloc (sizeof (struct tgdb_request));
+
+  (*request)->header = TGDB_REQUEST_CONSOLE_COMMAND;
+  (*request)->choice.console_command.command = (const char *)
+    xstrdup (command);
+
+  
+  return 0;
+}
+
+int
+tgdb_request_inferiors_source_files (struct tgdb *tgdb, struct tgdb_request **request)
+{
+  if (!tgdb || !request)
+    return -1;
+
+  *request = (struct tgdb_request *)
+    xmalloc (sizeof (struct tgdb_request));
+  (*request)->header = TGDB_REQUEST_INFO_SOURCES;
+
+  return 0;
+}
+
+int
+tgdb_request_absolute_path (struct tgdb *tgdb, const char *file, struct tgdb_request **request)
+{
+  if (!tgdb || !request)
+    return -1;
+
+  *request = (struct tgdb_request *)
+    xmalloc (sizeof (struct tgdb_request));
+  (*request)->header = TGDB_REQUEST_ABSOLUTE_PATH;
+  if (file) {
+    (*request)->choice.absolute_path.file = (const char *)
+      xstrdup (file);
+  } else
+    (*request)->choice.absolute_path.file = NULL;
+
+    
+  return 0;
+}
+
+int
+tgdb_request_run_debugger_command (struct tgdb *tgdb, enum tgdb_command_type c, struct tgdb_request **request)
+{
+  if (!tgdb || !request)
+    return -1;
+
+  *request = (struct tgdb_request *)
+    xmalloc (sizeof (struct tgdb_request));
+  (*request)->header = TGDB_REQUEST_DEBUGGER_COMMAND;
+  (*request)->choice.debugger_command.c = c;
+    
+  return 0;
+}
+
+int
+tgdb_request_modify_breakpoint (struct tgdb *tgdb, const char *file, int line,
+			enum tgdb_breakpoint_action b, struct tgdb_request **request)
+{
+  if (!tgdb || !request)
+    return -1;
+
+  *request = (struct tgdb_request *)
+    xmalloc (sizeof (struct tgdb_request));
+  (*request)->header = TGDB_REQUEST_MODIFY_BREAKPOINT;
+  (*request)->choice.modify_breakpoint.file = (const char *)
+    xstrdup (file);
+  (*request)->choice.modify_breakpoint.line = line;
+  (*request)->choice.modify_breakpoint.b = b;
+
+  return 0;
+}
+
+int
+tgdb_request_complete (struct tgdb *tgdb, const char *line, struct tgdb_request **request)
+{
+  if (!tgdb || !request)
+    return -1;
+
+  *request = (struct tgdb_request *)
+    xmalloc (sizeof (struct tgdb_request));
+  (*request)->header = TGDB_REQUEST_COMPLETE;
+  (*request)->choice.complete.line = (const char *)
+    xstrdup (line);
+
+  return 0;
+}
+
+// }}}
+
+// Process {{{
+
+int
+tgdb_process_console_command (struct tgdb *tgdb, struct tgdb_request *request)
+{
+  if (!tgdb || !request)
+    return -1;
+
+  if (!is_ready (tgdb))
+    return -1;
+
+  if (request->header != TGDB_REQUEST_CONSOLE_COMMAND)
+    return -1;
+  
+  int ret = tgdb_command_callback (tgdb, request->choice.console_command.command);
+  if (ret == -1)
+    {
+      logger_write_pos (logger, __FILE__, __LINE__, "tgdb_send_debugger_data");
+      return -1;
+    }
+
+  return 0;
+}
+
+int
+tgdb_process_info_sources (struct tgdb *tgdb, struct tgdb_request *request)
+{
+  int ret;
+
+  if (!tgdb || !request)
+    return -1;
+
+  if (request->header != TGDB_REQUEST_INFO_SOURCES)
+    return -1;
+
+  ret = tgdb_client_get_inferior_source_files (tgdb->tcc);
   tgdb_process_client_commands (tgdb);
+
   return ret;
 }
 
 int
-tgdb_get_absolute_path (struct tgdb *tgdb, const char *file)
+tgdb_process_absolute_path (struct tgdb *tgdb, struct tgdb_request *request)
 {
-  int ret = tgdb_client_get_absolute_path (tgdb->tcc, file);
+  int ret;
+
+  if (!tgdb || !request)
+    return -1;
+
+  if (request->header != TGDB_REQUEST_ABSOLUTE_PATH)
+    return -1;
+
+  ret = tgdb_client_get_absolute_path (tgdb->tcc, request->choice.absolute_path.file);
   tgdb_process_client_commands (tgdb);
+
   return ret;
 }
 
 int
-tgdb_run_debugger_command (struct tgdb *tgdb, enum tgdb_command_type c)
+tgdb_process_debugger_command (struct tgdb *tgdb, struct tgdb_request *request)
 {
-  return tgdb_send (tgdb, tgdb_get_client_command (tgdb, c),
+  if (!tgdb || !request)
+    return -1;
+
+  if (request->header != TGDB_REQUEST_DEBUGGER_COMMAND)
+    return -1;
+
+  return tgdb_send (tgdb, tgdb_get_client_command (tgdb, request->choice.debugger_command.c),
 		    TGDB_COMMAND_FRONT_END);
 }
 
 int
-tgdb_modify_breakpoint (struct tgdb *tgdb, const char *file, int line,
-			enum tgdb_breakpoint_action b)
+tgdb_process_modify_breakpoint (struct tgdb *tgdb, struct tgdb_request *request)
 {
-  char *val = tgdb_client_modify_breakpoint_call (tgdb, file, line, b);
+  char *val;
+
+  if (!tgdb || !request)
+    return -1;
+
+  if (request->header != TGDB_REQUEST_MODIFY_BREAKPOINT)
+    return -1;
+
+  val = tgdb_client_modify_breakpoint_call (
+	   tgdb, 
+	   request->choice.modify_breakpoint.file, 
+	   request->choice.modify_breakpoint.line, 
+	   request->choice.modify_breakpoint.b);
 
   if (val == NULL)
     return -1;
@@ -1243,19 +1357,91 @@ tgdb_modify_breakpoint (struct tgdb *tgdb, const char *file, int line,
 }
 
 int
-tgdb_complete (struct tgdb *tgdb, const char *line)
+tgdb_process_complete (struct tgdb *tgdb, struct tgdb_request *request)
 {
   int ret;
 
-  if (!tgdb || !line)
+  if (!tgdb || !request)
     return -1;
 
-  ret = tgdb_client_completion_callback (tgdb->tcc, line);
+  if (request->header != TGDB_REQUEST_COMPLETE)
+    return -1;
+
+  ret = tgdb_client_completion_callback (tgdb->tcc, request->choice.complete.line);
   tgdb_process_client_commands (tgdb);
+
   return ret;
 }
 
+int 
+tgdb_process_command (struct tgdb *tgdb, struct tgdb_request *request)
+{
+  if (!tgdb || !request)
+    return -1;
+
+  if (!is_ready (tgdb))
+    return -1;
+
+  if (request->header == TGDB_REQUEST_CONSOLE_COMMAND)
+    return tgdb_process_console_command (tgdb, request);
+  else if (request->header == TGDB_REQUEST_INFO_SOURCES)
+    return tgdb_process_info_sources (tgdb, request);
+  else if (request->header == TGDB_REQUEST_ABSOLUTE_PATH)
+    return tgdb_process_absolute_path (tgdb, request);
+  else if (request->header == TGDB_REQUEST_DEBUGGER_COMMAND)
+    return tgdb_process_debugger_command (tgdb, request);
+  else if (request->header == TGDB_REQUEST_MODIFY_BREAKPOINT)
+    return tgdb_process_modify_breakpoint (tgdb, request);
+  else if (request->header == TGDB_REQUEST_COMPLETE)
+    return tgdb_process_complete (tgdb, request);
+
+  return 0;
+}
+
+// }}}
+
 /* }}} */
+
+// TGDB Queue commands {{{
+
+int 
+tgdb_queue_append (struct tgdb *tgdb, struct tgdb_request *request)
+{
+  if (!tgdb || !request)
+    return -1;
+
+  queue_append (tgdb->gdb_client_request_queue, request);
+
+  return 0;
+}
+
+struct tgdb_request *
+tgdb_queue_pop (struct tgdb *tgdb)
+{
+  struct tgdb_request *item;
+
+  if (!tgdb)
+    return NULL;
+
+  item = queue_pop (tgdb->gdb_client_request_queue);
+
+  return item;
+}
+
+int 
+tgdb_queue_size (struct tgdb *tgdb, int *size)
+{
+  if (!tgdb || !size)
+    return -1;
+
+  *size = queue_size (tgdb->gdb_client_request_queue);
+
+  return 0;
+}
+
+// }}}
+
+// Signal Handling Support {{{
 
 int
 tgdb_signal_notification (struct tgdb *tgdb, int signum)
@@ -1288,6 +1474,9 @@ tgdb_signal_notification (struct tgdb *tgdb, int signum)
   return 0;
 }
 
+// }}}
+
+// Config Options {{{
 int
 tgdb_set_verbose_gui_command_output (struct tgdb *tgdb, int value)
 {
@@ -1315,14 +1504,4 @@ tgdb_set_verbose_error_handling (struct tgdb *tgdb, int value)
   return logger_is_recording (logger);
 }
 
-void
-tgdb_traverse_responses (struct tgdb *tgdb)
-{
-  tgdb_list_foreach (tgdb->command_list, tgdb_types_print_command);
-}
-
-void
-tgdb_delete_responses (struct tgdb *tgdb)
-{
-  tgdb_list_free (tgdb->command_list, tgdb_types_free_command);
-}
+// }}}
