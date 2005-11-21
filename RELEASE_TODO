@@ -1,25 +1,12 @@
+Bug fixes/improvement for cgdb-0.6.0
+
 - TGDB interface changes
- [x] TGDB will no longer buffer commands. It will receive and process
-    1 command at a time.
- [x] Provide an TGDB queue interface, which can be used by CGDB and
-    tgdb_driver to provide a buffer of commands that are similar.
-    Other client can maintain there own queue if they want to.
- [x] Each of the functions that will cause TGDB to do commands, like
-    tgdb_get_inferior_source_files, tgdb_get_absolute_path, ...
-    will return a 'tgdb_input_command' data structure. 
  [ ] Make each command return the request as the return type, instead of
     as the parameter. If the value returns as NULL, there was an error.
- [x] The client can make TGDB process a command by giving it the 
-    tgdb_input_command function.
- [x] Alternativly, the client can put the command data structure into
-    the TGDB queue.
  [ ] Provide a single interface to the user, that process's GDB output.
     When a command is finished a different return value will be sent
     then when a command is stil being processed. Also, when a command
     is finished, then the user can look at the tgdb_responses.
- [x] Remove the tgdb_set_prompt_update_callback function. Because TGDB
-    will no longer buffer callbacks, the user will know when another
-    command is being executed.
  [ ] Remove the tgdb_set_prompt_change_callback, and add it to the 
     tgdb_response mechanism.
  [ ] Modify the tgdb_response data structure to incorporate into it
@@ -29,15 +16,12 @@
  [ ] Delete all annotations that are not being used.
  [ ] Figure out how to get extra prototypes out of cgdb.h
  [ ] Document INTERFACE_REQUEST_COMMANDS
+ [ ] Free tgdb_request data structures.
+ [ ] Empty command queue when the ^c signal is reached. [should this be done
+     in CGDB or TGDB]?
 
 - What happens if there is no matches for tab completion and you hit
   tab twice?
-- If you hit 'o', an extra prompt appears at the console. If you set a 
-  breakpoint from the GUI, this doesn't happen. That's because TGDB hacks
-  an extra "\n" into the output stream. This hack needs to go away.
-  Also, the update_prompt callback should go away. TGDB should return the
-  command that it just ran when it's done. The GUI can determine what to
-  do from that command.
 - Look into Crash on Mac (OSX Jaguar).
 - Think about how to handle MAC formatted files on unix.
 - Fix ACS_VLINE problem. This char is not available everywhere and 
@@ -47,6 +31,32 @@
 - Add documentation to CGDB. I think texinfo is the prefered way to do this,
   it generates info and html pages. For man pages, looking at help2man might
   be a good idea.
+
+Closed:
+
+- TGDB interface changes
+ [x] TGDB will no longer buffer commands. It will receive and process
+    1 command at a time.
+ [x] Provide an TGDB queue interface, which can be used by CGDB and
+    tgdb_driver to provide a buffer of commands that are similar.
+    Other client can maintain there own queue if they want to.
+ [x] Each of the functions that will cause TGDB to do commands, like
+    tgdb_get_inferior_source_files, tgdb_get_absolute_path, ...
+    will return a 'tgdb_input_command' data structure. 
+ [x] The client can make TGDB process a command by giving it the 
+    tgdb_input_command function.
+ [x] Alternativly, the client can put the command data structure into
+    the TGDB queue.
+ [x] Remove the tgdb_set_prompt_update_callback function. Because TGDB
+    will no longer buffer callbacks, the user will know when another
+    command is being executed.
+
+- If you hit 'o', an extra prompt appears at the console. If you set a 
+  breakpoint from the GUI, this doesn't happen. That's because TGDB hacks
+  an extra "\n" into the output stream. This hack needs to go away.
+  Also, the update_prompt callback should go away. TGDB should return the
+  command that it just ran when it's done. The GUI can determine what to
+  do from that command.
 
 Bug fixes/improvement for cgdb-0.5.3
 
