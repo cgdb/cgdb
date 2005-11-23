@@ -215,12 +215,23 @@ extern "C"
 
   enum INTERFACE_REQUEST_COMMANDS
   {
+    /** Request for TGDB to run a console command through the debugger */
     TGDB_REQUEST_CONSOLE_COMMAND,
-    /* Info sources */
+    /** 
+     * Request for TGDB to get all of the source files that the debugger 
+     * currently knows about the inferior. */
     TGDB_REQUEST_INFO_SOURCES,
+    /**
+     * Request the absolute path from the debugger given a relative path.
+     * The relative path must have been returned by the 
+     * TGDB_REQUEST_INFO_SOURCES command.
+     */
     TGDB_REQUEST_ABSOLUTE_PATH,
+    /** Run a debugger command (ie next, step, finish) */
     TGDB_REQUEST_DEBUGGER_COMMAND,
+    /** Modify a breakpoint (ie delete/create/disable) */
     TGDB_REQUEST_MODIFY_BREAKPOINT,
+    /** Ask GDB to give a list of tab completions for a given string */
     TGDB_REQUEST_COMPLETE
   };
 
@@ -248,12 +259,16 @@ extern "C"
       } debugger_command;
 
       struct {
+	/* The filename to set the breakpoint in */
 	const char *file;
+	/* The corresponding line number */
 	int line;
+	/* The action to take */
 	enum tgdb_breakpoint_action b;
       } modify_breakpoint;
 
       struct {
+	/* The line to ask GDB for completions for */
 	const char *line;
       } complete;
     } choice;

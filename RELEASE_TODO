@@ -1,7 +1,6 @@
 Bug fixes/improvement for cgdb-0.6.0
 
 - TGDB interface changes
- [ ] Document INTERFACE_REQUEST_COMMANDS
  [ ] Empty command queue when the ^c signal is reached. [should this be done
      in CGDB or TGDB]?
  [ ] Free tgdb_request data structures.
@@ -50,6 +49,7 @@ Closed:
     command is being executed.
  [x] Make each command return the request as the return type, instead of
     as the parameter. If the value returns as NULL, there was an error.
+ [x] Document INTERFACE_REQUEST_COMMANDS
 
 - If you hit 'o', an extra prompt appears at the console. If you set a 
   breakpoint from the GUI, this doesn't happen. That's because TGDB hacks
