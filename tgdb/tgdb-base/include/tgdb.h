@@ -515,6 +515,9 @@ extern "C"
    * to libtgdb, the appropriate processing will be done.
    * Currently, TGDB only handles SIGINT,SIGTERM and SIGQUIT.
    *
+   * libtgdb will remove all elements from it's queue when a SIGINT
+   * is received.
+   *
    * \param tgdb
    * An instance of the tgdb library to operate on.
    *

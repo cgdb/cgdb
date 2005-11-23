@@ -561,6 +561,40 @@ tgdb_is_busy (struct tgdb *tgdb, int *is_busy)
   return 0;
 }
 
+static void 
+tgdb_request_destroy (void *item)
+{
+  tgdb_request_ptr request_ptr = (tgdb_request_ptr) item;
+
+  switch (request_ptr->header) {
+    case TGDB_REQUEST_CONSOLE_COMMAND:
+      free ((char*)request_ptr->choice.console_command.command);
+      request_ptr->choice.console_command.command = NULL;
+      break;
+    case TGDB_REQUEST_INFO_SOURCES:
+      break;
+    case TGDB_REQUEST_ABSOLUTE_PATH:
+      free ((char*)request_ptr->choice.absolute_path.file);
+      request_ptr->choice.absolute_path.file = NULL;
+      break;
+    case TGDB_REQUEST_DEBUGGER_COMMAND:
+      break;
+    case TGDB_REQUEST_MODIFY_BREAKPOINT:
+      free ((char*)request_ptr->choice.modify_breakpoint.file);
+      request_ptr->choice.modify_breakpoint.file = NULL;
+      break;
+    case TGDB_REQUEST_COMPLETE:
+      free ((char*)request_ptr->choice.complete.line);
+      request_ptr->choice.complete.line = NULL;
+      break;
+    default:
+      break;
+  }
+
+  free (request_ptr);
+  request_ptr = NULL;
+}
+
 /* tgdb_handle_signals
  */
 static int
@@ -569,6 +603,7 @@ tgdb_handle_signals (struct tgdb *tgdb)
   if (tgdb->control_c)
     {
       queue_free_list (tgdb->gdb_input_queue, tgdb_command_destroy);
+      queue_free_list (tgdb->gdb_client_request_queue, tgdb_request_destroy);
       tgdb->control_c = 0;
     }
 

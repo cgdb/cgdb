@@ -1,5 +1,11 @@
 11/23/2005 Bob Rossi <bob@brasko.net>
 
+	* tgdb-base/include/tgdb.h (tgdb_signal_notification): Update comment.
+	* tgdb-base/src/tgdb.c (tgdb_request_destroy): Add function.
+	(tgdb_handle_signals): Call tgdb_request_destroy.
+
+11/23/2005 Bob Rossi <bob@brasko.net>
+
 	* tgdb-base/include/tgdb.h, tgdb-base/src/tgdb.c (
 	tgdb_request_run_console_command, tgdb_request_inferiors_source_files,
 	tgdb_request_absolute_path, tgdb_request_run_debugger_command, 
