@@ -1,22 +1,22 @@
 Bug fixes/improvement for cgdb-0.6.0
 
 - TGDB interface changes
+ [ ] Document INTERFACE_REQUEST_COMMANDS
+ [ ] Empty command queue when the ^c signal is reached. [should this be done
+     in CGDB or TGDB]?
+ [ ] Free tgdb_request data structures.
+ [ ] Re-arrange the a2 subsystem to be easier and better to modify
+ [ ] Modify the tgdb_response data structure to incorporate into it
+    the associated tgdb_request data structure. Make sure to remove
+    the cgdb.c:last_request variable.
+ [ ] Remove the tgdb_set_prompt_change_callback, and add it to the 
+    tgdb_response mechanism.
  [ ] Provide a single interface to the user, that process's GDB output.
     When a command is finished a different return value will be sent
     then when a command is stil being processed. Also, when a command
     is finished, then the user can look at the tgdb_responses.
- [ ] Remove the tgdb_set_prompt_change_callback, and add it to the 
-    tgdb_response mechanism.
- [ ] Modify the tgdb_response data structure to incorporate into it
-    the associated tgdb_request data structure. Make sure to remove
-    the cgdb.c:last_request variable.
- [ ] Re-arrange the a2 subsystem to be easier and better to modify
- [ ] Delete all annotations that are not being used.
  [ ] Figure out how to get extra prototypes out of cgdb.h
- [ ] Document INTERFACE_REQUEST_COMMANDS
- [ ] Free tgdb_request data structures.
- [ ] Empty command queue when the ^c signal is reached. [should this be done
-     in CGDB or TGDB]?
+ [ ] Delete all annotations that are not being used.
 
 - What happens if there is no matches for tab completion and you hit
   tab twice?
