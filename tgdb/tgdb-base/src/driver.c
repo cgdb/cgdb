@@ -90,7 +90,8 @@ static void change_prompt(char *prompt) {
 static void 
 rlctx_send_user_command(char *line) 
 {
-  struct tgdb_request *request;
+  tgdb_request_ptr request_ptr;
+
   /* This happens when rl_callback_read_char gets EOF */
   if ( line == NULL )
     return;
@@ -100,17 +101,18 @@ rlctx_send_user_command(char *line)
     rline_add_history(rline, line);
 
   /* Send this command to TGDB */
-  if ( tgdb_request_run_console_command ( tgdb, line, &request) == -1 )
+  request_ptr = tgdb_request_run_console_command ( tgdb, line);
+  if (!request_ptr)
     logger_write_pos ( logger, __FILE__, __LINE__, "rlctx_send_user_command\n"); 
 
-  handle_request (tgdb, request);
+  handle_request (tgdb, request_ptr);
 }
 
 
 static int tab_completion(int a, int b) {
   char *cur_line;
   int ret;
-  struct tgdb_request *request;
+  tgdb_request_ptr request_ptr;
 
   is_tab_completing = 1;
 
@@ -118,9 +120,11 @@ static int tab_completion(int a, int b) {
   if (ret == -1)
     logger_write_pos ( logger, __FILE__, __LINE__, "rline_get_current_line error\n"); 
 
-  tgdb_request_complete (tgdb, cur_line, &request);
+  request_ptr = tgdb_request_complete (tgdb, cur_line);
+  if (!request_ptr)
+    logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_request_complete error\n"); 
 
-  handle_request (tgdb, request);
+  handle_request (tgdb, request_ptr);
   return 0;
 }
 

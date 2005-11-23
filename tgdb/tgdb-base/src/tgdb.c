@@ -1155,101 +1155,124 @@ tgdb_tty_name (struct tgdb *tgdb)
 
 // Request {{{
 
-int
-tgdb_request_run_console_command (struct tgdb *tgdb, const char *command,
-			      struct tgdb_request **request)
+tgdb_request_ptr
+tgdb_request_run_console_command (struct tgdb *tgdb, const char *command)
 {
-  if (!tgdb || !request)
-    return -1;
+  tgdb_request_ptr request_ptr;
+  if (!tgdb || !command)
+    return NULL;
 
-  *request = (struct tgdb_request *)
+  request_ptr = (tgdb_request_ptr)
     xmalloc (sizeof (struct tgdb_request));
+  if (!request_ptr)
+    return NULL;
 
-  (*request)->header = TGDB_REQUEST_CONSOLE_COMMAND;
-  (*request)->choice.console_command.command = (const char *)
+  request_ptr->header = TGDB_REQUEST_CONSOLE_COMMAND;
+  request_ptr->choice.console_command.command = (const char *)
     xstrdup (command);
 
   
-  return 0;
+  return request_ptr;
 }
 
-int
-tgdb_request_inferiors_source_files (struct tgdb *tgdb, struct tgdb_request **request)
+tgdb_request_ptr
+tgdb_request_inferiors_source_files (struct tgdb *tgdb)
 {
-  if (!tgdb || !request)
-    return -1;
+  tgdb_request_ptr request_ptr;
+  if (!tgdb)
+    return NULL;
 
-  *request = (struct tgdb_request *)
+  request_ptr = (tgdb_request_ptr)
     xmalloc (sizeof (struct tgdb_request));
-  (*request)->header = TGDB_REQUEST_INFO_SOURCES;
+  if (!request_ptr)
+    return NULL;
 
-  return 0;
+  request_ptr->header = TGDB_REQUEST_INFO_SOURCES;
+
+  return request_ptr;
 }
 
-int
-tgdb_request_absolute_path (struct tgdb *tgdb, const char *file, struct tgdb_request **request)
+tgdb_request_ptr
+tgdb_request_absolute_path (struct tgdb *tgdb, const char *file)
 {
-  if (!tgdb || !request)
-    return -1;
+  tgdb_request_ptr request_ptr;
+  if (!tgdb)
+    return NULL;
 
-  *request = (struct tgdb_request *)
+  request_ptr = (tgdb_request_ptr)
     xmalloc (sizeof (struct tgdb_request));
-  (*request)->header = TGDB_REQUEST_ABSOLUTE_PATH;
+  if (!request_ptr)
+    return NULL;
+
+  request_ptr->header = TGDB_REQUEST_ABSOLUTE_PATH;
+
   if (file) {
-    (*request)->choice.absolute_path.file = (const char *)
+    request_ptr->choice.absolute_path.file = (const char *)
       xstrdup (file);
   } else
-    (*request)->choice.absolute_path.file = NULL;
+    request_ptr->choice.absolute_path.file = NULL;
 
     
-  return 0;
+  return request_ptr;
 }
 
-int
-tgdb_request_run_debugger_command (struct tgdb *tgdb, enum tgdb_command_type c, struct tgdb_request **request)
+tgdb_request_ptr
+tgdb_request_run_debugger_command (struct tgdb *tgdb, enum tgdb_command_type c)
 {
-  if (!tgdb || !request)
-    return -1;
+  tgdb_request_ptr request_ptr;
+  if (!tgdb)
+    return NULL;
 
-  *request = (struct tgdb_request *)
+  request_ptr = (tgdb_request_ptr)
     xmalloc (sizeof (struct tgdb_request));
-  (*request)->header = TGDB_REQUEST_DEBUGGER_COMMAND;
-  (*request)->choice.debugger_command.c = c;
+  if (!request_ptr)
+    return NULL;
+
+  request_ptr->header = TGDB_REQUEST_DEBUGGER_COMMAND;
+  request_ptr->choice.debugger_command.c = c;
     
-  return 0;
+  return request_ptr;
 }
 
-int
+tgdb_request_ptr
 tgdb_request_modify_breakpoint (struct tgdb *tgdb, const char *file, int line,
-			enum tgdb_breakpoint_action b, struct tgdb_request **request)
+				enum tgdb_breakpoint_action b)
 {
-  if (!tgdb || !request)
-    return -1;
+  tgdb_request_ptr request_ptr;
+  if (!tgdb)
+    return NULL;
 
-  *request = (struct tgdb_request *)
+  request_ptr = (tgdb_request_ptr)
     xmalloc (sizeof (struct tgdb_request));
-  (*request)->header = TGDB_REQUEST_MODIFY_BREAKPOINT;
-  (*request)->choice.modify_breakpoint.file = (const char *)
-    xstrdup (file);
-  (*request)->choice.modify_breakpoint.line = line;
-  (*request)->choice.modify_breakpoint.b = b;
+  if (!request_ptr)
+    return NULL;
 
-  return 0;
+  request_ptr->header = TGDB_REQUEST_MODIFY_BREAKPOINT;
+  request_ptr->choice.modify_breakpoint.file = (const char *)
+    xstrdup (file);
+  request_ptr->choice.modify_breakpoint.line = line;
+  request_ptr->choice.modify_breakpoint.b = b;
+
+  return request_ptr;
 }
 
-int
-tgdb_request_complete (struct tgdb *tgdb, const char *line, struct tgdb_request **request)
+tgdb_request_ptr
+tgdb_request_complete (struct tgdb *tgdb, const char *line)
 {
-  if (!tgdb || !request)
-    return -1;
+  tgdb_request_ptr request_ptr;
+  if (!tgdb)
+    return NULL;
 
-  *request = (struct tgdb_request *)
+  request_ptr = (tgdb_request_ptr)
     xmalloc (sizeof (struct tgdb_request));
-  (*request)->header = TGDB_REQUEST_COMPLETE;
-  (*request)->choice.complete.line = (const char *)
+  if (!request_ptr)
+    return NULL;
+
+  request_ptr->header = TGDB_REQUEST_COMPLETE;
+  request_ptr->choice.complete.line = (const char *)
     xstrdup (line);
 
-  return 0;
+  return request_ptr;
 }
 
 // }}}

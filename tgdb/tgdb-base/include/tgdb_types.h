@@ -259,6 +259,8 @@ extern "C"
     } choice;
   };
 
+  typedef struct tgdb_request *tgdb_request_ptr;
+
  /**
   *  This is the commands interface used between the front end and TGDB.
   *  When TGDB is responding to a request or when an event is being generated

@@ -1,8 +1,6 @@
 Bug fixes/improvement for cgdb-0.6.0
 
 - TGDB interface changes
- [ ] Make each command return the request as the return type, instead of
-    as the parameter. If the value returns as NULL, there was an error.
  [ ] Provide a single interface to the user, that process's GDB output.
     When a command is finished a different return value will be sent
     then when a command is stil being processed. Also, when a command
@@ -50,6 +48,8 @@ Closed:
  [x] Remove the tgdb_set_prompt_update_callback function. Because TGDB
     will no longer buffer callbacks, the user will know when another
     command is being executed.
+ [x] Make each command return the request as the return type, instead of
+    as the parameter. If the value returns as NULL, there was an error.
 
 - If you hit 'o', an extra prompt appears at the console. If you set a 
   breakpoint from the GUI, this doesn't happen. That's because TGDB hacks

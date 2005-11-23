@@ -1,3 +1,7 @@
+11/23/2005 Bob Rossi <bob@brasko.net>
+
+	* RELEASE_TODO: Finish task for .6.0
+
 11/21/2005 Bob Rossi <bob@brasko.net>
 
 	* configure.in: Update to have -lreadline before -lncurses

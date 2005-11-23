@@ -908,8 +908,7 @@ toggle_breakpoint(struct sviewer *sview, enum tgdb_breakpoint_action t)
 {
   char *path;
   int   line;
-  struct tgdb_request *request;
-  int val;
+  tgdb_request_ptr request_ptr;
 
   if (!sview || !sview->cur || !sview->cur->path)
     return 0;
@@ -925,10 +924,13 @@ toggle_breakpoint(struct sviewer *sview, enum tgdb_breakpoint_action t)
   if ( sview->cur->buf.breakpts[line] )
     t = TGDB_BREAKPOINT_DELETE;
 
-  val = tgdb_request_modify_breakpoint ( tgdb, path, line + 1, t, &request );
-  handle_request (tgdb, request);
+  request_ptr = tgdb_request_modify_breakpoint (tgdb, path, line + 1, t);
+  if (!request_ptr)
+    return -1;
+
+  handle_request (tgdb, request_ptr);
   
-  return val;
+  return 0;
 }
 
 /* source_input: Handles user input to the source window.
@@ -996,9 +998,9 @@ static void source_input(struct sviewer *sview, int key)
         case 'o':
            /* Causes file dialog to be opened */
 	   {
-	     struct tgdb_request *request;
-             tgdb_request_inferiors_source_files (tgdb, &request);
-	     handle_request (tgdb, request);
+	     tgdb_request_ptr request_ptr;
+             request_ptr = tgdb_request_inferiors_source_files (tgdb);
+	     handle_request (tgdb, request_ptr);
 	   }
            break;
         case ':':
@@ -1023,19 +1025,19 @@ static void source_input(struct sviewer *sview, int key)
 
     /* Some extended features that are set by :set sc */
     if ( shortcut_option ) {
-	struct tgdb_request *request = NULL;
+	tgdb_request_ptr request_ptr = NULL;
         switch ( key ) {
-            case 'r': tgdb_request_run_debugger_command (tgdb, TGDB_RUN, &request); 		break;
-            case 'n': tgdb_request_run_debugger_command (tgdb, TGDB_NEXT, &request);		break;
-            case 's': tgdb_request_run_debugger_command (tgdb, TGDB_STEP, &request);		break;
-            case 'c': tgdb_request_run_debugger_command (tgdb, TGDB_CONTINUE, &request);	break;
-            case 'f': tgdb_request_run_debugger_command (tgdb, TGDB_FINISH, &request);  	break;
-            case 'u': tgdb_request_run_debugger_command (tgdb, TGDB_UP, &request);      	break;
-            case 'd': tgdb_request_run_debugger_command (tgdb, TGDB_DOWN, &request);    	break;
+            case 'r': request_ptr = tgdb_request_run_debugger_command (tgdb, TGDB_RUN);		break;
+            case 'n': request_ptr = tgdb_request_run_debugger_command (tgdb, TGDB_NEXT);	break;
+            case 's': request_ptr = tgdb_request_run_debugger_command (tgdb, TGDB_STEP);	break;
+            case 'c': request_ptr = tgdb_request_run_debugger_command (tgdb, TGDB_CONTINUE);	break;
+            case 'f': request_ptr = tgdb_request_run_debugger_command (tgdb, TGDB_FINISH);  	break;
+            case 'u': request_ptr = tgdb_request_run_debugger_command (tgdb, TGDB_UP);      	break;
+            case 'd': request_ptr = tgdb_request_run_debugger_command (tgdb, TGDB_DOWN);    	break;
             default:                                    				break;
         }
-	if (request)
-	  handle_request (tgdb, request);
+	if (request_ptr)
+	  handle_request (tgdb, request_ptr);
     }
 
     if_draw();
@@ -1182,41 +1184,41 @@ int internal_if_input(int key) {
                 case CGDB_KEY_F5:
                     /* Issue GDB run command */
 		    {
-		      struct tgdb_request *request;
-                      tgdb_request_run_debugger_command ( tgdb, TGDB_RUN, &request);
-		      handle_request (tgdb, request);
+		      tgdb_request_ptr request_ptr;
+                      request_ptr = tgdb_request_run_debugger_command (tgdb, TGDB_RUN);
+		      handle_request (tgdb, request_ptr);
 		    }
                     return 0;
                 case CGDB_KEY_F6:
                     /* Issue GDB continue command */
 		    {
-		      struct tgdb_request *request;
-                      tgdb_request_run_debugger_command (tgdb, TGDB_CONTINUE, &request);
-		      handle_request (tgdb, request);
+		      tgdb_request_ptr request_ptr;
+                      request_ptr = tgdb_request_run_debugger_command (tgdb, TGDB_CONTINUE);
+		      handle_request (tgdb, request_ptr);
 		    }
                     return 0;
                 case CGDB_KEY_F7:
                     /* Issue GDB finish command */
 		    {
-		      struct tgdb_request *request;
-                      tgdb_request_run_debugger_command (tgdb, TGDB_FINISH, &request);
-		      handle_request (tgdb, request);
+		      tgdb_request_ptr request_ptr;
+                      request_ptr = tgdb_request_run_debugger_command (tgdb, TGDB_FINISH);
+		      handle_request (tgdb, request_ptr);
 		    }
                     return 0;
                 case CGDB_KEY_F8:
                     /* Issue GDB next command */
 		    {
-		      struct tgdb_request *request;
-                      tgdb_request_run_debugger_command (tgdb, TGDB_NEXT, &request);
-		      handle_request (tgdb, request);
+		      tgdb_request_ptr request_ptr;
+                      request_ptr = tgdb_request_run_debugger_command (tgdb, TGDB_NEXT);
+		      handle_request (tgdb, request_ptr);
 		    }
                     return 0;
                 case CGDB_KEY_F10:
                     /* Issue GDB step command */
 		    {
-		      struct tgdb_request *request;
-                      tgdb_request_run_debugger_command (tgdb, TGDB_STEP, &request);
-		      handle_request (tgdb, request);
+		      tgdb_request_ptr request_ptr;
+                      request_ptr = tgdb_request_run_debugger_command (tgdb, TGDB_STEP);
+		      handle_request (tgdb, request_ptr);
 		    }
                     return 0;
                 case CGDB_KEY_CTRL_L:
@@ -1243,9 +1245,9 @@ int internal_if_input(int key) {
                 return 0;
             /* The user picked a file */
             } else if ( ret == 1 ) {
-		struct tgdb_request *request;
-                tgdb_request_absolute_path ( tgdb, filedlg_file, &request);
-		handle_request (tgdb, request);
+		tgdb_request_ptr request_ptr;
+                request_ptr = tgdb_request_absolute_path (tgdb, filedlg_file);
+		handle_request (tgdb, request_ptr);
                 strcpy(last_relative_file, filedlg_file);
                 if_set_focus(CGDB);
                 return 0;

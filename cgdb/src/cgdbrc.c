@@ -281,20 +281,22 @@ int command_focus_tty( void )
 
 int command_do_continue( void )
 {
-    struct tgdb_request *request;
-    if ( tgdb_request_run_debugger_command ( tgdb, TGDB_CONTINUE, &request ) == -1 ) 
+    tgdb_request_ptr request_ptr;
+    request_ptr = tgdb_request_run_debugger_command (tgdb, TGDB_CONTINUE);
+    if (!request_ptr)
         return -1;
-    handle_request (tgdb, request);
+    handle_request (tgdb, request_ptr);
 
     return 0;
 }
 
 int command_do_finish( void )
 {
-    struct tgdb_request *request;
-    if ( tgdb_request_run_debugger_command ( tgdb, TGDB_FINISH, &request ) == -1 )
+    tgdb_request_ptr request_ptr;
+    request_ptr = tgdb_request_run_debugger_command (tgdb, TGDB_FINISH);
+    if (!request_ptr)
         return -1;
-    handle_request (tgdb, request);
+    handle_request (tgdb, request_ptr);
 
     return 0;
 }
@@ -307,10 +309,11 @@ int command_do_help( void )
 
 int command_do_next( void )
 {
-    struct tgdb_request *request;
-    if ( tgdb_request_run_debugger_command  ( tgdb, TGDB_NEXT, &request ) == -1 )
+    tgdb_request_ptr request_ptr;
+    request_ptr = tgdb_request_run_debugger_command  (tgdb, TGDB_NEXT);
+    if (!request_ptr)
         return -1;
-    handle_request (tgdb, request);
+    handle_request (tgdb, request_ptr);
 
     return 0;
 }
@@ -333,20 +336,22 @@ int command_do_quit_force( void )
 int command_do_run( void )
 {
     /* FIXME: see if there are any other arguments to pass to the run command */
-    struct tgdb_request *request;
-    if ( tgdb_request_run_debugger_command  ( tgdb, TGDB_RUN, &request ) == -1 )
+    tgdb_request_ptr request_ptr;
+    request_ptr = tgdb_request_run_debugger_command (tgdb, TGDB_RUN);
+    if (!request_ptr)
         return -1;
-    handle_request (tgdb, request);
+    handle_request (tgdb, request_ptr);
 
     return 0;
 }
 
 int command_do_step( void )
 {
-    struct tgdb_request *request;
-    if ( tgdb_request_run_debugger_command  ( tgdb, TGDB_STEP, &request ) == -1 )
+    tgdb_request_ptr request_ptr;
+    request_ptr = tgdb_request_run_debugger_command (tgdb, TGDB_STEP);
+    if (!request_ptr)
         return -1;
-    handle_request (tgdb, request);
+    handle_request (tgdb, request_ptr);
 
     return 0;
 }

@@ -346,14 +346,11 @@ extern "C"
    * \param command
    * The null terminated command to pass to GDB as a console command.
    * 
-   * \param request
-   * Will return as a tgdb request command on success, otherwise invalid.
-   *
-   * @return
-   * 0 on success or -1 on error
+   * \return
+   * Will return as a tgdb request command on success, otherwise NULL.
    */
-  int tgdb_request_run_console_command (struct tgdb *tgdb, const char *command,
-				    struct tgdb_request **request);
+  tgdb_request_ptr tgdb_request_run_console_command (struct tgdb *tgdb, 
+						     const char *command);
 
   /**
    * Gets a list of source files that make up the program being debugged.
@@ -370,10 +367,10 @@ extern "C"
    * \param tgdb
    * An instance of the tgdb library to operate on.
    *
-   * @return
-   * 0 on success or -1 on error
+   * \return
+   * Will return as a tgdb request command on success, otherwise NULL.
    */
-  int tgdb_request_inferiors_source_files (struct tgdb *tgdb, struct tgdb_request **request);
+  tgdb_request_ptr tgdb_request_inferiors_source_files (struct tgdb *tgdb);
 
   /**
    * This gets the absolute path from FILE. FILE must have been returned
@@ -389,10 +386,11 @@ extern "C"
    * \param file
    * The relative filename to get the absolute path of.
    *
-   * @return
-   * 0 on success or -1 on error
+   * \return
+   * Will return as a tgdb request command on success, otherwise NULL.
    */
-  int tgdb_request_absolute_path (struct tgdb *tgdb, const char *file, struct tgdb_request **request);
+  tgdb_request_ptr tgdb_request_absolute_path (struct tgdb *tgdb, 
+					       const char *file);
 
   /**
    * This tells libtgdb to run a command through the debugger.
@@ -404,9 +402,10 @@ extern "C"
    * This is the command that libtgdb should run through the debugger.
    *
    * @return
-   * 0 on success or -1 on error
+   * Will return as a tgdb request command on success, otherwise NULL.
    */
-  int tgdb_request_run_debugger_command (struct tgdb *tgdb, enum tgdb_command_type c, struct tgdb_request **request);
+  tgdb_request_ptr tgdb_request_run_debugger_command (
+		     struct tgdb *tgdb, enum tgdb_command_type c);
 
   /**
    * Modify's a breakpoint.
@@ -424,13 +423,12 @@ extern "C"
    * Determines what the user wants to do with the breakpoint.
    *
    * @return
-   * 0 on success or -1 on error
+   * Will return as a tgdb request command on success, otherwise NULL.
    */
-  int tgdb_request_modify_breakpoint (struct tgdb *tgdb,
+  tgdb_request_ptr tgdb_request_modify_breakpoint (struct tgdb *tgdb,
 			      const char *file,
 			      int line, 
-			      enum tgdb_breakpoint_action b,
-			      struct tgdb_request **request);
+			      enum tgdb_breakpoint_action b);
 
   /**
    * Used to get all of the possible tab completion options for LINE.
@@ -442,9 +440,9 @@ extern "C"
    * The line to tab complete.
    *
    * \return
-   * 0 on success or -1 on error.
+   * Will return as a tgdb request command on success, otherwise NULL.
    */
-  int tgdb_request_complete (struct tgdb *tgdb, const char *line, struct tgdb_request **request);
+  tgdb_request_ptr tgdb_request_complete (struct tgdb *tgdb, const char *line);
 
 //@}
 // }}}

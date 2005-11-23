@@ -1,3 +1,12 @@
+11/23/2005 Bob Rossi <bob@brasko.net>
+
+	* src/cgdb.c (rlctx_send_user_command, tab_completion): Update to
+	TGDB's new interface.
+	* src/cgdbrc.c (command_do_continue, command_do_finish,
+	command_do_next, command_do_run, command_do_step): Ditto.
+	* src/interface.c (toggle_breakpoint, source_input,
+	internal_if_input): Ditto.
+
 11/20/2005 Bob Rossi <bob@brasko.net>
 
 	* src/cgdb.h (handle_request): Added temporary prototype.
