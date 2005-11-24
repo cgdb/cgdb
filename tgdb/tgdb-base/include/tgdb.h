@@ -182,7 +182,7 @@ extern "C"
    * \return
    * 0 on success or -1 on error
    */
-  int tgdb_process_command (struct tgdb *tgdb, struct tgdb_request *request);
+  int tgdb_process_command (struct tgdb *tgdb, tgdb_request_ptr request);
   
   /**
    * Gets output from the debugger.
@@ -468,7 +468,7 @@ extern "C"
    * \return
    * 0 on success or -1 on error
    */
-  int tgdb_queue_append (struct tgdb *tgdb, struct tgdb_request *request);
+  int tgdb_queue_append (struct tgdb *tgdb, tgdb_request_ptr request);
 
   /**
    * Get a tgdb_request command back from TGDB.
@@ -481,7 +481,7 @@ extern "C"
    * Popping a command when the queue is empty is also considered an error,
    * and NULL will be returned.
    */
-  struct tgdb_request *tgdb_queue_pop (struct tgdb *tgdb);
+  tgdb_request_ptr tgdb_queue_pop (struct tgdb *tgdb);
 
   /**
    * Get's the number of items that are in the queue for TGDB to run.

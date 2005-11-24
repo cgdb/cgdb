@@ -42,6 +42,8 @@
 
 static int num_loggers = 0;
 
+/* struct tgdb {{{ */
+
 /**
  * The TGDB context data structure.
  */
@@ -143,12 +145,18 @@ struct tgdb
   prompt_change prompt_change_callback;
 };
 
-/* Temporary prototypes */
+/* }}} */
+
+/* Temporary prototypes {{{ */
 static int tgdb_deliver_command (struct tgdb *tgdb, int fd,
 				 struct tgdb_command *command);
 static int tgdb_run_command (struct tgdb *tgdb);
 static int tgdb_dispatch_command (struct tgdb *tgdb,
 				  struct tgdb_command *com);
+
+/* }}} */
+
+/* Callbacks {{{ */
 
 int
 tgdb_set_prompt_change_callback (struct tgdb *tgdb, prompt_change callback)
@@ -163,6 +171,8 @@ tgdb_set_prompt_change_callback (struct tgdb *tgdb, prompt_change callback)
 
   return 0;
 }
+
+/* }}} */
 
 /**
  * Process the commands that were created by the client
@@ -358,6 +368,8 @@ tgdb_initialize_logger_interface (struct tgdb *tgdb, char *config_dir)
   return 0;
 }
 
+// Createing and Destroying a libtgdb context. {{{
+
 struct tgdb *
 tgdb_initialize (const char *debugger,
 		 int argc, char **argv, int *debugger_fd, int *inferior_fd)
@@ -453,6 +465,8 @@ tgdb_shutdown (struct tgdb *tgdb)
 
   return tgdb_client_destroy_context (tgdb->tcc);
 }
+
+// }}}
 
 char *
 tgdb_err_msg (struct tgdb *tgdb)
@@ -1315,7 +1329,7 @@ tgdb_request_complete (struct tgdb *tgdb, const char *line)
 // Process {{{
 
 int
-tgdb_process_console_command (struct tgdb *tgdb, struct tgdb_request *request)
+tgdb_process_console_command (struct tgdb *tgdb, tgdb_request_ptr request)
 {
   if (!tgdb || !request)
     return -1;
@@ -1337,7 +1351,7 @@ tgdb_process_console_command (struct tgdb *tgdb, struct tgdb_request *request)
 }
 
 int
-tgdb_process_info_sources (struct tgdb *tgdb, struct tgdb_request *request)
+tgdb_process_info_sources (struct tgdb *tgdb, tgdb_request_ptr request)
 {
   int ret;
 
@@ -1354,7 +1368,7 @@ tgdb_process_info_sources (struct tgdb *tgdb, struct tgdb_request *request)
 }
 
 int
-tgdb_process_absolute_path (struct tgdb *tgdb, struct tgdb_request *request)
+tgdb_process_absolute_path (struct tgdb *tgdb, tgdb_request_ptr request)
 {
   int ret;
 
@@ -1371,7 +1385,7 @@ tgdb_process_absolute_path (struct tgdb *tgdb, struct tgdb_request *request)
 }
 
 int
-tgdb_process_debugger_command (struct tgdb *tgdb, struct tgdb_request *request)
+tgdb_process_debugger_command (struct tgdb *tgdb, tgdb_request_ptr request)
 {
   if (!tgdb || !request)
     return -1;
@@ -1384,7 +1398,7 @@ tgdb_process_debugger_command (struct tgdb *tgdb, struct tgdb_request *request)
 }
 
 int
-tgdb_process_modify_breakpoint (struct tgdb *tgdb, struct tgdb_request *request)
+tgdb_process_modify_breakpoint (struct tgdb *tgdb, tgdb_request_ptr request)
 {
   char *val;
 
@@ -1415,7 +1429,7 @@ tgdb_process_modify_breakpoint (struct tgdb *tgdb, struct tgdb_request *request)
 }
 
 int
-tgdb_process_complete (struct tgdb *tgdb, struct tgdb_request *request)
+tgdb_process_complete (struct tgdb *tgdb, tgdb_request_ptr request)
 {
   int ret;
 
@@ -1432,7 +1446,7 @@ tgdb_process_complete (struct tgdb *tgdb, struct tgdb_request *request)
 }
 
 int 
-tgdb_process_command (struct tgdb *tgdb, struct tgdb_request *request)
+tgdb_process_command (struct tgdb *tgdb, tgdb_request_ptr request)
 {
   if (!tgdb || !request)
     return -1;
@@ -1463,7 +1477,7 @@ tgdb_process_command (struct tgdb *tgdb, struct tgdb_request *request)
 // TGDB Queue commands {{{
 
 int 
-tgdb_queue_append (struct tgdb *tgdb, struct tgdb_request *request)
+tgdb_queue_append (struct tgdb *tgdb, tgdb_request_ptr request)
 {
   if (!tgdb || !request)
     return -1;
@@ -1473,10 +1487,10 @@ tgdb_queue_append (struct tgdb *tgdb, struct tgdb_request *request)
   return 0;
 }
 
-struct tgdb_request *
+tgdb_request_ptr
 tgdb_queue_pop (struct tgdb *tgdb)
 {
-  struct tgdb_request *item;
+  tgdb_request_ptr item;
 
   if (!tgdb)
     return NULL;
