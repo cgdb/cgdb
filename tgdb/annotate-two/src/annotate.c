@@ -95,7 +95,8 @@ static int handle_post_prompt(struct annotate_two *a2, const char *buf, size_t n
 }
 
 static int handle_breakpoints_invalid(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list){
-   return 0;
+  /* Don't use anymore because GDB is buggy */
+  return 0;
 }
 
 static int handle_breakpoints_headers(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list){
@@ -168,30 +169,6 @@ static int handle_quit(struct annotate_two *a2, const char *buf, size_t n, struc
    return 0;
 }
 
-static int handle_display_begin(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list){
-   return 0;
-}
-
-static int handle_display_number_end(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list){
-   return 0;
-}
-
-static int handle_display_format(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list){
-   return 0;
-}
-
-static int handle_display_expression(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list){
-   return 0;
-}
-
-static int handle_display_expression_end(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list){
-   return 0;
-}
-
-static int handle_display_value(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list){
-   return 0;
-}
-
 static int handle_exited(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list){
   char *tmp = (char*)malloc ( sizeof ( char )*(n+1));
   int *i = (int *)malloc ( sizeof ( int ) );
@@ -205,10 +182,6 @@ static int handle_exited(struct annotate_two *a2, const char *buf, size_t n, str
   response->choice.inferior_exited.exit_status = i;
   tgdb_types_append_command(list, response);
   return 0;
-}
-
-static int NOT_SUPPORTED(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list){
-   return 0;
 }
 
 /**
@@ -333,71 +306,6 @@ static struct annotation {
       handle_breakpoints_table
   },
   {
-      "value-history-begin",
-      19,
-      NOT_SUPPORTED
-  },
-  {
-      "value-history-value",
-      19,
-      NOT_SUPPORTED
-  },
-  {
-      "value-history-end",
-      17,
-      NOT_SUPPORTED
-  },
-  {
-      "value-begin",
-      11,
-      NOT_SUPPORTED
-  },
-  {
-      "value-end",
-      9,
-      NOT_SUPPORTED
-  },
-  {
-      "arg-begin",
-      9,
-      NOT_SUPPORTED
-  },
-  {
-      "arg-name-end",
-      12,
-      NOT_SUPPORTED
-  },
-  {
-      "arg-value",
-      9,
-      NOT_SUPPORTED
-  },
-  {
-      "arg-end",
-      7,
-      NOT_SUPPORTED
-  },
-  {
-      "field-begin",
-      11,
-      NOT_SUPPORTED
-  },
-  {
-      "field-name-end",
-      14,
-      NOT_SUPPORTED
-  },
-  {
-      "field-value",
-      11,
-      NOT_SUPPORTED
-  },
-  {
-      "field-end",
-      9,
-      NOT_SUPPORTED
-  },
-  {
       "field",
       5,
       handle_field
@@ -423,39 +331,9 @@ static struct annotation {
       handle_quit
   },
   {
-      "display-begin",
-      13,
-      handle_display_begin
-  },
-  {
-     "display-number-end",
-     18,
-     handle_display_number_end
-  },
-  {
-     "display-format",
-      14,
-      handle_display_format
-  },
-  {
-     "display-expression",
-     18,
-     handle_display_expression
-  },
-  {
-     "display-expression-end",
-     22,
-     handle_display_expression_end
-  },
-  {
-     "display-value",
-     13,
-     handle_display_value
-  },
-  {
-	  "exited",
-	  6,
-	  handle_exited
+      "exited",
+      6,
+      handle_exited
   },
   {
       NULL,

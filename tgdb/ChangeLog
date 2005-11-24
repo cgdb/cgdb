@@ -1,5 +1,13 @@
 11/23/2005 Bob Rossi <bob@brasko.net>
 
+	* annotate-two/src/annotate.c (handle_display_begin,
+	handle_display_number_end, handle_display_format,
+	handle_display_expression, handle_display_expression_end,
+	handle_display_value, NOT_SUPPORTED): Removed functions.
+	(annotations): Removed elements.
+
+11/23/2005 Bob Rossi <bob@brasko.net>
+
 	* tgdb-base/include/tgdb.h (tgdb_signal_notification): Update comment.
 	* tgdb-base/src/tgdb.c (tgdb_request_destroy): Add function.
 	(tgdb_handle_signals): Call tgdb_request_destroy.
