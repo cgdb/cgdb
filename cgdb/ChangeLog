@@ -1,3 +1,8 @@
+11/26/2005 Bob Rossi <bob@brasko.net>
+
+	* src/cgdb.c (process_commands): Process new TGDB command.
+	(main): Remove call to old TGDB interface function.
+
 11/23/2005 Bob Rossi <bob@brasko.net>
 
 	* src/cgdb.c (rlctx_send_user_command, tab_completion): Update to

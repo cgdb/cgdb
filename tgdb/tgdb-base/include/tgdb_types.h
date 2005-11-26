@@ -337,6 +337,9 @@ extern "C"
      */
     TGDB_UPDATE_COMPLETIONS,
 
+    /** The prompt has changed, here is the new value.  */
+    TGDB_UPDATE_CONSOLE_PROMPT_VALUE,
+
     /**
      * This happens when gdb quits.
      * libtgdb is done. 
@@ -401,6 +404,12 @@ extern "C"
 	 * representing each possible completion. */
 	struct tgdb_list *completion_list;
       } update_completions;
+
+      /* header == TGDB_UPDATE_CONSOLE_PROMPT_VALUE */
+      struct {
+	/* The new prompt GDB has reported */
+	const char *prompt_value;
+      } update_console_prompt_value;
 
       /* header == TGDB_QUIT */
       struct {

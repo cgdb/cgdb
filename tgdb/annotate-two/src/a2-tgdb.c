@@ -154,6 +154,8 @@ static struct annotate_two *initialize_annotate_two ( void ) {
 	a2->first_prompt_reached    = 0;
 	a2->source_already_received = 0;
 
+	a2->cur_response_list = NULL;
+
 	return a2;
 }
 
@@ -291,9 +293,12 @@ int a2_parse_io (
 	struct annotate_two *a2 = (struct annotate_two *)ctx;
 
 	a2->command_finished = 0;
+	a2->cur_response_list = list;
 
 	val = a2_handle_data ( a2, a2->sm, input_data, input_data_size,
 		debugger_output, debugger_output_size, list );
+
+	a2->cur_response_list = NULL;
 
 	if (a2->command_finished) 
 		return 1;
@@ -347,25 +352,6 @@ int a2_get_inferior_sources ( void *ctx) {
     }
 
 	return 0;
-}
-
-int a2_change_prompt(
-		void *ctx,
-		const char *prompt) {
-	struct annotate_two *a2 = (struct annotate_two *)ctx;
-
-    /* Must call a callback to change the prompt */
-    if ( commands_issue_command ( 
-				a2->c, 
-				a2->client_command_list,
-				ANNOTATE_SET_PROMPT, 
-				prompt, 
-				2 ) == -1 ) {
-        logger_write_pos ( logger, __FILE__, __LINE__, "commands_issue_command error");
-        return -1;
-    }
-            
-    return 0;
 }
 
 char *a2_return_client_command ( void *ctx, enum tgdb_command_type c ) {

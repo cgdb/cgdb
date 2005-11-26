@@ -1063,13 +1063,6 @@ int commands_issue_command (
                 TGDB_CLIENT_COMMAND_DISPLAY_NOTHING,
 				TGDB_CLIENT_COMMAND_ACTION_NONE,
                 (void*) nacom ); 
-    } else if ( oob == 2 ) {
-        client_command = tgdb_client_command_create ( 
-                ncom,
-                TGDB_CLIENT_COMMAND_TGDB_BASE,
-                TGDB_CLIENT_COMMAND_DISPLAY_NOTHING,
-                TGDB_CLIENT_COMMAND_ACTION_CONSOLE_SET_PROMPT,
-                NULL ); 
     } else if ( oob == 4 ) {
         client_command = tgdb_client_command_create ( 
                 ncom,

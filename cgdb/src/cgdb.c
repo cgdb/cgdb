@@ -655,6 +655,12 @@ process_commands(struct tgdb *tgdb)
 	do_tab_completion (list);
 	break;
       }
+      case TGDB_UPDATE_CONSOLE_PROMPT_VALUE:
+      {
+        const char *new_prompt = item->choice.update_console_prompt_value.prompt_value;
+	change_prompt (new_prompt);
+        break;
+      }
       case TGDB_QUIT:
 	cleanup();            
 	exit(0);
@@ -1113,13 +1119,6 @@ int main(int argc, char *argv[]) {
       logger_write_pos ( logger, __FILE__, __LINE__, "Unable to init readline"); 
       cleanup();
       exit(-1);
-    }
-
-    /* Set the tgdb callback */
-    if (tgdb_set_prompt_change_callback (tgdb, change_prompt) == -1) {
-        logger_write_pos ( logger, __FILE__, __LINE__,  "Unable to set tgdb callback"); 
-        cleanup();
-        exit(-1);
     }
 
     if ( create_help_file() == -1 ) {

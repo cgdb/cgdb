@@ -97,6 +97,11 @@ struct annotate_two {
 	 * It is set to 0 if it hasn't, otherwise 1.
 	 */
 	int source_already_received;
+
+	/**
+	 * The current response list.
+	 */
+	struct tgdb_list *cur_response_list;
 };
 
 #endif /* __ANNOTATE_TWO_H__ */

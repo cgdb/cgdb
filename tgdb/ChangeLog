@@ -1,3 +1,35 @@
+11/26/2005 Bob Rossi <bob@brasko.net>
+
+	* annotate-two/include/a2-tgdb.h (a2_change_prompt): Removed.
+	* annotate-two/include/annotate_two.h (annotate_two): Add field.
+	* annotate-two/src/a2-tgdb.c (initialize_annotate_two): Init new
+	field.
+	(a2_parse_io): Setup new field when calling into annotate 2 subsystem.
+	(a2_change_prompt): Removed.
+	* annotate-two/src/commands.c (commands_issue_command): Removed case.
+	* annotate-two/src/data.c (data_set_state): Add prompt change
+	response.
+	* gdbmi/src/gdbmi_tgdb.c (gdbmi_initialize): Take out prompt change.
+	* tgdb-base/include/tgdb.h (prompt_change): Removed.
+	(tgdb_set_prompt_update_callback): Removed.
+	* tgdb-base/include/tgdb_client_command.h
+	(tgdb_client_command_choice): Remove enumeration value.
+	* tgdb-base/include/tgdb_client_interface.h
+	(tgdb_client_change_debugger_prompt): Removed.
+	* tgdb-base/include/tgdb_types.h (INTERFACE_RESPONSE_COMMANDS): Add
+	response kind.
+	(tgdb_response): Ditto.
+	* tgdb-base/src/driver.c (gdb_input): Handle new response case.
+	(main): Remove old callback initialization function.
+	* tgdb-base/src/tgdb.c (tgdb): Remove prompt_change_callback field.
+	(tgdb_set_prompt_change_callback): Removed.
+	(tgdb_process_client_commands): Removed case statement.
+	(initialize_tgdb_context): Removed init code for removed field.
+	* tgdb-base/src/tgdb_client_interface.c
+	(tgdb_client_debugger_interfaces): Remove field.
+	* tgdb-base/src/tgdb_types.c (tgdb_types_print_item): Add case.
+	(tgdb_types_delete_item): Ditto.
+
 11/23/2005 Bob Rossi <bob@brasko.net>
 
 	* annotate-two/src/annotate.c (handle_display_begin,

@@ -224,13 +224,15 @@ static int gdb_input(void) {
 	if (item->header == TGDB_UPDATE_COMPLETIONS) {
 	  struct tgdb_list *list = item->choice.update_completions.completion_list;
 	  do_tab_completion (list);
-	  break;
+	}
+	if (item->header == TGDB_UPDATE_CONSOLE_PROMPT_VALUE) {
+	  driver_prompt_change (item->choice.update_console_prompt_value.prompt_value);
 	}
 
         if( item->header == TGDB_QUIT) {
            fprintf ( stderr, "%s:%d TGDB_QUIT\n", __FILE__, __LINE__);
            return -1;
-		}
+	}
     }
 
   {
@@ -492,12 +494,6 @@ int main(int argc, char **argv){
 		logger_write_pos ( logger, __FILE__, __LINE__, "driver error");
 		goto driver_end;
 	}
-
-    /* Set up prompt callback function */
-    if (tgdb_set_prompt_change_callback (tgdb, driver_prompt_change) == -1) {
-      logger_write_pos ( logger, __FILE__, __LINE__, "driver error");
-      goto driver_end;
-    }
 
     set_up_signal();
 

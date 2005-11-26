@@ -70,10 +70,6 @@ static struct tgdb_client_debugger_interfaces {
 	int (*tgdb_client_get_inferior_source_files) ( 
 			void *ctx );
 
-	int (*tgdb_client_change_debugger_prompt) (
-			void *ctx,
-			const char *prompt);
-
 	int (*tgdb_client_completion_callback) (
 			void *ctx,
 			const char *completion_command);
@@ -128,8 +124,6 @@ static struct tgdb_client_debugger_interfaces {
 		a2_get_source_absolute_filename,
 		/* tgdb_client_get_inferior_source_files */
 		a2_get_inferior_sources,
-		/* tgdb_client_change_debugger_prompt */
-		a2_change_prompt,
 		/* tgdb_client_completion_callback */
 		a2_completion_callback,
 		/* tgdb_client_return_command*/
@@ -171,8 +165,6 @@ static struct tgdb_client_debugger_interfaces {
 		NULL,
 		/* tgdb_client_get_inferior_source_files */
 		NULL,
-		/* tgdb_client_change_debugger_prompt */
-		NULL,
 		/* tgdb_client_completion_callback */
 		NULL,
 		/* tgdb_client_return_command*/
@@ -211,8 +203,6 @@ static struct tgdb_client_debugger_interfaces {
 		/* tgdb_client_get_absolute_path */
 		NULL,
 		/* tgdb_client_get_inferior_source_files */
-		NULL,
-		/* tgdb_client_change_debugger_prompt */
 		NULL,
 		/* tgdb_client_completion_callback */
 		NULL,
@@ -426,12 +416,6 @@ int tgdb_client_get_inferior_source_files ( struct tgdb_client_context *tcc ) {
 	
 	return tcc->tgdb_client_interface->tgdb_client_get_inferior_source_files ( 
 			tcc->tgdb_debugger_context );
-}
-
-int tgdb_client_change_debugger_prompt(
-		struct tgdb_client_context *tcc,
-		const char *prompt) {
-	return -1;
 }
 
 int tgdb_client_completion_callback(

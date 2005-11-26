@@ -338,20 +338,6 @@ int a2_get_source_absolute_filename (
 int a2_get_inferior_sources ( void *ctx );
 
 /** 
- * This will change the prompt the user sees to PROMPT.
- *
- * \param ctx
- * The annotate two context.
- *
- * \param prompt
- * The new prompt to change too.
- *
- * @return
- * 0 on success, otherwise -1 on error.
- */
-int a2_change_prompt( void *ctx, const char *prompt);
-
-/** 
  * This is called when readline determines a command needs to be completed.
  *
  * \param ctx

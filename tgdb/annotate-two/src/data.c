@@ -112,7 +112,14 @@ void data_set_state ( struct annotate_two *a2, enum internal_state state ) {
       if ( strcmp(a2->data->gdb_prompt, a2->data->gdb_prompt_last) != 0 ) {
 	strcpy(a2->data->gdb_prompt_last, a2->data->gdb_prompt);
 	/* Update the prompt */
-	a2_change_prompt(a2, a2->data->gdb_prompt_last);
+	if (a2->cur_response_list) {
+	  struct tgdb_response *response = (struct tgdb_response *)
+	    xmalloc (sizeof (struct tgdb_response));
+	  response->header = TGDB_UPDATE_CONSOLE_PROMPT_VALUE;
+	  response->choice.update_console_prompt_value.prompt_value = 
+	    xstrdup (a2->data->gdb_prompt_last);
+	  tgdb_list_append (a2->cur_response_list, response);
+	}
       }
 
       a2->command_finished = 1;

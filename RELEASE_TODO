@@ -6,8 +6,6 @@ Bug fixes/improvement for cgdb-0.6.0
     the associated tgdb_request data structure. Make sure to remove
     the cgdb.c:last_request variable.
  [ ] Free tgdb_request data structures.
- [ ] Remove the tgdb_set_prompt_change_callback, and add it to the 
-    tgdb_response mechanism.
  [ ] Provide a single interface to the user, that process's GDB output.
     When a command is finished a different return value will be sent
     then when a command is stil being processed. Also, when a command
@@ -29,6 +27,8 @@ Bug fixes/improvement for cgdb-0.6.0
 Closed:
 
 - TGDB interface changes
+ [x] Remove the tgdb_set_prompt_change_callback, and add it to the 
+    tgdb_response mechanism.
  [x] TGDB will no longer buffer commands. It will receive and process
     1 command at a time.
  [x] Provide an TGDB queue interface, which can be used by CGDB and

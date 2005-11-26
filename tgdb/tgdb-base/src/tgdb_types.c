@@ -139,6 +139,12 @@ tgdb_types_print_item (void *command)
 	fprintf (fd, "completions end\n");
 	break;
       }
+    case TGDB_UPDATE_CONSOLE_PROMPT_VALUE: 
+      {
+	const char *value = com->choice.update_console_prompt_value.prompt_value;
+	fprintf (fd, "TGDB_UPDATE_CONSOLE_PROMPT_VALUE(%s)\n", value);
+	break;
+      }
     case TGDB_QUIT:
       {
 	struct tgdb_debugger_exit_status *status = com->choice.quit.exit_status;
@@ -242,6 +248,13 @@ tgdb_types_delete_item (void *command)
       {
 	struct tgdb_list *list = com->choice.update_completions.completion_list;
 	tgdb_list_free (list, tgdb_types_source_files_free);
+	break;
+      }
+    case TGDB_UPDATE_CONSOLE_PROMPT_VALUE: 
+      {
+	const char *value = com->choice.update_console_prompt_value.prompt_value;
+	free ((char*)value);
+	value = NULL;
 	break;
       }
     case TGDB_QUIT:

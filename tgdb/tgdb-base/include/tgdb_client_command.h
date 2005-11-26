@@ -39,12 +39,7 @@ enum tgdb_client_command_choice {
 	 * priority's or not need to use this feature. It's here because it
 	 * was usefull early on to get the annotate_two client to work.
 	 */
-    TGDB_CLIENT_COMMAND_PRIORITY,
-
-	/**
-	 * This is used when the client wants TGDB_BASE to run a command.
-	 */
-	TGDB_CLIENT_COMMAND_TGDB_BASE
+	TGDB_CLIENT_COMMAND_PRIORITY,
 };
 
 /**

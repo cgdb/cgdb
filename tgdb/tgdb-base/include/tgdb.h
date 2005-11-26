@@ -87,40 +87,6 @@ extern "C"
 //@}
 // }}}
 
-// Callbacks {{{
-/******************************************************************************/
-/**
- * @name Callbacks Commands
- * These are functions that TGDB will call when it has data to give to the
- * front end. If the front end set's this data up, TGDB will call the 
- * functions when the data becomes available.
- */
-/******************************************************************************/
-
-//@{
-  typedef void (*prompt_change) (const char *new_prompt);
-
-  /**
-   * This tell's TGDB what function to call when it has detected that
-   * the the user changed the prompt or if it wants to set the prompt.
-   * The front end can choose any prompt that it wants, and can ignore
-   * this callback if it is not interested in 100% GDB compatibility.
-   *
-   * \param tgdb
-   * An instance of the tgdb library to operate on.
-   *
-   * \param callback
-   * The function to call when TGDB detectst that the prompt has changed.
-   *
-   * \return
-   * 0 on success, or -1 on error
-   */
-  int tgdb_set_prompt_change_callback (struct tgdb *tgdb,
-				       prompt_change callback);
-
-//@}
-// }}}
-
 // Status Commands {{{
 /******************************************************************************/
 /**

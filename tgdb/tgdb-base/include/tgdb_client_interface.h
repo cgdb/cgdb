@@ -403,22 +403,6 @@ int tgdb_client_get_absolute_path (
 int tgdb_client_get_inferior_source_files ( struct tgdb_client_context *tcc );
 
 /** 
- * This will change the prompt the user sees to PROMPT.
- *
- * \param tcc
- * The client context.
- *
- * \param prompt
- * The new prompt to change to.
- *
- * @return
- * 0 on success, otherwise -1 on error.
- */
-int tgdb_client_change_debugger_prompt(
-		struct tgdb_client_context *tcc,
-		const char *prompt);
-
-/** 
  * TGDB calls this function when it determines a command needs to be completed.
  *
  * \param tcc

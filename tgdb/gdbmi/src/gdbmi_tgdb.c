@@ -283,8 +283,6 @@ int gdbmi_initialize (
 	int *inferior_stdin, int *inferior_stdout) {
 	struct tgdb_gdbmi *gdbmi = (struct tgdb_gdbmi *)ctx;
 
-    struct tgdb_client_command *client_command = NULL;
-	
 	gdbmi->client_command_list = tgdb_list_init ();
 
 	*debugger_stdin 	= gdbmi->debugger_stdin;
@@ -292,6 +290,9 @@ int gdbmi_initialize (
 
    	gdbmi->tgdb_initialized = 1;
 
+#if 0
+	/* Need to set the prompt via a tgdb_response */
+	struct tgdb_client_command *client_command = NULL;
 	client_command = tgdb_client_command_create ( 
 		"(tgdbmi) ",
 		TGDB_CLIENT_COMMAND_TGDB_BASE,
@@ -300,6 +301,7 @@ int gdbmi_initialize (
 		NULL ); 
 
 	tgdb_list_append ( gdbmi->client_command_list, client_command );
+#endif
 
     return 0;
 }

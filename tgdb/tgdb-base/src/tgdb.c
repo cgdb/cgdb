@@ -136,13 +136,6 @@ struct tgdb
    * no matter how many are receieved, this will only be 1. Otherwise if none have been
    * received this will be 0.  */
   int has_sigchld_recv;
-
-  /**
-   * This is the function that should be called when TGDB has determined
-   * that the prompt has changed.
-   *
-   * If this is NULL, there is no need to call the function.  */
-  prompt_change prompt_change_callback;
 };
 
 /* }}} */
@@ -153,24 +146,6 @@ static int tgdb_deliver_command (struct tgdb *tgdb, int fd,
 static int tgdb_run_command (struct tgdb *tgdb);
 static int tgdb_dispatch_command (struct tgdb *tgdb,
 				  struct tgdb_command *com);
-
-/* }}} */
-
-/* Callbacks {{{ */
-
-int
-tgdb_set_prompt_change_callback (struct tgdb *tgdb, prompt_change callback)
-{
-  if (!tgdb)
-    {
-      logger_write_pos (logger, __FILE__, __LINE__, "tgdb context is NULL");
-      return -1;
-    }
-
-  tgdb->prompt_change_callback = callback;
-
-  return 0;
-}
 
 /* }}} */
 
@@ -215,11 +190,6 @@ tgdb_process_client_commands (struct tgdb *tgdb)
 	case TGDB_CLIENT_COMMAND_PRIORITY:
 	  command_choice = TGDB_COMMAND_TGDB_CLIENT_PRIORITY;
 	  add_command = 1;
-	  break;
-	case TGDB_CLIENT_COMMAND_TGDB_BASE:
-	  if (tgdb->prompt_change_callback)
-	    tgdb->prompt_change_callback (client_command->
-					  tgdb_client_command_data);
 	  break;
 	default:
 	  logger_write_pos (logger, __FILE__, __LINE__,
@@ -279,7 +249,6 @@ initialize_tgdb_context (void)
 
   tgdb->command_list = tgdb_list_init ();
   tgdb->has_sigchld_recv = 0;
-  tgdb->prompt_change_callback = NULL;
 
   logger = NULL;
 
