@@ -258,6 +258,11 @@ void commands_shutdown ( struct commands *c ) {
 	ibuf_free ( c->info_sources_string );
 	c->info_sources_string = NULL;
 
+	ibuf_free (c->tab_completion_string);
+	c->tab_completion_string = NULL;
+
+	tgdb_list_destroy (c->tab_completions);
+
 	tgdb_list_free (c->inferior_source_files, free_char_star);
 	tgdb_list_destroy (c->inferior_source_files);
 	

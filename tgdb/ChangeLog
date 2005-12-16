@@ -1,3 +1,7 @@
+12/15/2005 Bob Rossi <bob@brasko.net>
+
+	* annotate-two/src/commands.c (commands_shutdown): Free data.
+
 11/26/2005 Bob Rossi <bob@brasko.net>
 
 	* annotate-two/include/a2-tgdb.h (a2_change_prompt): Removed.
