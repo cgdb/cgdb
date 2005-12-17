@@ -1,30 +1,37 @@
-Bug fixes/improvement for cgdb-0.6.0
+Bug fixes/improvement for cgdb-0.6.1
 
-- TGDB interface changes
- [ ] Re-arrange the a2 subsystem to be easier and better to modify
- [ ] Modify the tgdb_response data structure to incorporate into it
-    the associated tgdb_request data structure. Make sure to remove
-    the cgdb.c:last_request variable.
- [ ] Free tgdb_request data structures.
+ [ ] Figure out how to get extra prototypes out of cgdb.h
  [ ] Provide a single interface to the user, that process's GDB output.
     When a command is finished a different return value will be sent
     then when a command is stil being processed. Also, when a command
     is finished, then the user can look at the tgdb_responses.
- [ ] Figure out how to get extra prototypes out of cgdb.h
+ [ ] Re-arrange the a2 subsystem to be easier and better to modify
+     This could include writing a quick flex/bison parser that could make a 
+     parse tree of the annotation command.
 
-- What happens if there is no matches for tab completion and you hit
-  tab twice?
-- Look into Crash on Mac (OSX Jaguar).
-- Think about how to handle MAC formatted files on unix.
+- Use valgrind to get rid of most memory leaks.
+
+- Add documentation to CGDB. I think texinfo is the prefered way to do this,
+  it generates info and html pages. For man pages, looking at help2man might
+  be a good idea. Ben is willing to help with this.
+
+Bug fixes/improvement for cgdb-0.6.0
+
+- TGDB interface changes
+ [ ] Modify the tgdb_response data structure to incorporate into it
+    the associated tgdb_request data structure. Make sure to remove
+    the cgdb.c:last_request variable.
+ [ ] Free tgdb_request data structures.
+
 - Fix ACS_VLINE problem. This char is not available everywhere and 
   should be a runtime option. Check with jonathon to make sure this problem
   is fixed.  (Actually, check on ALL ACS characters, we use several of them.)
 - Use valgrind to get rid of most memory leaks.
-- Add documentation to CGDB. I think texinfo is the prefered way to do this,
-  it generates info and html pages. For man pages, looking at help2man might
-  be a good idea.
 
 Closed:
+
+ [x] Strip readline out of TGDB and put it into CGDB. 
+     This is in preparation for removing the rlctx code.
 
 - TGDB interface changes
  [x] Remove the tgdb_set_prompt_change_callback, and add it to the 
@@ -50,28 +57,18 @@ Closed:
  [x] Empty command queue when the ^c signal is reached. [should this be done
      in CGDB or TGDB]? Done in TGDB.
  [x] Delete all annotations that are not being used.
-
-- If you hit 'o', an extra prompt appears at the console. If you set a 
-  breakpoint from the GUI, this doesn't happen. That's because TGDB hacks
-  an extra "\n" into the output stream. This hack needs to go away.
-  Also, the update_prompt callback should go away. TGDB should return the
-  command that it just ran when it's done. The GUI can determine what to
-  do from that command.
-
-Bug fixes/improvement for cgdb-0.5.3
-
-- Strip readline out of TGDB and put it into CGDB. 
-  This is in preparation for removing the rlctx code.
-- revamp the tgdb_response data structure to simply be a union with an
+ [x] revamp the tgdb_response data structure to simply be a union with an
   enum, which selects the appropriate values. This would be a self
   documenting data structure.
+
+Bug fixes/improvement for cgdb-0.5.3
 
 Closed:
 
 - Get readline library to only build the static library.
 - Update FAQ, it's wrong.
 - Fix runtime error with arrow style long and regex searching.
-- Should package readline with CGDB?  Yes!
+- Should package readline with CGDB?  No!
 - Make sure arrowstyle option is commented.
 - Get ^l to refresh the screen.
 - Fix compiler warning 
