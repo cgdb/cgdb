@@ -96,6 +96,16 @@ struct commands {
 	 */
 	struct ibuf *info_source_string;
 
+	/**
+	 * The discovered relative path, found from the info source output.
+	 */
+	struct ibuf *info_source_relative_path;
+
+	/**
+	 * The discovered absolute path, found from the info source output.
+	 */
+	struct ibuf *info_source_absolute_path;
+
 	/** 
 	 * Finished parsing the line being looked for.
 	 */
@@ -171,42 +181,46 @@ struct commands {
 	int source_relative_prefix_length;
 };
 
-struct commands *commands_initialize(void) {
-	struct commands *c = (struct commands *)
-		xmalloc ( sizeof ( struct commands ));
+struct commands *
+commands_initialize(void)
+{
+  struct commands *c = (struct commands *)
+    xmalloc ( sizeof ( struct commands ));
 
-    c->absolute_path       	= ibuf_init();
-    c->line_number         	= ibuf_init();
+  c->absolute_path       	= ibuf_init();
+  c->line_number         	= ibuf_init();
 
-	c->cur_command_state 	= VOID_COMMAND;
-	c->cur_field_num 		   = 0;
-   c->field_5_newline_hit  = 0;
+  c->cur_command_state		= VOID_COMMAND;
+  c->cur_field_num		= 0;
+  c->field_5_newline_hit	= 0;
 
-    c->breakpoint_list    	= tgdb_list_init();
-    c->breakpoint_string   	= ibuf_init();
-	c->breakpoint_table    	= 0;
-	c->breakpoint_enabled   = FALSE;
-	c->breakpoint_started   = FALSE;
+  c->breakpoint_list    	= tgdb_list_init();
+  c->breakpoint_string   	= ibuf_init();
+  c->breakpoint_table    	= 0;
+  c->breakpoint_enabled		= FALSE;
+  c->breakpoint_started		= FALSE;
 
-    c->info_source_string  	= ibuf_init();
-	c->info_source_ready   	= 0;
-	c->last_info_source_requested = ibuf_init();
+  c->info_source_string  	= ibuf_init();
+  c->info_source_relative_path	= ibuf_init();
+  c->info_source_absolute_path	= ibuf_init();
+  c->info_source_ready		= 0;
+  c->last_info_source_requested	= ibuf_init();
 
-	c->sources_ready 		= 0;
-    c->info_sources_string 	= ibuf_init();
-	c->inferior_source_files= tgdb_list_init ();
+  c->sources_ready 		= 0;
+  c->info_sources_string 	= ibuf_init ();
+  c->inferior_source_files	= tgdb_list_init ();
 
-	c->tab_completion_ready 		= 0;
-    c->tab_completion_string 	= ibuf_init();
-	c->tab_completions= tgdb_list_init ();
+  c->tab_completion_ready	= 0;
+  c->tab_completion_string 	= ibuf_init();
+  c->tab_completions		= tgdb_list_init ();
 
-	c->source_prefix 		= "Located in ";
-	c->source_prefix_length = 11;
+  c->source_prefix 		= "Located in ";
+  c->source_prefix_length	= 11;
 
-	c->source_relative_prefix 	= "Current source file is ";
-	c->source_relative_prefix_length 	= 23;
+  c->source_relative_prefix 	= "Current source file is ";
+  c->source_relative_prefix_length = 23;
 
-	return c;
+  return c;
 }
 
 int free_breakpoint (void *item) {
@@ -236,40 +250,48 @@ int free_char_star (void *item) {
   return 0;
 }
 
-void commands_shutdown ( struct commands *c ) {
-	if ( c == NULL )
-		return;
+void 
+commands_shutdown (struct commands *c)
+{
+  if (c == NULL)
+    return;
 
-	ibuf_free ( c->absolute_path );
-	c->absolute_path = NULL;
+  ibuf_free (c->absolute_path);
+  c->absolute_path = NULL;
 
-	ibuf_free ( c->line_number );
-	c->line_number = NULL;
+  ibuf_free (c->line_number);
+  c->line_number = NULL;
 
-	tgdb_list_free (c->breakpoint_list, free_breakpoint);
-	tgdb_list_destroy (c->breakpoint_list);
+  tgdb_list_free (c->breakpoint_list, free_breakpoint);
+  tgdb_list_destroy (c->breakpoint_list);
 
-	ibuf_free ( c->breakpoint_string );
-	c->breakpoint_string = NULL;
+  ibuf_free (c->breakpoint_string);
+  c->breakpoint_string = NULL;
 
-	ibuf_free ( c->info_source_string );
-	c->info_source_string = NULL;
+  ibuf_free (c->info_source_string);
+  c->info_source_string = NULL;
 
-	ibuf_free ( c->info_sources_string );
-	c->info_sources_string = NULL;
+  ibuf_free (c->info_source_relative_path);
+  c->info_source_relative_path = NULL;
 
-	ibuf_free (c->tab_completion_string);
-	c->tab_completion_string = NULL;
+  ibuf_free (c->info_source_absolute_path);
+  c->info_source_absolute_path = NULL;
 
-	tgdb_list_destroy (c->tab_completions);
+  ibuf_free (c->info_sources_string);
+  c->info_sources_string = NULL;
 
-	tgdb_list_free (c->inferior_source_files, free_char_star);
-	tgdb_list_destroy (c->inferior_source_files);
+  ibuf_free (c->tab_completion_string);
+  c->tab_completion_string = NULL;
+
+  tgdb_list_destroy (c->tab_completions);
+
+  tgdb_list_free (c->inferior_source_files, free_char_star);
+  tgdb_list_destroy (c->inferior_source_files);
 	
-	/* TODO: free source_files queue */
+  /* TODO: free source_files queue */
 
-	free ( c );
-	c = NULL;
+  free ( c );
+  c = NULL;
 }
 
 int commands_parse_field(struct commands *c, const char *buf, size_t n, int *field){
@@ -515,16 +537,20 @@ enum COMMAND_STATE commands_get_state( struct commands *c){
    return c->cur_command_state;
 }
 
-static void commands_prepare_info_source(struct annotate_two *a2, struct commands *c, enum COMMAND_STATE state){
-   data_set_state(a2, INTERNAL_COMMAND );
-   ibuf_clear(c->info_source_string);
+static void 
+commands_prepare_info_source (struct annotate_two *a2, struct commands *c, enum COMMAND_STATE state)
+{
+  data_set_state (a2, INTERNAL_COMMAND);
+  ibuf_clear (c->info_source_string);
+  ibuf_clear (c->info_source_relative_path);
+  ibuf_clear (c->info_source_absolute_path);
    
-   if ( state == INFO_SOURCE_ABSOLUTE ) {
-        commands_set_state(c, INFO_SOURCE_ABSOLUTE, NULL);
-   } else if ( state == INFO_SOURCE_RELATIVE )
-        commands_set_state(c, INFO_SOURCE_RELATIVE, NULL);
+  if (state == INFO_SOURCE_ABSOLUTE)
+    commands_set_state (c, INFO_SOURCE_ABSOLUTE, NULL);
+   else if (state == INFO_SOURCE_RELATIVE)
+    commands_set_state (c, INFO_SOURCE_RELATIVE, NULL);
 
-   c->info_source_ready = 0;
+  c->info_source_ready = 0;
 }
 
 void commands_list_command_finished (
@@ -553,19 +579,16 @@ void commands_list_command_finished (
  * Otherwise the gui will be notified that the file is not valid.
  */
 static void 
-commands_send_source_absolute_source_file (
-  struct commands *c, 
-  struct tgdb_list *list)
+commands_send_source_absolute_source_file (struct commands *c, 
+					   struct tgdb_list *list)
 {
   /*err_msg("Whats up(%s:%d)\r\n", info_source_buf, info_source_buf_pos);*/
-  unsigned long length = ibuf_length(c->info_source_string);
-  static char *info_ptr; 
-  info_ptr = ibuf_get(c->info_source_string);
+  unsigned long length = ibuf_length(c->info_source_absolute_path);
 
   /* found */
-  if(length >= c->source_prefix_length && 
-    (strncmp(info_ptr, c->source_prefix, c->source_prefix_length) == 0)){
-    char *path = info_ptr + c->source_prefix_length;
+  if (length > 0)
+  {
+    char *path = ibuf_get (c->info_source_absolute_path);
 
     struct tgdb_source_file *tsf = (struct tgdb_source_file *)
       xmalloc ( sizeof ( struct tgdb_source_file ) );
@@ -593,24 +616,28 @@ commands_send_source_absolute_source_file (
   }
 }
 
-static void commands_process_source_line(struct commands *c ){
-    unsigned long length = ibuf_length(c->info_sources_string), i, start = 0;
-    static char *info_ptr; 
-    static char *nfile;
-    info_ptr = ibuf_get(c->info_sources_string);
+static void
+commands_send_source_relative_source_file (struct commands *c,
+					   struct tgdb_list *list)
+{
+  /* So far, INFO_SOURCE_RELATIVE is only used when a 
+   * TGDB_UPDATE_FILE_POSITION is needed.
+   */
+  /* This section allocates a new structure to add into the queue 
+   * All of its members will need to be freed later.
+   */
+  struct tgdb_file_position *tfp = (struct tgdb_file_position *)
+    xmalloc ( sizeof ( struct tgdb_file_position ) );
+  struct tgdb_response *response = (struct tgdb_response *)
+    xmalloc (sizeof (struct tgdb_response));
+  tfp->absolute_path = strdup ( ibuf_get ( c->absolute_path ) );
+  tfp->relative_path = strdup (ibuf_get (c->info_source_relative_path));
+  tfp->line_number   = atoi ( ibuf_get ( c->line_number ) );
   
-    for(i = 0 ; i < length; ++i){
-        if(i > 0 && info_ptr[i - 1] == ',' && info_ptr[i] == ' '){
-            nfile = calloc(sizeof(char),i - start) ;
-            strncpy(nfile, info_ptr + start , i - start - 1);
-            start += ((i + 1) - start); 
-			tgdb_list_append ( c->inferior_source_files, nfile );
-        } else if (i == length - 1 ){
-            nfile = calloc(sizeof(char),i - start + 2);
-            strncpy(nfile, info_ptr + start , i - start + 1);
-			tgdb_list_append ( c->inferior_source_files, nfile );
-        }
-    }
+  response->header = TGDB_UPDATE_FILE_POSITION;
+  response->choice.update_file_position.file_position = tfp;
+
+  tgdb_types_append_command(list, response);
 }
 
 /* commands_process_info_source:
@@ -637,41 +664,50 @@ commands_process_info_source (
   if (a == '\r')
     return;
 
-  if(a == '\n'){ 
+  if(a == '\n')
+  {
     /* This is the line containing the absolute path to the source file */
-    if (commands_get_state(c) == INFO_SOURCE_ABSOLUTE && 
-	length >= c->source_prefix_length && 
+    if (length >= c->source_prefix_length && 
 	strncmp(info_ptr, c->source_prefix, c->source_prefix_length) == 0 ) {
-      commands_send_source_absolute_source_file ( c, list );
+        ibuf_add (c->info_source_absolute_path, info_ptr + c->source_prefix_length);
       c->info_source_ready = 1;
-    /* This is the line contatining the relative path to the source file */
-    } else if (commands_get_state(c) == INFO_SOURCE_RELATIVE && 
-	       length >= c->source_relative_prefix_length && 
-	       strncmp(info_ptr, c->source_relative_prefix, c->source_relative_prefix_length) == 0 ) {
-      /* So far, INFO_SOURCE_RELATIVE is only used when a 
-       * TGDB_UPDATE_FILE_POSITION is needed.
-       */
-      /* This section allocates a new structure to add into the queue 
-       * All of its members will need to be freed later.
-       */
-      struct tgdb_file_position *tfp = (struct tgdb_file_position *)
-	xmalloc ( sizeof ( struct tgdb_file_position ) );
-      struct tgdb_response *response = (struct tgdb_response *)
-	xmalloc (sizeof (struct tgdb_response));
-      tfp->absolute_path = strdup ( ibuf_get ( c->absolute_path ) );
-      tfp->relative_path = strdup ( info_ptr + c->source_relative_prefix_length );
-      tfp->line_number   = atoi ( ibuf_get ( c->line_number ) );
-  
-      response->header = TGDB_UPDATE_FILE_POSITION;
-      response->choice.update_file_position.file_position = tfp;
+      ibuf_clear(c->info_source_string);
 
-      tgdb_types_append_command(list, response);
-      c->info_source_ready = 1;
+      /* commands_finalize_command will use the populated data */
+
+    /* This is the line contatining the relative path to the source file */
+    } else if (length >= c->source_relative_prefix_length && 
+	       strncmp(info_ptr, c->source_relative_prefix, c->source_relative_prefix_length) == 0 ) {
+      ibuf_add (c->info_source_relative_path, info_ptr + c->source_relative_prefix_length);
+      ibuf_clear(c->info_source_string);
     } else
       ibuf_clear(c->info_source_string);
   } else
     ibuf_addchar(c->info_source_string, a);
 }
+
+static void 
+commands_process_source_line (struct commands *c)
+{
+  unsigned long length = ibuf_length(c->info_sources_string), i, start = 0;
+  static char *info_ptr; 
+  static char *nfile;
+  info_ptr = ibuf_get(c->info_sources_string);
+  
+  for(i = 0 ; i < length; ++i){
+    if(i > 0 && info_ptr[i - 1] == ',' && info_ptr[i] == ' '){
+      nfile = calloc(sizeof(char),i - start) ;
+      strncpy(nfile, info_ptr + start , i - start - 1);
+      start += ((i + 1) - start); 
+      tgdb_list_append ( c->inferior_source_files, nfile );
+    } else if (i == length - 1 ){
+      nfile = calloc(sizeof(char),i - start + 2);
+      strncpy(nfile, info_ptr + start , i - start + 1);
+      tgdb_list_append ( c->inferior_source_files, nfile );
+    }
+  }
+}
+
 
 /* process's source files */
 static void commands_process_sources(struct commands *c, char a){
@@ -848,6 +884,11 @@ commands_finalize_command (
 	response->header = TGDB_ABSOLUTE_SOURCE_DENIED;
 	response->choice.absolute_source_denied.source_file = rejected;
 	tgdb_types_append_command(list, response);
+      } else {
+	if (commands_get_state (c) == INFO_SOURCE_RELATIVE)
+	  commands_send_source_relative_source_file (c, list);
+	else if (commands_get_state (c) == INFO_SOURCE_ABSOLUTE)
+	  commands_send_source_absolute_source_file (c, list);
       }
       break;
     default: 

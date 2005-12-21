@@ -1,3 +1,14 @@
+12/21/2005 Bob Rossi <bob@brasko.net>
+	* annotate-two/src/commands.c (struct commands): Added
+	info_source_relative_path, info_source_absolute_path fields.
+	(commands_initialize): Init new fields.
+	(commands_shutdown): Free new fields.
+	(commands_prepare_info_source): Clear new fields.
+	(commands_send_source_absolute_source_file): Update to use new fields.
+	(commands_process_info_source): Store relative and absolute paths from
+	info source.
+	(commands_finalize_command): Get data from 'info source' command.
+
 12/20/2005 Bob Rossi <bob@brasko.net>
 
 	* annotate-two/include/a2-tgdb.h (annotate_commands): Add new command.
