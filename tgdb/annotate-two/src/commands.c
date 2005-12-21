@@ -549,7 +549,10 @@ void commands_list_command_finished (
   tgdb_types_append_command (list, response);
 }
 
-void 
+/* This will send to the gui the absolute path to the file being requested. 
+ * Otherwise the gui will be notified that the file is not valid.
+ */
+static void 
 commands_send_source_absolute_source_file (
   struct commands *c, 
   struct tgdb_list *list)
@@ -564,23 +567,14 @@ commands_send_source_absolute_source_file (
     (strncmp(info_ptr, c->source_prefix, c->source_prefix_length) == 0)){
     char *path = info_ptr + c->source_prefix_length;
 
-    /* requesting file */
-    if(c->last_info_source_requested == NULL) {
-      /* This happens only when libtgdb starts */
-      ibuf_clear( c->absolute_path );
-      ibuf_add ( c->absolute_path, path );
-      ibuf_clear( c->line_number );
-      ibuf_add ( c->line_number, "1" );
-    } else { 
-      struct tgdb_source_file *tsf = (struct tgdb_source_file *)
-	xmalloc ( sizeof ( struct tgdb_source_file ) );
-      tsf->absolute_path = strdup ( path );
-      struct tgdb_response *response = (struct tgdb_response *)
-	xmalloc (sizeof (struct tgdb_response));
-      response->header = TGDB_ABSOLUTE_SOURCE_ACCEPTED;
-      response->choice.absolute_source_accepted.source_file = tsf;
-      tgdb_types_append_command(list, response);
-    }
+    struct tgdb_source_file *tsf = (struct tgdb_source_file *)
+      xmalloc ( sizeof ( struct tgdb_source_file ) );
+    tsf->absolute_path = strdup (path);
+    struct tgdb_response *response = (struct tgdb_response *)
+      xmalloc (sizeof (struct tgdb_response));
+    response->header = TGDB_ABSOLUTE_SOURCE_ACCEPTED;
+    response->choice.absolute_source_accepted.source_file = tsf;
+    tgdb_types_append_command(list, response);
   /* not found */
   } else {
     struct tgdb_source_file *rejected = (struct tgdb_source_file *)
@@ -891,6 +885,8 @@ int commands_prepare_for_command (
         case ANNOTATE_LIST:
             commands_prepare_list ( a2, c, com->tgdb_client_command_data );
             break;
+        case ANNOTATE_INFO_LINE:
+            break;
         case ANNOTATE_INFO_SOURCE_RELATIVE:
             commands_prepare_info_source ( a2, c, INFO_SOURCE_RELATIVE );
             break;
@@ -934,92 +930,98 @@ int commands_prepare_for_command (
  * A command ready to be run through the debugger or NULL on error.
  * The memory is malloc'd, and must be freed.
  */
-static char *commands_create_command ( 
-	struct commands *c,
-    enum annotate_commands com,
-    const char *data) {
-
-    char *ncom = NULL;
+static char *
+commands_create_command (struct commands *c, enum annotate_commands com, 
+	                 const char *data)
+{
+  char *ncom = NULL;
     
-    switch ( com ) {
-        case ANNOTATE_INFO_SOURCES: 
-            ncom = strdup ( "server info sources\n" );   
-            break;
-        case ANNOTATE_LIST:
-            {
-				struct ibuf *temp_file_name = NULL;
-                if ( data != NULL ) {
-					temp_file_name = ibuf_init ();
-					ibuf_add ( temp_file_name, data );
-				}
+  switch (com)
+  {
+    case ANNOTATE_INFO_SOURCES: 
+      ncom = strdup ( "server info sources\n" );   
+      break;
+    case ANNOTATE_LIST:
+    {
+      struct ibuf *temp_file_name = NULL;
+      if (data != NULL)
+      {
+	temp_file_name = ibuf_init ();
+	ibuf_add ( temp_file_name, data );
+      }
+      if (data == NULL)
+	ncom = (char *)xmalloc( sizeof ( char ) * ( 16 ));
+      else
+        ncom = (char *)xmalloc( sizeof ( char ) * ( 16 + strlen (data )));
+      strcpy ( ncom, "server list " );
 
-                if ( data == NULL )
-                    ncom = (char *)xmalloc( sizeof ( char ) * ( 16 ));
-                else
-                    ncom = (char *)xmalloc( sizeof ( char ) * ( 16 + strlen (data )));
-                strcpy ( ncom, "server list " );
+      if (temp_file_name != NULL)
+      {
+        strcat (ncom, ibuf_get (temp_file_name));
+        strcat (ncom, ":1");
+      } 
 
-                /* This should only happen for the initial 'list' */
-                if ( temp_file_name != NULL ) {
-                    strcat ( ncom, ibuf_get ( temp_file_name ) );
-                    strcat ( ncom, ":1" );
-                } 
+      /* This happens when the user wants to get the absolute path of 
+       * the current file. They pass in NULL to represent that. */
+      if (temp_file_name == NULL)
+      {
+	ibuf_free ( c->last_info_source_requested );
+	c->last_info_source_requested = NULL;
+      } else {
+	if ( c->last_info_source_requested == NULL )
+	  c->last_info_source_requested = ibuf_init ();
 
-                if ( temp_file_name == NULL ) {
-					ibuf_free ( c->last_info_source_requested );
-					c->last_info_source_requested = NULL;
-				} else {
-					if ( c->last_info_source_requested == NULL )
-						c->last_info_source_requested = ibuf_init ();
+	ibuf_clear ( c->last_info_source_requested );
+	ibuf_add ( c->last_info_source_requested, ibuf_get ( temp_file_name ) );
+      }
 
-					ibuf_clear ( c->last_info_source_requested );
-					ibuf_add ( c->last_info_source_requested, ibuf_get ( temp_file_name ) );
-				}
+      strcat ( ncom, "\n" );
 
-                strcat ( ncom, "\n" );
+      ibuf_free ( temp_file_name );
+      temp_file_name = NULL;
+      break;
+    }
+    case ANNOTATE_INFO_LINE:
+      ncom = strdup ( "server info line\n" );   
+      break;
+    case ANNOTATE_INFO_SOURCE_RELATIVE:                         
+      ncom = strdup ( "server info source\n" );   
+      break;
+    case ANNOTATE_INFO_SOURCE_ABSOLUTE:                         
+      ncom = strdup ( "server info source\n" );   
+      break;
+    case ANNOTATE_INFO_BREAKPOINTS:
+      ncom = strdup ( "server info breakpoints\n" );   
+      break;
+    case ANNOTATE_TTY:
+    {
+      struct ibuf *temp_tty_name = ibuf_init ();
+      ibuf_add ( temp_tty_name, data );
+      ncom = (char *)xmalloc( sizeof ( char ) * ( 13 + strlen( data )));
+      strcpy ( ncom, "server tty " );
+      strcat ( ncom, ibuf_get  (temp_tty_name ) );
+      strcat ( ncom, "\n" );
 
-				ibuf_free ( temp_file_name );
-				temp_file_name = NULL;
-                break;
-            }
-        case ANNOTATE_INFO_SOURCE_RELATIVE:                         
-            ncom = strdup ( "server info source\n" );   
-            break;
-        case ANNOTATE_INFO_SOURCE_ABSOLUTE:                         
-            ncom = strdup ( "server info source\n" );   
-            break;
-        case ANNOTATE_INFO_BREAKPOINTS:
-            ncom = strdup ( "server info breakpoints\n" );   
-            break;
-        case ANNOTATE_TTY:
-            {
-				struct ibuf *temp_tty_name = ibuf_init ();
-				ibuf_add ( temp_tty_name, data );
-                ncom = (char *)xmalloc( sizeof ( char ) * ( 13 + strlen( data )));
-                strcpy ( ncom, "server tty " );
-                strcat ( ncom, ibuf_get  (temp_tty_name ) );
-                strcat ( ncom, "\n" );
+      ibuf_free ( temp_tty_name );
+      temp_tty_name = NULL;
+      break;
+    }
+    case ANNOTATE_COMPLETE:
+      ncom = (char *)xmalloc( sizeof ( char ) * ( 18 + strlen( data )));
+      strcpy ( ncom, "server complete " );
+      strcat ( ncom, data );
+      strcat ( ncom, "\n" );
+      break;
+    case ANNOTATE_SET_PROMPT:
+      ncom = strdup ( data );   
+      break;
+    case ANNOTATE_VOID:
+    default: 
+      logger_write_pos ( logger, __FILE__, __LINE__, "switch error");
+      break;
+  };
 
-				ibuf_free ( temp_tty_name );
-				temp_tty_name = NULL;
-                break;
-            }
-        case ANNOTATE_COMPLETE:
-            ncom = (char *)xmalloc( sizeof ( char ) * ( 18 + strlen( data )));
-            strcpy ( ncom, "server complete " );
-            strcat ( ncom, data );
-            strcat ( ncom, "\n" );
-            break;
-        case ANNOTATE_SET_PROMPT:
-            ncom = strdup ( data );   
-            break;
-        case ANNOTATE_VOID:
-        default: 
-            logger_write_pos ( logger, __FILE__, __LINE__, "switch error");
-            break;
-    };
-
-    return ncom;
+  return ncom;
 }
 
 int commands_user_ran_command ( 

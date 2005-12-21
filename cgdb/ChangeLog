@@ -1,3 +1,8 @@
+12/20/2005 Bob Rossi <bob@brasko.net>
+
+	* src/cgdb.c (start_gdb): Query TGDB for the initial source location.
+	(does_request_require_console_update): Add case.
+
 11/26/2005 Bob Rossi <bob@brasko.net>
 
 	* src/cgdb.c (process_commands): Process new TGDB command.

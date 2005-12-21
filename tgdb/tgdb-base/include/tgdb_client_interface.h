@@ -391,6 +391,18 @@ int tgdb_client_get_absolute_path (
 		struct tgdb_client_context *tcc, 
 		const char *relative_path );
 
+/**
+ * Get's the current fullname, filename and line number that the debugger is 
+ * at.
+ *
+ * \param tcc
+ * The client context.
+ *
+ * @return
+ * 0 on success, otherwise -1 on error.
+ */
+int tgdb_client_get_current_location (struct tgdb_client_context *tcc);
+
 /** 
  * Gets all of the source files that the inferior is made of.
  *

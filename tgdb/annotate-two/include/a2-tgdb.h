@@ -75,6 +75,14 @@ enum annotate_commands {
     ANNOTATE_LIST,
 
 	/**
+ 	 * Get's the current fullname, filename and line number.
+	 * This is because the 'info line' command to GDB generates the source
+	 * annotation, which in turn causes the a2 subsystem to get the 
+	 * relative path.
+	 */
+    ANNOTATE_INFO_LINE,
+
+	/**
 	 * Sets the prompt.
 	 */
     ANNOTATE_SET_PROMPT
@@ -325,6 +333,17 @@ struct tgdb_list *a2_get_client_commands ( void *ctx );
 int a2_get_source_absolute_filename ( 
 		void *ctx, 
 		const char *file );
+
+/**
+ * Get's the fullname, filename and line number GDB is currently at.
+ *
+ * \param ctx
+ * The annotate two context.
+ *
+ * @return
+ * 0 on success, otherwise -1 on error.
+ */
+int a2_get_current_location (void *ctx);
 
 /** 
  * Gets all the source files that the inferior makes up.

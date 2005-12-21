@@ -227,6 +227,10 @@ extern "C"
      * TGDB_REQUEST_INFO_SOURCES command.
      */
     TGDB_REQUEST_ABSOLUTE_PATH,
+    /**
+     * This asks TGDB to determine the current fullname, filename and line 
+     * number that the debugger is currently at, in the inferior. */
+    TGDB_REQUEST_CURRENT_LOCATION,
     /** Run a debugger command (ie next, step, finish) */
     TGDB_REQUEST_DEBUGGER_COMMAND,
     /** Modify a breakpoint (ie delete/create/disable) */

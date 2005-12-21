@@ -68,23 +68,6 @@ enum internal_state data_get_state( struct data *d){
    return d->data_state;
 }
 
-/* 
- * If a source annotation has already been recieved, then this means that
- * the annotation subsystem does not have to figure out the initial file.
- */
-static int tgdb_initialize_annotation_state ( struct annotate_two *a2 ) {
-	if ( !a2->source_already_received ) {
-		a2_get_source_absolute_filename(a2, NULL);
-
-		if ( commands_issue_command ( a2->c, a2->client_command_list, ANNOTATE_INFO_SOURCE_RELATIVE, NULL, 0 ) == -1 ) {
-			logger_write_pos ( logger, __FILE__, __LINE__, "commands_issue_command error");
-			return -1;
-		}
-	}
-
-	return 0;
-}
-
 void data_set_state ( struct annotate_two *a2, enum internal_state state ) {
   /* if tgdb is at an internal command, than nothing changes that
    * state unless tgdb gets to the prompt annotation. This means that
@@ -99,11 +82,6 @@ void data_set_state ( struct annotate_two *a2, enum internal_state state ) {
       break;
     case AT_PROMPT:         
       a2->data->gdb_prompt_size = 0;
-
-      if ( !a2->first_prompt_reached ) {
-	tgdb_initialize_annotation_state ( a2 );
-	a2->first_prompt_reached = 1;	
-      }
       break;
     case USER_AT_PROMPT:    
       /* Null-Terminate the prompt */

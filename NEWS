@@ -1,3 +1,7 @@
+   * CGDB now supports getting the initial line, as well as the initial
+     file that GDB is on when it first starts the inferior. It used to only
+     determine the initial file.
+   
    * CGDB now supports when the terminal does not have control flow turned 
      on. If control flow (XON/XOFF) is off, the ^s and ^q will go directly
      to readline instead of freezing and restarting the terminal.

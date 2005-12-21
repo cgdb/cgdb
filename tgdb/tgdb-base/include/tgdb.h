@@ -350,13 +350,28 @@ extern "C"
    * An instance of the tgdb library to operate on.
    *
    * \param file
-   * The relative filename to get the absolute path of.
+   * The relative filename to get the absolute path of. If this is passed in as
+   * NULL, then this function will return NULL.
    *
    * \return
    * Will return as a tgdb request command on success, otherwise NULL.
    */
   tgdb_request_ptr tgdb_request_absolute_path (struct tgdb *tgdb, 
 					       const char *file);
+
+  /**
+   * This will ask the debugger for it's current file and line number.
+   * It will return to the caller a tgdb_response with the 
+   * response->update_source_files set. This is the same response you 
+   * will get when TGDB asynchronously sends the update_file_postition.
+   *
+   * \param tgdb
+   * An instance of the tgdb library to operate on.
+   *
+   * \return
+   * Will return as a tgdb request command on success, otherwise NULL.
+   */
+  tgdb_request_ptr tgdb_request_current_location (struct tgdb *tgdb);
 
   /**
    * This tells libtgdb to run a command through the debugger.

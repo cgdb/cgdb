@@ -1217,6 +1217,9 @@ tgdb_request_absolute_path (struct tgdb *tgdb, const char *file)
   if (!tgdb)
     return NULL;
 
+  if (!file)
+    return NULL;
+
   request_ptr = (tgdb_request_ptr)
     xmalloc (sizeof (struct tgdb_request));
   if (!request_ptr)
@@ -1231,6 +1234,23 @@ tgdb_request_absolute_path (struct tgdb *tgdb, const char *file)
     request_ptr->choice.absolute_path.file = NULL;
 
     
+  return request_ptr;
+}
+
+tgdb_request_ptr 
+tgdb_request_current_location (struct tgdb *tgdb)
+{
+  tgdb_request_ptr request_ptr;
+  if (!tgdb)
+    return NULL;
+
+  request_ptr = (tgdb_request_ptr)
+    xmalloc (sizeof (struct tgdb_request));
+  if (!request_ptr)
+    return NULL;
+
+  request_ptr->header = TGDB_REQUEST_CURRENT_LOCATION;
+
   return request_ptr;
 }
 
@@ -1353,6 +1373,23 @@ tgdb_process_absolute_path (struct tgdb *tgdb, tgdb_request_ptr request)
   return ret;
 }
 
+int 
+tgdb_process_current_location (struct tgdb *tgdb, tgdb_request_ptr request)
+{
+  int ret = 0;
+
+  if (!tgdb || !request)
+    return -1;
+
+  if (request->header != TGDB_REQUEST_CURRENT_LOCATION)
+    return -1;
+
+  ret = tgdb_client_get_current_location (tgdb->tcc);
+  tgdb_process_client_commands (tgdb);
+  
+  return ret;
+}
+
 int
 tgdb_process_debugger_command (struct tgdb *tgdb, tgdb_request_ptr request)
 {
@@ -1429,6 +1466,8 @@ tgdb_process_command (struct tgdb *tgdb, tgdb_request_ptr request)
     return tgdb_process_info_sources (tgdb, request);
   else if (request->header == TGDB_REQUEST_ABSOLUTE_PATH)
     return tgdb_process_absolute_path (tgdb, request);
+  else if (request->header == TGDB_REQUEST_CURRENT_LOCATION)
+    return tgdb_process_current_location (tgdb, request);
   else if (request->header == TGDB_REQUEST_DEBUGGER_COMMAND)
     return tgdb_process_debugger_command (tgdb, request);
   else if (request->header == TGDB_REQUEST_MODIFY_BREAKPOINT)

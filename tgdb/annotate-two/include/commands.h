@@ -129,14 +129,6 @@ void commands_send_gui_completions (
 		struct commands *c, 
 		struct tgdb_list *list);
 
-/* commands_send_source_absolute_source_file: This will send to the gui the 
- *             absolute path to the file being requested. Otherwise the gui
- *             will be notified that the file is not valid.
- */
-void commands_send_source_absolute_source_file (
-		struct commands *c, 
-		struct tgdb_list *list);
-
 /* The 3 functions below are for tgdb only.
  * These functions are responsible for keeping tgdb up to date with gdb.
  * If a particular piece of information is needed after each command the user

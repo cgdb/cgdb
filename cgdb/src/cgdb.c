@@ -457,7 +457,7 @@ static int create_help_file(void) {
  */
 static int 
 start_gdb(int argc, char *argv[]) {
-  //struct tgdb_request *request;
+  tgdb_request_ptr request_ptr;
   //int val;
 
   tgdb = tgdb_initialize(debugger_path, argc, argv, &gdb_fd, &tty_fd);
@@ -474,6 +474,9 @@ start_gdb(int argc, char *argv[]) {
   /**
    * Get the filename GDB defaults to. 
    */ 
+  request_ptr = tgdb_request_current_location (tgdb);
+  if (handle_request (tgdb, request_ptr) == -1)
+    return -1;
 
   return 0;
 }
@@ -702,6 +705,7 @@ does_request_require_console_update (struct tgdb_request *request, int *update)
 	break;
       case TGDB_REQUEST_INFO_SOURCES:
       case TGDB_REQUEST_ABSOLUTE_PATH:
+      case TGDB_REQUEST_CURRENT_LOCATION:
 	*update = 0;
 	break;
       case TGDB_REQUEST_DEBUGGER_COMMAND:

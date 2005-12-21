@@ -17,7 +17,16 @@ Bug fixes/improvement for cgdb-0.6.1
 
 Bug fixes/improvement for cgdb-0.6.0
 
+[ ] If GDB responds with a fullname in the file dialog, then when the file is 
+    selected, CGDB only knows about the fullname. When breakpoints are then set,
+    it doesn't work because the filename is absolute, and CGDB doesn't know the
+    relative component. This is a major bug.
+
 - TGDB interface changes
+ [ ] Modify TGDB to not automatically run commands. (ie. initial list command)
+     [x] The file and line discovery is now not done automatically. CGDB
+         requests this functionality after it creates the TGDB instance.
+
  [ ] Modify the tgdb_response data structure to incorporate into it
     the associated tgdb_request data structure. Make sure to remove
     the cgdb.c:last_request variable.

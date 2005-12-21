@@ -1,3 +1,37 @@
+12/20/2005 Bob Rossi <bob@brasko.net>
+
+	* annotate-two/include/a2-tgdb.h (annotate_commands): Add new command.
+	(a2_get_current_location): Add new prototype.
+	* annotate-two/include/annotate_two.h (struct annotate_two): Removed
+	first_prompt_reached field.
+	* annotate-two/include/commands.h
+	(commands_send_source_absolute_source_file): Remove prototype.
+	* annotate-two/src/a2-tgdb.c (initialize_annotate_two): Remove
+	a2->first_prompt_reached initialization.
+	(a2_get_current_location): Add implementation.
+	* annotate-two/src/annotate.c (handle_source): Add comment.
+	* annotate-two/src/commands.c
+	(commands_send_source_absolute_source_file): Remove unneeded code.
+	(commands_prepare_for_command): Add case.
+	(commands_create_command): Reformat. Add case.
+	* annotate-two/src/data.c (tgdb_initialize_annotation_state): Removed.
+	(data_set_state): No longer call removed function.
+	* tgdb-base/include/tgdb.h (tgdb_request_current_location): Add
+	new TGDB implementation.
+	* tgdb-base/include/tgdb_client_interface.h
+	(tgdb_client_get_current_location): Add prototype.
+	* tgdb-base/include/tgdb_types.h (INTERFACE_REQUEST_COMMANDS): Add new
+	request TGDB_REQUEST_CURRENT_LOCATION.
+	* tgdb-base/src/tgdb.c (tgdb_request_absolute_path): Do not allow
+	passing in NULL.
+	(tgdb_request_current_location): Add function.
+	(tgdb_process_current_location): Ditto.
+	(tgdb_process_modify_breakpoint): Add call to new function.
+	* tgdb-base/src/tgdb_client_interface.c (struct
+	tgdb_client_debugger_interfaces): Add new field.
+	(tgdb_client_debugger_interfaces): Init new field.
+	(tgdb_client_get_current_location): Add new function.
+
 12/15/2005 Bob Rossi <bob@brasko.net>
 
 	* annotate-two/src/commands.c (commands_shutdown): Free data.

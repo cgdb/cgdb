@@ -18,15 +18,22 @@
 #include "globals.h"
 #include "io.h"
 
-static int handle_source(struct annotate_two *a2, const char *buf,  size_t n, struct tgdb_list *list){
-   int ret = commands_parse_source(a2->c, a2->client_command_list, buf, n, list);
+static int 
+handle_source (struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list)
+{
+  int ret = commands_parse_source (a2->c, a2->client_command_list, buf, n, list);
 
-   /* This tells the annotate subsystem if the source annotation has been
-	* reached. This is important because if the source annotation has been 
-	* reached before tgdb is initialized, then the annotate subsystem doesn't
-	* have to probe gdb for the first file to open.
-	*/
+  /* This tells the annotate subsystem if the source annotation has been
+   * reached. This could be useful to the application using TGDB to determine if a single
+   * source annotation has been reached yet. If so, it doesn't have to probe TGDB for the
+   * initiale source file when GDB starts up. 
+   *
+   * As of 12/17/2005 it is no longer being used within TGDB. I moved the responsibilty of
+   * probing for the first file to the calling application. If the variable ends up being
+   * useless, it can be removed.
+   */
    a2->source_already_received = 1;
+
    return ret;
 }
 

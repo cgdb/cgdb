@@ -67,6 +67,8 @@ static struct tgdb_client_debugger_interfaces {
 			void *ctx, 
 			const char *relative_path );
 
+	int (*tgdb_client_get_current_location) (void *ctx);
+
 	int (*tgdb_client_get_inferior_source_files) ( 
 			void *ctx );
 
@@ -122,6 +124,8 @@ static struct tgdb_client_debugger_interfaces {
 		a2_get_client_commands,
 		/* tgdb_client_get_absolute_path */
 		a2_get_source_absolute_filename,
+		/* tgdb_client_get_current_location */
+		a2_get_current_location,
 		/* tgdb_client_get_inferior_source_files */
 		a2_get_inferior_sources,
 		/* tgdb_client_completion_callback */
@@ -163,6 +167,8 @@ static struct tgdb_client_debugger_interfaces {
 		gdbmi_get_client_commands,
 		/* tgdb_client_get_absolute_path */
 		NULL,
+		/* tgdb_client_get_current_location */
+		NULL,
 		/* tgdb_client_get_inferior_source_files */
 		NULL,
 		/* tgdb_client_completion_callback */
@@ -201,6 +207,8 @@ static struct tgdb_client_debugger_interfaces {
 		/* tgdb_client_parse_io */
 		NULL,
 		/* tgdb_client_get_absolute_path */
+		NULL,
+		/* tgdb_client_get_current_location */
 		NULL,
 		/* tgdb_client_get_inferior_source_files */
 		NULL,
@@ -406,6 +414,17 @@ int tgdb_client_get_absolute_path (
 	
 	return tcc->tgdb_client_interface->tgdb_client_get_absolute_path ( 
 			tcc->tgdb_debugger_context, relative_path );
+}
+
+int tgdb_client_get_current_location (struct tgdb_client_context *tcc)
+{
+  if (tcc == NULL || tcc->tgdb_client_interface == NULL)
+  {
+    logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_client_get_current_location unimplemented");
+    return -1;
+  }
+	
+  return tcc->tgdb_client_interface->tgdb_client_get_current_location (tcc->tgdb_debugger_context);
 }
 
 int tgdb_client_get_inferior_source_files ( struct tgdb_client_context *tcc ) {

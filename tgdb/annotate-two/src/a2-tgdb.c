@@ -151,7 +151,6 @@ static struct annotate_two *initialize_annotate_two ( void ) {
 	a2->config_dir[0] 		= '\0';
 	a2->a2_gdb_init_file[0] = '\0';
 
-	a2->first_prompt_reached    = 0;
 	a2->source_already_received = 0;
 
 	a2->cur_response_list = NULL;
@@ -337,6 +336,31 @@ int a2_get_source_absolute_filename (
     }
 
 	return 0;
+}
+
+int
+a2_get_current_location (void *ctx)
+{
+  struct annotate_two *a2 = (struct annotate_two *)ctx;
+  int ret;
+
+  ret = commands_issue_command (a2->c, a2->client_command_list, ANNOTATE_LIST,
+	                        NULL, 0);
+  if (ret == -1)
+  {
+    logger_write_pos ( logger, __FILE__, __LINE__, "commands_issue_command error");
+    return -1;
+  }
+
+  ret = commands_issue_command (a2->c, a2->client_command_list,
+				ANNOTATE_INFO_LINE, NULL, 0);
+  if (ret == -1)
+  {
+    logger_write_pos ( logger, __FILE__, __LINE__, "commands_issue_command error");
+    return -1;
+  }
+
+  return 0;
 }
 
 int a2_get_inferior_sources ( void *ctx) {

@@ -83,14 +83,6 @@ struct annotate_two {
 	 * This is a list of all the commands generated since in the last call. 
 	 */
 	struct tgdb_list *client_command_list;
-
-	/** 
-	 * This is to determine if the first annotation prompt has been reached
-	 * yet. If it hasn't been reached, this should be zero. Otherwise one.
-	 * Its used with the variable below to determine if the annotate 
-	 * subsystem needs to probe gdb for the initial file to display.
-	 */
-	int first_prompt_reached;
 	
 	/** 
 	 * This is used to show if the source annotation has been recieved yet.
