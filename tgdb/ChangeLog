@@ -1,3 +1,46 @@
+12/22/2005 Bob Rossi <bob@brasko.net>
+
+	* annotate-two/include/a2-tgdb.h (annotate_commands): Renamed
+	enumeration value.
+	(a2_get_source_absolute_filename): Renamed to
+	a2_get_source_filename_pair.
+	* annotate-two/include/commands.h (COMMAND_STATE): Renamed enumeration
+	value.
+	* annotate-two/src/a2-tgdb.c (a2_get_source_absolute_filename):
+	Renamed to a2_get_source_filename_pair. Reindented.
+	* annotate-two/src/commands.c (commands_set_state): Changed case
+	statement.
+	(commands_prepare_info_source): Ditto.
+	(commands_send_source_absolute_source_file): Send relative and
+	absolute now.
+	(commands_process): Ditto.
+	(commands_finalize_command): Ditto.
+	(commands_prepare_for_command): Ditto.
+	(commands_create_command): Ditto.
+	* tgdb-base/include/tgdb.h (tgdb_request_absolute_path): Renamed to
+	tgdb_request_filename_pair.
+	* tgdb-base/include/tgdb_client_interface.h
+	(tgdb_client_get_absolute_path): Renamed to
+	tgdb_client_get_filename_pair. Changed parameter name.
+	* tgdb-base/include/tgdb_types.h (INTERFACE_REQUEST_COMMANDS): Changed
+	enumeration.
+	(struct tgdb_request): Modified for new enumeration.
+	(INTERFACE_RESPONSE_COMMANDS): Change response because of request
+	change.
+	(struct tgdb_response): Modified for new enumeration.
+	* tgdb-base/src/tgdb.c (tgdb_request_destroy): Destroy modified request.
+	(tgdb_request_absolute_path): Renamed to tgdb_request_filename_pair.
+	(tgdb_process_absolute_path): Ditto.
+	(tgdb_process_command): Call renamed function.
+	* tgdb-base/src/tgdb_client_interface.c (struct
+	tgdb_client_debugger_interfaces): Renamed field.
+	(tgdb_client_debugger_interfaces): Init modified field.
+	(tgdb_client_get_absolute_path): Rename to
+	tgdb_client_get_filename_pair. Rename parameter.
+	* tgdb-base/src/tgdb_types.c (tgdb_types_print_item): Update for new
+	request/response.
+	(tgdb_types_delete_item): Delete response properly.
+
 12/21/2005 Bob Rossi <bob@brasko.net>
 	* annotate-two/src/commands.c (struct commands): Added
 	info_source_relative_path, info_source_absolute_path fields.

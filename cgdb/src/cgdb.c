@@ -99,8 +99,6 @@ struct kui_manager *kui_ctx = NULL; /* The key input package */
 
 int resize_pipe[2] = { -1, -1 };
 
-char last_relative_file[MAX_LINE];
-
 /* Readline interface */
 static struct rline *rline;
 static int is_tab_completing = 0;
@@ -621,11 +619,12 @@ process_commands(struct tgdb *tgdb)
 	break;
 
       /* This is the absolute path to the last file the user requested */
-      case TGDB_ABSOLUTE_SOURCE_ACCEPTED:
+      case TGDB_FILENAME_PAIR:
       {
-	struct tgdb_source_file *file = item->choice.absolute_source_accepted.source_file;
-	if_show_file( file->absolute_path, 1);
-	source_set_relative_path(if_get_sview(), file->absolute_path, last_relative_file);
+	const char *apath = item->choice.filename_pair.absolute_path;
+	const char *rpath = item->choice.filename_pair.relative_path;
+	if_show_file ((char*)apath, 1);
+	source_set_relative_path(if_get_sview(), apath, rpath);
 	break;
       }
 
@@ -704,7 +703,7 @@ does_request_require_console_update (struct tgdb_request *request, int *update)
         *update = 1;
 	break;
       case TGDB_REQUEST_INFO_SOURCES:
-      case TGDB_REQUEST_ABSOLUTE_PATH:
+      case TGDB_REQUEST_FILENAME_PAIR:
       case TGDB_REQUEST_CURRENT_LOCATION:
 	*update = 0;
 	break;

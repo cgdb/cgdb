@@ -222,11 +222,11 @@ extern "C"
      * currently knows about the inferior. */
     TGDB_REQUEST_INFO_SOURCES,
     /**
-     * Request the absolute path from the debugger given a relative path.
-     * The relative path must have been returned by the 
-     * TGDB_REQUEST_INFO_SOURCES command.
+     * Request the absolute and relative path from the debugger given a path.
+     * This path being used to get the pair should have been returned by the 
+     * tgdb_request_inferiors_source_files command.
      */
-    TGDB_REQUEST_ABSOLUTE_PATH,
+    TGDB_REQUEST_FILENAME_PAIR,
     /**
      * This asks TGDB to determine the current fullname, filename and line 
      * number that the debugger is currently at, in the inferior. */
@@ -253,9 +253,8 @@ extern "C"
       } info_sources;
 
       struct {
-	/** The relative filename to get the absolute path of */
 	const char *file;
-      } absolute_path;
+      } filename_pair;
 
       struct {
 	/** This is the command that libtgdb should run through the debugger */
@@ -311,10 +310,10 @@ extern "C"
     TGDB_SOURCES_DENIED,
 
     /** 
-     * This is a response to the function call tgdb_get_source_absolute_filename.
-     * It returns the absolute path to the relative path asked for.
+     * This is a response to the function call tgdb_get_filename_pair.
+     * It returns the absolute and relative path to the source file requested.
      */
-    TGDB_ABSOLUTE_SOURCE_ACCEPTED,
+    TGDB_FILENAME_PAIR,
 
     /** 
      * This is a response to the function call tgdb_get_source_absolute_filename.
@@ -387,10 +386,17 @@ extern "C"
       struct {
       } sources_denied;
       
-      /* header == TGDB_ABSOLUTE_SOURCE_ACCEPTED */
+      /* header == TGDB_FILENAME_PAIR */
       struct {
-        struct tgdb_source_file *source_file;
-      } absolute_source_accepted;
+        /** 
+	 * If either of these are NULL, the data could not be retrieved from
+	 * the debugger. */
+	  
+	/** The absolute path to the file being looked for */
+	const char *absolute_path;
+	/** The relative path to the file being looked for */
+	const char *relative_path;
+      } filename_pair;
 
       /* header == TGDB_ABSOLUTE_SOURCE_DENIED */
       struct {

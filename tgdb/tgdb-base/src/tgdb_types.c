@@ -100,12 +100,12 @@ tgdb_types_print_item (void *command)
     case TGDB_SOURCES_DENIED:
       fprintf (fd, "TGDB_SOURCES_DENIED\n");
       break;
-    case TGDB_ABSOLUTE_SOURCE_ACCEPTED:
+    case TGDB_FILENAME_PAIR:
       {
-	struct tgdb_source_file *file =
-	  com->choice.absolute_source_accepted.source_file;
-	fprintf (fd, "TGDB_ABSOLUTE_SOURCE_ACCEPTED(%s)\n",
-		 file->absolute_path);
+	const char *apath = com->choice.filename_pair.absolute_path;
+	const char *rpath = com->choice.filename_pair.relative_path;
+	fprintf (fd, "TGDB_ABSOLUTE_SOURCE_ACCEPTED ABSOLUTE(%s) RELATIVE(%s)\n",
+		 apath, rpath);
 	break;
       }
     case TGDB_ABSOLUTE_SOURCE_DENIED:
@@ -219,13 +219,12 @@ tgdb_types_delete_item (void *command)
     case TGDB_SOURCES_DENIED:
       /* Nothing to do */
       break;
-    case TGDB_ABSOLUTE_SOURCE_ACCEPTED:
+    case TGDB_FILENAME_PAIR:
       {
-	struct tgdb_source_file *file = com->choice.absolute_source_accepted.source_file;
-	free (file->absolute_path);
-	file->absolute_path = NULL;
-	free (file);
-	file = NULL;
+	free ((char*)com->choice.filename_pair.absolute_path);
+	com->choice.filename_pair.absolute_path = NULL;
+	free ((char*)com->choice.filename_pair.relative_path);
+	com->choice.filename_pair.relative_path = NULL;
 	break;
       }
     case TGDB_ABSOLUTE_SOURCE_DENIED:

@@ -372,24 +372,20 @@ struct tgdb_list *tgdb_client_get_client_commands (
 //@{
 
 /** 
- * Gets the absolute path of a relative path outputted by a debugger.
+ * Get's the absolute and relative path that relates to the path PATH.
  *  
  * \param tcc
  * The client context.
  *
- * \param relative_path
- * The path that the debugger outputted. ( Usually relative ).
+ * \param path
+ * The path that the debugger outputted. (relative or absolute)
  *
  * @return
  * 0 on success, otherwise -1 on error.
- *
- * \pre
- * If relative_path is absolute ( not relative ), then this function should not
- * be called.
  */
-int tgdb_client_get_absolute_path ( 
+int tgdb_client_get_filename_pair ( 
 		struct tgdb_client_context *tcc, 
-		const char *relative_path );
+		const char *path );
 
 /**
  * Get's the current fullname, filename and line number that the debugger is 

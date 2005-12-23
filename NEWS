@@ -1,3 +1,10 @@
+   * Fix a bug regarding the CGDB source viewer displaying breakpoints. If you
+     used the file dialog to open a file, and the file was an absolute 
+     path, CGDB would display the file. If it was the first time CGDB 
+     encountered this file, then when you set a breakpoint, CGDB would not
+     display the line as having a breakpoint in the source window, even though 
+     the breakpoint was actually being set. This is now fixed.
+   
    * CGDB now supports getting the initial line, as well as the initial
      file that GDB is on when it first starts the inferior. It used to only
      determine the initial file.

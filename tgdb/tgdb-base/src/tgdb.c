@@ -556,9 +556,9 @@ tgdb_request_destroy (void *item)
       break;
     case TGDB_REQUEST_INFO_SOURCES:
       break;
-    case TGDB_REQUEST_ABSOLUTE_PATH:
-      free ((char*)request_ptr->choice.absolute_path.file);
-      request_ptr->choice.absolute_path.file = NULL;
+    case TGDB_REQUEST_FILENAME_PAIR:
+      free ((char*)request_ptr->choice.filename_pair.file);
+      request_ptr->choice.filename_pair.file = NULL;
       break;
     case TGDB_REQUEST_DEBUGGER_COMMAND:
       break;
@@ -1211,7 +1211,7 @@ tgdb_request_inferiors_source_files (struct tgdb *tgdb)
 }
 
 tgdb_request_ptr
-tgdb_request_absolute_path (struct tgdb *tgdb, const char *file)
+tgdb_request_filename_pair (struct tgdb *tgdb, const char *file)
 {
   tgdb_request_ptr request_ptr;
   if (!tgdb)
@@ -1225,13 +1225,13 @@ tgdb_request_absolute_path (struct tgdb *tgdb, const char *file)
   if (!request_ptr)
     return NULL;
 
-  request_ptr->header = TGDB_REQUEST_ABSOLUTE_PATH;
+  request_ptr->header = TGDB_REQUEST_FILENAME_PAIR;
 
   if (file) {
-    request_ptr->choice.absolute_path.file = (const char *)
+    request_ptr->choice.filename_pair.file = (const char *)
       xstrdup (file);
   } else
-    request_ptr->choice.absolute_path.file = NULL;
+    request_ptr->choice.filename_pair.file = NULL;
 
     
   return request_ptr;
@@ -1357,17 +1357,17 @@ tgdb_process_info_sources (struct tgdb *tgdb, tgdb_request_ptr request)
 }
 
 int
-tgdb_process_absolute_path (struct tgdb *tgdb, tgdb_request_ptr request)
+tgdb_process_filename_pair (struct tgdb *tgdb, tgdb_request_ptr request)
 {
   int ret;
 
   if (!tgdb || !request)
     return -1;
 
-  if (request->header != TGDB_REQUEST_ABSOLUTE_PATH)
+  if (request->header != TGDB_REQUEST_FILENAME_PAIR)
     return -1;
 
-  ret = tgdb_client_get_absolute_path (tgdb->tcc, request->choice.absolute_path.file);
+  ret = tgdb_client_get_filename_pair (tgdb->tcc, request->choice.filename_pair.file);
   tgdb_process_client_commands (tgdb);
 
   return ret;
@@ -1464,8 +1464,8 @@ tgdb_process_command (struct tgdb *tgdb, tgdb_request_ptr request)
     return tgdb_process_console_command (tgdb, request);
   else if (request->header == TGDB_REQUEST_INFO_SOURCES)
     return tgdb_process_info_sources (tgdb, request);
-  else if (request->header == TGDB_REQUEST_ABSOLUTE_PATH)
-    return tgdb_process_absolute_path (tgdb, request);
+  else if (request->header == TGDB_REQUEST_FILENAME_PAIR)
+    return tgdb_process_filename_pair (tgdb, request);
   else if (request->header == TGDB_REQUEST_CURRENT_LOCATION)
     return tgdb_process_current_location (tgdb, request);
   else if (request->header == TGDB_REQUEST_DEBUGGER_COMMAND)

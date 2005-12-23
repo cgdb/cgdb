@@ -62,7 +62,7 @@ enum annotate_commands {
 	/**
 	 * absolute source path.
 	 */
-    ANNOTATE_INFO_SOURCE_ABSOLUTE,
+    ANNOTATE_INFO_SOURCE_FILENAME_PAIR,
 
 	/**
  	 * Shows information on the current source file
@@ -330,7 +330,7 @@ struct tgdb_list *a2_get_client_commands ( void *ctx );
  * @return
  * 0 on success, otherwise -1 on error.
  */
-int a2_get_source_absolute_filename ( 
+int a2_get_source_filename_pair ( 
 		void *ctx, 
 		const char *file );
 

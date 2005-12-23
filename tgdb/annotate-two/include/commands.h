@@ -25,7 +25,7 @@ enum COMMAND_STATE {
 
    /* Related to the 'info source' command */
    INFO_LIST,
-   INFO_SOURCE_ABSOLUTE,
+   INFO_SOURCE_FILENAME_PAIR,
    INFO_SOURCE_RELATIVE
 };
 

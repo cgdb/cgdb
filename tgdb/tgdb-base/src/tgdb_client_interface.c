@@ -63,9 +63,9 @@ static struct tgdb_client_debugger_interfaces {
 	struct tgdb_list *(*tgdb_client_get_client_commands) ( 
 			void *ctx );
 
-	int (*tgdb_client_get_absolute_path) ( 
+	int (*tgdb_client_get_filename_pair) ( 
 			void *ctx, 
-			const char *relative_path );
+			const char *path );
 
 	int (*tgdb_client_get_current_location) (void *ctx);
 
@@ -122,8 +122,8 @@ static struct tgdb_client_debugger_interfaces {
 		a2_parse_io,
 		/* tgdb_client_get_client_commands */
 		a2_get_client_commands,
-		/* tgdb_client_get_absolute_path */
-		a2_get_source_absolute_filename,
+		/* tgdb_client_get_filename_pair */
+		a2_get_source_filename_pair,
 		/* tgdb_client_get_current_location */
 		a2_get_current_location,
 		/* tgdb_client_get_inferior_source_files */
@@ -165,7 +165,7 @@ static struct tgdb_client_debugger_interfaces {
 		gdbmi_parse_io,
 		/* tgdb_client_get_client_commands */
 		gdbmi_get_client_commands,
-		/* tgdb_client_get_absolute_path */
+		/* tgdb_client_get_filename_pair */
 		NULL,
 		/* tgdb_client_get_current_location */
 		NULL,
@@ -206,7 +206,7 @@ static struct tgdb_client_debugger_interfaces {
 		NULL,
 		/* tgdb_client_parse_io */
 		NULL,
-		/* tgdb_client_get_absolute_path */
+		/* tgdb_client_get_filename_pair */
 		NULL,
 		/* tgdb_client_get_current_location */
 		NULL,
@@ -404,16 +404,16 @@ struct tgdb_list *tgdb_client_get_client_commands (
 			tcc->tgdb_debugger_context );
 }
 
-int tgdb_client_get_absolute_path ( 
+int tgdb_client_get_filename_pair ( 
 		struct tgdb_client_context *tcc, 
-		const char *relative_path ) {
+		const char *path ) {
 	if ( tcc == NULL || tcc->tgdb_client_interface == NULL ) {
 		logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_client_get_absolute_path unimplemented");
 		return -1;
 	}
 	
-	return tcc->tgdb_client_interface->tgdb_client_get_absolute_path ( 
-			tcc->tgdb_debugger_context, relative_path );
+	return tcc->tgdb_client_interface->tgdb_client_get_filename_pair ( 
+			tcc->tgdb_debugger_context, path );
 }
 
 int tgdb_client_get_current_location (struct tgdb_client_context *tcc)

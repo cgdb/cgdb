@@ -513,7 +513,7 @@ void commands_set_state(
             c->breakpoint_table = 1; 
             c->breakpoint_started = TRUE;
             break;
-        case INFO_SOURCE_ABSOLUTE:
+        case INFO_SOURCE_FILENAME_PAIR:
             break;
         case INFO_SOURCE_RELATIVE:
             break;
@@ -545,8 +545,8 @@ commands_prepare_info_source (struct annotate_two *a2, struct commands *c, enum 
   ibuf_clear (c->info_source_relative_path);
   ibuf_clear (c->info_source_absolute_path);
    
-  if (state == INFO_SOURCE_ABSOLUTE)
-    commands_set_state (c, INFO_SOURCE_ABSOLUTE, NULL);
+  if (state == INFO_SOURCE_FILENAME_PAIR)
+    commands_set_state (c, INFO_SOURCE_FILENAME_PAIR, NULL);
    else if (state == INFO_SOURCE_RELATIVE)
     commands_set_state (c, INFO_SOURCE_RELATIVE, NULL);
 
@@ -588,15 +588,17 @@ commands_send_source_absolute_source_file (struct commands *c,
   /* found */
   if (length > 0)
   {
-    char *path = ibuf_get (c->info_source_absolute_path);
+    char *apath = NULL, *rpath = NULL;
+    if (length > 0)
+      apath = ibuf_get (c->info_source_absolute_path);
+    if (ibuf_length (c->info_source_relative_path) > 0)
+      rpath = ibuf_get (c->info_source_relative_path);
 
-    struct tgdb_source_file *tsf = (struct tgdb_source_file *)
-      xmalloc ( sizeof ( struct tgdb_source_file ) );
-    tsf->absolute_path = strdup (path);
     struct tgdb_response *response = (struct tgdb_response *)
       xmalloc (sizeof (struct tgdb_response));
-    response->header = TGDB_ABSOLUTE_SOURCE_ACCEPTED;
-    response->choice.absolute_source_accepted.source_file = tsf;
+    response->header = TGDB_FILENAME_PAIR;
+    response->choice.filename_pair.absolute_path = strdup (apath);
+    response->choice.filename_pair.relative_path = strdup (rpath);
     tgdb_types_append_command(list, response);
   /* not found */
   } else {
@@ -799,7 +801,7 @@ void commands_process ( struct commands *c, char a, struct tgdb_list *list){
         commands_process_complete(c, a);     
     } else if(commands_get_state(c) == INFO_LIST){
         /* do nothing with data */
-    } else if(commands_get_state(c) == INFO_SOURCE_ABSOLUTE 
+    } else if(commands_get_state(c) == INFO_SOURCE_FILENAME_PAIR 
             ||commands_get_state(c) == INFO_SOURCE_RELATIVE){
         commands_process_info_source(c, list, a);   
     } else if(c->breakpoint_table && c->cur_command_state == FIELD && c->cur_field_num == 5){ /* the file name and line num */ 
@@ -870,7 +872,7 @@ commands_finalize_command (
 {
   switch ( commands_get_state (c) ) {
     case INFO_SOURCE_RELATIVE:
-    case INFO_SOURCE_ABSOLUTE:
+    case INFO_SOURCE_FILENAME_PAIR:
       if ( c->info_source_ready == 0 ) {
 	struct tgdb_source_file *rejected = (struct tgdb_source_file *)
 	  xmalloc ( sizeof ( struct tgdb_source_file ) );
@@ -887,7 +889,7 @@ commands_finalize_command (
       } else {
 	if (commands_get_state (c) == INFO_SOURCE_RELATIVE)
 	  commands_send_source_relative_source_file (c, list);
-	else if (commands_get_state (c) == INFO_SOURCE_ABSOLUTE)
+	else if (commands_get_state (c) == INFO_SOURCE_FILENAME_PAIR)
 	  commands_send_source_absolute_source_file (c, list);
       }
       break;
@@ -931,8 +933,8 @@ int commands_prepare_for_command (
         case ANNOTATE_INFO_SOURCE_RELATIVE:
             commands_prepare_info_source ( a2, c, INFO_SOURCE_RELATIVE );
             break;
-        case ANNOTATE_INFO_SOURCE_ABSOLUTE:
-            commands_prepare_info_source ( a2, c, INFO_SOURCE_ABSOLUTE );
+        case ANNOTATE_INFO_SOURCE_FILENAME_PAIR:
+            commands_prepare_info_source ( a2, c, INFO_SOURCE_FILENAME_PAIR);
             break;
         case ANNOTATE_INFO_BREAKPOINTS:
             commands_prepare_info_breakpoints (c);
@@ -1026,9 +1028,7 @@ commands_create_command (struct commands *c, enum annotate_commands com,
       ncom = strdup ( "server info line\n" );   
       break;
     case ANNOTATE_INFO_SOURCE_RELATIVE:                         
-      ncom = strdup ( "server info source\n" );   
-      break;
-    case ANNOTATE_INFO_SOURCE_ABSOLUTE:                         
+    case ANNOTATE_INFO_SOURCE_FILENAME_PAIR:                         
       ncom = strdup ( "server info source\n" );   
       break;
     case ANNOTATE_INFO_BREAKPOINTS:

@@ -339,9 +339,14 @@ extern "C"
   tgdb_request_ptr tgdb_request_inferiors_source_files (struct tgdb *tgdb);
 
   /**
-   * This gets the absolute path from FILE. FILE must have been returned
-   * from libtgdb as a relative path. libtgdb has a mechanism for getting the
-   * absolute path from the debugger given the relative path.
+   * This gets the absolute path and the relative path from the given file, 
+   * FILE. The file parameter should have been returned by 
+   * tgdb_request_inferiors_source_files. It can return both relative and 
+   * absolute filenames.
+   *
+   * Basically, if the parameter file is a relative path OR an absolute path, 
+   * both the relative path and the absolute path will be returned in the 
+   * response.
    *
    * If this functions succeeds TGDB_ABSOLUTE_SOURCE_ACCEPTED will be returned.
    * Otherwise, TGDB_ABSOLUTE_SOURCE_DENIED gets returned.
@@ -356,7 +361,7 @@ extern "C"
    * \return
    * Will return as a tgdb request command on success, otherwise NULL.
    */
-  tgdb_request_ptr tgdb_request_absolute_path (struct tgdb *tgdb, 
+  tgdb_request_ptr tgdb_request_filename_pair (struct tgdb *tgdb, 
 					       const char *file);
 
   /**

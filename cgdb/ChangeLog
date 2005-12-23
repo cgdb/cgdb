@@ -1,3 +1,12 @@
+12/22/2005 Bob Rossi <bob@brasko.net>
+
+	* src/cgdb.c (last_relative_file): Removed global.
+	(process_commands): Add TGDB_FILENAME_PAIR case.
+	Remove TGDB_ABSOLUTE_SOURCE_ACCEPTED case.
+	(does_request_require_console_update): Modify cases.
+	* src/interfac.c (internal_if_input): Removed last_relative_file
+	extern. Update to TGDB's new interface.
+
 12/20/2005 Bob Rossi <bob@brasko.net>
 
 	* src/cgdb.c (start_gdb): Query TGDB for the initial source location.

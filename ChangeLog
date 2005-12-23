@@ -1,5 +1,9 @@
 12/20/2005 Bob Rossi <bob@brasko.net>
 
+	* NEWS: Fixed a CGDB bug.
+
+12/20/2005 Bob Rossi <bob@brasko.net>
+
 	* NEWS: Add note about initial file and line discovery.
 	* RELEASE_TODO: Update.
 
