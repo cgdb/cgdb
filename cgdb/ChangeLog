@@ -1,3 +1,8 @@
+12/25/2005 Bob Rossi <bob@brasko.net>
+
+	* src/cgdb.c (gdb_input): TGDB changed tgdb_recv_debugger_console_data 
+	to gdb_process.
+
 12/22/2005 Bob Rossi <bob@brasko.net>
 
 	* src/cgdb.c (last_relative_file): Removed global.

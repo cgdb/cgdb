@@ -207,7 +207,7 @@ static int gdb_input(void) {
     size_t i;
     struct tgdb_response *item;
 
-    if( (size = tgdb_recv_debugger_console_data (tgdb, buf, MAXLINE)) == -1){
+    if( (size = tgdb_process (tgdb, buf, MAXLINE)) == -1){
         logger_write_pos ( logger, __FILE__, __LINE__, "file descriptor closed");
         return -1;
     } /* end if */

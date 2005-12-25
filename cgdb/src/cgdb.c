@@ -730,7 +730,7 @@ gdb_input()
   int size;
 
   /* Read from GDB */
-  size = tgdb_recv_debugger_console_data (tgdb, buf, GDB_MAXBUF);
+  size = tgdb_process (tgdb, buf, GDB_MAXBUF);
   if (size == -1){
     logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_recv_debugger_data error");
     free( buf );

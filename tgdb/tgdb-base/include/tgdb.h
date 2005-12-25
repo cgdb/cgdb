@@ -151,7 +151,12 @@ extern "C"
   int tgdb_process_command (struct tgdb *tgdb, tgdb_request_ptr request);
   
   /**
-   * Gets output from the debugger.
+   * This function does most of the dirty work in TGDB. It is capable of 
+   * processing the output of the debugger, to either satisfy a previously 
+   * made request, or to simply get console output for the caller to have.
+   *
+   * The data returned from this function is the console output of the 
+   * debugger.
    * 
    * \param tgdb
    * An instance of the tgdb library to operate on.
@@ -166,8 +171,7 @@ extern "C"
    * @return
    * The number of valid bytes in BUF on success, or -1 on error.
    */
-  size_t tgdb_recv_debugger_console_data (struct tgdb *tgdb, char *buf,
-					  size_t n);
+  size_t tgdb_process (struct tgdb *tgdb, char *buf, size_t n);
 
   /**
    * This sends a byte of data to the program being debugged.

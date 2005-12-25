@@ -1,5 +1,12 @@
 12/25/2005 Bob Rossi <bob@brasko.net>
 
+	* tgdb-base/include/tgdb.h: TGDB changed tgdb_recv_debugger_console_data 
+	to gdb_process.
+	* tgdb-base/src/tgdb.c: Ditto.
+	* tgdb-base/src/driver.c (gdb_input): Ditto.
+
+12/25/2005 Bob Rossi <bob@brasko.net>
+
 	* tgdb-base/src/tgdb.c (struct tgdb): Removed
 	tgdb_partially_run_command field.
 	(initialize_tgdb_context): Removed init of tgdb_partially_run_command.
