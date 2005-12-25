@@ -1,3 +1,9 @@
+12/25/2005 Bob Rossi <bob@brasko.net>
+
+	* tgdb-base/src/tgdb.c (struct tgdb): Removed
+	tgdb_partially_run_command field.
+	(initialize_tgdb_context): Removed init of tgdb_partially_run_command.
+
 12/22/2005 Bob Rossi <bob@brasko.net>
 
 	* annotate-two/include/a2-tgdb.h (annotate_commands): Renamed

@@ -84,11 +84,6 @@ struct tgdb
    */
   struct queue *oob_input_queue;
 
-  /** 
-   * This variable needs to be removed from libannotate 
-   * I don't really know if its usefull anymore.  */
-  unsigned short tgdb_partially_run_command;
-
   /** These are 2 very important state variables.  */
 
   /**
@@ -239,8 +234,6 @@ initialize_tgdb_context (void)
   tgdb->gdb_client_request_queue = NULL;
   tgdb->gdb_input_queue = NULL;
   tgdb->oob_input_queue = NULL;
-
-  tgdb->tgdb_partially_run_command = 0;
 
   tgdb->IS_SUBSYSTEM_READY_FOR_NEXT_COMMAND = 1;
 

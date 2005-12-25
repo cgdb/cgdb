@@ -21,6 +21,11 @@ Bug fixes/improvement for cgdb-0.6.0
  [ ] Modify TGDB to not automatically run commands. (ie. initial list command)
      [x] The file and line discovery is now not done automatically. CGDB
          requests this functionality after it creates the TGDB instance.
+     [ ] The 'info breakpoints' is automatically done for the client. This could
+         either be a request that is done each time, a request that's done once for
+	 asychronous updates.
+     [ ] The asynchronous source updates. This could be done with the same 
+         techniques as above.
 
  [ ] Modify the tgdb_response data structure to incorporate into it
     the associated tgdb_request data structure. Make sure to remove
