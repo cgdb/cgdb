@@ -1,0 +1,8 @@
+12/27/2005 Bob Rossi <bob@brasko.net>
+
+	* Makefile.am: Added.
+	* Makefile.in: Ditto.
+	* cgdb.texinfo: Ditto.
+	* fdl.texi: Ditto.
+	* gpl.texi: Ditto.
+
