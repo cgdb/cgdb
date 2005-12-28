@@ -11,11 +11,11 @@ Bug fixes/improvement for cgdb-0.6.1
 
 - Use valgrind to get rid of most memory leaks.
 
+Bug fixes/improvement for cgdb-0.6.0
+
 - Add documentation to CGDB. I think texinfo is the prefered way to do this,
   it generates info and html pages. For man pages, looking at help2man might
   be a good idea. Ben is willing to help with this.
-
-Bug fixes/improvement for cgdb-0.6.0
 
 - TGDB interface changes
  [ ] Modify TGDB to not automatically run commands. (ie. initial list command)
