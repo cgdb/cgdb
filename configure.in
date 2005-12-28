@@ -183,7 +183,7 @@ tgdb/Makefile \
 tgdb/annotate-two/Makefile tgdb/annotate-two/src/Makefile \
 tgdb/gdbmi/Makefile tgdb/gdbmi/src/Makefile \
 tgdb/tgdb-base/Makefile tgdb/tgdb-base/src/Makefile \
-cgdb/Makefile cgdb/src/Makefile \
+doc/Makefile cgdb/Makefile cgdb/src/Makefile \
 cgdb/lib/Makefile cgdb/lib/kui/Makefile cgdb/lib/kui/src/Makefile \
 cgdb/lib/wm/Makefile cgdb/lib/wm/src/Makefile \
 cgdb/tokenizer/Makefile cgdb/tokenizer/src/Makefile)
