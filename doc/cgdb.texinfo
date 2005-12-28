@@ -1,8 +1,10 @@
 \input texinfo   @c -*-texinfo-*-
 @c %**start of header
 @setfilename sample.info
-@settitle Sample Manual 1.0
+@settitle CGDB Manual @value{VERSION}
 @c %**end of header
+
+@include version.texi
 
 @copying
 This is a short example of a complete Texinfo file.
