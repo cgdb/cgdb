@@ -138,7 +138,7 @@ CONFIG_CLEAN_FILES =
 DIST_SOURCES =
 TEXINFO_TEX = $(top_srcdir)/config/texinfo.tex
 am__TEXINFO_TEX_DIR = $(top_srcdir)/config
-INFO_DEPS = sample.info
+INFO_DEPS = cgdb.info
 DVIS = cgdb.dvi
 PDFS = cgdb.pdf
 PSS = cgdb.ps
@@ -169,9 +169,9 @@ Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.s
 	TEXINPUTS="$(am__TEXINFO_TEX_DIR)$(PATH_SEPARATOR)$$TEXINPUTS" \
 	MAKEINFO='$(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) -I $(srcdir)' \
 	$(TEXI2PDF) `test -f '$<' || echo '$(srcdir)/'`$<
-sample.info: cgdb.texinfo version.texi $(cgdb_TEXINFOS)
-sample.dvi: cgdb.texinfo version.texi $(cgdb_TEXINFOS)
-sample.pdf: cgdb.texinfo version.texi $(cgdb_TEXINFOS)
+cgdb.info: cgdb.texinfo version.texi $(cgdb_TEXINFOS)
+cgdb.dvi: cgdb.texinfo version.texi $(cgdb_TEXINFOS)
+cgdb.pdf: cgdb.texinfo version.texi $(cgdb_TEXINFOS)
 version.texi: @MAINTAINER_MODE_TRUE@ stamp-vti
 stamp-vti: cgdb.texinfo $(top_srcdir)/configure
 	@(dir=.; test -f ./cgdb.texinfo || dir=$(srcdir); \
@@ -233,8 +233,8 @@ dist-info: $(INFO_DEPS)
 
 mostlyclean-aminfo:
 	-rm -f cgdb.aux cgdb.cp cgdb.cps cgdb.fn cgdb.fns cgdb.ky cgdb.kys cgdb.log \
-	  cgdb.pg cgdb.pgs cgdb.tmp cgdb.toc cgdb.tp cgdb.tps cgdb.vr \
-	  cgdb.vrs sample.dvi sample.pdf sample.ps
+	  cgdb.pg cgdb.tmp cgdb.toc cgdb.tp cgdb.tps cgdb.vr cgdb.vrs \
+	  cgdb.dvi cgdb.pdf cgdb.ps
 
 maintainer-clean-aminfo:
 	@list='$(INFO_DEPS)'; for i in $$list; do \
