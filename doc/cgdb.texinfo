@@ -1,25 +1,47 @@
 \input texinfo   @c -*-texinfo-*-
-@c %**start of header
-@setfilename sample.info
-@settitle CGDB Manual @value{VERSION}
-@c %**end of header
-
+@comment $Id$
+@comment %**start of header
+@setfilename cgdb.info
 @include version.texi
-
+@settitle CGDB Manual @value{VERSION}
+@syncodeindex pg cp
+@comment %**end of header
 @copying
-This is a short example of a complete Texinfo file.
+This manual is for GNU Sample
+(version @value{VERSION}, @value{UPDATED}),
+which is an example in the Texinfo documentation.
 
-Copyright (C) 2004 Free Software Foundation, Inc.
+Copyright @copyright{} 2004 Free Software Foundation, Inc.
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.1 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with the Front-Cover Texts being ``A GNU Manual,''
+and with the Back-Cover Texts as in (a) below.  A copy of the
+license is included in the section entitled ``GNU Free Documentation
+License.''
+
+(a) The FSF's Back-Cover Text is: ``You have freedom to copy and modify
+this GNU Manual, like GNU software.  Copies published by the Free
+Software Foundation raise funds for GNU development.''
+@end quotation
 @end copying
 
+@dircategory Texinfo documentation system
+@direntry
+* sample: (sample)Invoking sample.
+@end direntry
+
 @titlepage
-@title Sample Title
+@title GNU Sample
+@subtitle for version @value{VERSION}, @value{UPDATED}
+@author A.U. Thor (@email{bug-texinfo@@gnu.org})
 @page
 @vskip 0pt plus 1filll
 @insertcopying
 @end titlepage
 
-@c Output the table of the contents at the beginning.
 @contents
 
 @ifnottex
@@ -30,29 +52,31 @@ Copyright (C) 2004 Free Software Foundation, Inc.
 @end ifnottex
 
 @menu
-* First Chapter::    The first chapter is the
-		   only chapter in this sample.
-* Index::            Complete index.
+* Invoking sample::
+* Copying This Manual::
+* Index::
 @end menu
 
 
-@node First Chapter
-@chapter First Chapter
+@node Invoking sample
+@chapter Invoking sample
 
-@cindex chapter, first
+@pindex sample
+@cindex invoking @command{sample}
 
-This is the first chapter.
-@cindex index entry, another
+This is a sample manual.  There is no sample program to
+invoke, but if there was, you could see its basic usage
+and command line options here.
 
-Here is a numbered list.
 
-@enumerate
-@item
-This is the first item.
+@node Copying This Manual
+@appendix Copying This Manual
 
-@item
-This is the second item.
-@end enumerate
+@menu
+* GNU Free Documentation License::  License for copying this manual.
+@end menu
+
+@include fdl.texi
 
 
 @node Index
