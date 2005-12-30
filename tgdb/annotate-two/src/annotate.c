@@ -121,6 +121,10 @@ static int handle_breakpoints_table_end(struct annotate_two *a2, const char *buf
    return 0;
 }
 
+static int handle_unwanted_fields(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list){
+  return 0;
+}
+
 static int handle_field(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list){
    int i = -1;
    
@@ -311,6 +315,11 @@ static struct annotation {
       "breakpoints-table",
       17,
       handle_breakpoints_table
+  },
+  {
+      "field-",
+      6,
+      handle_unwanted_fields
   },
   {
       "field",

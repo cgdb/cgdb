@@ -1,3 +1,8 @@
+12/30/2005 Bob Rossi <bob@brasko.net>
+
+	* tgdb-base/src/annotate.c (handle_unwanted_fields): Added function.
+	(annotations): Add new entry.
+
 12/25/2005 Bob Rossi <bob@brasko.net>
 
 	* tgdb-base/include/tgdb.h: TGDB changed tgdb_recv_debugger_console_data 
