@@ -1,3 +1,7 @@
+12/30/2005 Bob Rossi <bob@brasko.net>
+
+	* src/cgdb.c (gdb_input): Update to new TGDB interface.
+
 12/25/2005 Bob Rossi <bob@brasko.net>
 
 	* src/cgdb.c (gdb_input): TGDB changed tgdb_recv_debugger_console_data 

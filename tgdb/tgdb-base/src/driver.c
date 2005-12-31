@@ -201,47 +201,52 @@ driver_prompt_change (const char *new_prompt)
   change_prompt (nprompt);
 }
 
-static int gdb_input(void) {
-    char buf[MAXLINE];
-    size_t size;
-    size_t i;
-    struct tgdb_response *item;
+static int 
+gdb_input (void)
+{
+  char buf[MAXLINE];
+  size_t size;
+  size_t i;
+  struct tgdb_response *item;
+  int is_finished;
 
-    if( (size = tgdb_process (tgdb, buf, MAXLINE)) == -1){
-        logger_write_pos ( logger, __FILE__, __LINE__, "file descriptor closed");
-        return -1;
+  if ((size = tgdb_process (tgdb, buf, MAXLINE, &is_finished)) == -1)
+    {
+      logger_write_pos ( logger, __FILE__, __LINE__, "file descriptor closed");
+      return -1;
     } /* end if */
 
-    for(i = 0; i < size; ++i) {
-        if(write(STDOUT_FILENO, &(buf[i]), 1) != 1 ){
-           logger_write_pos ( logger, __FILE__, __LINE__, "could not write byte");
-           return -1;
+  for (i = 0; i < size; ++i)
+    {
+      if (write(STDOUT_FILENO, &(buf[i]), 1) != 1 )
+        {
+          logger_write_pos ( logger, __FILE__, __LINE__, "could not write byte");
+          return -1;
         }
     }
-    /*tgdb_traverse_responses ( tgdb );*/
+  
+  /*tgdb_traverse_responses ( tgdb );*/
 
-    while ( (item = tgdb_get_response(tgdb)) != NULL ) {
-	if (item->header == TGDB_UPDATE_COMPLETIONS) {
+  while ((item = tgdb_get_response (tgdb)) != NULL)
+    {
+      if (item->header == TGDB_UPDATE_COMPLETIONS)
+        {
 	  struct tgdb_list *list = item->choice.update_completions.completion_list;
 	  do_tab_completion (list);
 	}
-	if (item->header == TGDB_UPDATE_CONSOLE_PROMPT_VALUE) {
-	  driver_prompt_change (item->choice.update_console_prompt_value.prompt_value);
-	}
 
-        if( item->header == TGDB_QUIT) {
-           fprintf ( stderr, "%s:%d TGDB_QUIT\n", __FILE__, __LINE__);
-           return -1;
-	}
+	if (item->header == TGDB_UPDATE_CONSOLE_PROMPT_VALUE)
+	  driver_prompt_change (item->choice.update_console_prompt_value.prompt_value);
+
+        if (item->header == TGDB_QUIT)
+	  {
+	    fprintf ( stderr, "%s:%d TGDB_QUIT\n", __FILE__, __LINE__);
+	    return -1;
+	  }
     }
 
-  {
-    int is_busy;
-    int val = tgdb_is_busy (tgdb, &is_busy);
-    if (val == -1)
-      return -1;
-
-    if (!is_busy) {
+  if (is_finished)
+    {
       int size;
 
       tgdb_queue_size (tgdb, &size);
@@ -251,18 +256,18 @@ static int gdb_input(void) {
 	rline_get_prompt (rline, &prompt);
 	printf (prompt);
 
-	if (request->header == TGDB_REQUEST_CONSOLE_COMMAND) {
-	  printf (request->choice.console_command.command);
-	  printf ("\n");
-	}
+	if (request->header == TGDB_REQUEST_CONSOLE_COMMAND)
+	  {
+	    printf (request->choice.console_command.command);
+	    printf ("\n");
+	  }
 
 	tgdb_process_command (tgdb, request);
       } else
         rline_rl_forced_update_display(rline);
     }
-  }
 
-    return 0;
+  return 0;
 }
 
 static void tty_input(void) {

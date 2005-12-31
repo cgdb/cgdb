@@ -1,5 +1,11 @@
 12/30/2005 Bob Rossi <bob@brasko.net>
 
+	* tgdb-base/src/driver.c (gdb_input): Update to new TGDB interface.
+	* tgdb-base/src/tgdb.c (tgdb_process): Add new parameter.
+	* tgdb-base/include/tgdb.h (tgdb_process): Add new parameter.
+
+12/30/2005 Bob Rossi <bob@brasko.net>
+
 	* tgdb-base/src/annotate.c (handle_unwanted_fields): Added function.
 	(annotations): Add new entry.
 

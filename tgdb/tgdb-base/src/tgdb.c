@@ -971,7 +971,7 @@ tgdb_get_quit_command (struct tgdb *tgdb, int *tgdb_will_quit)
 }
 
 size_t
-tgdb_process (struct tgdb *tgdb, char *buf, size_t n)
+tgdb_process (struct tgdb *tgdb, char *buf, size_t n, int *is_finished)
 {
   char local_buf[10 * n];
   ssize_t size;
@@ -1104,6 +1104,24 @@ tgdb_finish:
    * calls tgdb_get_command it, it will be in the right spot.
    */
   tgdb->command_list_iterator = tgdb_list_get_first (tgdb->command_list);
+
+  if (is_finished)
+    {
+      int is_busy;
+      int val;
+      val = tgdb_is_busy (tgdb, &is_busy);
+      if (val == -1)
+        {
+          logger_write_pos (logger, __FILE__, __LINE__,
+			    "tgdb_handle_signals failed");
+	  return -1;
+	}
+
+      if (is_busy)
+	*is_finished = 0;
+      else
+	*is_finished = 1;
+    }
 
   return buf_size;
 }

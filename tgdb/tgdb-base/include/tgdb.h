@@ -168,10 +168,17 @@ extern "C"
    * \param n
    * Tells libtgdb how large the buffer BUF is that the client passed in.
    *
+   * \param is_finished
+   * If this is passed in as NULL, it is not set.
+   *
+   * If it is non-null, it will be set to 1 if TGDB finished processing the
+   * current request. Otherwise, it will be set to 0 if TGDB needs more input
+   * in order to finish processing the current requested command.
+   *
    * @return
    * The number of valid bytes in BUF on success, or -1 on error.
    */
-  size_t tgdb_process (struct tgdb *tgdb, char *buf, size_t n);
+  size_t tgdb_process (struct tgdb *tgdb, char *buf, size_t n, int *is_finished);
 
   /**
    * This sends a byte of data to the program being debugged.

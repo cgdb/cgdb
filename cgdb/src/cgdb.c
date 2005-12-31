@@ -728,9 +728,10 @@ gdb_input()
 {
   char *buf = malloc(GDB_MAXBUF+1);
   int size;
+  int is_finished;
 
   /* Read from GDB */
-  size = tgdb_process (tgdb, buf, GDB_MAXBUF);
+  size = tgdb_process (tgdb, buf, GDB_MAXBUF, &is_finished);
   if (size == -1){
     logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_recv_debugger_data error");
     free( buf );
@@ -770,43 +771,37 @@ gdb_input()
    * readline data and the data from the TGDB command being sent. This could
    * result in a race condition.
    */
-  {
-    int is_busy;
-    int val = tgdb_is_busy (tgdb, &is_busy);
-    if (val == -1)
-      return -1;
-    if (!is_busy) {
-      int size;
+  if (is_finished) {
+    int size;
 
-      tgdb_queue_size (tgdb, &size);
-      /* This is the second case, this command was queued. */
-      if (size > 0) {
-	struct tgdb_request *request = tgdb_queue_pop (tgdb);
-	char *prompt;
-	rline_get_prompt (rline, &prompt);
-	if_print (prompt);
+    tgdb_queue_size (tgdb, &size);
+    /* This is the second case, this command was queued. */
+    if (size > 0) {
+      struct tgdb_request *request = tgdb_queue_pop (tgdb);
+      char *prompt;
+      rline_get_prompt (rline, &prompt);
+      if_print (prompt);
 
-	if (request->header == TGDB_REQUEST_CONSOLE_COMMAND) {
-	  if_print (request->choice.console_command.command);
-	  if_print ("\n");
-	}
-
-	last_request = request;
-	tgdb_process_command (tgdb, request);
-      /* This is the first case */
-      } else {
-	int update = 1, ret_val;
-	
-	if (last_request) {
-	  ret_val = does_request_require_console_update (last_request, &update);
-	  if (ret_val == -1)
-	    return -1;
-	  last_request = NULL;
-	}
-	  
-	if (update)
-          rline_rl_forced_update_display(rline);
+      if (request->header == TGDB_REQUEST_CONSOLE_COMMAND) {
+	if_print (request->choice.console_command.command);
+	if_print ("\n");
       }
+
+      last_request = request;
+      tgdb_process_command (tgdb, request);
+    /* This is the first case */
+    } else {
+      int update = 1, ret_val;
+      
+      if (last_request) {
+	ret_val = does_request_require_console_update (last_request, &update);
+	if (ret_val == -1)
+	  return -1;
+	last_request = NULL;
+      }
+	
+      if (update)
+	rline_rl_forced_update_display(rline);
     }
   }
 
