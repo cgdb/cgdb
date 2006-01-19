@@ -115,7 +115,7 @@ type @samp{cgdb} to start CGDB.
 type @kbd{quit} or @kbd{C-d} in the GDB window to exit.
 @item
 type @kbd{:quit} in the source window to exit.  This even works if GDB is 
-currenently hanging, or operating a long command.
+currently hanging, or operating a long command.
 @end itemize
 
 @node Understanding CGDB
@@ -123,7 +123,7 @@ currenently hanging, or operating a long command.
 
 The CGDB user interface currently consists of two windows and a status bar.  
 The "source" window is currently on the top and the "GDB" window is on the 
-bottom.  The status bar currently sepearates the two windows.
+bottom.  The status bar currently separates the two windows.
 
 The interface has two modes depending on which window is focused.  "CGDB" mode
 is when the source window is focused, and "GDB" mode when the GDB window is 
@@ -168,7 +168,7 @@ represent that the particular line, is the current line being debugged by GDB.
 Also, CGDB will display an arrow extending from the line number, to the 
 source line.  You can configure what type of arrow CGDB uses with the
 @code{:set arrowstyle} configuration option. By default, the @code{short}
-arrow is used.  However, my personal favoriate is the @code{long} arrow.
+arrow is used.  However, my personal favorite is the @code{long} arrow.
 
 As you navigate through the source window, the current line the cursor is
 on will be highlighted white.  This simply helps you keep track of where you
@@ -188,14 +188,14 @@ of interest.  The C library regular expression functions are used to perform
 this search, which honors things like @code{*} or @code{+}.
 
 Please see the list of commands that are available when you are at the source 
-window.  They are avialable here: @xref{CGDB Mode}.
+window.  They are available here: @xref{CGDB Mode}.
 
 @node GDB Window
 @section Understanding the GDB window.
 
 The GDB window is how CGDB allows the user to interface with the GNU debugger.
 If the user wishes to pass a command to GDB, it can simply be typed into this
-window, and GDB will recieve the command.  This interface is intended to be 
+window, and GDB will receive the command.  This interface is intended to be 
 100% identical to using GDB on a terminal.
 
 There is a limited set of keys that can be typed into this window that CGDB
@@ -225,7 +225,7 @@ and you can even use regular expression to find your file.  This can save a
 lot of time as the number of files grow.
 
 Please see the list of commands that are available when you are at the file 
-dialog.  They are avialable here: @xref{File Dialog Mode}.
+dialog.  They are available here: @xref{File Dialog Mode}.
 
 @node TTY Window
 @section Understanding the TTY window.
@@ -265,25 +265,25 @@ which window is active.  The following information will help you determine
 what commands are accessible during which modes.
 
 @menu
-* CGDB Mode::			Commands avialable during CGDB mode
-* GDB Mode::			Commands avialable during GDB mode
-* File Dialog Mode::		Commands avialable during the file dialog mode
+* CGDB Mode::			Commands available during CGDB mode
+* GDB Mode::			Commands available during GDB mode
+* File Dialog Mode::		Commands available during the file dialog mode
 * Status Bar Mode::		Commands available in the status bar
 @end menu
 
 @node CGDB Mode
-@section Commands avialable during CGDB mode
+@section Commands available during CGDB mode
 
 When you are in the source window, you are implicitly in CGDB mode.  All of 
-the below commands are avialable during this mode.  This mode is primarily 
-avialable for the user to view the current source file, search it, or switch
+the below commands are available during this mode.  This mode is primarily 
+available for the user to view the current source file, search it, or switch
 to a different mode.
 
 @table @code
 @item ESC
 Puts the user into command mode. However, you are already in this mode.
 @item i
-Puts the user into gdb mode.
+Puts the user into GDB mode.
 @item I
 Puts the user into tty mode.
 @item T
@@ -343,7 +343,7 @@ Clear and redraw the screen.
 @end table
 
 @node GDB Mode
-@section Commands avialable during GDB mode
+@section Commands available during GDB mode
 
 When in GDB mode, the user is mostly interested in working with the GDB 
 console.  That is, sending commands to GDB and receiving data back from GDB.
@@ -363,7 +363,7 @@ Move up a page.
 @item page down
 Move down a page.
 @item F11
-Go to the beggining of the GDB buffer.
+Go to the beginning of the GDB buffer.
 @item F12
 Go to the end of the GDB buffer.
 @end table
@@ -374,7 +374,7 @@ determined that a command has been received, it alerts CGDB, and a command is
 then sent to GDB. This is the same method used when invoking GDB directly.
 
 @node File Dialog Mode
-@section Commands avialable during the file dialog mode
+@section Commands available during the file dialog mode
 
 The file dialog is primarily used to allow the user to find and open a source
 file that the program you are debugging is made up of.  The file dialog will
@@ -449,14 +449,14 @@ changed since it was opened by CGDB.  (abbreviated as :e)
 @node Configuring CGDB
 @chapter CGDB configuration commands
 
-There may be several features that you find usefull in CGDB.  CGDB is capable
+There may be several features that you find useful in CGDB.  CGDB is capable
 of automating any of these commands through the use of the config file called
 cgdbrc.  It looks in $HOME/.cgdb/cgdbrc for the file.  If it exists, CGDB
 executes each line in the file in order.  It is as if the user typed in all the
 commands into the status bar after the tui was initialized.
 
 Eventually this file will be used to create macros and high level key 
-bindings. Until then, it is a very usefull way to automate simple commands.
+bindings. Until then, it is a very useful way to automate simple commands.
 
 The following variables change the behavior of some aspect of cgdb.  Many
 of these commands may be abbreviated in some way, and all boolean commands
