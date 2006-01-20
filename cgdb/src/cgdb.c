@@ -304,7 +304,7 @@ change_prompt (const char *new_prompt)
 
 
 void usage(void) {
-fprintf(stderr, 
+printf( 
 "CGDB Usage:\n"      
 "   cgdb [cgdb options] [gdb options]\n"
 "\n"
