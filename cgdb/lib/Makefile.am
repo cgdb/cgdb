@@ -1,1 +1,1 @@
-SUBDIRS = kui wm
+SUBDIRS = kui
