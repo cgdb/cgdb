@@ -89,7 +89,7 @@ and annotations can be avoided by using it.
 
 Some features offered by CGDB are:
 
-@enumerate
+@itemize @bullet
 @item
 Syntax-highlighted source window
 
@@ -101,7 +101,7 @@ Keyboard shortcuts for common functions
 
 @item
 Searching source window (using regexp)
-@end enumerate
+@end itemize
 
 @node Invocation
 @chapter Getting In and Out of CGDB
@@ -542,7 +542,7 @@ Send a continue command to GDB.
 @item :finish
 Send a finish command to gdb
 @item :help
-Opens the help dialog
+This will display the current manual, in text format.
 @item :insert
 Move focus to the gdb window
 @item :next

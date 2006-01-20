@@ -87,13 +87,13 @@ parsing GDB's output and annotations can be avoided by using it.
 
    Some features offered by CGDB are:
 
-  1. Syntax-highlighted source window
+   * Syntax-highlighted source window
 
-  2. Visual breakpoint setting
+   * Visual breakpoint setting
 
-  3. Keyboard shortcuts for common functions
+   * Keyboard shortcuts for common functions
 
-  4. Searching source window (using regexp)
+   * Searching source window (using regexp)
 
 
 File: cgdb.info,  Node: Invocation,  Next: Understanding CGDB,  Prev: Summary,  Up: Top
@@ -108,7 +108,7 @@ The essentials are:
    * type `quit' or `C-d' in the GDB window to exit.
 
    * type `:quit' in the source window to exit.  This even works if GDB
-     is currenently hanging, or operating a long command.
+     is currently hanging, or operating a long command.
 
 
 File: cgdb.info,  Node: Understanding CGDB,  Next: Controlling CGDB,  Prev: Invocation,  Up: Top
@@ -118,7 +118,7 @@ File: cgdb.info,  Node: Understanding CGDB,  Next: Controlling CGDB,  Prev: Invo
 
 The CGDB user interface currently consists of two windows and a status
 bar.  The "source" window is currently on the top and the "GDB" window
-is on the bottom.  The status bar currently sepearates the two windows.
+is on the bottom.  The status bar currently separates the two windows.
 
    The interface has two modes depending on which window is focused.
 "CGDB" mode is when the source window is focused, and "GDB" mode when
@@ -166,7 +166,7 @@ represent that the particular line, is the current line being debugged
 by GDB.  Also, CGDB will display an arrow extending from the line
 number, to the source line.  You can configure what type of arrow CGDB
 uses with the `:set arrowstyle' configuration option. By default, the
-`short' arrow is used.  However, my personal favoriate is the `long'
+`short' arrow is used.  However, my personal favorite is the `long'
 arrow.
 
    As you navigate through the source window, the current line the
@@ -187,7 +187,7 @@ a string of interest.  The C library regular expression functions are
 used to perform this search, which honors things like `*' or `+'.
 
    Please see the list of commands that are available when you are at
-the source window.  They are avialable here: *Note CGDB Mode::.
+the source window.  They are available here: *Note CGDB Mode::.
 
 
 File: cgdb.info,  Node: GDB Window,  Next: File Dialog Window,  Prev: Source Window,  Up: Understanding CGDB
@@ -197,7 +197,7 @@ File: cgdb.info,  Node: GDB Window,  Next: File Dialog Window,  Prev: Source Win
 
 The GDB window is how CGDB allows the user to interface with the GNU
 debugger.  If the user wishes to pass a command to GDB, it can simply
-be typed into this window, and GDB will recieve the command.  This
+be typed into this window, and GDB will receive the command.  This
 interface is intended to be 100% identical to using GDB on a terminal.
 
    There is a limited set of keys that can be typed into this window
@@ -218,12 +218,19 @@ File: cgdb.info,  Node: File Dialog Window,  Next: TTY Window,  Prev: GDB Window
 
 The file dialog window is available to help the user view and select
 which file they would like to view.  It provides the user with a list
-of all the files that make up the program being debugged.  If there is
-no program being debugged, the file dialog will not open and a message
-will be displayed at the status bar.
+of all the files that make up the program being debugged.  If there are
+no files available, because there is no program being debugged or
+because there is no debug symbols, then the file dialog will not open
+and a message will be displayed at the status bar.
 
-   Once you enter the file dialog, it is possible to enter it by
-hitting `q'.
+   You can get to the file dialog by hitting `o' when you are at the
+source window.  Once you enter the file dialog, it is possible to leave
+it by hitting `q'.  You can navigate the file dialog using the standard
+direction keys and you can even use regular expression to find your
+file.  This can save a lot of time as the number of files grow.
+
+   Please see the list of commands that are available when you are at
+the file dialog.  They are available here: *Note File Dialog Mode::.
 
 
 File: cgdb.info,  Node: TTY Window,  Next: Status Bar,  Prev: File Dialog Window,  Up: Understanding CGDB
@@ -231,7 +238,23 @@ File: cgdb.info,  Node: TTY Window,  Next: Status Bar,  Prev: File Dialog Window
 2.4 Understanding the TTY window.
 =================================
 
-File dialog window.
+The TTY window is available to allow the user to pass input to the
+program being debugged. This window will act similar to the GDB window,
+except that the data you type will get sent to the program being
+debugged.  *Note Sending I/O to Inferior::.
+
+   You will notice that the TTY window has a terminal device between it
+and the program being debugged.  So, if the program being debugged uses
+say readline, which allows command line editing, the same interface
+will be provided via the TTY window as at the terminal.  You can see
+the name of the terminal device in the TTY status bar.
+
+   The commands available while at the TTY window are here: *Note TTY
+Mode::.
+
+   I personally don't use the TTY window often, and prefer to start the
+application that needs input from stdin on a different terminal.  This
+simplifies the use of CGDB, and works in all cases.
 
 
 File: cgdb.info,  Node: Status Bar,  Next: Switching Windows,  Prev: TTY Window,  Up: Understanding CGDB
@@ -239,7 +262,20 @@ File: cgdb.info,  Node: Status Bar,  Next: Switching Windows,  Prev: TTY Window,
 2.5 Understanding the status bar.
 =================================
 
-Status bar.
+The status bar is the general purpose way for CGDB to show the user
+which commands they are currently typeing or report errors to the user
+when they occur.  CGDB does not use popup's or other forms of I/O to
+alert the user of information or problems.
+
+   While CGDB is running, you can configure it with any of the commands
+that are valid in CGDB's configuration file. *Note Configuring CGDB::.
+Simply type `:' in the source window, and you will see the colon, and
+the rest of the command you type appear in the status bar.  When you are
+finished typing the command that you are interested in, type `enter'.
+This will alert CGDB to execute the command.
+
+   The commands available while at the status bar are here: *Note
+Status Bar Mode::.
 
 
 File: cgdb.info,  Node: Switching Windows,  Prev: Status Bar,  Up: Understanding CGDB
@@ -268,20 +304,21 @@ help you determine what commands are accessible during which modes.
 
 * Menu:
 
-* CGDB Mode::			Commands avialable during CGDB mode
-* GDB Mode::			Commands avialable during GDB mode
-* File Dialog Mode::		Commands avialable during the file dialog mode
+* CGDB Mode::			Commands available during CGDB mode
+* GDB Mode::			Commands available during GDB mode
+* File Dialog Mode::		Commands available during the file dialog mode
+* TTY Mode::			Commands available during TTY mode
 * Status Bar Mode::		Commands available in the status bar
 
 
 File: cgdb.info,  Node: CGDB Mode,  Next: GDB Mode,  Up: Controlling CGDB
 
-3.1 Commands avialable during CGDB mode
+3.1 Commands available during CGDB mode
 =======================================
 
 When you are in the source window, you are implicitly in CGDB mode.
-All of the below commands are avialable during this mode.  This mode is
-primarily avialable for the user to view the current source file,
+All of the below commands are available during this mode.  This mode is
+primarily available for the user to view the current source file,
 search it, or switch to a different mode.
 
 `ESC'
@@ -289,7 +326,7 @@ search it, or switch to a different mode.
      mode.
 
 `i'
-     Puts the user into gdb mode.
+     Puts the user into GDB mode.
 
 `I'
      Puts the user into tty mode.
@@ -382,7 +419,7 @@ search it, or switch to a different mode.
 
 File: cgdb.info,  Node: GDB Mode,  Next: File Dialog Mode,  Prev: CGDB Mode,  Up: Controlling CGDB
 
-3.2 Commands avialable during GDB mode
+3.2 Commands available during GDB mode
 ======================================
 
 When in GDB mode, the user is mostly interested in working with the GDB
@@ -405,7 +442,7 @@ that CGDB is interested in, and does not pass along any further.
      Move down a page.
 
 `F11'
-     Go to the beggining of the GDB buffer.
+     Go to the beginning of the GDB buffer.
 
 `F12'
      Go to the end of the GDB buffer.
@@ -417,9 +454,9 @@ it alerts CGDB, and a command is then sent to GDB. This is the same
 method used when invoking GDB directly.
 
 
-File: cgdb.info,  Node: File Dialog Mode,  Next: Status Bar Mode,  Prev: GDB Mode,  Up: Controlling CGDB
+File: cgdb.info,  Node: File Dialog Mode,  Next: TTY Mode,  Prev: GDB Mode,  Up: Controlling CGDB
 
-3.3 Commands avialable during the file dialog mode
+3.3 Commands available during the file dialog mode
 ==================================================
 
 The file dialog is primarily used to allow the user to find and open a
@@ -482,37 +519,33 @@ regular expression and again to select the file.
      Select the current file.
 
 
-File: cgdb.info,  Node: Status Bar Mode,  Prev: File Dialog Mode,  Up: Controlling CGDB
+File: cgdb.info,  Node: TTY Mode,  Next: Status Bar Mode,  Prev: File Dialog Mode,  Up: Controlling CGDB
 
-3.4 Commands available in the status bar
+3.4 Commands available during TTY mode
+======================================
+
+`ESC'
+     Switch back to source window.
+
+`page up'
+     Move up a page.
+
+`page down'
+     Move down a page.
+
+`F11'
+     Go to the beginning of the GDB buffer.
+
+`F12'
+     Go to the end of the GDB buffer.
+
+
+File: cgdb.info,  Node: Status Bar Mode,  Prev: TTY Mode,  Up: Controlling CGDB
+
+3.5 Commands available in the status bar
 ========================================
 
-At the time of this writing, all of these options are off by default.
-
-`:continue'
-     Send a continue command to GDB.
-
-`:finish'
-     Send a finish command to gdb
-
-`:help'
-     Opens the help dialog
-
-`:insert'
-     Move focus to the gdb window
-
-`:next'
-     Send a next command to gdb
-
-`:quit'
-     Quit cgdb (may be abbreviated as :q)
-
-`:quit!'
-     Quit cgdb, even if debugged program is running (abbreviated as :q!)
-
-`:edit'
-     Reloads the file in the source window. This can be useful if the
-     file has changed since it was opened by CGDB.  (abbreviated as :e)
+Status bar.
 
 
 File: cgdb.info,  Node: Configuring CGDB,  Next: Sending I/O to Inferior,  Prev: Controlling CGDB,  Up: Top
@@ -520,7 +553,7 @@ File: cgdb.info,  Node: Configuring CGDB,  Next: Sending I/O to Inferior,  Prev:
 4 CGDB configuration commands
 *****************************
 
-There may be several features that you find usefull in CGDB.  CGDB is
+There may be several features that you find useful in CGDB.  CGDB is
 capable of automating any of these commands through the use of the
 config file called cgdbrc.  It looks in $HOME/.cgdb/cgdbrc for the
 file.  If it exists, CGDB executes each line in the file in order.  It
@@ -528,7 +561,7 @@ is as if the user typed in all the commands into the status bar after
 the tui was initialized.
 
    Eventually this file will be used to create macros and high level key
-bindings. Until then, it is a very usefull way to automate simple
+bindings. Until then, it is a very useful way to automate simple
 commands.
 
    The following variables change the behavior of some aspect of cgdb.
@@ -611,6 +644,31 @@ noignorecase' turns on case-sensitive searching.
 
 `:set wrapscan'
      Searches wrap around the end of file.
+
+`:continue'
+     Send a continue command to GDB.
+
+`:finish'
+     Send a finish command to gdb
+
+`:help'
+     This will display the current manual, in text format.
+
+`:insert'
+     Move focus to the gdb window
+
+`:next'
+     Send a next command to gdb
+
+`:quit'
+     Quit cgdb (may be abbreviated as :q)
+
+`:quit!'
+     Quit cgdb, even if debugged program is running (abbreviated as :q!)
+
+`:edit'
+     Reloads the file in the source window. This can be useful if the
+     file has changed since it was opened by CGDB.  (abbreviated as :e)
 
 
 File: cgdb.info,  Node: Sending I/O to Inferior,  Next: Terminal Control Flow,  Prev: Configuring CGDB,  Up: Top
@@ -1134,23 +1192,24 @@ Tag Table:
 Node: Top1050
 Node: Summary2411
 Node: Invocation3566
-Node: Understanding CGDB4022
-Node: Source Window5359
-Node: GDB Window7870
-Node: File Dialog Window8850
-Node: TTY Window9442
-Node: Status Bar9641
-Node: Switching Windows9831
-Node: Controlling CGDB10304
-Node: CGDB Mode10960
-Node: GDB Mode12635
-Node: File Dialog Mode13846
-Node: Status Bar Mode15174
-Node: Configuring CGDB15921
-Node: Sending I/O to Inferior19511
-Node: Terminal Control Flow21908
-Node: Copying This Manual22671
-Node: GNU Free Documentation License22914
-Node: Index45322
+Node: Understanding CGDB4020
+Node: Source Window5356
+Node: GDB Window7866
+Node: File Dialog Window8846
+Node: TTY Window9925
+Node: Status Bar10964
+Node: Switching Windows11881
+Node: Controlling CGDB12354
+Node: CGDB Mode13060
+Node: GDB Mode14735
+Node: File Dialog Mode15946
+Node: TTY Mode17267
+Node: Status Bar Mode17660
+Node: Configuring CGDB17839
+Node: Sending I/O to Inferior21961
+Node: Terminal Control Flow24358
+Node: Copying This Manual25121
+Node: GNU Free Documentation License25364
+Node: Index47772
 
 End Tag Table
