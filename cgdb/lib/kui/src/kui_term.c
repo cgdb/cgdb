@@ -14,6 +14,10 @@
 #include <stdlib.h> /* for getenv */
 #endif /* HAVE_STDLIB_H */
 
+#if HAVE_STDIO_H
+#include <stdio.h> /* for stderr */
+#endif /* HAVE_STDIO_H */
+
 /* term.h prototypes */
 extern int tgetent();
 extern int tgetflag();
@@ -21,6 +25,7 @@ extern int tgetnum();
 extern char *tgetstr();
 extern int tputs();
 extern char *tgoto();
+extern char *tigetstr(char *capname);
 
 #include "kui_term.h"
 
