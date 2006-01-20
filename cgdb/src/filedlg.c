@@ -468,7 +468,7 @@ int filedlg_recv_char(struct filedlg *fd, int key, char *file) {
             filedlg_vscroll(fd, 1);
             break;
         case CGDB_KEY_NPAGE:
-        case 'J':
+	case CGDB_KEY_CTRL_F:	/* VI-style page down */
             filedlg_vscroll(fd, height - 1);
             break;
         case CGDB_KEY_UP:
@@ -476,7 +476,7 @@ int filedlg_recv_char(struct filedlg *fd, int key, char *file) {
             filedlg_vscroll(fd, -1);
             break;
         case CGDB_KEY_PPAGE:
-        case 'K':
+	case CGDB_KEY_CTRL_B:	/* VI-style page up */
             filedlg_vscroll(fd, -(height - 1));
             break;
         /* Horizontal scrolling */

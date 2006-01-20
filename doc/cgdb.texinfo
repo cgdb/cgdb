@@ -238,12 +238,32 @@ the data you type will get sent to the program being debugged.
 You will notice that the TTY window has a terminal device between it and the 
 program being debugged.  So, if the program being debugged uses say readline, 
 which allows command line editing, the same interface will be provided via the
-TTY window as at the terminal.
+TTY window as at the terminal.  You can see the name of the terminal device 
+in the TTY status bar.
+
+The commands available while at the TTY window are here: @xref{TTY Mode}.
+
+I personally don't use the TTY window often, and prefer to start the 
+application that needs input from stdin on a different terminal.  This 
+simplifies the use of CGDB, and works in all cases.
 
 @node Status Bar
 @section Understanding the status bar.
 
-Status bar.
+The status bar is the general purpose way for CGDB to show the user which
+commands they are currently typeing or report errors to the user when they 
+occur.  CGDB does not use popup's or other forms of I/O to alert the user 
+of information or problems.
+
+While CGDB is running, you can configure it with any of the commands that 
+are valid in CGDB's configuration file. @xref{Configuring CGDB}.  Simply
+type @code{:} in the source window, and you will see the colon, and 
+the rest of the command you type appear in the status bar.  When you are
+finished typing the command that you are interested in, type @code{enter}.  
+This will alert CGDB to execute the command.
+
+The commands available while at the status bar are here: 
+@xref{Status Bar Mode}.
 
 @node Switching Windows
 @section Switch between windows
@@ -268,6 +288,7 @@ what commands are accessible during which modes.
 * CGDB Mode::			Commands available during CGDB mode
 * GDB Mode::			Commands available during GDB mode
 * File Dialog Mode::		Commands available during the file dialog mode
+* TTY Mode::			Commands available during TTY mode
 * Status Bar Mode::		Commands available in the status bar
 @end menu
 
@@ -420,31 +441,26 @@ next reverse search.
 Select the current file.
 @end table
 
+@node TTY Mode
+@section Commands available during TTY mode
+
+@table @code
+@item ESC
+Switch back to source window.
+@item page up
+Move up a page.
+@item page down
+Move down a page.
+@item F11
+Go to the beginning of the GDB buffer.
+@item F12
+Go to the end of the GDB buffer.
+@end table
+
 @node Status Bar Mode
 @section Commands available in the status bar
 
-At the time of this writing, all of these options are off by default.
-
-@table @code
-@item :continue
-Send a continue command to GDB.
-@item :finish
-Send a finish command to gdb
-@item :help
-Opens the help dialog
-@item :insert
-Move focus to the gdb window
-@item :next
-Send a next command to gdb
-@item :quit
-Quit cgdb (may be abbreviated as :q)
-@item :quit!
-Quit cgdb, even if debugged program is running (abbreviated as :q!)
-@item :edit
-Reloads the file in the source window. This can be useful if the file has 
-changed since it was opened by CGDB.  (abbreviated as :e)
-@end table
-
+Status bar.
 
 @node Configuring CGDB
 @chapter CGDB configuration commands
@@ -521,6 +537,23 @@ values=@sc{top_full, top_big, even, bottom_big, bottom_full}
 @item :set ws
 @item :set wrapscan
 Searches wrap around the end of file.
+@item :continue
+Send a continue command to GDB.
+@item :finish
+Send a finish command to gdb
+@item :help
+Opens the help dialog
+@item :insert
+Move focus to the gdb window
+@item :next
+Send a next command to gdb
+@item :quit
+Quit cgdb (may be abbreviated as :q)
+@item :quit!
+Quit cgdb, even if debugged program is running (abbreviated as :q!)
+@item :edit
+Reloads the file in the source window. This can be useful if the file has 
+changed since it was opened by CGDB.  (abbreviated as :e)
 @end table
 
 @node Sending I/O to Inferior

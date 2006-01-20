@@ -1,0 +1,1156 @@
+This is ../../cgdb/doc/cgdb.info, produced by makeinfo version 4.7 from
+../../cgdb/doc/cgdb.texinfo.
+
+   This manual is for GNU CGDB (version 0.5.3-cvs, 17 January 2006),
+the GNU ncurses based front end to GDB.
+
+   Copyright (C) 2004 Free Software Foundation, Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.1 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover Texts
+     being "A GNU Manual," and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     "GNU Free Documentation License."
+
+     (a) The FSF's Back-Cover Text is: "You have freedom to copy and
+     modify this GNU Manual, like GNU software.  Copies published by
+     the Free Software Foundation raise funds for GNU development."
+
+INFO-DIR-SECTION Software development
+START-INFO-DIR-ENTRY
+* CGDB: (CGDB)GNU Ncurses front end to GDB.
+END-INFO-DIR-ENTRY
+
+
+File: cgdb.info,  Node: Top,  Next: Summary,  Up: (dir)
+
+CGDB
+****
+
+This manual is for GNU CGDB (version 0.5.3-cvs, 17 January 2006), the
+GNU ncurses based front end to GDB.
+
+   Copyright (C) 2004 Free Software Foundation, Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.1 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover Texts
+     being "A GNU Manual," and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     "GNU Free Documentation License."
+
+     (a) The FSF's Back-Cover Text is: "You have freedom to copy and
+     modify this GNU Manual, like GNU software.  Copies published by
+     the Free Software Foundation raise funds for GNU development."
+
+* Menu:
+
+* Summary::                     Summary of CGDB
+
+* Invocation::                  Getting in and out of CGDB
+* Understanding CGDB::		Understanding the core concepts of CGDB
+* Controlling CGDB::            CGDB commands
+* Configuring CGDB::            CGDB configuration commands
+* Sending I/O to Inferior::     Sending I/O to the program being debugged
+* Terminal Control Flow::       Allowing terminal control flow in CGDB
+
+* Copying This Manual::
+
+* Index::
+
+
+File: cgdb.info,  Node: Summary,  Next: Invocation,  Prev: Top,  Up: Top
+
+Summary of CGDB
+***************
+
+CGDB is a curses-based interface to the GNU Debugger (GDB).  The goal
+of CGDB is to be lightweight and responsive; not encumbered with
+unnecessary features.
+
+   The interface is designed to deliver the familiar GDB text
+interface, with a split screen showing the source as it executes.  The
+UI is modeled on the classic Unix text editor, vi.  Those familiar with
+vi should feel right at home using CGDB.
+
+   The library responsible for communicating with GDB is called Trivial
+GDB (tgdb, or more accurately, libtgdb).  This abstraction allows the
+UI code to be independent of the debugger, as well as greatly
+simplifying its implementation.
+
+   Those wanting to develop other interfaces to GDB are welcome to use
+libtgdb as the basis for their program.  Many of the headaches of
+parsing GDB's output and annotations can be avoided by using it.
+
+   Some features offered by CGDB are:
+
+  1. Syntax-highlighted source window
+
+  2. Visual breakpoint setting
+
+  3. Keyboard shortcuts for common functions
+
+  4. Searching source window (using regexp)
+
+
+File: cgdb.info,  Node: Invocation,  Next: Understanding CGDB,  Prev: Summary,  Up: Top
+
+1 Getting In and Out of CGDB
+****************************
+
+This chapter discusses how to start CGDB, and how to get out of it.
+The essentials are:
+   * type `cgdb' to start CGDB.
+
+   * type `quit' or `C-d' in the GDB window to exit.
+
+   * type `:quit' in the source window to exit.  This even works if GDB
+     is currenently hanging, or operating a long command.
+
+
+File: cgdb.info,  Node: Understanding CGDB,  Next: Controlling CGDB,  Prev: Invocation,  Up: Top
+
+2 Understanding the core concepts of CGDB
+*****************************************
+
+The CGDB user interface currently consists of two windows and a status
+bar.  The "source" window is currently on the top and the "GDB" window
+is on the bottom.  The status bar currently sepearates the two windows.
+
+   The interface has two modes depending on which window is focused.
+"CGDB" mode is when the source window is focused, and "GDB" mode when
+the GDB window is focused.
+
+   By the time version CGDB version 1.0 is reached, the windows will be
+movable, and the user will be able to create as many or as few that is
+desired.  Currently however, all of my time is spent developing the
+interface between CGDB and GDB. Once this is complete, the UI of CGDB
+will become much more polished.  If you are a ncurses developer, and
+have spare time to work on this task, please contact me.
+
+* Menu:
+
+* Source Window::		Understanding the source window.
+* GDB Window::                  Understanding the GDB window.
+* File Dialog Window::          Understanding the file dialog window.
+* TTY Window::			Understanding the TTY window.
+* Status Bar::                  Understanding the status bar.
+* Switching Windows::           Switching between windows.
+
+
+File: cgdb.info,  Node: Source Window,  Next: GDB Window,  Up: Understanding CGDB
+
+2.1 Understanding the source window.
+====================================
+
+The source window is the window that provides you a view of the source
+code that the debugged program is made up of.  It will display to the
+user a single source file at a time.  While the user is debugging, via
+next and step, CGDB will update the source file and line number to keep
+you informed as to where GDB is debugging.
+
+   On top of simply showing the source file to the user, CGDB has
+several features that make debugging easier than using plain old GDB.
+One feature you will notice right away while debugging a C, C++ or ADA
+program, is that the source files are syntax highlighted.  This allows
+the user to easily navigate through the source file to look for certain
+places in the source code.  If you would like to see another source
+language highlighted, contact us.
+
+   On top of showing the source code, CGDB also displays to the user the
+currently executing line. The line number will be highlighted green, to
+represent that the particular line, is the current line being debugged
+by GDB.  Also, CGDB will display an arrow extending from the line
+number, to the source line.  You can configure what type of arrow CGDB
+uses with the `:set arrowstyle' configuration option. By default, the
+`short' arrow is used.  However, my personal favoriate is the `long'
+arrow.
+
+   As you navigate through the source window, the current line the
+cursor is on will be highlighted white.  This simply helps you keep
+track of where you are in the file.
+
+   Also, you can set or delete breakpoints in CGDB from the source
+window.  Simply navigate to the line that you are interested in setting
+a breakpoint, and hit the space bar.  This will set a breakpoint on the
+line if one did not already exist.  The line number should turn red to
+indicate that a breakpoint has been set.  Hitting the space bar again
+will delete the breakpoint.  If you disable the breakpoint, the line
+number will turn yellow, to represent the disabled breakpoint.
+
+   CGDB also supports regular expression searching within the source
+window.  If you type `/' or `?' you can search in the source window for
+a string of interest.  The C library regular expression functions are
+used to perform this search, which honors things like `*' or `+'.
+
+   Please see the list of commands that are available when you are at
+the source window.  They are avialable here: *Note CGDB Mode::.
+
+
+File: cgdb.info,  Node: GDB Window,  Next: File Dialog Window,  Prev: Source Window,  Up: Understanding CGDB
+
+2.2 Understanding the GDB window.
+=================================
+
+The GDB window is how CGDB allows the user to interface with the GNU
+debugger.  If the user wishes to pass a command to GDB, it can simply
+be typed into this window, and GDB will recieve the command.  This
+interface is intended to be 100% identical to using GDB on a terminal.
+
+   There is a limited set of keys that can be typed into this window
+that CGDB interprets and handles, instead of sending to GDB.  This list
+can be found here: *Note GDB Mode::.
+
+   CGDB attempts to buffer commands the same way they would be if you
+typed them at the terminal.  So, if you type several commands before a
+single one finishes, they will each be run in order.  There will be no
+way to stop these commands from being run besides from typing `^c',
+like you would at any normal terminal when working with GDB.
+
+
+File: cgdb.info,  Node: File Dialog Window,  Next: TTY Window,  Prev: GDB Window,  Up: Understanding CGDB
+
+2.3 Understanding the file dialog window.
+=========================================
+
+The file dialog window is available to help the user view and select
+which file they would like to view.  It provides the user with a list
+of all the files that make up the program being debugged.  If there is
+no program being debugged, the file dialog will not open and a message
+will be displayed at the status bar.
+
+   Once you enter the file dialog, it is possible to enter it by
+hitting `q'.
+
+
+File: cgdb.info,  Node: TTY Window,  Next: Status Bar,  Prev: File Dialog Window,  Up: Understanding CGDB
+
+2.4 Understanding the TTY window.
+=================================
+
+File dialog window.
+
+
+File: cgdb.info,  Node: Status Bar,  Next: Switching Windows,  Prev: TTY Window,  Up: Understanding CGDB
+
+2.5 Understanding the status bar.
+=================================
+
+Status bar.
+
+
+File: cgdb.info,  Node: Switching Windows,  Prev: Status Bar,  Up: Understanding CGDB
+
+2.6 Switch between windows
+==========================
+
+When CGDB is invoked, the interface is in GDB mode.  A '*' at the right
+of the status bar indicates that input will be passed to GDB.  To change
+the focus to the source window, hit `ESC'.  The interface is now in CGDB
+mode.
+
+   To switch back into GDB mode, press `i'.  This syntax is based on the
+popular Unix text-editor, vi.
+
+
+File: cgdb.info,  Node: Controlling CGDB,  Next: Configuring CGDB,  Prev: Understanding CGDB,  Up: Top
+
+3 CGDB commands
+***************
+
+CGDB can be controlled in a variety of different ways.  Each mode that
+CGDB is in acts differently. Currently CGDB implicitly changes modes
+depending on which window is active.  The following information will
+help you determine what commands are accessible during which modes.
+
+* Menu:
+
+* CGDB Mode::			Commands avialable during CGDB mode
+* GDB Mode::			Commands avialable during GDB mode
+* File Dialog Mode::		Commands avialable during the file dialog mode
+* Status Bar Mode::		Commands available in the status bar
+
+
+File: cgdb.info,  Node: CGDB Mode,  Next: GDB Mode,  Up: Controlling CGDB
+
+3.1 Commands avialable during CGDB mode
+=======================================
+
+When you are in the source window, you are implicitly in CGDB mode.
+All of the below commands are avialable during this mode.  This mode is
+primarily avialable for the user to view the current source file,
+search it, or switch to a different mode.
+
+`ESC'
+     Puts the user into command mode. However, you are already in this
+     mode.
+
+`i'
+     Puts the user into gdb mode.
+
+`I'
+     Puts the user into tty mode.
+
+`T'
+     Opens a window to give input to the debugged program.
+
+`^T'
+     Opens a new tty for the debugged program.
+
+`up arrow'
+
+`j'
+     Move up a line.
+
+`down arrow'
+
+`k'
+     Move down a line.
+
+`left arrow'
+
+`h'
+     Move left a line.
+
+`right arrow'
+
+`l'
+     Move right a line.
+
+`page up'
+
+`^b'
+     Move up a page.
+
+`^u'
+     Move up 1/2 a page.
+
+`page down'
+
+`^f'
+     Move down a page.
+
+`^d'
+     Move down 1/2 a page.
+
+`gg'
+     Move to the top of file.
+
+`G'
+     Move to the bottom of file.
+
+`/'
+     search from current cursor position.
+
+`?'
+     reverse search from current cursor position.
+
+`n'
+     next forward search.
+
+`N'
+     next reverse search.
+
+`o'
+     open the file dialog.
+
+`spacebar'
+     Sets a breakpoint at the current line number.
+
+`t'
+     Sets a temporary breakpoint at the current line number.
+
+`-'
+     Shrink source window 1 line.
+
+`='
+     Grow source window 1 line.
+
+`_'
+     Shrink source window 25% (or, shrink tty window 1 line, if
+     visible).
+
+`+'
+     Grow source window 25% (or, grow tty window 1 line, if visible).
+
+`^l'
+     Clear and redraw the screen.
+
+
+File: cgdb.info,  Node: GDB Mode,  Next: File Dialog Mode,  Prev: CGDB Mode,  Up: Controlling CGDB
+
+3.2 Commands avialable during GDB mode
+======================================
+
+When in GDB mode, the user is mostly interested in working with the GDB
+console.  That is, sending commands to GDB and receiving data back from
+GDB.  Almost all data passed into this window is directly sent to
+readline and then to GDB.
+
+   It is important to understand that CGDB parses the keys entered in
+the GDB window and has the first chance at dealing with them.  If it is
+interested in the keys, it will handle them. Below is a list of keys
+that CGDB is interested in, and does not pass along any further.
+
+`ESC'
+     Switch back to source window.
+
+`page up'
+     Move up a page.
+
+`page down'
+     Move down a page.
+
+`F11'
+     Go to the beggining of the GDB buffer.
+
+`F12'
+     Go to the end of the GDB buffer.
+
+   Any other keys, besides the ones above, CGDB is currently not
+interested in.  CGDB will pass along these keys to the readline
+library. When readline has determined that a command has been received,
+it alerts CGDB, and a command is then sent to GDB. This is the same
+method used when invoking GDB directly.
+
+
+File: cgdb.info,  Node: File Dialog Mode,  Next: Status Bar Mode,  Prev: GDB Mode,  Up: Controlling CGDB
+
+3.3 Commands avialable during the file dialog mode
+==================================================
+
+The file dialog is primarily used to allow the user to find and open a
+source file that the program you are debugging is made up of.  The file
+dialog will be full screen, and will list each file that the debugged
+program is made up of.  A usual instance of the file dialog would be to
+open it up from the source window using the `o' key, and then to search
+for the file of interest. If you are looking for foo.c type `/foo.c'.
+If you want to select this file, press `enter' once to finish the
+regular expression and again to select the file.
+
+   The commands available in the file dialog are:
+
+`q'
+     Will exit the file dialog, and return to the source window.
+
+`down arrow'
+
+`k'
+     Move down a line.
+
+`down arrow'
+
+`k'
+     Move down a line.
+
+`right arrow'
+
+`l'
+     Move right a line.
+
+`left arrow'
+
+`h'
+     Move left a line.
+
+`page up'
+
+`^b'
+     Move up a page.
+
+`page down'
+
+`^f'
+     Move down a page.
+
+`/'
+     search from current cursor position.
+
+`?'
+     reverse search from current cursor position.
+
+`n'
+     next forward search.
+
+`N'
+     next reverse search.
+
+`enter'
+     Select the current file.
+
+
+File: cgdb.info,  Node: Status Bar Mode,  Prev: File Dialog Mode,  Up: Controlling CGDB
+
+3.4 Commands available in the status bar
+========================================
+
+At the time of this writing, all of these options are off by default.
+
+`:continue'
+     Send a continue command to GDB.
+
+`:finish'
+     Send a finish command to gdb
+
+`:help'
+     Opens the help dialog
+
+`:insert'
+     Move focus to the gdb window
+
+`:next'
+     Send a next command to gdb
+
+`:quit'
+     Quit cgdb (may be abbreviated as :q)
+
+`:quit!'
+     Quit cgdb, even if debugged program is running (abbreviated as :q!)
+
+`:edit'
+     Reloads the file in the source window. This can be useful if the
+     file has changed since it was opened by CGDB.  (abbreviated as :e)
+
+
+File: cgdb.info,  Node: Configuring CGDB,  Next: Sending I/O to Inferior,  Prev: Controlling CGDB,  Up: Top
+
+4 CGDB configuration commands
+*****************************
+
+There may be several features that you find usefull in CGDB.  CGDB is
+capable of automating any of these commands through the use of the
+config file called cgdbrc.  It looks in $HOME/.cgdb/cgdbrc for the
+file.  If it exists, CGDB executes each line in the file in order.  It
+is as if the user typed in all the commands into the status bar after
+the tui was initialized.
+
+   Eventually this file will be used to create macros and high level key
+bindings. Until then, it is a very usefull way to automate simple
+commands.
+
+   The following variables change the behavior of some aspect of cgdb.
+Many of these commands may be abbreviated in some way, and all boolean
+commands my be negated by appending 'no' to the front.  For example:
+`:set ignorecase' turns on case-insensitive searching; while `:set
+noignorecase' turns on case-sensitive searching.
+
+`:set as'
+
+`:set arrowstyle'
+     values=SHORT, LONG, HIGHLIGHT Changes the style of the arrow that
+     is used to indicate the currently executing line in the source
+     viewer.  The default value is short.  A longer arrow is available,
+     for easier readability.  Finally, the 'highlight' option draws no
+     arrow at all, instead drawing the entire line in inverse video.
+
+`:set asr'
+
+`:set autosourcereload'
+     If this is on, CGDB will automatically reload a source file if it
+     has changed since CGDB has opened it.  If it is off, the file will
+     never be reloaded, until you start CGDB again. The default is off.
+     This feature is useful when you are debugging a program, then you
+     modify a source file, recompile, and 'r' in GDB's CLI window. The
+     file in this case will be updated to show the new version.  Note,
+     CGDB only looks at the timestamp of the source file to determine
+     if it has changed. So if you modify the source file, and didn't
+     recompile yet, CGDB will still pick up on the changes.
+
+`:set escdelay'
+     Set the length of time to wait before timing out and treating the
+     ESC keystroke as the ESC character rather than combining it with
+     other characters in the buffer to create a key sequence. The
+     variable is measured in milli seconds. If ESCDELAY is 0, the
+     system immediately composes the ESCAPE response without waiting
+     for more information from the buffer. The user may choose any
+     value between 0 and 10000, inclusive. The default setting for the
+     ESCDELAY environment variable is 40 (forty tenths of a second).
+
+`:set ic'
+
+`:set ignorecase'
+     Sets searching case insensitive
+
+`:set sc'
+
+`:set shortcut'
+     Enables shortcut commands typed in source window
+
+`:set stc'
+
+`:set showtgdbcommands'
+     If this is on, CGDB will show all of the commands that it sends to
+     GDB.  If it is off, CGDB will not show the commands that it gives
+     to GDB.  The default is off.
+
+`:set syn'
+
+`:set syntax'
+     Sets the current highlighting mode of the current file.
+     values=C,ADA,OFF
+
+`:set tabstop'
+     Number of spaces that should be rendered on screen for TAB
+     characters (\t)
+
+`:set wmh'
+
+`:set winminheight'
+     The minimal height of a window. Windows will never become smaller
+     than this value.
+
+`:set winsplit'
+     Set the split point between source and gdb window (especially
+     useful as an init setting in cgdbrc) values=TOP_FULL, TOP_BIG,
+     EVEN, BOTTOM_BIG, BOTTOM_FULL
+
+`:set ws'
+
+`:set wrapscan'
+     Searches wrap around the end of file.
+
+
+File: cgdb.info,  Node: Sending I/O to Inferior,  Next: Terminal Control Flow,  Prev: Configuring CGDB,  Up: Top
+
+5 Sending I/O to the program being debugged
+*******************************************
+
+If the program being debugged takes input on the terminal it is
+recommended that the user start the program on one terminal, and attach
+to it with CGDB from another terminal.  This is the easiest way to pass
+input to the debugged program.
+
+   However, if the user wishes to pass input to the program being
+debugged from within CGDB, there is a mechanism available for doing so.
+However, as of this writing, the technique described below does not
+work on windows, using a natively compiled GDB.  It may work when using
+the GDB that comes with Cygwin.
+
+   This technique is similar to getting in and out of GDB mode.  The
+tty window is not visible by default.  This is because it is only
+needed if the user wishes to send data to the program being debugged.
+To display the tty window, hit `'T'' while in command mode.  After
+hitting `'T'' you will notice that there is another window in the
+middle of the 'source window' and the 'gdb window'.  This is called the
+'tty window'. You will also see a new status bar called the tty status
+bar.  There will be a `*' on the tty status bar after the `'T'' was
+hit.  This is because when the window is opened with the `'T'' command,
+CGDB automatically puts the user into 'tty mode'.  To get out of this
+window hit `ESC'.  This will put you back into command mode.  To make
+the tty window appear and disappear hit the `'T'' key while in command
+mode.  It is a toggle.
+
+   Once the tty window is already open, the user can then hit `'I'' in
+command mode to get into tty mode.  The user can then hit `ESC' in tty
+mode to get back into command mode.
+
+   When the tty window is open, all data that comes from the program,
+goes there.  Any data typed into the tty window will ONLY go to the
+program being debugged.  It will not go to gdb. When the tty window is
+closed, all output from the debugged program will go to the 'gdb
+window' AND to the 'tty window' (for viewing later when the tty window
+is opened).
+
+   If the user wishes to get a new tty for the program being debugged
+then they can type 'Control T'. This will delete all the buffered data
+waiting to be read into the debugged program. This might be useful when
+you rerun or start a new program.
+
+
+File: cgdb.info,  Node: Terminal Control Flow,  Next: Copying This Manual,  Prev: Sending I/O to Inferior,  Up: Top
+
+6 Allowing terminal control flow in CGDB
+****************************************
+
+A user can typically set there control flow behavior by using the stty
+command like so `stty -ixon -ixoff'.  This will disable control flow on
+the terminal where CGDB is started.  If you want to turn control flow
+back on you can type `stty ixon ixoff'.  If flow control is on, when
+the user types `^s', the terminal stops.  When the user types `^q', the
+terminal restarts.  When using readline, the `^s' character usually does
+a forward search.  So, if you want to get this, or other functionality
+out of readline, simply turn off control flow and start CGDB.
+
+
+File: cgdb.info,  Node: Copying This Manual,  Next: Index,  Prev: Terminal Control Flow,  Up: Top
+
+Appendix A Copying This Manual
+******************************
+
+* Menu:
+
+* GNU Free Documentation License::  License for copying this manual.
+
+
+File: cgdb.info,  Node: GNU Free Documentation License,  Up: Copying This Manual
+
+A.1 GNU Free Documentation License
+==================================
+
+                      Version 1.2, November 2002
+
+     Copyright (C) 2000,2001,2002 Free Software Foundation, Inc.
+     51 Franklin St, Fifth Floor, Boston, MA  02110-1301, USA
+
+     Everyone is permitted to copy and distribute verbatim copies
+     of this license document, but changing it is not allowed.
+
+  0. PREAMBLE
+
+     The purpose of this License is to make a manual, textbook, or other
+     functional and useful document "free" in the sense of freedom: to
+     assure everyone the effective freedom to copy and redistribute it,
+     with or without modifying it, either commercially or
+     noncommercially.  Secondarily, this License preserves for the
+     author and publisher a way to get credit for their work, while not
+     being considered responsible for modifications made by others.
+
+     This License is a kind of "copyleft", which means that derivative
+     works of the document must themselves be free in the same sense.
+     It complements the GNU General Public License, which is a copyleft
+     license designed for free software.
+
+     We have designed this License in order to use it for manuals for
+     free software, because free software needs free documentation: a
+     free program should come with manuals providing the same freedoms
+     that the software does.  But this License is not limited to
+     software manuals; it can be used for any textual work, regardless
+     of subject matter or whether it is published as a printed book.
+     We recommend this License principally for works whose purpose is
+     instruction or reference.
+
+  1. APPLICABILITY AND DEFINITIONS
+
+     This License applies to any manual or other work, in any medium,
+     that contains a notice placed by the copyright holder saying it
+     can be distributed under the terms of this License.  Such a notice
+     grants a world-wide, royalty-free license, unlimited in duration,
+     to use that work under the conditions stated herein.  The
+     "Document", below, refers to any such manual or work.  Any member
+     of the public is a licensee, and is addressed as "you".  You
+     accept the license if you copy, modify or distribute the work in a
+     way requiring permission under copyright law.
+
+     A "Modified Version" of the Document means any work containing the
+     Document or a portion of it, either copied verbatim, or with
+     modifications and/or translated into another language.
+
+     A "Secondary Section" is a named appendix or a front-matter section
+     of the Document that deals exclusively with the relationship of the
+     publishers or authors of the Document to the Document's overall
+     subject (or to related matters) and contains nothing that could
+     fall directly within that overall subject.  (Thus, if the Document
+     is in part a textbook of mathematics, a Secondary Section may not
+     explain any mathematics.)  The relationship could be a matter of
+     historical connection with the subject or with related matters, or
+     of legal, commercial, philosophical, ethical or political position
+     regarding them.
+
+     The "Invariant Sections" are certain Secondary Sections whose
+     titles are designated, as being those of Invariant Sections, in
+     the notice that says that the Document is released under this
+     License.  If a section does not fit the above definition of
+     Secondary then it is not allowed to be designated as Invariant.
+     The Document may contain zero Invariant Sections.  If the Document
+     does not identify any Invariant Sections then there are none.
+
+     The "Cover Texts" are certain short passages of text that are
+     listed, as Front-Cover Texts or Back-Cover Texts, in the notice
+     that says that the Document is released under this License.  A
+     Front-Cover Text may be at most 5 words, and a Back-Cover Text may
+     be at most 25 words.
+
+     A "Transparent" copy of the Document means a machine-readable copy,
+     represented in a format whose specification is available to the
+     general public, that is suitable for revising the document
+     straightforwardly with generic text editors or (for images
+     composed of pixels) generic paint programs or (for drawings) some
+     widely available drawing editor, and that is suitable for input to
+     text formatters or for automatic translation to a variety of
+     formats suitable for input to text formatters.  A copy made in an
+     otherwise Transparent file format whose markup, or absence of
+     markup, has been arranged to thwart or discourage subsequent
+     modification by readers is not Transparent.  An image format is
+     not Transparent if used for any substantial amount of text.  A
+     copy that is not "Transparent" is called "Opaque".
+
+     Examples of suitable formats for Transparent copies include plain
+     ASCII without markup, Texinfo input format, LaTeX input format,
+     SGML or XML using a publicly available DTD, and
+     standard-conforming simple HTML, PostScript or PDF designed for
+     human modification.  Examples of transparent image formats include
+     PNG, XCF and JPG.  Opaque formats include proprietary formats that
+     can be read and edited only by proprietary word processors, SGML or
+     XML for which the DTD and/or processing tools are not generally
+     available, and the machine-generated HTML, PostScript or PDF
+     produced by some word processors for output purposes only.
+
+     The "Title Page" means, for a printed book, the title page itself,
+     plus such following pages as are needed to hold, legibly, the
+     material this License requires to appear in the title page.  For
+     works in formats which do not have any title page as such, "Title
+     Page" means the text near the most prominent appearance of the
+     work's title, preceding the beginning of the body of the text.
+
+     A section "Entitled XYZ" means a named subunit of the Document
+     whose title either is precisely XYZ or contains XYZ in parentheses
+     following text that translates XYZ in another language.  (Here XYZ
+     stands for a specific section name mentioned below, such as
+     "Acknowledgements", "Dedications", "Endorsements", or "History".)
+     To "Preserve the Title" of such a section when you modify the
+     Document means that it remains a section "Entitled XYZ" according
+     to this definition.
+
+     The Document may include Warranty Disclaimers next to the notice
+     which states that this License applies to the Document.  These
+     Warranty Disclaimers are considered to be included by reference in
+     this License, but only as regards disclaiming warranties: any other
+     implication that these Warranty Disclaimers may have is void and
+     has no effect on the meaning of this License.
+
+  2. VERBATIM COPYING
+
+     You may copy and distribute the Document in any medium, either
+     commercially or noncommercially, provided that this License, the
+     copyright notices, and the license notice saying this License
+     applies to the Document are reproduced in all copies, and that you
+     add no other conditions whatsoever to those of this License.  You
+     may not use technical measures to obstruct or control the reading
+     or further copying of the copies you make or distribute.  However,
+     you may accept compensation in exchange for copies.  If you
+     distribute a large enough number of copies you must also follow
+     the conditions in section 3.
+
+     You may also lend copies, under the same conditions stated above,
+     and you may publicly display copies.
+
+  3. COPYING IN QUANTITY
+
+     If you publish printed copies (or copies in media that commonly
+     have printed covers) of the Document, numbering more than 100, and
+     the Document's license notice requires Cover Texts, you must
+     enclose the copies in covers that carry, clearly and legibly, all
+     these Cover Texts: Front-Cover Texts on the front cover, and
+     Back-Cover Texts on the back cover.  Both covers must also clearly
+     and legibly identify you as the publisher of these copies.  The
+     front cover must present the full title with all words of the
+     title equally prominent and visible.  You may add other material
+     on the covers in addition.  Copying with changes limited to the
+     covers, as long as they preserve the title of the Document and
+     satisfy these conditions, can be treated as verbatim copying in
+     other respects.
+
+     If the required texts for either cover are too voluminous to fit
+     legibly, you should put the first ones listed (as many as fit
+     reasonably) on the actual cover, and continue the rest onto
+     adjacent pages.
+
+     If you publish or distribute Opaque copies of the Document
+     numbering more than 100, you must either include a
+     machine-readable Transparent copy along with each Opaque copy, or
+     state in or with each Opaque copy a computer-network location from
+     which the general network-using public has access to download
+     using public-standard network protocols a complete Transparent
+     copy of the Document, free of added material.  If you use the
+     latter option, you must take reasonably prudent steps, when you
+     begin distribution of Opaque copies in quantity, to ensure that
+     this Transparent copy will remain thus accessible at the stated
+     location until at least one year after the last time you
+     distribute an Opaque copy (directly or through your agents or
+     retailers) of that edition to the public.
+
+     It is requested, but not required, that you contact the authors of
+     the Document well before redistributing any large number of
+     copies, to give them a chance to provide you with an updated
+     version of the Document.
+
+  4. MODIFICATIONS
+
+     You may copy and distribute a Modified Version of the Document
+     under the conditions of sections 2 and 3 above, provided that you
+     release the Modified Version under precisely this License, with
+     the Modified Version filling the role of the Document, thus
+     licensing distribution and modification of the Modified Version to
+     whoever possesses a copy of it.  In addition, you must do these
+     things in the Modified Version:
+
+       A. Use in the Title Page (and on the covers, if any) a title
+          distinct from that of the Document, and from those of
+          previous versions (which should, if there were any, be listed
+          in the History section of the Document).  You may use the
+          same title as a previous version if the original publisher of
+          that version gives permission.
+
+       B. List on the Title Page, as authors, one or more persons or
+          entities responsible for authorship of the modifications in
+          the Modified Version, together with at least five of the
+          principal authors of the Document (all of its principal
+          authors, if it has fewer than five), unless they release you
+          from this requirement.
+
+       C. State on the Title page the name of the publisher of the
+          Modified Version, as the publisher.
+
+       D. Preserve all the copyright notices of the Document.
+
+       E. Add an appropriate copyright notice for your modifications
+          adjacent to the other copyright notices.
+
+       F. Include, immediately after the copyright notices, a license
+          notice giving the public permission to use the Modified
+          Version under the terms of this License, in the form shown in
+          the Addendum below.
+
+       G. Preserve in that license notice the full lists of Invariant
+          Sections and required Cover Texts given in the Document's
+          license notice.
+
+       H. Include an unaltered copy of this License.
+
+       I. Preserve the section Entitled "History", Preserve its Title,
+          and add to it an item stating at least the title, year, new
+          authors, and publisher of the Modified Version as given on
+          the Title Page.  If there is no section Entitled "History" in
+          the Document, create one stating the title, year, authors,
+          and publisher of the Document as given on its Title Page,
+          then add an item describing the Modified Version as stated in
+          the previous sentence.
+
+       J. Preserve the network location, if any, given in the Document
+          for public access to a Transparent copy of the Document, and
+          likewise the network locations given in the Document for
+          previous versions it was based on.  These may be placed in
+          the "History" section.  You may omit a network location for a
+          work that was published at least four years before the
+          Document itself, or if the original publisher of the version
+          it refers to gives permission.
+
+       K. For any section Entitled "Acknowledgements" or "Dedications",
+          Preserve the Title of the section, and preserve in the
+          section all the substance and tone of each of the contributor
+          acknowledgements and/or dedications given therein.
+
+       L. Preserve all the Invariant Sections of the Document,
+          unaltered in their text and in their titles.  Section numbers
+          or the equivalent are not considered part of the section
+          titles.
+
+       M. Delete any section Entitled "Endorsements".  Such a section
+          may not be included in the Modified Version.
+
+       N. Do not retitle any existing section to be Entitled
+          "Endorsements" or to conflict in title with any Invariant
+          Section.
+
+       O. Preserve any Warranty Disclaimers.
+
+     If the Modified Version includes new front-matter sections or
+     appendices that qualify as Secondary Sections and contain no
+     material copied from the Document, you may at your option
+     designate some or all of these sections as invariant.  To do this,
+     add their titles to the list of Invariant Sections in the Modified
+     Version's license notice.  These titles must be distinct from any
+     other section titles.
+
+     You may add a section Entitled "Endorsements", provided it contains
+     nothing but endorsements of your Modified Version by various
+     parties--for example, statements of peer review or that the text
+     has been approved by an organization as the authoritative
+     definition of a standard.
+
+     You may add a passage of up to five words as a Front-Cover Text,
+     and a passage of up to 25 words as a Back-Cover Text, to the end
+     of the list of Cover Texts in the Modified Version.  Only one
+     passage of Front-Cover Text and one of Back-Cover Text may be
+     added by (or through arrangements made by) any one entity.  If the
+     Document already includes a cover text for the same cover,
+     previously added by you or by arrangement made by the same entity
+     you are acting on behalf of, you may not add another; but you may
+     replace the old one, on explicit permission from the previous
+     publisher that added the old one.
+
+     The author(s) and publisher(s) of the Document do not by this
+     License give permission to use their names for publicity for or to
+     assert or imply endorsement of any Modified Version.
+
+  5. COMBINING DOCUMENTS
+
+     You may combine the Document with other documents released under
+     this License, under the terms defined in section 4 above for
+     modified versions, provided that you include in the combination
+     all of the Invariant Sections of all of the original documents,
+     unmodified, and list them all as Invariant Sections of your
+     combined work in its license notice, and that you preserve all
+     their Warranty Disclaimers.
+
+     The combined work need only contain one copy of this License, and
+     multiple identical Invariant Sections may be replaced with a single
+     copy.  If there are multiple Invariant Sections with the same name
+     but different contents, make the title of each such section unique
+     by adding at the end of it, in parentheses, the name of the
+     original author or publisher of that section if known, or else a
+     unique number.  Make the same adjustment to the section titles in
+     the list of Invariant Sections in the license notice of the
+     combined work.
+
+     In the combination, you must combine any sections Entitled
+     "History" in the various original documents, forming one section
+     Entitled "History"; likewise combine any sections Entitled
+     "Acknowledgements", and any sections Entitled "Dedications".  You
+     must delete all sections Entitled "Endorsements."
+
+  6. COLLECTIONS OF DOCUMENTS
+
+     You may make a collection consisting of the Document and other
+     documents released under this License, and replace the individual
+     copies of this License in the various documents with a single copy
+     that is included in the collection, provided that you follow the
+     rules of this License for verbatim copying of each of the
+     documents in all other respects.
+
+     You may extract a single document from such a collection, and
+     distribute it individually under this License, provided you insert
+     a copy of this License into the extracted document, and follow
+     this License in all other respects regarding verbatim copying of
+     that document.
+
+  7. AGGREGATION WITH INDEPENDENT WORKS
+
+     A compilation of the Document or its derivatives with other
+     separate and independent documents or works, in or on a volume of
+     a storage or distribution medium, is called an "aggregate" if the
+     copyright resulting from the compilation is not used to limit the
+     legal rights of the compilation's users beyond what the individual
+     works permit.  When the Document is included in an aggregate, this
+     License does not apply to the other works in the aggregate which
+     are not themselves derivative works of the Document.
+
+     If the Cover Text requirement of section 3 is applicable to these
+     copies of the Document, then if the Document is less than one half
+     of the entire aggregate, the Document's Cover Texts may be placed
+     on covers that bracket the Document within the aggregate, or the
+     electronic equivalent of covers if the Document is in electronic
+     form.  Otherwise they must appear on printed covers that bracket
+     the whole aggregate.
+
+  8. TRANSLATION
+
+     Translation is considered a kind of modification, so you may
+     distribute translations of the Document under the terms of section
+     4.  Replacing Invariant Sections with translations requires special
+     permission from their copyright holders, but you may include
+     translations of some or all Invariant Sections in addition to the
+     original versions of these Invariant Sections.  You may include a
+     translation of this License, and all the license notices in the
+     Document, and any Warranty Disclaimers, provided that you also
+     include the original English version of this License and the
+     original versions of those notices and disclaimers.  In case of a
+     disagreement between the translation and the original version of
+     this License or a notice or disclaimer, the original version will
+     prevail.
+
+     If a section in the Document is Entitled "Acknowledgements",
+     "Dedications", or "History", the requirement (section 4) to
+     Preserve its Title (section 1) will typically require changing the
+     actual title.
+
+  9. TERMINATION
+
+     You may not copy, modify, sublicense, or distribute the Document
+     except as expressly provided for under this License.  Any other
+     attempt to copy, modify, sublicense or distribute the Document is
+     void, and will automatically terminate your rights under this
+     License.  However, parties who have received copies, or rights,
+     from you under this License will not have their licenses
+     terminated so long as such parties remain in full compliance.
+
+ 10. FUTURE REVISIONS OF THIS LICENSE
+
+     The Free Software Foundation may publish new, revised versions of
+     the GNU Free Documentation License from time to time.  Such new
+     versions will be similar in spirit to the present version, but may
+     differ in detail to address new problems or concerns.  See
+     `http://www.gnu.org/copyleft/'.
+
+     Each version of the License is given a distinguishing version
+     number.  If the Document specifies that a particular numbered
+     version of this License "or any later version" applies to it, you
+     have the option of following the terms and conditions either of
+     that specified version or of any later version that has been
+     published (not as a draft) by the Free Software Foundation.  If
+     the Document does not specify a version number of this License,
+     you may choose any version ever published (not as a draft) by the
+     Free Software Foundation.
+
+A.1.1 ADDENDUM: How to use this License for your documents
+----------------------------------------------------------
+
+To use this License in a document you have written, include a copy of
+the License in the document and put the following copyright and license
+notices just after the title page:
+
+       Copyright (C)  YEAR  YOUR NAME.
+       Permission is granted to copy, distribute and/or modify this document
+       under the terms of the GNU Free Documentation License, Version 1.2
+       or any later version published by the Free Software Foundation;
+       with no Invariant Sections, no Front-Cover Texts, and no Back-Cover
+       Texts.  A copy of the license is included in the section entitled ``GNU
+       Free Documentation License''.
+
+   If you have Invariant Sections, Front-Cover Texts and Back-Cover
+Texts, replace the "with...Texts." line with this:
+
+         with the Invariant Sections being LIST THEIR TITLES, with
+         the Front-Cover Texts being LIST, and with the Back-Cover Texts
+         being LIST.
+
+   If you have Invariant Sections without Cover Texts, or some other
+combination of the three, merge those two alternatives to suit the
+situation.
+
+   If your document contains nontrivial examples of program code, we
+recommend releasing these examples in parallel under your choice of
+free software license, such as the GNU General Public License, to
+permit their use in free software.
+
+
+File: cgdb.info,  Node: Index,  Prev: Copying This Manual,  Up: Top
+
+Index
+*****
+
+ [index ]
+* Menu:
+
+* FDL, GNU Free Documentation License:   GNU Free Documentation License.
+                                                                (line 6)
+
+
+
+Tag Table:
+Node: Top1050
+Node: Summary2411
+Node: Invocation3566
+Node: Understanding CGDB4022
+Node: Source Window5359
+Node: GDB Window7870
+Node: File Dialog Window8850
+Node: TTY Window9442
+Node: Status Bar9641
+Node: Switching Windows9831
+Node: Controlling CGDB10304
+Node: CGDB Mode10960
+Node: GDB Mode12635
+Node: File Dialog Mode13846
+Node: Status Bar Mode15174
+Node: Configuring CGDB15921
+Node: Sending I/O to Inferior19511
+Node: Terminal Control Flow21908
+Node: Copying This Manual22671
+Node: GNU Free Documentation License22914
+Node: Index45322
+
+End Tag Table
