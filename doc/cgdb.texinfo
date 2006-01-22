@@ -150,21 +150,21 @@ task, please contact me.
 @node Source Window
 @section Understanding the source window.
 
-The source window is the window that provides you a view of the source code
-that the debugged program is made up of.  It will display to the user a single
-source file at a time.  While the user is debugging, via next and step, CGDB
-will update the source file and line number to keep you informed as to where
-GDB is debugging.
+@cindex source window
+The @dfn{source window} is the window that provides you a view of the source 
+code that the debugged program is made up of.  It will display to the user a 
+single source file at a time.  While the user is debugging, via @code{next} 
+and @code{step}, CGDB will update the source file and line number to keep you 
+informed as to where GDB is debugging.
 
-On top of simply showing the source file to the user, CGDB has several
-features that make debugging easier than using plain old GDB.  One feature
-you will notice right away while debugging a C, C++ or ADA program, is that
-the source files are syntax highlighted.  This allows the user to easily 
-navigate through the source file to look for certain places in the source 
-code.  If you would like to see another source language highlighted, contact 
-us.
+CGDB has several features that make debugging easier than using plain old GDB.  
+One feature you will notice right away while debugging a C, C++ or ADA program, 
+is that the source files are syntax highlighted.  This allows the user to 
+easily navigate through the source file to look for certain places in the 
+source code.  If you would like to see another source language highlighted, 
+contact us.
 
-On top of showing the source code, CGDB also displays to the user the 
+In addition to showing the source code, CGDB also displays to the user the 
 currently executing line. The line number will be highlighted green, to
 represent that the particular line, is the current line being debugged by GDB.
 Also, CGDB will display an arrow extending from the line number, to the 
@@ -195,10 +195,11 @@ window.  They are available here: @xref{CGDB Mode}.
 @node GDB Window
 @section Understanding the GDB window.
 
-The GDB window is how CGDB allows the user to interface with the GNU debugger.
-If the user wishes to pass a command to GDB, it can simply be typed into this
-window, and GDB will receive the command.  This interface is intended to be 
-100% identical to using GDB on a terminal.
+@cindex GDB window
+The @dfn{GDB window} is how CGDB allows the user to interface with the GNU 
+debugger.  If the user wishes to pass a command to GDB, it can simply be 
+typed into this window, and GDB will receive the command.  This interface is 
+intended to be 100% identical to using GDB on a terminal.
 
 There is a limited set of keys that can be typed into this window that CGDB
 interprets and handles, instead of sending to GDB.  This list can be found
@@ -213,9 +214,10 @@ normal terminal when working with GDB.
 @node File Dialog Window
 @section Understanding the file dialog window.
 
-The file dialog window is available to help the user view and select which
-file they would like to view.  It provides the user with a list of all the
-files that make up the program being debugged.  If there are no files 
+@cindex file dialog window
+The @dfn{file dialog window} is available to help the user view and select 
+which file they would like to view.  It provides the user with a list of all 
+the files that make up the program being debugged.  If there are no files 
 available, because there is no program being debugged or because there is
 no debug symbols, then the file dialog will not open and a message will be 
 displayed at the status bar.
@@ -232,7 +234,8 @@ dialog.  They are available here: @xref{File Dialog Mode}.
 @node TTY Window
 @section Understanding the TTY window.
 
-The TTY window is available to allow the user to pass input to the program 
+@cindex TTY window
+The @dfn{TTY window} is available to allow the user to pass input to the program 
 being debugged. This window will act similar to the GDB window, except that
 the data you type will get sent to the program being debugged.  
 @xref{Sending I/O to Inferior}.
@@ -252,10 +255,11 @@ simplifies the use of CGDB, and works in all cases.
 @node Status Bar
 @section Understanding the status bar.
 
-The status bar is the general purpose way for CGDB to show the user which
-commands they are currently typeing or report errors to the user when they 
-occur.  CGDB does not use popup's or other forms of I/O to alert the user 
-of information or problems.
+@cindex status bar
+The @dfn{status bar} is the general purpose way for CGDB to show the user 
+which commands they are currently typeing or report errors to the user when 
+they occur.  CGDB does not use popup's or other forms of I/O to alert the 
+user of information or problems.
 
 While CGDB is running, you can configure it with any of the commands that 
 are valid in CGDB's configuration file. @xref{Configuring CGDB}.  Simply

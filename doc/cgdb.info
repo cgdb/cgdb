@@ -148,27 +148,26 @@ File: cgdb.info,  Node: Source Window,  Next: GDB Window,  Up: Understanding CGD
 2.1 Understanding the source window.
 ====================================
 
-The source window is the window that provides you a view of the source
+The "source window" is the window that provides you a view of the source
 code that the debugged program is made up of.  It will display to the
 user a single source file at a time.  While the user is debugging, via
-next and step, CGDB will update the source file and line number to keep
-you informed as to where GDB is debugging.
+`next' and `step', CGDB will update the source file and line number to
+keep you informed as to where GDB is debugging.
 
-   On top of simply showing the source file to the user, CGDB has
-several features that make debugging easier than using plain old GDB.
-One feature you will notice right away while debugging a C, C++ or ADA
-program, is that the source files are syntax highlighted.  This allows
-the user to easily navigate through the source file to look for certain
-places in the source code.  If you would like to see another source
-language highlighted, contact us.
+   CGDB has several features that make debugging easier than using
+plain old GDB.  One feature you will notice right away while debugging
+a C, C++ or ADA program, is that the source files are syntax
+highlighted.  This allows the user to easily navigate through the
+source file to look for certain places in the source code.  If you
+would like to see another source language highlighted, contact us.
 
-   On top of showing the source code, CGDB also displays to the user the
-currently executing line. The line number will be highlighted green, to
-represent that the particular line, is the current line being debugged
-by GDB.  Also, CGDB will display an arrow extending from the line
-number, to the source line.  You can configure what type of arrow CGDB
-uses with the `:set arrowstyle' configuration option. By default, the
-`short' arrow is used.  However, my personal favorite is the `long'
+   In addition to showing the source code, CGDB also displays to the
+user the currently executing line. The line number will be highlighted
+green, to represent that the particular line, is the current line being
+debugged by GDB.  Also, CGDB will display an arrow extending from the
+line number, to the source line.  You can configure what type of arrow
+CGDB uses with the `:set arrowstyle' configuration option. By default,
+the `short' arrow is used.  However, my personal favorite is the `long'
 arrow.
 
    As you navigate through the source window, the current line the
@@ -197,9 +196,9 @@ File: cgdb.info,  Node: GDB Window,  Next: File Dialog Window,  Prev: Source Win
 2.2 Understanding the GDB window.
 =================================
 
-The GDB window is how CGDB allows the user to interface with the GNU
-debugger.  If the user wishes to pass a command to GDB, it can simply
-be typed into this window, and GDB will receive the command.  This
+The "GDB window" is how CGDB allows the user to interface with the GNU
+debugger.  If the user wishes to pass a command to GDB, it can simply be
+typed into this window, and GDB will receive the command.  This
 interface is intended to be 100% identical to using GDB on a terminal.
 
    There is a limited set of keys that can be typed into this window
@@ -218,7 +217,7 @@ File: cgdb.info,  Node: File Dialog Window,  Next: TTY Window,  Prev: GDB Window
 2.3 Understanding the file dialog window.
 =========================================
 
-The file dialog window is available to help the user view and select
+The "file dialog window" is available to help the user view and select
 which file they would like to view.  It provides the user with a list
 of all the files that make up the program being debugged.  If there are
 no files available, because there is no program being debugged or
@@ -240,7 +239,7 @@ File: cgdb.info,  Node: TTY Window,  Next: Status Bar,  Prev: File Dialog Window
 2.4 Understanding the TTY window.
 =================================
 
-The TTY window is available to allow the user to pass input to the
+The "TTY window" is available to allow the user to pass input to the
 program being debugged. This window will act similar to the GDB window,
 except that the data you type will get sent to the program being
 debugged.  *Note Sending I/O to Inferior::.
@@ -264,7 +263,7 @@ File: cgdb.info,  Node: Status Bar,  Next: Switching Windows,  Prev: TTY Window,
 2.5 Understanding the status bar.
 =================================
 
-The status bar is the general purpose way for CGDB to show the user
+The "status bar" is the general purpose way for CGDB to show the user
 which commands they are currently typeing or report errors to the user
 when they occur.  CGDB does not use popup's or other forms of I/O to
 alert the user of information or problems.
@@ -1254,6 +1253,11 @@ Index
 
 * FDL, GNU Free Documentation License:   GNU Free Documentation License.
                                                                 (line 6)
+* file dialog window:                    File Dialog Window.    (line 6)
+* GDB window:                            GDB Window.            (line 6)
+* source window:                         Source Window.         (line 6)
+* status bar:                            Status Bar.            (line 6)
+* TTY window:                            TTY Window.            (line 6)
 
 
 
@@ -1263,23 +1267,23 @@ Node: Summary2478
 Node: Invocation3633
 Node: Understanding CGDB4087
 Node: Source Window5422
-Node: GDB Window7932
-Node: File Dialog Window8912
-Node: TTY Window9991
-Node: Status Bar11030
-Node: Switching Windows11947
-Node: Controlling CGDB12420
-Node: CGDB Mode13197
-Node: GDB Mode15007
-Node: File Dialog Mode16218
-Node: TTY Mode17638
-Node: Status Bar Mode18031
-Node: Configuring CGDB18210
-Node: Sending I/O to Inferior22332
-Node: Terminal Control Flow24729
-Node: Building CGDB25486
-Node: Copying This Manual27359
-Node: GNU Free Documentation License27594
-Node: Index50002
+Node: GDB Window7890
+Node: File Dialog Window8872
+Node: TTY Window9953
+Node: Status Bar10994
+Node: Switching Windows11913
+Node: Controlling CGDB12386
+Node: CGDB Mode13163
+Node: GDB Mode14973
+Node: File Dialog Mode16184
+Node: TTY Mode17604
+Node: Status Bar Mode17997
+Node: Configuring CGDB18176
+Node: Sending I/O to Inferior22298
+Node: Terminal Control Flow24695
+Node: Building CGDB25452
+Node: Copying This Manual27325
+Node: GNU Free Documentation License27560
+Node: Index49968
 
 End Tag Table
