@@ -124,11 +124,11 @@ currently hanging, or operating a long command.
 @chapter Understanding the core concepts of CGDB
 
 The CGDB user interface currently consists of two windows and a status bar.  
-The "source" window is currently on the top and the "GDB" window is on the 
+The source window is currently on the top and the GDB window is on the 
 bottom.  The status bar currently separates the two windows.
 
-The interface has two modes depending on which window is focused.  "CGDB" mode
-is when the source window is focused, and "GDB" mode when the GDB window is 
+The interface has two modes depending on which window is focused.  CGDB mode
+is when the source window is focused, and GDB mode when the GDB window is 
 focused.
 
 By the time version CGDB version 1.0 is reached, the windows will be movable,
