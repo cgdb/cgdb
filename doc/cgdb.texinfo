@@ -131,7 +131,7 @@ The interface has two modes depending on which window is focused.  CGDB mode
 is when the source window is focused, and GDB mode when the GDB window is 
 focused.
 
-By the time version CGDB version 1.0 is reached, the windows will be movable,
+Beggining with CGDB version 1.0, the windows are movable,
 and the user will be able to create as many or as few that is desired. 
 Currently however, all of my time is spent developing the interface between
 CGDB and GDB. Once this is complete, the UI of CGDB will become much more 

@@ -126,12 +126,12 @@ on the bottom.  The status bar currently separates the two windows.
 CGDB mode is when the source window is focused, and GDB mode when the
 GDB window is focused.
 
-   By the time version CGDB version 1.0 is reached, the windows will be
-movable, and the user will be able to create as many or as few that is
-desired.  Currently however, all of my time is spent developing the
-interface between CGDB and GDB. Once this is complete, the UI of CGDB
-will become much more polished.  If you are a ncurses developer, and
-have spare time to work on this task, please contact me.
+   Beggining with CGDB version 1.0, the windows are movable, and the
+user will be able to create as many or as few that is desired.
+Currently however, all of my time is spent developing the interface
+between CGDB and GDB. Once this is complete, the UI of CGDB will become
+much more polished.  If you are a ncurses developer, and have spare
+time to work on this task, please contact me.
 
 * Menu:
 
@@ -1262,24 +1262,24 @@ Node: Top1050
 Node: Summary2478
 Node: Invocation3633
 Node: Understanding CGDB4087
-Node: Source Window5443
-Node: GDB Window7953
-Node: File Dialog Window8933
-Node: TTY Window10012
-Node: Status Bar11051
-Node: Switching Windows11968
-Node: Controlling CGDB12441
-Node: CGDB Mode13218
-Node: GDB Mode15028
-Node: File Dialog Mode16239
-Node: TTY Mode17659
-Node: Status Bar Mode18052
-Node: Configuring CGDB18231
-Node: Sending I/O to Inferior22353
-Node: Terminal Control Flow24750
-Node: Building CGDB25507
-Node: Copying This Manual27380
-Node: GNU Free Documentation License27615
-Node: Index50023
+Node: Source Window5422
+Node: GDB Window7932
+Node: File Dialog Window8912
+Node: TTY Window9991
+Node: Status Bar11030
+Node: Switching Windows11947
+Node: Controlling CGDB12420
+Node: CGDB Mode13197
+Node: GDB Mode15007
+Node: File Dialog Mode16218
+Node: TTY Mode17638
+Node: Status Bar Mode18031
+Node: Configuring CGDB18210
+Node: Sending I/O to Inferior22332
+Node: Terminal Control Flow24729
+Node: Building CGDB25486
+Node: Copying This Manual27359
+Node: GNU Free Documentation License27594
+Node: Index50002
 
 End Tag Table
