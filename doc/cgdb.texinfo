@@ -12,7 +12,7 @@ This manual is for @acronym{GNU} CGDB
 (version @value{VERSION}, @value{UPDATED}),
 the @acronym{GNU} ncurses based front end to GDB.
 
-Copyright @copyright{} 2004 Free Software Foundation, Inc.
+Copyright @copyright{} 2006 Free Software Foundation, Inc.
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -55,7 +55,7 @@ Software Foundation raise funds for GNU development.''
 * Summary::                     Summary of CGDB
 
 * Invocation::                  Getting in and out of CGDB
-* Understanding CGDB::		Understanding the core concepts of CGDB
+* Understanding CGDB::          Understanding the core concepts of CGDB
 * Controlling CGDB::            CGDB commands
 * Configuring CGDB::            CGDB configuration commands
 * Sending I/O to Inferior::     Sending I/O to the program being debugged
@@ -139,10 +139,10 @@ polished.  If you are a ncurses developer, and have spare time to work on this
 task, please contact me.
 
 @menu
-* Source Window::		Understanding the source window.
+* Source Window::               Understanding the source window.
 * GDB Window::                  Understanding the GDB window.
 * File Dialog Window::          Understanding the file dialog window.
-* TTY Window::			Understanding the TTY window.
+* TTY Window::                  Understanding the TTY window.
 * Status Bar::                  Understanding the status bar.
 * Switching Windows::           Switching between windows.
 @end menu
@@ -287,11 +287,11 @@ which window is active.  The following information will help you determine
 what commands are accessible during which modes.
 
 @menu
-* CGDB Mode::			Commands available during CGDB mode
-* GDB Mode::			Commands available during GDB mode
-* File Dialog Mode::		Commands available during the file dialog mode
-* TTY Mode::			Commands available during TTY mode
-* Status Bar Mode::		Commands available in the status bar
+* CGDB Mode::                   Commands available during CGDB mode
+* GDB Mode::                    Commands available during GDB mode
+* File Dialog Mode::            Commands available during the file dialog mode
+* TTY Mode::                    Commands available during TTY mode
+* Status Bar Mode::             Commands available in the status bar
 @end menu
 
 @node CGDB Mode

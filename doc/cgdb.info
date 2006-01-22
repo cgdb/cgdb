@@ -4,7 +4,7 @@ This is ../../cgdb/doc/cgdb.info, produced by makeinfo version 4.7 from
    This manual is for GNU CGDB (version 0.5.3-cvs, 17 January 2006),
 the GNU ncurses based front end to GDB.
 
-   Copyright (C) 2004 Free Software Foundation, Inc.
+   Copyright (C) 2006 Free Software Foundation, Inc.
 
      Permission is granted to copy, distribute and/or modify this
      document under the terms of the GNU Free Documentation License,
@@ -32,7 +32,7 @@ CGDB
 This manual is for GNU CGDB (version 0.5.3-cvs, 17 January 2006), the
 GNU ncurses based front end to GDB.
 
-   Copyright (C) 2004 Free Software Foundation, Inc.
+   Copyright (C) 2006 Free Software Foundation, Inc.
 
      Permission is granted to copy, distribute and/or modify this
      document under the terms of the GNU Free Documentation License,
@@ -51,7 +51,7 @@ GNU ncurses based front end to GDB.
 * Summary::                     Summary of CGDB
 
 * Invocation::                  Getting in and out of CGDB
-* Understanding CGDB::		Understanding the core concepts of CGDB
+* Understanding CGDB::          Understanding the core concepts of CGDB
 * Controlling CGDB::            CGDB commands
 * Configuring CGDB::            CGDB configuration commands
 * Sending I/O to Inferior::     Sending I/O to the program being debugged
@@ -135,10 +135,10 @@ have spare time to work on this task, please contact me.
 
 * Menu:
 
-* Source Window::		Understanding the source window.
+* Source Window::               Understanding the source window.
 * GDB Window::                  Understanding the GDB window.
 * File Dialog Window::          Understanding the file dialog window.
-* TTY Window::			Understanding the TTY window.
+* TTY Window::                  Understanding the TTY window.
 * Status Bar::                  Understanding the status bar.
 * Switching Windows::           Switching between windows.
 
@@ -306,11 +306,11 @@ help you determine what commands are accessible during which modes.
 
 * Menu:
 
-* CGDB Mode::			Commands available during CGDB mode
-* GDB Mode::			Commands available during GDB mode
-* File Dialog Mode::		Commands available during the file dialog mode
-* TTY Mode::			Commands available during TTY mode
-* Status Bar Mode::		Commands available in the status bar
+* CGDB Mode::                   Commands available during CGDB mode
+* GDB Mode::                    Commands available during GDB mode
+* File Dialog Mode::            Commands available during the file dialog mode
+* TTY Mode::                    Commands available during TTY mode
+* Status Bar Mode::             Commands available in the status bar
 
 
 File: cgdb.info,  Node: CGDB Mode,  Next: GDB Mode,  Up: Controlling CGDB
@@ -340,26 +340,31 @@ search it, or switch to a different mode.
      Opens a new tty for the debugged program.
 
 `up arrow'
+     Move up a line.
 
 `j'
      Move up a line.
 
 `down arrow'
+     Move down a line.
 
 `k'
      Move down a line.
 
 `left arrow'
+     Move left a line.
 
 `h'
      Move left a line.
 
 `right arrow'
+     Move right a line.
 
 `l'
      Move right a line.
 
 `page up'
+     Move up a page.
 
 `^b'
      Move up a page.
@@ -368,6 +373,7 @@ search it, or switch to a different mode.
      Move up 1/2 a page.
 
 `page down'
+     Move down a page.
 
 `^f'
      Move down a page.
@@ -462,45 +468,51 @@ File: cgdb.info,  Node: File Dialog Mode,  Next: TTY Mode,  Prev: GDB Mode,  Up:
 ==================================================
 
 The file dialog is primarily used to allow the user to find and open a
-source file that the program you are debugging is made up of.  The file
-dialog will be full screen, and will list each file that the debugged
-program is made up of.  A usual instance of the file dialog would be to
-open it up from the source window using the `o' key, and then to search
-for the file of interest. If you are looking for foo.c type `/foo.c'.
-If you want to select this file, press `enter' once to finish the
-regular expression and again to select the file.
+source file that the program they are debugging is made up of.  The
+file dialog will be full screen, and will list each file that the
+debugged program is made up of.  A usual instance of the file dialog
+would be to open it up from the source window using the `o' key, and
+then to search for the file of interest. If you are looking for foo.c
+type `/foo.c', press `enter' once to finish the regular expression and
+again to select the file.
 
    The commands available in the file dialog are:
 
 `q'
      Will exit the file dialog, and return to the source window.
 
-`down arrow'
+`up arrow'
+     Move up a line.
 
 `k'
+     Move up a line.
+
+`down arrow'
      Move down a line.
 
-`down arrow'
-
-`k'
+`j'
      Move down a line.
 
 `right arrow'
+     Move right a line.
 
 `l'
      Move right a line.
 
 `left arrow'
+     Move left a line.
 
 `h'
      Move left a line.
 
 `page up'
+     Move up a page.
 
 `^b'
      Move up a page.
 
 `page down'
+     Move down a page.
 
 `^f'
      Move down a page.
@@ -740,7 +752,54 @@ File: cgdb.info,  Node: Building CGDB,  Next: Copying This Manual,  Prev: Termin
 7 Building CGDB from source
 ***************************
 
-Building CGDB.
+Building CGDB from source requires several packages. First, CGDB is
+hosted at sf.net/projects/cgdb. You can determine how to get CGDB from
+source by looking here: http://sourceforge.net/cvs/?group_id=72581.
+
+   Once you have the source to CGDB, now you can begin to build it.
+You will of course need many packages to build CGDB. Below is a list of
+all of them that are required to build CGDB.
+
+`GNU Make'
+     I have successfully used version 3.79.1, however, older versions
+     probably will work.
+
+`GNU GCC'
+     The GNU C compiler. I've compiled CGDB with versions as old as
+     2.9.5, and as new as 4.0.2.
+
+`GNU Readline'
+     The GNU readline library version 5.1. CGDB will not work with
+     versions before 5.1.  Readline was modified specifically to work
+     with CGDB.
+
+`GNU Ncurses'
+     I have successfully used libncurses.so.5 successfully.  However,
+     older versions probably will work.
+
+   Below is a list of optional packages you will need, if modifying
+certain files in CGDB.
+
+`GNU Flex'
+     If you modify any files with an extension of `.l', you will have
+     to have flex installed.  I have used flex 2.5.4 to build CGDB.
+
+`GNU Texinfo'
+     If you modify doc/cgdb.texinfo, then you will be required to have
+     this package installed.  I have used version 4.7 to build CGDB.
+
+   CGDB uses autoconf/automake to build its configure scripts and
+makefiles.  So, if you change any of the autoconf/automake files, you
+will need this software installed.
+
+`GNU Automake'
+     This has the program acolocl, and must be version Version 1.9.5.
+
+`GNU Autoconf'
+     This has the program autoconf, and must be version 2.59.
+
+`GNU m4'
+     This has the program m4, and must be version 1.4.3.
 
 
 File: cgdb.info,  Node: Copying This Manual,  Next: Index,  Prev: Building CGDB,  Up: Top
@@ -1200,27 +1259,27 @@ Index
 
 Tag Table:
 Node: Top1050
-Node: Summary2470
-Node: Invocation3625
-Node: Understanding CGDB4079
-Node: Source Window5415
-Node: GDB Window7925
-Node: File Dialog Window8905
-Node: TTY Window9984
-Node: Status Bar11023
-Node: Switching Windows11940
-Node: Controlling CGDB12413
-Node: CGDB Mode13119
-Node: GDB Mode14794
-Node: File Dialog Mode16005
-Node: TTY Mode17326
-Node: Status Bar Mode17719
-Node: Configuring CGDB17898
-Node: Sending I/O to Inferior22020
-Node: Terminal Control Flow24417
-Node: Building CGDB25174
-Node: Copying This Manual25356
-Node: GNU Free Documentation License25591
-Node: Index47999
+Node: Summary2478
+Node: Invocation3633
+Node: Understanding CGDB4087
+Node: Source Window5451
+Node: GDB Window7961
+Node: File Dialog Window8941
+Node: TTY Window10020
+Node: Status Bar11059
+Node: Switching Windows11976
+Node: Controlling CGDB12449
+Node: CGDB Mode13226
+Node: GDB Mode15036
+Node: File Dialog Mode16247
+Node: TTY Mode17667
+Node: Status Bar Mode18060
+Node: Configuring CGDB18239
+Node: Sending I/O to Inferior22361
+Node: Terminal Control Flow24758
+Node: Building CGDB25515
+Node: Copying This Manual27388
+Node: GNU Free Documentation License27623
+Node: Index50031
 
 End Tag Table
