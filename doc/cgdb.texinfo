@@ -61,6 +61,8 @@ Software Foundation raise funds for GNU development.''
 * Sending I/O to Inferior::     Sending I/O to the program being debugged
 * Terminal Control Flow::       Allowing terminal control flow in CGDB
 
+* Building CGDB::               Building CGDB from source
+
 * Copying This Manual::
 
 * Index::
@@ -312,23 +314,29 @@ Opens a window to give input to the debugged program.
 @item ^T
 Opens a new tty for the debugged program.
 @item up arrow
+Move up a line.
 @item j
 Move up a line.
 @item down arrow
+Move down a line.
 @item k
 Move down a line.
 @item left arrow
+Move left a line.
 @item h
 Move left a line.
 @item right arrow
+Move right a line.
 @item l
 Move right a line.
 @item page up
+Move up a page.
 @item ^b
 Move up a page.
 @item ^u
 Move up 1/2 a page.
 @item page down
+Move down a page.
 @item ^f
 Move down a page.
 @item ^d
@@ -398,35 +406,40 @@ then sent to GDB. This is the same method used when invoking GDB directly.
 @section Commands available during the file dialog mode
 
 The file dialog is primarily used to allow the user to find and open a source
-file that the program you are debugging is made up of.  The file dialog will
+file that the program they are debugging is made up of.  The file dialog will
 be full screen, and will list each file that the debugged program is made up 
 of.  A usual instance of the file dialog would be to open it up from the 
 source window using the @code{o} key, and then to search for the file of 
-interest. If you are looking for foo.c type @code{/foo.c}.  If you want to 
-select this file, press @code{enter} once to finish the regular expression and
-again to select the file.
+interest. If you are looking for foo.c type @code{/foo.c}, press @code{enter} 
+once to finish the regular expression and again to select the file.
 
 The commands available in the file dialog are:
 
 @table @code
 @item q
 Will exit the file dialog, and return to the source window.
-@item down arrow
+@item up arrow
+Move up a line.
 @item k
+Move up a line.
+@item down arrow
 Move down a line.
-@item down arrow
-@item k
+@item j
 Move down a line.
 @item right arrow
+Move right a line.
 @item l
 Move right a line.
 @item left arrow
+Move left a line.
 @item h
 Move left a line.
 @item page up
+Move up a page.
 @item ^b
 Move up a page.
 @item page down
+Move down a page.
 @item ^f
 Move down a page.
 @item /
@@ -608,6 +621,57 @@ types @code{^s}, the terminal stops.  When the user types @code{^q}, the
 terminal restarts.  When using readline, the @code{^s} character usually does 
 a forward search.  So, if you want to get this, or other functionality out of 
 readline, simply turn off control flow and start CGDB.
+
+@node Building CGDB
+@chapter Building CGDB from source
+
+Building CGDB from source requires several packages. First, CGDB is hosted
+at sf.net/projects/cgdb. You can determine how to get CGDB from source by
+looking here: http://sourceforge.net/cvs/?group_id=72581.
+
+Once you have the source to CGDB, now you can begin to build it.  You will of 
+course need many packages to build CGDB. Below is a list of all of them 
+that are required to build CGDB.
+
+@table @code
+@item GNU Make
+I have successfully used version 3.79.1, however, older versions probably 
+will work.
+@item GNU GCC
+The GNU C compiler. I've compiled CGDB with versions as old as 2.9.5, and as
+new as 4.0.2.
+@item GNU Readline
+The GNU readline library version 5.1. CGDB will not work with versions before 
+5.1.  Readline was modified specifically to work with CGDB.
+@item GNU Ncurses
+I have successfully used libncurses.so.5 successfully.  However, older versions
+probably will work.
+@end table
+
+Below is a list of optional packages you will need, if modifying certain files
+in CGDB.
+
+@table @code
+@item GNU Flex
+If you modify any files with an extension of @code{.l}, you will have to have flex 
+installed.  I have used flex 2.5.4 to build CGDB.
+@item GNU Texinfo
+If you modify doc/cgdb.texinfo, then you will be required to have this package
+installed.  I have used version 4.7 to build CGDB.
+@end table
+
+CGDB uses autoconf/automake to build its configure scripts and makefiles.  So, 
+if you change any of the autoconf/automake files, you will need this software 
+installed.
+
+@table @code
+@item GNU Automake
+This has the program acolocl, and must be version Version 1.9.5.
+@item GNU Autoconf
+This has the program autoconf, and must be version 2.59.
+@item GNU m4
+This has the program m4, and must be version 1.4.3.
+@end table
 
 @node Copying This Manual
 @appendix Copying This Manual

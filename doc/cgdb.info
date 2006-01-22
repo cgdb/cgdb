@@ -57,6 +57,8 @@ GNU ncurses based front end to GDB.
 * Sending I/O to Inferior::     Sending I/O to the program being debugged
 * Terminal Control Flow::       Allowing terminal control flow in CGDB
 
+* Building CGDB::               Building CGDB from source
+
 * Copying This Manual::
 
 * Index::
@@ -718,7 +720,7 @@ waiting to be read into the debugged program. This might be useful when
 you rerun or start a new program.
 
 
-File: cgdb.info,  Node: Terminal Control Flow,  Next: Copying This Manual,  Prev: Sending I/O to Inferior,  Up: Top
+File: cgdb.info,  Node: Terminal Control Flow,  Next: Building CGDB,  Prev: Sending I/O to Inferior,  Up: Top
 
 6 Allowing terminal control flow in CGDB
 ****************************************
@@ -733,7 +735,15 @@ a forward search.  So, if you want to get this, or other functionality
 out of readline, simply turn off control flow and start CGDB.
 
 
-File: cgdb.info,  Node: Copying This Manual,  Next: Index,  Prev: Terminal Control Flow,  Up: Top
+File: cgdb.info,  Node: Building CGDB,  Next: Copying This Manual,  Prev: Terminal Control Flow,  Up: Top
+
+7 Building CGDB from source
+***************************
+
+Building CGDB.
+
+
+File: cgdb.info,  Node: Copying This Manual,  Next: Index,  Prev: Building CGDB,  Up: Top
 
 Appendix A Copying This Manual
 ******************************
@@ -1190,26 +1200,27 @@ Index
 
 Tag Table:
 Node: Top1050
-Node: Summary2411
-Node: Invocation3566
-Node: Understanding CGDB4020
-Node: Source Window5356
-Node: GDB Window7866
-Node: File Dialog Window8846
-Node: TTY Window9925
-Node: Status Bar10964
-Node: Switching Windows11881
-Node: Controlling CGDB12354
-Node: CGDB Mode13060
-Node: GDB Mode14735
-Node: File Dialog Mode15946
-Node: TTY Mode17267
-Node: Status Bar Mode17660
-Node: Configuring CGDB17839
-Node: Sending I/O to Inferior21961
-Node: Terminal Control Flow24358
-Node: Copying This Manual25121
-Node: GNU Free Documentation License25364
-Node: Index47772
+Node: Summary2470
+Node: Invocation3625
+Node: Understanding CGDB4079
+Node: Source Window5415
+Node: GDB Window7925
+Node: File Dialog Window8905
+Node: TTY Window9984
+Node: Status Bar11023
+Node: Switching Windows11940
+Node: Controlling CGDB12413
+Node: CGDB Mode13119
+Node: GDB Mode14794
+Node: File Dialog Mode16005
+Node: TTY Mode17326
+Node: Status Bar Mode17719
+Node: Configuring CGDB17898
+Node: Sending I/O to Inferior22020
+Node: Terminal Control Flow24417
+Node: Building CGDB25174
+Node: Copying This Manual25356
+Node: GNU Free Documentation License25591
+Node: Index47999
 
 End Tag Table
