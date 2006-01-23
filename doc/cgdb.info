@@ -159,7 +159,9 @@ plain old GDB.  One feature you will notice right away while debugging
 a C, C++ or ADA program, is that the source files are syntax
 highlighted.  This allows the user to easily navigate through the
 source file to look for certain places in the source code.  If you
-would like to see another source language highlighted, contact us.
+would like to see another source language highlighted, contact us.  To
+understanding how to navigate through the source window look at the
+commands in *Note CGDB Mode::.
 
    In addition to showing the source code, CGDB also displays to the
 user the currently executing line. The line number will be highlighted
@@ -187,8 +189,8 @@ window.  If you type `/' or `?' you can search in the source window for
 a string of interest.  The C library regular expression functions are
 used to perform this search, which honors things like `*' or `+'.
 
-   Please see the list of commands that are available when you are at
-the source window.  They are available here: *Note CGDB Mode::.
+   The full list of commands that are available in the source window is
+in *Note CGDB Mode::.
 
 
 File: cgdb.info,  Node: GDB Window,  Next: File Dialog Window,  Prev: Source Window,  Up: Understanding CGDB
@@ -197,18 +199,18 @@ File: cgdb.info,  Node: GDB Window,  Next: File Dialog Window,  Prev: Source Win
 =================================
 
 The "GDB window" is how CGDB allows the user to interface with the GNU
-debugger.  If the user wishes to pass a command to GDB, it can simply be
-typed into this window, and GDB will receive the command.  This
-interface is intended to be 100% identical to using GDB on a terminal.
+debugger.  If you wish to pass a commmand to GDB, simply type it into
+this window and GDB will receive the command.  This interface is
+intended to be 100% identical to using GDB on a terminal.
 
    There is a limited set of keys that can be typed into this window
-that CGDB interprets and handles, instead of sending to GDB.  This list
-can be found here: *Note GDB Mode::.
+that CGDB interprets and handles, instead of sending to GDB.  They are
+all available in *Note GDB Mode::.
 
    CGDB attempts to buffer commands the same way they would be if you
 typed them at the terminal.  So, if you type several commands before a
 single one finishes, they will each be run in order.  There will be no
-way to stop these commands from being run besides from typing `^c',
+way to stop these commands from being run besides from typing `Ctrl-C',
 like you would at any normal terminal when working with GDB.
 
 
@@ -230,8 +232,8 @@ it by hitting `q'.  You can navigate the file dialog using the standard
 direction keys and you can even use regular expression to find your
 file.  This can save a lot of time as the number of files grow.
 
-   Please see the list of commands that are available when you are at
-the file dialog.  They are available here: *Note File Dialog Mode::.
+   The full list of commands that are available in the source window is
+in *Note File Dialog Mode::.
 
 
 File: cgdb.info,  Node: TTY Window,  Next: Status Bar,  Prev: File Dialog Window,  Up: Understanding CGDB
@@ -250,12 +252,13 @@ say readline, which allows command line editing, the same interface
 will be provided via the TTY window as at the terminal.  You can see
 the name of the terminal device in the TTY status bar.
 
-   The commands available while at the TTY window are here: *Note TTY
-Mode::.
+   The full list of commands that are available in the source window is
+in *Note TTY Mode::.
 
-   I personally don't use the TTY window often, and prefer to start the
-application that needs input from stdin on a different terminal.  This
-simplifies the use of CGDB, and works in all cases.
+   Sending I/O to the program being debugged can be confusing.  It is
+described better in *Note Sending I/O to Inferior::.  Unless the I/O
+with the program being debugged is simple, I usually prefer starting
+the application on a separate terminal and attaching to it with CGDB.
 
 
 File: cgdb.info,  Node: Status Bar,  Next: Switching Windows,  Prev: TTY Window,  Up: Understanding CGDB
@@ -264,7 +267,7 @@ File: cgdb.info,  Node: Status Bar,  Next: Switching Windows,  Prev: TTY Window,
 =================================
 
 The "status bar" is the general purpose way for CGDB to show the user
-which commands they are currently typeing or report errors to the user
+which commands they are currently typing or report errors to the user
 when they occur.  CGDB does not use popup's or other forms of I/O to
 alert the user of information or problems.
 
@@ -275,8 +278,8 @@ the rest of the command you type appear in the status bar.  When you are
 finished typing the command that you are interested in, type `enter'.
 This will alert CGDB to execute the command.
 
-   The commands available while at the status bar are here: *Note
-Status Bar Mode::.
+   The full list of commands that are available in the source window is
+in *Note Status Bar Mode::.
 
 
 File: cgdb.info,  Node: Switching Windows,  Prev: Status Bar,  Up: Understanding CGDB
@@ -284,9 +287,9 @@ File: cgdb.info,  Node: Switching Windows,  Prev: Status Bar,  Up: Understanding
 2.6 Switch between windows
 ==========================
 
-When CGDB is invoked, the interface is in GDB mode.  A '*' at the right
+When CGDB is invoked, the interface is in GDB mode.  A `*' at the right
 of the status bar indicates that input will be passed to GDB.  To change
-the focus to the source window, hit `ESC'.  The interface is now in CGDB
+the focus to the source window, hit <ESC>.  The interface is now in CGDB
 mode.
 
    To switch back into GDB mode, press `i'.  This syntax is based on the
@@ -568,29 +571,26 @@ File: cgdb.info,  Node: Configuring CGDB,  Next: Sending I/O to Inferior,  Prev:
 
 There may be several features that you find useful in CGDB.  CGDB is
 capable of automating any of these commands through the use of the
-config file called cgdbrc.  It looks in $HOME/.cgdb/cgdbrc for the
+config file called `cgdbrc'.  It looks in `$HOME'`/.cgdb/' for that
 file.  If it exists, CGDB executes each line in the file in order.  It
 is as if the user typed in all the commands into the status bar after
 the tui was initialized.
 
-   Eventually this file will be used to create macros and high level key
-bindings. Until then, it is a very useful way to automate simple
-commands.
-
-   The following variables change the behavior of some aspect of cgdb.
+   The following variables change the behavior of some aspect of CGDB.
 Many of these commands may be abbreviated in some way, and all boolean
 commands my be negated by appending 'no' to the front.  For example:
 `:set ignorecase' turns on case-insensitive searching; while `:set
 noignorecase' turns on case-sensitive searching.
 
-`:set as'
-
-`:set arrowstyle'
-     values=SHORT, LONG, HIGHLIGHT Changes the style of the arrow that
-     is used to indicate the currently executing line in the source
-     viewer.  The default value is short.  A longer arrow is available,
-     for easier readability.  Finally, the 'highlight' option draws no
-     arrow at all, instead drawing the entire line in inverse video.
+`:set as STYLE'
+`:set arrowstyle STYLE'
+     Set the arrow style to STYLE.  Possible values for STYLE are
+     `short', `long', and `highlight'.  Changes the style of the arrow
+     that is used to indicate the currently executing line in the
+     source viewer.  The default value is short.  A longer arrow is
+     available, for easier readability.  Finally, the `highlight'
+     option draws no arrow at all, instead drawing the entire line in
+     inverse video.
 
 `:set asr'
 
@@ -599,11 +599,11 @@ noignorecase' turns on case-sensitive searching.
      has changed since CGDB has opened it.  If it is off, the file will
      never be reloaded, until you start CGDB again. The default is off.
      This feature is useful when you are debugging a program, then you
-     modify a source file, recompile, and 'r' in GDB's CLI window. The
-     file in this case will be updated to show the new version.  Note,
-     CGDB only looks at the timestamp of the source file to determine
-     if it has changed. So if you modify the source file, and didn't
-     recompile yet, CGDB will still pick up on the changes.
+     modify a source file, recompile, and type `r' in GDB's CLI window.
+     The file in this case will be updated to show the new version.
+     Note, CGDB only looks at the timestamp of the source file to
+     determine if it has changed. So if you modify the source file, and
+     didn't recompile yet, CGDB will still pick up on the changes.
 
 `:set escdelay'
      Set the length of time to wait before timing out and treating the
@@ -703,19 +703,19 @@ the GDB that comes with Cygwin.
    This technique is similar to getting in and out of GDB mode.  The
 tty window is not visible by default.  This is because it is only
 needed if the user wishes to send data to the program being debugged.
-To display the tty window, hit `'T'' while in command mode.  After
-hitting `'T'' you will notice that there is another window in the
-middle of the 'source window' and the 'gdb window'.  This is called the
-'tty window'. You will also see a new status bar called the tty status
-bar.  There will be a `*' on the tty status bar after the `'T'' was
-hit.  This is because when the window is opened with the `'T'' command,
-CGDB automatically puts the user into 'tty mode'.  To get out of this
-window hit `ESC'.  This will put you back into command mode.  To make
-the tty window appear and disappear hit the `'T'' key while in command
-mode.  It is a toggle.
+To display the tty window, hit `T' while in command mode.  After
+hitting `T' you will notice that there is another window in the middle
+of the "source window" and the "gdb window".  This is called the "tty
+window". You will also see a new status bar called the tty status bar.
+There will be a `*' on the tty status bar after the `T' was hit.  This
+is because when the window is opened with the `T' command, CGDB
+automatically puts the user into 'tty mode'.  To get out of this window
+hit <ESC>.  This will put you back into command mode.  To make the tty
+window appear and disappear hit the `T' key while in command mode.  It
+is a toggle.
 
-   Once the tty window is already open, the user can then hit `'I'' in
-command mode to get into tty mode.  The user can then hit `ESC' in tty
+   Once the tty window is already open, the user can then hit `I' in
+command mode to get into tty mode.  The user can then hit <ESC> in tty
 mode to get back into command mode.
 
    When the tty window is open, all data that comes from the program,
@@ -726,7 +726,7 @@ window' AND to the 'tty window' (for viewing later when the tty window
 is opened).
 
    If the user wishes to get a new tty for the program being debugged
-then they can type 'Control T'. This will delete all the buffered data
+then they can type `Ctrl-T'.  This will delete all the buffered data
 waiting to be read into the debugged program. This might be useful when
 you rerun or start a new program.
 
@@ -740,10 +740,11 @@ A user can typically set there control flow behavior by using the stty
 command like so `stty -ixon -ixoff'.  This will disable control flow on
 the terminal where CGDB is started.  If you want to turn control flow
 back on you can type `stty ixon ixoff'.  If flow control is on, when
-the user types `^s', the terminal stops.  When the user types `^q', the
-terminal restarts.  When using readline, the `^s' character usually does
-a forward search.  So, if you want to get this, or other functionality
-out of readline, simply turn off control flow and start CGDB.
+the user types `Ctrl-s', the terminal stops.  When the user types
+`Ctrl-q', the terminal restarts.  When using readline, the `Ctrl-s'
+character usually does a forward search.  So, if you want to get this,
+or other functionality out of readline, simply turn off control flow
+and start CGDB.
 
 
 File: cgdb.info,  Node: Building CGDB,  Next: Copying This Manual,  Prev: Terminal Control Flow,  Up: Top
@@ -1267,23 +1268,23 @@ Node: Summary2478
 Node: Invocation3633
 Node: Understanding CGDB4087
 Node: Source Window5422
-Node: GDB Window7890
-Node: File Dialog Window8872
-Node: TTY Window9953
-Node: Status Bar10994
-Node: Switching Windows11913
-Node: Controlling CGDB12386
-Node: CGDB Mode13163
-Node: GDB Mode14973
-Node: File Dialog Mode16184
-Node: TTY Mode17604
-Node: Status Bar Mode17997
-Node: Configuring CGDB18176
-Node: Sending I/O to Inferior22298
-Node: Terminal Control Flow24695
-Node: Building CGDB25452
-Node: Copying This Manual27325
-Node: GNU Free Documentation License27560
-Node: Index49968
+Node: GDB Window7953
+Node: File Dialog Window8921
+Node: TTY Window9964
+Node: Status Bar11103
+Node: Switching Windows12036
+Node: Controlling CGDB12509
+Node: CGDB Mode13286
+Node: GDB Mode15096
+Node: File Dialog Mode16307
+Node: TTY Mode17727
+Node: Status Bar Mode18120
+Node: Configuring CGDB18299
+Node: Sending I/O to Inferior22364
+Node: Terminal Control Flow24746
+Node: Building CGDB25515
+Node: Copying This Manual27388
+Node: GNU Free Documentation License27623
+Node: Index50031
 
 End Tag Table

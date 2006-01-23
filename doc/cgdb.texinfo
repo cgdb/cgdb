@@ -113,8 +113,10 @@ The essentials are:
 @itemize @bullet
 @item
 type @samp{cgdb} to start CGDB.
+
 @item
 type @kbd{quit} or @kbd{C-d} in the GDB window to exit.
+
 @item
 type @kbd{:quit} in the source window to exit.  This even works if GDB is 
 currently hanging, or operating a long command.
@@ -162,7 +164,8 @@ One feature you will notice right away while debugging a C, C++ or ADA program,
 is that the source files are syntax highlighted.  This allows the user to 
 easily navigate through the source file to look for certain places in the 
 source code.  If you would like to see another source language highlighted, 
-contact us.
+contact us.  To understanding how to navigate through the source window look
+at the commands in @ref{CGDB Mode}.
 
 In addition to showing the source code, CGDB also displays to the user the 
 currently executing line. The line number will be highlighted green, to
@@ -185,30 +188,30 @@ disable the breakpoint, the line number will turn yellow, to represent the
 disabled breakpoint.
 
 CGDB also supports regular expression searching within the source window.  If
-you type @code{/} or @code{?} you can search in the source window for a string
+you type @kbd{/} or @kbd{?} you can search in the source window for a string
 of interest.  The C library regular expression functions are used to perform 
-this search, which honors things like @code{*} or @code{+}.
+this search, which honors things like @samp{*} or @samp{+}.
 
-Please see the list of commands that are available when you are at the source 
-window.  They are available here: @xref{CGDB Mode}.
+The full list of commands that are available in the source window is in
+@ref{CGDB Mode}.
 
 @node GDB Window
 @section Understanding the GDB window.
 
 @cindex GDB window
 The @dfn{GDB window} is how CGDB allows the user to interface with the GNU 
-debugger.  If the user wishes to pass a command to GDB, it can simply be 
-typed into this window, and GDB will receive the command.  This interface is 
-intended to be 100% identical to using GDB on a terminal.
+debugger.  If you wish to pass a commmand to GDB, simply type it into this 
+window and GDB will receive the command.  This interface is intended to be 
+100% identical to using GDB on a terminal.
 
 There is a limited set of keys that can be typed into this window that CGDB
-interprets and handles, instead of sending to GDB.  This list can be found
-here: @xref{GDB Mode}.
+interprets and handles, instead of sending to GDB.  They are all available in
+@ref{GDB Mode}.
 
 CGDB attempts to buffer commands the same way they would be if you typed them
 at the terminal.  So, if you type several commands before a single one 
 finishes, they will each be run in order.  There will be no way to stop these
-commands from being run besides from typing @code{^c}, like you would at any
+commands from being run besides from typing @kbd{Ctrl-C}, like you would at any
 normal terminal when working with GDB.
 
 @node File Dialog Window
@@ -228,8 +231,8 @@ window.  Once you enter the file dialog, it is possible to leave it by hitting
 and you can even use regular expression to find your file.  This can save a 
 lot of time as the number of files grow.
 
-Please see the list of commands that are available when you are at the file 
-dialog.  They are available here: @xref{File Dialog Mode}.
+The full list of commands that are available in the source window is in
+@ref{File Dialog Mode}.
 
 @node TTY Window
 @section Understanding the TTY window.
@@ -246,40 +249,42 @@ which allows command line editing, the same interface will be provided via the
 TTY window as at the terminal.  You can see the name of the terminal device 
 in the TTY status bar.
 
-The commands available while at the TTY window are here: @xref{TTY Mode}.
+The full list of commands that are available in the source window is in
+@ref{TTY Mode}.
 
-I personally don't use the TTY window often, and prefer to start the 
-application that needs input from stdin on a different terminal.  This 
-simplifies the use of CGDB, and works in all cases.
+Sending I/O to the program being debugged can be confusing.  It is described
+better in @ref{Sending I/O to Inferior}.  Unless the I/O with the program
+being debugged is simple, I usually prefer starting the application on a
+separate terminal and attaching to it with CGDB.
 
 @node Status Bar
 @section Understanding the status bar.
 
 @cindex status bar
 The @dfn{status bar} is the general purpose way for CGDB to show the user 
-which commands they are currently typeing or report errors to the user when 
+which commands they are currently typing or report errors to the user when 
 they occur.  CGDB does not use popup's or other forms of I/O to alert the 
 user of information or problems.
 
 While CGDB is running, you can configure it with any of the commands that 
 are valid in CGDB's configuration file. @xref{Configuring CGDB}.  Simply
-type @code{:} in the source window, and you will see the colon, and 
+type @kbd{:} in the source window, and you will see the colon, and 
 the rest of the command you type appear in the status bar.  When you are
 finished typing the command that you are interested in, type @code{enter}.  
 This will alert CGDB to execute the command.
 
-The commands available while at the status bar are here: 
-@xref{Status Bar Mode}.
+The full list of commands that are available in the source window is in
+@ref{Status Bar Mode}.
 
 @node Switching Windows
 @section Switch between windows
 
-When CGDB is invoked, the interface is in GDB mode.  A '*' at the right
+When CGDB is invoked, the interface is in GDB mode.  A @samp{*} at the right
 of the status bar indicates that input will be passed to GDB.  To change
-the focus to the source window, hit @code{ESC}.  The interface is now in CGDB
+the focus to the source window, hit @key{ESC}.  The interface is now in CGDB
 mode.
 
-To switch back into GDB mode, press @code{i}.  This syntax is based on the
+To switch back into GDB mode, press @kbd{i}.  This syntax is based on the
 popular Unix text-editor, vi.
 
 @node Controlling CGDB
@@ -306,71 +311,103 @@ the below commands are available during this mode.  This mode is primarily
 available for the user to view the current source file, search it, or switch
 to a different mode.
 
-@table @code
+@table @kbd
 @item ESC
 Puts the user into command mode. However, you are already in this mode.
+
 @item i
 Puts the user into GDB mode.
+
 @item I
 Puts the user into tty mode.
+
 @item T
 Opens a window to give input to the debugged program.
+
 @item ^T
 Opens a new tty for the debugged program.
+
 @item up arrow
 Move up a line.
+
 @item j
 Move up a line.
+
 @item down arrow
 Move down a line.
+
 @item k
 Move down a line.
+
 @item left arrow
 Move left a line.
+
 @item h
 Move left a line.
+
 @item right arrow
 Move right a line.
+
 @item l
 Move right a line.
+
 @item page up
 Move up a page.
+
 @item ^b
 Move up a page.
+
 @item ^u
 Move up 1/2 a page.
+
 @item page down
 Move down a page.
+
 @item ^f
 Move down a page.
+
 @item ^d
 Move down 1/2 a page.
+
 @item gg
 Move to the top of file.
+
 @item G
 Move to the bottom of file.
+
 @item /
 search from current cursor position.
+
 @item ?
 reverse search from current cursor position.
+
 @item n
 next forward search.
+
 @item N
 next reverse search.
+
 @item o
 open the file dialog.
+
 @item spacebar
 Sets a breakpoint at the current line number.
+
 @item t
 Sets a temporary breakpoint at the current line number.
+
 @item -
 Shrink source window 1 line.
+
 @item =
 Grow source window 1 line.
+
 @item _
 Shrink source window 25% (or, shrink tty window 1 line, if visible).
+
 @item +
 Grow source window 25% (or, grow tty window 1 line, if visible).
+
 @item ^l
 Clear and redraw the screen.
 @end table
@@ -388,15 +425,19 @@ the GDB window and has the first chance at dealing with them.  If it is
 interested in the keys, it will handle them. Below is a list of keys that
 CGDB is interested in, and does not pass along any further.
 
-@table @code
+@table @kbd
 @item ESC
 Switch back to source window.
+
 @item page up
 Move up a page.
+
 @item page down
 Move down a page.
+
 @item F11
 Go to the beginning of the GDB buffer.
+
 @item F12
 Go to the end of the GDB buffer.
 @end table
@@ -413,47 +454,64 @@ The file dialog is primarily used to allow the user to find and open a source
 file that the program they are debugging is made up of.  The file dialog will
 be full screen, and will list each file that the debugged program is made up 
 of.  A usual instance of the file dialog would be to open it up from the 
-source window using the @code{o} key, and then to search for the file of 
-interest. If you are looking for foo.c type @code{/foo.c}, press @code{enter} 
+source window using the @kbd{o} key, and then to search for the file of 
+interest. If you are looking for foo.c type @code{/foo.c}, press @kbd{enter} 
 once to finish the regular expression and again to select the file.
 
 The commands available in the file dialog are:
 
-@table @code
+@table @kbd
 @item q
 Will exit the file dialog, and return to the source window.
+
 @item up arrow
 Move up a line.
+
 @item k
 Move up a line.
+
 @item down arrow
 Move down a line.
+
 @item j
 Move down a line.
+
 @item right arrow
 Move right a line.
+
 @item l
 Move right a line.
+
 @item left arrow
 Move left a line.
+
 @item h
 Move left a line.
+
 @item page up
 Move up a page.
+
 @item ^b
 Move up a page.
+
 @item page down
 Move down a page.
+
 @item ^f
 Move down a page.
+
 @item /
 search from current cursor position.
+
 @item ?
 reverse search from current cursor position.
+
 @item n
 next forward search.
+
 @item N
 next reverse search.
+
 @item enter
 Select the current file.
 @end table
@@ -461,15 +519,19 @@ Select the current file.
 @node TTY Mode
 @section Commands available during TTY mode
 
-@table @code
+@table @kbd
 @item ESC
 Switch back to source window.
+
 @item page up
 Move up a page.
+
 @item page down
 Move down a page.
+
 @item F11
 Go to the beginning of the GDB buffer.
+
 @item F12
 Go to the end of the GDB buffer.
 @end table
@@ -484,39 +546,39 @@ Status bar.
 
 There may be several features that you find useful in CGDB.  CGDB is capable
 of automating any of these commands through the use of the config file called
-cgdbrc.  It looks in $HOME/.cgdb/cgdbrc for the file.  If it exists, CGDB
-executes each line in the file in order.  It is as if the user typed in all the
-commands into the status bar after the tui was initialized.
+@file{cgdbrc}.  It looks in @env{$HOME}@file{/.cgdb/} for that file.  If it 
+exists, CGDB executes each line in the file in order.  It is as if the user 
+typed in all the commands into the status bar after the tui was initialized.
 
-Eventually this file will be used to create macros and high level key 
-bindings. Until then, it is a very useful way to automate simple commands.
-
-The following variables change the behavior of some aspect of cgdb.  Many
+The following variables change the behavior of some aspect of CGDB.  Many
 of these commands may be abbreviated in some way, and all boolean commands
 my be negated by appending 'no' to the front.  For example: 
-@code{:set ignorecase} turns on case-insensitive searching; while
-@code{:set noignorecase} turns on case-sensitive searching.
+@kbd{:set ignorecase} turns on case-insensitive searching; while
+@kbd{:set noignorecase} turns on case-sensitive searching.
 
-@table @code
-@item :set as
-@item :set arrowstyle
-values=@sc{short, long, highlight}
+@table @kbd
+@item :set as @var{style}
+@itemx :set arrowstyle @var{style}
+Set the arrow style to @var{style}.  Possible values for @var{style}
+are @samp{short}, @samp{long}, and @samp{highlight}.
 Changes the style of the arrow that is used to indicate the currently
 executing line in the source viewer.  The default value is short.  A
 longer arrow is available, for easier readability.  Finally, the
-'highlight' option draws no arrow at all, instead drawing the entire
+@samp{highlight} option draws no arrow at all, instead drawing the entire
 line in inverse video.
+
 @item :set asr
 @item :set autosourcereload
 If this is on, CGDB will automatically reload a source file if it has 
 changed since CGDB has opened it.  If it is off, the file will never be 
 reloaded, until you start CGDB again. The default is off.
 This feature is useful when you are debugging a program, then you modify 
-a source file, recompile, and 'r' in GDB's CLI window. The file in this 
-case will be updated to show the new version.  Note, CGDB only looks at 
+a source file, recompile, and type @kbd{r} in GDB's CLI window. The file in 
+this case will be updated to show the new version.  Note, CGDB only looks at 
 the timestamp of the source file to determine if it has changed. So if 
 you modify the source file, and didn't recompile yet, CGDB will still 
 pick up on the changes.
+
 @item :set escdelay 
 Set the length of time to wait before timing out and treating the ESC 
 keystroke as the ESC character rather than combining it with other 
@@ -526,48 +588,64 @@ composes the ESCAPE response without waiting for more information
 from the buffer. The user may choose any value between 0 and 10000, 
 inclusive. The default setting for the ESCDELAY environment variable is 
 40 (forty tenths of a second).
+
 @item :set ic
 @item :set ignorecase
 Sets searching case insensitive
+
 @item :set sc
 @item :set shortcut
 Enables shortcut commands typed in source window
+
 @item :set stc
 @item :set showtgdbcommands
 If this is on, CGDB will show all of the commands that it sends to GDB. 
 If it is off, CGDB will not show the commands that it gives to GDB. 
 The default is off. 
+
 @item :set syn
 @item :set syntax
 Sets the current highlighting mode of the current file.
 values=@sc{c,ada,off}
+
 @item :set tabstop 
 Number of spaces that should be rendered on screen for TAB characters (\t)
+
 @item :set wmh
 @item :set winminheight
 The minimal height of a window. Windows will never become smaller than 
 this value.
+
 @item :set winsplit 
 Set the split point between source and gdb window
 (especially useful as an init setting in cgdbrc)
 values=@sc{top_full, top_big, even, bottom_big, bottom_full}
+
 @item :set ws
 @item :set wrapscan
 Searches wrap around the end of file.
+
 @item :continue
 Send a continue command to GDB.
+
 @item :finish
 Send a finish command to gdb
+
 @item :help
 This will display the current manual, in text format.
+
 @item :insert
 Move focus to the gdb window
+
 @item :next
 Send a next command to gdb
+
 @item :quit
 Quit cgdb (may be abbreviated as :q)
+
 @item :quit!
 Quit cgdb, even if debugged program is running (abbreviated as :q!)
+
 @item :edit
 Reloads the file in the source window. This can be useful if the file has 
 changed since it was opened by CGDB.  (abbreviated as :e)
@@ -589,18 +667,18 @@ natively compiled GDB.  It may work when using the GDB that comes with Cygwin.
 This technique is similar to getting in and out of GDB mode.  The tty window 
 is not visible by default.  This is because it is only needed if the user 
 wishes to send data to the program being debugged.  To display the tty window,
-hit @code{'T'} while in command mode.  After hitting @code{'T'} you will 
-notice that there is another window in the middle of the 'source window' 
-and the 'gdb window'.  This is called the 'tty window'. You will also see a 
-new status bar called the tty status bar.  There will be a @code{*} on the tty
-status bar after the @code{'T'} was hit.  This is because when the window is
-opened with the @code{'T'} command, CGDB automatically puts the user into 
-'tty mode'.  To get out of this window hit @code{ESC}.  This will put you back
-into command mode.  To make the tty window appear and disappear hit the 
-@code{'T'} key while in command mode.  It is a toggle.
+hit @kbd{T} while in command mode.  After hitting @kbd{T} you will 
+notice that there is another window in the middle of the @dfn{source window} 
+and the @dfn{gdb window}.  This is called the @dfn{tty window}. You will also 
+see a new status bar called the tty status bar.  There will be a @samp{*} on 
+the tty status bar after the @kbd{T} was hit.  This is because when the 
+window is opened with the @kbd{T} command, CGDB automatically puts the user 
+into 'tty mode'.  To get out of this window hit @key{ESC}.  This will put you 
+back into command mode.  To make the tty window appear and disappear hit the 
+@kbd{T} key while in command mode.  It is a toggle.
 
-Once the tty window is already open, the user can then hit @code{'I'} in
-command mode to get into tty mode.  The user can then hit @code{ESC} in tty
+Once the tty window is already open, the user can then hit @kbd{I} in
+command mode to get into tty mode.  The user can then hit @key{ESC} in tty
 mode to get back into command mode.
 
 When the tty window is open, all data that comes from the program, goes
@@ -610,7 +688,7 @@ all output from the debugged program will go to the 'gdb window' AND to
 the 'tty window' (for viewing later when the tty window is opened). 
 
 If the user wishes to get a new tty for the program being debugged then
-they can type 'Control T'. This will delete all the buffered data
+they can type @kbd{Ctrl-T}.  This will delete all the buffered data
 waiting to be read into the debugged program. This might be useful when
 you rerun or start a new program.
 
@@ -621,8 +699,8 @@ A user can typically set there control flow behavior by using the stty
 command like so @code{stty -ixon -ixoff}.  This will disable control flow on
 the terminal where CGDB is started.  If you want to turn control flow back 
 on you can type @code{stty ixon ixoff}.  If flow control is on, when the user
-types @code{^s}, the terminal stops.  When the user types @code{^q}, the 
-terminal restarts.  When using readline, the @code{^s} character usually does 
+types @kbd{Ctrl-s}, the terminal stops.  When the user types @kbd{Ctrl-q}, the 
+terminal restarts.  When using readline, the @kbd{Ctrl-s} character usually does 
 a forward search.  So, if you want to get this, or other functionality out of 
 readline, simply turn off control flow and start CGDB.
 
@@ -641,12 +719,15 @@ that are required to build CGDB.
 @item GNU Make
 I have successfully used version 3.79.1, however, older versions probably 
 will work.
+
 @item GNU GCC
 The GNU C compiler. I've compiled CGDB with versions as old as 2.9.5, and as
 new as 4.0.2.
+
 @item GNU Readline
 The GNU readline library version 5.1. CGDB will not work with versions before 
 5.1.  Readline was modified specifically to work with CGDB.
+
 @item GNU Ncurses
 I have successfully used libncurses.so.5 successfully.  However, older versions
 probably will work.
@@ -659,6 +740,7 @@ in CGDB.
 @item GNU Flex
 If you modify any files with an extension of @code{.l}, you will have to have flex 
 installed.  I have used flex 2.5.4 to build CGDB.
+
 @item GNU Texinfo
 If you modify doc/cgdb.texinfo, then you will be required to have this package
 installed.  I have used version 4.7 to build CGDB.
@@ -671,8 +753,10 @@ installed.
 @table @code
 @item GNU Automake
 This has the program acolocl, and must be version Version 1.9.5.
+
 @item GNU Autoconf
 This has the program autoconf, and must be version 2.59.
+
 @item GNU m4
 This has the program m4, and must be version 1.4.3.
 @end table
