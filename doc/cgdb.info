@@ -613,7 +613,7 @@ noignorecase' turns on case-sensitive searching.
      system immediately composes the ESCAPE response without waiting
      for more information from the buffer. The user may choose any
      value between 0 and 10000, inclusive. The default setting for the
-     ESCDELAY environment variable is 40 (forty tenths of a second).
+     ESCDELAY environment variable is 40 (forty hundreths of a second).
 
 `:set ic'
 
@@ -1284,11 +1284,11 @@ Node: File Dialog Mode16306
 Node: TTY Mode17726
 Node: Status Bar Mode18119
 Node: Configuring CGDB18298
-Node: Sending I/O to Inferior22535
-Node: Terminal Control Flow24917
-Node: Building CGDB25686
-Node: Copying This Manual27593
-Node: GNU Free Documentation License27828
-Node: Index50236
+Node: Sending I/O to Inferior22538
+Node: Terminal Control Flow24920
+Node: Building CGDB25689
+Node: Copying This Manual27596
+Node: GNU Free Documentation License27831
+Node: Index50239
 
 End Tag Table

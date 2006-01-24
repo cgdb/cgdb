@@ -587,7 +587,7 @@ measured in milli seconds. If ESCDELAY is 0, the system immediately
 composes the ESCAPE response without waiting for more information 
 from the buffer. The user may choose any value between 0 and 10000, 
 inclusive. The default setting for the ESCDELAY environment variable is 
-40 (forty tenths of a second).
+40 (forty hundreths of a second).
 
 @item :set ic
 @item :set ignorecase
