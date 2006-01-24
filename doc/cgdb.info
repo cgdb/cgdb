@@ -126,7 +126,7 @@ on the bottom.  The status bar currently separates the two windows.
 CGDB mode is when the source window is focused, and GDB mode when the
 GDB window is focused.
 
-   Beggining with CGDB version 1.0, the windows are movable, and the
+   Beginning with CGDB version 1.0, the windows are movable, and the
 user will be able to create as many or as few that is desired.
 Currently however, all of my time is spent developing the interface
 between CGDB and GDB. Once this is complete, the UI of CGDB will become
@@ -199,7 +199,7 @@ File: cgdb.info,  Node: GDB Window,  Next: File Dialog Window,  Prev: Source Win
 =================================
 
 The "GDB window" is how CGDB allows the user to interface with the GNU
-debugger.  If you wish to pass a commmand to GDB, simply type it into
+debugger.  If you wish to pass a command to GDB, simply type it into
 this window and GDB will receive the command.  This interface is
 intended to be 100% identical to using GDB on a terminal.
 
@@ -795,7 +795,7 @@ makefiles.  So, if you change any of the autoconf/automake files, you
 will need this software installed.
 
 `GNU Automake'
-     This has the program acolocl, and must be version Version 1.9.5.
+     This has the program aclocal, and must be version Version 1.9.5.
 
 `GNU Autoconf'
      This has the program autoconf, and must be version 2.59.
@@ -1271,22 +1271,22 @@ Node: Invocation3633
 Node: Understanding CGDB4087
 Node: Source Window5422
 Node: GDB Window7953
-Node: File Dialog Window8921
-Node: TTY Window9964
-Node: Status Bar11103
-Node: Switching Windows12036
-Node: Controlling CGDB12509
-Node: CGDB Mode13286
-Node: GDB Mode15096
-Node: File Dialog Mode16307
-Node: TTY Mode17727
-Node: Status Bar Mode18120
-Node: Configuring CGDB18299
-Node: Sending I/O to Inferior22364
-Node: Terminal Control Flow24746
-Node: Building CGDB25515
-Node: Copying This Manual27422
-Node: GNU Free Documentation License27657
-Node: Index50065
+Node: File Dialog Window8920
+Node: TTY Window9963
+Node: Status Bar11102
+Node: Switching Windows12035
+Node: Controlling CGDB12508
+Node: CGDB Mode13285
+Node: GDB Mode15095
+Node: File Dialog Mode16306
+Node: TTY Mode17726
+Node: Status Bar Mode18119
+Node: Configuring CGDB18298
+Node: Sending I/O to Inferior22363
+Node: Terminal Control Flow24745
+Node: Building CGDB25514
+Node: Copying This Manual27421
+Node: GNU Free Documentation License27656
+Node: Index50064
 
 End Tag Table

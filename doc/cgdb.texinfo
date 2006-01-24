@@ -133,7 +133,7 @@ The interface has two modes depending on which window is focused.  CGDB mode
 is when the source window is focused, and GDB mode when the GDB window is 
 focused.
 
-Beggining with CGDB version 1.0, the windows are movable,
+Beginning with CGDB version 1.0, the windows are movable,
 and the user will be able to create as many or as few that is desired. 
 Currently however, all of my time is spent developing the interface between
 CGDB and GDB. Once this is complete, the UI of CGDB will become much more 
@@ -200,7 +200,7 @@ The full list of commands that are available in the source window is in
 
 @cindex GDB window
 The @dfn{GDB window} is how CGDB allows the user to interface with the GNU 
-debugger.  If you wish to pass a commmand to GDB, simply type it into this 
+debugger.  If you wish to pass a command to GDB, simply type it into this 
 window and GDB will receive the command.  This interface is intended to be 
 100% identical to using GDB on a terminal.
 
@@ -752,7 +752,7 @@ installed.
 
 @table @code
 @item GNU Automake
-This has the program acolocl, and must be version Version 1.9.5.
+This has the program aclocal, and must be version Version 1.9.5.
 
 @item GNU Autoconf
 This has the program autoconf, and must be version 2.59.
