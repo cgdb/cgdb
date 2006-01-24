@@ -603,10 +603,11 @@ If this is on, CGDB will show all of the commands that it sends to GDB.
 If it is off, CGDB will not show the commands that it gives to GDB. 
 The default is off. 
 
-@item :set syn
-@item :set syntax
-Sets the current highlighting mode of the current file.
-values=@sc{c,ada,off}
+@item :set syn @var{style}
+@item :set syntax @var{style}
+Sets the current highlighting mode of the current file to have the syntax 
+@var{style}.  Possible values for @var{syntax} are @samp{c}, @samp{ada}, and 
+@samp{off}.
 
 @item :set tabstop 
 Number of spaces that should be rendered on screen for TAB characters (\t)
@@ -616,10 +617,11 @@ Number of spaces that should be rendered on screen for TAB characters (\t)
 The minimal height of a window. Windows will never become smaller than 
 this value.
 
-@item :set winsplit 
-Set the split point between source and gdb window
-(especially useful as an init setting in cgdbrc)
-values=@sc{top_full, top_big, even, bottom_big, bottom_full}
+@item :set winsplit @var{style}
+Set the split point between source and gdb window.  This is especially useful
+as an init setting in @file{cgdbrc}.  @xref{Configuring CGDB}.  The possible 
+values for @var{style} are @samp{top_full}, @samp{top_big}, @samp{even}, 
+@samp{bottom_big}, and @samp{bottom_full}.
 
 @item :set ws
 @item :set wrapscan

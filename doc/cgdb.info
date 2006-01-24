@@ -632,11 +632,12 @@ noignorecase' turns on case-sensitive searching.
      GDB.  If it is off, CGDB will not show the commands that it gives
      to GDB.  The default is off.
 
-`:set syn'
+`:set syn STYLE'
 
-`:set syntax'
-     Sets the current highlighting mode of the current file.
-     values=C,ADA,OFF
+`:set syntax STYLE'
+     Sets the current highlighting mode of the current file to have the
+     syntax STYLE.  Possible values for SYNTAX are `c', `ada', and
+     `off'.
 
 `:set tabstop'
      Number of spaces that should be rendered on screen for TAB
@@ -648,10 +649,11 @@ noignorecase' turns on case-sensitive searching.
      The minimal height of a window. Windows will never become smaller
      than this value.
 
-`:set winsplit'
-     Set the split point between source and gdb window (especially
-     useful as an init setting in cgdbrc) values=TOP_FULL, TOP_BIG,
-     EVEN, BOTTOM_BIG, BOTTOM_FULL
+`:set winsplit STYLE'
+     Set the split point between source and gdb window.  This is
+     especially useful as an init setting in `cgdbrc'.  *Note
+     Configuring CGDB::.  The possible values for STYLE are `top_full',
+     `top_big', `even', `bottom_big', and `bottom_full'.
 
 `:set ws'
 
@@ -1282,11 +1284,11 @@ Node: File Dialog Mode16306
 Node: TTY Mode17726
 Node: Status Bar Mode18119
 Node: Configuring CGDB18298
-Node: Sending I/O to Inferior22363
-Node: Terminal Control Flow24745
-Node: Building CGDB25514
-Node: Copying This Manual27421
-Node: GNU Free Documentation License27656
-Node: Index50064
+Node: Sending I/O to Inferior22535
+Node: Terminal Control Flow24917
+Node: Building CGDB25686
+Node: Copying This Manual27593
+Node: GNU Free Documentation License27828
+Node: Index50236
 
 End Tag Table
