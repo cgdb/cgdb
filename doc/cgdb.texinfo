@@ -324,7 +324,7 @@ Puts the user into tty mode.
 @item T
 Opens a window to give input to the debugged program.
 
-@item ^T
+@item Ctrl-T
 Opens a new tty for the debugged program.
 
 @item up arrow
@@ -354,19 +354,19 @@ Move right a line.
 @item page up
 Move up a page.
 
-@item ^b
+@item Ctrl-b
 Move up a page.
 
-@item ^u
+@item Ctrl-u
 Move up 1/2 a page.
 
 @item page down
 Move down a page.
 
-@item ^f
+@item Ctrl-f
 Move down a page.
 
-@item ^d
+@item Ctrl-d
 Move down 1/2 a page.
 
 @item gg
@@ -408,7 +408,7 @@ Shrink source window 25% (or, shrink tty window 1 line, if visible).
 @item +
 Grow source window 25% (or, grow tty window 1 line, if visible).
 
-@item ^l
+@item Ctrl-l
 Clear and redraw the screen.
 @end table
 
@@ -491,13 +491,13 @@ Move left a line.
 @item page up
 Move up a page.
 
-@item ^b
+@item Ctrl-b
 Move up a page.
 
 @item page down
 Move down a page.
 
-@item ^f
+@item Ctrl-f
 Move down a page.
 
 @item /

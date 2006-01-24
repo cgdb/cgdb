@@ -338,7 +338,7 @@ search it, or switch to a different mode.
 `T'
      Opens a window to give input to the debugged program.
 
-`^T'
+`Ctrl-T'
      Opens a new tty for the debugged program.
 
 `up arrow'
@@ -368,19 +368,19 @@ search it, or switch to a different mode.
 `page up'
      Move up a page.
 
-`^b'
+`Ctrl-b'
      Move up a page.
 
-`^u'
+`Ctrl-u'
      Move up 1/2 a page.
 
 `page down'
      Move down a page.
 
-`^f'
+`Ctrl-f'
      Move down a page.
 
-`^d'
+`Ctrl-d'
      Move down 1/2 a page.
 
 `gg'
@@ -423,7 +423,7 @@ search it, or switch to a different mode.
 `+'
      Grow source window 25% (or, grow tty window 1 line, if visible).
 
-`^l'
+`Ctrl-l'
      Clear and redraw the screen.
 
 
@@ -510,13 +510,13 @@ again to select the file.
 `page up'
      Move up a page.
 
-`^b'
+`Ctrl-b'
      Move up a page.
 
 `page down'
      Move down a page.
 
-`^f'
+`Ctrl-f'
      Move down a page.
 
 `/'
@@ -1279,16 +1279,16 @@ Node: Status Bar11102
 Node: Switching Windows12035
 Node: Controlling CGDB12508
 Node: CGDB Mode13285
-Node: GDB Mode15095
-Node: File Dialog Mode16306
-Node: TTY Mode17726
-Node: Status Bar Mode18119
-Node: Configuring CGDB18298
-Node: Sending I/O to Inferior22538
-Node: Terminal Control Flow24920
-Node: Building CGDB25689
-Node: Copying This Manual27596
-Node: GNU Free Documentation License27831
-Node: Index50239
+Node: GDB Mode15119
+Node: File Dialog Mode16330
+Node: TTY Mode17758
+Node: Status Bar Mode18151
+Node: Configuring CGDB18330
+Node: Sending I/O to Inferior22570
+Node: Terminal Control Flow24952
+Node: Building CGDB25721
+Node: Copying This Manual27628
+Node: GNU Free Documentation License27863
+Node: Index50271
 
 End Tag Table
