@@ -1,3 +1,7 @@
+1/23/2006 Bob Rossi <bob@brasko.net>
+
+	* src/cgdb.c (version_info): Update Copyright.
+
 1/20/2006 Bob Rossi <bob@brasko.net>
 
 	* lib/Makefile.am (SUBDIRS): Remove wm.

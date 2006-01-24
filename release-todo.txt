@@ -6,7 +6,8 @@ Steps for releasing a new CGDB version, follow these in order.
     cgdb/README. Next, cd ./cgdb/src and run 'perl ht.pl'.
 
 -  Make sure the man page is updated. Run help2man like this,
-   'help2man ./cgdb' > cgdb.1.
+   'help2man ./cgdb' > cgdb.1. This only need to be done if the
+   usage is modified.
 
 -  Update all ChangeLogs to have the new release date and version.
     The ChangeLogs live in many places currently.
