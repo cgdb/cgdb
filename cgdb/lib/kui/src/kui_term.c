@@ -25,7 +25,6 @@ extern int tgetnum();
 extern char *tgetstr();
 extern int tputs();
 extern char *tgoto();
-extern char *tigetstr(char *capname);
 
 #include "kui_term.h"
 

@@ -1,3 +1,8 @@
+1/23/2006 Bob Rossi <bob@brasko.net>
+
+   * src/kui_term.c (stdio): Add include.
+   (tigetstr): Remove prototype.
+
 1/20/2006 Bob Rossi <bob@brasko.net>
 
    * src/kui_term.c (stdio): Add include.
