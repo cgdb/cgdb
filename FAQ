@@ -39,7 +39,7 @@
 
 2. What dependencies does CGDB have?
 	CGDB could not have been written without the use of other libraries.
-	1. CGDB depends on readline-development-4.2 or greater.
+	1. CGDB depends on readline-development-5.1 or greater.
 	   If you don't have this, you might get a link error that looks something
 	   like this, 'undefined symbol, rl_set_prompt'.
 	2. CGDB depends on ncurses/curses.  The version number is not known.
