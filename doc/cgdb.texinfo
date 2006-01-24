@@ -583,10 +583,10 @@ pick up on the changes.
 Set the length of time to wait before timing out and treating the ESC 
 keystroke as the ESC character rather than combining it with other 
 characters in the buffer to create a key sequence. The variable is 
-measured in milli seconds. If ESCDELAY is 0, the system immediately 
+measured in milli seconds. If @var{escdelay} is 0, the system immediately 
 composes the ESCAPE response without waiting for more information 
 from the buffer. The user may choose any value between 0 and 10000, 
-inclusive. The default setting for the ESCDELAY environment variable is 
+inclusive. The default setting for the @var{escdelay} environment variable is 
 40 (forty hundreths of a second).
 
 @item :set ic
