@@ -69,9 +69,6 @@
 /* ncurses library */
 #undef HAVE_NCURSES
 
-/* Define to 1 if you have the <ncurses.h> header file. */
-#undef HAVE_NCURSES_H
-
 /* Define to 1 if you have the <pty.h> header file. */
 #undef HAVE_PTY_H
 
