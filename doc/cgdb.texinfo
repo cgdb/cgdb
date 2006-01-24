@@ -708,8 +708,8 @@ readline, simply turn off control flow and start CGDB.
 @chapter Building CGDB from source
 
 Building CGDB from source requires several packages. First, CGDB is hosted
-at sf.net/projects/cgdb. You can determine how to get CGDB from source by
-looking here: http://sourceforge.net/cvs/?group_id=72581.
+at http://sf.net/projects/cgdb. You can determine how to get CGDB from source 
+by looking here: http://sourceforge.net/cvs/?group_id=72581.
 
 Once you have the source to CGDB, now you can begin to build it.  You will of 
 course need many packages to build CGDB. Below is a list of all of them 
@@ -743,7 +743,7 @@ installed.  I have used flex 2.5.4 to build CGDB.
 
 @item GNU Texinfo
 If you modify doc/cgdb.texinfo, then you will be required to have this package
-installed.  I have used version 4.7 to build CGDB.
+installed.  I have used version 4.7 to build the documentation for CGDB.
 @end table
 
 CGDB uses autoconf/automake to build its configure scripts and makefiles.  So, 

@@ -753,8 +753,9 @@ File: cgdb.info,  Node: Building CGDB,  Next: Copying This Manual,  Prev: Termin
 ***************************
 
 Building CGDB from source requires several packages. First, CGDB is
-hosted at sf.net/projects/cgdb. You can determine how to get CGDB from
-source by looking here: http://sourceforge.net/cvs/?group_id=72581.
+hosted at http://sf.net/projects/cgdb. You can determine how to get
+CGDB from source by looking here:
+http://sourceforge.net/cvs/?group_id=72581.
 
    Once you have the source to CGDB, now you can begin to build it.
 You will of course need many packages to build CGDB. Below is a list of
@@ -786,7 +787,8 @@ certain files in CGDB.
 
 `GNU Texinfo'
      If you modify doc/cgdb.texinfo, then you will be required to have
-     this package installed.  I have used version 4.7 to build CGDB.
+     this package installed.  I have used version 4.7 to build the
+     documentation for CGDB.
 
    CGDB uses autoconf/automake to build its configure scripts and
 makefiles.  So, if you change any of the autoconf/automake files, you
@@ -1283,8 +1285,8 @@ Node: Configuring CGDB18299
 Node: Sending I/O to Inferior22364
 Node: Terminal Control Flow24746
 Node: Building CGDB25515
-Node: Copying This Manual27388
-Node: GNU Free Documentation License27623
-Node: Index50031
+Node: Copying This Manual27422
+Node: GNU Free Documentation License27657
+Node: Index50065
 
 End Tag Table
