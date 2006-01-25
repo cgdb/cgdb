@@ -1,7 +1,12 @@
 1/24/2006 Bob Rossi <bob@brasko.net>
 
+	* src/cgdbrc.c (command_start_tty): Removed.
+	(COMMANDS): Remove the :start_tty array index.
+
+1/24/2006 Bob Rossi <bob@brasko.net>
+
 	* src/cgdbrc.c (command_do_quit_force): Removed.
-	(COMMANDS): Remove q! and quit! array index.
+	(COMMANDS): Remove the q! and quit! array index.
 	(command_source_reload): Check for null dereference.
 
 1/23/2006 Bob Rossi <bob@brasko.net>

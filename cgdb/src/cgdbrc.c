@@ -111,7 +111,6 @@ static int command_do_run( void );
 static int command_do_step( void );
 static int command_search_next( void );
 static int command_source_reload( void );
-static int command_start_tty( void );
 static int command_toggle_tty( void );
 
 static int command_parse_syntax( void );
@@ -136,7 +135,6 @@ static struct commands
     /* quit        */ { "quit",        command_do_quit },
     /* run         */ { "run",         command_do_run },
     /* search_next */ { "search_next", command_search_next },
-    /* start_tty   */ { "start_tty",   command_start_tty },
     /* step        */ { "step",        command_do_step },
     /* syntax      */ { "syntax",      command_parse_syntax },
     /* toggle_tty  */ { "toggle_tty",  command_toggle_tty },
@@ -367,18 +365,6 @@ int command_source_reload( void )
         return -1;
 
     return 0;
-}
-
-int command_start_tty( void )
-{
-    /* FIXME: Find out what this is supposed to do and implement */
-    return 1;
-//    if ( tgdb_new_tty() == -1 ) {
-//        return 1;
-//    } else {
-//        /* FIXME: interface does scr_free( tty_win ), tty_win = NULL, if_layout(); */
-//        return 0;
-//    }
 }
 
 int command_toggle_tty( void )
