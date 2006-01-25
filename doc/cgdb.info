@@ -582,18 +582,16 @@ commands my be negated by appending 'no' to the front.  For example:
 `:set ignorecase' turns on case-insensitive searching; while `:set
 noignorecase' turns on case-sensitive searching.
 
-`:set as STYLE'
-`:set arrowstyle STYLE'
+`:set as=STYLE'
+`:set arrowstyle=STYLE'
      Set the arrow style to STYLE.  Possible values for STYLE are
      `short', `long', and `highlight'.  Changes the style of the arrow
-     that is used to indicate the currently executing line in the
-     source viewer.  The default value is short.  A longer arrow is
-     available, for easier readability.  Finally, the `highlight'
-     option draws no arrow at all, instead drawing the entire line in
-     inverse video.
+     that is used to indicate the currently executing line in the source
+     viewer.  The default value is short.  A longer arrow is available,
+     for easier readability.  Finally, the `highlight' option draws no
+     arrow at all, instead drawing the entire line in inverse video.
 
 `:set asr'
-
 `:set autosourcereload'
      If this is on, CGDB will automatically reload a source file if it
      has changed since CGDB has opened it.  If it is off, the file will
@@ -605,85 +603,86 @@ noignorecase' turns on case-sensitive searching.
      determine if it has changed. So if you modify the source file, and
      didn't recompile yet, CGDB will still pick up on the changes.
 
-`:set escdelay'
+`:set escdelay=DELAY'
      Set the length of time to wait before timing out and treating the
-     ESC keystroke as the ESC character rather than combining it with
-     other characters in the buffer to create a key sequence. The
-     variable is measured in milli seconds. If ESCDELAY is 0, the
-     system immediately composes the ESCAPE response without waiting
-     for more information from the buffer. The user may choose any
-     value between 0 and 10000, inclusive. The default setting for the
-     ESCDELAY environment variable is 40 (forty hundreths of a second).
+     <ESC> keystroke as the <ESC> character rather than combining it
+     with other characters in the buffer to create a key sequence.  The
+     variable is measured in milli seconds.  If DELAY is 0, the system
+     immediately composes the ESCAPE response without waiting for more
+     information from the buffer.  DELAY may be any value between 0 and
+     10000, inclusive.  The default setting for the DELAY variable is
+     40 (forty hundreths of a second).
 
 `:set ic'
-
 `:set ignorecase'
-     Sets searching case insensitive
+     Sets searching case insensitive.  The default is off.
 
 `:set sc'
-
 `:set shortcut'
-     Enables shortcut commands typed in source window
+     Enables shortcut commands typed in source window.  The default is
+     off.
 
 `:set stc'
-
 `:set showtgdbcommands'
      If this is on, CGDB will show all of the commands that it sends to
      GDB.  If it is off, CGDB will not show the commands that it gives
      to GDB.  The default is off.
 
-`:set syn STYLE'
-
-`:set syntax STYLE'
+`:set syn=STYLE'
+`:set syntax=STYLE'
      Sets the current highlighting mode of the current file to have the
      syntax STYLE.  Possible values for SYNTAX are `c', `ada', and
-     `off'.
+     `off'.  Normally, the user will never have to do this, since CGDB
+     automatically detects what syntax a file should be based on its
+     file extension.  However, this feature can currently be useful for
+     debugging purposes.
 
-`:set tabstop'
-     Number of spaces that should be rendered on screen for TAB
-     characters (\t)
+`:set ts=NUMBER'
 
-`:set wmh'
+`:set tabstop=NUMBER'
+     Sets the number of spaces that should be rendered on the screen
+     for <TAB> characters.  The default value for NUMBER is 8.
 
-`:set winminheight'
-     The minimal height of a window. Windows will never become smaller
-     than this value.
+`:set wmh=NUMBER'
+`:set winminheight=NUMBER'
+     The minimal height of a window.  Windows will never become smaller
+     than this value.  The default value for NUMBER is 0.
 
-`:set winsplit STYLE'
+`:set winsplit=STYLE'
      Set the split point between source and gdb window.  This is
-     especially useful as an init setting in `cgdbrc'.  *Note
+     especially useful as an init setting in your `cgdbrc' file.  *Note
      Configuring CGDB::.  The possible values for STYLE are `top_full',
      `top_big', `even', `bottom_big', and `bottom_full'.
 
 `:set ws'
 
 `:set wrapscan'
-     Searches wrap around the end of file.
+     Searches wrap around the end of file.  The default is on.
 
 `:continue'
      Send a continue command to GDB.
 
 `:finish'
-     Send a finish command to gdb
+     Send a finish command to gdb.
 
 `:help'
-     This will display the current manual, in text format.
+     This will display the current manual in text format, in the
+     "source window".
 
 `:insert'
-     Move focus to the gdb window
+     Move focus to the gdb window.
 
 `:next'
-     Send a next command to gdb
+     Send a next command to gdb.
 
+`:q'
 `:quit'
-     Quit cgdb (may be abbreviated as :q)
+     Quit CGDB.
 
-`:quit!'
-     Quit cgdb, even if debugged program is running (abbreviated as :q!)
-
+`:e'
 `:edit'
-     Reloads the file in the source window. This can be useful if the
-     file has changed since it was opened by CGDB.  (abbreviated as :e)
+     Reloads the file in the source window.  This can be useful if the
+     file has changed since it was opened by CGDB.
 
 
 File: cgdb.info,  Node: Sending I/O to Inferior,  Next: Terminal Control Flow,  Prev: Configuring CGDB,  Up: Top
@@ -1284,11 +1283,11 @@ Node: File Dialog Mode16330
 Node: TTY Mode17758
 Node: Status Bar Mode18151
 Node: Configuring CGDB18330
-Node: Sending I/O to Inferior22570
-Node: Terminal Control Flow24952
-Node: Building CGDB25721
-Node: Copying This Manual27628
-Node: GNU Free Documentation License27863
-Node: Index50271
+Node: Sending I/O to Inferior22887
+Node: Terminal Control Flow25269
+Node: Building CGDB26038
+Node: Copying This Manual27945
+Node: GNU Free Documentation License28180
+Node: Index50588
 
 End Tag Table

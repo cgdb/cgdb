@@ -557,18 +557,17 @@ my be negated by appending 'no' to the front.  For example:
 @kbd{:set noignorecase} turns on case-sensitive searching.
 
 @table @kbd
-@item :set as @var{style}
-@itemx :set arrowstyle @var{style}
+@item :set as=@var{style}
+@itemx :set arrowstyle=@var{style}
 Set the arrow style to @var{style}.  Possible values for @var{style}
-are @samp{short}, @samp{long}, and @samp{highlight}.
-Changes the style of the arrow that is used to indicate the currently
-executing line in the source viewer.  The default value is short.  A
-longer arrow is available, for easier readability.  Finally, the
-@samp{highlight} option draws no arrow at all, instead drawing the entire
-line in inverse video.
+are @samp{short}, @samp{long}, and @samp{highlight}.  Changes the style of 
+the arrow that is used to indicate the currently executing line in the source 
+viewer.  The default value is short.  A longer arrow is available, for easier 
+readability.  Finally, the @samp{highlight} option draws no arrow at all, 
+instead drawing the entire line in inverse video.
 
 @item :set asr
-@item :set autosourcereload
+@itemx :set autosourcereload
 If this is on, CGDB will automatically reload a source file if it has 
 changed since CGDB has opened it.  If it is off, the file will never be 
 reloaded, until you start CGDB again. The default is off.
@@ -579,78 +578,83 @@ the timestamp of the source file to determine if it has changed. So if
 you modify the source file, and didn't recompile yet, CGDB will still 
 pick up on the changes.
 
-@item :set escdelay 
-Set the length of time to wait before timing out and treating the ESC 
-keystroke as the ESC character rather than combining it with other 
-characters in the buffer to create a key sequence. The variable is 
-measured in milli seconds. If @var{escdelay} is 0, the system immediately 
+@item :set escdelay=@var{delay}
+Set the length of time to wait before timing out and treating the @key{ESC}
+keystroke as the @key{ESC} character rather than combining it with other 
+characters in the buffer to create a key sequence.  The variable is 
+measured in milli seconds.  If @var{delay} is 0, the system immediately 
 composes the ESCAPE response without waiting for more information 
-from the buffer. The user may choose any value between 0 and 10000, 
-inclusive. The default setting for the @var{escdelay} environment variable is 
+from the buffer.  @var{delay} may be any value between 0 and 10000, 
+inclusive.  The default setting for the @var{delay} variable is 
 40 (forty hundreths of a second).
 
 @item :set ic
-@item :set ignorecase
-Sets searching case insensitive
+@itemx :set ignorecase
+Sets searching case insensitive.  The default is off.
 
 @item :set sc
-@item :set shortcut
-Enables shortcut commands typed in source window
+@itemx :set shortcut
+Enables shortcut commands typed in source window.  The default is off.
 
 @item :set stc
-@item :set showtgdbcommands
+@itemx :set showtgdbcommands
 If this is on, CGDB will show all of the commands that it sends to GDB. 
 If it is off, CGDB will not show the commands that it gives to GDB. 
 The default is off. 
 
-@item :set syn @var{style}
-@item :set syntax @var{style}
+@item :set syn=@var{style}
+@itemx :set syntax=@var{style}
 Sets the current highlighting mode of the current file to have the syntax 
 @var{style}.  Possible values for @var{syntax} are @samp{c}, @samp{ada}, and 
-@samp{off}.
+@samp{off}.  Normally, the user will never have to do this, since CGDB 
+automatically detects what syntax a file should be based on its file 
+extension.  However, this feature can currently be useful for debugging 
+purposes.
 
-@item :set tabstop 
-Number of spaces that should be rendered on screen for TAB characters (\t)
+@item :set ts=@var{number}
+@item :set tabstop=@var{number}
+Sets the number of spaces that should be rendered on the screen for @key{TAB}
+characters.  The default value for @var{number} is 8.
 
-@item :set wmh
-@item :set winminheight
-The minimal height of a window. Windows will never become smaller than 
-this value.
+@item :set wmh=@var{number}
+@itemx :set winminheight=@var{number}
+The minimal height of a window.  Windows will never become smaller than 
+this value.  The default value for @var{number} is 0.
 
-@item :set winsplit @var{style}
+@item :set winsplit=@var{style}
 Set the split point between source and gdb window.  This is especially useful
-as an init setting in @file{cgdbrc}.  @xref{Configuring CGDB}.  The possible 
-values for @var{style} are @samp{top_full}, @samp{top_big}, @samp{even}, 
-@samp{bottom_big}, and @samp{bottom_full}.
+as an init setting in your @file{cgdbrc} file.  @xref{Configuring CGDB}.  The 
+possible values for @var{style} are @samp{top_full}, @samp{top_big}, 
+@samp{even}, @samp{bottom_big}, and @samp{bottom_full}.
 
 @item :set ws
 @item :set wrapscan
-Searches wrap around the end of file.
+Searches wrap around the end of file.  The default is on.
 
 @item :continue
 Send a continue command to GDB.
 
 @item :finish
-Send a finish command to gdb
+Send a finish command to gdb.
 
 @item :help
-This will display the current manual, in text format.
+This will display the current manual in text format, in the 
+@dfn{source window}.
 
 @item :insert
-Move focus to the gdb window
+Move focus to the gdb window.
 
 @item :next
-Send a next command to gdb
+Send a next command to gdb.
 
-@item :quit
-Quit cgdb (may be abbreviated as :q)
+@item :q
+@itemx :quit
+Quit CGDB.
 
-@item :quit!
-Quit cgdb, even if debugged program is running (abbreviated as :q!)
-
-@item :edit
-Reloads the file in the source window. This can be useful if the file has 
-changed since it was opened by CGDB.  (abbreviated as :e)
+@item :e
+@itemx :edit
+Reloads the file in the source window.  This can be useful if the file has 
+changed since it was opened by CGDB.
 @end table
 
 @node Sending I/O to Inferior
