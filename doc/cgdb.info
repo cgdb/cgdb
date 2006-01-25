@@ -122,9 +122,10 @@ The CGDB user interface currently consists of two windows and a status
 bar.  The source window is currently on the top and the GDB window is
 on the bottom.  The status bar currently separates the two windows.
 
-   The interface has two modes depending on which window is focused.
-CGDB mode is when the source window is focused, and GDB mode when the
-GDB window is focused.
+   The interface has several modes depending on which window is focused.
+"CGDB mode" is when the source window is focused, "GDB mode" is when
+the GDB window is focused and "TTY mode" is when the TTY window is
+focused.
 
    Beginning with CGDB version 1.0, the windows are movable, and the
 user will be able to create as many or as few that is desired.
@@ -287,13 +288,13 @@ File: cgdb.info,  Node: Switching Windows,  Prev: Status Bar,  Up: Understanding
 2.6 Switch between windows
 ==========================
 
-When CGDB is invoked, the interface is in GDB mode.  A `*' at the right
-of the status bar indicates that input will be passed to GDB.  To change
-the focus to the source window, hit <ESC>.  The interface is now in CGDB
-mode.
+When CGDB is invoked, the interface is in "GDB mode".  A `*' at the
+right of the status bar indicates that input will be passed to GDB.  To
+change the focus to the source window, hit <ESC>.  The interface is now
+in "CGDB mode".
 
-   To switch back into GDB mode, press `i'.  This syntax is based on the
-popular Unix text-editor, vi.
+   To switch back into "GDB mode", press `i'.  This syntax is based on
+the popular Unix text-editor, vi.
 
 
 File: cgdb.info,  Node: Controlling CGDB,  Next: Configuring CGDB,  Prev: Understanding CGDB,  Up: Top
@@ -319,7 +320,7 @@ File: cgdb.info,  Node: CGDB Mode,  Next: GDB Mode,  Up: Controlling CGDB
 3.1 Commands available during CGDB mode
 =======================================
 
-When you are in the source window, you are implicitly in CGDB mode.
+When you are in the source window, you are implicitly in "CGDB mode".
 All of the below commands are available during this mode.  This mode is
 primarily available for the user to view the current source file,
 search it, or switch to a different mode.
@@ -329,10 +330,10 @@ search it, or switch to a different mode.
      mode.
 
 `i'
-     Puts the user into GDB mode.
+     Puts the user into "GDB mode".
 
 `I'
-     Puts the user into tty mode.
+     Puts the user into "TTY mode".
 
 `T'
      Opens a window to give input to the debugged program.
@@ -419,9 +420,9 @@ File: cgdb.info,  Node: GDB Mode,  Next: File Dialog Mode,  Prev: CGDB Mode,  Up
 3.2 Commands available during GDB mode
 ======================================
 
-When in GDB mode, the user is mostly interested in working with the GDB
-console.  That is, sending commands to GDB and receiving data back from
-GDB.  Almost all data passed into this window is directly sent to
+When in "GDB mode", the user is mostly interested in working with the
+GDB console.  That is, sending commands to GDB and receiving data back
+from GDB.  Almost all data passed into this window is directly sent to
 readline and then to GDB.
 
    It is important to understand that CGDB parses the keys entered in
@@ -578,7 +579,7 @@ noignorecase' turns on case-sensitive searching.
      immediately composes the ESCAPE response without waiting for more
      information from the buffer.  DELAY may be any value between 0 and
      10000, inclusive.  The default setting for the DELAY variable is
-     40 (forty hundreths of a second).
+     40 (forty hundredths of a second).
 
 `:set ic'
 `:set ignorecase'
@@ -675,7 +676,7 @@ As of this writing, the technique described below does not work on
 windows, using a natively compiled GDB.  It may work when using the GDB
 that comes with Cygwin.
 
-   This technique is similar to getting in and out of GDB mode.  The
+   This technique is similar to getting in and out of "GDB mode".  The
 tty window is not visible by default.  This is because it is only
 needed if the user wishes to send data to the program being debugged.
 To display the tty window, hit `T' while in command mode.  After
@@ -684,14 +685,14 @@ of the "source window" and the "gdb window".  This is called the "tty
 window". You will also see a new status bar called the tty status bar.
 There will be a `*' on the tty status bar after the `T' was hit.  This
 is because when the window is opened with the `T' command, CGDB
-automatically puts the user into tty mode.  To get out of this window
+automatically puts the user into "TTY mode".  To get out of this window
 hit <ESC>.  This will put you back into command mode.  To make the tty
 window appear and disappear hit the `T' key while in command mode.  It
 is a toggle.
 
    Once the tty window is already open, the user can then hit `I' in
-command mode to get into tty mode.  The user can then hit <ESC> in tty
-mode to get back into command mode.
+command mode to get into "TTY mode".  The user can then hit <ESC> in
+"TTY mode" to get back into command mode.
 
    When the tty window is open, all data that comes from the program,
 goes there.  Any data typed into the tty window will ONLY go to the
@@ -1230,6 +1231,7 @@ Index
 * Menu:
 
 * building CGDB:                         Building CGDB.        (line  6)
+* CGDB mode:                             Understanding CGDB.   (line  6)
 * commands, in CGDB mode:                CGDB Mode.            (line  6)
 * commands, in File Dialog mode:         File Dialog Mode.     (line  6)
 * commands, in GDB mode:                 GDB Mode.             (line  6)
@@ -1239,6 +1241,7 @@ Index
 * FDL, GNU Free Documentation License:   GNU Free Documentation License.
                                                                (line  6)
 * file dialog window:                    File Dialog Window.   (line  6)
+* GDB mode:                              Understanding CGDB.   (line  6)
 * GDB window:                            GDB Window.           (line  6)
 * invocation CGDB:                       Invocation.           (line  6)
 * regular expression search:             Source Window.        (line 42)
@@ -1249,6 +1252,7 @@ Index
 * switch between windows:                Switching Windows.    (line  6)
 * terminal control flow:                 Terminal Control Flow.
                                                                (line  6)
+* TTY mode:                              Understanding CGDB.   (line  6)
 * TTY window:                            TTY Window.           (line  6)
 * tty window:                            TTY Window.           (line  6)
 * understanding CGDB:                    Understanding CGDB.   (line  6)
@@ -1260,23 +1264,23 @@ Node: Top1050
 Node: Summary2478
 Node: Invocation3633
 Node: Understanding CGDB4087
-Node: Source Window5422
-Node: GDB Window7953
-Node: File Dialog Window8920
-Node: TTY Window9963
-Node: Status Bar11102
-Node: Switching Windows12012
-Node: Controlling CGDB12485
-Node: CGDB Mode13193
-Node: GDB Mode14886
-Node: File Dialog Mode16097
-Node: TTY Mode17384
-Node: Configuring CGDB17753
-Node: Sending I/O to Inferior22433
-Node: Terminal Control Flow24804
-Node: Building CGDB25573
-Node: Copying This Manual27480
-Node: GNU Free Documentation License27715
-Node: Index50123
+Node: Source Window5478
+Node: GDB Window8009
+Node: File Dialog Window8976
+Node: TTY Window10019
+Node: Status Bar11158
+Node: Switching Windows12068
+Node: Controlling CGDB12547
+Node: CGDB Mode13255
+Node: GDB Mode14954
+Node: File Dialog Mode16167
+Node: TTY Mode17454
+Node: Configuring CGDB17823
+Node: Sending I/O to Inferior22504
+Node: Terminal Control Flow24883
+Node: Building CGDB25652
+Node: Copying This Manual27559
+Node: GNU Free Documentation License27794
+Node: Index50202
 
 End Tag Table
