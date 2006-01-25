@@ -1,3 +1,10 @@
+   * There is a new manual for CGDB. The text version is located in 
+     cgdb/doc/cgdb.txt. The info version is available at cgdb/doc/cgdb.info.
+     The text, html, pdf, info and possibly other versions are avialable at
+     http://cgdb.sourceforge.net/documentation.shtml
+   
+   * There is a new CGDB man page. It is located in cgdb/doc/cgdb.1.
+   
    * Fix a crash in CGDB if the user would type ':e' or ':edit' in the 
      source window, and the source window was empty. This crash is considered
      not very significant, since I can't understand why the user would try to
