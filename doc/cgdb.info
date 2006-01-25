@@ -684,6 +684,9 @@ noignorecase' turns on case-sensitive searching.
 `:run'
      Send a run command to GDB.
 
+`:syntax'
+     Turn the syntax on or off.
+
 `:q'
 `:quit'
      Quit CGDB.
@@ -1292,11 +1295,11 @@ Node: File Dialog Mode16330
 Node: TTY Mode17758
 Node: Status Bar Mode18151
 Node: Configuring CGDB18330
-Node: Sending I/O to Inferior23077
-Node: Terminal Control Flow25459
-Node: Building CGDB26228
-Node: Copying This Manual28135
-Node: GNU Free Documentation License28370
-Node: Index50778
+Node: Sending I/O to Inferior23120
+Node: Terminal Control Flow25502
+Node: Building CGDB26271
+Node: Copying This Manual28178
+Node: GNU Free Documentation License28413
+Node: Index50821
 
 End Tag Table

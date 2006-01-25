@@ -655,6 +655,9 @@ Send a next command to GDB.
 @item :run
 Send a run command to GDB.
 
+@item :syntax
+Turn the syntax on or off.
+
 @item :q
 @itemx :quit
 Quit CGDB.
