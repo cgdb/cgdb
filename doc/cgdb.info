@@ -554,7 +554,7 @@ the tui was initialized.
 
    The following variables change the behavior of some aspect of CGDB.
 Many of these commands may be abbreviated in some way, and all boolean
-commands my be negated by appending 'no' to the front.  For example:
+commands my be negated by appending `no' to the front.  For example:
 `:set ignorecase' turns on case-insensitive searching; while `:set
 noignorecase' turns on case-sensitive searching.
 
@@ -680,9 +680,9 @@ input to the debugged program.
 
    However, if the user wishes to pass input to the program being
 debugged from within CGDB, there is a mechanism available for doing so.
-However, as of this writing, the technique described below does not
-work on windows, using a natively compiled GDB.  It may work when using
-the GDB that comes with Cygwin.
+As of this writing, the technique described below does not work on
+windows, using a natively compiled GDB.  It may work when using the GDB
+that comes with Cygwin.
 
    This technique is similar to getting in and out of GDB mode.  The
 tty window is not visible by default.  This is because it is only
@@ -693,7 +693,7 @@ of the "source window" and the "gdb window".  This is called the "tty
 window". You will also see a new status bar called the tty status bar.
 There will be a `*' on the tty status bar after the `T' was hit.  This
 is because when the window is opened with the `T' command, CGDB
-automatically puts the user into 'tty mode'.  To get out of this window
+automatically puts the user into tty mode.  To get out of this window
 hit <ESC>.  This will put you back into command mode.  To make the tty
 window appear and disappear hit the `T' key while in command mode.  It
 is a toggle.
@@ -705,8 +705,8 @@ mode to get back into command mode.
    When the tty window is open, all data that comes from the program,
 goes there.  Any data typed into the tty window will ONLY go to the
 program being debugged.  It will not go to GDB. When the tty window is
-closed, all output from the debugged program will go to the 'GDB
-window' AND to the 'tty window' (for viewing later when the tty window
+closed, all output from the debugged program will go to the "GDB
+window" AND to the "tty window" (for viewing later when the tty window
 is opened).
 
    If the user wishes to get a new tty for the program being debugged
@@ -1238,13 +1238,30 @@ Index
  [index ]
 * Menu:
 
+* building CGDB:                         Building CGDB.        (line  6)
+* commands, in CGDB mode:                CGDB Mode.            (line  6)
+* commands, in File Dialog mode:         File Dialog Mode.     (line  6)
+* commands, in GDB mode:                 GDB Mode.             (line  6)
+* commands, in Status Bar mode:          Status Bar Mode.      (line  6)
+* commands, in TTY mode:                 TTY Mode.             (line  6)
+* configurating CGDB:                    Configuring CGDB.     (line  6)
+* controlling CGDB:                      Controlling CGDB.     (line  6)
 * FDL, GNU Free Documentation License:   GNU Free Documentation License.
-                                                                (line 6)
-* file dialog window:                    File Dialog Window.    (line 6)
-* GDB window:                            GDB Window.            (line 6)
-* source window:                         Source Window.         (line 6)
-* status bar:                            Status Bar.            (line 6)
-* TTY window:                            TTY Window.            (line 6)
+                                                               (line  6)
+* file dialog window:                    File Dialog Window.   (line  6)
+* GDB window:                            GDB Window.           (line  6)
+* invocation CGDB:                       Invocation.           (line  6)
+* regular expression search:             Source Window.        (line 42)
+* sending I/O to inferior:               Sending I/O to Inferior.
+                                                               (line  6)
+* source window:                         Source Window.        (line  6)
+* status bar:                            Status Bar.           (line  6)
+* switch between windows:                Switching Windows.    (line  6)
+* terminal control flow:                 Terminal Control Flow.
+                                                               (line  6)
+* TTY window:                            TTY Window.           (line  6)
+* tty window:                            TTY Window.           (line  6)
+* understanding CGDB:                    Understanding CGDB.   (line  6)
 
 
 
@@ -1267,10 +1284,10 @@ Node: TTY Mode17476
 Node: Status Bar Mode17869
 Node: Configuring CGDB18048
 Node: Sending I/O to Inferior22728
-Node: Terminal Control Flow25110
-Node: Building CGDB25879
-Node: Copying This Manual27786
-Node: GNU Free Documentation License28021
-Node: Index50429
+Node: Terminal Control Flow25099
+Node: Building CGDB25868
+Node: Copying This Manual27775
+Node: GNU Free Documentation License28010
+Node: Index50418
 
 End Tag Table

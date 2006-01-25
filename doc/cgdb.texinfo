@@ -107,6 +107,7 @@ Searching source window (using regexp)
 
 @node Invocation
 @chapter Getting In and Out of CGDB
+@cindex invocation CGDB
 
 This chapter discusses how to start CGDB, and how to get out of it.
 The essentials are:
@@ -124,6 +125,7 @@ currently hanging, or operating a long command.
 
 @node Understanding CGDB
 @chapter Understanding the core concepts of CGDB
+@cindex understanding CGDB
 
 The CGDB user interface currently consists of two windows and a status bar.  
 The source window is currently on the top and the GDB window is on the 
@@ -151,6 +153,7 @@ task, please contact me.
 
 @node Source Window
 @section Understanding the source window.
+@cindex source window
 
 @cindex source window
 The @dfn{source window} is the window that provides you a view of the source 
@@ -187,6 +190,7 @@ been set.  Hitting the space bar again will delete the breakpoint.  If you
 disable the breakpoint, the line number will turn yellow, to represent the
 disabled breakpoint.
 
+@cindex regular expression search
 CGDB also supports regular expression searching within the source window.  If
 you type @kbd{/} or @kbd{?} you can search in the source window for a string
 of interest.  The C library regular expression functions are used to perform 
@@ -197,6 +201,7 @@ The full list of commands that are available in the source window is in
 
 @node GDB Window
 @section Understanding the GDB window.
+@cindex GDB window
 
 @cindex GDB window
 The @dfn{GDB window} is how CGDB allows the user to interface with the GNU 
@@ -216,6 +221,7 @@ normal terminal when working with GDB.
 
 @node File Dialog Window
 @section Understanding the file dialog window.
+@cindex file dialog window
 
 @cindex file dialog window
 The @dfn{file dialog window} is available to help the user view and select 
@@ -236,6 +242,7 @@ The full list of commands that are available in the source window is in
 
 @node TTY Window
 @section Understanding the TTY window.
+@cindex tty window
 
 @cindex TTY window
 The @dfn{TTY window} is available to allow the user to pass input to the program 
@@ -259,6 +266,7 @@ separate terminal and attaching to it with CGDB.
 
 @node Status Bar
 @section Understanding the status bar.
+@cindex status bar
 
 @cindex status bar
 The @dfn{status bar} is the general purpose way for CGDB to show the user 
@@ -278,6 +286,7 @@ The full list of commands that are available in the source window is in
 
 @node Switching Windows
 @section Switch between windows
+@cindex switch between windows
 
 When CGDB is invoked, the interface is in GDB mode.  A @samp{*} at the right
 of the status bar indicates that input will be passed to GDB.  To change
@@ -289,6 +298,7 @@ popular Unix text-editor, vi.
 
 @node Controlling CGDB
 @chapter CGDB commands
+@cindex controlling CGDB
 
 CGDB can be controlled in a variety of different ways.  Each mode that CGDB 
 is in acts differently. Currently CGDB implicitly changes modes depending on 
@@ -305,6 +315,7 @@ what commands are accessible during which modes.
 
 @node CGDB Mode
 @section Commands available during CGDB mode
+@cindex commands, in CGDB mode
 
 When you are in the source window, you are implicitly in CGDB mode.  All of 
 the below commands are available during this mode.  This mode is primarily 
@@ -402,6 +413,7 @@ Clear and redraw the screen.
 
 @node GDB Mode
 @section Commands available during GDB mode
+@cindex commands, in GDB mode
 
 When in GDB mode, the user is mostly interested in working with the GDB 
 console.  That is, sending commands to GDB and receiving data back from GDB.
@@ -437,6 +449,7 @@ then sent to GDB. This is the same method used when invoking GDB directly.
 
 @node File Dialog Mode
 @section Commands available during the file dialog mode
+@cindex commands, in File Dialog mode
 
 The file dialog is primarily used to allow the user to find and open a source
 file that the program they are debugging is made up of.  The file dialog will
@@ -494,6 +507,7 @@ Select the current file.
 
 @node TTY Mode
 @section Commands available during TTY mode
+@cindex commands, in TTY mode
 
 @table @kbd
 @item ESC
@@ -514,11 +528,13 @@ Go to the end of the GDB buffer.
 
 @node Status Bar Mode
 @section Commands available in the status bar
+@cindex commands, in Status Bar mode
 
 Status bar.
 
 @node Configuring CGDB
 @chapter CGDB configuration commands
+@cindex configurating CGDB
 
 There may be several features that you find useful in CGDB.  CGDB is capable
 of automating any of these commands through the use of the config file called
@@ -528,7 +544,7 @@ typed in all the commands into the status bar after the tui was initialized.
 
 The following variables change the behavior of some aspect of CGDB.  Many
 of these commands may be abbreviated in some way, and all boolean commands
-my be negated by appending 'no' to the front.  For example: 
+my be negated by appending @samp{no} to the front.  For example: 
 @kbd{:set ignorecase} turns on case-insensitive searching; while
 @kbd{:set noignorecase} turns on case-sensitive searching.
 
@@ -644,6 +660,7 @@ Turn the syntax on or off.
 
 @node Sending I/O to Inferior
 @chapter Sending I/O to the program being debugged
+@cindex sending I/O to inferior
 
 If the program being debugged takes input on the terminal it is recommended
 that the user start the program on one terminal, and attach to it with CGDB
@@ -651,9 +668,9 @@ from another terminal.  This is the easiest way to pass input to the
 debugged program.
 
 However, if the user wishes to pass input to the program being debugged from
-within CGDB, there is a mechanism available for doing so.  However, as of this
-writing, the technique described below does not work on windows, using a 
-natively compiled GDB.  It may work when using the GDB that comes with Cygwin.
+within CGDB, there is a mechanism available for doing so.  As of this writing, 
+the technique described below does not work on windows, using a natively 
+compiled GDB.  It may work when using the GDB that comes with Cygwin.
 
 This technique is similar to getting in and out of GDB mode.  The tty window 
 is not visible by default.  This is because it is only needed if the user 
@@ -664,7 +681,7 @@ and the @dfn{gdb window}.  This is called the @dfn{tty window}. You will also
 see a new status bar called the tty status bar.  There will be a @samp{*} on 
 the tty status bar after the @kbd{T} was hit.  This is because when the 
 window is opened with the @kbd{T} command, CGDB automatically puts the user 
-into 'tty mode'.  To get out of this window hit @key{ESC}.  This will put you 
+into tty mode.  To get out of this window hit @key{ESC}.  This will put you 
 back into command mode.  To make the tty window appear and disappear hit the 
 @kbd{T} key while in command mode.  It is a toggle.
 
@@ -675,8 +692,8 @@ mode to get back into command mode.
 When the tty window is open, all data that comes from the program, goes
 there.  Any data typed into the tty window will ONLY go to the program
 being debugged.  It will not go to GDB. When the tty window is closed,
-all output from the debugged program will go to the 'GDB window' AND to
-the 'tty window' (for viewing later when the tty window is opened). 
+all output from the debugged program will go to the @dfn{GDB window} AND to
+the @dfn{tty window} (for viewing later when the tty window is opened). 
 
 If the user wishes to get a new tty for the program being debugged then
 they can type @kbd{Ctrl-T}.  This will delete all the buffered data
@@ -685,6 +702,7 @@ you rerun or start a new program.
 
 @node Terminal Control Flow
 @chapter Allowing terminal control flow in CGDB
+@cindex terminal control flow
 
 A user can typically set there control flow behavior by using the stty 
 command like so @code{stty -ixon -ixoff}.  This will disable control flow on
@@ -697,6 +715,7 @@ readline, simply turn off control flow and start CGDB.
 
 @node Building CGDB
 @chapter Building CGDB from source
+@cindex building CGDB
 
 Building CGDB from source requires several packages. First, CGDB is hosted
 at http://sf.net/projects/cgdb. You can determine how to get CGDB from source 
