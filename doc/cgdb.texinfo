@@ -622,7 +622,7 @@ The minimal height of a window.  Windows will never become smaller than
 this value.  The default value for @var{number} is 0.
 
 @item :set winsplit=@var{style}
-Set the split point between source and gdb window.  This is especially useful
+Set the split point between source and GDB window.  This is especially useful
 as an init setting in your @file{cgdbrc} file.  @xref{Configuring CGDB}.  The 
 possible values for @var{style} are @samp{top_full}, @samp{top_big}, 
 @samp{even}, @samp{bottom_big}, and @samp{bottom_full}.
@@ -635,17 +635,25 @@ Searches wrap around the end of file.  The default is on.
 Send a continue command to GDB.
 
 @item :finish
-Send a finish command to gdb.
+Send a finish command to GDB.
+
+@item :e
+@item :edit
+This will referesh the current source window.  This is useful if the user has 
+modified the file after it was opened by CGDB.
 
 @item :help
 This will display the current manual in text format, in the 
 @dfn{source window}.
 
 @item :insert
-Move focus to the gdb window.
+Move focus to the GDB window.
 
 @item :next
-Send a next command to gdb.
+Send a next command to GDB.
+
+@item :run
+Send a run command to GDB.
 
 @item :q
 @itemx :quit
@@ -689,8 +697,8 @@ mode to get back into command mode.
 
 When the tty window is open, all data that comes from the program, goes
 there.  Any data typed into the tty window will ONLY go to the program
-being debugged.  It will not go to gdb. When the tty window is closed,
-all output from the debugged program will go to the 'gdb window' AND to
+being debugged.  It will not go to GDB. When the tty window is closed,
+all output from the debugged program will go to the 'GDB window' AND to
 the 'tty window' (for viewing later when the tty window is opened). 
 
 If the user wishes to get a new tty for the program being debugged then

@@ -649,7 +649,7 @@ noignorecase' turns on case-sensitive searching.
      than this value.  The default value for NUMBER is 0.
 
 `:set winsplit=STYLE'
-     Set the split point between source and gdb window.  This is
+     Set the split point between source and GDB window.  This is
      especially useful as an init setting in your `cgdbrc' file.  *Note
      Configuring CGDB::.  The possible values for STYLE are `top_full',
      `top_big', `even', `bottom_big', and `bottom_full'.
@@ -663,17 +663,26 @@ noignorecase' turns on case-sensitive searching.
      Send a continue command to GDB.
 
 `:finish'
-     Send a finish command to gdb.
+     Send a finish command to GDB.
+
+`:e'
+
+`:edit'
+     This will referesh the current source window.  This is useful if
+     the user has modified the file after it was opened by CGDB.
 
 `:help'
      This will display the current manual in text format, in the
      "source window".
 
 `:insert'
-     Move focus to the gdb window.
+     Move focus to the GDB window.
 
 `:next'
-     Send a next command to gdb.
+     Send a next command to GDB.
+
+`:run'
+     Send a run command to GDB.
 
 `:q'
 `:quit'
@@ -721,8 +730,8 @@ mode to get back into command mode.
 
    When the tty window is open, all data that comes from the program,
 goes there.  Any data typed into the tty window will ONLY go to the
-program being debugged.  It will not go to gdb. When the tty window is
-closed, all output from the debugged program will go to the 'gdb
+program being debugged.  It will not go to GDB. When the tty window is
+closed, all output from the debugged program will go to the 'GDB
 window' AND to the 'tty window' (for viewing later when the tty window
 is opened).
 
@@ -1283,11 +1292,11 @@ Node: File Dialog Mode16330
 Node: TTY Mode17758
 Node: Status Bar Mode18151
 Node: Configuring CGDB18330
-Node: Sending I/O to Inferior22887
-Node: Terminal Control Flow25269
-Node: Building CGDB26038
-Node: Copying This Manual27945
-Node: GNU Free Documentation License28180
-Node: Index50588
+Node: Sending I/O to Inferior23077
+Node: Terminal Control Flow25459
+Node: Building CGDB26228
+Node: Copying This Manual28135
+Node: GNU Free Documentation License28370
+Node: Index50778
 
 End Tag Table
