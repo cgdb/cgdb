@@ -31,9 +31,8 @@ Bug fixes/improvement for cgdb-0.6.1
 
 Bug fixes/improvement for cgdb-0.6.0
 
-- Use valgrind to get rid of most memory leaks.
-
 Closed:
+[x] Use valgrind to get rid of most memory leaks.
 
 [x] Add documentation to CGDB. I think texinfo is the prefered way to do this,
   it generates info and html pages. For man pages, looking at help2man might
