@@ -109,7 +109,6 @@ static int command_do_next( void );
 static int command_do_quit( void );
 static int command_do_run( void );
 static int command_do_step( void );
-static int command_search_next( void );
 static int command_source_reload( void );
 
 static int command_parse_syntax( void );
@@ -133,10 +132,8 @@ static struct commands
     /* q           */ { "q",           command_do_quit },
     /* quit        */ { "quit",        command_do_quit },
     /* run         */ { "run",         command_do_run },
-    /* search_next */ { "search_next", command_search_next },
     /* step        */ { "step",        command_do_step },
     /* syntax      */ { "syntax",      command_parse_syntax },
-    /* tty         */ { "tty",         command_focus_tty },
 };
 
 action_t get_command( const char *cmd )
@@ -339,12 +336,6 @@ int command_do_step( void )
         return -1;
     handle_request (tgdb, request_ptr);
 
-    return 0;
-}
-
-int command_search_next( void )
-{
-    if_search_next();
     return 0;
 }
 

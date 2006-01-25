@@ -634,13 +634,13 @@ Searches wrap around the end of file.  The default is on.
 @item :continue
 Send a continue command to GDB.
 
+@item :e
+@itemx :edit
+reloads the file in the source window.  this can be useful if the file has 
+changed since it was opened by cgdb.
+
 @item :finish
 Send a finish command to GDB.
-
-@item :e
-@item :edit
-This will referesh the current source window.  This is useful if the user has 
-modified the file after it was opened by CGDB.
 
 @item :help
 This will display the current manual in text format, in the 
@@ -652,20 +652,18 @@ Move focus to the GDB window.
 @item :next
 Send a next command to GDB.
 
-@item :run
-Send a run command to GDB.
-
-@item :syntax
-Turn the syntax on or off.
-
 @item :q
 @itemx :quit
 Quit CGDB.
 
-@item :e
-@itemx :edit
-Reloads the file in the source window.  This can be useful if the file has 
-changed since it was opened by CGDB.
+@item :run
+Send a run command to GDB.
+
+@item :step
+Send a step command to GDB.
+
+@item :syntax
+Turn the syntax on or off.
 @end table
 
 @node Sending I/O to Inferior

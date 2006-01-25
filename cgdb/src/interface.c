@@ -1401,12 +1401,6 @@ Focus if_get_focus(void) {
     return focus;
 }
 
-void if_search_next( void )
-{
-    source_search_regex(src_win, regex_line, 2, regex_direction, regex_icase);
-    if_draw();
-}
-
 void if_set_winsplit( WIN_SPLIT_TYPE new_split )
 {
    cur_win_split = new_split;

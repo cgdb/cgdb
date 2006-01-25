@@ -662,14 +662,13 @@ noignorecase' turns on case-sensitive searching.
 `:continue'
      Send a continue command to GDB.
 
+`:e'
+`:edit'
+     reloads the file in the source window.  this can be useful if the
+     file has changed since it was opened by cgdb.
+
 `:finish'
      Send a finish command to GDB.
-
-`:e'
-
-`:edit'
-     This will referesh the current source window.  This is useful if
-     the user has modified the file after it was opened by CGDB.
 
 `:help'
      This will display the current manual in text format, in the
@@ -681,20 +680,18 @@ noignorecase' turns on case-sensitive searching.
 `:next'
      Send a next command to GDB.
 
-`:run'
-     Send a run command to GDB.
-
-`:syntax'
-     Turn the syntax on or off.
-
 `:q'
 `:quit'
      Quit CGDB.
 
-`:e'
-`:edit'
-     Reloads the file in the source window.  This can be useful if the
-     file has changed since it was opened by CGDB.
+`:run'
+     Send a run command to GDB.
+
+`:step'
+     Send a step command to GDB.
+
+`:syntax'
+     Turn the syntax on or off.
 
 
 File: cgdb.info,  Node: Sending I/O to Inferior,  Next: Terminal Control Flow,  Prev: Configuring CGDB,  Up: Top
@@ -1295,11 +1292,11 @@ Node: File Dialog Mode16330
 Node: TTY Mode17758
 Node: Status Bar Mode18151
 Node: Configuring CGDB18330
-Node: Sending I/O to Inferior23120
-Node: Terminal Control Flow25502
-Node: Building CGDB26271
-Node: Copying This Manual28178
-Node: GNU Free Documentation License28413
-Node: Index50821
+Node: Sending I/O to Inferior23012
+Node: Terminal Control Flow25394
+Node: Building CGDB26163
+Node: Copying This Manual28070
+Node: GNU Free Documentation License28305
+Node: Index50713
 
 End Tag Table
