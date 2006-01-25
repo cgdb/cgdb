@@ -158,12 +158,10 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 info_TEXINFOS = cgdb.texinfo
 cgdb_TEXINFOS = gpl.texi fdl.texi
-SUFFIXES = .html
-html_docs = cgdb.html
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .html .dvi .info .pdf .ps .texinfo
+.SUFFIXES: .dvi .html .info .pdf .ps .texinfo
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -223,6 +221,20 @@ $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	TEXINPUTS="$(am__TEXINFO_TEX_DIR)$(PATH_SEPARATOR)$$TEXINPUTS" \
 	MAKEINFO='$(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) -I $(srcdir)' \
 	$(TEXI2PDF) $<
+
+.texinfo.html:
+	rm -rf $(@:.html=.htp)
+	if $(MAKEINFOHTML) $(AM_MAKEINFOHTMLFLAGS) $(MAKEINFOFLAGS) -I $(srcdir) \
+	 -o $(@:.html=.htp) $<; \
+	then \
+	  rm -rf $@; \
+	  if test ! -d $(@:.html=.htp) && test -d $(@:.html=); then \
+	    mv $(@:.html=) $@; else mv $(@:.html=.htp) $@; fi; \
+	else \
+	  if test ! -d $(@:.html=.htp) && test -d $(@:.html=); then \
+	    rm -rf $(@:.html=); else rm -Rf $(@:.html=.htp) $@; fi; \
+	  exit 1; \
+	fi
 $(srcdir)/cgdb.info: cgdb.texinfo $(srcdir)/version.texi $(cgdb_TEXINFOS)
 cgdb.dvi: cgdb.texinfo $(srcdir)/version.texi $(cgdb_TEXINFOS)
 cgdb.pdf: cgdb.texinfo $(srcdir)/version.texi $(cgdb_TEXINFOS)
@@ -377,6 +389,8 @@ dvi: dvi-am
 
 dvi-am: $(DVIS)
 
+html: html-am
+
 html-am: $(HTMLS)
 
 info: info-am
@@ -453,12 +467,6 @@ uninstall-am: uninstall-info-am
 	mostlyclean-generic mostlyclean-vti pdf pdf-am ps ps-am \
 	uninstall uninstall-am uninstall-info-am
 
-
-.texinfo.html:
-	$(MAKEINFO) --html $<
-
-.PHONY: html
-html: $(html_docs)
 
 clean-local:
 	rm -rf *.t2d
