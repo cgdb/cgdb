@@ -1,5 +1,11 @@
 1/24/2006 Bob Rossi <bob@brasko.net>
 
+	* src/cgdbrc.c (command_toggle_tty): Removed.
+	(COMMANDS): Remove the :toggle_tty array index.
+	* src/interface.c (if_tty_toggle): Removed.
+
+1/24/2006 Bob Rossi <bob@brasko.net>
+
 	* src/cgdbrc.c (command_start_tty): Removed.
 	(COMMANDS): Remove the :start_tty array index.
 

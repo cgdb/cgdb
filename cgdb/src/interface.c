@@ -1401,18 +1401,6 @@ Focus if_get_focus(void) {
     return focus;
 }
 
-void if_tty_toggle( void )
-{
-    tty_win_on = !tty_win_on;
-    if ( tty_win_on ) {
-        if_set_focus( CGDB );
-    } else {
-        if_set_focus( TTY );
-    }
-
-    if_layout();
-}
-
 void if_search_next( void )
 {
     source_search_regex(src_win, regex_line, 2, regex_direction, regex_icase);

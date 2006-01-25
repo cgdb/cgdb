@@ -111,7 +111,6 @@ static int command_do_run( void );
 static int command_do_step( void );
 static int command_search_next( void );
 static int command_source_reload( void );
-static int command_toggle_tty( void );
 
 static int command_parse_syntax( void );
 
@@ -137,7 +136,6 @@ static struct commands
     /* search_next */ { "search_next", command_search_next },
     /* step        */ { "step",        command_do_step },
     /* syntax      */ { "syntax",      command_parse_syntax },
-    /* toggle_tty  */ { "toggle_tty",  command_toggle_tty },
     /* tty         */ { "tty",         command_focus_tty },
 };
 
@@ -364,12 +362,6 @@ int command_source_reload( void )
     if ( source_reload ( sview, sview->cur->path, 1 ) == -1 )
         return -1;
 
-    return 0;
-}
-
-int command_toggle_tty( void )
-{
-    if_tty_toggle();
     return 0;
 }
 
