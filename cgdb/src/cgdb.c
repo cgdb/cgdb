@@ -558,7 +558,7 @@ process_commands(struct tgdb *tgdb)
 	  /* For each breakpoint */
 	  tb = (struct tgdb_breakpoint *)tgdb_list_get_item ( iterator );
 
-	  file = strdup ( tb->file );
+	  file = tb->file;
 
 	  if (tb->enabled)
 	    source_enable_break(sview, file, tb->line);

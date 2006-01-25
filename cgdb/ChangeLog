@@ -1,6 +1,10 @@
 1/24/2006 Bob Rossi <bob@brasko.net>
   
-	* cgdb/include/helptext.h: Update.
+	* src/cgdb.c (process_commands): Fix memory leak.
+
+1/24/2006 Bob Rossi <bob@brasko.net>
+  
+	* include/helptext.h: Update.
 
 1/24/2006 Bob Rossi <bob@brasko.net>
 
