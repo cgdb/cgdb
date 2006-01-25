@@ -1,4 +1,8 @@
 1/24/2006 Bob Rossi <bob@brasko.net>
+  
+	* cgdb/include/helptext.h: Update.
+
+1/24/2006 Bob Rossi <bob@brasko.net>
 
 	* src/cgdbrc.c (command_search_next): Removed.
 	(COMMANDS): Remove the :search_next and :tty array index.
