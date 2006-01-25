@@ -327,43 +327,31 @@ Opens a window to give input to the debugged program.
 @item Ctrl-T
 Opens a new tty for the debugged program.
 
-@item up arrow
+@item k
+@itemx up arrow
 Move up a line.
 
 @item j
-Move up a line.
-
-@item down arrow
+@itemx down arrow
 Move down a line.
-
-@item k
-Move down a line.
-
-@item left arrow
-Move left a line.
 
 @item h
+@itemx left arrow
 Move left a line.
 
-@item right arrow
-Move right a line.
-
 @item l
+@itemx right arrow
 Move right a line.
-
-@item page up
-Move up a page.
 
 @item Ctrl-b
+@itemx page up
 Move up a page.
 
 @item Ctrl-u
 Move up 1/2 a page.
 
-@item page down
-Move down a page.
-
 @item Ctrl-f
+@itemx page down
 Move down a page.
 
 @item Ctrl-d
@@ -464,40 +452,28 @@ The commands available in the file dialog are:
 @item q
 Will exit the file dialog, and return to the source window.
 
-@item up arrow
-Move up a line.
-
 @item k
+@itemx up arrow
 Move up a line.
-
-@item down arrow
-Move down a line.
 
 @item j
+@itemx down arrow
 Move down a line.
 
-@item right arrow
-Move right a line.
+@item h
+@itemx left arrow
+Move left a line.
 
 @item l
+@itemx right arrow
 Move right a line.
 
-@item left arrow
-Move left a line.
-
-@item h
-Move left a line.
-
-@item page up
-Move up a page.
-
 @item Ctrl-b
+@itemx page up
 Move up a page.
-
-@item page down
-Move down a page.
 
 @item Ctrl-f
+@itemx page down
 Move down a page.
 
 @item /
@@ -612,7 +588,7 @@ extension.  However, this feature can currently be useful for debugging
 purposes.
 
 @item :set ts=@var{number}
-@item :set tabstop=@var{number}
+@itemx :set tabstop=@var{number}
 Sets the number of spaces that should be rendered on the screen for @key{TAB}
 characters.  The default value for @var{number} is 8.
 
@@ -628,7 +604,7 @@ possible values for @var{style} are @samp{top_full}, @samp{top_big},
 @samp{even}, @samp{bottom_big}, and @samp{bottom_full}.
 
 @item :set ws
-@item :set wrapscan
+@itemx :set wrapscan
 Searches wrap around the end of file.  The default is on.
 
 @item :continue

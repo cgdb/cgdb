@@ -341,43 +341,31 @@ search it, or switch to a different mode.
 `Ctrl-T'
      Opens a new tty for the debugged program.
 
+`k'
 `up arrow'
      Move up a line.
 
 `j'
-     Move up a line.
-
 `down arrow'
      Move down a line.
 
-`k'
-     Move down a line.
-
+`h'
 `left arrow'
      Move left a line.
 
-`h'
-     Move left a line.
-
+`l'
 `right arrow'
      Move right a line.
 
-`l'
-     Move right a line.
-
-`page up'
-     Move up a page.
-
 `Ctrl-b'
+`page up'
      Move up a page.
 
 `Ctrl-u'
      Move up 1/2 a page.
 
-`page down'
-     Move down a page.
-
 `Ctrl-f'
+`page down'
      Move down a page.
 
 `Ctrl-d'
@@ -483,40 +471,28 @@ again to select the file.
 `q'
      Will exit the file dialog, and return to the source window.
 
+`k'
 `up arrow'
      Move up a line.
 
-`k'
-     Move up a line.
-
+`j'
 `down arrow'
      Move down a line.
 
-`j'
-     Move down a line.
-
-`right arrow'
-     Move right a line.
-
-`l'
-     Move right a line.
-
+`h'
 `left arrow'
      Move left a line.
 
-`h'
-     Move left a line.
+`l'
+`right arrow'
+     Move right a line.
 
+`Ctrl-b'
 `page up'
      Move up a page.
 
-`Ctrl-b'
-     Move up a page.
-
-`page down'
-     Move down a page.
-
 `Ctrl-f'
+`page down'
      Move down a page.
 
 `/'
@@ -638,7 +614,6 @@ noignorecase' turns on case-sensitive searching.
      debugging purposes.
 
 `:set ts=NUMBER'
-
 `:set tabstop=NUMBER'
      Sets the number of spaces that should be rendered on the screen
      for <TAB> characters.  The default value for NUMBER is 8.
@@ -655,7 +630,6 @@ noignorecase' turns on case-sensitive searching.
      `top_big', `even', `bottom_big', and `bottom_full'.
 
 `:set ws'
-
 `:set wrapscan'
      Searches wrap around the end of file.  The default is on.
 
@@ -1287,16 +1261,16 @@ Node: Status Bar11102
 Node: Switching Windows12035
 Node: Controlling CGDB12508
 Node: CGDB Mode13285
-Node: GDB Mode15119
-Node: File Dialog Mode16330
-Node: TTY Mode17758
-Node: Status Bar Mode18151
-Node: Configuring CGDB18330
-Node: Sending I/O to Inferior23012
-Node: Terminal Control Flow25394
-Node: Building CGDB26163
-Node: Copying This Manual28070
-Node: GNU Free Documentation License28305
-Node: Index50713
+Node: GDB Mode14978
+Node: File Dialog Mode16189
+Node: TTY Mode17476
+Node: Status Bar Mode17869
+Node: Configuring CGDB18048
+Node: Sending I/O to Inferior22728
+Node: Terminal Control Flow25110
+Node: Building CGDB25879
+Node: Copying This Manual27786
+Node: GNU Free Documentation License28021
+Node: Index50429
 
 End Tag Table
