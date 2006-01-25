@@ -275,14 +275,14 @@ they occur.  CGDB does not use popup's or other forms of I/O to alert the
 user of information or problems.
 
 While CGDB is running, you can configure it with any of the commands that 
-are valid in CGDB's configuration file. @xref{Configuring CGDB}.  Simply
-type @kbd{:} in the source window, and you will see the colon, and 
-the rest of the command you type appear in the status bar.  When you are
-finished typing the command that you are interested in, type @code{enter}.  
-This will alert CGDB to execute the command.
+are valid in CGDB's configuration file.  Simply type @kbd{:} in the source 
+window, and you will see the colon, and the rest of the command you type 
+appear in the status bar.  When you are finished typing the command that 
+you are interested in, type @code{enter}.  This will alert CGDB to execute 
+the command.
 
 The full list of commands that are available in the source window is in
-@ref{Status Bar Mode}.
+@ref{Configuring CGDB}.
 
 @node Switching Windows
 @section Switch between windows
@@ -310,7 +310,6 @@ what commands are accessible during which modes.
 * GDB Mode::                    Commands available during GDB mode
 * File Dialog Mode::            Commands available during the file dialog mode
 * TTY Mode::                    Commands available during TTY mode
-* Status Bar Mode::             Commands available in the status bar
 @end menu
 
 @node CGDB Mode
@@ -526,15 +525,9 @@ Go to the beginning of the GDB buffer.
 Go to the end of the GDB buffer.
 @end table
 
-@node Status Bar Mode
-@section Commands available in the status bar
-@cindex commands, in Status Bar mode
-
-Status bar.
-
 @node Configuring CGDB
 @chapter CGDB configuration commands
-@cindex configurating CGDB
+@cindex configuring CGDB
 
 There may be several features that you find useful in CGDB.  CGDB is capable
 of automating any of these commands through the use of the config file called
@@ -578,7 +571,7 @@ measured in milli seconds.  If @var{delay} is 0, the system immediately
 composes the ESCAPE response without waiting for more information 
 from the buffer.  @var{delay} may be any value between 0 and 10000, 
 inclusive.  The default setting for the @var{delay} variable is 
-40 (forty hundreths of a second).
+40 (forty hundredths of a second).
 
 @item :set ic
 @itemx :set ignorecase

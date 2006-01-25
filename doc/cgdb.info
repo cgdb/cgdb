@@ -272,14 +272,14 @@ when they occur.  CGDB does not use popup's or other forms of I/O to
 alert the user of information or problems.
 
    While CGDB is running, you can configure it with any of the commands
-that are valid in CGDB's configuration file. *Note Configuring CGDB::.
-Simply type `:' in the source window, and you will see the colon, and
-the rest of the command you type appear in the status bar.  When you are
-finished typing the command that you are interested in, type `enter'.
-This will alert CGDB to execute the command.
+that are valid in CGDB's configuration file.  Simply type `:' in the
+source window, and you will see the colon, and the rest of the command
+you type appear in the status bar.  When you are finished typing the
+command that you are interested in, type `enter'.  This will alert CGDB
+to execute the command.
 
    The full list of commands that are available in the source window is
-in *Note Status Bar Mode::.
+in *Note Configuring CGDB::.
 
 
 File: cgdb.info,  Node: Switching Windows,  Prev: Status Bar,  Up: Understanding CGDB
@@ -312,7 +312,6 @@ help you determine what commands are accessible during which modes.
 * GDB Mode::                    Commands available during GDB mode
 * File Dialog Mode::            Commands available during the file dialog mode
 * TTY Mode::                    Commands available during TTY mode
-* Status Bar Mode::             Commands available in the status bar
 
 
 File: cgdb.info,  Node: CGDB Mode,  Next: GDB Mode,  Up: Controlling CGDB
@@ -511,7 +510,7 @@ again to select the file.
      Select the current file.
 
 
-File: cgdb.info,  Node: TTY Mode,  Next: Status Bar Mode,  Prev: File Dialog Mode,  Up: Controlling CGDB
+File: cgdb.info,  Node: TTY Mode,  Prev: File Dialog Mode,  Up: Controlling CGDB
 
 3.4 Commands available during TTY mode
 ======================================
@@ -530,14 +529,6 @@ File: cgdb.info,  Node: TTY Mode,  Next: Status Bar Mode,  Prev: File Dialog Mod
 
 `F12'
      Go to the end of the GDB buffer.
-
-
-File: cgdb.info,  Node: Status Bar Mode,  Prev: TTY Mode,  Up: Controlling CGDB
-
-3.5 Commands available in the status bar
-========================================
-
-Status bar.
 
 
 File: cgdb.info,  Node: Configuring CGDB,  Next: Sending I/O to Inferior,  Prev: Controlling CGDB,  Up: Top
@@ -1242,9 +1233,8 @@ Index
 * commands, in CGDB mode:                CGDB Mode.            (line  6)
 * commands, in File Dialog mode:         File Dialog Mode.     (line  6)
 * commands, in GDB mode:                 GDB Mode.             (line  6)
-* commands, in Status Bar mode:          Status Bar Mode.      (line  6)
 * commands, in TTY mode:                 TTY Mode.             (line  6)
-* configurating CGDB:                    Configuring CGDB.     (line  6)
+* configuring CGDB:                      Configuring CGDB.     (line  6)
 * controlling CGDB:                      Controlling CGDB.     (line  6)
 * FDL, GNU Free Documentation License:   GNU Free Documentation License.
                                                                (line  6)
@@ -1275,19 +1265,18 @@ Node: GDB Window7953
 Node: File Dialog Window8920
 Node: TTY Window9963
 Node: Status Bar11102
-Node: Switching Windows12035
-Node: Controlling CGDB12508
-Node: CGDB Mode13285
-Node: GDB Mode14978
-Node: File Dialog Mode16189
-Node: TTY Mode17476
-Node: Status Bar Mode17869
-Node: Configuring CGDB18048
-Node: Sending I/O to Inferior22728
-Node: Terminal Control Flow25099
-Node: Building CGDB25868
-Node: Copying This Manual27775
-Node: GNU Free Documentation License28010
-Node: Index50418
+Node: Switching Windows12012
+Node: Controlling CGDB12485
+Node: CGDB Mode13193
+Node: GDB Mode14886
+Node: File Dialog Mode16097
+Node: TTY Mode17384
+Node: Configuring CGDB17753
+Node: Sending I/O to Inferior22433
+Node: Terminal Control Flow24804
+Node: Building CGDB25573
+Node: Copying This Manual27480
+Node: GNU Free Documentation License27715
+Node: Index50123
 
 End Tag Table
