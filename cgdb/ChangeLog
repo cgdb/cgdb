@@ -1,3 +1,9 @@
+1/24/2006 Bob Rossi <bob@brasko.net>
+
+	* src/cgdbrc.c (command_do_quit_force): Removed.
+	(COMMANDS): Remove q! and quit! array index.
+	(command_source_reload): Check for null dereference.
+
 1/23/2006 Bob Rossi <bob@brasko.net>
 
 	* src/cgdb.c (version_info): Update Copyright.

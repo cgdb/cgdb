@@ -107,7 +107,6 @@ static int command_do_finish( void );
 static int command_do_help( void );
 static int command_do_next( void );
 static int command_do_quit( void );
-static int command_do_quit_force( void );
 static int command_do_run( void );
 static int command_do_step( void );
 static int command_search_next( void );
@@ -134,9 +133,7 @@ static struct commands
     /* insert      */ { "insert",      command_focus_gdb },
     /* next        */ { "next",        command_do_next },
     /* q           */ { "q",           command_do_quit },
-    /* q!          */ { "q!",          command_do_quit_force },
     /* quit        */ { "quit",        command_do_quit },
-    /* quit!       */ { "quit!",       command_do_quit_force },
     /* run         */ { "run",         command_do_run },
     /* search_next */ { "search_next", command_search_next },
     /* start_tty   */ { "start_tty",   command_start_tty },
@@ -326,13 +323,6 @@ int command_do_quit( void )
     return 0;
 }
 
-int command_do_quit_force( void )
-{
-    cleanup();
-    exit(0);
-    return 0;
-}
-
 int command_do_run( void )
 {
     /* FIXME: see if there are any other arguments to pass to the run command */
@@ -365,6 +355,13 @@ int command_search_next( void )
 int command_source_reload( void )
 {
     struct sviewer *sview = if_get_sview ();
+
+    if (!sview)
+      return -1;
+
+    /* If there is no current source file, then there is nothing to reload. */
+    if (!sview->cur)
+      return 0;
 
     if ( source_reload ( sview, sview->cur->path, 1 ) == -1 )
         return -1;

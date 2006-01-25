@@ -1,3 +1,11 @@
+   * Fix a crash in CGDB if the user would type ':e' or ':edit' in the 
+     source window, and the source window was empty. This crash is considered
+     not very significant, since I can't understand why the user would try to
+     refresh the file, if it didn't exist.
+
+   * Removed the :q! and :quit! commands, since they don't do anything 
+     different than :q or :quit.
+   
    * Fix a bug regarding the CGDB source viewer displaying breakpoints. If you
      used the file dialog to open a file, and the file was an absolute 
      path, CGDB would display the file. If it was the first time CGDB 
