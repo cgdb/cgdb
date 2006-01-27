@@ -414,6 +414,31 @@ search it, or switch to a different mode.
 `Ctrl-l'
      Clear and redraw the screen.
 
+   If you have the `shortcut' option turned on, then the source window
+will have several more commands available.  These commands override the
+above commands.
+
+`r'
+     Send a run command to GDB.
+
+`n'
+     Send a next command to GDB.
+
+`s'
+     Send a step command to GDB.
+
+`c'
+     Send a continue command to GDB.
+
+`f'
+     Send a finish command to GDB.
+
+`u'
+     Send an up command to GDB.
+
+`d'
+     Send a down command to GDB.
+
 
 File: cgdb.info,  Node: GDB Mode,  Next: File Dialog Mode,  Prev: CGDB Mode,  Up: Controlling CGDB
 
@@ -588,7 +613,7 @@ noignorecase' turns on case-sensitive searching.
 `:set sc'
 `:set shortcut'
      Enables shortcut commands typed in source window.  The default is
-     off.
+     off.  *Note CGDB Mode::.
 
 `:set stc'
 `:set showtgdbcommands'
@@ -1230,32 +1255,33 @@ Index
  [index ]
 * Menu:
 
-* building CGDB:                         Building CGDB.        (line  6)
-* CGDB mode:                             Understanding CGDB.   (line  6)
-* commands, in CGDB mode:                CGDB Mode.            (line  6)
-* commands, in File Dialog mode:         File Dialog Mode.     (line  6)
-* commands, in GDB mode:                 GDB Mode.             (line  6)
-* commands, in TTY mode:                 TTY Mode.             (line  6)
-* configuring CGDB:                      Configuring CGDB.     (line  6)
-* controlling CGDB:                      Controlling CGDB.     (line  6)
+* building CGDB:                         Building CGDB.       (line   6)
+* CGDB mode:                             Understanding CGDB.  (line   6)
+* commands, in CGDB mode:                CGDB Mode.           (line   6)
+* commands, in File Dialog mode:         File Dialog Mode.    (line   6)
+* commands, in GDB mode:                 GDB Mode.            (line   6)
+* commands, in TTY mode:                 TTY Mode.            (line   6)
+* configuring CGDB:                      Configuring CGDB.    (line   6)
+* controlling CGDB:                      Controlling CGDB.    (line   6)
 * FDL, GNU Free Documentation License:   GNU Free Documentation License.
-                                                               (line  6)
-* file dialog window:                    File Dialog Window.   (line  6)
-* GDB mode:                              Understanding CGDB.   (line  6)
-* GDB window:                            GDB Window.           (line  6)
-* invocation CGDB:                       Invocation.           (line  6)
-* regular expression search:             Source Window.        (line 42)
+                                                              (line   6)
+* file dialog window:                    File Dialog Window.  (line   6)
+* GDB mode:                              Understanding CGDB.  (line   6)
+* GDB window:                            GDB Window.          (line   6)
+* invocation CGDB:                       Invocation.          (line   6)
+* regular expression search:             Source Window.       (line  42)
 * sending I/O to inferior:               Sending I/O to Inferior.
-                                                               (line  6)
-* source window:                         Source Window.        (line  6)
-* status bar:                            Status Bar.           (line  6)
-* switch between windows:                Switching Windows.    (line  6)
+                                                              (line   6)
+* shortcut commands:                     CGDB Mode.           (line 100)
+* source window:                         Source Window.       (line   6)
+* status bar:                            Status Bar.          (line   6)
+* switch between windows:                Switching Windows.   (line   6)
 * terminal control flow:                 Terminal Control Flow.
-                                                               (line  6)
-* TTY mode:                              Understanding CGDB.   (line  6)
-* TTY window:                            TTY Window.           (line  6)
-* tty window:                            TTY Window.           (line  6)
-* understanding CGDB:                    Understanding CGDB.   (line  6)
+                                                              (line   6)
+* TTY mode:                              Understanding CGDB.  (line   6)
+* TTY window:                            TTY Window.          (line   6)
+* tty window:                            TTY Window.          (line   6)
+* understanding CGDB:                    Understanding CGDB.  (line   6)
 
 
 
@@ -1272,15 +1298,15 @@ Node: Status Bar11158
 Node: Switching Windows12068
 Node: Controlling CGDB12547
 Node: CGDB Mode13255
-Node: GDB Mode14954
-Node: File Dialog Mode16167
-Node: TTY Mode17454
-Node: Configuring CGDB17823
-Node: Sending I/O to Inferior22504
-Node: Terminal Control Flow24883
-Node: Building CGDB25652
-Node: Copying This Manual27559
-Node: GNU Free Documentation License27794
-Node: Index50202
+Node: GDB Mode15384
+Node: File Dialog Mode16597
+Node: TTY Mode17884
+Node: Configuring CGDB18253
+Node: Sending I/O to Inferior22954
+Node: Terminal Control Flow25333
+Node: Building CGDB26102
+Node: Copying This Manual28009
+Node: GNU Free Documentation License28244
+Node: Index50652
 
 End Tag Table

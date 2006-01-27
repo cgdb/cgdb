@@ -413,6 +413,34 @@ Grow source window 25% (or, grow tty window 1 line, if visible).
 Clear and redraw the screen.
 @end table
 
+@cindex shortcut commands
+If you have the @samp{shortcut} option turned on, then the source window 
+will have several more commands available.  These commands override the
+above commands.
+
+@table @kbd
+@item r
+Send a run command to GDB.
+
+@item n
+Send a next command to GDB.
+
+@item s
+Send a step command to GDB.
+
+@item c
+Send a continue command to GDB.
+
+@item f
+Send a finish command to GDB.
+
+@item u
+Send an up command to GDB.
+
+@item d
+Send a down command to GDB.
+@end table
+
 @node GDB Mode
 @section Commands available during GDB mode
 @cindex commands, in GDB mode
@@ -583,6 +611,7 @@ Sets searching case insensitive.  The default is off.
 @item :set sc
 @itemx :set shortcut
 Enables shortcut commands typed in source window.  The default is off.
+@xref{CGDB Mode}.
 
 @item :set stc
 @itemx :set showtgdbcommands
