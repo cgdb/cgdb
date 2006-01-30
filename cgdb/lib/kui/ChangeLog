@@ -1,3 +1,8 @@
+1/30/2006 Bob Rossi <bob@brasko.net>
+
+   * src/kui_term.c (import_keyseq): Allocate buffers for tgetent.
+   Comment out warnings. User should not see them.
+
 1/23/2006 Bob Rossi <bob@brasko.net>
 
    * src/kui_term.c (stdio): Add include.

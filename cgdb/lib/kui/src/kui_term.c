@@ -254,6 +254,15 @@ static int add_keybindings( struct kui_map_set *map ) {
 static int import_keyseq(struct tlist *i, struct kui_map_set *map) {
     char *terminfo, *termcap;
     int ret;
+    static char *term_buffer = (char *)NULL;
+    static char *buffer = (char *)NULL;
+
+
+    if (term_buffer == 0)
+    {
+	   term_buffer = (char *)malloc(4080);
+	   buffer = (char *)malloc(4080);
+    }
 
     char *env = getenv("TERM");
 
@@ -262,7 +271,7 @@ static int import_keyseq(struct tlist *i, struct kui_map_set *map) {
         return -1;
     }
     
-    if ( ( ret = tgetent(NULL, env)) == 0 ) {
+    if ( ( ret = tgetent(term_buffer, env)) == 0 ) {
         fprintf ( stderr, "%s:%d tgetent 'No such entry' error", __FILE__, __LINE__);
         return -1;
     } else if ( ret == -1 ) {
@@ -271,11 +280,11 @@ static int import_keyseq(struct tlist *i, struct kui_map_set *map) {
     }
     
     /* Set up the termcap seq */ 
-    if ( (termcap = tgetstr(i->tname, NULL)) == 0 ) {
+    if ( (termcap = tgetstr(i->tname, &buffer)) == 0 ) {
         /*fprintf ( stderr, "CAPNAME (%s) is not present in this TERM's termcap description\n", i->tname);*/
-	} else if (termcap == (char*)-1 )
-        fprintf ( stderr, "CAPNAME (%s) is not a termcap string capability\n", i->tname);
-    else {
+	} else if (termcap == (char*)-1 ) {
+        /* fprintf ( stderr, "CAPNAME (%s) is not a termcap string capability\n", i->tname); */
+    } else {
 		if ( kui_ms_register_map ( map, termcap, i->cgdb_key_code ) == -1 ) 
 			return -1;
 	}
@@ -283,9 +292,9 @@ static int import_keyseq(struct tlist *i, struct kui_map_set *map) {
     /* Set up the terminfo seq */ 
     if ( (terminfo = tigetstr(i->tiname)) == 0 ) {
         /* fprintf ( stderr, "CAPNAME (%s) is not present in this TERM's terminfo description\n", i->tiname);*/
-	} else if (terminfo == (char*)-1 )
-        fprintf ( stderr, "CAPNAME (%s) is not a terminfo string capability\n", i->tiname);
-    else {
+	} else if (terminfo == (char*)-1 ) {
+       /* fprintf ( stderr, "CAPNAME (%s) is not a terminfo string capability\n", i->tiname); */
+    } else {
 		if ( kui_ms_register_map ( map, terminfo, i->cgdb_key_code ) == -1 ) 
 			return -1;
 	}

@@ -45,6 +45,10 @@
 #include <string.h>
 #endif /* HAVE_STRING_H */
 
+#if HAVE_SYS_IOCTL_H
+#include <sys/ioctl.h>
+#endif /* HAVE_SYS_IOCTL_H */
+
 #if HAVE_ERRNO_H
 #include <errno.h>
 #endif /* HAVE_ERRNO_H */
@@ -1076,6 +1080,34 @@ init_readline (void)
   return 0;
 }
 
+int
+create_and_init_pair ()
+{
+  struct winsize size;
+  int slavefd;
+
+  pty_pair = pty_pair_create ();
+  if (!pty_pair) {
+    fprintf ( stderr, "%s:%d Unable to create PTY pair", __FILE__, __LINE__); 
+    return -1;
+  }
+
+  slavefd = pty_pair_get_slavefd (pty_pair);
+  if (slavefd == -1) {
+    logger_write_pos (logger, __FILE__, __LINE__, "pty_pair_get_slavefd error");
+    return -1;
+  }
+
+  /* Set the pty winsize to the winsize of stdout */
+  if (ioctl (0, TIOCGWINSZ, &size) < 0)
+    return -1;
+
+  if (ioctl (slavefd, TIOCSWINSZ, &size) < 0)
+    return -1;
+
+  return 0;
+}
+
 int main(int argc, char *argv[]) {
 /* Uncomment to debug and attach */
 #if 0
@@ -1092,8 +1124,7 @@ int main(int argc, char *argv[]) {
 
     current_line = ibuf_init ();
     
-    pty_pair = pty_pair_create ();
-    if (!pty_pair) {
+    if (create_and_init_pair () == -1) {
         fprintf ( stderr, "%s:%d Unable to create PTY pair", __FILE__, __LINE__); 
         exit(-1);
       }
