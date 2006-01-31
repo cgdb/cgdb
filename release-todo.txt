@@ -55,7 +55,6 @@ Steps for releasing a new CGDB version, follow these in order.
     * New release name (ie. cgdb-0.5.1)
 	* you should be able to put whats new in the NEWS file into the
 	  release notes.
-	* Copy new README file into readme.txt
 
 -  Download and test the new version from sourceforge.
 
