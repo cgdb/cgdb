@@ -256,7 +256,7 @@ static int import_keyseq(struct tlist *i, struct kui_map_set *map) {
     int ret;
     static char *term_buffer = (char *)NULL;
     static char *buffer = (char *)NULL;
-
+    char *env;
 
     if (term_buffer == 0)
     {
@@ -264,7 +264,7 @@ static int import_keyseq(struct tlist *i, struct kui_map_set *map) {
 	   buffer = (char *)malloc(4080);
     }
 
-    char *env = getenv("TERM");
+    env = getenv("TERM");
 
     if ( !env ) {
         fprintf ( stderr, "%s:%d TERM not set error", __FILE__, __LINE__);

@@ -183,11 +183,12 @@ static int handle_quit(struct annotate_two *a2, const char *buf, size_t n, struc
 static int handle_exited(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list){
   char *tmp = (char*)malloc ( sizeof ( char )*(n+1));
   int *i = (int *)malloc ( sizeof ( int ) );
+  struct tgdb_response *response;
   sprintf ( tmp, buf + 7 ); /* Skip the 'exited ' part */
   *i = atoi ( tmp ) ;
   free ( tmp );
   tmp = NULL;
-  struct tgdb_response *response = (struct tgdb_response *)
+  response = (struct tgdb_response *)
     xmalloc (sizeof (struct tgdb_response));
   response->header = TGDB_INFERIOR_EXITED;
   response->choice.inferior_exited.exit_status = i;

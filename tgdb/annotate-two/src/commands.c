@@ -589,12 +589,13 @@ commands_send_source_absolute_source_file (struct commands *c,
   if (length > 0)
   {
     char *apath = NULL, *rpath = NULL;
+    struct tgdb_response *response;
     if (length > 0)
       apath = ibuf_get (c->info_source_absolute_path);
     if (ibuf_length (c->info_source_relative_path) > 0)
       rpath = ibuf_get (c->info_source_relative_path);
 
-    struct tgdb_response *response = (struct tgdb_response *)
+    response = (struct tgdb_response *)
       xmalloc (sizeof (struct tgdb_response));
     response->header = TGDB_FILENAME_PAIR;
     response->choice.filename_pair.absolute_path = strdup (apath);

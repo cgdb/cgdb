@@ -1059,6 +1059,7 @@ int
 init_readline (void)
 {
   int slavefd, masterfd;
+  int length;
   slavefd = pty_pair_get_slavefd (pty_pair);
   if (slavefd == -1)
     return -1;
@@ -1072,7 +1073,7 @@ init_readline (void)
     
   /* The 16 is because I don't know how many char's the directory separator 
    * is going to be, I expect it to be 1, but who knows. */
-  int length = strlen (cgdb_home_dir) + strlen (readline_history_filename) + 16;
+  length = strlen (cgdb_home_dir) + strlen (readline_history_filename) + 16;
   readline_history_path = (char*)malloc (sizeof(char)*length);
   fs_util_get_path (cgdb_home_dir, readline_history_filename, readline_history_path);
   rline = rline_initialize (slavefd, rlctx_send_user_command, tab_completion);

@@ -1,5 +1,9 @@
 1/30/2006 Bob Rossi <bob@brasko.net>
   
+	* src/cgdb.c (init_readline): Fix compile error.
+
+1/30/2006 Bob Rossi <bob@brasko.net>
+  
 	* src/cgdb.c (create_and_init_pair): New function.
    (main): Call new function.
 

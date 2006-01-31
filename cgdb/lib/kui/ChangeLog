@@ -1,5 +1,9 @@
 1/30/2006 Bob Rossi <bob@brasko.net>
 
+   * src/kui_term.c (import_keyseq): Fix compile error.
+
+1/30/2006 Bob Rossi <bob@brasko.net>
+
    * src/kui_term.c (import_keyseq): Allocate buffers for tgetent.
    Comment out warnings. User should not see them.
 

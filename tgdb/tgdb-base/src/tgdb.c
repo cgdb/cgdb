@@ -1331,6 +1331,8 @@ tgdb_request_complete (struct tgdb *tgdb, const char *line)
 int
 tgdb_process_console_command (struct tgdb *tgdb, tgdb_request_ptr request)
 {
+  int ret;
+
   if (!tgdb || !request)
     return -1;
 
@@ -1340,7 +1342,7 @@ tgdb_process_console_command (struct tgdb *tgdb, tgdb_request_ptr request)
   if (request->header != TGDB_REQUEST_CONSOLE_COMMAND)
     return -1;
   
-  int ret = tgdb_command_callback (tgdb, request->choice.console_command.command);
+  ret = tgdb_command_callback (tgdb, request->choice.console_command.command);
   if (ret == -1)
     {
       logger_write_pos (logger, __FILE__, __LINE__, "tgdb_send_debugger_data");
