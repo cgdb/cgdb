@@ -5115,11 +5115,11 @@ else
   { { echo "$as_me:$LINENO: error: cgdb needs ncurses/curses to build. ncurses is strongly recommended.
     If your system does not have ncurses get it!
     If that is not an option try 'configure --with-curses.'
-    You can try --with-ncurses-prefix=/foo/ncurses to tell configure where ncurses is." >&5
+    You can try --with-ncurses=/foo/ncurses to tell configure where ncurses is." >&5
 echo "$as_me: error: cgdb needs ncurses/curses to build. ncurses is strongly recommended.
     If your system does not have ncurses get it!
     If that is not an option try 'configure --with-curses.'
-    You can try --with-ncurses-prefix=/foo/ncurses to tell configure where ncurses is." >&2;}
+    You can try --with-ncurses=/foo/ncurses to tell configure where ncurses is." >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -5205,10 +5205,10 @@ _ACEOF
 else
   { { echo "$as_me:$LINENO: error: cgdb needs ncurses/curses to build. ncurses is strongly recommended.
     If your system does not have ncurses get it!
-    You can try --with-curses-prefix=/foo/curses to tell configure where curses is." >&5
+    You can try --with-curses=/foo/curses to tell configure where curses is." >&5
 echo "$as_me: error: cgdb needs ncurses/curses to build. ncurses is strongly recommended.
     If your system does not have ncurses get it!
-    You can try --with-curses-prefix=/foo/curses to tell configure where curses is." >&2;}
+    You can try --with-curses=/foo/curses to tell configure where curses is." >&2;}
    { (exit 1); exit 1; }; }
 fi
 
