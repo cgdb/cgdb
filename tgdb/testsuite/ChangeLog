@@ -1,3 +1,5 @@
+version 0.6.0 (01/30/2006):
+
 09/30/2005 Bob Rossi <bob@brasko.net>
 
 	* unix.exp (TGDB_DRIVER): Select the program to find.

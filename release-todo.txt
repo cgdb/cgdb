@@ -37,6 +37,12 @@ Steps for releasing a new CGDB version, follow these in order.
 -  Test doing 'make dist' then untar, ./configure && make
     and run ./cgdb --version to check version number.
 
+-  Commit all currently modified files (should only be ChangeLogs).
+
+-  Create a cvs tag for the tree to be able to get back to the 
+    version number. If the version is cgdb-0.3.3, name the tag
+	cgdb-0_3_3 .
+
 -  Put a release on sourceforge.net/projects/cgdb
     * ftp upload.sourceforge.net
       * user=anonymous, passwd=email
@@ -61,10 +67,6 @@ Steps for releasing a new CGDB version, follow these in order.
     * ssh cgdb.sourceforge.net
     * cd /home/groups/c/cg/cgdb/htdocs
 	* run 'cvs update'
-
--  Create a cvs tag for the tree to be able to get back to the 
-    version number. If the version is cgdb-0.3.3, name the tag
-	cgdb-0_3_3 .
 
 -  Test website by looking at it and attempting to download file.
     
