@@ -1,5 +1,7 @@
 Bug fixes/improvement for cgdb-0.6.1
 
+ [ ] Add Steve Folta's color patch.
+ [ ] Add key mapping support to cgdbrc.
  [ ] Figure out how to get extra prototypes out of cgdb.h
  [ ] Provide a single interface to the user, that process's GDB output.
     When a command is finished a different return value will be sent

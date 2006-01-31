@@ -4,7 +4,7 @@ directory.
     an HTML view of the manual, and possibly some other formats.
   - Look at doc/cgdb.info for the info manual. 
   - The plain text version of the manual is provided here doc/cgdb.txt.
-  - doc/cgdb.man will provide you with the man page.
+  - cgdb/doc/cgdb.1 will provide you with the man page.
 
 If you are interested in building CGDB from CVS, please look at the 
 section "Building CGDB from source" in the manual. This will describe
