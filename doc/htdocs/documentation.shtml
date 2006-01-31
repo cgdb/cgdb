@@ -18,10 +18,11 @@
      <P>
      This manual (CGDB) is available in the following formats:
      <UL>
-       <LI><A Href="cgdb.txt">Text</a> - entirely on one web page. </li>
-       <LI><A Href="cgdb.info">Info document</a> - an info file. </li>
-       <LI><A Href="cgdb.html">Html</a> - entirely on one web page. </li>
-       <LI><A Href="cgdb-split.html">Html</a> - with one web page per node. </li>
+       <LI><A Href="cgdb.txt">Ascii Text</a> - entirely on one web page. </li>
+       <LI><A Href="cgdb.info">Info document</a></li>
+       <LI><A Href="cgdb.html">HTML</a> - entirely on one web page. </li>
+       <LI><A Href="cgdb-split.html">HTML</a> - with one web page per node. </li>
+       <LI><A Href="cgdb.pdf">PDF File</a></li>
      </ul>
      </P>
 
