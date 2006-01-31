@@ -1,4 +1,4 @@
-@set UPDATED 17 January 2006
+@set UPDATED 30 January 2006
 @set UPDATED-MONTH January 2006
-@set EDITION 0.5.3-cvs
-@set VERSION 0.5.3-cvs
+@set EDITION 0.6.0
+@set VERSION 0.6.0

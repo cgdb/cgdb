@@ -8,13 +8,21 @@ Steps for releasing a new CGDB version, follow these in order.
       * libtool ( GNU libtool ) 1.5.6
       * m4      ( GNU m4 )     1.4.3
 
--  It's important to store the text and info version of the 
+-  This section generates all the applicable documentation. Make sure the file
+   doc/version.texi has the new version numbers. You will probably have to 
+   configure CGDB with --enable-maintainer-mode for this to happen. I have yet
+   to determine a better way.
+
+   It's important to store the text and info version of the 
    documentation in the doc directory, for releases. The info version is
-   always available in cgdb/doc/cgdb.info. However, the text version must
+   always available in cgdb/doc/cgdb.infl. However, the text version must
    be generated. Run 'make html', and then copy the command and replace 
    '--html' with '--plaintext', and output the file to cgdb/doc/cgdb.txt. 
    Then run 'perl ht.pl'. CGDB's source has now been modified. Check in the 
    new files.
+
+   Now is also the time to create the pdf file 'make pdf' and the single file
+   html file. Check in any new generated documentation at this point.
 
 -  Make sure the man page is updated. Run help2man like this,
    'help2man ./cgdb' > cgdb.1. This only need to be done if the

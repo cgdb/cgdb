@@ -1,31 +1,3 @@
-This is ../../cgdb/doc/cgdb.info, produced by makeinfo version 4.7 from
-../../cgdb/doc/cgdb.texinfo.
-
-   This manual is for GNU CGDB (version 0.6.0, 30 January 2006), the
-GNU ncurses based front end to GDB.
-
-   Copyright (C) 2006 Free Software Foundation, Inc.
-
-     Permission is granted to copy, distribute and/or modify this
-     document under the terms of the GNU Free Documentation License,
-     Version 1.1 or any later version published by the Free Software
-     Foundation; with no Invariant Sections, with the Front-Cover Texts
-     being "A GNU Manual," and with the Back-Cover Texts as in (a)
-     below.  A copy of the license is included in the section entitled
-     "GNU Free Documentation License."
-
-     (a) The FSF's Back-Cover Text is: "You have freedom to copy and
-     modify this GNU Manual, like GNU software.  Copies published by
-     the Free Software Foundation raise funds for GNU development."
-
-INFO-DIR-SECTION Software development
-START-INFO-DIR-ENTRY
-* CGDB: (CGDB)GNU Ncurses front end to GDB.
-END-INFO-DIR-ENTRY
-
-
-File: cgdb.info,  Node: Top,  Next: Summary,  Up: (dir)
-
 CGDB
 ****
 
@@ -45,26 +17,6 @@ ncurses based front end to GDB.
      (a) The FSF's Back-Cover Text is: "You have freedom to copy and
      modify this GNU Manual, like GNU software.  Copies published by
      the Free Software Foundation raise funds for GNU development."
-
-* Menu:
-
-* Summary::                     Summary of CGDB
-
-* Invocation::                  Getting in and out of CGDB
-* Understanding CGDB::          Understanding the core concepts of CGDB
-* Controlling CGDB::            CGDB commands
-* Configuring CGDB::            CGDB configuration commands
-* Sending I/O to Inferior::     Sending I/O to the program being debugged
-* Terminal Control Flow::       Allowing terminal control flow in CGDB
-
-* Building CGDB::               Building CGDB from source
-
-* Copying This Manual::
-
-* Index::
-
-
-File: cgdb.info,  Node: Summary,  Next: Invocation,  Prev: Top,  Up: Top
 
 Summary of CGDB
 ***************
@@ -97,9 +49,6 @@ parsing GDB's output and annotations can be avoided by using it.
 
    * Searching source window (using regexp)
 
-
-File: cgdb.info,  Node: Invocation,  Next: Understanding CGDB,  Prev: Summary,  Up: Top
-
 1 Getting In and Out of CGDB
 ****************************
 
@@ -111,9 +60,6 @@ The essentials are:
 
    * type `:quit' in the source window to exit.  This even works if GDB
      is currently hanging, or operating a long command.
-
-
-File: cgdb.info,  Node: Understanding CGDB,  Next: Controlling CGDB,  Prev: Invocation,  Up: Top
 
 2 Understanding the core concepts of CGDB
 *****************************************
@@ -133,18 +79,6 @@ Currently however, all of my time is spent developing the interface
 between CGDB and GDB. Once this is complete, the UI of CGDB will become
 much more polished.  If you are a ncurses developer, and have spare
 time to work on this task, please contact me.
-
-* Menu:
-
-* Source Window::               Understanding the source window.
-* GDB Window::                  Understanding the GDB window.
-* File Dialog Window::          Understanding the file dialog window.
-* TTY Window::                  Understanding the TTY window.
-* Status Bar::                  Understanding the status bar.
-* Switching Windows::           Switching between windows.
-
-
-File: cgdb.info,  Node: Source Window,  Next: GDB Window,  Up: Understanding CGDB
 
 2.1 Understanding the source window.
 ====================================
@@ -193,9 +127,6 @@ used to perform this search, which honors things like `*' or `+'.
    The full list of commands that are available in the source window is
 in *Note CGDB Mode::.
 
-
-File: cgdb.info,  Node: GDB Window,  Next: File Dialog Window,  Prev: Source Window,  Up: Understanding CGDB
-
 2.2 Understanding the GDB window.
 =================================
 
@@ -213,9 +144,6 @@ typed them at the terminal.  So, if you type several commands before a
 single one finishes, they will each be run in order.  There will be no
 way to stop these commands from being run besides from typing `Ctrl-C',
 like you would at any normal terminal when working with GDB.
-
-
-File: cgdb.info,  Node: File Dialog Window,  Next: TTY Window,  Prev: GDB Window,  Up: Understanding CGDB
 
 2.3 Understanding the file dialog window.
 =========================================
@@ -235,9 +163,6 @@ file.  This can save a lot of time as the number of files grow.
 
    The full list of commands that are available in the source window is
 in *Note File Dialog Mode::.
-
-
-File: cgdb.info,  Node: TTY Window,  Next: Status Bar,  Prev: File Dialog Window,  Up: Understanding CGDB
 
 2.4 Understanding the TTY window.
 =================================
@@ -261,9 +186,6 @@ described better in *Note Sending I/O to Inferior::.  Unless the I/O
 with the program being debugged is simple, I usually prefer starting
 the application on a separate terminal and attaching to it with CGDB.
 
-
-File: cgdb.info,  Node: Status Bar,  Next: Switching Windows,  Prev: TTY Window,  Up: Understanding CGDB
-
 2.5 Understanding the status bar.
 =================================
 
@@ -282,9 +204,6 @@ to execute the command.
    The full list of commands that are available in the source window is
 in *Note Configuring CGDB::.
 
-
-File: cgdb.info,  Node: Switching Windows,  Prev: Status Bar,  Up: Understanding CGDB
-
 2.6 Switch between windows
 ==========================
 
@@ -296,9 +215,6 @@ in "CGDB mode".
    To switch back into "GDB mode", press `i'.  This syntax is based on
 the popular Unix text-editor, vi.
 
-
-File: cgdb.info,  Node: Controlling CGDB,  Next: Configuring CGDB,  Prev: Understanding CGDB,  Up: Top
-
 3 CGDB commands
 ***************
 
@@ -306,16 +222,6 @@ CGDB can be controlled in a variety of different ways.  Each mode that
 CGDB is in acts differently. Currently CGDB implicitly changes modes
 depending on which window is active.  The following information will
 help you determine what commands are accessible during which modes.
-
-* Menu:
-
-* CGDB Mode::                   Commands available during CGDB mode
-* GDB Mode::                    Commands available during GDB mode
-* File Dialog Mode::            Commands available during the file dialog mode
-* TTY Mode::                    Commands available during TTY mode
-
-
-File: cgdb.info,  Node: CGDB Mode,  Next: GDB Mode,  Up: Controlling CGDB
 
 3.1 Commands available during CGDB mode
 =======================================
@@ -439,9 +345,6 @@ above commands.
 `d'
      Send a down command to GDB.
 
-
-File: cgdb.info,  Node: GDB Mode,  Next: File Dialog Mode,  Prev: CGDB Mode,  Up: Controlling CGDB
-
 3.2 Commands available during GDB mode
 ======================================
 
@@ -475,9 +378,6 @@ interested in.  CGDB will pass along these keys to the readline
 library. When readline has determined that a command has been received,
 it alerts CGDB, and a command is then sent to GDB. This is the same
 method used when invoking GDB directly.
-
-
-File: cgdb.info,  Node: File Dialog Mode,  Next: TTY Mode,  Prev: GDB Mode,  Up: Controlling CGDB
 
 3.3 Commands available during the file dialog mode
 ==================================================
@@ -535,9 +435,6 @@ again to select the file.
 `enter'
      Select the current file.
 
-
-File: cgdb.info,  Node: TTY Mode,  Prev: File Dialog Mode,  Up: Controlling CGDB
-
 3.4 Commands available during TTY mode
 ======================================
 
@@ -555,9 +452,6 @@ File: cgdb.info,  Node: TTY Mode,  Prev: File Dialog Mode,  Up: Controlling CGDB
 
 `F12'
      Go to the end of the GDB buffer.
-
-
-File: cgdb.info,  Node: Configuring CGDB,  Next: Sending I/O to Inferior,  Prev: Controlling CGDB,  Up: Top
 
 4 CGDB configuration commands
 *****************************
@@ -684,9 +578,6 @@ noignorecase' turns on case-sensitive searching.
 `:syntax'
      Turn the syntax on or off.
 
-
-File: cgdb.info,  Node: Sending I/O to Inferior,  Next: Terminal Control Flow,  Prev: Configuring CGDB,  Up: Top
-
 5 Sending I/O to the program being debugged
 *******************************************
 
@@ -731,9 +622,6 @@ then they can type `Ctrl-T'.  This will delete all the buffered data
 waiting to be read into the debugged program. This might be useful when
 you rerun or start a new program.
 
-
-File: cgdb.info,  Node: Terminal Control Flow,  Next: Building CGDB,  Prev: Sending I/O to Inferior,  Up: Top
-
 6 Allowing terminal control flow in CGDB
 ****************************************
 
@@ -746,9 +634,6 @@ the user types `Ctrl-s', the terminal stops.  When the user types
 character usually does a forward search.  So, if you want to get this,
 or other functionality out of readline, simply turn off control flow
 and start CGDB.
-
-
-File: cgdb.info,  Node: Building CGDB,  Next: Copying This Manual,  Prev: Terminal Control Flow,  Up: Top
 
 7 Building CGDB from source
 ***************************
@@ -804,18 +689,8 @@ will need this software installed.
 `GNU m4'
      This has the program m4, and must be version 1.4.3.
 
-
-File: cgdb.info,  Node: Copying This Manual,  Next: Index,  Prev: Building CGDB,  Up: Top
-
 Appendix A Copying This Manual
 ******************************
-
-* Menu:
-
-* GNU Free Documentation License::  License for copying this manual.
-
-
-File: cgdb.info,  Node: GNU Free Documentation License,  Up: Copying This Manual
 
 A.1 GNU Free Documentation License
 ==================================
@@ -1246,67 +1121,6 @@ recommend releasing these examples in parallel under your choice of
 free software license, such as the GNU General Public License, to
 permit their use in free software.
 
-
-File: cgdb.info,  Node: Index,  Prev: Copying This Manual,  Up: Top
-
 Index
 *****
 
- [index ]
-* Menu:
-
-* building CGDB:                         Building CGDB.       (line   6)
-* CGDB mode:                             Understanding CGDB.  (line   6)
-* commands, in CGDB mode:                CGDB Mode.           (line   6)
-* commands, in File Dialog mode:         File Dialog Mode.    (line   6)
-* commands, in GDB mode:                 GDB Mode.            (line   6)
-* commands, in TTY mode:                 TTY Mode.            (line   6)
-* configuring CGDB:                      Configuring CGDB.    (line   6)
-* controlling CGDB:                      Controlling CGDB.    (line   6)
-* FDL, GNU Free Documentation License:   GNU Free Documentation License.
-                                                              (line   6)
-* file dialog window:                    File Dialog Window.  (line   6)
-* GDB mode:                              Understanding CGDB.  (line   6)
-* GDB window:                            GDB Window.          (line   6)
-* invocation CGDB:                       Invocation.          (line   6)
-* regular expression search:             Source Window.       (line  42)
-* sending I/O to inferior:               Sending I/O to Inferior.
-                                                              (line   6)
-* shortcut commands:                     CGDB Mode.           (line 100)
-* source window:                         Source Window.       (line   6)
-* status bar:                            Status Bar.          (line   6)
-* switch between windows:                Switching Windows.   (line   6)
-* terminal control flow:                 Terminal Control Flow.
-                                                              (line   6)
-* TTY mode:                              Understanding CGDB.  (line   6)
-* TTY window:                            TTY Window.          (line   6)
-* tty window:                            TTY Window.          (line   6)
-* understanding CGDB:                    Understanding CGDB.  (line   6)
-
-
-
-Tag Table:
-Node: Top1046
-Node: Summary2470
-Node: Invocation3625
-Node: Understanding CGDB4079
-Node: Source Window5470
-Node: GDB Window8001
-Node: File Dialog Window8968
-Node: TTY Window10011
-Node: Status Bar11150
-Node: Switching Windows12060
-Node: Controlling CGDB12539
-Node: CGDB Mode13247
-Node: GDB Mode15376
-Node: File Dialog Mode16589
-Node: TTY Mode17876
-Node: Configuring CGDB18245
-Node: Sending I/O to Inferior22946
-Node: Terminal Control Flow25325
-Node: Building CGDB26094
-Node: Copying This Manual28001
-Node: GNU Free Documentation License28236
-Node: Index50644
-
-End Tag Table
