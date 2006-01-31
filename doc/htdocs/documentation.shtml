@@ -30,7 +30,8 @@
      </P>
 
       <UL>
-        <LI><A Href="http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/*checkout*/cgdb/cgdb/README?rev=HEAD&amp;content-type=text/plain">CGDB README</a></li>
+        <LI><A Href="http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/*checkout*/cgdb/cgdb/README?rev=HEAD&amp;content-type=text/plain">README</a></li>
+        <LI><A Href="http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/*checkout*/cgdb/cgdb/NEWS?rev=HEAD&amp;content-type=text/plain">NEWS</a></li>
         <LI><A Href="faq.shtml">FAQ</a></li>
       </ul>
 
