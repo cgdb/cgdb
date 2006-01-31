@@ -67,6 +67,10 @@ Steps for releasing a new CGDB version, follow these in order.
     * cd /home/groups/c/cg/cgdb/htdocs
 	* run 'cvs update'
 
+- Update documentation on website. You will need to scp from your computer
+  to cgdb.sf.net to get files uploaded. Then you will need to copy over
+  cgdb.pdf, cgdb.html, cgdb.text, cgdb-split.html and cgdb.info.
+
 -  Test website by looking at it and attempting to download file.
     
 -  Announce the release on freshmeat
