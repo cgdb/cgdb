@@ -1,5 +1,13 @@
 Steps for releasing a new CGDB version, follow these in order.
 
+-  Change configure.in file to reflect new version number.
+      * Run autoregen.sh
+    Make sure you have the appropriate versions of these installed:
+      * aclocal (GNU automake) 1.9.5
+      * autoconf (GNU Autoconf) 2.59
+      * libtool ( GNU libtool ) 1.5.6
+      * m4      ( GNU m4 )     1.4.3
+
 -  It's important to store the text and info version of the 
    documentation in the doc directory, for releases. The info version is
    always available in cgdb/doc/cgdb.info. However, the text version must
@@ -18,14 +26,6 @@ Steps for releasing a new CGDB version, follow these in order.
 
 -  Update the NEWS file to have the new release date and version.
     
--  Change configure.in file to reflect new version number.
-      * Run autoregen.sh
-    Make sure you have the appropriate versions of these installed:
-      * aclocal (GNU automake) 1.9.5
-      * autoconf (GNU Autoconf) 2.59
-      * libtool ( GNU libtool ) 1.5.6
-      * m4      ( GNU m4 )     1.4.3
-
 -  Test doing 'make dist' then untar, ./configure && make
     and run ./cgdb --version to check version number.
 
