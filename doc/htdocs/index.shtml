@@ -27,12 +27,32 @@ Some features offered by CGDB are:<P>
   <LI>Visual breakpoint setting</li>
   <LI>Keyboard shortcuts for common functions</li>
   <LI>Searching source window (using regexp)</li>
+  <LI>Tab Completion</li>
 </ul>
 
 </blockquote>
 
 <B>News</b><BR>
 <BLOCKQUOTE>
+  
+  <I>Jan 30, 2006</i><BR>
+  <BLOCKQUOTE>
+  CGDB v0.6.0 was released today, see the <A Href="download.shtml">download 
+  page</a> to try it out. This contains many new fixes and several new features.
+  <BR>
+  <BR>
+  CGDB finally has tab completion! I've received countless Emails about this
+  feature, and finally CGDB can provide it. Download the latest version to 
+  try it out (and beta test :) ).
+  <BR>
+  <BR>
+  Besides tab completion, CGDB now has an official manual. Please check it
+  out <A Href="documentation.shtml">here</a>.
+  <BR>
+  <BR>
+  The CGDB Team hopes you enjoy the new release. As usual, thanks for reporting
+  bugs and sending in contributions.
+  </blockquote>
 
   <I>Jan 27, 2006</i><BR>
   <BLOCKQUOTE>
