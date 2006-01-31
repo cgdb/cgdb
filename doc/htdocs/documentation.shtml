@@ -16,9 +16,11 @@
       </p>
 
      <P>
-     CGDB's manual attempt's to document any feature or command that CGDB 
-     supports. The manual is currently small, as CGDB currently doesn't 
-     allow that much configuration.
+     This manual (CGDB) is available in the following formats:
+     <UL>
+       <LI><A Href="cgdb.txt">Text</a> - entirely on one web page. </li>
+       <LI><A Href="cgdb.info">Info document</a></li>
+     </ul>
      </P>
 
      <P>
