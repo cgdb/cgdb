@@ -57,7 +57,7 @@ PROGRAMS = $(bin_PROGRAMS)
 am_cgdb_OBJECTS = cgdb.$(OBJEXT) highlight.$(OBJEXT) \
 	interface.$(OBJEXT) filedlg.$(OBJEXT) scroller.$(OBJEXT) \
 	sources.$(OBJEXT) logo.$(OBJEXT) command_lexer.$(OBJEXT) \
-	cgdbrc.$(OBJEXT)
+	cgdbrc.$(OBJEXT) usage.$(OBJEXT)
 cgdb_OBJECTS = $(am_cgdb_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
@@ -194,7 +194,8 @@ scroller.c \
 sources.c \
 logo.c \
 command_lexer.l \
-cgdbrc.c
+cgdbrc.c \
+usage.c
 
 
 # links cgdb if common is changed
@@ -283,6 +284,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/logo.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/scroller.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sources.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/usage.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \

@@ -76,6 +76,7 @@
 #include "queue.h"
 #include "rline.h"
 #include "ibuf.h"
+#include "usage.h"
 
 /* --------------- */
 /* Local Variables */
@@ -305,28 +306,6 @@ change_prompt (const char *new_prompt)
 /* ------------------------ */
 /* Initialization functions */
 /* ------------------------ */
-
-
-void usage(void) {
-printf( 
-"CGDB Usage:\n"      
-"   cgdb [cgdb options] [gdb options]\n"
-"\n"
-"CGDB Options:\n"
-#ifdef HAVE_GETOPT_H
-"   --version   Print version information and then exit.\n"
-#else
-"   -v          Print version information and then exit.\n"
-#endif
-#ifdef HAVE_GETOPT_H
-"   --help      Print help (this message) and then exit.\n"
-#else
-"   -h          Print help (this message) and then exit.\n"
-#endif
-"   -d          Set debugger to use.\n"
-    );
-    exit(1);
-}
 
 /* version_info: Returns version information about cgdb.
  * ------------- 

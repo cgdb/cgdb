@@ -429,7 +429,7 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-local mostlyclean-am
+clean-am: clean-generic mostlyclean-am
 
 distclean: distclean-am
 	-rm -f Makefile
@@ -508,12 +508,12 @@ uninstall-am: uninstall-info-am uninstall-man
 
 uninstall-man: uninstall-man1
 
-.PHONY: all all-am check check-am clean clean-generic clean-local \
-	dist-info distclean distclean-generic distdir dvi dvi-am html \
-	html-am info info-am install install-am install-data \
-	install-data-am install-exec install-exec-am install-info \
-	install-info-am install-man install-man1 install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
+.PHONY: all all-am check check-am clean clean-generic dist-info \
+	distclean distclean-generic distdir dvi dvi-am html html-am \
+	info info-am install install-am install-data install-data-am \
+	install-exec install-exec-am install-info install-info-am \
+	install-man install-man1 install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
 	maintainer-clean-aminfo maintainer-clean-generic \
 	maintainer-clean-vti mostlyclean mostlyclean-aminfo \
 	mostlyclean-generic mostlyclean-vti pdf pdf-am ps ps-am \
@@ -521,8 +521,10 @@ uninstall-man: uninstall-man1
 	uninstall-man1
 
 
-clean-local:
-	rm -rf *.t2d
+# Autogenerate the man page using help2man. This happens whenever the user modifies
+# either configure.in or usage.c, which contains CGDB's usage.
+cgdb.1: $(top_srcdir)/cgdb/src/usage.c $(top_srcdir)/configure.in
+	help2man --output=$(top_srcdir)/doc/cgdb.1 $(top_builddir)/cgdb/src/cgdb$(EXEEXT)
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

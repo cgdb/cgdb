@@ -32,7 +32,8 @@ scroller.c \
 sources.c \
 logo.c \
 command_lexer.l \
-cgdbrc.c
+cgdbrc.c \
+usage.c
 
 # links cgdb if common is changed
 cgdb_DEPENDENCIES = \
