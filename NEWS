@@ -1,3 +1,6 @@
+   * The man page now get's installed when 'make install' is done. This didn't
+   happen on the last release.
+
 cgdb-0.6.0 (01/30/2006)
 
    * There is a new manual for CGDB. The text version is located in 
