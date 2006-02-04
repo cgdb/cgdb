@@ -787,9 +787,15 @@ certain files in CGDB.
      to have flex installed.  I have used flex 2.5.4 to build CGDB.
 
 `GNU Texinfo'
-     If you modify doc/cgdb.texinfo, then you will be required to have
-     this package installed.  I have used version 4.7 to build the
+     If you modify `doc/cgdb.texinfo', then you will be required to
+     have this package installed.  I have used version 4.7 to build the
      documentation for CGDB.
+
+`help2man'
+     If you modify `configure.in' or `cgdb/src/usage.c' then you will be
+     required to have this package installed.  There is a Makefile rule
+     in `doc/Makefile.am' that automatically generates the man page
+     when either of these files are modified.
 
    CGDB uses autoconf/automake to build its configure scripts and
 makefiles.  So, if you change any of the autoconf/automake files, you
@@ -1305,8 +1311,8 @@ Node: Configuring CGDB18245
 Node: Sending I/O to Inferior22946
 Node: Terminal Control Flow25325
 Node: Building CGDB26094
-Node: Copying This Manual28001
-Node: GNU Free Documentation License28236
-Node: Index50644
+Node: Copying This Manual28274
+Node: GNU Free Documentation License28509
+Node: Index50917
 
 End Tag Table
