@@ -24,9 +24,8 @@ Steps for releasing a new CGDB version, follow these in order.
    Now is also the time to create the pdf file 'make pdf' and the single file
    html file. Check in any new generated documentation at this point.
 
--  Make sure the man page is updated. Run help2man like this,
-   'help2man ./cgdb' > cgdb.1. This only need to be done if the
-   usage is modified.
+-  Make sure the man page is updated (this is a sanity check).
+   Run cgdb --help and cgdb --version and compare to cgdb.1.
 
 -  Update all ChangeLogs to have the new release date and version.
     The ChangeLogs live in many places currently.

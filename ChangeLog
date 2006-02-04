@@ -1,5 +1,9 @@
 2/04/2006 Bob Rossi <bob@brasko.net>
 
+	* release-todo: Simplify the man page step for releasing.
+
+2/04/2006 Bob Rossi <bob@brasko.net>
+
 	* RELEASE_TODO: Finished autogenerating man pages with help2man.
 
 2/04/2006 Bob Rossi <bob@brasko.net>
