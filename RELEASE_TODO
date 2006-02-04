@@ -4,6 +4,7 @@ Bug fixes/improvement for cgdb-0.6.1
  [ ] Add Steve Folta's color patch.
  [ ] Add key mapping support to cgdbrc.
  [x] Fix cgdb.1 to be in release. Also in make install.
+ [x] Automatically generate man pages using help2man.
  [ ] Figure out how to get extra prototypes out of cgdb.h
  [ ] Provide a single interface to the user, that process's GDB output.
     When a command is finished a different return value will be sent
@@ -40,7 +41,7 @@ Closed:
 
 [x] Add documentation to CGDB. I think texinfo is the prefered way to do this,
   it generates info and html pages. For man pages, looking at help2man might
-  be a good idea. Ben is willing to help with this.
+  be a good idea.
 
 [x] If GDB responds with a fullname in the file dialog, then when the file is 
     selected, CGDB only knows about the fullname. When breakpoints are then set,
