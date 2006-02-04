@@ -1,5 +1,6 @@
 Bug fixes/improvement for cgdb-0.6.1
 
+ [ ] Setup nightly distribution for download.
  [ ] Add Steve Folta's color patch.
  [ ] Add key mapping support to cgdbrc.
  [x] Fix cgdb.1 to be in release. Also in make install.
