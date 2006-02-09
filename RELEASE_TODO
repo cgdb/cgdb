@@ -5,6 +5,8 @@ Bug fixes/improvement for cgdb-0.6.1
  [ ] Add key mapping support to cgdbrc.
  [x] Fix cgdb.1 to be in release. Also in make install.
  [x] Automatically generate man pages using help2man.
+ [ ] Look into getopts, it generates the usage/getopts/man/texinfo data.
+     This could replace the already done work of generating a man page.
  [ ] Figure out how to get extra prototypes out of cgdb.h
  [ ] Provide a single interface to the user, that process's GDB output.
     When a command is finished a different return value will be sent
