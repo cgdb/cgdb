@@ -15,6 +15,7 @@ Bug fixes/improvement for cgdb-0.6.1
  [ ] Re-arrange the a2 subsystem to be easier and better to modify
      This could include writing a quick flex/bison parser that could make a 
      parse tree of the annotation command.
+ [ ] Tab completion feature request from cgdb.sf.net
 
 - Use valgrind to get rid of most memory leaks.
 
