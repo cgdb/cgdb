@@ -583,7 +583,7 @@ int command_parse_file( FILE *fp )
     while( linenumber++, fgets( p, sizeof(buffer) - ( p - buffer ), fp ) )
     {
         int bufferlen = strlen( buffer );
-        if( buffer[bufferlen - 2] == '\\' ) 
+        if ((bufferlen-2>=0) && buffer[bufferlen - 2] == '\\' ) 
         {
             /* line continuation character, read another line into the buffer */
             linenumber--;

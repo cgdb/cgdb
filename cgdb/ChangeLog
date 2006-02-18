@@ -1,5 +1,9 @@
 2/18/2006 Bob Rossi <bob@brasko.net>
 
+	* src/cgdbrc.c (command_parse_file): Fix valgrind found error.
+
+2/18/2006 Bob Rossi <bob@brasko.net>
+
 	* src/cgdb.c (rl_resize): Added function.
 	(cgdb_resize_term): Reformat and fix.
 	(main): Remove check for no longer supported return value.
