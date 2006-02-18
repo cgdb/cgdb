@@ -12,6 +12,10 @@
 #include <stdio.h>
 #endif  /* HAVE_STDLIB_H */
 
+#if HAVE_SYS_IOCTL_H
+#include <sys/ioctl.h>
+#endif /* HAVE_SYS_IOCTL_H */
+
 // includes {{{
 
 #ifdef HAVE_LIBREADLINE
@@ -95,6 +99,7 @@ rline_initialize (int slavefd, command_cb *command, completion_cb *completion)
 
   /* Tell readline not to catch signals */
   rl_catch_signals = 0;
+  rl_catch_sigwinch = 0;
 
   /* Tell readline what the prompt is if it needs to put it back */
   rl_callback_handler_install("(tgdb) ", command);
@@ -361,6 +366,24 @@ rline_rl_complete (struct rline *rline, struct tgdb_list *list, display_callback
   if (key != TAB)
     fprintf (rline->output, "\r");
 
+  return 0;
+}
+
+int 
+rline_resize_terminal_and_redisplay (struct rline *rline, int rows, int cols)
+{
+  struct winsize size;
+
+  if (!rline)
+    return -1;
+
+  size.ws_row = rows;
+  size.ws_col = cols;
+  size.ws_xpixel = 0;
+  size.ws_ypixel = 0;
+  ioctl (fileno (rline->input), TIOCSWINSZ, &size);
+
+  rl_resize_terminal ();
   return 0;
 }
 

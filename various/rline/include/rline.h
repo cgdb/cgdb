@@ -245,6 +245,24 @@ typedef void (*display_callback)(char **,int,int);
  */
 int rline_rl_complete (struct rline *rline, struct tgdb_list *list, display_callback display_cb);
 
+/**
+ * This will adjust the size of the PTY that readline is working on, then 
+ * it will alert readline that it will need to be redisplay it's data.
+ * 
+ * \param rline
+ * The readline context to operate on.
+ *
+ * \param rows
+ * The new number of rows the readline pty should be.
+ *
+ * \param cols
+ * The new number of cols the readline pty should be.
+ *
+ * \return
+ * 0 on success or -1 on error.
+ */
+int rline_resize_terminal_and_redisplay (struct rline *rline, int rows, int cols);
+
 //@}
 // }}}
 

@@ -111,7 +111,6 @@ enum Command_Type {
 /* --------------- */
 static int curses_initialized = 0;      /* Flag: Curses has been initialized */
 static int curses_colors      = 0;      /* Flag: Terminal supports colors */
-static int resize             = 0;      /* Flag: Resize event occurred */
 static struct scroller *gdb_win = NULL; /* The GDB input/output window */
 static struct scroller  *tty_win = NULL;/* The tty input/output window */
 static int tty_win_on = 0;              /* Flag: tty window being shown */
@@ -450,9 +449,6 @@ static void validate_window_sizes ( void ) {
 static int if_layout()
 {
     /* Verify the window size is reasonable */
-    if (COLS < 20 || LINES < 10)
-        return 1;
-
     validate_window_sizes ();
 
     /* Initialize the GDB I/O window */
@@ -504,6 +500,7 @@ static int if_layout()
  *
  * Return Value:  Zero on success, non-zero on failure.
  */
+void rl_resize (int rows, int cols);
 static int if_resize()
 {
     if (ioctl(fileno(stdout), TIOCGWINSZ, &screen_size) != -1){
@@ -511,6 +508,7 @@ static int if_resize()
         if (screen_size.ws_row != LINES || screen_size.ws_col != COLS){
             resizeterm(screen_size.ws_row, screen_size.ws_col);
             refresh();
+            rl_resize (screen_size.ws_row, screen_size.ws_col);
             return if_layout();
         }
 #else
@@ -521,7 +519,9 @@ static int if_resize()
         refresh();
         source_hscroll(src_win, 0);
 #endif
+        rl_resize (screen_size.ws_row, screen_size.ws_col);
         return if_layout();
+
     }
 
     return 0;
@@ -531,7 +531,6 @@ int if_resize_term(void) {
     if (if_resize())
         return -1;
 
-    resize = 0;
     return 0;
 }
 
@@ -664,11 +663,8 @@ void rl_sigint_recved (void);
 static void signal_handler(int signo) {
     extern int resize_pipe[2];
     if (signo == SIGWINCH){
-        if (resize == 0) {
-            int c = CGDB_KEY_RESIZE;
-            write( resize_pipe[1], &c, sizeof(int));
-            resize = 1;
-        }
+      int c = CGDB_KEY_RESIZE;
+      write( resize_pipe[1], &c, sizeof(int));
     } else if ( signo == SIGINT || signo == SIGTERM || 
                 signo == SIGQUIT || signo == SIGCHLD ) {
       rl_sigint_recved ();
@@ -1106,10 +1102,8 @@ int if_init(void)
     /* Set up window layout */
     window_height_shift = (int)((HEIGHT/2) * (cur_win_split / 2.0)); 
     switch (if_layout()){
-        case 1:
-            return 3;
-        case 2:
-            return 4;
+      case 2:
+        return 4;
     }
 
     return 0;    

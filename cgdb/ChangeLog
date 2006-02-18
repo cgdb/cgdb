@@ -1,3 +1,15 @@
+2/18/2006 Bob Rossi <bob@brasko.net>
+
+	* src/cgdb.c (rl_resize): Added function.
+	(cgdb_resize_term): Reformat and fix.
+	(main): Remove check for no longer supported return value.
+	* src/interface.c (resize): Removed variable.
+	(if_layout): No longer force a minimum terminal size on the user.
+	(if_resize): Update readline with the new terminal size.
+	(if_resize_term): Remove use of resize variable.
+	(signal_handler): Ditto.
+	(if_init): No longer can return one of the errors.
+
 2/04/2006 Bob Rossi <bob@brasko.net>
 
 	* src/Makefile.am (cgdb_SOURCES): Added usage.c.

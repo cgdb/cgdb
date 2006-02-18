@@ -1,3 +1,10 @@
+2/18/2006 Bob Rossi <bob@brasko.net>
+  
+	* include/rline.h (rline_resize_terminal_and_redisplay): Add.
+	* src/rline.c (rline_resize_terminal_and_redisplay): Ditto.
+	(#include <sys/ioctl.h>): Added.
+	(rline_initialize): Add extra init code.
+
 version 0.6.0 (01/30/2006):
 
 1/19/2006 Bob Rossi <bob@brasko.net>

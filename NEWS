@@ -1,3 +1,7 @@
+   * CGDB broke it's terminal resizing functionality in cgdb-0.6.0. This is 
+     now working again. The bug was introduced while bringing readline into 
+     the same address space as CGDB.
+   
    * The man page now get's installed when 'make install' is done. This didn't
    happen on the last release.
 

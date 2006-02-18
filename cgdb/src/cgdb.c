@@ -295,6 +295,11 @@ void rl_sigint_recved (void){
   is_tab_completing = 0;
 }
 
+void rl_resize (int rows, int cols)
+{
+  rline_resize_terminal_and_redisplay (rline, rows, cols);
+}
+
 static void 
 change_prompt (const char *new_prompt)
 {
@@ -851,30 +856,33 @@ static int child_input()
     return 0;
 }
 
-static int cgdb_resize_term(int fd) {
-    int c, result;
-    read(resize_pipe[0], &c, sizeof(int) );
+static 
+int cgdb_resize_term (int fd)
+{
+  int c, result;
+  read (resize_pipe[0], &c, sizeof (int));
 
-	/* If there is more input in the pipe, that means another resize has
-	 * been recieved, and we still have not handled this one. So, skip this
-	 * one and only handle the next one.
-	 */
-	result = io_data_ready( resize_pipe[0], 0 );
-    if (result == -1) {
-        logger_write_pos ( logger, __FILE__, __LINE__, "io_data_ready");
-        return -1;
-    }
+  /* If there is more input in the pipe, that means another resize has
+   * been recieved, and we still have not handled this one. So, skip this
+   * one and only handle the next one.
+   */
+  result = io_data_ready( resize_pipe[0], 0 );
+  if (result == -1)
+  {
+    logger_write_pos ( logger, __FILE__, __LINE__, "io_data_ready");
+    return -1;
+  }
 
-    if (result) {
-		if_print ( "skip signal\n" );
-		return 0;
-	}
-
-    if ( if_resize_term() == -1 ) {
-        logger_write_pos ( logger, __FILE__, __LINE__, "Unreasonable terminal size");
-        return -1;
-    }
+  if (result)
     return 0;
+
+  if (if_resize_term () == -1)
+  {
+    logger_write_pos ( logger, __FILE__, __LINE__, "if_resize_term error");
+    return -1;
+  }
+
+  return 0;
 }
 
 static int main_loop(void) {
@@ -1157,10 +1165,6 @@ int main(int argc, char *argv[]) {
 			exit(-1);
         case 2:
             logger_write_pos ( logger, __FILE__, __LINE__, "Unable to handle signal: SIGWINCH");
-			cleanup();
-			exit(-1);
-        case 3:
-            logger_write_pos ( logger, __FILE__, __LINE__, "Unreasonable terminal size -- too small");
 			cleanup();
 			exit(-1);
         case 4:
