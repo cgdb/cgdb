@@ -1,4 +1,7 @@
 2/24/2006 Bob Rossi <bob@brasko.net>
+	* src/logo.c (usage): Modify logo usage again.
+
+2/24/2006 Bob Rossi <bob@brasko.net>
 	* src/interface.c: Used indent on file.
 
 2/24/2006 Bob Rossi <bob@brasko.net>
