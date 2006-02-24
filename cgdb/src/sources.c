@@ -55,6 +55,7 @@
 #include "logo.h"
 #include "sys_util.h"
 #include "cgdbrc.h"
+#include "highlight_groups.h"
 
 int sources_syntax_on = 1;
 int auto_source_reload = 0;
@@ -300,6 +301,14 @@ static void draw_current_line(struct sviewer *sview, int line, int lwidth) {
     char *otext = NULL;                 /* The current line (unhighlighted) */
     unsigned int length = 0;            /* Length of the line */
     int column_offset = 0;              /* Text to skip due to arrow */
+    int arrow_attr;
+    int highlight_attr;
+
+    if (hl_groups_get_attr (hl_groups_instance, HLG_ARROW, &arrow_attr) == -1)
+      return;
+
+    if (hl_groups_get_attr (hl_groups_instance, HLG_LINE_HIGHLIGHT, &highlight_attr) == -1)
+      return;
 
     /* Initialize height and width */
     getmaxyx(sview->win, height, width);
@@ -325,18 +334,15 @@ static void draw_current_line(struct sviewer *sview, int line, int lwidth) {
 
         case ARROWSTYLE_SHORT:
 
-            wattron(sview->win, A_BOLD);
-            wattron(sview->win, COLOR_PAIR(CGDB_COLOR_GREEN));
+            wattron(sview->win, arrow_attr);
             waddch(sview->win, ACS_LTEE);
             waddch(sview->win, '>');
-            wattroff(sview->win, COLOR_PAIR(CGDB_COLOR_GREEN));
-            wattroff(sview->win, A_BOLD);
+            wattroff(sview->win, arrow_attr);
             break;
 
         case ARROWSTYLE_LONG:
 
-            wattron(sview->win, A_BOLD);
-            wattron(sview->win, COLOR_PAIR(CGDB_COLOR_GREEN));
+            wattron(sview->win, arrow_attr);
             waddch(sview->win, ACS_LTEE);
 
             // Compute the length of the arrow, respecting tab stops, etc.
@@ -363,16 +369,14 @@ static void draw_current_line(struct sviewer *sview, int line, int lwidth) {
             }
 
             waddch(sview->win, '>');
-            wattroff(sview->win, COLOR_PAIR(CGDB_COLOR_GREEN));
-            wattroff(sview->win, A_BOLD);
+            wattroff(sview->win, arrow_attr);
             break;
 
         case ARROWSTYLE_HIGHLIGHT:
             waddch(sview->win, VERT_LINE);
             waddch(sview->win, ' ');
 
-            wattron(sview->win, A_BOLD);
-            wattron(sview->win, COLOR_PAIR(CGDB_COLOR_INVERSE_GREEN));
+            wattron(sview->win, highlight_attr);
             for (i = 0; i < width-lwidth-2; i++) {
                 if (i < length) {
                     waddch(sview->win, otext[i]);
@@ -380,8 +384,7 @@ static void draw_current_line(struct sviewer *sview, int line, int lwidth) {
                     waddch(sview->win, ' ');
                 }
             }
-            wattroff(sview->win, COLOR_PAIR(CGDB_COLOR_INVERSE_GREEN));
-            wattroff(sview->win, A_BOLD);
+            wattroff(sview->win, highlight_attr);
 
             return;
     }
@@ -551,6 +554,7 @@ int source_display(struct sviewer *sview, int focus)
     int lwidth;
     int line;
     int i;
+		int attr = 0;
 
     /* Check that a file is loaded */
     if (sview->cur == NULL || sview->cur->buf.tlines == NULL){
@@ -604,46 +608,41 @@ int source_display(struct sviewer *sview, int focus)
             } else if (line == sview->cur->exe_line) {
                 switch(sview->cur->buf.breakpts[line]){
                     case 0:
-                        wattron(sview->win, COLOR_PAIR(CGDB_COLOR_GREEN));
-                        break;
+		      if (hl_groups_get_attr (hl_groups_instance, HLG_ARROW, &attr) == -1)
+			return -1;
+                      break;
                     case 1:
-                        wattron(sview->win, COLOR_PAIR(CGDB_COLOR_RED));
-                        break;
+		      if (hl_groups_get_attr (hl_groups_instance, HLG_ENABLED_BREAKPOINT, &attr) == -1)
+			return -1;
+                      break;
                     case 2:
-                        wattron(sview->win, COLOR_PAIR(CGDB_COLOR_YELLOW));
-                        break;
+		      if (hl_groups_get_attr (hl_groups_instance, HLG_DISABLED_BREAKPOINT, &attr) == -1)
+			return -1;
+                      break;
                 }
-                wattron(sview->win, A_BOLD);
+                wattron(sview->win, attr);
                 wprintw(sview->win, fmt, line+1);
-                switch(sview->cur->buf.breakpts[line]){
-                    case 0:
-                        wattroff(sview->win, COLOR_PAIR(CGDB_COLOR_GREEN));
-                        break;
-                    case 1:
-                        wattroff(sview->win, COLOR_PAIR(CGDB_COLOR_RED));
-                        break;
-                    case 2:
-                        wattroff(sview->win, COLOR_PAIR(CGDB_COLOR_YELLOW));
-                        break;
-                }
-                wattroff(sview->win, A_BOLD);
+                wattroff(sview->win, attr);
 
                 draw_current_line(sview, line, lwidth);
 
             /* Look for breakpoints */
             } else if (sview->cur->buf.breakpts[line]){
                 if (sview->cur->buf.breakpts[line] == 1)
-                    wattron(sview->win, COLOR_PAIR(CGDB_COLOR_RED));
+		{
+		  if (hl_groups_get_attr (hl_groups_instance, HLG_ENABLED_BREAKPOINT, &attr) == -1)
+		    return -1;
+		}
                 else
-                    wattron(sview->win, COLOR_PAIR(CGDB_COLOR_YELLOW));
-                wattron(sview->win, A_BOLD);
+		{
+		  if (hl_groups_get_attr (hl_groups_instance, HLG_DISABLED_BREAKPOINT, &attr) == -1)
+		    return -1;
+		}
+                wattron(sview->win, attr);
                 wprintw(sview->win, fmt, line+1);
-                if (sview->cur->buf.breakpts[line] == 1)
-                    wattroff(sview->win, COLOR_PAIR(CGDB_COLOR_RED));
-                else
-                    wattroff(sview->win, COLOR_PAIR(CGDB_COLOR_YELLOW));
-                if (!focus)
-                    wattroff(sview->win, A_BOLD);
+								wattroff(sview->win, attr);
+                if (focus)
+                    wattron(sview->win, A_BOLD);
                 waddch(sview->win, VERT_LINE);
                 if (focus)
                     wattroff(sview->win, A_BOLD);

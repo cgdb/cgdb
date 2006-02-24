@@ -36,11 +36,13 @@
 
 /* Local Includes */
 #include "highlight.h"
+#include "highlight_groups.h"
 #include "sources.h"
 #include "cgdb.h"
 #include "tokenizer.h"
 #include "interface.h"
 #include "sys_util.h"
+#include "logger.h"
 
 int highlight_tabstop = 8;
 extern int config_wrapscan;
@@ -50,70 +52,6 @@ extern int config_wrapscan;
 /* ----------- */
  
 #define HL_CHAR CHAR_MAX       /* Special marker character */
-#define HL_OFFSET 6            /* The number to add to a color to get
-                                  Its highlighted color */
-
-#define SET_COLOR(string, color) \
-   do { \
-       string[pos++] = HL_CHAR; \
-       string[pos++] = color; \
-       cur_color = color; \
-   } while(0)
-
-#define issep(c) (strchr(separators, c) != NULL)
-
-/* --------------- */
-/* Data Structures */
-/* --------------- */
-
-/* Syntax highlighting colors: */
-enum syntax_type {
-    SYN_KEYWORD = 1,
-    SYN_TYPE,
-    SYN_LITERAL,
-    SYN_COMMENT,
-    SYN_DIRECTIVE,
-    SYN_TEXT,
-    SYN_SEARCH,
-    SYN_LAST
-};
-
-/* Note: These next two arrays should probably be loaded from the .tgdbrc file
- *       in the future (so that they are user-configurable). */
-
-/* Colors for the syntax types enumerated above */
-static int colors[] = {
-    0,                          /* (0) Blank first entry */
-    CGDB_COLOR_BLUE,            /* (1) C/C++ Keyword color */
-    CGDB_COLOR_GREEN,           /* (2) Typemark color */
-    CGDB_COLOR_RED,             /* (3) String or numeric literal color */
-    CGDB_COLOR_YELLOW,          /* (4) Comment color */
-    CGDB_COLOR_CYAN,            /* (5) Preprocessor directive color */
-    CGDB_COLOR_WHITE,           /* (6) Other text color */
-    CGDB_COLOR_INVERSE_BLUE,    /* (7) C/C++ Keyword inverse color */
-    CGDB_COLOR_INVERSE_GREEN,   /* (8) Typemark inverse color */
-    CGDB_COLOR_INVERSE_RED,     /* (9) String or numeric literal inverse color */
-    CGDB_COLOR_INVERSE_YELLOW,  /* (a) Comment inverse color */
-    CGDB_COLOR_INVERSE_CYAN,    /* (b) Preprocessor directive inverse color */
-    CGDB_COLOR_INVERSE_WHITE,   /* (c) Other text inverse color */
-};
-
-/* Attributes may be joined with a bitwise OR (|) */
-static int attributes[] = {
-    0,                     /* Blank first entry */
-    A_BOLD,                /* C/C++ keyword attributes */
-    A_BOLD,                /* Typemark attributes */
-    A_BOLD,                /* String or numeric literal attributes */
-    A_NORMAL,              /* Comment attributes */
-    A_BOLD,                /* Preprocessor directive attributes */
-    A_NORMAL,              /* Other text attributes */
-    A_NORMAL,              /* Other text attributes */
-    A_NORMAL,              /* Other text attributes */
-    A_NORMAL,              /* Other text attributes */
-    A_NORMAL,              /* Other text attributes */
-    A_NORMAL,              /* Other text attributes */
-    A_NORMAL,              /* Other text attributes */
-};
 
 /* --------------- */
 /* Local Variables */
@@ -124,7 +62,7 @@ static int highlight_node ( struct list_node *node ) {
 	int ret;
 	struct ibuf *ibuf = ibuf_init ();
 	ibuf_addchar ( ibuf, HL_CHAR );
-	ibuf_addchar ( ibuf, SYN_TEXT );
+	ibuf_addchar ( ibuf, HLG_TEXT );
 
 	/* Initialize */
 	node->buf.length = 0;
@@ -143,41 +81,41 @@ static int highlight_node ( struct list_node *node ) {
 		switch ( e ) {
 			case TOKENIZER_KEYWORD:
 				ibuf_addchar ( ibuf, HL_CHAR );
-				ibuf_addchar ( ibuf, SYN_KEYWORD );
+				ibuf_addchar ( ibuf, HLG_KEYWORD );
 				ibuf_add ( ibuf, tokenizer_get_data ( t ) );
 				ibuf_addchar ( ibuf, HL_CHAR );
-				ibuf_addchar ( ibuf, SYN_TEXT );
+				ibuf_addchar ( ibuf, HLG_TEXT );
 				break;
 			case TOKENIZER_TYPE:
 				ibuf_addchar ( ibuf, HL_CHAR );
-				ibuf_addchar ( ibuf, SYN_TYPE );
+				ibuf_addchar ( ibuf, HLG_TYPE );
 				ibuf_add ( ibuf, tokenizer_get_data ( t ) );
 				ibuf_addchar ( ibuf, HL_CHAR );
-				ibuf_addchar ( ibuf, SYN_TEXT );
+				ibuf_addchar ( ibuf, HLG_TEXT );
 				break;
 			case TOKENIZER_LITERAL:
 				ibuf_addchar ( ibuf, HL_CHAR );
-				ibuf_addchar ( ibuf, SYN_LITERAL );
+				ibuf_addchar ( ibuf, HLG_LITERAL );
 				ibuf_add ( ibuf, tokenizer_get_data ( t ) );
 				ibuf_addchar ( ibuf, HL_CHAR );
-				ibuf_addchar ( ibuf, SYN_TEXT );
+				ibuf_addchar ( ibuf, HLG_TEXT );
 				break;
 			case TOKENIZER_NUMBER:
 				ibuf_add ( ibuf, tokenizer_get_data ( t ) );
 				break;
 			case TOKENIZER_COMMENT:
 				ibuf_addchar ( ibuf, HL_CHAR );
-				ibuf_addchar ( ibuf, SYN_COMMENT );
+				ibuf_addchar ( ibuf, HLG_COMMENT );
 				ibuf_add ( ibuf, tokenizer_get_data ( t ) );
 				ibuf_addchar ( ibuf, HL_CHAR );
-				ibuf_addchar ( ibuf, SYN_TEXT );
+				ibuf_addchar ( ibuf, HLG_TEXT );
 				break;
 			case TOKENIZER_DIRECTIVE:
 				ibuf_addchar ( ibuf, HL_CHAR );
-				ibuf_addchar ( ibuf, SYN_DIRECTIVE );
+				ibuf_addchar ( ibuf, HLG_DIRECTIVE );
 				ibuf_add ( ibuf, tokenizer_get_data ( t ) );
 				ibuf_addchar ( ibuf, HL_CHAR );
-				ibuf_addchar ( ibuf, SYN_TEXT );
+				ibuf_addchar ( ibuf, HLG_TEXT );
 				break;
 			case TOKENIZER_TEXT:
 				ibuf_add ( ibuf, tokenizer_get_data ( t ) );
@@ -190,10 +128,9 @@ static int highlight_node ( struct list_node *node ) {
 				if ( ibuf_length ( ibuf ) > node->buf.max_width )
 					node->buf.max_width = ibuf_length ( ibuf );
 
-
 				ibuf_clear ( ibuf );
 				ibuf_addchar ( ibuf, HL_CHAR );
-				ibuf_addchar ( ibuf, SYN_TEXT );
+				ibuf_addchar ( ibuf, HLG_TEXT );
 				break;
 			case TOKENIZER_ERROR:
 				ibuf_add ( ibuf, tokenizer_get_data ( t ) );
@@ -240,14 +177,11 @@ void highlight(struct list_node *node)
  *  Return Value: Null on error. Or a pointer to a new line that
  *  has highlighting. The new line MUST BE FREED.
  */ 
-//#define HIGHLIGHT_DEBUG
+/*#define HIGHLIGHT_DEBUG*/
 static char *highlight_line_segment(const char *orig, int start, int end) {
     char *new_line = NULL;
     int length = strlen(orig), j = 0, pos = 0;
-    int syn_search_recieved = 0, cur_color = SYN_TEXT;
-#ifdef HIGHLIGHT_DEBUG
-    extern struct scroller *gdb_win;
-#endif
+    int syn_search_recieved = 0, cur_color = HLG_TEXT;
 
     /* Cases not possible */
     if ( start > end || orig == NULL || 
@@ -292,7 +226,7 @@ static char *highlight_line_segment(const char *orig, int start, int end) {
         if ( j == start ) {
             syn_search_recieved = 1;
             new_line[pos++] = HL_CHAR;
-            new_line[pos++] = cur_color + HL_OFFSET;
+            new_line[pos++] = HLG_SEARCH;
         } else if ( j == end ) {
             syn_search_recieved = 0;
             new_line[pos++] = HL_CHAR;
@@ -302,9 +236,12 @@ static char *highlight_line_segment(const char *orig, int start, int end) {
         new_line[pos++] = orig[j];
 
         /* If the search has started, then make all the colors the 
-         * highlighted colors by adding HL_OFFSET to the color */
+         * highlighted colors  */
         if ( syn_search_recieved && orig[j] == HL_CHAR )
-            new_line[pos++] = ((int)orig[++j]) + HL_OFFSET;
+	{
+	  ++j;
+          new_line[pos++] = HLG_SEARCH;
+	}
     }
 
     new_line[pos] = '\0';
@@ -312,11 +249,8 @@ static char *highlight_line_segment(const char *orig, int start, int end) {
 #ifdef HIGHLIGHT_DEBUG
     for ( j = 0; j < strlen(new_line); j++ ) {
        char temp[100];
-       sprintf(temp, "(%d:%c)", new_line[j], new_line[j]);
-       scr_add(gdb_win, temp);
+       fprintf(stderr, "(%d:%c)\r\n", new_line[j], new_line[j]);
     }
-    scr_add(gdb_win, "\r\n");
-    scr_refresh(gdb_win, 1);
 #endif
 
     /* Now the line has new information in it.
@@ -329,15 +263,18 @@ static char *highlight_line_segment(const char *orig, int start, int end) {
 
 void hl_wprintw(WINDOW *win, const char *line, int width, int offset)
 {
-    int length;                        /* Length of the line passed in */
-    enum syntax_type color = SYN_TEXT; /* Color used to print current char */
-    int i;                             /* Loops through the line char by char */
-    int j;                             /* General iterator */
-    int p;                             /* Count of chars printed to screen */
-    int pad;                           /* Used to pad partial tabs */
+    int length;               /* Length of the line passed in */
+    enum hl_group_kind color; /* Color used to print current char */
+    int i;                    /* Loops through the line char by char */
+    int j;                    /* General iterator */
+    int p;                    /* Count of chars printed to screen */
+    int pad;                  /* Used to pad partial tabs */
+    int attr;                 /* A temp variable used for attributes */
     
     /* Jump ahead to the character at offset (process color commands too) */
     length = strlen(line);
+    color = HLG_TEXT;
+
     for (i = 0, j = 0; i < length && j < offset; i++){
         if (line[i] == HL_CHAR && i+1 < length){
             /* Even though we're not printing anything in this loop,
@@ -362,38 +299,50 @@ void hl_wprintw(WINDOW *win, const char *line, int width, int offset)
         wprintw(win, " ");    
 
     /* Set the color appropriately */
-    wattron(win, COLOR_PAIR(colors[color]));
-    wattron(win, attributes[color]);
+    if (hl_groups_get_attr (hl_groups_instance, color, &attr) == -1)
+    {
+      logger_write_pos ( logger, __FILE__, __LINE__, "hl_groups_get_attr error");
+      return;
+    }
+
+    wattron(win, attr);
     
     /* Print string 1 char at a time */
-    for (; i < length && p < width; i++){
-        if (line[i] == HL_CHAR){
-            if (++i < length){
-                wattroff(win, COLOR_PAIR(colors[color]));
-                wattroff(win, attributes[color]);
-                color = (int)line[i];
-                wattron(win, COLOR_PAIR(colors[color]));
-                wattron(win, attributes[color]);
-            }
+    for (; i < length && p < width; i++)
+    {
+      if (line[i] == HL_CHAR)
+      {
+        if (++i < length)
+	{
+	  wattroff(win, attr);
+	  color = (int)line[i];
+
+	  if (hl_groups_get_attr (hl_groups_instance, color, &attr) == -1)
+	  {
+	    logger_write_pos ( logger, __FILE__, __LINE__, "hl_groups_get_attr error");
+	    return;
+	  }
+
+	  wattron(win, attr);
         }
-        else{
-            switch (line[i]){
-                case '\t':
-                    do{
-                        wprintw(win, " ");
-                        p++;
-                    } while ((p+offset) % highlight_tabstop > 0 && p < width);
-                    break;
-                default:
-                    wprintw(win, "%c", line[i]);
-                    p++;
-            }
-        }
+      } else {
+	switch (line[i])
+	{
+	  case '\t':
+	    do{
+	      wprintw(win, " ");
+	      p++;
+	    } while ((p+offset) % highlight_tabstop > 0 && p < width);
+	    break;
+	  default:
+	    wprintw(win, "%c", line[i]);
+	    p++;
+	}
+      }
     }
     
     /* Shut off color attribute */
-    wattroff(win, COLOR_PAIR(colors[color]));
-    wattroff(win, attributes[color]);
+    wattroff(win, attr);
 
     for (; p < width; p++)
         wprintw(win, " ");

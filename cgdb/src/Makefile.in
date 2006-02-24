@@ -57,7 +57,7 @@ PROGRAMS = $(bin_PROGRAMS)
 am_cgdb_OBJECTS = cgdb.$(OBJEXT) highlight.$(OBJEXT) \
 	interface.$(OBJEXT) filedlg.$(OBJEXT) scroller.$(OBJEXT) \
 	sources.$(OBJEXT) logo.$(OBJEXT) command_lexer.$(OBJEXT) \
-	cgdbrc.$(OBJEXT) usage.$(OBJEXT)
+	cgdbrc.$(OBJEXT) highlight_groups.$(OBJEXT) usage.$(OBJEXT)
 cgdb_OBJECTS = $(am_cgdb_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
@@ -195,6 +195,7 @@ sources.c \
 logo.c \
 command_lexer.l \
 cgdbrc.c \
+highlight_groups.c \
 usage.c
 
 
@@ -280,6 +281,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/command_lexer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/filedlg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/highlight.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/highlight_groups.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/interface.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/logo.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/scroller.Po@am__quote@

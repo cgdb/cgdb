@@ -30,6 +30,7 @@
 /* Local Includes */
 #include "cgdb.h"
 #include "logo.h"
+#include "highlight_groups.h"
 
 /* ----------- */
 /* Definitions */
@@ -116,6 +117,10 @@ void logo_display(WINDOW *win)
     int line;                            /* Starting line */
     int usage_height;                    /* Height of the usage message */
     int i, j;                            /* Iterators */
+    int attr;
+
+    if (hl_groups_get_attr (hl_groups_instance, HLG_LOGO, &attr) == -1)
+      return;
     
     /* Get dimensions */
     getmaxyx(win, height, width);
@@ -130,8 +135,7 @@ void logo_display(WINDOW *win)
     }  
         
     /* Display cgdb logo */
-    wattron(win, COLOR_PAIR(CGDB_COLOR_BLUE));
-    wattron(win, A_BOLD);
+    wattron(win, attr);
 
     /* Pick a random logo */
     if (logo == -1){
@@ -159,7 +163,6 @@ void logo_display(WINDOW *win)
     for (j = 0; j < sizeof(usage)/sizeof(char *); j++)
         center_line(win, ++i + line, width, usage[j]);
 
-    wattroff(win, COLOR_PAIR(CGDB_COLOR_BLUE));
-    wattroff(win, A_BOLD);
+    wattroff(win, attr);
     curs_set(0);         /* Hide the cursor */
 }

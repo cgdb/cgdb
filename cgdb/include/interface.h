@@ -32,7 +32,7 @@ typedef enum { WIN_SPLIT_FREE        = -3,   // split point not on quarter mark
  * Return Value: Zero on success, or...
  *               1: Initializing curses failed
  *               2: Signal handler install failed
- *               3: Terminal too small
+ *               3: hl groups couldn't be setup
  *               4: Can't create new GDB scroller
  *               5: Can not init the file dialog
  */

@@ -33,6 +33,7 @@ sources.c \
 logo.c \
 command_lexer.l \
 cgdbrc.c \
+highlight_groups.c \
 usage.c
 
 # links cgdb if common is changed

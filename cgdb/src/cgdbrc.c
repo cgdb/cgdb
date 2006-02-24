@@ -16,6 +16,7 @@
 #include "tgdb.h"
 #include "interface.h"
 #include "tokenizer.h"
+#include "highlight_groups.h"
 #include "cgdb.h"
 
 extern struct tgdb *tgdb;
@@ -112,6 +113,7 @@ static int command_do_step( void );
 static int command_source_reload( void );
 
 static int command_parse_syntax( void );
+static int command_parse_highlight (void);
 
 typedef int (*action_t)(void);
 static struct commands
@@ -127,6 +129,8 @@ static struct commands
     /* edit        */ { "edit",        command_source_reload },
     /* finish      */ { "finish",      command_do_finish },
     /* help        */ { "help",        command_do_help },
+    /* highlight   */ { "hi",          command_parse_highlight },
+    /* highlight   */ { "highlight",   command_parse_highlight },
     /* insert      */ { "insert",      command_focus_gdb },
     /* next        */ { "next",        command_do_next },
     /* q           */ { "q",           command_do_quit },
@@ -387,6 +391,12 @@ int command_parse_syntax( void )
   return 0;
 }
 
+int 
+command_parse_highlight (void)
+{
+  return hl_groups_parse_config (hl_groups_instance);
+}
+
 int command_parse_set( void )
 {
     /* commands could look like the following:
@@ -399,7 +409,7 @@ int command_parse_set( void )
     int rv = 1;
     int boolean = 1;
     const char * value = NULL;
-    
+
     switch ( (rv = yylex()) ) {
     case EOL: {
         /* TODO: Print out all the variables that have been set. */

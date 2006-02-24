@@ -58,6 +58,7 @@
 #include "filedlg.h"
 #include "cgdbrc.h"
 #include "highlight.h"
+#include "highlight_groups.h"
 #include "fs_util.h"
 
 /* ----------- */
@@ -145,38 +146,28 @@ static int display_command;             /* Currently going to a line number */
  *
  * Return Value: Zero on success, non-zero on failure.
  */
-static int init_curses()
+static int 
+init_curses()
 {
-    if ( putenv("ESCDELAY=0") == -1 )
-       fprintf(stderr, "(%s:%d) putenv failed\r\n", __FILE__, __LINE__);
+  if (putenv("ESCDELAY=0") == -1)
+    fprintf(stderr, "(%s:%d) putenv failed\r\n", __FILE__, __LINE__);
 
-    initscr();                       /* Start curses mode */
+  initscr();                       /* Start curses mode */
 
-    if ((curses_colors = has_colors())){
-        start_color();
-        bkgdset(0);
-        bkgd(CGDB_COLOR_WHITE);
-        init_pair(CGDB_COLOR_GREEN, COLOR_GREEN, COLOR_BLACK);
-        init_pair(CGDB_COLOR_RED, COLOR_RED, COLOR_BLACK);
-        init_pair(CGDB_COLOR_CYAN, COLOR_CYAN, COLOR_BLACK);
-        init_pair(CGDB_COLOR_WHITE, COLOR_WHITE, COLOR_BLACK);
-        init_pair(CGDB_COLOR_MAGENTA, COLOR_MAGENTA, COLOR_BLACK);
-        init_pair(CGDB_COLOR_BLUE, COLOR_BLUE, COLOR_BLACK);
-        init_pair(CGDB_COLOR_YELLOW, COLOR_YELLOW, COLOR_BLACK);
-        init_pair(CGDB_COLOR_INVERSE_GREEN, COLOR_BLACK, COLOR_WHITE);
-        init_pair(CGDB_COLOR_INVERSE_RED, COLOR_BLACK, COLOR_RED);
-        init_pair(CGDB_COLOR_INVERSE_CYAN, COLOR_BLACK, COLOR_CYAN);
-        init_pair(CGDB_COLOR_INVERSE_WHITE, COLOR_BLACK, COLOR_WHITE);
-        init_pair(CGDB_COLOR_INVERSE_MAGENTA, COLOR_BLACK, COLOR_MAGENTA);
-        init_pair(CGDB_COLOR_INVERSE_BLUE, COLOR_BLACK, COLOR_BLUE);
-        init_pair(CGDB_COLOR_INVERSE_YELLOW, COLOR_BLACK, COLOR_YELLOW);
-        init_pair(CGDB_COLOR_STATUS_BAR, COLOR_BLACK, COLOR_WHITE);
-    }
+  if ((curses_colors = has_colors())){
+    start_color();
+#ifdef NCURSES_VERSION
+    use_default_colors ();
+#else
+    bkgdset(0);
+    bkgd(COLOR_WHITE);
+#endif
+  }
 
-    refresh();                       /* Refresh the initial window once */
-    curses_initialized = 1;
+  refresh();                       /* Refresh the initial window once */
+  curses_initialized = 1;
 
-    return 0;
+  return 0;
 }
 
 /* --------------------------------------
@@ -287,23 +278,27 @@ static int get_gdb_width(void) {
 static void update_status_win(void) {
     int pos;
     char filename[FSUTIL_PATH_MAX];
+    int attr;
+
+    if (hl_groups_get_attr (hl_groups_instance, HLG_STATUS_BAR, &attr) == -1)
+      return;
 
     /* Update the tty status bar */
     if ( tty_win_on ) {
-        wattron(tty_status_win, COLOR_PAIR(CGDB_COLOR_STATUS_BAR));
+        wattron(tty_status_win, attr);
         for ( pos = 0; pos < WIDTH; pos++)
            mvwprintw(tty_status_win, 0, pos, " ");
 
         mvwprintw(tty_status_win, 0, 0, (char*)tgdb_tty_name(tgdb));
-        wattroff(tty_status_win, COLOR_PAIR(CGDB_COLOR_STATUS_BAR));
+        wattroff(tty_status_win, attr);
     }
 
     /* Print white background */
-    wattron(status_win, COLOR_PAIR(CGDB_COLOR_STATUS_BAR));
+    wattron(status_win, attr);
     for ( pos = 0; pos < WIDTH; pos++)
        mvwprintw(status_win, 0, pos, " ");
     if ( tty_win_on )
-       wattron(tty_status_win, COLOR_PAIR(CGDB_COLOR_STATUS_BAR));
+       wattron(tty_status_win, attr);
     /* Show the user which window is focused */
     if ( focus == GDB )
        mvwprintw(status_win, 0, WIDTH - 1, "*");
@@ -311,9 +306,9 @@ static void update_status_win(void) {
        mvwprintw(tty_status_win, 0, WIDTH - 1, "*");
     else if ( focus == CGDB )
        mvwprintw(status_win, 0, WIDTH - 1, " ");
-    wattroff(status_win, COLOR_PAIR(CGDB_COLOR_STATUS_BAR));
+    wattroff(status_win, attr);
     if ( tty_win_on )
-       wattroff(tty_status_win, COLOR_PAIR(CGDB_COLOR_STATUS_BAR));
+       wattroff(tty_status_win, attr);
     
     /* Print the regex that the user is looking for Forward */
     if ( regex_search && regex_direction){
@@ -345,6 +340,11 @@ void if_display_message(const char *msg, int width, const char *fmt, ...) {
     char va_buf[MAXLINE];
     char buf_display[MAXLINE];
     int pos, error_length, length;
+    int attr;
+
+    if (hl_groups_get_attr (hl_groups_instance, HLG_STATUS_BAR, &attr) == -1)
+      return;
+
     curs_set(0);
 
     if ( !width )
@@ -370,12 +370,12 @@ void if_display_message(const char *msg, int width, const char *fmt, ...) {
         sprintf(buf_display, "%s%s", msg, va_buf);
 
     /* Print white background */
-    wattron(status_win, COLOR_PAIR(CGDB_COLOR_STATUS_BAR));
+    wattron(status_win, attr);
     for ( pos = 0; pos < WIDTH; pos++)
        mvwprintw(status_win, 0, pos, " ");
 
     mvwprintw(status_win, 0, 0, "%s" , buf_display);
-    wattroff(status_win, COLOR_PAIR(CGDB_COLOR_STATUS_BAR));
+    wattroff(status_win, attr);
     wrefresh(status_win);
 }
 
@@ -504,7 +504,7 @@ void rl_resize (int rows, int cols);
 static int if_resize()
 {
     if (ioctl(fileno(stdout), TIOCGWINSZ, &screen_size) != -1){
-#ifdef HAVE_NCURSES
+#ifdef NCURSES_VERSION
         if (screen_size.ws_row != LINES || screen_size.ws_col != COLS){
             resizeterm(screen_size.ws_row, screen_size.ws_col);
             refresh();
@@ -1081,10 +1081,18 @@ static int set_up_signal(void) {
 /* ----------------- */
 
 /* See interface.h for function descriptions. */
-int if_init(void)
+int 
+if_init(void)
 {
     if (init_curses())
         return 1;
+
+    hl_groups_instance = hl_groups_initialize ();
+    if (!hl_groups_instance)
+      return 3;
+
+    if (hl_groups_setup (hl_groups_instance) == -1)
+      return 3;
 
     /* Set up the signal handler to catch SIGWINCH */
     if ( set_up_signal() == -1 )

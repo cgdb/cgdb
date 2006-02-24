@@ -1167,6 +1167,10 @@ int main(int argc, char *argv[]) {
             logger_write_pos ( logger, __FILE__, __LINE__, "Unable to handle signal: SIGWINCH");
 			cleanup();
 			exit(-1);
+        case 3:
+            logger_write_pos ( logger, __FILE__, __LINE__, "Unable to setup highlighting groups");
+			cleanup();
+			exit(-1);
         case 4:
             logger_write_pos ( logger, __FILE__, __LINE__, "New GDB window failed -- out of memory?");
 			cleanup();

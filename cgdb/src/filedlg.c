@@ -22,6 +22,7 @@
 #include "cgdb.h"
 #include "highlight.h"
 #include "kui_term.h"
+#include "highlight_groups.h"
 
 struct file_buffer {
    int length;                     /* Number of files in program */
@@ -252,6 +253,7 @@ int filedlg_display( struct filedlg *fd ) {
     int lwidth;
     int file;
     int i;
+    int attr;
     static char *label = "Select a file or press q to cancel.";
 
     curs_set(0);
@@ -284,7 +286,10 @@ int filedlg_display( struct filedlg *fd ) {
     lwidth = (int) log10(fd->buf->length)+1;
     sprintf(fmt, "%%%dd", lwidth);
 
-    print_in_middle(fd->win, 0, width, label, COLOR_PAIR(CGDB_COLOR_GREEN));
+    if (hl_groups_get_attr (hl_groups_instance, HLG_UI_LABEL, &attr) == -1)
+      return -1;
+
+    print_in_middle(fd->win, 0, width, label, attr);
     wmove(fd->win, 0, 0);
 
     for (i = 1; i < height + 1; i++, file++){
@@ -306,11 +311,13 @@ int filedlg_display( struct filedlg *fd ) {
             else if (file == fd->buf->sel_line){
                 wattron(fd->win, A_BOLD);
                 wprintw(fd->win, fmt, file+1);
-                wattron(fd->win, COLOR_PAIR(CGDB_COLOR_GREEN));
+                wattroff(fd->win, A_BOLD);
+		if (hl_groups_get_attr (hl_groups_instance, HLG_ARROW, &attr) == -1)
+		  return -1;
+                wattron(fd->win, attr);
                 waddch(fd->win, '-');
                 waddch(fd->win, '>');
-                wattroff(fd->win, COLOR_PAIR(CGDB_COLOR_GREEN));
-                wattroff(fd->win, A_BOLD);
+                wattroff(fd->win, attr);
                 if ( fd->buf->cur_line != NULL )
                     hl_wprintw(fd->win, fd->buf->cur_line, width-lwidth-2, fd->buf->sel_col);
                 else
@@ -318,13 +325,15 @@ int filedlg_display( struct filedlg *fd ) {
             }
             /* Ordinary file */
             else{
+		if (hl_groups_get_attr (hl_groups_instance, HLG_FILEDLG_FILENUM, &attr) == -1)
+		  return -1;
                 if ( fd->buf->sel_line == file )
-                    wattron(fd->win, COLOR_PAIR(CGDB_COLOR_RED));
+                    wattron(fd->win, attr);
                     
                 wprintw(fd->win, fmt, file+1);
                 
                 if ( fd->buf->sel_line == file )
-                    wattroff(fd->win, COLOR_PAIR(CGDB_COLOR_RED));
+                    wattroff(fd->win, attr);
 
                 wattron(fd->win, A_BOLD);
                 waddch(fd->win, VERT_LINE);
@@ -350,7 +359,9 @@ int filedlg_display( struct filedlg *fd ) {
     wmove(fd->win, height , 0);
     
     /* Print white background */
-    wattron(fd->win, COLOR_PAIR(CGDB_COLOR_STATUS_BAR));
+    if (hl_groups_get_attr (hl_groups_instance, HLG_STATUS_BAR, &attr) == -1)
+      return -1;
+    wattron(fd->win, attr);
 
     for ( i = 0; i < width; i++)
        mvwprintw(fd->win, height - 1, i, " ");
@@ -360,7 +371,7 @@ int filedlg_display( struct filedlg *fd ) {
     else if ( regex_search )
         mvwprintw(fd->win, height - 1, 0, "RSearch:%s" , regex_line);
 
-    wattroff(fd->win, COLOR_PAIR(CGDB_COLOR_STATUS_BAR));
+    wattroff(fd->win, attr);
     
     wmove(fd->win, height - (file - fd->buf->sel_line) - 1, lwidth+2);
     wrefresh(fd->win);
@@ -370,17 +381,21 @@ int filedlg_display( struct filedlg *fd ) {
 
 void filedlg_display_message(struct filedlg *fd, char *message) {
     int height, width, i;
+    int attr;
+
+    if (hl_groups_get_attr (hl_groups_instance, HLG_STATUS_BAR, &attr) == -1)
+      return;
 
     getmaxyx(fd->win, height, width);
     
     /* Print white background */
-    wattron(fd->win, COLOR_PAIR(CGDB_COLOR_STATUS_BAR));
+    wattron(fd->win, attr);
 
     for ( i = 0; i < width; i++)
        mvwprintw(fd->win, height - 1, i, " ");
 
     mvwprintw(fd->win, height - 1, 0, "%s" , message);
-    wattroff(fd->win, COLOR_PAIR(CGDB_COLOR_STATUS_BAR));
+    wattroff(fd->win, attr);
     wrefresh(fd->win);
 }
 

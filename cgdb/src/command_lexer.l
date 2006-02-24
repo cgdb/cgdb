@@ -33,6 +33,7 @@ const char * get_token( void )
 
 "="                                                        { return '='; }
 ";"                                                        { return ';'; }
+","                                                        { return ','; }
 
 
 (\r\n|\n\r|\n|\r)                                          { return EOL; }
