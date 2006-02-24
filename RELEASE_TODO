@@ -18,6 +18,8 @@ Bug fixes/improvement for cgdb-0.6.1
  [ ] Tab completion feature request from cgdb.sf.net
  [ ] Add a key binding to get to the currently executing line.
      'p' was suggested for this.
+ [ ] Document the new Highlight command.
+ [ ] Test the new Highlight command.
  [ ] Cursor isn't shown in xterm
  [x] Logo message could be displayed to have <ESC>:help in window
  [ ] Breakpoint's made in thread's do not apper in browser, this is
