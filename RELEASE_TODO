@@ -31,10 +31,6 @@ Bug fixes/improvement for cgdb-0.6.1
     (\n)
     (\032)(\032)breakpoints-table-end(\n)
 
-- For highlighting stuff
-  [ ] Get config file reading to happen before initializing the interface.
-  [ ] Maybe move hl_groups_parse_config into cgdbrc?
-
 - Use valgrind to get rid of most memory leaks.
 
 - TGDB interface changes
