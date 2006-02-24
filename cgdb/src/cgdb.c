@@ -1157,17 +1157,6 @@ int main(int argc, char *argv[]) {
         exit(-1);
 	}
 
-    {
-        char config_file[ FSUTIL_PATH_MAX ];
-        FILE *config;
-        fs_util_get_path( cgdb_home_dir, "cgdbrc", config_file );
-        config = fopen( config_file, "r" );
-        if( config ) { 
-            command_parse_file( config );
-            fclose( config );
-        }
-    }
-
     /* Initialize the display */
     switch (if_init()){
         case 1:
@@ -1194,6 +1183,17 @@ int main(int argc, char *argv[]) {
 		cleanup();
 		exit(-1);
 	}
+
+    {
+        char config_file[ FSUTIL_PATH_MAX ];
+        FILE *config;
+        fs_util_get_path( cgdb_home_dir, "cgdbrc", config_file );
+        config = fopen( config_file, "r" );
+        if( config ) { 
+            command_parse_file( config );
+            fclose( config );
+        }
+    }
 
     /* Enter main loop */
     main_loop();
