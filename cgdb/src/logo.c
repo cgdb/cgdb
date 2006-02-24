@@ -97,8 +97,8 @@ static struct Logo CGDB_LOGO[CGDB_NUM_LOGOS] =
 };
 
 static char *usage[] = {
-    "type  :help   for help",
-    "type  :q      to quit "
+    "type  <ESC>:help<Enter>   for help",
+    "type  <ESC>:q<Enter>      to quit "
 };
 
 /* --------- */

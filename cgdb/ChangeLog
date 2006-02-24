@@ -1,3 +1,6 @@
+2/24/2006 Bob Rossi <bob@brasko.net>
+	* src/logo.c (usage): Modify logo usage.
+
 2/23/2006 Bob Rossi <bob@brasko.net>
 
 	* include/cgdb.h (debug,CGDB_COLOR_*): Removed.
