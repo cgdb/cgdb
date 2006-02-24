@@ -1,9 +1,19 @@
+   * Thanks to Steve Folta for sending in a patch which added support in CGDB
+     for configuring the syntax colors. The colors used to be hard coded and
+     could not be changed. Now just use the ":highlight" command to change 
+     the default colors.    
+
+   * Again, thanks to Steve Folta for getting CGDB to run on terminals with
+     background colors besides black. CGDB used to paint the terminal 
+     background color black regardless of what it was. Now it respects the 
+     background color. This feature only works when linked to ncurses. If you 
+     have curses, CGDB will force the background black.
+
    * CGDB broke it's terminal resizing functionality in cgdb-0.6.0. This is 
      now working again. The bug was introduced while bringing readline into 
      the same address space as CGDB.
    
-   * The man page now get's installed when 'make install' is done. This didn't
-   happen on the last release.
+   * The man page now get's installed when 'make install' is done.
 
 cgdb-0.6.0 (01/30/2006)
 
