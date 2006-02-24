@@ -1,10 +1,7 @@
-Bug fixes/improvement for cgdb-0.6.1
+Bug fixes/improvement for cgdb-0.6.2
 
  [ ] Setup nightly distribution for download.
- [x] Add Steve Folta's color patch.
  [ ] Add key mapping support to cgdbrc.
- [x] Fix cgdb.1 to be in release. Also in make install.
- [x] Automatically generate man pages using help2man.
  [ ] Look into getopts, it generates the usage/getopts/man/texinfo data.
      This could replace the already done work of generating a man page.
  [ ] Figure out how to get extra prototypes out of cgdb.h
@@ -15,9 +12,29 @@ Bug fixes/improvement for cgdb-0.6.1
  [ ] Re-arrange the a2 subsystem to be easier and better to modify
      This could include writing a quick flex/bison parser that could make a 
      parse tree of the annotation command.
- [ ] Tab completion feature request from cgdb.sf.net
  [ ] Add a key binding to get to the currently executing line.
      'p' was suggested for this.
+
+- TGDB interface changes
+ [ ] Modify TGDB to not automatically run commands. (ie. initial list command)
+     [ ] The 'info breakpoints' is automatically done for the client. This could
+         either be a request that is done each time, a request that's done once for
+	 asychronous updates.
+     [ ] The asynchronous source updates. This could be done with the same 
+         techniques as above.
+
+- TGDB interface changes
+ [ ] Modify the tgdb_response data structure to incorporate into it
+    the associated tgdb_request data structure. Make sure to remove
+    the cgdb.c:last_request variable.
+ [ ] Free tgdb_request data structures.
+
+Bug fixes/improvement for cgdb-0.6.1
+
+ [x] Add Steve Folta's color patch.
+ [x] Fix cgdb.1 to be in release. Also in make install.
+ [x] Automatically generate man pages using help2man.
+ [ ] Tab completion feature request from cgdb.sf.net
  [ ] Document the new Highlight command.
  [ ] Test the new Highlight command.
  [ ] Cursor isn't shown in xterm
@@ -34,20 +51,6 @@ Bug fixes/improvement for cgdb-0.6.1
     (\032)(\032)breakpoints-table-end(\n)
 
 - Use valgrind to get rid of most memory leaks.
-
-- TGDB interface changes
- [ ] Modify TGDB to not automatically run commands. (ie. initial list command)
-     [ ] The 'info breakpoints' is automatically done for the client. This could
-         either be a request that is done each time, a request that's done once for
-	 asychronous updates.
-     [ ] The asynchronous source updates. This could be done with the same 
-         techniques as above.
-
-- TGDB interface changes
- [ ] Modify the tgdb_response data structure to incorporate into it
-    the associated tgdb_request data structure. Make sure to remove
-    the cgdb.c:last_request variable.
- [ ] Free tgdb_request data structures.
 
 - Fix ACS_VLINE problem. This char is not available everywhere and 
   should be a runtime option. Check with jonathon to make sure this problem
