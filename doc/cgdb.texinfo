@@ -58,6 +58,7 @@ Software Foundation raise funds for GNU development.''
 * Understanding CGDB::          Understanding the core concepts of CGDB
 * Controlling CGDB::            CGDB commands
 * Configuring CGDB::            CGDB configuration commands
+* Highlighting Groups::         CGDB highlighting groups
 * Sending I/O to Inferior::     Sending I/O to the program being debugged
 * Terminal Control Flow::       Allowing terminal control flow in CGDB
 
@@ -127,12 +128,13 @@ currently hanging, or operating a long command.
 @chapter Understanding the core concepts of CGDB
 @cindex understanding CGDB
 
+@cindex status bar
 @cindex CGDB mode
 @cindex GDB mode
 @cindex TTY mode
 The CGDB user interface currently consists of two windows and a status bar.  
 The source window is currently on the top and the GDB window is on the 
-bottom.  The status bar currently separates the two windows.
+bottom.  The @dfn{status bar} currently separates the two windows.
 
 The interface has several modes depending on which window is focused.  
 @dfn{CGDB mode} is when the source window is focused, @dfn{GDB mode} is when 
@@ -158,7 +160,6 @@ task, please contact me.
 @section Understanding the source window.
 @cindex source window
 
-@cindex source window
 The @dfn{source window} is the window that provides you a view of the source 
 code that the debugged program is made up of.  It will display to the user a 
 single source file at a time.  While the user is debugging, via @code{next} 
@@ -663,6 +664,26 @@ Send a finish command to GDB.
 This will display the current manual in text format, in the 
 @dfn{source window}.
 
+@item :hi @var{group} ctermfg=@var{attributes} ctermfg=@var{color} ctermbg=@var{color} term=@var{attributes}
+@itemx :highlight @var{group} ctermfg=@var{attributes} ctermfg=@var{color} ctermbg=@var{color} term=@var{attributes}
+Set the @var{color} and @var{attributes} for a highlighting group.  The syntax 
+mimic's vim's ``highlight'' command.  Possible values for @var{group}, 
+@var{attributes} and @var{color} are available in @ref{Highlighting Groups}.
+
+You can give as many or as few of the name=value pairs as you wish, in any 
+order.  @samp{ctermfg} and @samp{ctermbg} set the foreground and background 
+colors.  These can be specified by color number or by using the same color 
+names that vim uses.  You can use -1 as a color number when CGDB has been
+linked against ncurses, otherwise you can not.
+
+@samp{cterm} sets the video attributes for color terminals.  @samp{term} sets
+the video attributes for monochrome terminals.  Some examples are,
+@smallexample
+:highlight Logo cterm=blink,underline ctermfg=Red ctermbg=Black
+:highlight Normal cterm=reverse ctermfg=White ctermbg=Black
+:hi Normal term=bold
+@end smallexample
+
 @item :insert
 Move focus to the GDB window.
 
@@ -682,6 +703,201 @@ Send a step command to GDB.
 @item :syntax
 Turn the syntax on or off.
 @end table
+
+@node Highlighting Groups
+@chapter CGDB highlighting groups
+@cindex highlighting groups
+
+CGDB is capable of using colors if the terminal it is run in supports them.  
+Until version 0.6.1, CGDB did not allow the user to configure these colors in
+any way.  CGDB color use is now fully configurable.
+
+CGDB's modeled it's use of color highlighting after vim.  Any data that will
+be colored in the terminal is represented by a highlighting group.  
+A @dfn{highlighting group} represents data that should be formatted using
+foreground colors, background colors and attributes.  There are currently 
+several types of highlighting groups in CGDB.  There are syntax highlighting 
+groups, which represent syntax highlighting of sources files.  There are also 
+User Interface groups, which represent things like CGDB's logo, or the status 
+bar.
+
+Each highlighting group has a default set of attributes and colors associated 
+with it.  You can modify a highlighting groups propertys by using the
+highlight command.  @xref{Configuring CGDB}.
+
+Note that CGDB currently supports using the same background color the terminal 
+was using before CGDB was started.  However, this only works when CGDB was
+linked with ncurses.  If you link CGDB with curses, then CGDB will force
+the background to Black.
+
+@menu
+* Available Highlighting Groups::         The different highlighting groups.
+* Available Attributes::                  The different attributes.
+* Available Colors::                      The different colors.
+@end menu
+
+@node Available Highlighting Groups
+@section The different highlighting groups
+@cindex highlighting groups
+
+Below is a list of all the highlighting groups that CDGB will use when syntax 
+highlighting source files.
+
+@table @code
+@item Statement
+This represents the keywords a language defines.
+@item Type
+This represents the types a language defines.
+@item Constant
+This represents either a string or numeric value.
+@item Comment
+This represents the comments in a source file.
+@item PreProc
+This represents the C/C++ preprocessor commands.
+@item Normal
+This represents all normal text.
+@end table
+
+Below is a list of all the highlighting groups that CGDB will use when it is
+displaying it's User Interface.
+
+@table @code
+@item StatusLine
+This represents the @dfn{status bar} in CGDB.  The file dialog's status 
+bar also uses this group.
+@item IncSearch
+This represents the group used when the user is searching in either the source 
+window, or the @dfn{file dialog window}.
+@item Arrow
+This represents the arrow that CGDB draws to point to the currently viewed 
+line.
+@item LineHighlight
+This represents the group used when the user has the @code{arrowstyle} option 
+set to @code{highlight}.
+@item Breakpoint
+This represents the group that is used when CGDB displays to the user a line
+that has a breakpoint set.
+@item DisabledBreakpoint
+This represents the group that is used when CGDB displays to the user a line
+that has a disabled breakpoint set.
+@item Logo
+This is the group CGDB uses to display it's logo on startup when no source 
+file can be auto detected.
+@end table
+
+
+@node Available Attributes
+@section The different attributes
+@cindex attributes
+
+CGDB supports many of the attributes that curses provides.  It will apply the
+attributes to the output window, but it is up to the terminal you are using
+to support such features.
+
+The list of attributes that CGDB currently supports is below.
+
+@table @code
+@item normal
+@itemx NONE
+This will leave the text normal.  Uses A_NORMAL curses attribute.
+@item bold
+This will make the text appear bold.  Uses A_BOLD curses attribute.
+@item underline
+This will underline the text.  Uses A_UNDERLINE curses attribute.
+@item reverse
+@itemx inverse
+This will reverse the foreground and background colors.  Uses A_REVERSE curses
+attribute.
+@item standout
+This is the best highlighting mode of the terminal.  Uses A_STANDOUT curses 
+attribute.
+@item blink
+This will cause the text to blink.  Uses A_BLINK curses attribute.
+@item dim
+This will cause the text to be 1/2 bright.  Uses A_DIM curses attribute.
+@end table
+
+@node Available Colors
+@section The different colors
+@cindex colors
+
+CGDB supports several colors, depending on how many colors your terminal 
+supports.  Below is a chart of the colors that CGDB provides.  The heading 
+NR-16 is used to reprsent terminals that support at least 16 colors.  The
+heading NR-8 is used to represent terminals that support at least 8 colors.  
+The integer values for each color represent the values past to the curses
+function init_pair() to ask curses to create a new color.
+
+@multitable @columnfractions .4 .2 .2 .2
+@item @code{COLOR NAME}
+@tab @code{NR-16}
+@tab @code{NR-8}
+@tab @code{NR-8 bold attribute}
+@item Black
+@tab 0
+@tab 0
+@tab No
+@item DarkBlue
+@tab 1
+@tab 4
+@tab No
+@item DarkGreen
+@tab 2
+@tab 2
+@tab No
+@item DarkCyan
+@tab 3
+@tab 6
+@tab No
+@item DarkRed
+@tab 4
+@tab 1
+@tab No
+@item DarkMagenta
+@tab 5
+@tab 5
+@tab No
+@item Brown, DarkYellow
+@tab 6
+@tab 3
+@tab No
+@item LightGray, LightGrey, Gray, Grey
+@tab 7
+@tab 7
+@tab No
+@item DarkGray, DarkGrey
+@tab 8
+@tab 0
+@tab Yes
+@item Blue, LightBlue
+@tab 9
+@tab 4
+@tab Yes
+@item Green, LightGreen
+@tab 10
+@tab 2
+@tab Yes
+@item Cyan, LightCyan
+@tab 11
+@tab 6
+@tab Yes
+@item Red, LightRed
+@tab 12
+@tab 1
+@tab Yes
+@item Magenta, LightMagenta
+@tab 13
+@tab 5
+@tab Yes
+@item Yellow, LightYellow
+@tab 14
+@tab 3
+@tab Yes
+@item White
+@tab 15
+@tab 7
+@tab Yes
+@end multitable
 
 @node Sending I/O to Inferior
 @chapter Sending I/O to the program being debugged

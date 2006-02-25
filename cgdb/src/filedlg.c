@@ -55,9 +55,8 @@ static int regex_direction;             /* Direction to search */
  *  line:   The line to print the message at
  *  width:  The width of the window
  *  string: The message to print
- *  color:  The color to print the message
  */
-static void print_in_middle(WINDOW *win, int line, int width, char *string, int color) {  
+static void print_in_middle(WINDOW *win, int line, int width, char *string) {  
    int  x, y;
    int j;
    int length = strlen(string);
@@ -70,9 +69,7 @@ static void print_in_middle(WINDOW *win, int line, int width, char *string, int 
    for (j = 0; j < x; j++)
        waddch(win, ' ');
 
-       wattron(win, color);
-       mvwprintw(win, line, x, "%s", string);
-       wattroff(win, color);
+   mvwprintw(win, line, x, "%s", string);
 
     for (j = x + length; j < width; j++)
         waddch(win, ' ');
@@ -286,10 +283,7 @@ int filedlg_display( struct filedlg *fd ) {
     lwidth = (int) log10(fd->buf->length)+1;
     sprintf(fmt, "%%%dd", lwidth);
 
-    if (hl_groups_get_attr (hl_groups_instance, HLG_UI_LABEL, &attr) == -1)
-      return -1;
-
-    print_in_middle(fd->win, 0, width, label, attr);
+    print_in_middle(fd->win, 0, width, label);
     wmove(fd->win, 0, 0);
 
     for (i = 1; i < height + 1; i++, file++){
@@ -325,16 +319,7 @@ int filedlg_display( struct filedlg *fd ) {
             }
             /* Ordinary file */
             else{
-		if (hl_groups_get_attr (hl_groups_instance, HLG_FILEDLG_FILENUM, &attr) == -1)
-		  return -1;
-                if ( fd->buf->sel_line == file )
-                    wattron(fd->win, attr);
-                    
                 wprintw(fd->win, fmt, file+1);
-                
-                if ( fd->buf->sel_line == file )
-                    wattroff(fd->win, attr);
-
                 wattron(fd->win, A_BOLD);
                 waddch(fd->win, VERT_LINE);
                 wattroff(fd->win, A_BOLD);

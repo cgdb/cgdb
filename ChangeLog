@@ -1,3 +1,7 @@
+2/25/2006 Bob Rossi <bob@brasko.net>
+	* RELEASE_TODO: Document new highlight command.
+	* NEWS: Add note about manual.
+
 2/24/2006 Bob Rossi <bob@brasko.net>
 	* RELEASE_TODO: Reorganize for .6.1
 

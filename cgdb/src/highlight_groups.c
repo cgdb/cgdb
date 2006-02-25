@@ -89,8 +89,6 @@ static const struct default_hl_group_info default_groups_for_curses [] = {
   {HLG_ENABLED_BREAKPOINT, A_BOLD, A_BOLD, COLOR_RED, COLOR_BLACK},
   {HLG_DISABLED_BREAKPOINT, A_BOLD, A_BOLD, COLOR_YELLOW, COLOR_BLACK},
   {HLG_LOGO, A_BOLD, A_BOLD, COLOR_BLUE, COLOR_BLACK},
-  {HLG_UI_LABEL, A_NORMAL, A_NORMAL, COLOR_GREEN, COLOR_BLACK},
-  {HLG_FILEDLG_FILENUM, A_NORMAL, A_NORMAL, COLOR_RED, COLOR_BLACK},
   {HLG_LAST, A_NORMAL, A_NORMAL, -1, -1}
 };
 
@@ -112,8 +110,6 @@ static const struct default_hl_group_info default_groups_for_background_dark [] 
   {HLG_ENABLED_BREAKPOINT, A_BOLD, A_BOLD, COLOR_RED, -1},
   {HLG_DISABLED_BREAKPOINT, A_BOLD, A_BOLD, COLOR_YELLOW, -1},
   {HLG_LOGO, A_BOLD, A_BOLD, COLOR_BLUE, -1},
-  {HLG_UI_LABEL, A_NORMAL, A_NORMAL, COLOR_GREEN, -1},
-  {HLG_FILEDLG_FILENUM, A_NORMAL, A_NORMAL, COLOR_RED, -1},
   {HLG_LAST, A_NORMAL, A_NORMAL, -1, -1}
 };
 
@@ -132,15 +128,13 @@ static struct hl_group_name hl_group_names[] = {
   {HLG_COMMENT, "Comment"},
   {HLG_DIRECTIVE, "PreProc"},
   {HLG_TEXT, "Normal"},
-  {HLG_SEARCH, "StatusLine"},
-  {HLG_STATUS_BAR, "IncSearch"},
+  {HLG_SEARCH, "IncSearch"},
+  {HLG_STATUS_BAR, "StatusLine"},
   {HLG_ARROW, "Arrow"},
   {HLG_LINE_HIGHLIGHT, "LineHighlight"},
   {HLG_ENABLED_BREAKPOINT, "Breakpoint"},
   {HLG_DISABLED_BREAKPOINT, "DisabledBreakpoint"},
   {HLG_LOGO, "Logo"},
-  {HLG_UI_LABEL, "UILable"},
-  {HLG_FILEDLG_FILENUM, "FileDlgFileNum"},
   {HLG_LAST, "NULL"}
 };
 
@@ -189,9 +183,11 @@ static const struct attr_pair attr_names[] = {
   {"underline", A_UNDERLINE},
   {"reverse", A_REVERSE},
   {"inverse", A_REVERSE},
-  {"italic", A_NORMAL},		/* available in vim, but not in curses */
   {"standout", A_STANDOUT},
   {"NONE", A_NORMAL},
+  {"normal", A_NORMAL},
+  {"blink", A_BLINK},
+  {"dim", A_DIM},
   {NULL, 0}
 };
 
@@ -297,6 +293,13 @@ setup_group (hl_groups_ptr hl_groups, enum hl_group_kind group, int mono_attrs,
   static int next_color_pair = 1;
 
   struct hl_group_info *info = lookup_group_info_by_key (hl_groups, group);
+
+/* Don't allow -1 to be used in curses mode */
+#ifndef NCURSES_VERSION
+  if (fore_color < 0 || back_color < 0)
+    return 0;
+#endif
+
   info->mono_attrs = mono_attrs;
   info->color_attrs = color_attrs;
 

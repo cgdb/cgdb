@@ -66,7 +66,7 @@ The essentials are:
 
 The CGDB user interface currently consists of two windows and a status
 bar.  The source window is currently on the top and the GDB window is
-on the bottom.  The status bar currently separates the two windows.
+on the bottom.  The "status bar" currently separates the two windows.
 
    The interface has several modes depending on which window is focused.
 "CGDB mode" is when the source window is focused, "GDB mode" is when
@@ -559,6 +559,25 @@ noignorecase' turns on case-sensitive searching.
      This will display the current manual in text format, in the
      "source window".
 
+`:hi GROUP ctermfg=ATTRIBUTES ctermfg=COLOR ctermbg=COLOR term=ATTRIBUTES'
+`:highlight GROUP ctermfg=ATTRIBUTES ctermfg=COLOR ctermbg=COLOR term=ATTRIBUTES'
+     Set the COLOR and ATTRIBUTES for a highlighting group.  The syntax
+     mimic's vim's "highlight" command.  Possible values for GROUP,
+     ATTRIBUTES and COLOR are available in *Note Highlighting Groups::.
+
+     You can give as many or as few of the name=value pairs as you
+     wish, in any order.  `ctermfg' and `ctermbg' set the foreground
+     and background colors.  These can be specified by color number or
+     by using the same color names that vim uses.  You can use -1 as a
+     color number when CGDB has been linked against ncurses, otherwise
+     you can not.
+
+     `cterm' sets the video attributes for color terminals.  `term' sets
+     the video attributes for monochrome terminals.  Some examples are,
+          :highlight Logo cterm=blink,underline ctermfg=Red ctermbg=Black
+          :highlight Normal cterm=reverse ctermfg=White ctermbg=Black
+          :hi Normal term=bold
+
 `:insert'
      Move focus to the GDB window.
 
@@ -578,7 +597,153 @@ noignorecase' turns on case-sensitive searching.
 `:syntax'
      Turn the syntax on or off.
 
-5 Sending I/O to the program being debugged
+5 CGDB highlighting groups
+**************************
+
+CGDB is capable of using colors if the terminal it is run in supports
+them.  Until version 0.6.1, CGDB did not allow the user to configure
+these colors in any way.  CGDB color use is now fully configurable.
+
+   CGDB's modeled it's use of color highlighting after vim.  Any data
+that will be colored in the terminal is represented by a highlighting
+group.  A "highlighting group" represents data that should be formatted
+using foreground colors, background colors and attributes.  There are
+currently several types of highlighting groups in CGDB.  There are
+syntax highlighting groups, which represent syntax highlighting of
+sources files.  There are also User Interface groups, which represent
+things like CGDB's logo, or the status bar.
+
+   Each highlighting group has a default set of attributes and colors
+associated with it.  You can modify a highlighting groups propertys by
+using the highlight command.  *Note Configuring CGDB::.
+
+   Note that CGDB currently supports using the same background color
+the terminal was using before CGDB was started.  However, this only
+works when CGDB was linked with ncurses.  If you link CGDB with curses,
+then CGDB will force the background to Black.
+
+5.1 The different highlighting groups
+=====================================
+
+Below is a list of all the highlighting groups that CDGB will use when
+syntax highlighting source files.
+
+`Statement'
+     This represents the keywords a language defines.
+
+`Type'
+     This represents the types a language defines.
+
+`Constant'
+     This represents either a string or numeric value.
+
+`Comment'
+     This represents the comments in a source file.
+
+`PreProc'
+     This represents the C/C++ preprocessor commands.
+
+`Normal'
+     This represents all normal text.
+
+   Below is a list of all the highlighting groups that CGDB will use
+when it is displaying it's User Interface.
+
+`StatusLine'
+     This represents the "status bar" in CGDB.  The file dialog's status
+     bar also uses this group.
+
+`IncSearch'
+     This represents the group used when the user is searching in
+     either the source window, or the "file dialog window".
+
+`Arrow'
+     This represents the arrow that CGDB draws to point to the
+     currently viewed line.
+
+`LineHighlight'
+     This represents the group used when the user has the `arrowstyle'
+     option set to `highlight'.
+
+`Breakpoint'
+     This represents the group that is used when CGDB displays to the
+     user a line that has a breakpoint set.
+
+`DisabledBreakpoint'
+     This represents the group that is used when CGDB displays to the
+     user a line that has a disabled breakpoint set.
+
+`Logo'
+     This is the group CGDB uses to display it's logo on startup when
+     no source file can be auto detected.
+
+5.2 The different attributes
+============================
+
+CGDB supports many of the attributes that curses provides.  It will
+apply the attributes to the output window, but it is up to the terminal
+you are using to support such features.
+
+   The list of attributes that CGDB currently supports is below.
+
+`normal'
+`NONE'
+     This will leave the text normal.  Uses A_NORMAL curses attribute.
+
+`bold'
+     This will make the text appear bold.  Uses A_BOLD curses attribute.
+
+`underline'
+     This will underline the text.  Uses A_UNDERLINE curses attribute.
+
+`reverse'
+`inverse'
+     This will reverse the foreground and background colors.  Uses
+     A_REVERSE curses attribute.
+
+`standout'
+     This is the best highlighting mode of the terminal.  Uses
+     A_STANDOUT curses attribute.
+
+`blink'
+     This will cause the text to blink.  Uses A_BLINK curses attribute.
+
+`dim'
+     This will cause the text to be 1/2 bright.  Uses A_DIM curses
+     attribute.
+
+5.3 The different colors
+========================
+
+CGDB supports several colors, depending on how many colors your terminal
+supports.  Below is a chart of the colors that CGDB provides.  The
+heading NR-16 is used to reprsent terminals that support at least 16
+colors.  The heading NR-8 is used to represent terminals that support
+at least 8 colors.  The integer values for each color represent the
+values past to the curses function init_pair() to ask curses to create
+a new color.
+
+`COLOR NAME'                  `NR-16'        `NR-8'         `NR-8 bold
+                                                            attribute'
+Black                         0              0              No
+DarkBlue                      1              4              No
+DarkGreen                     2              2              No
+DarkCyan                      3              6              No
+DarkRed                       4              1              No
+DarkMagenta                   5              5              No
+Brown, DarkYellow             6              3              No
+LightGray, LightGrey, Gray,   7              7              No
+Grey                                                        
+DarkGray, DarkGrey            8              0              Yes
+Blue, LightBlue               9              4              Yes
+Green, LightGreen             10             2              Yes
+Cyan, LightCyan               11             6              Yes
+Red, LightRed                 12             1              Yes
+Magenta, LightMagenta         13             5              Yes
+Yellow, LightYellow           14             3              Yes
+White                         15             7              Yes
+
+6 Sending I/O to the program being debugged
 *******************************************
 
 If the program being debugged takes input on the terminal it is
@@ -622,7 +787,7 @@ then they can type `Ctrl-T'.  This will delete all the buffered data
 waiting to be read into the debugged program. This might be useful when
 you rerun or start a new program.
 
-6 Allowing terminal control flow in CGDB
+7 Allowing terminal control flow in CGDB
 ****************************************
 
 A user can typically set there control flow behavior by using the stty
@@ -635,7 +800,7 @@ character usually does a forward search.  So, if you want to get this,
 or other functionality out of readline, simply turn off control flow
 and start CGDB.
 
-7 Building CGDB from source
+8 Building CGDB from source
 ***************************
 
 Building CGDB from source requires several packages. First, CGDB is
@@ -672,9 +837,15 @@ certain files in CGDB.
      to have flex installed.  I have used flex 2.5.4 to build CGDB.
 
 `GNU Texinfo'
-     If you modify doc/cgdb.texinfo, then you will be required to have
-     this package installed.  I have used version 4.7 to build the
+     If you modify `doc/cgdb.texinfo', then you will be required to
+     have this package installed.  I have used version 4.7 to build the
      documentation for CGDB.
+
+`help2man'
+     If you modify `configure.in' or `cgdb/src/usage.c' then you will be
+     required to have this package installed.  There is a Makefile rule
+     in `doc/Makefile.am' that automatically generates the man page
+     when either of these files are modified.
 
    CGDB uses autoconf/automake to build its configure scripts and
 makefiles.  So, if you change any of the autoconf/automake files, you

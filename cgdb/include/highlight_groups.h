@@ -23,10 +23,11 @@
  * use when drawing this particular group. Each highlighting group has 
  * default values that CGDB assigns to it. However, each of them are also
  * configurable.
+ *
+ * If you modify this enumeration, update the manual!
  */
 enum hl_group_kind
 {
-  /* Never use this group, it only represents the first position. */
   HLG_KEYWORD = 1,
   HLG_TYPE,
   HLG_LITERAL,
@@ -37,14 +38,9 @@ enum hl_group_kind
   HLG_STATUS_BAR,
   HLG_ARROW,
   HLG_LINE_HIGHLIGHT,
-  /** The color for enabled breakpoints */
   HLG_ENABLED_BREAKPOINT,
-  /** The color for disabled breakpoints */
   HLG_DISABLED_BREAKPOINT,
-  /** The CGDB logo on the startup screen. */
   HLG_LOGO,
-  HLG_UI_LABEL,
-  HLG_FILEDLG_FILENUM,
 
   HLG_LAST
 };

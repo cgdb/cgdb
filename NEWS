@@ -1,7 +1,8 @@
    * Thanks to Steve Folta for sending in a patch which added support in CGDB
      for configuring the syntax colors. The colors used to be hard coded and
      could not be changed. Now just use the ":highlight" command to change 
-     the default colors.    
+     the default colors.  There is a new section in the manual called 
+     "CGDB highlighting groups" that describes the new functionality.
 
    * Again, thanks to Steve Folta for getting CGDB to run on terminals with
      background colors besides black. CGDB used to paint the terminal 
