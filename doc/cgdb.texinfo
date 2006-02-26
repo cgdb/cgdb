@@ -667,19 +667,20 @@ This will display the current manual in text format, in the
 @item :hi @var{group} ctermfg=@var{attributes} ctermfg=@var{color} ctermbg=@var{color} term=@var{attributes}
 @itemx :highlight @var{group} ctermfg=@var{attributes} ctermfg=@var{color} ctermbg=@var{color} term=@var{attributes}
 Set the @var{color} and @var{attributes} for a highlighting group.  The syntax 
-mimic's vim's ``highlight'' command.  Possible values for @var{group}, 
+mimics vim's ``highlight'' command.  Possible values for @var{group}, 
 @var{attributes} and @var{color} are available in @ref{Highlighting Groups}.
 
 You can give as many or as few of the name=value pairs as you wish, in any 
 order.  @samp{ctermfg} and @samp{ctermbg} set the foreground and background 
 colors.  These can be specified by color number or by using the same color 
-names that vim uses.  You can use -1 as a color number when CGDB has been
-linked against ncurses, otherwise you can not.
+names that vim uses.  When CGDB is linked with ncurses, the number you use to
+represent the color can be between -1 and COLORS.  When CGDB is linked against
+curses, it must be between 0 and COLORS.  
 
 @samp{cterm} sets the video attributes for color terminals.  @samp{term} sets
 the video attributes for monochrome terminals.  Some examples are,
 @smallexample
-:highlight Logo cterm=blink,underline ctermfg=Red ctermbg=Black
+:highlight Logo cterm=bold,underline ctermfg=Red ctermbg=Black
 :highlight Normal cterm=reverse ctermfg=White ctermbg=Black
 :hi Normal term=bold
 @end smallexample
@@ -712,7 +713,7 @@ CGDB is capable of using colors if the terminal it is run in supports them.
 Until version 0.6.1, CGDB did not allow the user to configure these colors in
 any way.  CGDB color use is now fully configurable.
 
-CGDB's modeled it's use of color highlighting after vim.  Any data that will
+CGDB's modeled its use of color highlighting after vim.  Any data that will
 be colored in the terminal is represented by a highlighting group.  
 A @dfn{highlighting group} represents data that should be formatted using
 foreground colors, background colors and attributes.  There are currently 
@@ -722,7 +723,7 @@ User Interface groups, which represent things like CGDB's logo, or the status
 bar.
 
 Each highlighting group has a default set of attributes and colors associated 
-with it.  You can modify a highlighting groups propertys by using the
+with it.  You can modify a highlighting groups properties by using the
 highlight command.  @xref{Configuring CGDB}.
 
 Note that CGDB currently supports using the same background color the terminal 
@@ -775,13 +776,13 @@ line.
 This represents the group used when the user has the @code{arrowstyle} option 
 set to @code{highlight}.
 @item Breakpoint
-This represents the group that is used when CGDB displays to the user a line
-that has a breakpoint set.
+This represents the group that is used when CGDB displays a line that has a 
+breakpoint set.
 @item DisabledBreakpoint
-This represents the group that is used when CGDB displays to the user a line
-that has a disabled breakpoint set.
+This represents the group that is used when CGDB displays a line that has a 
+disabled breakpoint set.
 @item Logo
-This is the group CGDB uses to display it's logo on startup when no source 
+This is the group CGDB uses to display its logo on startup when no source 
 file can be auto detected.
 @end table
 
@@ -823,9 +824,9 @@ This will cause the text to be 1/2 bright.  Uses A_DIM curses attribute.
 
 CGDB supports several colors, depending on how many colors your terminal 
 supports.  Below is a chart of the colors that CGDB provides.  The heading 
-NR-16 is used to reprsent terminals that support at least 16 colors.  The
+NR-16 is used to represent terminals that support at least 16 colors.  The
 heading NR-8 is used to represent terminals that support at least 8 colors.  
-The integer values for each color represent the values past to the curses
+The integer values for each color represent the values passed to the curses
 function init_pair() to ask curses to create a new color.
 
 @multitable @columnfractions .4 .2 .2 .2
