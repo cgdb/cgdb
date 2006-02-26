@@ -39,11 +39,11 @@ lookup_group_info_by_key (struct hl_groups *groups, enum hl_group_kind kind)
   int i;
 
   for (i = 0; i < HLG_LAST; ++i)
-  {
-    lgroups = &groups->groups[i];
-    if (kind == lgroups->kind)
-      return lgroups;
-  }
+    {
+      lgroups = &groups->groups[i];
+      if (kind == lgroups->kind)
+	return lgroups;
+    }
 
   return NULL;
 }
@@ -52,9 +52,9 @@ lookup_group_info_by_key (struct hl_groups *groups, enum hl_group_kind kind)
 hl_groups_ptr hl_groups_instance = NULL;
 
 /** 
- * This describes all the attributes that a highligting group can represent.
+ * This describes all the attributes that a highlighting group can represent.
  * It is used to represent the default value for a group.
- */ 
+ */
 struct default_hl_group_info
 {
   /** The kind of group */
@@ -70,12 +70,12 @@ struct default_hl_group_info
 };
 
 /** 
- * The default colors and attributes when use_default_colors is not avialable. 
+ * The default colors and attributes when use_default_colors is not available.
  * This means that -1 can not be used to represent the default color 
  * background. Currently, in this case, black is used as the color. This 
  * could eventually be configurable.
  */
-static const struct default_hl_group_info default_groups_for_curses [] = {
+static const struct default_hl_group_info default_groups_for_curses[] = {
   {HLG_KEYWORD, A_BOLD, A_BOLD, COLOR_BLUE, COLOR_BLACK},
   {HLG_TYPE, A_BOLD, A_BOLD, COLOR_GREEN, COLOR_BLACK},
   {HLG_LITERAL, A_BOLD, A_BOLD, COLOR_RED, COLOR_BLACK},
@@ -96,7 +96,8 @@ static const struct default_hl_group_info default_groups_for_curses [] = {
  * The default colors and attributes for each type of token. 
  * This is used when ncurses is available.
  */
-static const struct default_hl_group_info default_groups_for_background_dark [] = {
+static const struct default_hl_group_info default_groups_for_background_dark[]
+  = {
   {HLG_KEYWORD, A_BOLD, A_BOLD, COLOR_BLUE, -1},
   {HLG_TYPE, A_BOLD, A_BOLD, COLOR_GREEN, -1},
   {HLG_LITERAL, A_BOLD, A_BOLD, COLOR_RED, -1},
@@ -120,7 +121,7 @@ struct hl_group_name
   /** The name of the group */
   const char *name;
 };
-  
+
 static struct hl_group_name hl_group_names[] = {
   {HLG_KEYWORD, "Statement"},
   {HLG_TYPE, "Type"},
@@ -160,10 +161,10 @@ get_hl_group_kind_from_name (const char *name, enum hl_group_kind *kind)
 
   for (i = 0; hl_group_names[i].name != NULL; ++i)
     if (strcasecmp (name, hl_group_names[i].name) == 0)
-    {
-      *kind = hl_group_names[i].kind;
-      return 0;
-    }
+      {
+	*kind = hl_group_names[i].kind;
+	return 0;
+      }
 
   return -1;
 }
@@ -216,7 +217,7 @@ struct color_info
   int nr8ForegroundBold;
 };
 
-/** A list of all the default colors and there values */
+/** A list of all the default colors and their values */
 static const struct color_info hl_color_names[] = {
   {"Black", 0, 0, 0},
   {"DarkBlue", 1, 4, 0},
@@ -283,8 +284,8 @@ color_spec_for_name (const char *name)
  * 0 on success, -1 on error.
  */
 static int
-setup_group (hl_groups_ptr hl_groups, enum hl_group_kind group, int mono_attrs, 
-	     int color_attrs, int fore_color, int back_color)
+setup_group (hl_groups_ptr hl_groups, enum hl_group_kind group,
+	     int mono_attrs, int color_attrs, int fore_color, int back_color)
 {
   if (!hl_groups)
     return -1;
@@ -320,10 +321,11 @@ setup_group (hl_groups_ptr hl_groups, enum hl_group_kind group, int mono_attrs,
 
   /* Set up the color pair. */
   if (info->color_pair < COLOR_PAIRS)
-  {
-    if (init_pair (info->color_pair, fore_color, back_color) != OK)
-      return -1;
-  } else
+    {
+      if (init_pair (info->color_pair, fore_color, back_color) != OK)
+	return -1;
+    }
+  else
     return -1;
 
   return 0;
@@ -331,15 +333,16 @@ setup_group (hl_groups_ptr hl_groups, enum hl_group_kind group, int mono_attrs,
 
 // }}}
 
-// Createing and Destroying a hl_groups context. {{{
+// Creating and Destroying a hl_groups context. {{{
 //@{
 
-hl_groups_ptr 
+hl_groups_ptr
 hl_groups_initialize (void)
 {
   int i;
 
-  hl_groups_ptr hl_groups = (hl_groups_ptr)malloc (sizeof(struct hl_groups));
+  hl_groups_ptr hl_groups =
+    (hl_groups_ptr) malloc (sizeof (struct hl_groups));
   if (!hl_groups)
     return NULL;
 
@@ -350,7 +353,7 @@ hl_groups_initialize (void)
     {
       struct hl_group_info *info;
       info = &hl_groups->groups[i];
-      info->kind = i+1;
+      info->kind = i + 1;
       info->mono_attrs = 0;
       info->mono_attrs = 0;
       info->color_pair = 0;
@@ -360,14 +363,14 @@ hl_groups_initialize (void)
   return hl_groups;
 }
 
-int 
+int
 hl_groups_shutdown (hl_groups_ptr hl_groups)
 {
   if (hl_groups)
-  {
-    free (hl_groups);
-    hl_groups = NULL;
-  }
+    {
+      free (hl_groups);
+      hl_groups = NULL;
+    }
 
   return 0;
 }
@@ -379,7 +382,7 @@ hl_groups_shutdown (hl_groups_ptr hl_groups)
 
 //@{
 
-int 
+int
 hl_groups_setup (hl_groups_ptr hl_groups)
 {
   int i;
@@ -403,20 +406,22 @@ hl_groups_setup (hl_groups_ptr hl_groups)
     {
       int val;
       const struct default_hl_group_info *spec = &ginfo[i];
-      val = setup_group (hl_groups, spec->kind, spec->mono_attrs, spec->color_attrs,
-			 spec->fore_color, spec->back_color);
+      val =
+	setup_group (hl_groups, spec->kind, spec->mono_attrs,
+		     spec->color_attrs, spec->fore_color, spec->back_color);
       if (val == -1)
-      {
-        logger_write_pos (logger, __FILE__, __LINE__, "setup group.");
-	return -1;
-      }
+	{
+	  logger_write_pos (logger, __FILE__, __LINE__, "setup group.");
+	  return -1;
+	}
     }
 
   return 0;
 }
 
-int 
-hl_groups_get_attr (hl_groups_ptr hl_groups, enum hl_group_kind kind, int *attr)
+int
+hl_groups_get_attr (hl_groups_ptr hl_groups, enum hl_group_kind kind,
+		    int *attr)
 {
   struct hl_group_info *info = lookup_group_info_by_key (hl_groups, kind);
 
@@ -434,7 +439,7 @@ hl_groups_get_attr (hl_groups_ptr hl_groups, enum hl_group_kind kind, int *attr)
   return 0;
 }
 
-int 
+int
 hl_groups_parse_config (hl_groups_ptr hl_groups)
 {
   int token, val;
@@ -471,12 +476,13 @@ hl_groups_parse_config (hl_groups_ptr hl_groups)
 
   val = get_hl_group_kind_from_name (name, &group_kind);
   if (val == -1)
-  {
+    {
 #ifdef LOG_HIGHLIGHT_COMMAND_ERRORS
-    logger_write_pos (logger, __FILE__, __LINE__, "Bad parameter name (\"%s\").", name);
+      logger_write_pos (logger, __FILE__, __LINE__,
+			"Bad parameter name (\"%s\").", name);
 #endif
-    return 1;
-  }
+      return 1;
+    }
 
   if (group_kind < 0)
     {
@@ -497,7 +503,8 @@ hl_groups_parse_config (hl_groups_ptr hl_groups)
       if (token != IDENTIFIER)
 	{
 #ifdef LOG_HIGHLIGHT_COMMAND_ERRORS
-	  logger_write_pos (logger, __FILE__, __LINE__, "Bad parameter name (\"%s\").", get_token ());
+	  logger_write_pos (logger, __FILE__, __LINE__,
+			    "Bad parameter name (\"%s\").", get_token ());
 #endif
 	  return 1;
 	}
@@ -519,7 +526,8 @@ hl_groups_parse_config (hl_groups_ptr hl_groups)
       if (yylex () != '=')
 	{
 #ifdef LOG_HIGHLIGHT_COMMAND_ERRORS
-	  logger_write_pos (logger, __FILE__, __LINE__, "Missing '=' in \"highlight\" command.");
+	  logger_write_pos (logger, __FILE__, __LINE__,
+			    "Missing '=' in \"highlight\" command.");
 #endif
 	  return 1;
 	}
@@ -537,7 +545,9 @@ hl_groups_parse_config (hl_groups_ptr hl_groups)
 	      if (token != IDENTIFIER)
 		{
 #ifdef LOG_HIGHLIGHT_COMMAND_ERRORS
-		  logger_write_pos (logger, __FILE__, __LINE__, "Bad attribute name: \"%s\".", get_token ());
+		  logger_write_pos (logger, __FILE__, __LINE__,
+				    "Bad attribute name: \"%s\".",
+				    get_token ());
 #endif
 		  return 1;
 		}
@@ -545,16 +555,18 @@ hl_groups_parse_config (hl_groups_ptr hl_groups)
 
 	      pair = lookup_attr_pair_by_name (name);
 	      if (!pair)
-	      {
+		{
 #ifdef LOG_HIGHLIGHT_COMMAND_ERRORS
-		  logger_write_pos (logger, __FILE__, __LINE__, "Unknown attribute name");
+		  logger_write_pos (logger, __FILE__, __LINE__,
+				    "Unknown attribute name");
 #endif
-		return 1;
-	      }
+		  return 1;
+		}
 	      if (pair->value == -1)
 		{
 #ifdef LOG_HIGHLIGHT_COMMAND_ERRORS
-		  logger_write_pos (logger, __FILE__, __LINE__, "Unknown attribute name: \"%s\".", name);
+		  logger_write_pos (logger, __FILE__, __LINE__,
+				    "Unknown attribute name: \"%s\".", name);
 #endif
 		  return 1;
 		}
@@ -587,7 +599,8 @@ hl_groups_parse_config (hl_groups_ptr hl_groups)
 	      if (color_spec == NULL)
 		{
 #ifdef LOG_HIGHLIGHT_COMMAND_ERRORS
-		  logger_write_pos (logger, __FILE__, __LINE__, "Unknown color: \"%s\".", name);
+		  logger_write_pos (logger, __FILE__, __LINE__,
+				    "Unknown color: \"%s\".", name);
 #endif
 		  return 1;
 		}
@@ -603,7 +616,9 @@ hl_groups_parse_config (hl_groups_ptr hl_groups)
 
 	    default:
 #ifdef LOG_HIGHLIGHT_COMMAND_ERRORS
-	      logger_write_pos (logger, __FILE__, __LINE__, "Bad token for color (\"%s\").", get_token ());
+	      logger_write_pos (logger, __FILE__, __LINE__,
+				"Bad token for color (\"%s\").",
+				get_token ());
 #endif
 	      return 1;
 	    }
@@ -629,12 +644,12 @@ hl_groups_parse_config (hl_groups_ptr hl_groups)
 	}
     }
 
-  val = setup_group (hl_groups, group_kind, mono_attrs, color_attrs, fg_color, 
+  val = setup_group (hl_groups, group_kind, mono_attrs, color_attrs, fg_color,
 		     bg_color);
   if (val == -1)
-  {
-    return 1;
-  }
+    {
+      return 1;
+    }
 
   return 0;
 }
