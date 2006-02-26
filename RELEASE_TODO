@@ -31,6 +31,7 @@ Bug fixes/improvement for cgdb-0.6.2
 
 Bug fixes/improvement for cgdb-0.6.1
 
+ [ ] is_finished is not set if tgdb_process exists in first return statement
  [x] Add Steve Folta's color patch.
  [x] Fix cgdb.1 to be in release. Also in make install.
  [x] Automatically generate man pages using help2man.
