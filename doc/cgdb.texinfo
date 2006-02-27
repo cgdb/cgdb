@@ -664,8 +664,8 @@ Send a finish command to GDB.
 This will display the current manual in text format, in the 
 @dfn{source window}.
 
-@item :hi @var{group} ctermfg=@var{attributes} ctermfg=@var{color} ctermbg=@var{color} term=@var{attributes}
-@itemx :highlight @var{group} ctermfg=@var{attributes} ctermfg=@var{color} ctermbg=@var{color} term=@var{attributes}
+@item :hi @var{group} cterm=@var{attributes} ctermfg=@var{color} ctermbg=@var{color} term=@var{attributes}
+@itemx :highlight @var{group} cterm=@var{attributes} ctermfg=@var{color} ctermbg=@var{color} term=@var{attributes}
 Set the @var{color} and @var{attributes} for a highlighting group.  The syntax 
 mimics vim's ``highlight'' command.  Possible values for @var{group}, 
 @var{attributes} and @var{color} are available in @ref{Highlighting Groups}.

@@ -666,8 +666,8 @@ noignorecase' turns on case-sensitive searching.
      This will display the current manual in text format, in the
      "source window".
 
-`:hi GROUP ctermfg=ATTRIBUTES ctermfg=COLOR ctermbg=COLOR term=ATTRIBUTES'
-`:highlight GROUP ctermfg=ATTRIBUTES ctermfg=COLOR ctermbg=COLOR term=ATTRIBUTES'
+`:hi GROUP cterm=ATTRIBUTES ctermfg=COLOR ctermbg=COLOR term=ATTRIBUTES'
+`:highlight GROUP cterm=ATTRIBUTES ctermfg=COLOR ctermbg=COLOR term=ATTRIBUTES'
      Set the COLOR and ATTRIBUTES for a highlighting group.  The syntax
      mimics vim's "highlight" command.  Possible values for GROUP,
      ATTRIBUTES and COLOR are available in *Note Highlighting Groups::.
@@ -1500,15 +1500,15 @@ Node: GDB Mode15435
 Node: File Dialog Mode16648
 Node: TTY Mode17935
 Node: Configuring CGDB18304
-Node: Highlighting Groups24140
-Node: Available Highlighting Groups25721
-Node: Available Attributes27343
-Node: Available Colors28440
-Node: Sending I/O to Inferior30245
-Node: Terminal Control Flow32627
-Node: Building CGDB33396
-Node: Copying This Manual35576
-Node: GNU Free Documentation License35811
-Node: Index58219
+Node: Highlighting Groups24136
+Node: Available Highlighting Groups25717
+Node: Available Attributes27339
+Node: Available Colors28436
+Node: Sending I/O to Inferior30241
+Node: Terminal Control Flow32623
+Node: Building CGDB33392
+Node: Copying This Manual35572
+Node: GNU Free Documentation License35807
+Node: Index58215
 
 End Tag Table

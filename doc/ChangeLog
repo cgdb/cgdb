@@ -1,3 +1,7 @@
+2/26/2006 Bob Rossi <bob@brasko.net>
+
+	* cgdb.texinfo (Configuring CGDB): Fix :highlight command.
+
 2/25/2006 Bob Rossi <bob@brasko.net>
 
 	* cgdb.texinfo (Highlighting Groups): Spelling errors.
