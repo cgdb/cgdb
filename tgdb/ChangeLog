@@ -1,5 +1,9 @@
 2/27/2006 Bob Rossi <bob@brasko.net>
 
+	* annotate-two/src/commands.c: Format comments.
+
+2/27/2006 Bob Rossi <bob@brasko.net>
+
 	* annotate-two/src/commands.c: Indent.
 
 version 0.6.0 (01/30/2006):

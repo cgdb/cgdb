@@ -32,19 +32,13 @@
 struct commands
 {
 
-  /**
-   * The current absolute path the debugger is at in the inferior.
-   */
+  /** The current absolute path the debugger is at in the inferior.  */
   struct ibuf *absolute_path;
 
-  /**
-   * The current line number the debugger is at in the inferior.
-   */
+  /** The current line number the debugger is at in the inferior.  */
   struct ibuf *line_number;
 
-  /**
-   * The state of the command context.
-   */
+  /** The state of the command context.  */
   enum COMMAND_STATE cur_command_state;
 
   /**
@@ -53,9 +47,7 @@ struct commands
    */
   int cur_field_num;
 
-  /**
-   * This is a flag to let us know when the 5th field has been hit.
-   */
+  /** This is a flag to let us know when the 5th field has been hit.  */
   int field_5_newline_hit;
 
   /** breakpoint information */
