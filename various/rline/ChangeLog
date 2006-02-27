@@ -1,3 +1,7 @@
+2/27/2006 Bob Rossi <bob@brasko.net>
+
+	* src/rline.c (termios): Add include.
+        
 2/18/2006 Bob Rossi <bob@brasko.net>
   
 	* include/rline.h (rline_resize_terminal_and_redisplay): Add.

@@ -1,10 +1,12 @@
 #include "highlight_groups.h"
 #include "command_lexer.h"
 #include "logger.h"
-#include <ncurses.h>
-#include <term.h>
+#include <curses.h>
 #include <strings.h>
 #include <stdlib.h>
+
+/* term.h prototypes */
+extern int tgetnum();
 
 // internal {{{
 

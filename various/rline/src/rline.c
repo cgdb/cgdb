@@ -16,6 +16,10 @@
 #include <sys/ioctl.h>
 #endif /* HAVE_SYS_IOCTL_H */
 
+#if HAVE_TERMIOS_H
+#include <termios.h>
+#endif /* HAVE_TERMIOS_H */
+
 // includes {{{
 
 #ifdef HAVE_LIBREADLINE
