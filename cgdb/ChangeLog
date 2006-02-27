@@ -1,3 +1,12 @@
+2/26/2006 Bob Rossi <bob@brasko.net>
+
+	* src/highlight_groups.c (UNSPECIFIED_COLOR): Added define.
+	(setup_group): Fix to work with UNSPECIFIED_COLOR.
+	(hl_groups_get_attr): Fix bug where "term" didn't work.
+	(hl_groups_parse_config): Update for UNSPECIFIED_COLOR.
+
+
+
 2/25/2006 Bob Rossi <bob@brasko.net>
 
 	* src/highlight_groups.c: Fixed comments, and spelling errors.

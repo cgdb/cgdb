@@ -8,6 +8,8 @@
 
 // internal {{{
 
+#define UNSPECIFIED_COLOR (-2)
+
 /** This represents all the data for a particular highlighting group. */
 struct hl_group_info
 {
@@ -287,29 +289,56 @@ static int
 setup_group (hl_groups_ptr hl_groups, enum hl_group_kind group,
 	     int mono_attrs, int color_attrs, int fore_color, int back_color)
 {
+  /** Starts creating new colors at 1, and then is incremented each time. */
+  static int next_color_pair = 1;
+  struct hl_group_info *info;
+
   if (!hl_groups)
     return -1;
 
-  /** Starts creating new colors at 1, and then is incremented each time. */
-  static int next_color_pair = 1;
+  info = lookup_group_info_by_key (hl_groups, group);
 
-  struct hl_group_info *info = lookup_group_info_by_key (hl_groups, group);
+  if (!info)
+    return -1;
 
-/* Don't allow -1 to be used in curses mode */
+  if (mono_attrs != UNSPECIFIED_COLOR)
+    info->mono_attrs = mono_attrs;
+  if (color_attrs != UNSPECIFIED_COLOR)
+    info->color_attrs = color_attrs;
+
+  /* The rest of this function sets up the colors, so we can stop here
+   * if color isn't used. */
+  if (!hl_groups->in_color)
+    return 0;
+
+  /* If no colors are specified, we're done. */
+  if (fore_color == UNSPECIFIED_COLOR && back_color == UNSPECIFIED_COLOR)
+    return 0;
+
+  /* Don't allow -1 to be used in curses mode */
 #ifndef NCURSES_VERSION
   if (fore_color < 0 || back_color < 0)
     return 0;
 #endif
 
-  info->mono_attrs = mono_attrs;
-  info->color_attrs = color_attrs;
+  /* If either the foreground or background color is unspecified, we
+   * need to read the other so we don't clobber it. */
+  if (fore_color == UNSPECIFIED_COLOR)
+    {
+      short old_fore_color, old_back_color;
+      pair_content (info->color_pair, &old_fore_color, &old_back_color);
+      fore_color = old_fore_color;
+    }
+  else if (back_color == UNSPECIFIED_COLOR)
+    {
+      short old_fore_color, old_back_color;
+      pair_content (info->color_pair, &old_fore_color, &old_back_color);
+      back_color = old_back_color;
+    }
 
-  /* The rest is setting up the colors, but if the group is already using
-   * the default colors, and we're not changing it, don't consume a color
-   * pair. */
-  if (!hl_groups->in_color)
-    return 0;
-  if (fore_color < 0 && back_color < 0 && info->color_pair != 0)
+  /* If the group is already using the default colors, and we're not changing
+   * it, don't consume a color pair. */
+  if (fore_color < 0 && back_color < 0 && info->color_pair == 0)
     return 0;
 
   /* Allocate a new color pair if the group doesn't have one yet. */
@@ -406,9 +435,8 @@ hl_groups_setup (hl_groups_ptr hl_groups)
     {
       int val;
       const struct default_hl_group_info *spec = &ginfo[i];
-      val =
-	setup_group (hl_groups, spec->kind, spec->mono_attrs,
-		     spec->color_attrs, spec->fore_color, spec->back_color);
+      val = setup_group (hl_groups, spec->kind, spec->mono_attrs,
+			 spec->color_attrs, spec->fore_color, spec->back_color);
       if (val == -1)
 	{
 	  logger_write_pos (logger, __FILE__, __LINE__, "setup group.");
@@ -420,7 +448,7 @@ hl_groups_setup (hl_groups_ptr hl_groups)
 }
 
 int
-hl_groups_get_attr (hl_groups_ptr hl_groups, enum hl_group_kind kind,
+hl_groups_get_attr (hl_groups_ptr hl_groups, enum hl_group_kind kind, 
 		    int *attr)
 {
   struct hl_group_info *info = lookup_group_info_by_key (hl_groups, kind);
@@ -428,13 +456,14 @@ hl_groups_get_attr (hl_groups_ptr hl_groups, enum hl_group_kind kind,
   if (!hl_groups || !info || !attr)
     return -1;
 
-  *attr = info->mono_attrs;
-
   if (!hl_groups->in_color)
-    return 0;
-
-  if (info->color_pair)
-    *attr |= COLOR_PAIR (info->color_pair);
+    *attr = info->mono_attrs;
+  else
+    {
+      *attr = info->color_attrs;
+      if (info->color_pair)
+	*attr |= COLOR_PAIR (info->color_pair);
+    }
 
   return 0;
 }
@@ -444,8 +473,8 @@ hl_groups_parse_config (hl_groups_ptr hl_groups)
 {
   int token, val;
   const char *name;
-  int mono_attrs = A_NORMAL, color_attrs = A_NORMAL;
-  int fg_color = -1, bg_color = -1;
+  int mono_attrs = UNSPECIFIED_COLOR, color_attrs = UNSPECIFIED_COLOR;
+  int fg_color = UNSPECIFIED_COLOR, bg_color = UNSPECIFIED_COLOR;
   int key, attrs, color;
   const struct color_info *color_spec;
   enum hl_group_kind group_kind;
@@ -570,7 +599,7 @@ hl_groups_parse_config (hl_groups_ptr hl_groups)
 #endif
 		  return 1;
 		}
-	      mono_attrs |= pair->value;
+	      attrs |= pair->value;
 
 	      /* Are there more attributes? */
 	      token = yylex ();
@@ -579,9 +608,19 @@ hl_groups_parse_config (hl_groups_ptr hl_groups)
 	      token = yylex ();
 	    }
 	  if (key == TERM)
-	    mono_attrs |= attrs;
+	    {
+	      if (mono_attrs == UNSPECIFIED_COLOR)
+		mono_attrs = attrs;
+	      else
+		mono_attrs |= attrs;
+	    }
 	  else
-	    color_attrs |= attrs;
+	    {
+	      if (color_attrs == UNSPECIFIED_COLOR)
+		color_attrs = attrs;
+	      else
+		color_attrs |= attrs;
+	    }
 	  break;
 
 	case FG:
@@ -610,7 +649,12 @@ hl_groups_parse_config (hl_groups_ptr hl_groups)
 		{
 		  color = color_spec->nr8Color;
 		  if (color_spec->nr8ForegroundBold)
-		    color_attrs |= A_BOLD;
+		    {
+		      if (color_attrs == UNSPECIFIED_COLOR)
+			color_attrs = A_BOLD;
+		      else
+			color_attrs |= A_BOLD;
+		    }
 		}
 	      break;
 
