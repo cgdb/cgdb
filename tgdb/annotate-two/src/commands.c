@@ -10,6 +10,14 @@
 #include <string.h>
 #endif /* HAVE_STRING_H */
 
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif /* HAVE_SYS_TYPES_H */
+
+#if HAVE_REGEX_H
+#include <regex.h>
+#endif /* HAVE_REGEX_H */
+
 /* Local includes */
 #include "commands.h"
 #include "data.h"
@@ -46,9 +54,6 @@ struct commands
    * It keeps track of the current field we are in.
    */
   int cur_field_num;
-
-  /** This is a flag to let us know when the 5th field has been hit.  */
-  int field_5_newline_hit;
 
   /** breakpoint information */
   //@{
@@ -144,7 +149,6 @@ commands_initialize (void)
 
   c->cur_command_state = VOID_COMMAND;
   c->cur_field_num = 0;
-  c->field_5_newline_hit = 0;
 
   c->breakpoint_list = tgdb_list_init ();
   c->breakpoint_string = ibuf_init ();
@@ -336,7 +340,10 @@ commands_parse_source (struct commands *c,
   return 0;
 }
 
-/* Unfortunatly, the line that this function has to parse is completly 
+/** 
+ * Parse a breakpoint that GDB passes back when annotate=2 is set.
+ * 
+ * Unfortunatly, the line that this function has to parse is completly 
  * ambiguous. GDB does not output a line that can be read in a 
  * non-ambiguous way. Therefore, TGDB tries its best to read the line 
  * properly. The line is in this format.
@@ -345,88 +352,52 @@ commands_parse_source (struct commands *c,
  *
  * so, TGDB can parser the ':number' part without a problem. However,
  * it may not be able to get function name and filename correctly. If
- * the filename contains ' at ' then, it TGDB will stop prematurly.
+ * the filename contains ' at ' in it, then TGDB will stop prematurly.
  */
-static void
+static int
 parse_breakpoint (struct commands *c)
 {
-  unsigned long size = ibuf_length (c->breakpoint_string);
-  char copy[size + 1];
-  char *cur = copy + size, *fcur;
-  struct ibuf *fname, *file, *line;
-  static char *info_ptr;
+#define BP_REGEX_SIZE (4)
+  char *info_ptr;
+  regex_t regex_bp;
+  static const char *regex = "[io]n (.*) at (.*):([0-9]+)";
+  int val;
+  size_t nmatch = BP_REGEX_SIZE;
+  regmatch_t pmatch[BP_REGEX_SIZE];
+  char *matches[BP_REGEX_SIZE] = {NULL, NULL, NULL, NULL};
+  int cur;
   struct tgdb_breakpoint *tb;
 
-  fname = ibuf_init ();
-  file = ibuf_init ();
-  line = ibuf_init ();
-
   info_ptr = ibuf_get (c->breakpoint_string);
+  if (!info_ptr) /* This should never really happen */
+    return -1;
 
-  strncpy (copy, info_ptr, size + 1);	/* modify local copy */
+  /* Compile the regular expression */
+  val = regcomp(&regex_bp, regex, REG_EXTENDED);
+  if (val != 0)
+    return -1;
 
-  /* Check to see if this is a watchpoint, if it is, 
-   * don't parse for a breakpoint.
-   */
-  if (strstr (copy, " at ") == NULL)
-    return;
-
-  /* This loop starts at the end and traverses backwards, until it finds
-   * the ':'. Then, it knows the file number for sure. */
-  while (cur != copy)
+  val = regexec(&regex_bp, info_ptr, nmatch, pmatch, 0);
+  if (val != 0)
     {
-      if ((*cur) == ':')
-	{
-	  int length = strlen (cur + 1);
-	  char *temp = xmalloc (sizeof (char) * (length + 1));
-
-	  if (sscanf (cur + 1, "%s", temp) != 1)
-	    logger_write_pos (logger, __FILE__, __LINE__,
-			      "Could not get line number");
-
-	  ibuf_add (line, temp);
-	  free (temp);
-	  temp = NULL;
-
-	  *cur = '\0';
-	  break;		/* in case of multiple ':' in the line */
-	}
-
-      --cur;
-    }				/* end while */
-
-  /* Assertion: The string to parse now looks like '[io]n .* at .*' */
-  if (!
-      ((copy[0] == 'i' || copy[0] == 'o') && copy[1] == 'n'
-       && copy[2] == ' '))
-    {
-      logger_write_pos (logger, __FILE__, __LINE__,
-			"Could not scan function and file name\n"
-			"\tWas the program compiled with debug info?");
+      regfree(&regex_bp);
+      return -1;
     }
 
-  fcur = &copy[3];
-
-  /* Assertion: The string to parse now looks like '.* at .*' */
-  if ((cur = strstr (fcur, " at ")) == NULL)
-    {
-      logger_write_pos (logger, __FILE__, __LINE__,
-			"Could not scan function and file name\n"
-			"\tWas the program compiled with debug info?");
-    }
-
-  *cur = '\0';
-  ibuf_add (fname, fcur);
-
-  /* Assertion: The string to parse now looks like ' at .*' */
-  cur += 4;
-  /* Assertion: The string to parse now looks like '.*' */
-  ibuf_add (file, cur);
+  /* Get the whole match, function, filename and number name */
+  for (cur = 0; cur < BP_REGEX_SIZE; ++cur)
+    if (pmatch[cur].rm_so != -1)
+      {
+	int size = pmatch[cur].rm_eo-pmatch[cur].rm_so;
+	matches[cur] = xmalloc (sizeof (char)*(size)+1);
+	strncpy (matches[cur], &info_ptr[pmatch[cur].rm_so], size);
+	matches[cur][size] = 0;
+      }
 
   tb = (struct tgdb_breakpoint *) xmalloc (sizeof (struct tgdb_breakpoint));
-  tb->file = strdup (ibuf_get (file));
-  tb->funcname = strdup (ibuf_get (fname));
-  sscanf (ibuf_get (line), "%d", &tb->line);
+  tb->funcname = matches[1];
+  tb->file = matches[2];
+  tb->line = atoi (matches[3]);
 
   if (c->breakpoint_enabled == TRUE)
     tb->enabled = 1;
@@ -435,16 +406,14 @@ parse_breakpoint (struct commands *c)
 
   tgdb_list_append (c->breakpoint_list, tb);
 
-  ibuf_free (fname);
-  fname = NULL;
+  /* Matches 1 && 2 are freed by client. */
+  free (matches[0]); matches[0] = NULL;
+  free (matches[3]); matches[3] = NULL;
 
-  ibuf_free (file);
-  file = NULL;
+  regfree(&regex_bp);
 
-  ibuf_free (line);
-  line = NULL;
+  return 0;
 }
-
 
 void
 commands_set_state (struct commands *c,
@@ -457,14 +426,17 @@ commands_set_state (struct commands *c,
     case RECORD:
       if (ibuf_length (c->breakpoint_string) > 0)
 	{
-	  parse_breakpoint (c);
+	  if (parse_breakpoint (c) == -1)
+	    logger_write_pos (logger, __FILE__, __LINE__, "parse_breakpoint error");
+
 	  ibuf_clear (c->breakpoint_string);
 	  c->breakpoint_enabled = FALSE;
 	}
       break;
     case BREAKPOINT_TABLE_END:
       if (ibuf_length (c->breakpoint_string) > 0)
-	parse_breakpoint (c);
+	if (parse_breakpoint (c) == -1)
+	  logger_write_pos (logger, __FILE__, __LINE__, "parse_breakpoint error");
       {
 	struct tgdb_response *response = (struct tgdb_response *)
 	  xmalloc (sizeof (struct tgdb_response));
@@ -510,10 +482,7 @@ commands_set_field_num (struct commands *c, int field_num)
   /* clear buffer and start over */
   if (c->breakpoint_table && c->cur_command_state == FIELD
       && c->cur_field_num == 5)
-    {
-      ibuf_clear (c->breakpoint_string);
-      c->field_5_newline_hit = 0;
-    }
+    ibuf_clear (c->breakpoint_string);
 }
 
 enum COMMAND_STATE
@@ -828,12 +797,9 @@ commands_process (struct commands *c, char a, struct tgdb_list *list)
     }
   else if (c->breakpoint_table && c->cur_command_state == FIELD
 	   && c->cur_field_num == 5)
-    {				/* the file name and line num */
-      if (a == '\n' || a == '\r')
-	c->field_5_newline_hit = 1;
-
-      if (!c->field_5_newline_hit)
-	ibuf_addchar (c->breakpoint_string, a);
+    { /* the file name and line num */
+      if (a != '\n' || a != '\r')
+        ibuf_addchar (c->breakpoint_string, a);
     }
   else if (c->breakpoint_table && c->cur_command_state == FIELD
 	   && c->cur_field_num == 3 && a == 'y')

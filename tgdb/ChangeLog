@@ -1,5 +1,14 @@
 2/27/2006 Bob Rossi <bob@brasko.net>
 
+	* annotate-two/src/commands.c (sys/types.h, regex.h): Added defines.
+	(struct commands): Remove field_5_newline_hit.
+	(parse_breakpoint): Modify comment, and completly re-write function.
+	(commands_set_state): Check parse_breakpoint return value.
+	(commands_set_field_num): Remove use of field_5_newline_hit.
+	(commands_process): Ditto. Do not add newlines for breakpoint info.
+
+2/27/2006 Bob Rossi <bob@brasko.net>
+
 	* annotate-two/src/commands.c: Format comments.
 
 2/27/2006 Bob Rossi <bob@brasko.net>
