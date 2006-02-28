@@ -32,7 +32,7 @@ Bug fixes/improvement for cgdb-0.6.2
 
 Bug fixes/improvement for cgdb-0.6.1
 
- [ ] is_finished is not set if tgdb_process exists in first return statement
+ [x] is_finished is not set if tgdb_process exists in first return statement
  [x] Add Steve Folta's color patch.
  [x] Fix cgdb.1 to be in release. Also in make install.
  [x] Automatically generate man pages using help2man.
@@ -40,7 +40,7 @@ Bug fixes/improvement for cgdb-0.6.1
  [x] Document the new Highlight command.
  [x] Test the new Highlight command.
  [x] Logo message could be displayed to have <ESC>:help in window
- [ ] Breakpoint's made in thread's do not apper in browser, this is
+ [x] Breakpoint's made in thread's do not apper in browser, this is
      because there is a newline in the field 5 info:
     0xb6f4e552 (\n)
     (\032)(\032)field 5(\n)

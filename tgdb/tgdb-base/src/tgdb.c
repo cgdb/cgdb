@@ -970,6 +970,45 @@ tgdb_get_quit_command (struct tgdb *tgdb, int *tgdb_will_quit)
   return 0;
 }
 
+/**
+ * A helper function that simply checks to see if TGDB is busy or not.
+ *
+ * \param tgdb
+ * A TGDB context to operate on
+ *
+ * \param is_finished
+ * Will return as 0 if not finished, and 1 if finished.
+ *
+ * \return
+ * 0 on success or -1 on error
+ */
+static int
+is_tgdb_finished (struct tgdb *tgdb, int *is_finished)
+{
+  int is_busy;
+  int val;
+
+  if (!tgdb)
+    return -1;
+
+  if (!is_finished) /* If they don't need to know, it's OK */
+    return 0;
+
+  val = tgdb_is_busy (tgdb, &is_busy);
+  if (val == -1)
+    {
+      logger_write_pos (logger, __FILE__, __LINE__, "tgdb_is_busy failed");
+      return -1;
+    }
+
+  if (is_busy)
+    *is_finished = 0;
+  else
+    *is_finished = 1;
+
+  return 0;
+}
+
 size_t
 tgdb_process (struct tgdb *tgdb, char *buf, size_t n, int *is_finished)
 {
@@ -992,6 +1031,14 @@ tgdb_process (struct tgdb *tgdb, char *buf, size_t n, int *is_finished)
   if (tgdb->last_gui_command != NULL)
     {
       int ret;
+
+      if (is_tgdb_finished (tgdb, is_finished) == -1)
+	{
+	  logger_write_pos (logger, __FILE__, __LINE__, 
+			    "is_tgdb_finished failed");
+	  return -1;
+	}
+
       if (tgdb->show_gui_commands)
 	{
 	  strcpy (buf, tgdb->last_gui_command);
@@ -1105,22 +1152,10 @@ tgdb_finish:
    */
   tgdb->command_list_iterator = tgdb_list_get_first (tgdb->command_list);
 
-  if (is_finished)
+  if (is_tgdb_finished (tgdb, is_finished) == -1)
     {
-      int is_busy;
-      int val;
-      val = tgdb_is_busy (tgdb, &is_busy);
-      if (val == -1)
-        {
-          logger_write_pos (logger, __FILE__, __LINE__,
-			    "tgdb_handle_signals failed");
-	  return -1;
-	}
-
-      if (is_busy)
-	*is_finished = 0;
-      else
-	*is_finished = 1;
+      logger_write_pos (logger, __FILE__, __LINE__, "is_tgdb_finished failed");
+      return -1;
     }
 
   return buf_size;

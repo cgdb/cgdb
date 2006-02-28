@@ -1,5 +1,10 @@
 2/27/2006 Bob Rossi <bob@brasko.net>
 
+	* tgdb-base/src/tgdb.c (is_tgdb_finished): Added.
+	(tgdb_process): Set is_finished parameter.
+
+2/27/2006 Bob Rossi <bob@brasko.net>
+
 	* annotate-two/src/commands.c (sys/types.h, regex.h): Added defines.
 	(struct commands): Remove field_5_newline_hit.
 	(parse_breakpoint): Modify comment, and completly re-write function.
