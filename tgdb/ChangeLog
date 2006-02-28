@@ -1,5 +1,12 @@
 2/27/2006 Bob Rossi <bob@brasko.net>
 
+	* annotate-two/src/commands.c (struct commands): Added regex_bp field.
+	(commands_initialize): Init new field.
+	(commands_shutdown): Destroy new field.
+	(parse_breakpoint): Use field, instead of recompiling regex.
+
+2/27/2006 Bob Rossi <bob@brasko.net>
+
 	* tgdb-base/src/tgdb.c (is_tgdb_finished): Added.
 	(tgdb_process): Set is_finished parameter.
 

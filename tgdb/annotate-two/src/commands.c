@@ -73,6 +73,9 @@ struct commands
   /** ???  */
   int breakpoint_started;
 
+  /* The regular expression matching the breakpoint GDB output */
+  regex_t regex_bp;
+
   //@}
 
   /** 'info source' information */
@@ -143,6 +146,7 @@ struct commands *
 commands_initialize (void)
 {
   struct commands *c = (struct commands *) xmalloc (sizeof (struct commands));
+  const char *regex = "[io]n (.*) at (.*):([0-9]+)";
 
   c->absolute_path = ibuf_init ();
   c->line_number = ibuf_init ();
@@ -155,6 +159,8 @@ commands_initialize (void)
   c->breakpoint_table = 0;
   c->breakpoint_enabled = FALSE;
   c->breakpoint_started = FALSE;
+  if (regcomp (&c->regex_bp, regex, REG_EXTENDED) != 0)
+    return NULL;
 
   c->info_source_string = ibuf_init ();
   c->info_source_relative_path = ibuf_init ();
@@ -229,6 +235,7 @@ commands_shutdown (struct commands *c)
 
   ibuf_free (c->breakpoint_string);
   c->breakpoint_string = NULL;
+  regfree(&c->regex_bp);
 
   ibuf_free (c->info_source_string);
   c->info_source_string = NULL;
@@ -359,28 +366,20 @@ parse_breakpoint (struct commands *c)
 {
 #define BP_REGEX_SIZE (4)
   char *info_ptr;
-  regex_t regex_bp;
-  static const char *regex = "[io]n (.*) at (.*):([0-9]+)";
-  int val;
   size_t nmatch = BP_REGEX_SIZE;
   regmatch_t pmatch[BP_REGEX_SIZE];
   char *matches[BP_REGEX_SIZE] = {NULL, NULL, NULL, NULL};
-  int cur;
+  int cur, val;
   struct tgdb_breakpoint *tb;
 
   info_ptr = ibuf_get (c->breakpoint_string);
   if (!info_ptr) /* This should never really happen */
     return -1;
 
-  /* Compile the regular expression */
-  val = regcomp(&regex_bp, regex, REG_EXTENDED);
-  if (val != 0)
-    return -1;
-
-  val = regexec(&regex_bp, info_ptr, nmatch, pmatch, 0);
+  val = regexec(&c->regex_bp, info_ptr, nmatch, pmatch, 0);
   if (val != 0)
     {
-      regfree(&regex_bp);
+      logger_write_pos (logger, __FILE__, __LINE__, "regexec failed");
       return -1;
     }
 
@@ -409,8 +408,6 @@ parse_breakpoint (struct commands *c)
   /* Matches 1 && 2 are freed by client. */
   free (matches[0]); matches[0] = NULL;
   free (matches[3]); matches[3] = NULL;
-
-  regfree(&regex_bp);
 
   return 0;
 }
