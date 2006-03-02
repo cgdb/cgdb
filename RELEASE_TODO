@@ -32,6 +32,9 @@ Bug fixes/improvement for cgdb-0.6.2
 
 Bug fixes/improvement for cgdb-0.6.1
 
+ [ ] Tab completion is broken in CGDB when using gnat 3.15p
+     If you tab on 'r -e E' you will get back 'server complete r -e E',
+     instead of nothing.
  [x] is_finished is not set if tgdb_process exists in first return statement
  [x] Add Steve Folta's color patch.
  [x] Fix cgdb.1 to be in release. Also in make install.
