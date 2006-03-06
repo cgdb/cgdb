@@ -294,7 +294,7 @@ get_gdb_col (void)
   return 0;
 }
 
-static int
+int
 get_gdb_height (void)
 {
   int window_size = ((screen_size.ws_row / 2) - window_height_shift - 1);
@@ -1659,6 +1659,25 @@ if_change_winminheight (int value)
 
   interface_winminheight = value;
   if_layout ();
+
+  return 0;
+}
+
+int
+if_clear_line ()
+{
+  int width = get_gdb_width ();
+  int i;
+  char line[width+3];
+  line[0] = '\r';
+  
+  for (i = 1; i <= width; ++i)
+    line[i] = ' ';
+
+  line[i] = '\r';
+  line[i+1] = '\0';
+
+  if_print (line);
 
   return 0;
 }

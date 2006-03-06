@@ -263,6 +263,19 @@ int rline_rl_complete (struct rline *rline, struct tgdb_list *list, display_call
  */
 int rline_resize_terminal_and_redisplay (struct rline *rline, int rows, int cols);
 
+/**
+ * Get's the value of rl_completion_query_items.
+ *
+ * \param rline
+ * The readline context to operate on.
+ * 
+ * \param query_items
+ *
+ * \return
+ * The value of rl_completion_query_items, if rline is NULL then -1.
+ */
+int rline_get_rl_completion_query_items (struct rline *rline);
+
 //@}
 // }}}
 

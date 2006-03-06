@@ -197,5 +197,22 @@ void if_highlight_sviewer ( enum tokenizer_language_support l );
  */
 int if_change_winminheight ( int value );
 
+/**
+ * This get's the height size of the GDB window.
+ *
+ * \return
+ * The size of the window.
+ */
+int get_gdb_height (void);
+
+/**
+ * Will clear the last line in the GDB window. This function is slightly slow
+ * as it writes spaces all the way, if it's necessary or not.
+ *
+ * \return
+ * 0 on success or -1 on error
+ */
+int if_clear_line (void);
+
 #endif
 

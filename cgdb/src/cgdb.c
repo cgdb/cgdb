@@ -74,6 +74,7 @@
 #include "rline.h"
 #include "ibuf.h"
 #include "usage.h"
+#include "sys_util.h"
 
 /* --------------- */
 /* Local Variables */
@@ -103,6 +104,11 @@ int resize_pipe[2] = { -1, -1 };
 
 /* Readline interface */
 static struct rline *rline;
+/**
+ * If this is 1, then CGDB is performing a tab completion in the GDB window.
+ * When this is true, there can be no data passed to readline. The completion
+ * must be displayed to the user first.
+ */
 static int is_tab_completing = 0;
 
 /* Current readline line. If the user enters 'b ma\<NL>in<NL>', where 
@@ -127,6 +133,56 @@ static struct ibuf *current_line = NULL;
  * can be set back when the user has finished entering the line.
  */
 static char *rline_last_prompt = NULL;
+
+/** 
+ * Represents all the different states that can be reached while displaying
+ * the tab completion information to the user.
+ */
+enum tab_completion_state
+{
+  /** Nothing has been done yet */
+  TAB_COMPLETION_START,
+  /** The query possibilities message was issued, and waiting for response */
+  TAB_COMPLETION_QUERY_POSSIBILITIES,
+  /** Displaying the tab completion */
+  TAB_COMPLETION_COMPLETION_DISPLAY,
+  /** Query the user to continue tab completion, and waiting for response */
+  TAB_COMPLETION_QUERY_PAGER,
+  /** All done */
+  TAB_COMPLETION_DONE
+};
+
+/**
+ * A context needed to allow the displaying of tab completion to take place. 
+ * Readline calls back into CGDB with the tab completion information. CGDB can
+ * not simply display all the information to the user because the displaying of
+ * the tab completion data can be interactive (and is by default). So, this 
+ * context keeps track of what has been displayed to the user, and what needs
+ * to be displayed while CGDB get's input from the user.
+ */
+typedef struct tab_completion_ctx
+{
+  /** All of the possible completion matches, valid from [0,num_matches]. */
+  char **matches;
+  /** The number of completion matches in the 'matches' field. */
+  int num_matches;
+  /** The longest line in the 'matches' field */
+  int max_length;
+
+  /** These variables changed based on the state of this object */
+
+  /** Total number of lines printed so far. */
+  int total;
+  /** Total number of lines printed so far since last pager. */
+  int lines;
+  /** The current tab completion state */
+  enum tab_completion_state state;
+} *tab_completion_ptr;
+
+/** 
+ * The current tab completion display context. 
+ * If non-null, currently doing a display */
+static tab_completion_ptr completion_ptr = NULL;
 
 /* Original terminal attributes */
 static struct termios term_attributes;
@@ -268,6 +324,212 @@ tab_completion (int a, int b)
 }
 
 /**
+ * Create a tab completion context.
+ *
+ * \param matches
+ * See tab_completion field documentation
+ * 
+ * \param num_matches
+ * See tab_completion field documentation
+ *
+ * \param max_length
+ * See tab_completion field documentation
+ *
+ * \return
+ * The next context, or NULL on error.
+ */
+static tab_completion_ptr
+tab_completion_create (char **matches, int num_matches, int max_length)
+{
+  int i;
+  tab_completion_ptr comptr;
+
+  comptr = (tab_completion_ptr) xmalloc (sizeof (struct tab_completion_ctx));
+
+  comptr->matches = xmalloc (sizeof (char *) * (num_matches + 1));
+  for (i = 0; i <= num_matches; ++i)
+    comptr->matches[i] = xstrdup (matches[i]);
+
+  comptr->num_matches = num_matches;
+  comptr->max_length = max_length;
+  comptr->total = 1;
+  comptr->lines = 0;
+  comptr->state = TAB_COMPLETION_START;
+
+  return comptr;
+}
+
+/**
+ * Destroy the tab completion context.
+ *
+ * \param comptr
+ * This object to destroy.
+ */
+static void
+tab_completion_destroy (tab_completion_ptr comptr)
+{
+  int i;
+
+  if (!comptr)
+    return;
+
+  if (comptr->matches == 0)
+    return;
+
+  for (i = 0; i <= comptr->num_matches; ++i)
+    {
+      free (comptr->matches[i]);
+      comptr->matches[i] = NULL;
+    }
+
+  free (comptr->matches);
+  comptr->matches = NULL;
+
+  free (comptr);
+  comptr = NULL;
+}
+
+/**
+ * Get a yes or no from the user.
+ *
+ * \param key
+ * The key that the user pressed
+ *
+ * \param for_pager
+ * Will be non-zero if this is for the pager, otherwise 0.
+ *
+ * \return
+ * 0 for no, 1 for yes, 2 for single line yes, -1 for nothing.
+ */
+static int
+cgdb_get_y_or_n (int key, int for_pager)
+{
+  if (key == 'y' || key == 'Y' || key == ' ')
+    return 1;
+  if (key == 'n' || key == 'N')
+    return 0;
+  if (for_pager && (key == '\r' || key == '\n' || key == CGDB_KEY_CTRL_M))
+    return 2;
+  if (for_pager && (key == 'q' || key == 'Q'))
+    return 0;
+  if (key == CGDB_KEY_CTRL_G)
+    return 0;
+
+  return -1;
+}
+
+/**
+ * The goal of this function is to display the tab completion information
+ * to the user in an asychronous and potentially interactive manner.
+ *
+ * It will output to the screen as much as can be until user input is needed. 
+ * If user input is needed, then this function must stop, and wait until 
+ * that data has been recieved.
+ *
+ * If this function is called a second time with the same completion_ptr
+ * parameter, it will continue outputting the tab completion data from
+ * where it left off.
+ *
+ * \param completion_ptr
+ * The tab completion data to output to the user
+ *
+ * \param key
+ * The key the user wants to pass to the query command that was made.
+ * If -1, then this is assummed to be the first time this function has been
+ * called.
+ *
+ * \return
+ * 0 on success or -1 on error
+ */
+static int
+handle_tab_completion_request (tab_completion_ptr comptr, int key)
+{
+  int query_items;
+  int gdb_window_size;
+
+  if (!comptr)
+    return -1;
+
+  query_items = rline_get_rl_completion_query_items (rline);
+  gdb_window_size = get_gdb_height ();
+
+  if (comptr->state == TAB_COMPLETION_START)
+    {
+      if_print ("\n");
+
+      if (query_items > 0 && comptr->num_matches >= query_items)
+	{
+	  if_print_message ("Display all %d possibilities? (y or n)\n",
+		   comptr->num_matches);
+	  comptr->state = TAB_COMPLETION_QUERY_POSSIBILITIES;
+	  return 0;
+	}
+
+      comptr->state = TAB_COMPLETION_COMPLETION_DISPLAY;
+    }
+
+  if (comptr->state == TAB_COMPLETION_QUERY_POSSIBILITIES)
+    {
+      int val = cgdb_get_y_or_n (key, 0);
+      if (val == 1)
+	comptr->state = TAB_COMPLETION_COMPLETION_DISPLAY;
+      else if (val == 0)
+	comptr->state = TAB_COMPLETION_DONE;
+      else
+	return 0;		/* stay at the same state */
+    }
+
+  if (comptr->state == TAB_COMPLETION_QUERY_PAGER)
+    {
+      int i = cgdb_get_y_or_n (key, 1);
+      if_clear_line (); /* Clear the --More-- */
+      if (i == 0)
+	comptr->state = TAB_COMPLETION_DONE;
+      else if (i == 2)
+      {
+	comptr->lines--;
+	comptr->state = TAB_COMPLETION_COMPLETION_DISPLAY;
+      }
+      else
+      {
+	comptr->lines = 0;
+	comptr->state = TAB_COMPLETION_COMPLETION_DISPLAY;
+      }
+    }
+
+  if (comptr->state == TAB_COMPLETION_COMPLETION_DISPLAY)
+    {
+      for (; comptr->total <= comptr->num_matches; comptr->total++)
+	{
+	  if_print (comptr->matches[comptr->total]);
+	  if_print ("\n");
+
+	  comptr->lines++;
+	  if (comptr->lines >= (gdb_window_size - 1) &&
+	      comptr->total < comptr->num_matches)
+	    {
+	      if_print ("--More--");
+	      comptr->state = TAB_COMPLETION_QUERY_PAGER;
+	      comptr->total++;
+	      return 0;
+	    }
+	}
+
+      comptr->state = TAB_COMPLETION_DONE;
+    }
+
+  if (comptr->state == TAB_COMPLETION_DONE)
+    {
+      tab_completion_destroy (completion_ptr);
+      completion_ptr = NULL;
+      is_tab_completing = 0;
+      rline_rl_forced_update_display (rline);
+    }
+
+  return 0;
+}
+
+/**
  * This is the function responsible for display the readline completions when there
  * is more than 1 item to complete. Currently it prints 1 per line.
  */
@@ -275,13 +537,15 @@ static void
 readline_completion_display_func (char **matches, int num_matches,
 				  int max_length)
 {
-  int i;
-  if_print ("\n");
-  for (i = 1; i <= num_matches; ++i)
-    {
-      if_print (matches[i]);
-      if_print ("\n");
-    }
+  /* Create the tab completion item, and attempt to display it to the user */
+  completion_ptr = tab_completion_create (matches, num_matches, max_length);
+  if (!completion_ptr)
+    logger_write_pos (logger, __FILE__, __LINE__,
+		      "tab_completion_create error\n");
+
+  if (handle_tab_completion_request (completion_ptr, -1) == -1)
+    logger_write_pos (logger, __FILE__, __LINE__,
+		      "handle_tab_completion_request error\n");
 }
 
 int
@@ -294,7 +558,13 @@ do_tab_completion (struct tgdb_list *list)
 			"rline_rl_complete error\n");
       return -1;
     }
-  is_tab_completing = 0;
+
+  /** 
+   * If completion_ptr is non-null, then this means CGDB still has to display
+   * the completion to the user. is_tab_completing can not be turned off until
+   * the completions are displayed to the user. */
+  if (!completion_ptr)
+    is_tab_completing = 0;
 
   return 0;
 }
@@ -470,7 +740,6 @@ static int
 start_gdb (int argc, char *argv[])
 {
   tgdb_request_ptr request_ptr;
-  //int val;
 
   tgdb = tgdb_initialize (debugger_path, argc, argv, &gdb_fd, &tty_fd);
   if (tgdb == NULL)
@@ -530,37 +799,39 @@ user_input (void)
       return -1;
     }
 
-  /* Process the key */
-  switch ((val = if_input (key)))
-    {
-    case 1:
-    case 2:
-      if (kui_term_is_cgdb_key (key))
-	{
-	  char *seqbuf = (char *) kui_manager_get_raw_data (kui_ctx);
+  val = if_input (key);
 
-	  if (seqbuf == NULL)
-	    {
-	      logger_write_pos (logger, __FILE__, __LINE__,
-				"input_get_last_seq error");
-	      return -1;
-	    }
-	  else
-	    {
-	      int length = strlen (seqbuf), i;
-	      for (i = 0; i < length; i++)
-		send_key (val, seqbuf[i]);
-	    }
+  if (val == -1)
+    {
+      logger_write_pos (logger, __FILE__, __LINE__, "if_input error");
+      return -1;
+    }
+  else if (val != 1 && val != 2)
+    return 0;
+
+  if (val == 1 && completion_ptr)
+    return handle_tab_completion_request (completion_ptr, key);
+
+  /* Process the key */
+  if (kui_term_is_cgdb_key (key))
+    {
+      char *seqbuf = (char *) kui_manager_get_raw_data (kui_ctx);
+
+      if (seqbuf == NULL)
+	{
+	  logger_write_pos (logger, __FILE__, __LINE__,
+			    "kui_manager_get_raw_data error");
+	  return -1;
 	}
       else
-	send_key (val, key);
-
-      break;
-    case -1:
-      return -1;
-    default:
-      break;
+	{
+	  int length = strlen (seqbuf), i;
+	  for (i = 0; i < length; i++)
+	    send_key (val, seqbuf[i]);
+	}
     }
+  else
+    send_key (val, key);
 
   return 0;
 }
@@ -835,7 +1106,8 @@ gdb_input ()
 	  tgdb_process_command (tgdb, request);
 	  /* This is the first case */
 	}
-      else
+      /** If the user is currently completing, do not update the prompt */
+      else if (!completion_ptr)
 	{
 	  int update = 1, ret_val;
 
@@ -998,8 +1270,13 @@ main_loop (void)
       FD_SET (gdb_fd, &rset);
       FD_SET (tty_fd, &rset);
       FD_SET (resize_pipe[0], &rset);
-      FD_SET (slavefd, &rset);
-      FD_SET (masterfd, &rset);
+
+      /* No readline activity allowed while displaying tab completion */
+      if (!is_tab_completing)
+        {
+	  FD_SET (slavefd, &rset);
+	  FD_SET (masterfd, &rset);
+	}
 
       /* Wait for input */
       if (select (max + 1, &rset, NULL, NULL, NULL) == -1)
@@ -1016,7 +1293,7 @@ main_loop (void)
 
       /* Input received through the pty:  Handle it 
        * Wrote to masterfd, now slavefd is ready, tell readline */
-      if (!is_tab_completing && FD_ISSET (slavefd, &rset))
+      if (FD_ISSET (slavefd, &rset))
 	rline_rl_callback_read_char (rline);
 
       /* Input received through the pty:  Handle it

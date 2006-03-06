@@ -1,3 +1,12 @@
+3/05/2006 Bob Rossi <bob@brasko.net>
+
+	* include/rline.h (rline_get_rl_completion_query_items): Added.
+	* src/rline.c (struct rline): Added field
+	rline_rl_completion_query_items.
+	(rline_initialize): Init new field. Set rl_completion_query_items to
+	-1.
+	(rline_get_rl_completion_query_items): Added.
+
 2/27/2006 Bob Rossi <bob@brasko.net>
 
 	* src/rline.c (termios): Add include.

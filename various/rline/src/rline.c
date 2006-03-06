@@ -64,6 +64,12 @@ struct rline
 
   /* The user defined tab completion function */
   rl_command_func_t *rline_rl_last_func;
+
+  /* The value of rl_completion_query_items before its set to -1.
+   * It is set to -1 so that readline will not attempt to ask "y or no",
+   * since that particular functionality of readline does not work with
+   * the alternative interface. */
+  int rline_rl_completion_query_items;
 };
 
 static void custom_deprep_term_function () {}
@@ -94,6 +100,7 @@ rline_initialize (int slavefd, command_cb *command, completion_cb *completion)
 
   rline->tab_completion = completion;
   rline->rline_rl_last_func = NULL;
+  rline->rline_rl_completion_query_items = rl_completion_query_items;
 
   rl_instream = rline->input;
   rl_outstream = rline->output;
@@ -124,7 +131,7 @@ rline_initialize (int slavefd, command_cb *command, completion_cb *completion)
   /* These variables are here to make sure readline doesn't 
    * attempt to query the user to determine if it wants more input.
    */
-  rl_completion_query_items = 90000000;
+  rl_completion_query_items = -1;
   rl_variable_bind ("page-completions", "0");
 
   return rline;
@@ -389,6 +396,15 @@ rline_resize_terminal_and_redisplay (struct rline *rline, int rows, int cols)
 
   rl_resize_terminal ();
   return 0;
+}
+
+int 
+rline_get_rl_completion_query_items (struct rline *rline)
+{
+  if (!rline)
+    return -1;  
+
+  return rline->rline_rl_completion_query_items;
 }
 
 //@}

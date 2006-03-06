@@ -1,3 +1,22 @@
+3/05/2006 Bob Rossi <bob@brasko.net>
+
+	* include/interface.h (get_gdb_height, if_clear_line): Added proto's.
+	* src/interface.c (get_gdb_height): Removed static keyword.
+	(if_clear_line): Added definition.
+	* src/cgdb.c (sys_util.h): Added include.
+	(is_tab_completing): Add comment.
+	(enum tab_completion_state, struct tab_completion_ctx): Added types.
+	(completion_ptr): Add global object.
+	(tab_completion_create, tab_completion_destroy, cgdb_get_y_or_n, 
+	handle_tab_completion_request, readline_completion_display_func):
+	Added functions.
+	(do_tab_completion): Added comments.
+	(start_gdb): Remove unused variables.
+	(user_input): Rewrote to clean up.
+	(gdb_input): Only rewrite the prompt conditionaly.
+	(main_loop): Do not select on slavefd and masterfd when tab
+	completing.
+
 3/02/2006 Bob Rossi <bob@brasko.net>
 
 	* src/cgdb.c: Indent.
