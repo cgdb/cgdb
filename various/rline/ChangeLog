@@ -1,5 +1,12 @@
 3/05/2006 Bob Rossi <bob@brasko.net>
 
+	* src/rline.c (rl_completer_word_break_characters,
+	rl_completer_quote_characters): Initialize values.
+	(rline_rl_completion_entry_function): Rename parameters.
+	Modify return value.
+
+3/05/2006 Bob Rossi <bob@brasko.net>
+
 	* include/rline.h (rline_get_rl_completion_query_items): Added.
 	* src/rline.c (struct rline): Added field
 	rline_rl_completion_query_items.

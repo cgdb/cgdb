@@ -133,6 +133,9 @@ rline_initialize (int slavefd, command_cb *command, completion_cb *completion)
    */
   rl_completion_query_items = -1;
   rl_variable_bind ("page-completions", "0");
+  rl_completer_word_break_characters = " \t\n!@#$%^&*()+=|~`}{[]\"';:?/>.<,-";
+  rl_completer_quote_characters = "'";
+
 
   return rline;
 }
@@ -283,13 +286,35 @@ rline_rl_callback_read_char (struct rline *rline)
 
 static tgdb_list_iterator *rline_local_iter;
 
+/**
+ * Return to readline a possible completion.
+ *
+ * \param text
+ * The text that is being completed. It can be a subset of the full current 
+ * line (rl_line_buffer) at the prompt.
+ *
+ * \param matches
+ * The current number of matches so far
+ *
+ * \return
+ * A possible match, or NULL if none left.
+ */
 char *
-rline_rl_completion_entry_function (const char *c, int i)
+rline_rl_completion_entry_function (const char *text, int matches)
 {
   if (rline_local_iter) {
+    /**
+     * 'local' is a possible completion. 'text' is the data to be completed.
+     * 'word' is the current possible match started off at the same point 
+     * in local, that text is started in rl_line_buffer.
+     *
+     * In C++ if you do "b 'classname::functionam<Tab>". This will complete
+     * the line like "b 'classname::functioname'".
+     */
     char *local = tgdb_list_get_item (rline_local_iter);
+    char *word = local + rl_point - strlen (text);
     rline_local_iter = tgdb_list_next (rline_local_iter);
-    return strdup (local);
+    return strdup (word);
   }
 
   return NULL;

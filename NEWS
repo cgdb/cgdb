@@ -1,3 +1,7 @@
+   * Improved tab completion support in readline for quoted data. For 
+     instance tab completing C++ member functions like b 'foo::b<tab>
+     will now produce b 'foo::bar()'.
+   
    * Improved tab completion support. This comes in 2 forms. First, CGDB 
      honors the readline variable rl_completion_query_items. If the number 
      of completions is greater than this variable, then the user will be 
