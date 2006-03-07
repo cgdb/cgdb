@@ -15,7 +15,7 @@ Steps for releasing a new CGDB version, follow these in order.
 
    It's important to store the text and info version of the 
    documentation in the doc directory, for releases. The info version is
-   always available in cgdb/doc/cgdb.infl. However, the text version must
+   always available in cgdb/doc/cgdb.info. However, the text version must
    be generated. Run 'make html', and then copy the command and replace 
    '--html' with '--plaintext', and output the file to cgdb/doc/cgdb.txt. 
    Then run 'perl ht.pl'. CGDB's source has now been modified. Check in the 

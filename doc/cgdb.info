@@ -1,7 +1,7 @@
 This is ../../cgdb/doc/cgdb.info, produced by makeinfo version 4.7 from
 ../../cgdb/doc/cgdb.texinfo.
 
-   This manual is for GNU CGDB (version 0.6.0, 30 January 2006), the
+   This manual is for GNU CGDB (version 0.6.1, 26 February 2006), the
 GNU ncurses based front end to GDB.
 
    Copyright (C) 2006 Free Software Foundation, Inc.
@@ -29,7 +29,7 @@ File: cgdb.info,  Node: Top,  Next: Summary,  Up: (dir)
 CGDB
 ****
 
-This manual is for GNU CGDB (version 0.6.0, 30 January 2006), the GNU
+This manual is for GNU CGDB (version 0.6.1, 26 February 2006), the GNU
 ncurses based front end to GDB.
 
    Copyright (C) 2006 Free Software Foundation, Inc.
@@ -1484,31 +1484,31 @@ Index
 
 
 Tag Table:
-Node: Top1046
-Node: Summary2527
-Node: Invocation3682
-Node: Understanding CGDB4136
-Node: Source Window5529
-Node: GDB Window8060
-Node: File Dialog Window9027
-Node: TTY Window10070
-Node: Status Bar11209
-Node: Switching Windows12119
-Node: Controlling CGDB12598
-Node: CGDB Mode13306
-Node: GDB Mode15435
-Node: File Dialog Mode16648
-Node: TTY Mode17935
-Node: Configuring CGDB18304
-Node: Highlighting Groups24136
-Node: Available Highlighting Groups25717
-Node: Available Attributes27339
-Node: Available Colors28436
-Node: Sending I/O to Inferior30241
-Node: Terminal Control Flow32623
-Node: Building CGDB33392
-Node: Copying This Manual35572
-Node: GNU Free Documentation License35807
-Node: Index58215
+Node: Top1047
+Node: Summary2529
+Node: Invocation3684
+Node: Understanding CGDB4138
+Node: Source Window5531
+Node: GDB Window8062
+Node: File Dialog Window9029
+Node: TTY Window10072
+Node: Status Bar11211
+Node: Switching Windows12121
+Node: Controlling CGDB12600
+Node: CGDB Mode13308
+Node: GDB Mode15437
+Node: File Dialog Mode16650
+Node: TTY Mode17937
+Node: Configuring CGDB18306
+Node: Highlighting Groups24138
+Node: Available Highlighting Groups25719
+Node: Available Attributes27341
+Node: Available Colors28438
+Node: Sending I/O to Inferior30243
+Node: Terminal Control Flow32625
+Node: Building CGDB33394
+Node: Copying This Manual35574
+Node: GNU Free Documentation License35809
+Node: Index58217
 
 End Tag Table
