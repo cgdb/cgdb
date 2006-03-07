@@ -34,6 +34,36 @@ Some features offered by CGDB are:<P>
 
 <B>News</b><BR>
 <BLOCKQUOTE>
+
+  <I>Mar 6, 2006</i><BR>
+  <BLOCKQUOTE>
+  CGDB v0.6.1 was released today, see the <A Href="download.shtml">download 
+  page</a> to try it out. This contains a very exciting new feature, along with
+  several important tab completion improvements and a major bug fix.
+  <BR>
+  <BR>
+  Thanks to Steve Folta, CGDB now fully supports configurable color 
+  highlighting. You can modify any highlighting group or color that you want 
+  by simply using the :highlight command. This is modeled after vim, and should
+  work the same. Also, you should be able to run CGDB in an xterm with a 
+  white background! Thanks Steve.
+  <BR>
+  <BR>
+  CGDB's tab completion has been improved to include interaction with the user
+  when there is a lot of items to display. It's been said that it took 8 minutes
+  for the completion to finish, so this feature was necessary. It should page 
+  exactly the way GDB does. If not, let me know. Also, CGDB now supports the 
+  C++ tab completion syntax with GDB. For example b 'foo::\t' turns into
+  b 'foo::bar ()'.
+  <BR>
+  <BR>
+  Finally, CGDB fixed an important bug. Resizing the terminal was broken. It 
+  should work fine now, please let me know otherwise.
+  <BR>
+  <BR>
+  The CGDB Team hopes you enjoy the new release. As usual, thanks for reporting
+  bugs and sending in contributions.
+  </blockquote>
   
   <I>Jan 30, 2006</i><BR>
   <BLOCKQUOTE>
