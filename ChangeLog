@@ -1,3 +1,8 @@
+3/06/2006 Bob Rossi <bob@brasko.net>
+
+	* NEWS: Add note for tab completion.
+	* RELEASE_TODO: Fixed last bug I know of for .6.2.
+
 3/05/2006 Bob Rossi <bob@brasko.net>
 
 	* RELEASE_TODO: Finished tab completion feature request.

@@ -714,7 +714,13 @@ static void
 commands_process_completion (struct commands *c)
 {
   const char *ptr = ibuf_get (c->tab_completion_string);
-  tgdb_list_append (c->tab_completions, strdup (ptr));
+  const char *scomplete = "server complete ";
+  /* Do not add the "server complete " matches, which is returned with 
+   * GNAT 3.15p version of GDB. Most likely this could happen with other 
+   * implementations that are derived from GDB.
+   */
+  if (strncmp (ptr, scomplete, strlen (scomplete)) != 0)
+    tgdb_list_append (c->tab_completions, strdup (ptr));
 }
 
 /* process's source files */

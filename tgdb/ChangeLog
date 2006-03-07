@@ -1,3 +1,8 @@
+3/06/2006 Bob Rossi <bob@brasko.net>
+
+	* annotate-two/src/commands.c (commands_process_completion): Don't add
+        completion's that GDB has returned that begin with "server complete ".
+
 2/27/2006 Bob Rossi <bob@brasko.net>
 
 	* annotate-two/src/commands.c (struct commands): Added regex_bp field.
