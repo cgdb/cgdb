@@ -1,3 +1,8 @@
+3/14/2006 Bob Rossi <bob@brasko.net>
+
+	* annotate-two/src/commands.c (parse_breakpoint): Do not log message
+	when regex searching fails.
+
 version 0.6.1 (03/06/2006):
 
 3/06/2006 Bob Rossi <bob@brasko.net>

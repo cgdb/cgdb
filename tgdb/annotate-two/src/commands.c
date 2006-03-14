@@ -378,10 +378,7 @@ parse_breakpoint (struct commands *c)
 
   val = regexec(&c->regex_bp, info_ptr, nmatch, pmatch, 0);
   if (val != 0)
-    {
-      logger_write_pos (logger, __FILE__, __LINE__, "regexec failed");
-      return -1;
-    }
+    return 0;
 
   /* Get the whole match, function, filename and number name */
   for (cur = 0; cur < BP_REGEX_SIZE; ++cur)

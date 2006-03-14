@@ -1,3 +1,8 @@
+   * The message 'CGDB had unexpected results, ...' will no longer be 
+     displayed when CGDB can not parse a breakpoint. This message was being
+     displayed when a watchpoint was issued by the user. It does not fix any
+     bugs though, just stops the message from being displayed.
+
 cgdb-0.6.1 (03/06/2006)
 
    * An improvement for tab completion support. With certain versions of GDB, 

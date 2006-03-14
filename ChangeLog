@@ -1,3 +1,7 @@
+3/14/2006 Bob Rossi <bob@brasko.net>
+
+	* NEWS: Add release note.
+
 3/07/2006 Bob Rossi <bob@brasko.net>
     
 	* configure.in (AC_INIT): Version update for CVS.
