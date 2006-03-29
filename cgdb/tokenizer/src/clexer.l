@@ -105,7 +105,7 @@ IDENTIFIER {L}+{T}*
 #{L}+                   { return(TOKENIZER_DIRECTIVE); }
 
 \"                                          { BEGIN(string_literal);    return(TOKENIZER_LITERAL); }
-<string_literal>(\\|\\[^\r\n"]|[^\\"\r\n])* { return(TOKENIZER_LITERAL); }
+<string_literal>(\\[^\r\n]|[^\\"\r\n])*     { return(TOKENIZER_LITERAL); }
 <string_literal>\n                          { return(TOKENIZER_NEWLINE); }
 <string_literal>\r                          { return(TOKENIZER_NEWLINE); }
 <string_literal>\r\n                        { return(TOKENIZER_NEWLINE); }

@@ -11,6 +11,11 @@
  */
 
 char *string_literal_bugfix = "\\";
+char *string_literal_bugfix2 = "\"";
+char *string_literal_bugfix2_a = "\"\"";
+char *string_literal_bugfix2_b = "\"abc\"";
+char *string_literal_bugfix2_c = "\"abc\"\\\"";
+char *string_literal_bugfix2_d = "\"abc\"\\\n\"";
 
 #include <stdio.h>
 

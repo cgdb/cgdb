@@ -1,3 +1,7 @@
+   * Fixed a bug in the syntax highlighter for C strings. A line like
+     char *s = "\""; would cause the highlighter to break and most of the
+     file after that would be displayed in red (string literal color).
+   
    * The message 'CGDB had unexpected results, ...' will no longer be 
      displayed when CGDB can not parse a breakpoint. This message was being
      displayed when a watchpoint was issued by the user. It does not fix any
