@@ -376,9 +376,17 @@ parse_breakpoint (struct commands *c)
   if (!info_ptr) /* This should never really happen */
     return -1;
 
+  /* Check to see if this is a watchpoint, if it is,
+   * don't parse for a breakpoint.  */
+  if (strstr (info_ptr, " at ") == NULL)
+    return 0;
+
   val = regexec(&c->regex_bp, info_ptr, nmatch, pmatch, 0);
   if (val != 0)
-    return 0;
+    {
+      logger_write_pos (logger, __FILE__, __LINE__, "regexec failed");
+      return -1;
+    }
 
   /* Get the whole match, function, filename and number name */
   for (cur = 0; cur < BP_REGEX_SIZE; ++cur)
