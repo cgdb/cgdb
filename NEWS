@@ -1,3 +1,9 @@
+   * Fixed a bug in the configure script that was probably added in .6.0
+     when the large readline integration was done. It was possible for 
+     readline to choose the wrong termcap library, because of a bad 
+     autoconf macro that CGDB was using. This could potentially cause the
+     screen to get corrupted.
+   
    * Fixed a bug in the syntax highlighter for C strings. A line like
      char *s = "\""; would cause the highlighter to break and most of the
      file after that would be displayed in red (string literal color).

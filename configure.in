@@ -123,23 +123,6 @@ dnl Checks for header files.
 AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
 
-dnl The code below is in case we want to package readline with CGDB
-dnl If using the internal readline package, tell the Makefile.am's
-dnl AM_CONDITIONAL(USE_PACKAGED_READLINE, test "$opt_with_readline_prefix" = "no")
-dnl # If using system readline, then configure for it
-dnl if test "$opt_with_readline_prefix" = "no"; then
-dnl AC_CONFIG_SUBDIRS(readline-5.0)
-dnl AC_SUBST(READLINE_DIR,readline-5.0)
-dnl AC_SUBST(READLINE_LIBRARY,1)
-dnl AC_DEFINE(HAVE_LIBREADLINE, 1, [internal readline package])
-dnl AC_DEFINE(HAVE_READLINE_HISTORY, 1, [internal  history package])
-dnl AC_DEFINE(HAVE_READLINE_H, 1, [readline history header])
-dnl AC_DEFINE(HAVE_HISTORY_H, 1, [readline history header])
-dnl AC_DEFINE(READLINE_LIBRARY, 1, [internal readline define])
-dnl else
-dnl VL_LIB_READLINE
-dnl fi
-
 dnl determine if terminal headers are available for tgdb
 AC_CHECK_HEADERS(pty.h sys/stropts.h termios.h sys/select.h)
 

@@ -5,26 +5,26 @@ AC_DEFUN([VL_LIB_READLINE], [
   AC_CACHE_CHECK([for a readline compatible library],
                  vl_cv_lib_readline, [
     ORIG_LIBS="$LIBS"
-    for readline_lib in readline; do
-      for termcap_lib in "" termcap ncurses curses; do
-        if test -z "$termcap_lib"; then
-          TRY_LIB="-l$readline_lib"
-        else
-          TRY_LIB="-l$readline_lib -l$termcap_lib"
-        fi
-        LIBS="$ORIG_LIBS $TRY_LIB"
-        AC_TRY_LINK_FUNC(readline, vl_cv_lib_readline="$TRY_LIB")
-        if test -n "$vl_cv_lib_readline"; then
-          break
-        fi
-      done
+    for termcap_lib in "" ncurses curses; do
+      if test -z "$termcap_lib"; then
+	TRY_LIB="-lreadline"
+      else
+	TRY_LIB="-lreadline -l$termcap_lib"
+      fi
+      LIBS="$ORIG_LIBS $TRY_LIB"
+      AC_TRY_LINK_FUNC(readline, vl_cv_lib_readline="$TRY_LIB")
       if test -n "$vl_cv_lib_readline"; then
-        break
+	break
       fi
     done
+    if test -n "$vl_cv_lib_readline"; then
+      break
+    fi
     if test -z "$vl_cv_lib_readline"; then
       vl_cv_lib_readline="no"
       LIBS="$ORIG_LIBS"
+    else
+      LIBS="$ORIG_LIBS -lreadline"
     fi
   ])
 
