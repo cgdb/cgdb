@@ -999,10 +999,9 @@ package installed.  I have used version 4.7 to build the documentation for
 CGDB.
 
 @item help2man
-If you modify @file{configure.in} or @file{cgdb/src/usage.c} then you will be 
-required to have this package installed.  There is a Makefile rule in 
-@file{doc/Makefile.am} that automatically generates the man page when either
-of these files are modified.
+If you are doing a release, then you will be required to have this package
+installed.  In the @file{doc/} build directory, you can execute the command 
+@code{make cgdb.1}, and the CGDB man page will be generated.
 @end table
 
 CGDB uses autoconf/automake to build its configure scripts and makefiles.  So, 

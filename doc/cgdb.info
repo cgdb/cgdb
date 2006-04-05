@@ -977,10 +977,9 @@ certain files in CGDB.
      documentation for CGDB.
 
 `help2man'
-     If you modify `configure.in' or `cgdb/src/usage.c' then you will be
-     required to have this package installed.  There is a Makefile rule
-     in `doc/Makefile.am' that automatically generates the man page
-     when either of these files are modified.
+     If you are doing a release, then you will be required to have this
+     package installed.  In the `doc/' build directory, you can execute
+     the command `make cgdb.1', and the CGDB man page will be generated.
 
    CGDB uses autoconf/automake to build its configure scripts and
 makefiles.  So, if you change any of the autoconf/automake files, you
@@ -1507,8 +1506,8 @@ Node: Available Colors28438
 Node: Sending I/O to Inferior30243
 Node: Terminal Control Flow32625
 Node: Building CGDB33394
-Node: Copying This Manual35574
-Node: GNU Free Documentation License35809
-Node: Index58217
+Node: Copying This Manual35532
+Node: GNU Free Documentation License35767
+Node: Index58175
 
 End Tag Table
