@@ -39,8 +39,7 @@ subdir = cgdb
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in ChangeLog \
 	TODO
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/config/readline.m4 \
-	$(top_srcdir)/config/readline_check_version.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/config/readline_check_version.m4 \
 	$(top_srcdir)/configure.in
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)

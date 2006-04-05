@@ -77,8 +77,49 @@ if test "$opt_with_curses_prefix" != "no"; then
   fi
 fi
 
-dnl Configure readline
-VL_LIB_READLINE
+dnl Checking for log10 function in math - I would like to remove this
+AC_CHECK_LIB(m, log10)
+
+dnl readline and ncurses/curses configure magic is difficult.
+dnl A prerequisite is that CGDB needs either ncurses or curses to link.
+dnl A prerequisite is that readline needs tgetent to link.
+dnl However, I'm not sure if ncurses or curses provides tgetent all the time.
+dnl So, here's the algorithm:
+dnl   Part 1: Detecting ncurses/curses
+dnl     Check for ncurses (for CGDB)
+dnl     Check for curses (for CGDB)
+dnl     If found ncurses or curses, continue. Otherwise quit.
+dnl
+dnl   Part 2: Detecting tgetent
+dnl     Check for tgetent in ncurses or curses (the one found above)
+dnl     Check for tgetent in tinfo
+dnl     Check for tgetent in libc
+dnl     If found tgetent, continue. Otherwise quit.
+
+dnl Part 1: Detecting ncurses/curses
+dnl If the user want ncurses, Try to find it and add it to the linking library.
+if test "$use_ncurses_library" = "yes"; then
+        AC_CHECK_LIB(ncurses, initscr,
+            [AC_DEFINE(HAVE_NCURSES, 1, ncurses library)],
+            AC_MSG_ERROR([cgdb needs ncurses/curses to build. ncurses is strongly recommended.
+    If your system does not have ncurses get it!
+    If that is not an option try 'configure --with-curses.'
+    You can try --with-ncurses=/foo/ncurses to tell configure where ncurses is.]))
+	curses_lib_name="ncurses"
+fi
+
+dnl If the user want curses, Warn them that cgdb does not run perfect against it.
+if test "$use_ncurses_library" = "no"; then
+        AC_MSG_WARN([ *****************************************************
+                     cgdb may not run properly when linked against curses!
+                     *****************************************************])
+        AC_CHECK_LIB(curses, initscr,
+            [AC_DEFINE(HAVE_CURSES, 1, curses library)],
+            AC_MSG_ERROR([cgdb needs ncurses/curses to build. ncurses is strongly recommended.
+    If your system does not have ncurses get it!
+    You can try --with-curses=/foo/curses to tell configure where curses is.]))
+	curses_lib_name="curses"
+fi
 
 dnl Make sure there is a version of readline that CGDB supports.
 dnl Simply putting 5.1* -> 5.9* just to take into accout future versions.
@@ -92,32 +133,15 @@ case "$ac_cv_rl_version" in
 	;;
 esac
 
-dnl If the user want ncurses, Try to find it and add it to the linking library.
-if test "$use_ncurses_library" = "yes"; then
-        AC_CHECK_LIB(ncurses, initscr,
-            [AC_DEFINE(HAVE_NCURSES, 1, ncurses library)],
-            AC_MSG_ERROR([cgdb needs ncurses/curses to build. ncurses is strongly recommended.
-    If your system does not have ncurses get it!
-    If that is not an option try 'configure --with-curses.'
-    You can try --with-ncurses=/foo/ncurses to tell configure where ncurses is.]))
-        LIBS="$LIBS -lncurses"
-fi
+dnl This will DEFINE the readline headers.
+RL_LIB_READLINE_INCLUDES
 
-dnl If the user want curses, Warn them that cgdb does not run perfect against it.
-if test "$use_ncurses_library" = "no"; then
-        AC_MSG_WARN([ *****************************************************
-                     cgdb may not run properly when linked against curses!
-                     *****************************************************])
-        AC_CHECK_LIB(curses, initscr,
-            [AC_DEFINE(HAVE_CURSES, 1, curses library)],
-            AC_MSG_ERROR([cgdb needs ncurses/curses to build. ncurses is strongly recommended.
-    If your system does not have ncurses get it!
-    You can try --with-curses=/foo/curses to tell configure where curses is.]))
-        LIBS="$LIBS -lcurses"
+dnl Made it this far, add the readline and termcap LIBS
+LIBS="-lreadline $TERMCAP_LIB $LIBS"
+dnl Add the ncurses/curses lib, if it's not the same as the termcap lib
+if test "$TERMCAP_LIB" != "-l$curses_lib_name"; then
+  LIBS="-l$curses_lib_name $LIBS"
 fi
-
-dnl Checking for log10 function in math - I would like to remove this
-AC_CHECK_LIB(m, log10)
 
 dnl Checks for header files.
 AC_HEADER_STDC

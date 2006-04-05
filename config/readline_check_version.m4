@@ -7,11 +7,10 @@ AC_MSG_CHECKING(which library has the termcap functions)
 _bash_needmsg=
 fi
 AC_CACHE_VAL(bash_cv_termcap_lib,
-[AC_CHECK_FUNC(tgetent, bash_cv_termcap_lib=libc,
-    [AC_CHECK_LIB(tinfo, tgetent, bash_cv_termcap_lib=libtinfo,
-        [AC_CHECK_LIB(ncurses, tgetent, bash_cv_termcap_lib=libncurses,
-	    [AC_CHECK_LIB(curses, tgetent, bash_cv_termcap_lib=libcurses,
-	        bash_cv_termcap_lib=gnutermcap)])])])])
+[AC_CHECK_LIB(]$curses_lib_name[, tgetent, bash_cv_termcap_lib=lib]$curses_lib_name[,
+  [AC_CHECK_LIB(tinfo, tgetent, bash_cv_termcap_lib=libtinfo,
+    [AC_CHECK_FUNC(tgetent, bash_cv_termcap_lib=libc,
+      bash_cv_termcap_lib=gnutermcap)])])])
 if test "X$_bash_needmsg" = "Xyes"; then
 AC_MSG_CHECKING(which library has the termcap functions)
 fi
@@ -23,14 +22,11 @@ TERMCAP_DEP="./lib/termcap/libtermcap.a"
 elif test $bash_cv_termcap_lib = libtinfo; then
 TERMCAP_LIB=-ltinfo
 TERMCAP_DEP=
-elif test $bash_cv_termcap_lib = libncurses; then
-TERMCAP_LIB=-lncurses
+elif test $bash_cv_termcap_lib = lib$curses_lib_name; then
+TERMCAP_LIB=-l$curses_lib_name
 TERMCAP_DEP=
 elif test $bash_cv_termcap_lib = libc; then
 TERMCAP_LIB=
-TERMCAP_DEP=
-else
-TERMCAP_LIB=-lcurses
 TERMCAP_DEP=
 fi
 ])
@@ -147,3 +143,18 @@ AC_MSG_RESULT($ac_cv_rl_version)
 
 fi
 ])
+
+dnl This checks to see where the includes files for readline is located.
+dnl It also defines the readline and history libraries
+AC_DEFUN([RL_LIB_READLINE_INCLUDES],
+[
+AC_DEFINE(HAVE_LIBREADLINE,1, [readline library available])
+AC_CHECK_HEADERS(readline.h readline/readline.h)
+vl_cv_lib_readline_history="no"
+AC_CHECK_LIB(readline, add_history, vl_cv_lib_readline_history="yes")
+if test "$vl_cv_lib_readline_history" = "yes"; then
+  AC_DEFINE(HAVE_READLINE_HISTORY, 1, [readline history library available])
+  AC_CHECK_HEADERS(history.h readline/history.h)
+fi
+])
+
