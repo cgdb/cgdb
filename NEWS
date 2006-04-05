@@ -1,3 +1,6 @@
+   * CGDB should run on solaris 2.5 again. I don't think it would since
+     CGDB .6.0. 
+   
    * Fixed a bug in the configure script that was probably added in .6.0
      when the large readline integration was done. It was possible for 
      readline to choose the wrong termcap library, because of a bad 

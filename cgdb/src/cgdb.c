@@ -1418,7 +1418,7 @@ init_readline (void)
   if (masterfd == -1)
     return -1;
 
-  if (tty_off_xon_xoff (masterfd) == -1)
+  if (tty_off_xon_xoff (slavefd) == -1)
     return -1;
 
   /* The 16 is because I don't know how many char's the directory separator 
