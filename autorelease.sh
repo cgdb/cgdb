@@ -164,4 +164,4 @@ cvs update >> $CGDB_OUTPUT_LOG 2>&1
 echo "-- Create the cvs tag $CGDB_RELEASE"
 ################################################################################
 # step 7, create the tag
-echo "$CGDB_RELEASE" | perl -pi -e 's/\./_/g' | xargs echo cvs tag >> $CGDB_OUTPUT_LOG 2>&1
+`echo "$CGDB_RELEASE" | perl -pi -e 's/\./_/g' | xargs echo cvs tag` >> $CGDB_OUTPUT_LOG 2>&1
