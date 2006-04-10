@@ -1,8 +1,8 @@
-This is ../../cgdb/doc/cgdb.info, produced by makeinfo version 4.7 from
-../../cgdb/doc/cgdb.texinfo.
+This is /home/bob/cvs/cgdb/cgdb/cgdb/doc/cgdb.info, produced by
+makeinfo version 4.7 from /home/bob/cvs/cgdb/cgdb/cgdb/doc/cgdb.texinfo.
 
-   This manual is for GNU CGDB (version 0.6.1, 26 February 2006), the
-GNU ncurses based front end to GDB.
+   This manual is for GNU CGDB (version 0.6.2, 5 April 2006), the GNU
+ncurses based front end to GDB.
 
    Copyright (C) 2006 Free Software Foundation, Inc.
 
@@ -29,7 +29,7 @@ File: cgdb.info,  Node: Top,  Next: Summary,  Up: (dir)
 CGDB
 ****
 
-This manual is for GNU CGDB (version 0.6.1, 26 February 2006), the GNU
+This manual is for GNU CGDB (version 0.6.2, 5 April 2006), the GNU
 ncurses based front end to GDB.
 
    Copyright (C) 2006 Free Software Foundation, Inc.
@@ -1483,31 +1483,31 @@ Index
 
 
 Tag Table:
-Node: Top1047
-Node: Summary2529
-Node: Invocation3684
-Node: Understanding CGDB4138
-Node: Source Window5531
-Node: GDB Window8062
-Node: File Dialog Window9029
-Node: TTY Window10072
-Node: Status Bar11211
-Node: Switching Windows12121
-Node: Controlling CGDB12600
-Node: CGDB Mode13308
-Node: GDB Mode15437
-Node: File Dialog Mode16650
-Node: TTY Mode17937
-Node: Configuring CGDB18306
-Node: Highlighting Groups24138
-Node: Available Highlighting Groups25719
-Node: Available Attributes27341
-Node: Available Colors28438
-Node: Sending I/O to Inferior30243
-Node: Terminal Control Flow32625
-Node: Building CGDB33394
-Node: Copying This Manual35532
-Node: GNU Free Documentation License35767
-Node: Index58175
+Node: Top1079
+Node: Summary2557
+Node: Invocation3712
+Node: Understanding CGDB4166
+Node: Source Window5559
+Node: GDB Window8090
+Node: File Dialog Window9057
+Node: TTY Window10100
+Node: Status Bar11239
+Node: Switching Windows12149
+Node: Controlling CGDB12628
+Node: CGDB Mode13336
+Node: GDB Mode15465
+Node: File Dialog Mode16678
+Node: TTY Mode17965
+Node: Configuring CGDB18334
+Node: Highlighting Groups24166
+Node: Available Highlighting Groups25747
+Node: Available Attributes27369
+Node: Available Colors28466
+Node: Sending I/O to Inferior30271
+Node: Terminal Control Flow32653
+Node: Building CGDB33422
+Node: Copying This Manual35560
+Node: GNU Free Documentation License35795
+Node: Index58203
 
 End Tag Table

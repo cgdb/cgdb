@@ -1,3 +1,5 @@
+cgdb-0.6.2 (09/04/2006)
+
    * CGDB should run on solaris 2.5 again. I don't think it would since
      CGDB .6.0. 
    

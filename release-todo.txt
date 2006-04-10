@@ -1,46 +1,39 @@
 Steps for releasing a new CGDB version, follow these in order.
 
--  Change configure.in file to reflect new version number.
-      * Run autoregen.sh
-    Make sure you have the appropriate versions of these installed:
-      * aclocal (GNU automake) 1.9.5
-      * autoconf (GNU Autoconf) 2.59
-      * m4      ( GNU m4 )     1.4.3
+--------------------------------------------------------------------------------
+All of the steps below are automated by autorelease.sh, just check to make
+sure that it worked properly.
+
+- Run autorelease.sh version, where version could be '0.6.2'
+
+- This check for
+  * aclocal (GNU automake) 1.9.5
+  * autoconf (GNU Autoconf) 2.59
+  * m4      ( GNU m4 )     1.4.3
+
+- This updates configure.in to have new version number in the
+  AC_INIT macro.
+
+- This step runs autoregen.sh
 
 -  This section generates all the applicable documentation. Make sure the file
-   doc/version.texi has the new version numbers. You will probably have to 
-   configure CGDB with --enable-maintainer-mode for this to happen. I have yet
-   to determine a better way.
+   doc/version.texi has the new version numbers. The date in this file is the 
+   date corresponding to the last time the file was modified.
 
-   It's important to store the text and info version of the 
-   documentation in the doc directory, for releases. The info version is
-   always available in cgdb/doc/cgdb.info. However, the text version must
-   be generated. Run 'make html', and then copy the command and replace 
-   '--html' with '--plaintext', and output the file to cgdb/doc/cgdb.txt. 
-   Then run 'perl ht.pl'. CGDB's source has now been modified. Check in the 
-   new files.
+   Make sure that doc/cgdb.1, doc/cgdb.info and doc/cgdb.txt are all updated.
+   Also, version.texi.builddir/doc/cgdb.pdf, 
+   version.texi.builddir/doc/cgdb-no-split.html
 
-   Now is also the time to create the pdf file 'make pdf' and the single file
-   html file. Check in any new generated documentation at this point.
+-  Run version.texi.builddir/tmp/target/bin/cgdb --version to check 
+   version number.
 
--  Generate the man page. 'cd doc/; make cgdb.1'.
-   Make sure the man page is updated (this is a sanity check).
-   Run cgdb --help and cgdb --version and compare to cgdb.1.
+-  Ensure tag is written. If the version is cgdb-0.3.3, name the tag
+   cgdb-0_3_3 .
 
--  Update all ChangeLogs to have the new release date and version.
-    The ChangeLogs live in many places currently.
-    find . -name ChangeLog
-
--  Update the NEWS file to have the new release date and version.
-    
--  Test doing 'make dist' then untar, ./configure && make
-    and run ./cgdb --version to check version number.
+--------------------------------------------------------------------------------
+These steps are manual.
 
 -  Commit all currently modified files (should only be ChangeLogs).
-
--  Create a cvs tag for the tree to be able to get back to the 
-    version number. If the version is cgdb-0.3.3, name the tag
-	cgdb-0_3_3 .
 
 -  Put a release on sourceforge.net/projects/cgdb
     * ftp upload.sourceforge.net

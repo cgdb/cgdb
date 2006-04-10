@@ -1,3 +1,5 @@
+version 0.6.2 (09/04/2006):
+
 4/05/2006 Bob Rossi <bob@brasko.net>
 
 	* Makefile.am (cgdb.1): Manual rule now.
