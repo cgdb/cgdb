@@ -1,5 +1,10 @@
 version 0.6.2 (09/04/2006):
 
+3/06/2006 Bob Rossi <bob@brasko.net>
+
+	* download.shtml: Change download directorly link
+	* index.shtml: Add note.
+
 version 0.6.1 (03/06/2006):
 
 3/06/2006 Bob Rossi <bob@brasko.net>

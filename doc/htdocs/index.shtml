@@ -35,6 +35,20 @@ Some features offered by CGDB are:<P>
 <B>News</b><BR>
 <BLOCKQUOTE>
 
+  <I>April 9, 2006</i><BR>
+  <BLOCKQUOTE>
+  CGDB v0.6.2 was released today, see the <A Href="download.shtml">download 
+  page</a> to try it out. This release get's CGDB working on Solaris again.
+  Also, it fixes some autotool problems that could have cause corruption in
+  the GDB window. It also fixes a regression from cgdb-0.6.1, the message
+  'CGDB had unexpected results, ...' will no longer be displayed when
+  shutting CGDB down if you set a watch point while debugging.
+  <BR>
+  <BR>
+  Enjoy.
+  <BR>
+  <BR>
+
   <I>Mar 6, 2006</i><BR>
   <BLOCKQUOTE>
   CGDB v0.6.1 was released today, see the <A Href="download.shtml">download 
