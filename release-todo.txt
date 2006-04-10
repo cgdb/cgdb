@@ -31,6 +31,31 @@ sure that it worked properly.
    cgdb-0_3_3 .
 
 --------------------------------------------------------------------------------
+Need to determine if this can be automated. What should be check in?
+
+-  Update website cgdb.sourceforge.net:
+    * change webpage in cgdb/doc/htdocs
+    * Modify download page -> download.shtml
+      * Download link
+      * Optionally, put a note in the index.shtml file (News section)
+    * ssh cgdb.sourceforge.net
+    * cd /home/groups/c/cg/cgdb/htdocs
+	* run 'cvs update'
+
+- Update documentation on website. You will need to scp from your computer
+  to cgdb.sf.net to get files uploaded. Then you will need to copy over
+  cgdb.pdf, cgdb.html, cgdb.text, cgdb-split.html and cgdb.info.
+
+  scp doc/cgdb.txt user@cgdb.sf.net:/home/groups/c/cg/cgdb/htdocs/
+  scp doc/cgdb.info user@cgdb.sf.net:/home/groups/c/cg/cgdb/htdocs/
+  scp version.texi.builddir/doc/cgdb.pdf user@cgdb.sf.net:/home/groups/c/cg/cgdb/htdocs/
+  scp version.texi.builddir/doc/cgdb-no-split.html user@cgdb.sf.net:/home/groups/c/cg/cgdb/htdocs/
+  scp -r version.texi.builddir/doc/cgdb.html user@cgdb.sf.net:/home/groups/c/cg/cgdb/htdocs/
+
+-  Test website by looking at it and attempting to download file.
+    
+
+--------------------------------------------------------------------------------
 These steps are manual.
 
 -  Commit all currently modified files (should only be ChangeLogs).
@@ -50,21 +75,6 @@ These steps are manual.
 
 -  Download and test the new version from sourceforge.
 
--  Update website cgdb.sourceforge.net:
-    * change webpage in cgdb/doc/htdocs
-    * Modify download page -> download.shtml
-      * Download link
-      * Optionally, put a note in the index.shtml file (News section)
-    * ssh cgdb.sourceforge.net
-    * cd /home/groups/c/cg/cgdb/htdocs
-	* run 'cvs update'
-
-- Update documentation on website. You will need to scp from your computer
-  to cgdb.sf.net to get files uploaded. Then you will need to copy over
-  cgdb.pdf, cgdb.html, cgdb.text, cgdb-split.html and cgdb.info.
-
--  Test website by looking at it and attempting to download file.
-    
 -  Announce the release on freshmeat
 
 -  Announce the release on cgdb-announce@lists.sourceforge.net
