@@ -1,3 +1,8 @@
+4/09/2006 Bob Rossi <bob@brasko.net>
+
+	* release-todo.txt: Remove software requirement.
+	* auto-release.sh: New release script.
+
 4/05/2006 Bob Rossi <bob@brasko.net>
 
 	* NEWS: Add note.
