@@ -13,6 +13,7 @@
 # PARTICULAR PURPOSE.
 
 @SET_MAKE@
+
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
 VPATH = @srcdir@
@@ -36,9 +37,9 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 subdir = doc
-DIST_COMMON = $(cgdb_TEXINFOS) $(dist_man_MANS) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in $(srcdir)/stamp-vti \
-	$(srcdir)/version.texi ChangeLog
+DIST_COMMON = $(cgdb_TEXINFOS) $(dist_man_MANS) $(dist_pkgdata_DATA) \
+	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
+	$(srcdir)/stamp-vti $(srcdir)/version.texi ChangeLog
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/config/readline_check_version.m4 \
 	$(top_srcdir)/configure.in
@@ -62,10 +63,19 @@ TEXI2PDF = $(TEXI2DVI) --pdf --batch
 MAKEINFOHTML = $(MAKEINFO) --html
 AM_MAKEINFOHTMLFLAGS = $(AM_MAKEINFOFLAGS)
 DVIPS = dvips
-am__installdirs = "$(DESTDIR)$(infodir)" "$(DESTDIR)$(man1dir)"
+am__installdirs = "$(DESTDIR)$(infodir)" "$(DESTDIR)$(man1dir)" \
+	"$(DESTDIR)$(pkgdatadir)"
 man1dir = $(mandir)/man1
 NROFF = nroff
 MANS = $(dist_man_MANS)
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
+dist_pkgdataDATA_INSTALL = $(INSTALL_DATA)
+DATA = $(dist_pkgdata_DATA)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMDEP_FALSE = @AMDEP_FALSE@
@@ -162,6 +172,7 @@ info_TEXINFOS = cgdb.texinfo
 cgdb_TEXINFOS = gpl.texi fdl.texi
 dist_man_MANS = cgdb.1
 EXTRA_DIST = cgdb.txt htdocs
+dist_pkgdata_DATA = cgdb.txt
 all: all-am
 
 .SUFFIXES:
@@ -358,6 +369,23 @@ uninstall-man1:
 	  echo " rm -f '$(DESTDIR)$(man1dir)/$$inst'"; \
 	  rm -f "$(DESTDIR)$(man1dir)/$$inst"; \
 	done
+install-dist_pkgdataDATA: $(dist_pkgdata_DATA)
+	@$(NORMAL_INSTALL)
+	test -z "$(pkgdatadir)" || $(mkdir_p) "$(DESTDIR)$(pkgdatadir)"
+	@list='$(dist_pkgdata_DATA)'; for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  f=$(am__strip_dir) \
+	  echo " $(dist_pkgdataDATA_INSTALL) '$$d$$p' '$(DESTDIR)$(pkgdatadir)/$$f'"; \
+	  $(dist_pkgdataDATA_INSTALL) "$$d$$p" "$(DESTDIR)$(pkgdatadir)/$$f"; \
+	done
+
+uninstall-dist_pkgdataDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(dist_pkgdata_DATA)'; for p in $$list; do \
+	  f=$(am__strip_dir) \
+	  echo " rm -f '$(DESTDIR)$(pkgdatadir)/$$f'"; \
+	  rm -f "$(DESTDIR)$(pkgdatadir)/$$f"; \
+	done
 tags: TAGS
 TAGS:
 
@@ -397,9 +425,9 @@ distdir: $(DISTFILES)
 	  dist-info
 check-am: all-am
 check: check-am
-all-am: Makefile $(INFO_DEPS) $(MANS)
+all-am: Makefile $(INFO_DEPS) $(MANS) $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(infodir)" "$(DESTDIR)$(man1dir)"; do \
+	for dir in "$(DESTDIR)$(infodir)" "$(DESTDIR)$(man1dir)" "$(DESTDIR)$(pkgdatadir)"; do \
 	  test -z "$$dir" || $(mkdir_p) "$$dir"; \
 	done
 install: install-am
@@ -446,7 +474,7 @@ info: info-am
 
 info-am: $(INFO_DEPS)
 
-install-data-am: install-info-am install-man
+install-data-am: install-dist_pkgdataDATA install-info-am install-man
 
 install-exec-am:
 
@@ -503,20 +531,22 @@ ps: ps-am
 
 ps-am: $(PSS)
 
-uninstall-am: uninstall-info-am uninstall-man
+uninstall-am: uninstall-dist_pkgdataDATA uninstall-info-am \
+	uninstall-man
 
 uninstall-man: uninstall-man1
 
 .PHONY: all all-am check check-am clean clean-generic dist-info \
 	distclean distclean-generic distdir dvi dvi-am html html-am \
 	info info-am install install-am install-data install-data-am \
-	install-exec install-exec-am install-info install-info-am \
-	install-man install-man1 install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-aminfo maintainer-clean-generic \
-	maintainer-clean-vti mostlyclean mostlyclean-aminfo \
-	mostlyclean-generic mostlyclean-vti pdf pdf-am ps ps-am \
-	uninstall uninstall-am uninstall-info-am uninstall-man \
+	install-dist_pkgdataDATA install-exec install-exec-am \
+	install-info install-info-am install-man install-man1 \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-aminfo \
+	maintainer-clean-generic maintainer-clean-vti mostlyclean \
+	mostlyclean-aminfo mostlyclean-generic mostlyclean-vti pdf \
+	pdf-am ps ps-am uninstall uninstall-am \
+	uninstall-dist_pkgdataDATA uninstall-info-am uninstall-man \
 	uninstall-man1
 
 

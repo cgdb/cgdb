@@ -1,3 +1,7 @@
+   * The file cgdb.txt is now installed into $PREFIX/share/cgdb/cgdb.txt. This
+     is the file CGDB will now use to display the manual when :help is typed.
+     This prevents CGDB from copying the data into the users home directory.
+
 cgdb-0.6.2 (09/04/2006)
 
    * CGDB should run on solaris 2.5 again. I don't think it would since

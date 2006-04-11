@@ -1,3 +1,9 @@
+4/10/2006 Bob Rossi <bob@brasko.net>
+
+	* NEWS: Note about cgdb.txt being installed.
+	* autorelease.sh: No longer run ht.pl.
+	* ht.pl: Removed.
+
 4/09/2006 Bob Rossi <bob@brasko.net>
 
 	* release-todo.txt: Remove software requirement.

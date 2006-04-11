@@ -1,3 +1,5 @@
+DEFS += -DPKGDATADIR=\"$(pkgdatadir)\"
+
 AM_CFLAGS = -g -Wall \
 -I$(top_srcdir)/tgdb/tgdb-base/include \
 -I$(top_srcdir)/tgdb/annotate-two/include \

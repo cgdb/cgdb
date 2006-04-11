@@ -106,18 +106,9 @@ if [ "$?" != "0" ]; then
 fi
 
 ################################################################################
-echo "-- Update text help in CGDB"
-################################################################################
-cd $CGDB_SOURCE_DIR
-perl ht.pl >> $CGDB_OUTPUT_LOG 2>&1
-if [ "$?" != "0" ]; then
-  echo "update text in CGDB failed."
-  exit
-fi
-
-################################################################################
 echo "-- Update the ChangeLogs"
 ################################################################################
+cd $CGDB_SOURCE_DIR
 echo -e "version $CGDB_VERSION (`date +%d/%m/%Y`):\n" > datetmp.txt
 for I in `find . -name ChangeLog`; 
 do 

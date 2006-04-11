@@ -1535,15 +1535,16 @@ if_show_file (char *path, int line)
 void
 if_display_help (void)
 {
-  extern char cgdb_help_file[MAXLINE];
+  char cgdb_help_file[MAXLINE];
   int ret_val = 0;
-  if (cgdb_help_file[0] &&
-      (ret_val = source_set_exec_line (src_win, cgdb_help_file, 1)) == 0)
+
+  fs_util_get_path (PKGDATADIR, "cgdb.txt", cgdb_help_file);
+  ret_val = source_set_exec_line (src_win, cgdb_help_file, 1);
+  if (ret_val == 0)
     if_draw ();
   else if (ret_val == 5)	/* File does not exist */
     if_display_message ("No such file: %s", 0, cgdb_help_file);
 }
-
 
 struct sviewer *
 if_get_sview ()

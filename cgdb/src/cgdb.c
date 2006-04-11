@@ -61,7 +61,6 @@
 #include "scroller.h"
 #include "sources.h"
 #include "tgdb.h"
-#include "helptext.h"
 #include "kui.h"
 #include "kui_term.h"
 #include "fs_util.h"
@@ -84,7 +83,6 @@ struct tgdb *tgdb;		/* The main TGDB context */
 struct tgdb_request *last_request = NULL;
 
 char cgdb_home_dir[MAXLINE];	/* Path to home directory with trailing slash */
-char cgdb_help_file[MAXLINE];	/* Path to home directory with trailing slash */
 const char *readline_history_filename = "readline_history.txt";
 char *readline_history_path;	/* After readline init is called, this will 
 				 * contain the path to the readline history 
@@ -695,40 +693,6 @@ init_home_dir (void)
     }
 
   fs_util_get_path (home_dir, cgdb_dir, cgdb_home_dir);
-
-  return 0;
-}
-
-/* create_help_file: Creates the file help.txt in $HOME/.cgdb
- *
- * Return:  0 on sucess or -1 on error
- */
-static int
-create_help_file (void)
-{
-  int i, length = 0;
-  static FILE *fd = NULL;
-  char *dashes = NULL;
-
-  fs_util_get_path (cgdb_home_dir, "help.txt", cgdb_help_file);
-
-  if ((fd = fopen (cgdb_help_file, "w")) == NULL)
-    return -1;
-
-  /* Write cgdb version number */
-  length = 5 + strlen (VERSION);
-  dashes = (char *) malloc (sizeof (char) * (length + 1));
-  memset (dashes, '-', length);
-  dashes[length] = 0;
-  fprintf (fd, "CGDB %s\n%s\n\n", VERSION, dashes);
-  free (dashes);
-
-  /* Write help file */
-  for (i = 0; cgdb_help_text[i] != NULL; i++)
-    fprintf (fd, "%s\n", cgdb_help_text[i]);
-
-  if (fclose (fd) == -1)
-    return -1;
 
   return 0;
 }
@@ -1511,14 +1475,6 @@ main (int argc, char *argv[])
     {
       logger_write_pos (logger, __FILE__, __LINE__,
 			"Unable to init readline");
-      cleanup ();
-      exit (-1);
-    }
-
-  if (create_help_file () == -1)
-    {
-      logger_write_pos (logger, __FILE__, __LINE__,
-			"Unable to create help file");
       cleanup ();
       exit (-1);
     }
