@@ -29,7 +29,7 @@
  */
 /******************************************************************************/
 
-//@{
+/*@{*/
 
 struct kui_map;
 
@@ -60,7 +60,7 @@ struct kui_map *kui_map_create (
  */
 int kui_map_destroy ( struct kui_map *map );
 
-//@}
+/*@}*/
 
 /******************************************************************************/
 /**
@@ -69,7 +69,7 @@ int kui_map_destroy ( struct kui_map *map );
  */
 /******************************************************************************/
 
-//@{
+/*@{*/
 
 /**
  * Get's the maps key.
@@ -115,7 +115,7 @@ int kui_map_get_value ( struct kui_map *map, char **value );
  */
 int kui_map_print_cgdb_key_array ( struct kui_map *map );
 
-//@}
+/*@}*/
 
 /* }}} */
 
@@ -139,7 +139,7 @@ int kui_map_print_cgdb_key_array ( struct kui_map *map );
  */
 /******************************************************************************/
 
-//@{
+/*@{*/
 
 struct kui_map_set;
 
@@ -162,7 +162,7 @@ struct kui_map_set *kui_ms_create ( void );
  */
 int kui_ms_destroy ( struct kui_map_set *kui_ms );
 
-//@}
+/*@}*/
 
 /******************************************************************************/
 /**
@@ -172,7 +172,7 @@ int kui_ms_destroy ( struct kui_map_set *kui_ms );
  */
 /******************************************************************************/
 
-//@{
+/*@{*/
 
 /**
  * Add a map to the map set.
@@ -225,7 +225,7 @@ int kui_ms_deregister_map (
  */
 std_list kui_ms_get_maps ( struct kui_map_set *kui_ms );
 
-//@}
+/*@}*/
 
 /* }}} */
 
@@ -242,7 +242,7 @@ std_list kui_ms_get_maps ( struct kui_map_set *kui_ms );
  */
 /******************************************************************************/
 
-//@{
+/*@{*/
 
 struct kuictx;
 
@@ -313,7 +313,7 @@ struct kuictx *kui_create(
 int kui_destroy ( struct kuictx *kctx );
 
 
-//@}
+/*@}*/
 
 /******************************************************************************/
 /**
@@ -322,7 +322,7 @@ int kui_destroy ( struct kuictx *kctx );
  */
 /******************************************************************************/
 
-//@{
+/*@{*/
 
 /**
  * Get's the current map set for the kui context.
@@ -408,7 +408,7 @@ const char *kui_get_raw_data ( struct kuictx *kctx );
  */
 int kui_set_blocking_ms ( struct kuictx *kctx, unsigned long msec );
 
-//@}
+/*@}*/
 
 /* }}} */
 
@@ -425,7 +425,7 @@ int kui_set_blocking_ms ( struct kuictx *kctx, unsigned long msec );
  */
 /******************************************************************************/
 
-//@{
+/*@{*/
 
 struct kui_manager;
 
@@ -452,7 +452,7 @@ struct kui_manager *kui_manager_create(int stdinfd );
 int kui_manager_destroy ( struct kui_manager *kuim );
 
 
-//@}
+/*@}*/
 
 /******************************************************************************/
 /**
@@ -461,7 +461,7 @@ int kui_manager_destroy ( struct kui_manager *kuim );
  */
 /******************************************************************************/
 
-//@{
+/*@{*/
 
 /**
  * Get's the current map set for the kui context.
@@ -557,7 +557,7 @@ const char *kui_manager_get_raw_data ( struct kui_manager *kuim );
 int kui_manager_set_terminal_escape_sequence_timeout ( 
 		struct kui_manager *kuim, 
 		unsigned int msec );
-//@}
+/*@}*/
 
 /* }}} */
 

@@ -128,7 +128,7 @@ void data_process (
         case VOID:    buf[(*n)++] = a;   break;
         case AT_PROMPT:         
             a2->data->gdb_prompt[a2->data->gdb_prompt_size++] = a;  
-//            buf[(*n)++] = a;
+/*            buf[(*n)++] = a;*/
             break;
         case USER_AT_PROMPT:             break;
         case GUI_COMMAND:

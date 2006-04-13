@@ -8,9 +8,9 @@
 #include <stdlib.h>
 #endif  /* HAVE_STDLIB_H */
 
-#if HAVE_STDLIB_H 
+#if HAVE_STDIO_H 
 #include <stdio.h>
-#endif  /* HAVE_STDLIB_H */
+#endif  /* HAVE_STDIO_H */
 
 #if HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
@@ -20,7 +20,11 @@
 #include <termios.h>
 #endif /* HAVE_TERMIOS_H */
 
-// includes {{{
+#if HAVE_STRING_H
+#include <string.h>
+#endif /* HAVE_STRING_H */
+
+/* includes {{{*/
 
 #ifdef HAVE_LIBREADLINE
 #  if defined(HAVE_READLINE_READLINE_H)
@@ -48,7 +52,7 @@ extern int read_history ();
  /* no history */
 #endif /* HAVE_READLINE_HISTORY */
 
-// }}}
+/* }}}*/
 
 struct rline
 {
@@ -74,7 +78,7 @@ struct rline
 
 static void custom_deprep_term_function () {}
 
-// Createing and Destroying a librline context. {{{
+/* Createing and Destroying a librline context. {{{*/
 struct rline* 
 rline_initialize (int slavefd, command_cb *command, completion_cb *completion)
 {
@@ -158,10 +162,10 @@ rline_shutdown (struct rline *rline)
   return 0;
 }
 
-//@}
-// }}}
+/*@}*/
+/* }}}*/
 
-// Reading and Writing the librline context. {{{
+/* Reading and Writing the librline context. {{{*/
 int 
 rline_read_history (struct rline *rline, const char *file)
 {
@@ -186,10 +190,10 @@ rline_write_history (struct rline *rline, const char *file)
   return 0;
 }
 
-//@}
-// }}}
+/*@}*/
+/* }}}*/
 
-// Functional commands {{{
+/* Functional commands {{{*/
 
 int 
 rline_set_prompt (struct rline *rline, const char *prompt)
@@ -432,5 +436,5 @@ rline_get_rl_completion_query_items (struct rline *rline)
   return rline->rline_rl_completion_query_items;
 }
 
-//@}
-// }}}
+/*@}*/
+/* }}}*/

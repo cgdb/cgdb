@@ -56,7 +56,7 @@ struct commands
   int cur_field_num;
 
   /** breakpoint information */
-  //@{
+  /*@{*/
 
   /** A list of breakpoints already parsed.  */
   struct tgdb_list *breakpoint_list;
@@ -76,11 +76,11 @@ struct commands
   /* The regular expression matching the breakpoint GDB output */
   regex_t regex_bp;
 
-  //@}
+  /*@}*/
 
   /** 'info source' information */
 
-  //@{
+  /*@{*/
 
   /** The current info source line being parsed */
   struct ibuf *info_source_string;
@@ -97,10 +97,10 @@ struct commands
   /** The name of the file requested to have 'info source' run on.  */
   struct ibuf *last_info_source_requested;
 
-  //@}
+  /*@}*/
 
-  // info sources information {{{
-  //@{
+  /* info sources information {{{*/
+  /*@{*/
 
   /** ??? Finished parsing the data being looked for.  */
   int sources_ready;
@@ -111,11 +111,11 @@ struct commands
   /** All of the source, parsed in put in a list, 1 at a time.  */
   struct tgdb_list *inferior_source_files;
 
-  //@}
-  // }}}
+  /*@}*/
+  /* }}}*/
 
-  // tab completion information {{{
-  //@{
+  /* tab completion information {{{*/
+  /*@{*/
 
   /** ??? Finished parsing the data being looked for.  */
   int tab_completion_ready;
@@ -126,8 +126,8 @@ struct commands
   /** All of the tab completion items, parsed in put in a list, 1 at a time. */
   struct tgdb_list *tab_completions;
 
-  //@}
-  // }}}
+  /*@}*/
+  /* }}}*/
 
   /** The absolute path prefix output by GDB when 'info source' is given */
   const char *source_prefix;
@@ -775,7 +775,7 @@ commands_send_gui_completions (struct commands *c, struct tgdb_list *list)
   /* If the inferior program was not compiled with debug, then no sources
    * will be available. If no sources are available, do not return the
    * TGDB_UPDATE_SOURCE_FILES command. */
-//  if (tgdb_list_size ( c->tab_completions ) > 0)
+/*  if (tgdb_list_size ( c->tab_completions ) > 0)*/
   struct tgdb_response *response = (struct tgdb_response *)
     xmalloc (sizeof (struct tgdb_response));
   response->header = TGDB_UPDATE_COMPLETIONS;

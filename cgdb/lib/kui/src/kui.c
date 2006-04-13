@@ -190,19 +190,19 @@ int kui_map_print_cgdb_key_array ( struct kui_map *map ) {
 
 /* struct kui_map_set {{{ */
 
-///* Kui map set */
+/* Kui map set */
 
 /** 
  * This maintains a list of maps. It also is capable of tracking if a user is 
  * matching any map in this set with the current key strokes being typed.
  */
 struct kui_map_set {
-	/// The ktree used in determining if a map has been reached or is being
-	/// reached. Of course, nothing could match also. This structure is efficient
-	/// in doing the work, it looks only at the current key read.
+	/* The ktree used in determining if a map has been reached or is being
+	 * reached. Of course, nothing could match also. This structure is efficient
+	 * in doing the work, it looks only at the current key read.  */
 	struct kui_tree *ktree;
 	
-	/// A linked list of the maps being checked for.
+	/* A linked list of the maps being checked for.*/
 	std_list maps;
 };
 
@@ -1069,12 +1069,12 @@ int kui_set_blocking_ms ( struct kuictx *kctx, unsigned long msec ) {
  * This context is capable of doing all the work associated with the KUI.
  */
 struct kui_manager {
-	/// The terminal escape sequence mappings
+	/* The terminal escape sequence mappings*/
 	struct kuictx *terminal_keys;
-	/// The user defined mappings
+	/* The user defined mappings*/
 	struct kuictx *normal_keys;
-	/// Need a reference to the terminal escape sequence mappings when destroying
-	/// this context. (a list is populated in the create function)
+	/* Need a reference to the terminal escape sequence mappings when destroying
+	 * this context. (a list is populated in the create function)  */
 	struct kui_map_set *terminal_key_set;
 };
 

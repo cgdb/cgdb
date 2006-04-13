@@ -115,7 +115,7 @@ enum tgdb_client_supported_protocols {
  */
 /******************************************************************************/
 
-//@{
+/*@{*/
 
 /** 
  * This creates a client context. 
@@ -200,7 +200,7 @@ int tgdb_client_initialize_context (
  */
 int tgdb_client_destroy_context ( struct tgdb_client_context *tcc );
 
-//@}
+/*@}*/
 
 /******************************************************************************/
 /**
@@ -209,7 +209,7 @@ int tgdb_client_destroy_context ( struct tgdb_client_context *tcc );
  */
 /******************************************************************************/
 
-//@{
+/*@{*/
 
 /** 
  * Returns the last error message ?
@@ -287,7 +287,7 @@ int tgdb_client_prepare_for_command (
  */
 int tgdb_client_can_tgdb_run_commands ( struct tgdb_client_context *tcc );
 
-//@}
+/*@}*/
 
 /******************************************************************************/
 /**
@@ -296,7 +296,7 @@ int tgdb_client_can_tgdb_run_commands ( struct tgdb_client_context *tcc );
  */
 /******************************************************************************/
 
-//@{
+/*@{*/
 
  /** 
   * This recieves all of the output from the debugger. It is all routed 
@@ -359,7 +359,7 @@ int tgdb_client_parse_io (
  */
 struct tgdb_list *tgdb_client_get_client_commands ( 
 		struct tgdb_client_context *tcc );
-//@}
+/*@}*/
 
 
 /******************************************************************************/
@@ -369,7 +369,7 @@ struct tgdb_list *tgdb_client_get_client_commands (
  */
 /******************************************************************************/
 
-//@{
+/*@{*/
 
 /** 
  * Get's the absolute and relative path that relates to the path PATH.
@@ -474,7 +474,7 @@ char *tgdb_client_modify_breakpoint (
  */
 pid_t tgdb_client_get_debugger_pid ( struct tgdb_client_context *tcc );
 
-//@}
+/*@}*/
 
 /******************************************************************************/
 /**
@@ -485,7 +485,7 @@ pid_t tgdb_client_get_debugger_pid ( struct tgdb_client_context *tcc );
  */
 /******************************************************************************/
 
-//@{
+/*@{*/
 
 /** 
  * \param tcc
@@ -518,6 +518,6 @@ int tgdb_client_open_new_tty (
  */
 const char *tgdb_client_get_tty_name ( struct tgdb_client_context *tcc );
 
-//@}
+/*@}*/
 
 #endif

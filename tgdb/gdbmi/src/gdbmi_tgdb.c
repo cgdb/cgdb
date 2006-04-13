@@ -23,7 +23,6 @@
 #endif
 
 #if HAVE_SIGNAL_H
-//#include <sys/types.h>
 #include <signal.h>
 #endif /* HAVE_SIGNAL_H */
 
@@ -110,6 +109,7 @@ struct tgdb_gdbmi {
 	struct ibuf *tgdb_cur_output_command;
 };
 
+#if 0
 //static int gdbmi_set_inferior_tty ( void *ctx ) {
 //	struct annotate_two *a2 = (struct annotate_two *)ctx;
 //
@@ -189,6 +189,7 @@ struct tgdb_gdbmi {
 //	struct annotate_two *a2 = (struct annotate_two *)ctx;
 //	return a2->inferior_tty_name;
 //}
+#endif
 
 /* initialize_gdbmi
  *
@@ -316,10 +317,12 @@ int gdbmi_shutdown ( void *ctx ) {
 	return 0;
 }
 
+#if 0
 /* TODO: Implement error messages. */
 //int a2_err_msg ( void *ctx ) {
 //	return -1;
 //}
+#endif
 
 int gdbmi_is_client_ready(void *ctx) {
     return TRUE;
@@ -458,7 +461,7 @@ int gdbmi_parse_io (
 	}
 
 	if ( found_command ) {
-//		gdbmi_walk_command ( gdbmi->tgdb_cur_output_command );
+/*		gdbmi_walk_command ( gdbmi->tgdb_cur_output_command );*/
 		ibuf_clear ( gdbmi->tgdb_cur_output_command );
 	}
 
@@ -478,6 +481,7 @@ struct tgdb_list *gdbmi_get_client_commands ( void *ctx ) {
 	return gdbmi->client_command_list;
 }
 
+#if 0
 //
 //int a2_get_source_absolute_filename ( 
 //		void *ctx,
@@ -571,12 +575,14 @@ struct tgdb_list *gdbmi_get_client_commands ( void *ctx ) {
 //	} else 
 //		return NULL;
 //}
+#endif
 
 pid_t gdbmi_get_debugger_pid ( void *ctx ) {
 	struct tgdb_gdbmi *gdbmi = (struct tgdb_gdbmi *)ctx;
 	return gdbmi->debugger_pid;
 }
 
+#if 0
 //int a2_completion_callback(
 //		void *ctx,
 //		const char *command) {
@@ -591,6 +597,7 @@ pid_t gdbmi_get_debugger_pid ( void *ctx ) {
 //
 //    return 0;
 //}
+#endif
 
 int gdbmi_user_ran_command ( void *ctx ) {
 	return 0;
@@ -600,7 +607,9 @@ int gdbmi_prepare_for_command ( void *ctx, struct tgdb_client_command *com ) {
 	return 0;
 }
 
+#if 0
 //int a2_is_misc_prompt ( void *ctx ) {
 //	struct annotate_two *a2 = (struct annotate_two *)ctx;
 //	return globals_is_misc_prompt ( a2->g );
 //}
+#endif

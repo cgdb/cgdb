@@ -1,11 +1,11 @@
 #ifndef __KUI_TREE_H__
 #define __KUI_TREE_H__
 
-// Includes {{{
+/* Includes {{{*/
 
 #include "std_list.h"
 
-// }}}
+/* }}}*/
 
 /* Doxygen headers {{{ */
 /*! 
@@ -33,7 +33,7 @@
  */
 /******************************************************************************/
 
-//@{
+/*@{*/
 
 struct kui_tree;
 
@@ -58,7 +58,7 @@ struct kui_tree *kui_tree_create ( void );
  */
 int kui_tree_destroy ( struct kui_tree *ktree );
 
-//@}
+/*@}*/
 
 /******************************************************************************/
 /**
@@ -67,7 +67,7 @@ int kui_tree_destroy ( struct kui_tree *ktree );
  */
 /******************************************************************************/
 
-//@{
+/*@{*/
 
 /**
  * Adding a key to the kui tree.
@@ -102,7 +102,7 @@ int kui_tree_insert ( struct kui_tree *ktree, int *klist, void *data );
  */
 int kui_tree_delete ( struct kui_tree *ktree, int *klist );
 
-//@}
+/*@}*/
 
 
 /******************************************************************************/
@@ -113,7 +113,7 @@ int kui_tree_delete ( struct kui_tree *ktree, int *klist );
  */
 /******************************************************************************/
 
-//@{
+/*@{*/
 
 enum kui_tree_state {
 	KUI_TREE_FOUND = 0,
@@ -175,7 +175,7 @@ int kui_tree_get_state ( struct kui_tree *ktree, enum kui_tree_state *state );
  */
 int kui_tree_get_data ( struct kui_tree *ktree, void *data );
 
-//@}
+/*@}*/
 
 /******************************************************************************/
 /**
@@ -184,7 +184,7 @@ int kui_tree_get_data ( struct kui_tree *ktree, void *data );
  */
 /******************************************************************************/
 
-//@{
+/*@{*/
 
 /**
  * Advance the state of the tree by one key.
@@ -206,7 +206,7 @@ int kui_tree_push_key (
 		int key,
 	    int *map_found );
 
-//@}
+/*@}*/
 
 /* }}} */
 

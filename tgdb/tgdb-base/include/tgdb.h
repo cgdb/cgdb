@@ -15,7 +15,7 @@ extern "C"
 {
 #endif
 
-// includes {{{
+/* includes {{{*/
 #if HAVE_CONFIG_H
 #include "config.h"
 #endif				/* HAVE_CONFIG_H */
@@ -25,9 +25,9 @@ extern "C"
 #endif				/* HAVE_SYS_TYPES_H */
 
 #include "tgdb_types.h"
-// }}}
+/* }}}*/
 
-// Createing and Destroying a libtgdb context. {{{
+/* Createing and Destroying a libtgdb context. {{{*/
 /******************************************************************************/
 /**
  * @name Createing and Destroying a libtgdb context.
@@ -35,7 +35,7 @@ extern "C"
  */
 /******************************************************************************/
 
-//@{
+/*@{*/
 
   /**
    *  This struct is a reference to a libtgdb instance.
@@ -84,10 +84,10 @@ extern "C"
    */
   int tgdb_shutdown (struct tgdb *tgdb);
 
-//@}
-// }}}
+/*@}*/
+/* }}}*/
 
-// Status Commands {{{
+/* Status Commands {{{*/
 /******************************************************************************/
 /**
  * @name Status Commands
@@ -95,7 +95,7 @@ extern "C"
  */
 /******************************************************************************/
 
-//@{
+/*@{*/
 
   /**
    * If a function returns an error, this can be called to report more
@@ -123,10 +123,10 @@ extern "C"
    */
   int tgdb_is_busy (struct tgdb *tgdb, int *is_busy);
 
-//@}
-// }}}
+/*@}*/
+/* }}}*/
 
-// Input/Output commands {{{
+/* Input/Output commands {{{*/
 /******************************************************************************/
 /**
  * @name Input/Output commands
@@ -134,7 +134,7 @@ extern "C"
  */
 /******************************************************************************/
 
-//@{
+/*@{*/
 
   /**
    * Have TGDB process a command.
@@ -211,10 +211,10 @@ extern "C"
    */
   size_t tgdb_recv_inferior_data (struct tgdb *tgdb, char *buf, size_t n);
 
-//@}
-// }}}
+/*@}*/
+/* }}}*/
 
-// Getting Data out of TGDB {{{
+/* Getting Data out of TGDB {{{*/
 /******************************************************************************/
 /**
  * @name Getting Data out of TGDB
@@ -222,7 +222,7 @@ extern "C"
  */
 /******************************************************************************/
 
-//@{
+/*@{*/
 
   /**
    * Gets a response from TGDB.
@@ -254,10 +254,10 @@ extern "C"
    */
   void tgdb_delete_responses (struct tgdb *tgdb);
 
-//@}
-// }}}
+/*@}*/
+/* }}}*/
 
-// Inferior tty commands {{{
+/* Inferior tty commands {{{*/
 /******************************************************************************/
 /**
  * @name Inferior tty commands
@@ -267,7 +267,7 @@ extern "C"
  */
 /******************************************************************************/
 
-//@{
+/*@{*/
 
   /**
    * This allocates a new tty and tells the debugger to use it for I/O
@@ -301,10 +301,10 @@ extern "C"
    */
   const char *tgdb_tty_name (struct tgdb *tgdb);
 
-//@}
-// }}}
+/*@}*/
+/* }}}*/
 
-// Functional commands {{{
+/* Functional commands {{{*/
 /******************************************************************************/
 /**
  * @name Functional commands
@@ -312,7 +312,7 @@ extern "C"
  */
 /******************************************************************************/
 
-//@{
+/*@{*/
 
   /**
    * This sends a console command to the debugger (GDB).
@@ -441,10 +441,10 @@ extern "C"
    */
   tgdb_request_ptr tgdb_request_complete (struct tgdb *tgdb, const char *line);
 
-//@}
-// }}}
+/*@}*/
+/* }}}*/
 
-// TGDB Queue commands {{{
+/* TGDB Queue commands {{{*/
 /******************************************************************************/
 /**
  * @name Queuing of TGDB commands
@@ -494,9 +494,9 @@ extern "C"
    */
   int tgdb_queue_size (struct tgdb *tgdb, int *size);
 
-// }}}
+/* }}}*/
 
-// Signal Handling Support {{{
+/* Signal Handling Support {{{*/
 /******************************************************************************/
 /**
  * @name Signal Handling Support
@@ -504,7 +504,7 @@ extern "C"
  */
 /******************************************************************************/
 
-//@{
+/*@{*/
 
   /**
    * The front end can use this function to notify libtgdb that an
@@ -526,10 +526,10 @@ extern "C"
    */
   int tgdb_signal_notification (struct tgdb *tgdb, int signum);
 
-//@}
-// }}}
+/*@}*/
+/* }}}*/
 
-// Config Options {{{
+/* Config Options {{{*/
 /******************************************************************************/
 /**
  * @name TGDB Config Options
@@ -538,7 +538,7 @@ extern "C"
  */
 /******************************************************************************/
 
-//@{
+/*@{*/
 
   /**
    * This sets the verbosity of the GUI's commands.
@@ -578,8 +578,8 @@ extern "C"
    */
   int tgdb_set_verbose_error_handling (struct tgdb *tgdb, int value);
 
-//@}
-// }}}
+/*@}*/
+/* }}}*/
 
 #ifdef __cplusplus
 }

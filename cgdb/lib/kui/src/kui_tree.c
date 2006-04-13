@@ -2,14 +2,14 @@
 #include <string.h>
 #include "kui_tree.h"
 
-// Internal Documentation {{{
+/* Internal Documentation {{{*/
 /*
  * This documentation is intended to be a brief description behind how kui_tree
  * works internally.
  *
  */
 
-// }}}
+/* }}}*/
 
 /* struct kui_tree_node {{{ */
 
@@ -280,16 +280,16 @@ static int kui_tree_node_delete (
  * Also, it can determine what mapping was reached if one was found.
  */
 struct kui_tree {
-	/// The root of the tree
+	/* The root of the tree*/
 	struct kui_tree_node *root;
-	/// The current position pointing into the tree ( while looking for a map )
+	/* The current position pointing into the tree ( while looking for a map )*/
 	struct kui_tree_node *cur;
-	/// The last node found while looking for a map.
-	/// This happens because maps can be subsets of other maps.
+	/* The last node found while looking for a map.*/
+	/* This happens because maps can be subsets of other maps.*/
 	struct kui_tree_node *found_node;
-	/// The internal state of the tree ( still looking, map found, not found )
+	/* The internal state of the tree ( still looking, map found, not found )*/
 	enum kui_tree_state state;
-	/// If a map was found at all, this is set to 1 while looking, otherwise 0.
+	/* If a map was found at all, this is set to 1 while looking, otherwise 0.*/
 	int found;
 };
 

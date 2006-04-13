@@ -10,6 +10,10 @@
 #include <string.h>
 #endif /* HAVE_STRING_H */
 
+#if HAVE_STRINGS_H
+#include <strings.h>
+#endif /* HAVE_STRINGS_H */
+
 #if HAVE_STDLIB_H
 #include <stdlib.h> /* for getenv */
 #endif /* HAVE_STDLIB_H */
@@ -37,11 +41,11 @@ extern char *tgoto();
  * termcap and terminfo.
  */
 struct tlist {
-	/// the termcap capability name
+	/* the termcap capability name  */
     char *tname;
-	/// the terminfo capability name
+	/* the terminfo capability name  */
     char *tiname;
-	/// the ascii representation of this key
+	/* the ascii representation of this key  */
     char *cgdb_key_code;
 } seqlist[] = {
   { "@7", "kend",   "<End>" },
@@ -87,8 +91,8 @@ struct tlist {
  */
 static int add_keybindings( struct kui_map_set *map ) {
 	/* Testing */
-//	if ( kui_ms_register_map ( map, "ab", "<ESC>xyz" ) == -1 ) return -1;
-//	if ( kui_ms_register_map ( map, "abcdf", "never_reached" ) == -1 ) return -1;
+/*	if ( kui_ms_register_map ( map, "ab", "<ESC>xyz" ) == -1 ) return -1; */
+/*	if ( kui_ms_register_map ( map, "abcdf", "never_reached" ) == -1 ) return -1; */
 	
 	if ( kui_ms_register_map ( map, "\033", "<Esc>" ) == -1 ) return -1;
 
@@ -346,12 +350,12 @@ struct kui_map_set *kui_term_get_terminal_mappings ( void ) {
  * vice versa.
  */
 struct cgdb_key_data {
-	/// This is the "key" that can be converted to text.
+	/* This is the "key" that can be converted to text.  */
 	enum cgdb_key key;
-	/// This is the text value associated with the key
+	/* This is the text value associated with the key  */
 	const char *keycode;
-	/// This is here purely for debugging purposes, it is used to print out the key
-	/// in human readable form.
+	/* This is here purely for debugging purposes, it is used to print out the key
+	 * in human readable form.  */
 	const char *key_as_string;
 } cgdb_keys[CGDB_KEY_ERROR-CGDB_KEY_ESC+1] = {
 	{

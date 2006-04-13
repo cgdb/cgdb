@@ -95,7 +95,7 @@ enum annotate_commands {
  */
 /******************************************************************************/
 
-//@{
+/*@{*/
 
 /** 
  * This invokes a libannotate_two library instance.
@@ -164,7 +164,7 @@ int a2_initialize (
  */
 int a2_shutdown ( void *ctx );
 
-//@}
+/*@}*/
 
 /******************************************************************************/
 /**
@@ -173,7 +173,7 @@ int a2_shutdown ( void *ctx );
  */
 /******************************************************************************/
 
-//@{
+/*@{*/
 
 /** 
  * Returns the last error message ?
@@ -238,7 +238,7 @@ int a2_prepare_for_command ( void *ctx, struct tgdb_client_command *com );
  */
 int a2_is_misc_prompt ( void *ctx );
 
-//@}
+/*@}*/
 
 /******************************************************************************/
 /**
@@ -247,7 +247,7 @@ int a2_is_misc_prompt ( void *ctx );
  */
 /******************************************************************************/
 
-//@{
+/*@{*/
 
  /** 
   * This recieves all of the output from the debugger. It is all routed 
@@ -307,7 +307,7 @@ int a2_parse_io (
  */
 struct tgdb_list *a2_get_client_commands ( void *ctx );
 
-//@}
+/*@}*/
 
 /******************************************************************************/
 /**
@@ -316,7 +316,7 @@ struct tgdb_list *a2_get_client_commands ( void *ctx );
  */
 /******************************************************************************/
 
-//@{
+/*@{*/
 
 /** 
  * Gets the Absolute path of FILE.
@@ -416,7 +416,7 @@ char *a2_client_modify_breakpoint (
  */
 pid_t a2_get_debugger_pid ( void *ctx );
 
-//@}
+/*@}*/
 
 /******************************************************************************/
 /**
@@ -425,7 +425,7 @@ pid_t a2_get_debugger_pid ( void *ctx );
  */
 /******************************************************************************/
 
-//@{
+/*@{*/
 
 /** 
  * \param ctx
@@ -451,6 +451,6 @@ int a2_open_new_tty ( void *ctx, int *inferior_stdin, int *inferior_stdout );
  */
 const char *a2_get_tty_name ( void *ctx );
 
-//@}
+/*@}*/
 
 #endif /* __A2_TGDB_H__ */

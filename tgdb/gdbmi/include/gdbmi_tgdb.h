@@ -87,7 +87,7 @@ enum gdbmi_commands {
  */
 /******************************************************************************/
 
-//@{
+/*@{*/
 
 /** 
  * This invokes a libgdbmi library instance.
@@ -156,7 +156,7 @@ int gdbmi_initialize (
  */
 int gdbmi_shutdown ( void *ctx );
 
-//@}
+/*@}*/
 
 /******************************************************************************/
 /**
@@ -165,7 +165,7 @@ int gdbmi_shutdown ( void *ctx );
  */
 /******************************************************************************/
 
-//@{
+/*@{*/
 
 /** 
  * Returns the last error message ?
@@ -230,7 +230,7 @@ int gdbmi_prepare_for_command ( void *ctx, struct tgdb_client_command *com );
  */
 int gdbmi_is_misc_prompt ( void *ctx );
 
-//@}
+/*@}*/
 
 /******************************************************************************/
 /**
@@ -239,7 +239,7 @@ int gdbmi_is_misc_prompt ( void *ctx );
  */
 /******************************************************************************/
 
-//@{
+/*@{*/
 
  /** 
   * This recieves all of the output from the debugger. It is all routed 
@@ -299,7 +299,7 @@ int gdbmi_parse_io (
  */
 struct tgdb_list *gdbmi_get_client_commands ( void *ctx );
 
-//@}
+/*@}*/
 
 /******************************************************************************/
 /**
@@ -308,7 +308,7 @@ struct tgdb_list *gdbmi_get_client_commands ( void *ctx );
  */
 /******************************************************************************/
 
-//@{
+/*@h*/
 
 /** 
  * Gets the Absolute path of FILE.
@@ -425,7 +425,7 @@ char *gdbmi_client_modify_breakpoint (
  */
 pid_t gdbmi_get_debugger_pid ( void *ctx );
 
-//@}
+/*@}*/
 
 /******************************************************************************/
 /**
@@ -434,7 +434,7 @@ pid_t gdbmi_get_debugger_pid ( void *ctx );
  */
 /******************************************************************************/
 
-//@{
+/*@{*/
 
 /** 
  * \param ctx
@@ -460,6 +460,6 @@ int gdbmi_open_new_tty ( void *ctx, int *inferior_stdin, int *inferior_stdout );
  */
 char *gdbmi_get_tty_name ( void *ctx );
 
-//@}
+/*@}*/
 
 #endif /* __GDBMI_TGDB_H__ */

@@ -60,7 +60,7 @@ static struct ConfigVariable
     enum ConfigType type;
     void *data;
 } VARIABLES[] = {
-    // keep this stuff sorted! !sort
+    /* keep this stuff sorted! !sort*/
     /* arrowstyle */
     { "arrowstyle", "as", CONFIG_TYPE_FUNC_STRING, command_set_arrowstyle},
 
@@ -119,11 +119,11 @@ typedef int (*action_t)(void);
 static struct commands
 {
     const char *name;
-    // these functions will return 0 on success and 1 on error.  
-    // Should the configuration file processing continue after an error?
+    /* these functions will return 0 on success and 1 on error.  */
+    /* Should the configuration file processing continue after an error?*/
     action_t action;
 } COMMANDS[] = {
-    // keep this stuff sorted, you can use !sort in vi
+    /* keep this stuff sorted, you can use !sort in vi*/
     /* continue    */ { "continue",    command_do_continue },
     /* edit        */ { "e",           command_source_reload },
     /* edit        */ { "edit",        command_source_reload },
@@ -226,7 +226,7 @@ int command_set_winsplit( const char *value )
       if_set_winsplit( WIN_SPLIT_BOTTOM_FULL );
    } else {
       if_set_winsplit( WIN_SPLIT_EVEN );
-   } // end if
+   } /* end if*/
 
    return 0;
 }

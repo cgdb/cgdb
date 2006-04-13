@@ -330,7 +330,7 @@ tgdb_initialize_logger_interface (struct tgdb *tgdb, char *config_dir)
   return 0;
 }
 
-// Createing and Destroying a libtgdb context. {{{
+/* Createing and Destroying a libtgdb context. {{{*/
 
 struct tgdb *
 tgdb_initialize (const char *debugger,
@@ -366,7 +366,7 @@ tgdb_initialize (const char *debugger,
 
   tgdb->tcc = tgdb_client_create_context (debugger, argc, argv, config_dir,
 					  TGDB_CLIENT_DEBUGGER_GNU_GDB,
-//                      TGDB_CLIENT_PROTOCOL_GNU_GDB_GDBMI,
+/*                      TGDB_CLIENT_PROTOCOL_GNU_GDB_GDBMI,*/
 					  TGDB_CLIENT_PROTOCOL_GNU_GDB_ANNOTATE_TWO,
 					  logger);
 
@@ -428,7 +428,7 @@ tgdb_shutdown (struct tgdb *tgdb)
   return tgdb_client_destroy_context (tgdb->tcc);
 }
 
-// }}}
+/* }}}*/
 
 char *
 tgdb_err_msg (struct tgdb *tgdb)
@@ -1161,7 +1161,7 @@ tgdb_finish:
   return buf_size;
 }
 
-// Getting Data out of TGDB {{{
+/* Getting Data out of TGDB {{{*/
 
 struct tgdb_response *
 tgdb_get_response (struct tgdb *tgdb)
@@ -1191,9 +1191,9 @@ tgdb_delete_responses (struct tgdb *tgdb)
   tgdb_list_free (tgdb->command_list, tgdb_types_free_command);
 }
 
-// }}}
+/* }}}*/
 
-// Inferior tty commands {{{
+/* Inferior tty commands {{{*/
 
 int
 tgdb_tty_new (struct tgdb *tgdb)
@@ -1213,11 +1213,11 @@ tgdb_tty_name (struct tgdb *tgdb)
   return tgdb_client_get_tty_name (tgdb->tcc);
 }
 
-// }}}
+/* }}}*/
 
 /* Functional commands {{{ */
 
-// Request {{{
+/* Request {{{*/
 
 tgdb_request_ptr
 tgdb_request_run_console_command (struct tgdb *tgdb, const char *command)
@@ -1359,9 +1359,9 @@ tgdb_request_complete (struct tgdb *tgdb, const char *line)
   return request_ptr;
 }
 
-// }}}
+/* }}}*/
 
-// Process {{{
+/* Process {{{*/
 
 int
 tgdb_process_console_command (struct tgdb *tgdb, tgdb_request_ptr request)
@@ -1526,11 +1526,11 @@ tgdb_process_command (struct tgdb *tgdb, tgdb_request_ptr request)
   return 0;
 }
 
-// }}}
+/* }}}*/
 
 /* }}} */
 
-// TGDB Queue commands {{{
+/* TGDB Queue commands {{{*/
 
 int 
 tgdb_queue_append (struct tgdb *tgdb, tgdb_request_ptr request)
@@ -1567,9 +1567,9 @@ tgdb_queue_size (struct tgdb *tgdb, int *size)
   return 0;
 }
 
-// }}}
+/* }}}*/
 
-// Signal Handling Support {{{
+/* Signal Handling Support {{{*/
 
 int
 tgdb_signal_notification (struct tgdb *tgdb, int signum)
@@ -1602,9 +1602,9 @@ tgdb_signal_notification (struct tgdb *tgdb, int signum)
   return 0;
 }
 
-// }}}
+/* }}}*/
 
-// Config Options {{{
+/* Config Options {{{*/
 int
 tgdb_set_verbose_gui_command_output (struct tgdb *tgdb, int value)
 {
@@ -1632,4 +1632,4 @@ tgdb_set_verbose_error_handling (struct tgdb *tgdb, int value)
   return logger_is_recording (logger);
 }
 
-// }}}
+/* }}}*/

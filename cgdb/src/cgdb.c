@@ -221,7 +221,7 @@ handle_request (struct tgdb *tgdb, struct tgdb_request *request)
   return 0;
 }
 
-// readline code {{{
+/* readline code {{{*/
 
 /* Please forgive me for adding all the comment below. This function
  * has some strange bahaviors that I thought should be well explained.
@@ -586,7 +586,7 @@ change_prompt (const char *new_prompt)
   rline_set_prompt (rline, new_prompt);
 }
 
-// }}}
+/* }}}*/
 
 /* ------------------------ */
 /* Initialization functions */

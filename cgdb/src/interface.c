@@ -634,28 +634,28 @@ increase_win_height (int jump_or_tty)
 
   if (jump_or_tty)
     {
-      // user input: '+' 
+      /* user input: '+' */
       if (tty_win_on)
 	{
-	  // tty window is visible
+	  /* tty window is visible*/
 	  height = get_gdb_height () + get_tty_height ();
 
 	  if (tty_win_height_shift + TTY_WIN_DEFAULT_HEIGHT <
 	      height - interface_winminheight)
 	    {
-	      // increase tty window size by 1
+	      /* increase tty window size by 1*/
 	      tty_win_height_shift++;
 	    }
 	}
       else
 	{
-	  // no tty window
+	  /* no tty window*/
 	  if (cur_win_split == WIN_SPLIT_FREE)
 	    {
-	      // cur position is not on mark, find nearest mark
+	      /* cur position is not on mark, find nearest mark*/
 	      cur_win_split = (int) (2 * window_height_shift) / height;
 
-	      // handle rounding on either side of mid-way mark
+	      /* handle rounding on either side of mid-way mark*/
 	      if (window_height_shift > 0)
 		{
 		  cur_win_split++;
@@ -663,29 +663,29 @@ increase_win_height (int jump_or_tty)
 	    }
 	  else
 	    {
-	      // increase to next mark
+	      /* increase to next mark*/
 	      cur_win_split++;
 	    }
 
-	  // check split bounds
+	  /* check split bounds*/
 	  if (cur_win_split > WIN_SPLIT_TOP_FULL)
 	    {
 	      cur_win_split = WIN_SPLIT_TOP_FULL;
 	    }
 
-	  // set window height to specified quarter mark
+	  /* set window height to specified quarter mark*/
 	  window_height_shift = (int) (height * (cur_win_split / 2.0));
 	}
     }
   else
     {
-      // user input: '='
-      cur_win_split = WIN_SPLIT_FREE;	// cur split is not on a mark
-      window_height_shift++;	// increase src window size by 1
+      /* user input: '='*/
+      cur_win_split = WIN_SPLIT_FREE;	/* cur split is not on a mark*/
+      window_height_shift++;	/* increase src window size by 1*/
 
     }
 
-  // reduce flicker by avoiding unnecessary redraws
+  /* reduce flicker by avoiding unnecessary redraws*/
   if (window_height_shift != old_window_height_shift ||
       tty_win_height_shift != old_tty_win_height_shift)
     {
@@ -711,26 +711,26 @@ decrease_win_height (int jump_or_tty)
 
   if (jump_or_tty)
     {
-      // user input: '_'
+      /* user input: '_'*/
       if (tty_win_on)
 	{
-	  // tty window is visible
+	  /* tty window is visible*/
 	  if (tty_win_height_shift >
 	      -(TTY_WIN_DEFAULT_HEIGHT - interface_winminheight))
 	    {
-	      // decrease tty window size by 1
+	      /* decrease tty window size by 1*/
 	      tty_win_height_shift--;
 	    }
 	}
       else
 	{
-	  // no tty window
+	  /* no tty window*/
 	  if (cur_win_split == WIN_SPLIT_FREE)
 	    {
-	      // cur position is not on mark, find nearest mark
+	      /* cur position is not on mark, find nearest mark*/
 	      cur_win_split = (int) (2 * window_height_shift) / height;
 
-	      // handle rounding on either side of mid-way mark
+	      /* handle rounding on either side of mid-way mark*/
 	      if (window_height_shift < 0)
 		{
 		  cur_win_split--;
@@ -738,29 +738,29 @@ decrease_win_height (int jump_or_tty)
 	    }
 	  else
 	    {
-	      // decrease to next mark
+	      /* decrease to next mark*/
 	      cur_win_split--;
 	    }
 
-	  // check split bounds
+	  /* check split bounds*/
 	  if (cur_win_split < WIN_SPLIT_BOTTOM_FULL)
 	    {
 	      cur_win_split = WIN_SPLIT_BOTTOM_FULL;
 	    }
 
-	  // set window height to specified quarter mark
+	  /* set window height to specified quarter mark*/
 	  window_height_shift = (int) (height * (cur_win_split / 2.0));
 	}
     }
   else
     {
-      // user input: '-'
-      cur_win_split = WIN_SPLIT_FREE;	// cur split is not on a mark
-      window_height_shift--;	// decrease src window size by 1
+      /* user input: '-'*/
+      cur_win_split = WIN_SPLIT_FREE;	/* cur split is not on a mark*/
+      window_height_shift--;	/* decrease src window size by 1*/
 
     }
 
-  // reduce flicker by avoiding unnecessary redraws
+  /* reduce flicker by avoiding unnecessary redraws*/
   if (window_height_shift != old_window_height_shift ||
       tty_win_height_shift != old_tty_win_height_shift)
     {
@@ -1124,19 +1124,19 @@ source_input (struct sviewer *sview, int key)
       source_set_sel_line (sview, 10000000);
       break;
     case '=':
-      // inc window by 1
+      /* inc window by 1*/
       increase_win_height (0);
       break;
     case '-':
-      // dec window by 1
+      /* dec window by 1*/
       decrease_win_height (0);
       break;
     case '+':
-      // inc to jump or inc tty
+      /* inc to jump or inc tty*/
       increase_win_height (1);
       break;
     case '_':
-      // dec to jump or dec tty
+      /* dec to jump or dec tty*/
       decrease_win_height (1);
       break;
     case 'o':

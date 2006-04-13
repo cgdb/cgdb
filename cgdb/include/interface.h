@@ -11,14 +11,14 @@
 /* Local Includes */
 #include "sources.h"
 
-// window split type enumeration
-typedef enum { WIN_SPLIT_FREE        = -3,   // split point not on quarter mark
+/* window split type enumeration*/
+typedef enum { WIN_SPLIT_FREE        = -3,   /* split point not on quarter mark*/
 
-               WIN_SPLIT_BOTTOM_FULL = -2,   // src window is 0%   of screen
-               WIN_SPLIT_BOTTOM_BIG  = -1,   // src window is 25%  of screen
-               WIN_SPLIT_EVEN        =  0,   // src window is 50%  of screen
-               WIN_SPLIT_TOP_BIG     =  1,   // src window is 75%  of screen
-               WIN_SPLIT_TOP_FULL    =  2    // src window is 100% of screen
+               WIN_SPLIT_BOTTOM_FULL = -2,   /* src window is 0%   of screen*/
+               WIN_SPLIT_BOTTOM_BIG  = -1,   /* src window is 25%  of screen*/
+               WIN_SPLIT_EVEN        =  0,   /* src window is 50%  of screen*/
+               WIN_SPLIT_TOP_BIG     =  1,   /* src window is 75%  of screen*/
+               WIN_SPLIT_TOP_FULL    =  2    /* src window is 100% of screen*/
 
              } WIN_SPLIT_TYPE;
 

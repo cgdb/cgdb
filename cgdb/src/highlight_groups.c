@@ -8,7 +8,7 @@
 /* term.h prototypes */
 extern int tgetnum();
 
-// internal {{{
+/* internal {{{*/
 
 #define UNSPECIFIED_COLOR (-2)
 
@@ -362,10 +362,10 @@ setup_group (hl_groups_ptr hl_groups, enum hl_group_kind group,
   return 0;
 }
 
-// }}}
+/* }}}*/
 
-// Creating and Destroying a hl_groups context. {{{
-//@{
+/* Creating and Destroying a hl_groups context. {{{*/
+/*@{*/
 
 hl_groups_ptr
 hl_groups_initialize (void)
@@ -406,12 +406,12 @@ hl_groups_shutdown (hl_groups_ptr hl_groups)
   return 0;
 }
 
-//@}
-// }}}
+/*@}*/
+/* }}}*/
 
-// Functional commands {{{
+/* Functional commands {{{*/
 
-//@{
+/*@{*/
 
 int
 hl_groups_setup (hl_groups_ptr hl_groups)
@@ -700,5 +700,5 @@ hl_groups_parse_config (hl_groups_ptr hl_groups)
   return 0;
 }
 
-//@}
-// }}}
+/*@}*/
+/* }}}*/

@@ -46,7 +46,7 @@ extern "C"
  */
 /******************************************************************************/
 
-//@{
+/*@{*/
 
  /**
   * This will print a client generated command to stderr.
@@ -83,7 +83,7 @@ extern "C"
   void tgdb_types_append_command (struct tgdb_list *command_list,
 				  struct tgdb_response *response);
 
-//@}
+/*@}*/
 
  /**
   * The client can give any of these commands to TGDB through 

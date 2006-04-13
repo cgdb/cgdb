@@ -112,4 +112,4 @@ int io_data_ready ( int fd, int ms );
  */
 int io_getchar (int fd, unsigned int ms, int *key);
 
-#endif // __IO_H__
+#endif /* __IO_H__ */

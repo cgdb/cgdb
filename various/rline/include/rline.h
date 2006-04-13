@@ -14,7 +14,7 @@
 
 #include "tgdb_list.h"
 
-// Createing and Destroying a librline context. {{{
+/* Createing and Destroying a librline context. {{{ */
 /******************************************************************************/
 /**
  * @name Createing and Destroying a librline context.
@@ -22,7 +22,7 @@
  */
 /******************************************************************************/
 
-//@{
+/*@{*/
 
 /**
  *  This struct is a reference to a librline instance.
@@ -70,10 +70,10 @@ struct rline* rline_initialize (int slavefd, command_cb *command, completion_cb 
  */
 int rline_shutdown (struct rline *rline);
 
-//@}
-// }}}
+/*@}*/
+/* }}}*/
 
-// Reading and Writing the librline context. {{{
+/* Reading and Writing the librline context. {{{*/
 /******************************************************************************/
 /**
  * @name Reading and Writing the librline context.
@@ -81,7 +81,7 @@ int rline_shutdown (struct rline *rline);
  */
 /******************************************************************************/
 
-//@{
+/*@{*/
 
 /**
  * Read readline history into memory.
@@ -111,10 +111,10 @@ int rline_read_history (struct rline *rline, const char *file);
  */
 int rline_write_history (struct rline *rline, const char *file);
 
-//@}
-// }}}
+/*@}*/
+/* }}}*/
 
-// Functional commands {{{
+/* Functional commands {{{*/
 /******************************************************************************/
 /**
  * @name Functional commands
@@ -122,7 +122,7 @@ int rline_write_history (struct rline *rline, const char *file);
  */
 /******************************************************************************/
 
-//@{
+/*@{*/
 
 /**
  * Ask librline to change the current prompt that it use's.
@@ -276,7 +276,7 @@ int rline_resize_terminal_and_redisplay (struct rline *rline, int rows, int cols
  */
 int rline_get_rl_completion_query_items (struct rline *rline);
 
-//@}
-// }}}
+/*@}*/
+/* }}}*/
 
 #endif /* __RL_H__ */

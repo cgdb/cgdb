@@ -14,7 +14,7 @@
  * the screen.
  */
 
-// hl_group_kind {{{
+/* hl_group_kind {{{*/
 
 /**
  * This is all of the different syntax highlighting color possibilities.
@@ -45,9 +45,9 @@ enum hl_group_kind
   HLG_LAST
 };
 
-// }}}
+/* }}}*/
 
-// Createing and Destroying a hl_groups context. {{{
+/* Createing and Destroying a hl_groups context. {{{*/
 /******************************************************************************/
 /**
  * @name Createing and Destroying a hl_groups context.
@@ -55,7 +55,7 @@ enum hl_group_kind
  */
 /******************************************************************************/
 
-//@{
+/*@{*/
 
 /**
  *  This struct is a reference to a hl_groups instance.
@@ -94,10 +94,10 @@ hl_groups_ptr hl_groups_initialize (void);
  */
 int hl_groups_shutdown (hl_groups_ptr hl_groups);
 
-//@}
-// }}}
+/*@}*/
+/* }}}*/
 
-// Functional commands {{{
+/* Functional commands {{{*/
 /******************************************************************************/
 /**
  * @name Functional commands
@@ -105,7 +105,7 @@ int hl_groups_shutdown (hl_groups_ptr hl_groups);
  */
 /******************************************************************************/
 
-//@{
+/*@{*/
 
 /**
  * Setup the highlighting group to have all of the default values.
@@ -147,7 +147,7 @@ int hl_groups_get_attr (hl_groups_ptr hl_groups, enum hl_group_kind kind, int *a
  */
 int hl_groups_parse_config (hl_groups_ptr hl_groups);
 
-//@}
-// }}}
+/*@}*/
+/* }}}*/
 
 #endif 	/* __HIGHLIGHT_GROUPS_H__ */

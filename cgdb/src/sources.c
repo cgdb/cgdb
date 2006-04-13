@@ -345,10 +345,10 @@ static void draw_current_line(struct sviewer *sview, int line, int lwidth) {
             wattron(sview->win, arrow_attr);
             waddch(sview->win, ACS_LTEE);
 
-            // Compute the length of the arrow, respecting tab stops, etc.
+            /* Compute the length of the arrow, respecting tab stops, etc.*/
             for (i = 0; i < length-1 && isspace(otext[i]); i++) {
 
-                // Oh so cryptic
+                /* Oh so cryptic*/
                 int offset = otext[i] != '\t' ? 1 :
                         highlight_tabstop - (column_offset % highlight_tabstop);
 
@@ -363,7 +363,7 @@ static void draw_current_line(struct sviewer *sview, int line, int lwidth) {
                 column_offset = 0;
             }
 
-            // Now actually draw the arrow
+            /* Now actually draw the arrow*/
             for (j = 0; j < column_offset; j++) {
                 waddch(sview->win, ACS_HLINE);
             }
