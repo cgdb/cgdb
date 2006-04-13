@@ -1,3 +1,6 @@
+   * CGDB now compiles according to the c89 standard. This should help with
+     porting to older systems.
+   
    * The file cgdb.txt is now installed into $PREFIX/share/cgdb/cgdb.txt. This
      is the file CGDB will now use to display the manual when :help is typed.
      This prevents CGDB from copying the data into the users home directory.
