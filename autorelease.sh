@@ -10,34 +10,13 @@ CGDB_VERSION=$1
 CGDB_RELEASE=cgdb-$CGDB_VERSION
 CGDB_SOURCE_DIR=$PWD
 CGDB_BUILD_DIR=$PWD/version.texi.builddir
+CGDB_C89_BUILD_DIR=$PWD/c89.builddir
 CGDB_OUTPUT_LOG=$PWD/output.log
 
 ################################################################################
 echo "-- Writing results of all commands in $CGDB_OUTPUT_LOG"
 ################################################################################
 rm $CGDB_OUTPUT_LOG
-
-################################################################################
-echo "-- Verify autotool versions"
-################################################################################
-
-AUTO_VERSION=`autoconf -V | grep "autoconf" | perl -pi -e 's/autoconf \(GNU Autoconf\) ([^d]+)/$1/g'`
-if [ "$AUTO_VERSION" != "2.59" ]; then
-  echo "Expected autoconf 2.59, you are using $AUTO_VERSION, aborting ..."
-  exit
-fi
-
-AUTO_VERSION=`aclocal --version | grep "aclocal" | perl -pi -e 's/aclocal \(GNU automake\) ([^d]+)/$1/g'`
-if [ "$AUTO_VERSION" != "1.9.5" ]; then
-  echo "Expected autoconf 1.9.5, you are using $AUTO_VERSION, aborting ..."
-  exit
-fi
-
-AUTO_VERSION=`m4 --version | grep "GNU" | perl -pi -e 's/GNU M4 ([^d]+)/$1/g'`
-if [ "$AUTO_VERSION" != "1.4.3" ]; then
-  echo "Expected autoconf 1.4.3, you are using $AUTO_VERSION, aborting ..."
-  exit
-fi
 
 ################################################################################
 echo "-- Update configure.in to reflect the new version number"
@@ -50,6 +29,19 @@ echo "-- Regenerate the autoconf files"
 ./autoregen.sh >> $CGDB_OUTPUT_LOG 2>&1
 
 ################################################################################
+echo "-- Verify CGDB works with --std=c89"
+################################################################################
+rm -fr $CGDB_C89_BUILD_DIR
+mkdir $CGDB_C89_BUILD_DIR
+cd $CGDB_C89_BUILD_DIR
+$CGDB_SOURCE_DIR/configure CFLAGS="-g --std=c89 -D_XOPEN_SOURCE=600" --with-readline=/home/bob/download/readline/readline-5.1/target >> $CGDB_OUTPUT_LOG 2>&1 
+make -s >> $CGDB_OUTPUT_LOG 2>&1
+if [ "$?" != "0" ]; then
+  echo "make --std=c89 failed. Look at $CGDB_OUTPUT_LOG for more detials."
+  exit
+fi
+
+################################################################################
 echo "-- Get the new doc/version.texi file"
 ################################################################################
 rm -fr $CGDB_BUILD_DIR
@@ -57,6 +49,10 @@ mkdir $CGDB_BUILD_DIR
 cd $CGDB_BUILD_DIR
 $CGDB_SOURCE_DIR/configure --enable-maintainer-mode --with-readline=/home/bob/download/readline/readline-5.1/target >> $CGDB_OUTPUT_LOG 2>&1
 make -s >> $CGDB_OUTPUT_LOG 2>&1
+if [ "$?" != "0" ]; then
+  echo "make failed. Look at $CGDB_OUTPUT_LOG for more detials."
+  exit
+fi
 cd doc/
 
 ################################################################################
