@@ -181,7 +181,8 @@ AC_TYPE_SIGNAL
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(mkdir putenv select strdup strerror)
 
-AC_OUTPUT(Makefile \
+AC_OUTPUT(Makefile lib/Makefile \
+lib/gdbmi/Makefile lib/gdbmi/src/Makefile \
 various/Makefile \
 various/util/Makefile various/util/src/Makefile \
 various/adt/Makefile various/adt/src/Makefile \

@@ -6925,7 +6925,7 @@ fi
 done
 
 
-                                                                                                                                                                                                                                      ac_config_files="$ac_config_files Makefile various/Makefile various/util/Makefile various/util/src/Makefile various/adt/Makefile various/adt/src/Makefile various/rline/Makefile various/rline/src/Makefile tgdb/Makefile tgdb/annotate-two/Makefile tgdb/annotate-two/src/Makefile tgdb/gdbmi/Makefile tgdb/gdbmi/src/Makefile tgdb/tgdb-base/Makefile tgdb/tgdb-base/src/Makefile doc/Makefile cgdb/Makefile cgdb/src/Makefile cgdb/lib/Makefile cgdb/lib/kui/Makefile cgdb/lib/kui/src/Makefile cgdb/tokenizer/Makefile cgdb/tokenizer/src/Makefile"
+                                                                                                                                                                                                                                                                    ac_config_files="$ac_config_files Makefile lib/Makefile lib/gdbmi/Makefile lib/gdbmi/src/Makefile various/Makefile various/util/Makefile various/util/src/Makefile various/adt/Makefile various/adt/src/Makefile various/rline/Makefile various/rline/src/Makefile tgdb/Makefile tgdb/annotate-two/Makefile tgdb/annotate-two/src/Makefile tgdb/gdbmi/Makefile tgdb/gdbmi/src/Makefile tgdb/tgdb-base/Makefile tgdb/tgdb-base/src/Makefile doc/Makefile cgdb/Makefile cgdb/src/Makefile cgdb/lib/Makefile cgdb/lib/kui/Makefile cgdb/lib/kui/src/Makefile cgdb/tokenizer/Makefile cgdb/tokenizer/src/Makefile"
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -7483,6 +7483,9 @@ do
   case "$ac_config_target" in
   # Handling of arguments.
   "Makefile" ) CONFIG_FILES="$CONFIG_FILES Makefile" ;;
+  "lib/Makefile" ) CONFIG_FILES="$CONFIG_FILES lib/Makefile" ;;
+  "lib/gdbmi/Makefile" ) CONFIG_FILES="$CONFIG_FILES lib/gdbmi/Makefile" ;;
+  "lib/gdbmi/src/Makefile" ) CONFIG_FILES="$CONFIG_FILES lib/gdbmi/src/Makefile" ;;
   "various/Makefile" ) CONFIG_FILES="$CONFIG_FILES various/Makefile" ;;
   "various/util/Makefile" ) CONFIG_FILES="$CONFIG_FILES various/util/Makefile" ;;
   "various/util/src/Makefile" ) CONFIG_FILES="$CONFIG_FILES various/util/src/Makefile" ;;
