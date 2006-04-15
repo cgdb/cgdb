@@ -43,6 +43,8 @@ case $host in
    ;;
 esac
 
+AC_CONFIG_SUBDIRS([lib/gdbmi])
+
 dnl Default variables
 dnl If ncurses is yes after arguments, than use ncurses. Otherwise, use curses
 opt_with_readline_prefix=no
@@ -182,7 +184,6 @@ AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(mkdir putenv select strdup strerror)
 
 AC_OUTPUT(Makefile lib/Makefile \
-lib/gdbmi/Makefile lib/gdbmi/src/Makefile \
 various/Makefile \
 various/util/Makefile various/util/src/Makefile \
 various/adt/Makefile various/adt/src/Makefile \

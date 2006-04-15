@@ -1,5 +1,11 @@
 4/14/2006 Bob Rossi <bob@brasko.net>
 
+	* autoregen.sh: Call lib/gdbmi autoregen script also.
+	* configure.in (AC_CONFIG_SBUDIRS): Add call to lib/gdbmi.
+	(AC_OUTPUT): Remove lib/gdbmi/Makefile lib/gdbmi/src/Makefile.
+
+4/14/2006 Bob Rossi <bob@brasko.net>
+
 	* BRANCHES: Removed file.
 	* TODO: Added, used to be RELEASE_TODO.
 	* RELEASE_TODO: Removed.
