@@ -1,5 +1,9 @@
 4/14/2006 Bob Rossi <bob@brasko.net>
 
+	* Makefile.am (EXTRA_DIST): Removed.
+
+4/14/2006 Bob Rossi <bob@brasko.net>
+
 	* configure.in (AM_MAINTAINER_MODE): Removed.
 
 4/13/2006 Bob Rossi <bob@brasko.net>
