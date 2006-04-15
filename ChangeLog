@@ -1,6 +1,9 @@
 4/14/2006 Bob Rossi <bob@brasko.net>
 
 	* BRANCHES: Removed file.
+	* TODO: Added, used to be RELEASE_TODO.
+	* RELEASE_TODO: Removed.
+	* FAQ: Quick fix.
 
 4/14/2006 Bob Rossi <bob@brasko.net>
 

@@ -51,7 +51,6 @@
 	   makefiles. At the time of this writing, CGDB was using
           * aclocal  (GNU automake)   1.9.5
           * autoconf (GNU Autoconf)   2.59
-          * libtool  (GNU libtool)    1.5.6
           * m4       (GNU m4)         1.4.3
 
 							Section III Problems
