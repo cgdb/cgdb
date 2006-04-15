@@ -2,7 +2,7 @@
 # readline directory simply needs to be copied as is, where as
 # the rest of the directories have a make dist rule run on them
 SUBDIRS=lib various tgdb cgdb doc
-DIST_SUBDIRS=various tgdb cgdb doc
+DIST_SUBDIRS=lib various tgdb cgdb doc
 EXTRA_DIST=config
 
 # The order is important here.

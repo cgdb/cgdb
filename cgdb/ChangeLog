@@ -1,3 +1,7 @@
+4/14/2006 Bob Rossi <bob@brasko.net>
+
+	* src/cgdbrc.c (#include <strings.h): Fix compile warning.
+
 4/10/2006 Bob Rossi <bob@brasko.net>
 
 	* src/Makefile.am (PKGDATADIR): Added.
