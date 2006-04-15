@@ -1,3 +1,7 @@
+4/14/2006 Bob Rossi <bob@brasko.net>
+
+	* Removed all autoconf generated files from CVS.
+
 4/13/2006 Bob Rossi <bob@brasko.net>
 
 	* Makefile.am (SUBDIRS): Added gdbmi.
