@@ -3,7 +3,6 @@ AC_PREREQ(2.5)
 AC_INIT(gdbmi, 0.1)
 AM_CONFIG_HEADER(config.h)
 AM_INIT_AUTOMAKE
-AM_MAINTAINER_MODE
 
 dnl Checks for programs.
 AC_PROG_CC

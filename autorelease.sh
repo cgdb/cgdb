@@ -47,7 +47,7 @@ echo "-- Get the new doc/version.texi file"
 rm -fr $CGDB_BUILD_DIR
 mkdir $CGDB_BUILD_DIR
 cd $CGDB_BUILD_DIR
-$CGDB_SOURCE_DIR/configure --enable-maintainer-mode --with-readline=/home/bob/download/readline/readline-5.1/target >> $CGDB_OUTPUT_LOG 2>&1
+$CGDB_SOURCE_DIR/configure --with-readline=/home/bob/download/readline/readline-5.1/target >> $CGDB_OUTPUT_LOG 2>&1
 make -s >> $CGDB_OUTPUT_LOG 2>&1
 if [ "$?" != "0" ]; then
   echo "make failed. Look at $CGDB_OUTPUT_LOG for more detials."

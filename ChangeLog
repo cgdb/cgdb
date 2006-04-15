@@ -1,5 +1,10 @@
 4/14/2006 Bob Rossi <bob@brasko.net>
 
+	* autorelease.sh: Remove --enable-maintainer-mode.
+	* configure.in (AM_MAINTAINER_MODE): Removed.
+
+4/14/2006 Bob Rossi <bob@brasko.net>
+
 	* configure.in (AC_INIT): Update version.
 
 4/14/2006 Bob Rossi <bob@brasko.net>
