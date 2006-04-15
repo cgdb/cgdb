@@ -1,5 +1,9 @@
 4/14/2006 Bob Rossi <bob@brasko.net>
 
+	* configure.in (AC_INIT): Update version.
+
+4/14/2006 Bob Rossi <bob@brasko.net>
+
 	* README: Document better how to build CGDB.
 
 4/14/2006 Bob Rossi <bob@brasko.net>
