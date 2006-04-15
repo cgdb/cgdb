@@ -1,5 +1,9 @@
 4/14/2006 Bob Rossi <bob@brasko.net>
 
+	* Makefile.am (EXTRA_DIST): Added.
+
+4/14/2006 Bob Rossi <bob@brasko.net>
+
 	* Makefile.am (EXTRA_DIST): Added src.
 
 4/14/2006 Bob Rossi <bob@brasko.net>

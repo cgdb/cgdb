@@ -9,6 +9,8 @@ gdbmi_lexer.l \
 gdbmi_pt.c \
 gdbmi_parser.c
 
+EXTRA_DIST = gdbmi_parser.h  gdbmi_pt.h gdbmi_grammar.h
+
 # gdbmi driver program
 noinst_bin_PROGRAMS = gdbmi_driver
 noinst_bindir = $(top_builddir)/progs
