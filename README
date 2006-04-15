@@ -10,4 +10,10 @@ If you are interested in building CGDB from CVS, please look at the
 section "Building CGDB from source" in the manual. This will describe
 all of the tools necessary that you will need in order to do this.
 
+CGDB does not package the autotool files in CVS. So, if you want to build 
+CGDB from CVS, then you will need to run the script ./autoregen.sh. This 
+will generate all the files necessary to build CGDB. You will need to have
+aclocal, autoconf, autoheader and automake installed. The specific versions
+I have used are documented in ./autoregen.sh. Other versions may work for you.
+
 Enjoy.
