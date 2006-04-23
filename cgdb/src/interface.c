@@ -95,20 +95,6 @@ static int tty_win_height_shift = 0;
 WIN_SPLIT_TYPE cur_win_split = WIN_SPLIT_EVEN;
 
 /* --------------- */
-/* Data Structures */
-/* --------------- */
-
-enum Command_Type
-{
-  CMD_LINE_NUMBER,		/* :123 line number */
-  CMD_QUIT,			/* :q   command */
-  CMD_QUIT_FORCE,		/* :q!  command */
-  CMD_SET,			/* :set command */
-  CMD_HELP,			/* :help command */
-  CMD_UNKNOWN			/* Unknown command */
-};
-
-/* --------------- */
 /* Local Variables */
 /* --------------- */
 static int curses_initialized = 0;	/* Flag: Curses has been initialized */
