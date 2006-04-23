@@ -1,3 +1,6 @@
+4/23/2006 Bob Rossi <bob@brasko.net>
+
+	* src/cgdb.c (rlctx_send_user_command): Added redraw of tgdb prompt.
 4/14/2006 Bob Rossi <bob@brasko.net>
 
 	* src/cgdbrc.c (#include <strings.h): Fix compile warning.

@@ -359,8 +359,7 @@ rlctx_send_user_command (char *line)
       for (i = 0; i < strlen(cmd) && isspace(cmd[i]); i++);
       run_shell_command(cmd+i);
 
-      /* TODO: Redisplay '(tgdb)' prompt here (I'm not sure how to do this) */
-
+      rline_rl_forced_update_display (rline);
   } else {
       request_ptr = tgdb_request_run_console_command (tgdb, cline);
 
