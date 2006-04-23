@@ -117,7 +117,7 @@ rm datetmp.txt
 ################################################################################
 echo "-- Update the NEWS file"
 ################################################################################
-echo -e "$CGDB_RELEASE (`date +%d/%m/%Y`)\n" > datetmp.txt
+echo -e "$CGDB_RELEASE (`date +%m/%d/%Y`)\n" > datetmp.txt
 cp NEWS NEWS.bak
 cat datetmp.txt NEWS.bak > NEWS
 rm NEWS.bak

@@ -1,3 +1,7 @@
+4/23/2006 Bob Rossi <bob@brasko.net>
+
+	* autorelease.sh: Fix date added to ChangeLog's.
+
 4/14/2006 Bob Rossi <bob@brasko.net>
 
 	* Makefile.am (DIST_SUBDIRS): Added lib.
@@ -53,7 +57,7 @@
 
 	* release-todo.txt: Remove software requirement.
 
-version 0.6.2 (09/04/2006):
+version 0.6.2 (04/09/2006):
 
 4/09/2006 Bob Rossi <bob@brasko.net>
 

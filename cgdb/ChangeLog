@@ -13,7 +13,7 @@
 	* src/interface.c (if_display_help): Display help from installed 
 	directory.
 
-version 0.6.2 (09/04/2006):
+version 0.6.2 (04/09/2006):
 
 4/05/2006 Bob Rossi <bob@brasko.net>
 
