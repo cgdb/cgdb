@@ -5,6 +5,10 @@
 #include <string.h>
 #endif /* HAVE_STRING_H */
 
+#if HAVE_CTYPE_H
+#include <ctype.h>
+#endif /* HAVE_CTYPE_H */
+
 struct ibuf {
     char *buf;
     unsigned long cur_buf_pos;
@@ -95,4 +99,35 @@ struct ibuf *ibuf_dup ( struct ibuf *s ) {
 	struct ibuf *ns = ibuf_init ();
 	ibuf_add ( ns, ibuf_get ( s ) );
 	return ns;	
+}
+
+void ibuf_trim(struct ibuf *s) {
+
+    int i, j = 0;
+
+    if (!s)
+        return;
+
+    // Find the first non-space character
+    for (i = 0; i < s->cur_buf_pos && isspace(s->buf[i]); i++);
+    
+    // If spaces were found, shift string leftward to overwrite them
+    if (i > 0) {
+        for (j = 0; i < s->cur_buf_pos; j++, i++) {
+            s->buf[j] = s->buf[i];
+        }
+
+        // Update buf pos and null terminate
+        s->cur_buf_pos = j;
+        s->buf[s->cur_buf_pos] = '\0';
+        if (s->cur_buf_pos == 0) {
+            return;
+        }
+    }
+
+    // Loop from the end, looking for spaces
+    for (i = s->cur_buf_pos - 1; i > 0 && isspace(s->buf[i]); i--);
+
+    s->cur_buf_pos = i+1;
+    s->buf[s->cur_buf_pos] = '\0';
 }

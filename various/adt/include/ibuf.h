@@ -54,4 +54,9 @@ unsigned long ibuf_length(struct ibuf *s);
  */
 struct ibuf *ibuf_dup ( struct ibuf *s );
 
+/**
+ * Trim whitespace from the head and tail of the string.
+ */
+void ibuf_trim(struct ibuf *s);
+
 #endif /* HAVE_CONFIG_H */

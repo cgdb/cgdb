@@ -12,8 +12,15 @@ std_hash.c \
 std_list.c
 
 # Installs the driver programs into progs directory
-noinst_PROGRAMS = std_hash_driver std_list_driver \
+noinst_PROGRAMS = ibuf_driver std_hash_driver std_list_driver \
                       std_btree_driver std_bbtree_driver
+
+# This is the ibuf driver
+ibuf_driver_LDFLAGS = -L.
+ibuf_driver_LDADD = -ladt
+ibuf_driver_SOURCES = ibuf_driver.c
+ibuf_driver_DEPENDENCIES = $(top_builddir)/various/adt/src
+ibuf_driver_CFLAGS = $(AM_CFLAGS)
 
 # This is the hash table driver
 std_hash_driver_LDFLAGS = -L.
