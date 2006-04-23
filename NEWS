@@ -1,3 +1,6 @@
+   * CGDB now supports the 'shell' command, and no longer hangs when a user
+     enters a shell command at the GDB prompt.
+
    * CGDB no longer packages the generated auto tool files in CVS. However,
      the distributions will have these files. This means you will need 
      autoconf, autoheader and automake installed to compile CGDB from CVS.
@@ -9,7 +12,7 @@
      is the file CGDB will now use to display the manual when :help is typed.
      This prevents CGDB from copying the data into the users home directory.
 
-cgdb-0.6.2 (09/04/2006)
+cgdb-0.6.2 (04/09/2006)
 
    * CGDB should run on solaris 2.5 again. I don't think it would since
      CGDB .6.0. 

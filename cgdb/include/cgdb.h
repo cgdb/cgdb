@@ -40,4 +40,9 @@ int handle_request (struct tgdb *tgdb, struct tgdb_request *request);
 
 void cleanup();
 
+/*
+ * See documentation in cgdb.c.
+ */
+int run_shell_command(const char *command);
+
 #endif

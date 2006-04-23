@@ -107,12 +107,14 @@ static int command_focus_cgdb( void );
 static int command_focus_gdb( void );
 static int command_focus_tty( void );
 
+static int command_do_bang( void );
 static int command_do_continue( void );
 static int command_do_finish( void );
 static int command_do_help( void );
 static int command_do_next( void );
 static int command_do_quit( void );
 static int command_do_run( void );
+static int command_do_shell( void );
 static int command_do_step( void );
 static int command_source_reload( void );
 
@@ -128,6 +130,7 @@ static struct commands
     action_t action;
 } COMMANDS[] = {
     /* keep this stuff sorted, you can use !sort in vi*/
+    /* bang        */ { "bang",        command_do_bang },
     /* continue    */ { "continue",    command_do_continue },
     /* edit        */ { "e",           command_source_reload },
     /* edit        */ { "edit",        command_source_reload },
@@ -140,6 +143,7 @@ static struct commands
     /* q           */ { "q",           command_do_quit },
     /* quit        */ { "quit",        command_do_quit },
     /* run         */ { "run",         command_do_run },
+    /* shell       */ { "shell",       command_do_shell },
     /* step        */ { "step",        command_do_step },
     /* syntax      */ { "syntax",      command_parse_syntax },
 };
@@ -277,6 +281,11 @@ int command_focus_tty( void )
     return 0;
 }
 
+int command_do_bang( void )
+{
+    return 0;
+}
+
 int command_do_continue( void )
 {
     tgdb_request_ptr request_ptr;
@@ -334,6 +343,11 @@ int command_do_run( void )
     handle_request (tgdb, request_ptr);
 
     return 0;
+}
+
+int command_do_shell( void )
+{
+    return run_shell_command(NULL);
 }
 
 int command_do_step( void )

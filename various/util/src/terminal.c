@@ -5,12 +5,15 @@
 #endif /* HAVE_SYS_IOCTL_H */
 
 int 
-tty_cbreak (int fd)
+tty_cbreak (int fd, struct termios *orig)
 {
   struct termios buf;
    
   if (tcgetattr (fd, &buf) < 0)
     return -1;
+
+  /* Save the original state, for resetting later */
+  *orig = buf;
       
   buf.c_lflag &= ~(ECHO | ICANON);
   buf.c_iflag &= ~(ICRNL | INLCR);

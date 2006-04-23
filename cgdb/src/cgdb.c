@@ -54,6 +54,10 @@
 #include <getopt.h>
 #endif
 
+#if HAVE_CTYPE_H
+#include <ctype.h>
+#endif
+
 /* Local Includes */
 #include "cgdb.h"
 #include "logger.h"
@@ -75,6 +79,13 @@
 #include "usage.h"
 #include "sys_util.h"
 
+/* --------- */
+/* Constants */
+/* --------- */
+
+const char *GDB_SHELL_COMMAND = "shell";
+const char *readline_history_filename = "readline_history.txt";
+
 /* --------------- */
 /* Local Variables */
 /* --------------- */
@@ -83,7 +94,6 @@ struct tgdb *tgdb;		/* The main TGDB context */
 struct tgdb_request *last_request = NULL;
 
 char cgdb_home_dir[MAXLINE];	/* Path to home directory with trailing slash */
-const char *readline_history_filename = "readline_history.txt";
 char *readline_history_path;	/* After readline init is called, this will 
 				 * contain the path to the readline history 
 				 * file. */
@@ -221,6 +231,57 @@ handle_request (struct tgdb *tgdb, struct tgdb_request *request)
   return 0;
 }
 
+/**
+ * Runs a command in the shell.  The shell may be interactive, and CGDB
+ * will be paused for the duration of the shell.  Any leading stuff, like
+ * 'shell ' or '!' should be removed prior to calling this function.
+ *
+ * \param command The command to run at the shell.  Empty string or null
+ *                means to invoke an interactive shell.
+ *
+ * \return The exit status of the system() call.
+ */
+int run_shell_command(const char *command) {
+
+    int rv;
+    char buf[64];
+
+    /* Cleanly scroll the screen up for a prompt */
+    scrl (1);
+    move (LINES - 1, 0);
+    printf ("\n");
+
+    /* Put the terminal in cooked mode and turn on echo */
+    endwin();
+    tty_set_attributes(STDIN_FILENO, &term_attributes);
+
+    /* NULL or empty string means invoke user's shell */
+    if (command == NULL || strlen(command) == 0) {
+
+        /* Check for SHELL environment variable */
+        char *shell = getenv("SHELL");
+        if (shell == NULL) {
+            /* Run /bin/sh instead */
+            rv = system("/bin/sh");
+        } else {
+            rv = system(shell);
+        }
+    } else {
+        /* Execute the command passed in via system() */
+        rv = system(command);
+    }
+
+    /* Press any key to continue... */
+    fprintf(stderr, "Hit ENTER to continue...");
+    fgets(buf, 64, stdin);
+
+    /* Turn off echo and put the terminal back into raw mode */
+    tty_cbreak(STDIN_FILENO, &term_attributes);
+    if_draw();
+
+    return rv;
+}
+
 /* readline code {{{*/
 
 /* Please forgive me for adding all the comment below. This function
@@ -233,6 +294,7 @@ rlctx_send_user_command (char *line)
   int length;
   char *rline_prompt;
   tgdb_request_ptr request_ptr;
+  int i;
 
   /* This happens when rl_callback_read_char gets EOF */
   if (line == NULL)
@@ -240,6 +302,10 @@ rlctx_send_user_command (char *line)
 
   /* Add the line passed in to the current line */
   ibuf_add (current_line, line);
+
+  /* TBD: Is this ok to do all the time?  Added for the 'shell' command,
+   * for simplicity.  */
+  ibuf_trim(current_line);
 
   /* Get current line, and current line length */
   cline = ibuf_get (current_line);
@@ -286,14 +352,25 @@ rlctx_send_user_command (char *line)
   if (length > 0)
     rline_add_history (rline, cline);
 
-  request_ptr = tgdb_request_run_console_command (tgdb, cline);
+  /* Look for GDB 'shell' command, which locks up CGDB (because no gdb prompt
+   * is immediately returned).  Instead, handle it with the front end. */
+  if (strncasecmp(cline, GDB_SHELL_COMMAND, strlen(GDB_SHELL_COMMAND)) == 0) {
+      char *cmd = cline + strlen(GDB_SHELL_COMMAND);
+      for (i = 0; i < strlen(cmd) && isspace(cmd[i]); i++);
+      run_shell_command(cmd+i);
 
-  /* Send this command to TGDB */
-  if (!request_ptr)
-    logger_write_pos (logger, __FILE__, __LINE__,
-		      "rlctx_send_user_command\n");
+      /* TODO: Redisplay '(tgdb)' prompt here (I'm not sure how to do this) */
 
-  handle_request (tgdb, request_ptr);
+  } else {
+      request_ptr = tgdb_request_run_console_command (tgdb, cline);
+
+      /* Send this command to TGDB */
+      if (!request_ptr)
+          logger_write_pos (logger, __FILE__, __LINE__,
+		          "rlctx_send_user_command\n");
+
+      handle_request (tgdb, request_ptr);
+  }
 
   ibuf_clear (current_line);
 }
@@ -1438,13 +1515,6 @@ main (int argc, char *argv[])
 
   parse_long_options (&argc, &argv);
 
-  if (tty_get_attributes (STDIN_FILENO, &term_attributes) == -1)
-    {
-      logger_write_pos (logger, __FILE__, __LINE__,
-			"tty_get_attributes error");
-      return -1;
-    }
-
   current_line = ibuf_init ();
 
   if (create_and_init_pair () == -1)
@@ -1479,7 +1549,7 @@ main (int argc, char *argv[])
       exit (-1);
     }
 
-  if (tty_cbreak (STDIN_FILENO) == -1)
+  if (tty_cbreak (STDIN_FILENO, &term_attributes) == -1)
     {
       logger_write_pos (logger, __FILE__, __LINE__, "tty_cbreak error");
       cleanup ();

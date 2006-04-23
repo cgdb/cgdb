@@ -450,12 +450,8 @@ int main(int argc, char **argv){
    int c;
    read(0, &c ,1);
 #endif
-   if (tty_get_attributes (STDIN_FILENO, &term_attributes) == -1) {
-     logger_write_pos ( logger, __FILE__, __LINE__, "tty_get_attributes error");
-     return -1;
-   }
 
-    if ( tty_cbreak(STDIN_FILENO) == -1 )
+    if ( tty_cbreak(STDIN_FILENO, &term_attributes) == -1 )
         logger_write_pos ( logger, __FILE__, __LINE__, "tty_cbreak error");
 
     pty_pair = pty_pair_create ();

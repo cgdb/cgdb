@@ -25,11 +25,16 @@ extern "C" {
  *
  * \param fd
  * The file descriptor of the terminal
+ *
+ * \param orig
+ * Output parameter, pass in the address of a termios structure and it will
+ * be populated with the current (aka original) state of the terminal.  Use
+ * this to reset the state with tty_set_attributes later.
  * 
  * \return
  * 0 on success, -1 on error
  */
-int tty_cbreak (int fd);
+int tty_cbreak(int fd, struct termios *orig);
 
 /** 
  * set the pseudo - terminal to not map NL to CR NL.

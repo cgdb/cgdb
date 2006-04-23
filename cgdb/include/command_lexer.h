@@ -19,6 +19,8 @@ enum TOKENS {
     UNSET,
     BIND,
     MACRO,
+    SHELL,
+    BANG,
     BOOLEAN,
     NUMBER,
     IDENTIFIER,
