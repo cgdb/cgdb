@@ -16,4 +16,7 @@ will generate all the files necessary to build CGDB. You will need to have
 aclocal, autoconf, autoheader and automake installed. The specific versions
 I have used are documented in ./autoregen.sh. Other versions may work for you.
 
+Your patches should be indented properly. You can use the ./indent.sh script
+and it will indent the files appropriatly.
+
 Enjoy.

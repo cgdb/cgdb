@@ -1,3 +1,8 @@
+4/27/2006 Bob Rossi <bob@brasko.net>
+
+	* indent.sh: Added.
+	* README: Describes use of indent.sh.
+
 4/23/2006 Bob Rossi <bob@brasko.net>
 
 	* autorelease.sh: Fix date added to ChangeLog's.
