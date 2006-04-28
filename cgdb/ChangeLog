@@ -1,3 +1,7 @@
+4/27/2006 Bob Rossi <bob@brasko.net>
+
+	* src/Makefile.am (cgdb_LDADD): Modify libs.
+
 4/23/2006 Bob Rossi <bob@brasko.net>
 
 	* src/cgdb.c (rlctx_send_user_command): Added redraw of tgdb prompt.

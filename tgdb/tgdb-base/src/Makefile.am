@@ -25,7 +25,7 @@ tgdb_driver_LDFLAGS = \
 -L$(top_builddir)/various/util/src \
 -L$(top_builddir)/various/rline/src
 
-tgdb_driver_LDADD = -ltgdb -lannotate_two -lgdbmi -lrline -ladt -lutil
+tgdb_driver_LDADD = -ltgdb -ltgdb_a2 -ltgdb_mi -lrline -ladt -lutil
 
 tgdb_driver_SOURCES = driver.c
 

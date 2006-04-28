@@ -1,3 +1,9 @@
+4/27/2006 Bob Rossi <bob@brasko.net>
+
+	* annotate-two/src/Makefile.am (noinst_LIBRARIES): Change to a2.
+	* gdbmi/src/Makefile.am (noinst_LIBRARIES): Change ot mi.
+	* tgdb-base/src/Makefile.am (tgdb_driver_LDADD): Change libs.
+
 version 0.6.2 (04/09/2006):
 
 4/05/2006 Bob Rossi <bob@brasko.net>

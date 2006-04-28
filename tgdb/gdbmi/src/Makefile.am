@@ -6,10 +6,10 @@ AM_CFLAGS = -g -Wall \
 
 # create the input library
 # This depends on input
-noinst_LIBRARIES = libgdbmi.a
+noinst_LIBRARIES = libtgdb_mi.a
 
-libgdbmi_a_SOURCES = gdbmi_tgdb.c
+libtgdb_mi_a_SOURCES = gdbmi_tgdb.c
 
-libgdbmi_a_DEPENDENCIES = \
+libtgdb_mi_a_DEPENDENCIES = \
 $(top_builddir)/various/util/src \
 $(top_builddir)/various/adt/src

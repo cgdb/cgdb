@@ -6,9 +6,9 @@ AM_CFLAGS = -g -Wall \
 
 # create the input library
 # This depends on input
-noinst_LIBRARIES = libannotate_two.a
+noinst_LIBRARIES = libtgdb_a2.a
 
-libannotate_two_a_SOURCES = \
+libtgdb_a2_a_SOURCES = \
 a2-tgdb.c \
 annotate.c \
 commands.c \
@@ -16,6 +16,6 @@ data.c \
 globals.c \
 state_machine.c
 
-libannotate_two_a_DEPENDENCIES = \
+libtgdb_a2_a_DEPENDENCIES = \
 $(top_builddir)/various/util/src \
 $(top_builddir)/various/adt/src

@@ -23,7 +23,7 @@ cgdb_LDFLAGS = \
 -L$(top_builddir)/cgdb/tokenizer/src \
 -L$(top_builddir)/tgdb/gdbmi/src
 
-cgdb_LDADD = -ltgdb -lannotate_two -lgdbmi -ltokenizer -lkui -lrline -ladt -lutil
+cgdb_LDADD = -ltgdb -ltgdb_a2 -ltgdb_mi -ltokenizer -lkui -lrline -ladt -lutil
 
 cgdb_SOURCES = \
 cgdb.c \
