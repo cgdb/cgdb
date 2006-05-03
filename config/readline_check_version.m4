@@ -144,17 +144,26 @@ AC_MSG_RESULT($ac_cv_rl_version)
 fi
 ])
 
-dnl This checks to see where the includes files for readline is located.
+dnl This checks to see where the include files for readline are located.
 dnl It also defines the readline and history libraries
 AC_DEFUN([RL_LIB_READLINE_INCLUDES],
 [
 AC_DEFINE(HAVE_LIBREADLINE,1, [readline library available])
-AC_CHECK_HEADERS(readline.h readline/readline.h)
-vl_cv_lib_readline_history="no"
-AC_CHECK_LIB(readline, add_history, vl_cv_lib_readline_history="yes")
-if test "$vl_cv_lib_readline_history" = "yes"; then
-  AC_DEFINE(HAVE_READLINE_HISTORY, 1, [readline history library available])
-  AC_CHECK_HEADERS(history.h readline/history.h)
+
+AC_CHECK_HEADERS([readline.h],is_readline_header_found="true",is_readline_header_found="false")
+if test "x$is_readline_header_found" = "xfalse"; then
+  AC_CHECK_HEADERS([readline/readline.h],is_readline_header_found="true",is_readline_header_found="false")
+  if test "x$is_readline_header_found" = "xfalse"; then
+    AC_MSG_ERROR([cgdb needs readline.h or readline/readline.h to build])
+  fi
+fi
+
+AC_CHECK_HEADERS([history.h],is_history_header_found="true",is_history_header_found="false")
+if test "x$is_history_header_found" = "xfalse"; then
+  AC_CHECK_HEADERS([readline/history.h],is_history_header_found="true",is_readline_header_found="false")
+  if test "x$is_history_header_found" = "xfalse"; then
+    AC_MSG_ERROR([cgdb needs history.h or readline/history.h to build])
+  fi
 fi
 ])
 

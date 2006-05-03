@@ -1,3 +1,9 @@
+5/03/2006 Bob Rossi <bob@brasko.net>
+
+	* src/rline.c (HAVE_READLINE_HISTORY): Removed.
+	Remove prototypes when readline.h or history.h is
+	not available.
+
 version 0.6.2 (04/09/2006):
 
 4/05/2006 Bob Rossi <bob@brasko.net>

@@ -1,5 +1,14 @@
 5/03/2006 Bob Rossi <bob@brasko.net>
 
+	* config/readline_check_version.m4 (RL_LIB_READLINE_INCLUDES): No
+	longer check to see if add_history () is around. add_history () 
+	will always be available if readline is available.
+	Check for readline.h and readline/readline.h and return configure
+	error if neither is available. Check for history.h and
+	readline/history.h and return error if neither is available.
+
+5/03/2006 Bob Rossi <bob@brasko.net>
+
 	* TODO: More stuff todo.
 
 4/27/2006 Bob Rossi <bob@brasko.net>
