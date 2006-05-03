@@ -1,5 +1,12 @@
 Bug fixes/improvement for cgdb-0.6.3
 
+bluffer_
+ [ ] Look at passing ^z to GDB
+ [ ] Look at how CGDB could allow itself to debug curses applications by
+     putting itself in the backgroud when the inferior runs.
+neosun_
+ [ ] Upload mac osx binary.
+
  [ ] Setup nightly distribution for download.
  [ ] Add key mapping support to cgdbrc.
  [ ] Look into getopts, it generates the usage/getopts/man/texinfo data.
