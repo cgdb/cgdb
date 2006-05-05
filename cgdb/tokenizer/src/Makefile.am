@@ -1,4 +1,4 @@
-AM_CFLAGS = -g -Wall -I$(srcdir)/../include \
+AM_CFLAGS = -I$(srcdir)/../include \
 -I$(top_srcdir)/various/adt/include \
 -I$(top_srcdir)/various/util/include
 

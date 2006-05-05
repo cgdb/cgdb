@@ -1,4 +1,4 @@
-AM_CFLAGS = -g -Wall \
+AM_CFLAGS = \
 -I$(top_srcdir)/various/util/include \
 -I$(top_srcdir)/various/adt/include \
 -I$(top_srcdir)/tgdb/tgdb-base/include \

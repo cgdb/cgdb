@@ -1,4 +1,4 @@
-AM_CFLAGS = -g -Wall \
+AM_CFLAGS = \
 -I$(top_srcdir)/tgdb/tgdb-base/include \
 -I$(top_srcdir)/tgdb/annotate-two/include \
 -I$(top_srcdir)/tgdb/gdbmi/include \

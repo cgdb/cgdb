@@ -1,4 +1,4 @@
-AM_CFLAGS = -g -Wall -I$(top_srcdir)/various/util/include -I$(top_srcdir)/various/adt/include -I$(srcdir)/../inc
+AM_CFLAGS = -I$(top_srcdir)/various/util/include -I$(top_srcdir)/various/adt/include -I$(srcdir)/../inc
 
 # create the input library
 noinst_LIBRARIES = libkui.a

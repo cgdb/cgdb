@@ -1,4 +1,4 @@
-AM_CFLAGS = -g -Wall -I$(srcdir)/../include
+AM_CFLAGS = -I$(srcdir)/../include
 noinst_LIBRARIES = libutil.a
 
 libutil_a_SOURCES = \

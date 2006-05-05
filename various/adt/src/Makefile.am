@@ -1,4 +1,4 @@
-AM_CFLAGS = -g -Wall -I$(top_srcdir)/various/util/include -I$(srcdir)/../include
+AM_CFLAGS = -I$(top_srcdir)/various/util/include -I$(srcdir)/../include
 
 noinst_LIBRARIES = libadt.a
 
