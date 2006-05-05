@@ -4,6 +4,11 @@ bluffer_
  [ ] Look at passing ^z to GDB
  [ ] Look at how CGDB could allow itself to debug curses applications by
      putting itself in the backgroud when the inferior runs.
+ [ ] If you single step into a system library call (or any library call for
+     that matter where the source isn't available), CGDB should show
+     [NO SOURCE], instead of displaying the last source position available.
+     Maybe make this an option.
+
 neosun_
  [ ] Upload mac osx binary.
 
