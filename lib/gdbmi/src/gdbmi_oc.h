@@ -22,4 +22,10 @@ typedef struct gdbmi_oc *gdbmi_oc_ptr;
 int
 gdbmi_get_output_commands (gdbmi_output_ptr output_ptr, gdbmi_oc_ptr *oc_ptr);
 
+/* Creating, Destroying and printing MI output commands  */
+gdbmi_oc_ptr create_gdbmi_oc (void);
+int destroy_gdbmi_oc (gdbmi_oc_ptr param);
+gdbmi_oc_ptr append_gdbmi_oc (gdbmi_oc_ptr list, gdbmi_oc_ptr item);
+int print_gdbmi_oc (gdbmi_oc_ptr param);
+
 #endif /* __GDBMI_OC_H__ */

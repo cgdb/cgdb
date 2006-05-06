@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "gdbmi_pt.h"
 
@@ -727,6 +728,23 @@ create_gdbmi_stream_record (void)
   return calloc (1, sizeof (struct gdbmi_stream_record));
 }
 
+gdbmi_stream_record_ptr 
+dup_gdbmi_stream_record (gdbmi_stream_record_ptr param)
+{
+  gdbmi_stream_record_ptr stream_record_ptr;
+  if (!param)
+    return NULL;
+
+  stream_record_ptr = create_gdbmi_stream_record ();
+  if (!stream_record_ptr)
+    return NULL;
+
+  stream_record_ptr->stream_record = param->stream_record;
+  stream_record_ptr->cstring = strdup (param->cstring);
+
+  return stream_record_ptr;
+}
+
 int
 destroy_gdbmi_stream_record (gdbmi_stream_record_ptr param)
 {
@@ -739,24 +757,50 @@ destroy_gdbmi_stream_record (gdbmi_stream_record_ptr param)
       param->cstring = NULL;
     }
 
+  if (destroy_gdbmi_stream_record (param->next) == -1)
+    return -1;
+  param->next = NULL;
+
   free (param);
   param = NULL;
   return 0;
 }
 
+gdbmi_stream_record_ptr
+append_gdbmi_stream_record (gdbmi_stream_record_ptr list, gdbmi_stream_record_ptr item)
+{
+  if (!item)
+    return NULL;
+
+  if (!list)
+    list = item;
+  else
+    {
+      gdbmi_stream_record_ptr cur = list;
+      while (cur->next)
+	cur = cur->next;
+
+      cur->next = item;
+    }
+
+  return list;
+}
+
 int
 print_gdbmi_stream_record (gdbmi_stream_record_ptr param)
 {
+  gdbmi_stream_record_ptr cur = param;
   int result;
 
-  if (!param)
-    return 0;
+  while (cur)
+    {
+      result = print_gdbmi_stream_record_choice (cur->stream_record);
+      if (result == -1)
+	return -1;
+      printf ("cstring->(%s)\n", cur->cstring);
 
-  result = print_gdbmi_stream_record_choice (param->stream_record);
-  if (result == -1)
-    return -1;
-
-  printf ("cstring->(%s)\n", param->cstring);
+      cur = cur->next;
+    }
 
   return 0;
 }

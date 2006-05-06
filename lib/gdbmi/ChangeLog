@@ -1,5 +1,18 @@
 5/05/2006 Bob Rossi <bob@brasko.net>
 
+	* src/gdbmi_oc.h (create_gdbmi_oc, destroy_gdbmi_oc, append_gdbmi_oc,
+	print_gdbmi_oc): Added.
+	* src/gdbmi_oc.c: Ditto
+	(stdio.h): Added #include.
+	(struct gdbmi_oc): Added stream_record_ptr and next.
+	(gdbmi_get_output_command): Set up command.
+	* src/gdbmi_pt.c (string.h): Added #include.
+	(dup_gdbmi_stream_record, append_gdbmi_stream_Record): Added.
+	(destroy_gdbmi_stream_record, print_gdbmi_stream_record): Use ->next also.
+	* src/gdbmi_pt.h (gdbmi_stream_record): Added next field.
+
+5/05/2006 Bob Rossi <bob@brasko.net>
+
 	* src/Makefile.am (libgdbmi_a_SOURCES): Add gdbmi_oc.c.
 	(EXTRA_DIST): Add gdbmi_oc.h.
 	(gdbmi_driver_DEPENDENCIES): Added.

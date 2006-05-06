@@ -196,6 +196,7 @@ struct gdbmi_stream_record
 {
   enum gdbmi_stream_record_choice stream_record;
   char *cstring;
+  gdbmi_stream_record_ptr next;
 };
 
 /* Print result class  */
@@ -264,7 +265,10 @@ int print_gdbmi_list (gdbmi_list_ptr param);
 
 /* Creating, Destroying and printing stream_record  */
 gdbmi_stream_record_ptr create_gdbmi_stream_record (void);
+gdbmi_stream_record_ptr dup_gdbmi_stream_record (gdbmi_stream_record_ptr param);
 int destroy_gdbmi_stream_record (gdbmi_stream_record_ptr param);
+gdbmi_stream_record_ptr append_gdbmi_stream_record (gdbmi_stream_record_ptr list, 
+						    gdbmi_stream_record_ptr item);
 int print_gdbmi_stream_record (gdbmi_stream_record_ptr param);
 
 #endif
