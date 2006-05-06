@@ -1,3 +1,13 @@
+5/05/2006 Bob Rossi <bob@brasko.net>
+
+	* src/Makefile.am (libgdbmi_a_SOURCES): Add gdbmi_oc.c.
+	(EXTRA_DIST): Add gdbmi_oc.h.
+	(gdbmi_driver_DEPENDENCIES): Added.
+	* src/gdbmi_driver.c (gdbmi_oc.h): Add #include.
+	(main): Add calls to gdbmi_oc.
+	* src/gdbmi_oc.h, src/gdbmi_oc.c: Added.
+	* src/gdbmi_tclext.c: Add tcl extension for GDB test suite.
+
 4/14/2006 Bob Rossi <bob@brasko.net>
 
 	* Makefile.am (EXTRA_DIST): Added.
