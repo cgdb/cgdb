@@ -1,3 +1,8 @@
+5/07/2006 Bob Rossi <bob@brasko.net>
+
+	* src/ibuf_driver.c (config.h, string.h): Add #include.
+	(stdio.h): Add #if HAVE_STDIO_H defines.
+
 version 0.6.2 (04/09/2006):
 
 4/05/2006 Bob Rossi <bob@brasko.net>
