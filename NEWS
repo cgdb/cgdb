@@ -1,3 +1,7 @@
+   * Fixed another bug in the configure script. CGDB should now be able 
+     to configure itself on a Mac. Thanks to Jens Frederich for finding
+     and reporting this problem.
+   
    * CGDB now supports the 'shell' command, and no longer hangs when a user
      enters a shell command at the GDB prompt.
 

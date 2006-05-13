@@ -116,7 +116,7 @@ RL_VERSION="0x${_RL_MAJOR}${_RL_MINOR}"
 
 # Readline versions greater than 4.2 have these defines in readline.h
 
-if test $ac_cv_rl_version = '0.0' ; then
+if test "$ac_cv_rl_version" = '0.0' ; then
 	AC_MSG_WARN([Could not test version of installed readline library.])
 elif test $RL_MAJOR -gt 4 || { test $RL_MAJOR = 4 && test $RL_MINOR -gt 2 ; } ; then
 	# set these for use by the caller
