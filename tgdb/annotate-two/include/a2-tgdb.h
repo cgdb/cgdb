@@ -340,10 +340,16 @@ int a2_get_source_filename_pair (
  * \param ctx
  * The annotate two context.
  *
+ * \param on_startup
+ * This variable can be set to 1 if the front end wants to probe GDB
+ * for the initial file and location of the program being debugged.
+ * However, each initial time after that, this variable should be 
+ * set to 0.
+ *
  * @return
  * 0 on success, otherwise -1 on error.
  */
-int a2_get_current_location (void *ctx);
+int a2_get_current_location (void *ctx, int on_startup);
 
 /** 
  * Gets all the source files that the inferior makes up.

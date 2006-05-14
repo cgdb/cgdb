@@ -67,7 +67,7 @@ static struct tgdb_client_debugger_interfaces {
 			void *ctx, 
 			const char *path );
 
-	int (*tgdb_client_get_current_location) (void *ctx);
+	int (*tgdb_client_get_current_location) (void *ctx, int on_startup);
 
 	int (*tgdb_client_get_inferior_source_files) ( 
 			void *ctx );
@@ -416,7 +416,8 @@ int tgdb_client_get_filename_pair (
 			tcc->tgdb_debugger_context, path );
 }
 
-int tgdb_client_get_current_location (struct tgdb_client_context *tcc)
+int tgdb_client_get_current_location (struct tgdb_client_context *tcc, 
+				      int on_startup)
 {
   if (tcc == NULL || tcc->tgdb_client_interface == NULL)
   {
@@ -424,7 +425,8 @@ int tgdb_client_get_current_location (struct tgdb_client_context *tcc)
     return -1;
   }
 	
-  return tcc->tgdb_client_interface->tgdb_client_get_current_location (tcc->tgdb_debugger_context);
+  return tcc->tgdb_client_interface->tgdb_client_get_current_location (
+	    tcc->tgdb_debugger_context, on_startup);
 }
 
 int tgdb_client_get_inferior_source_files ( struct tgdb_client_context *tcc ) {

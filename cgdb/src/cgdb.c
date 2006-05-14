@@ -369,6 +369,14 @@ rlctx_send_user_command (char *line)
 		          "rlctx_send_user_command\n");
 
       handle_request (tgdb, request_ptr);
+
+      /* After every console command the user types, CGDB wants to know the 
+       * current location that GDB thinks it is at. By doing this, CGDB
+       * can determine where GDB is at and display it in the source window. */
+      request_ptr = tgdb_request_current_location (tgdb, 0);
+      if (handle_request (tgdb, request_ptr) == -1)
+        logger_write_pos (logger, __FILE__, __LINE__, "handle_request error\n");
+
   }
 
   ibuf_clear (current_line);
@@ -795,7 +803,7 @@ start_gdb (int argc, char *argv[])
   /**
    * Get the filename GDB defaults to. 
    */
-  request_ptr = tgdb_request_current_location (tgdb);
+  request_ptr = tgdb_request_current_location (tgdb, 1);
   if (handle_request (tgdb, request_ptr) == -1)
     return -1;
 

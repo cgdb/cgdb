@@ -394,10 +394,17 @@ int tgdb_client_get_filename_pair (
  * \param tcc
  * The client context.
  *
+ * \param on_startup
+ * This variable can be set to 1 if the front end wants to probe GDB
+ * for the initial file and location of the program being debugged.
+ * However, each initial time after that, this variable should be 
+ * set to 0.
+ *
  * @return
  * 0 on success, otherwise -1 on error.
  */
-int tgdb_client_get_current_location (struct tgdb_client_context *tcc);
+int tgdb_client_get_current_location (struct tgdb_client_context *tcc, 
+				      int on_startup);
 
 /** 
  * Gets all of the source files that the inferior is made of.

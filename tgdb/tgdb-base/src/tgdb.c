@@ -1284,7 +1284,7 @@ tgdb_request_filename_pair (struct tgdb *tgdb, const char *file)
 }
 
 tgdb_request_ptr 
-tgdb_request_current_location (struct tgdb *tgdb)
+tgdb_request_current_location (struct tgdb *tgdb, int on_startup)
 {
   tgdb_request_ptr request_ptr;
   if (!tgdb)
@@ -1296,6 +1296,7 @@ tgdb_request_current_location (struct tgdb *tgdb)
     return NULL;
 
   request_ptr->header = TGDB_REQUEST_CURRENT_LOCATION;
+  request_ptr->choice.current_location.on_startup = on_startup;
 
   return request_ptr;
 }
@@ -1432,7 +1433,8 @@ tgdb_process_current_location (struct tgdb *tgdb, tgdb_request_ptr request)
   if (request->header != TGDB_REQUEST_CURRENT_LOCATION)
     return -1;
 
-  ret = tgdb_client_get_current_location (tgdb->tcc);
+  ret = tgdb_client_get_current_location (
+	  tgdb->tcc, request->choice.current_location.on_startup);
   tgdb_process_client_commands (tgdb);
   
   return ret;

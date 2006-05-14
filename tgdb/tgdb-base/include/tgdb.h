@@ -383,11 +383,18 @@ extern "C"
    *
    * \param tgdb
    * An instance of the tgdb library to operate on.
+   * 
+   * \param on_starup
+   * This variable can be set to 1 if the front end wants to probe GDB
+   * for the initial file and location of the program being debugged.
+   * However, each initial time after that, this variable should be 
+   * set to 0.
    *
    * \return
    * Will return as a tgdb request command on success, otherwise NULL.
    */
-  tgdb_request_ptr tgdb_request_current_location (struct tgdb *tgdb);
+  tgdb_request_ptr tgdb_request_current_location (struct tgdb *tgdb, 
+						  int on_startup);
 
   /**
    * This tells libtgdb to run a command through the debugger.

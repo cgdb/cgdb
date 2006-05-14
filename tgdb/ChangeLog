@@ -1,3 +1,21 @@
+5/13/2006 Bob Rossi <bob@brasko.net>
+
+	* annotate-two/include/a2-tgdb.h (a2_get_current_location): Add
+	on_startup parameter.
+	* annotate-two/include/a2-tgdb.c (a2_get_current_location): Add
+	and use on_startup parameter.
+	* tgdb-base/include/tgdb.h (tgdb_request_current_location): Add
+	on_startup parameter.
+	* tgdb-base/include/tgdb_client_interface.h
+	(tgdb_client_get_current_location): Ditto.
+	* tgdb-base/include/tgdb_types.h (tgdb_request): Add current_location
+	field.
+	* tgdb-base/src/tgdb.c (tgdb_request_current_location): Add and 
+	use on_startup parameter.
+	* tgdb-base/src/tgdb_client_interface.c
+	(tgdb_client_debugger_interfaces): Add parameter to
+	tgdb_client_get_current_location field.
+
 4/27/2006 Bob Rossi <bob@brasko.net>
 
 	* annotate-two/src/Makefile.am (noinst_LIBRARIES): Change to a2.

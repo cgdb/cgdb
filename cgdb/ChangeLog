@@ -1,3 +1,10 @@
+5/13/2006 Bob Rossi <bob@brasko.net>
+
+        * src/cgdb.c (rlctx_send_user_command): Make sure to update the
+	source window location after the user types a command in the 
+	GDB window.
+	(start_gdb): Update to match new TGDB interface.
+
 4/27/2006 Bob Rossi <bob@brasko.net>
 
 	* src/Makefile.am (cgdb_LDADD): Modify libs.

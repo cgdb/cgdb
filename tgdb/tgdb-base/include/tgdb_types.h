@@ -257,6 +257,10 @@ extern "C"
       } filename_pair;
 
       struct {
+	int on_startup;
+      } current_location;
+
+      struct {
 	/** This is the command that libtgdb should run through the debugger */
 	enum tgdb_command_type c;
       } debugger_command;

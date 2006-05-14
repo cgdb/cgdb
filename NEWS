@@ -1,3 +1,7 @@
+   * A new feature for CGDB is available. If you use the 'list' command
+     in the GDB window, CGDB will detect the line change and display
+     the current location in the source window.
+   
    * Fixed another bug in the configure script. CGDB should now be able 
      to configure itself on a Mac. Thanks to Jens Frederich for finding
      and reporting this problem.
