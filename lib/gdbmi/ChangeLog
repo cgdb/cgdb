@@ -1,3 +1,34 @@
+5/13/2006 Bob Rossi <bob@brasko.net>
+
+	* src/gdbmi_driver.c: Update to have input file also.
+	* src/gdbmi_oc.c (convert_cstring): Added.
+	(gdbmi_get_specific_output_command): Added 
+	GDBMI_FILE_LIST_EXEC_SOURCE_FILE, GDBMI_FILE_LIST_EXEC_SOURCE_FILES,
+	and GDBMI_BREAK_LIST.
+	(create_gdbmi_cstring_ll, destroy_gdbmi_cstring_ll,
+	append_gdbmi_cstring_ll, print_gdbmi_cstring_ll,
+	create_gdbmi_file_path_info, destroy_gdbmi_file_path_info,
+	append_gdbmi_file_path_info, print_gdbmi_file_path_info,
+	create_gdbmi_breakpoint, destroy_gdbmi_breakpoint,
+	append_gdbmi_breakpoint, print_gdbmi_breakpoint): Added.
+	* inc/gdbmi_oc.h (enum gdbmi_input_command, gdbmi_oc_cstring_ll,
+	gdbmi_oc_cstring_ll_ptr, struct gdbmi_oc_cstring_ll,
+	gdbmi_oc_file_path_info, gdbmi_oc_file_path_info_ptr, struct
+	gdbmi_oc_file_path_info, enum breakpoint_type, enum
+	breakpoint_disposition, struct gdbmi_oc_breakpoint,
+	gdbmi_oc_breakpoint_ptr, struct gdbmi_oc_breakpoint, struct gdbmi_oc):
+	Added.
+	(create_gdbmi_cstring_ll, destroy_gdbmi_cstring_ll,
+	append_gdbmi_cstring_ll, print_gdbmi_cstring_ll,
+	create_gdbmi_file_path_info, destroy_gdbmi_file_path_info,
+	append_gdbmi_file_path_info, print_gdbmi_file_path_info,
+	create_gdbmi_breakpoint, destroy_gdbmi_breakpoint,
+	append_gdbmi_breakpoint, print_gdbmi_breakpoint): Added.
+	* src/gdbmi_pt.c (#include <string.h>): Removed.
+	(dup_gdbmi_stream_record, append_gdbmi_stream_record): Removed.
+	* src/gdbmi_pt.h (dup_gdbmi_stream_record,
+	append_gdbmi_stream_record): Removed.
+
 5/05/2006 Bob Rossi <bob@brasko.net>
 
 	* src/gdbmi_oc.h (create_gdbmi_oc, destroy_gdbmi_oc, append_gdbmi_oc,

@@ -26,6 +26,7 @@ gdbmi_parser_create (void)
   gdbmi_parser_ptr parser;
 
   parser = (gdbmi_parser_ptr) malloc (sizeof (struct gdbmi_parser));
+  parser->last_error = NULL;
 
   if (!parser)
     {
