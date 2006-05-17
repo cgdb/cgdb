@@ -1,3 +1,7 @@
+5/17/2006 Bob Rossi <bob@brasko.net>
+
+	* NEWS: Add note about switching to SVN.
+
 5/13/2006 Bob Rossi <bob@brasko.net>
 
 	* config/readline_check_version.m4: Fix 'test' condition.
