@@ -1101,6 +1101,15 @@ commands_user_ran_command (struct commands *c,
       return -1;
     }
 
+  if (commands_issue_command (c,
+			      client_command_list,
+			      ANNOTATE_INFO_LINE, NULL, 0) == -1)
+    {
+      logger_write_pos (logger, __FILE__, __LINE__,
+			"commands_issue_command error");
+      return -1;
+    }
+
   return 0;
 }
 

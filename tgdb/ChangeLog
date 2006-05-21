@@ -1,3 +1,8 @@
+5/20/2006 Bob Rossi <bob@brasko.net>
+
+	* annotate-two/src/commands.c (commands_user_ran_command): Add call to
+	get the current line after each command the user runs.
+
 5/13/2006 Bob Rossi <bob@brasko.net>
 
 	* annotate-two/include/a2-tgdb.h (a2_get_current_location): Add

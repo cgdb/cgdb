@@ -1,3 +1,8 @@
+5/20/2006 Bob Rossi <bob@brasko.net>
+
+	* src/cgdb.c (start_gdb): Remove code to get the current location 
+	after each CLI command. This is moved into TGDB for now.
+
 5/13/2006 Bob Rossi <bob@brasko.net>
 
         * src/cgdb.c (rlctx_send_user_command): Make sure to update the
