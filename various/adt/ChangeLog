@@ -1,3 +1,14 @@
+5/20/2006 Bob Rossi <bob@brasko.net>
+
+	* src/Makefile.am (ibuf_driver_LDFLAGS, ibuf_driver_LDADD,
+	ibuf_driver_DEPENDENCIES, std_hash_driver_LDFLAGS,
+	std_hash_driver_LDFLAGS, std_hash_driver_DEPENDENCIES,
+	std_list_driver_LDFLAGS, std_list_driver_LDADD,
+	std_list_driver_DEPENDENCIES, std_btree_driver_LDFLAGS,
+	std_btree_driver_LDADD, std_btree_driver_DEPENDENCIES,
+	std_bbtree_driver_LDFLAGS, std_bbtree_driver_LDADD,
+	std_bbtree_driver_DEPENDENCIES): Add libutil to adt dependencies.
+
 5/07/2006 Bob Rossi <bob@brasko.net>
 
 	* src/ibuf_driver.c (config.h, string.h): Add #include.
