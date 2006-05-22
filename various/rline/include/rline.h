@@ -53,10 +53,14 @@ typedef int completion_cb (int, int);
  * \param completion
  * The completion callback that should be used when readline requests completion.
  *
+ * \param TERM
+ * Pass in the TERM that readline should think it's output should be like.
+ *
  * @return
  * NULL on error, a valid context on success.
  */
-struct rline* rline_initialize (int slavefd, command_cb *command, completion_cb *completion);
+struct rline* rline_initialize (int slavefd, command_cb *command, completion_cb *completion, 
+				char *TERM);
 
 /**
  * This will terminate a librline session. No functions should be called on

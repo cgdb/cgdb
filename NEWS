@@ -1,7 +1,16 @@
-   * CGDB is now maintained in a subvesion respository instead of a 
+   * CGDB now uses a psuedo terminal (PTY) to start GDB on, instead of
+     using a pipe. Jens Frederich reported that on a Mac, typing Ctrl-C
+     while the inferior was running would cause GDB to shut down, thus
+     causing CGDB to shut down. This patch fixes that problem. At the
+     same time, this patch caused GDB to ask the user several other
+     questions regarding shared breakpoints, and quiting while the 
+     inferior is running. Thus, CGDB acts more as if you were just using 
+     GDB.
+   
+   * CGDB is now maintained in a subversion repository instead of a 
      CVS repository. Although this might not appear to effect end users,
      it is possible that there will be problems associated with this 
-     switch. For this reason, I have documentated this here.
+     switch. For this reason, I have documented this here.
    
    * A new feature for CGDB is available. If you use the 'list' command
      in the GDB window, CGDB will detect the line change and display
@@ -129,7 +138,7 @@ cgdb-0.6.0 (01/30/2006)
 
    * Fix a bug in the c/c++ syntax highlighter. If a file had "\\" as a 
      string literal, the CGDB syntax tokenizer would be built incorrectly
-     resulting in incorret file highlighting.
+     resulting in incorrect file highlighting.
    
 cgdb-0.5.3 (08/08/2005)
    
@@ -199,7 +208,7 @@ cgdb-0.5.1 (04/02/2005)
     
    * Fix a bug in the c/c++ syntax highlighter. If a file had a dos file format
    and the C++ style comment // was used, then the file displayed would be 
-   completly unreadable. This is because the trailing '\r' would get grouped with
+   completely unreadable. This is because the trailing '\r' would get grouped with
    the comment.
 
    * Fix CGDB command line interface. If the user invoked CGDB like this,
@@ -212,7 +221,7 @@ cgdb-0.5.1 (04/02/2005)
    a file descriptor. There is now a mechanism to write warnings and 
    errors to a file for inspection by the user.
 
-   * Removed depricated libinput from the various subdirectory. It has been
+   * Removed deprecated libinput from the various subdirectory. It has been
    replaced by libkui.
 
    * Added 'set asr' or autosourcereload option to CGDB. It is off by default.
@@ -275,7 +284,7 @@ cgdb-0.4.0 (10/28/2003)
    be highlighted.
    
    * Fixed CGDB bug. When searching for text, CGDB would search for the next
-   occurence of the string from where it last found an occurence, rather than
+   occurrence of the string from where it last found an occurrence, rather than
    where the users cursor is.
    
    * Fixed crash in TGDB. It would try to parse watchpoints.

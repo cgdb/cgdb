@@ -1576,25 +1576,21 @@ tgdb_queue_size (struct tgdb *tgdb, int *size)
 int
 tgdb_signal_notification (struct tgdb *tgdb, int signum)
 {
-  pid_t pid;
+  struct termios t;
+  cc_t *sig_char = NULL;
 
-  pid = tgdb_client_get_debugger_pid (tgdb->tcc);
-
-  if (pid == -1)
-    return -1;
+  tcgetattr (tgdb->debugger_stdin, &t);
 
   if (signum == SIGINT)
     {				/* ^c */
       tgdb->control_c = 1;
-      kill (pid, SIGINT);
-    }
-  else if (signum == SIGTERM)
-    {
-      kill (pid, SIGTERM);
+      sig_char = &t.c_cc[VINTR];
+      write (tgdb->debugger_stdin, sig_char, 1);
     }
   else if (signum == SIGQUIT)
     {				/* ^\ */
-      kill (pid, SIGQUIT);
+      sig_char = &t.c_cc[VQUIT];
+      write (tgdb->debugger_stdin, sig_char, 1);
     }
   else if (signum == SIGCHLD)
     {

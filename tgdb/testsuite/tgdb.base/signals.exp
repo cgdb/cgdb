@@ -32,18 +32,20 @@ expect {
   }
 }
 
+set test "priming for signal 2"
 send "\3"
 expect {
-  -re "^Quit\[\r\n\]+$tgdb_prompt$" { pass "control_c passed" } 
+  -re "Quit\[\r\n\]+$tgdb_prompt$" { pass "control_c passed" } 
   timeout {
     fail "timeout $test"
   }
 }
 
 # Make sure a following signal also works.
+set test "priming for signal 3"
 send "\3"
 expect {
-  -re "^Quit\[\r\n\]+$tgdb_prompt$" { pass "control_c passed" }
+  -re "Quit\[\r\n\]+$tgdb_prompt$" { pass "control_c passed" }
   timeout {
     fail "timeout $test"
   }
@@ -51,6 +53,7 @@ expect {
 
 # Test that 'b main^c' will work. Also, make sure the data didn't go 
 # into the history.
+set test "priming for signal 4"
 send "b main"
 expect {
   -re "^b main$" { }
@@ -59,9 +62,10 @@ expect {
   }
 }
 
+set test "priming for signal 5"
 send "\3"
 expect {
-  -re "^Quit\[\r\n\]+$tgdb_prompt$" { pass "control_c passed"}
+  -re "Quit\[\r\n\]+$tgdb_prompt$" { pass "control_c passed"}
   timeout {
     fail "timeout $test"
   }
@@ -111,7 +115,7 @@ expect {
 
 send "\3"
 expect {
-  -re "^Quit\[\r\n\]+$tgdb_prompt$" {}
+  -re "Quit\[\r\n\]+$tgdb_prompt$" {}
   timeout {
     fail "timeout $test"
   }

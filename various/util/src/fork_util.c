@@ -147,6 +147,37 @@ void free_memory(int argc, char *argv[]) {
     free(argv);
 }
 
+/* free_memory: utility function that frees up memory.
+ *
+ * s:       if NULL, left alone, otherwise pty_release is called on it
+ * fd:      if -1, left alone, otherwise close is called on it
+ * argc:    The number of items in argv
+ * argv:    free is called on each of these
+ *
+ * Returns -1 if any call fails, otherwise 0
+ */
+static int pty_free_memory(char *s, int fd, int argc, char *argv[]) {
+    int error = 0, i;
+
+    if ( s && pty_release(s) == -1) {
+        logger_write_pos ( logger, __FILE__, __LINE__, "pty_release failed");
+        error = -1;
+    }
+
+    if ( fd != -1 && close(fd) == -1) {
+        logger_write_pos ( logger, __FILE__, __LINE__, "close failed");
+        error = -1;
+    }
+
+    /* Free the local list */
+    for (i = 0; i < argc; i++)
+        free(argv[i]);
+
+    free(argv);
+
+    return error;
+}
+
 int invoke_debugger(
             const char *path, 
             int argc, char *argv[], 
@@ -161,8 +192,9 @@ int invoke_debugger(
     char *F                              = filename;
     char **local_argv;
     int i, j = 0, extra = 6;
-    int pin[2] = { -1, -1 }, pout[2] = { -1, -1 };
     int malloc_size = argc + extra;
+    char slavename[64];
+    int masterfd;
 
     /* Copy the argv into the local_argv, and NULL terminate it.
      * sneak in the path name, the user did not type that */
@@ -179,10 +211,10 @@ int invoke_debugger(
     local_argv[j++] = xstrdup(NW);
 
     /* add the init file that the user did not type */    
-	if ( choice == 0 )
-		local_argv[j++] = xstrdup(ANNOTATE_TWO);
-	else if ( choice == 1 )
-		local_argv[j++] = xstrdup(GDBMI);
+    if ( choice == 0 )
+      local_argv[j++] = xstrdup(ANNOTATE_TWO);
+    else if ( choice == 1 )
+      local_argv[j++] = xstrdup(GDBMI);
 
     local_argv[j++] = xstrdup(X);
     local_argv[j++] = xstrdup(F);
@@ -192,53 +224,18 @@ int invoke_debugger(
         local_argv[j++] = xstrdup(argv[i]);
 
     local_argv[j] = NULL;
+    
+    /* Fork into two processes with a shared pty pipe */
+    pid = pty_fork(&masterfd, slavename, SLAVE_SIZE, NULL, NULL);
 
-    if ( pipe(pin) == -1 ) {
-        logger_write_pos ( logger, __FILE__, __LINE__, "pipe failed");
-        free_memory(malloc_size, local_argv);
-        return -1;
-    }
-
-    if ( pipe(pout) == -1 ) {
-        logger_write_pos ( logger, __FILE__, __LINE__, "pipe failed");
-        free_memory(malloc_size, local_argv);
-        return -1;
-    }
-
-    if ( (pid = fork()) == -1 ) { /* error, free memory and return  */
+    if (pid == -1 ) { /* error, free memory and return  */
+        pty_free_memory(slavename, masterfd, argc, local_argv);
         logger_write_pos ( logger, __FILE__, __LINE__, "fork failed");
         return -1;
     } else if ( pid == 0 ) {    /* child */
-
-        xclose(pin[1]);
-        xclose(pout[0]);
-
         /* If this is not called, when user types ^c SIGINT gets sent to gdb */
         setsid();
         
-        /* Make the stdout and stderr go to this pipe */
-        if ( (dup2(pout[1], STDOUT_FILENO)) == -1) {
-            logger_write_pos ( logger, __FILE__, __LINE__, "dup failed");
-            free_memory(malloc_size, local_argv);
-            return -1;
-        }
-        xclose(pout[1]);
-
-        /* Make stdout and stderr go to the same fd */
-        if ( dup2(STDOUT_FILENO, STDERR_FILENO) == -1 ) {
-            logger_write_pos ( logger, __FILE__, __LINE__, "dup2 failed");
-            free_memory(malloc_size, local_argv);
-            return -1;
-        }
-
-        /* Make programs stdin be this pipe */
-        if ( (dup2(pin[0], STDIN_FILENO)) == -1) {
-            logger_write_pos ( logger, __FILE__, __LINE__, "dup failed");
-            free_memory(malloc_size, local_argv);
-            return -1;
-        }
-
-        xclose(pin[0]);
         execvp(local_argv[0], local_argv);
 
         /* Will get here if exec failed. This will happen when the 
@@ -246,14 +243,12 @@ int invoke_debugger(
          * - user specified a different program via the -d option and it was
          *   not able to be exec'd.
          */
-
         exit (0);
     }
 
-    *in = pin[1];
-    xclose(pin[0]);
-    *out = pout[0];
-    xclose(pout[1]);
+    *in = masterfd;
+    *out = masterfd;
+
     free_memory(malloc_size, local_argv);
     return pid;
 }

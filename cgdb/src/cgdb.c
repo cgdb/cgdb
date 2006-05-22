@@ -1467,7 +1467,7 @@ init_readline (void)
   readline_history_path = (char *) malloc (sizeof (char) * length);
   fs_util_get_path (cgdb_home_dir, readline_history_filename,
 		    readline_history_path);
-  rline = rline_initialize (slavefd, rlctx_send_user_command, tab_completion);
+  rline = rline_initialize (slavefd, rlctx_send_user_command, tab_completion, "dumb");
   rline_read_history (rline, readline_history_path);
   return 0;
 }

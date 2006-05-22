@@ -1,3 +1,9 @@
+05/21/2006 Bob Rossi <bob@brasko.net>
+
+	* tgdb.base/signals.exp: No longer use anchors.
+	* lib/tgdb.exp: Remove number after expect.
+
+
 version 0.6.2 (04/09/2006):
 
 version 0.6.1 (03/06/2006):

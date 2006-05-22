@@ -70,7 +70,7 @@ static void custom_deprep_term_function () {}
 
 /* Createing and Destroying a librline context. {{{*/
 struct rline* 
-rline_initialize (int slavefd, command_cb *command, completion_cb *completion)
+rline_initialize (int slavefd, command_cb *command, completion_cb *completion, char *TERM)
 {
   struct rline *rline = (struct rline*)malloc (sizeof(struct rline));
   if (!rline)
@@ -112,7 +112,7 @@ rline_initialize (int slavefd, command_cb *command, completion_cb *completion)
 
   /* Set the terminal type to dumb so the output of readline can be
    * understood by tgdb */
-  if (rl_reset_terminal ("dumb") == -1) {
+  if (rl_reset_terminal (TERM) == -1) {
     rline_shutdown (rline);
     return NULL;
   }

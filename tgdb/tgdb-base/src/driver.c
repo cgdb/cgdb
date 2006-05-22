@@ -478,7 +478,7 @@ int main(int argc, char **argv){
     if (tty_off_xon_xoff (masterfd) == -1)
      exit(-1);
       
-    rline = rline_initialize (slavefd, rlctx_send_user_command, tab_completion);
+    rline = rline_initialize (slavefd, rlctx_send_user_command, tab_completion, getenv ("TERM"));
 
     if ( (tgdb = tgdb_initialize(NULL, argc-1, argv+1, &gdb_fd, &child_fd)) == NULL ) {
         logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_start error");

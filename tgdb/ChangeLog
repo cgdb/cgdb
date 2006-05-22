@@ -1,3 +1,9 @@
+5/21/2006 Bob Rossi <bob@brasko.net>
+
+	* tgdb-base/src/tgdb.c (tgdb_signal_notification): No longer use kill
+	to pass the signal to GDB. Instead, write the ^c to GDB's pty.
+	* tgdb-base/src/driver.c (main): Pass in new arg to rline_initialize.
+
 5/20/2006 Bob Rossi <bob@brasko.net>
 
 	* annotate-two/src/commands.c (commands_user_ran_command): Add call to

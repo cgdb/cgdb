@@ -27,7 +27,7 @@ proc gdb_file_cmd { arg } {
         }
         -re "Load new symbol table from \".*\".*y or n." {
             send "y\n"
-            expect 120 {
+            expect {
                 -re "Reading symbols from.*done.*$tgdb_prompt" {
                     verbose "\t\tLoaded $arg with new symbol table into $TGDB_DRIVER"
                     return 0
