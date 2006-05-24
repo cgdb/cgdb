@@ -1,7 +1,8 @@
 Bug fixes/improvement for cgdb-0.6.3
 
- [ ] Configure should not accept yacc. bison needs to be available to build CGDB.
+ [x] Configure should not accept yacc. bison needs to be available to build CGDB.
      Document in manual that bison is required and that yacc is not good enough.
+     - This is fixed, however, users will not need bison installed to build CGDB.
 
 bluffer_
  [ ] Look at passing ^z to GDB
