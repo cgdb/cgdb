@@ -20,9 +20,6 @@
      to configure itself on a Mac. Thanks to Jens Frederich for finding
      and reporting this problem.
    
-   * CGDB now supports the 'shell' command, and no longer hangs when a user
-     enters a shell command at the GDB prompt.
-
    * CGDB no longer packages the generated auto tool files in CVS. However,
      the distributions will have these files. This means you will need 
      autoconf, autoheader and automake installed to compile CGDB from CVS.

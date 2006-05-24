@@ -83,7 +83,6 @@
 /* Constants */
 /* --------- */
 
-const char *GDB_SHELL_COMMAND = "shell";
 const char *readline_history_filename = "readline_history.txt";
 
 /* --------------- */
@@ -303,10 +302,6 @@ rlctx_send_user_command (char *line)
   /* Add the line passed in to the current line */
   ibuf_add (current_line, line);
 
-  /* TBD: Is this ok to do all the time?  Added for the 'shell' command,
-   * for simplicity.  */
-  ibuf_trim(current_line);
-
   /* Get current line, and current line length */
   cline = ibuf_get (current_line);
   length = ibuf_length (current_line);
@@ -352,24 +347,13 @@ rlctx_send_user_command (char *line)
   if (length > 0)
     rline_add_history (rline, cline);
 
-  /* Look for GDB 'shell' command, which locks up CGDB (because no gdb prompt
-   * is immediately returned).  Instead, handle it with the front end. */
-  if (strncasecmp(cline, GDB_SHELL_COMMAND, strlen(GDB_SHELL_COMMAND)) == 0) {
-      char *cmd = cline + strlen(GDB_SHELL_COMMAND);
-      for (i = 0; i < strlen(cmd) && isspace(cmd[i]); i++);
-      run_shell_command(cmd+i);
+  request_ptr = tgdb_request_run_console_command (tgdb, cline);
+  if (!request_ptr)
+      logger_write_pos (logger, __FILE__, __LINE__,
+		      "rlctx_send_user_command\n");
 
-      rline_rl_forced_update_display (rline);
-  } else {
-      request_ptr = tgdb_request_run_console_command (tgdb, cline);
-
-      /* Send this command to TGDB */
-      if (!request_ptr)
-          logger_write_pos (logger, __FILE__, __LINE__,
-		          "rlctx_send_user_command\n");
-
-      handle_request (tgdb, request_ptr);
-  }
+  /* Send this command to TGDB */
+  handle_request (tgdb, request_ptr);
 
   ibuf_clear (current_line);
 }
