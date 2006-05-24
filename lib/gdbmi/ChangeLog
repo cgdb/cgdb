@@ -1,5 +1,9 @@
 5/23/2006 Bob Rossi <bob@brasko.net>
 
+	* autoregen.sh: Remove the auto tool version checks.
+
+5/23/2006 Bob Rossi <bob@brasko.net>
+
 	* src/gdbmi_grammar.c, src/gdbmi_grammar.h: Added generated files.
 
 5/13/2006 Bob Rossi <bob@brasko.net>

@@ -1,5 +1,9 @@
 5/23/2006 Bob Rossi <bob@brasko.net>
 
+	* autoregen.sh: Remove the auto tool version checks.
+
+5/23/2006 Bob Rossi <bob@brasko.net>
+
 	* NEWS: CGDB no longer supports the shell command. It was never
 	released with this functionality however.
 
