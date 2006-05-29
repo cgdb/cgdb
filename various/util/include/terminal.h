@@ -59,6 +59,20 @@ int tty_output_nl (int fd);
 int tty_off_xon_xoff (int fd);
 
 /**
+ * Either turn echo on or off for the PTY.
+ *
+ * \param fd
+ * The terminal descriptor to turn the echo on or off.
+ *
+ * \param echo_on
+ * If 1, the echo will be turned on, if 0 echo will be turned off.
+ *
+ * \return
+ * 0 on success, -1 on error
+ */
+int tty_set_echo (int fd, int echo_on);
+
+/**
  * This will get the terminal attributes and store them into the buffer buf.
  * 
  * \param fd

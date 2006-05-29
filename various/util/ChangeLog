@@ -1,3 +1,9 @@
+5/29/2006 Bob Rossi <bob@brasko.net>
+
+	* include/terminal.h (tty_set_echo): Added function.
+	* src/terminal.c (tty_set_echo): Ditto.
+	* src/fork_util.c (invoke_debugger): Turn echo off on GDB side.
+
 5/21/2006 Bob Rossi <bob@brasko.net>
 
 	* src/fork_util.c (pty_free_memory): Add function.

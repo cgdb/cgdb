@@ -233,6 +233,10 @@ int invoke_debugger(
         logger_write_pos ( logger, __FILE__, __LINE__, "fork failed");
         return -1;
     } else if ( pid == 0 ) {    /* child */
+	FILE *fd = fopen (slavename, "r");
+	if (fd)
+  	  tty_set_echo (fileno (fd), 0);
+
         /* If this is not called, when user types ^c SIGINT gets sent to gdb */
         setsid();
         

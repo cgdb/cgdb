@@ -72,6 +72,25 @@ tty_off_xon_xoff (int fd)
 }
 
 int 
+tty_set_echo (int fd, int echo_on)
+{
+  struct termios buf;
+
+  if (tcgetattr (fd, &buf) < 0)
+    return -1;
+
+  if (echo_on == 1)
+    buf.c_lflag |= ECHO;
+  else if (echo_on == 0)
+    buf.c_lflag &= ~ECHO;
+
+  if (tcsetattr (fd, TCSAFLUSH, &buf) < 0)
+    return -1;
+
+  return 0;
+}
+
+int 
 tty_get_attributes (int fd, struct termios *buf)
 {
   if (tcgetattr (fd, buf) < 0)
