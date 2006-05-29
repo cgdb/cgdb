@@ -22,7 +22,6 @@
 struct tgdb_command *tgdb_command_create (    
 		const char *tgdb_command_data,
         enum tgdb_command_choice command_choice, 
-        enum tgdb_command_action_choice action_choice,
 		struct tgdb_client_command *tcc,
        int is_buffered_console_command) {
 
@@ -36,7 +35,6 @@ struct tgdb_command *tgdb_command_create (
 		tc->tgdb_command_data = NULL;
 
 	tc->command_choice = command_choice;
-	tc->action_choice  = action_choice;
 	tc->client_command = tcc;
 	tc->is_buffered_console_command = is_buffered_console_command;
 

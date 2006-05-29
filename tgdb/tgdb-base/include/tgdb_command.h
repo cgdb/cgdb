@@ -36,31 +36,11 @@ enum tgdb_command_choice {
 	TGDB_COMMAND_TGDB_CLIENT,
 
 	/**
-	 * ???
+	 * A priority command is a command that the client context needs
+	 * to run before it can finish getting the data necessary for a 
+	 * TGDB_COMMAND_TGDB_CLIENT command.
 	 */
 	TGDB_COMMAND_TGDB_CLIENT_PRIORITY
-};
-
-/**
- * TGDB can do several actions for the client. The client is allowed to ask
- * TGDB to perform such action's through this interface.
- */
-enum tgdb_command_action_choice {
-
-	/**
-	 * This is relevant when there is no TGDB action.
-	 */
-	TGDB_COMMAND_ACTION_NONE,
-
-	/**
-	 * This tells TGDB to change the current prompt.
-	 */
-	TGDB_COMMAND_ACTION_CONSOLE_SET_PROMPT,
-
-	/**
-	 * This tells TGDB to redisplay the current prompt.
-	 */
-	TGDB_COMMAND_ACTION_CONSOLE_REDISPLAY_PROMPT
 };
 
 /* This is here to add new client_command/command faster */
@@ -81,11 +61,6 @@ struct tgdb_command {
 	 * The type of command this one is.
 	 */
 	enum tgdb_command_choice command_choice;
-
-	/**
-	 * What type of command is this?
-	 */
-	enum tgdb_command_action_choice action_choice;
 
 	/**
 	 * The client command associated with this command.
@@ -125,7 +100,6 @@ struct tgdb_command {
 struct tgdb_command *tgdb_command_create (    
 		const char *tgdb_command_data,
         enum tgdb_command_choice command_choice, 
-        enum tgdb_command_action_choice action_choice,
 		struct tgdb_client_command *tcc,
        int is_buffered_console_command	);
         

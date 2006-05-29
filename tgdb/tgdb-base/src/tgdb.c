@@ -200,8 +200,6 @@ tgdb_process_client_commands (struct tgdb *tgdb)
   while (iterator)
     {
       enum tgdb_command_choice command_choice;
-      enum tgdb_command_action_choice action_choice =
-	TGDB_COMMAND_ACTION_NONE;
 
       client_command =
 	(struct tgdb_client_command *) tgdb_list_get_item (iterator);
@@ -227,7 +225,6 @@ tgdb_process_client_commands (struct tgdb *tgdb)
 	{
 	  command = tgdb_command_create (command_data,
 					 command_choice,
-					 action_choice,
 					 client_command,
 					 0 /* No CONSOLE commands here */ );
 
@@ -616,8 +613,7 @@ tgdb_send (struct tgdb *tgdb, char *command,
   temp_command = NULL;
 
   /* Create the TGDB command */
-  tc = tgdb_command_create (NULL,
-			    command_choice, TGDB_COMMAND_ACTION_NONE, tcc, 0);
+  tc = tgdb_command_create (NULL, command_choice, tcc, 0);
 
   if (tgdb_run_or_queue_command (tgdb, tc) == -1)
     {

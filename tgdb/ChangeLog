@@ -1,19 +1,31 @@
 5/29/2006 Bob Rossi <bob@brasko.net>
 
-	* tgdb/annotate-two/src/a2-tgdb.c (a2_is_client_ready): Remove
+	* tgdb-base/include/tgdb_command.h (enum tgdb_command_choice): Comment
+	field.
+	(enum tgdb_command_action_choice): Remove type.
+	(tgdb_command_create): Remove parameter action_choice.
+	* tgdb-base/src/tgdb_command.c (tgdb_command_create): Remove parameter
+	action_choice.
+	* tgdb-base/src/tgdb.c (tgdb_process_client_commands): Modify for 
+	parameter that was removed.
+	(tgdb_send): Ditto.
+
+5/29/2006 Bob Rossi <bob@brasko.net>
+
+	* annotate-two/src/a2-tgdb.c (a2_is_client_ready): Remove
 	TRUE/FALSE, and replace with 1/0.
-	* tgdb/annotate-two/src/commands.c (commands_initialize): Ditto.
+	* annotate-two/src/commands.c (commands_initialize): Ditto.
 	(parse_breakpoint): Ditto.
 	(commands_set_state): Ditto.
 	(commands_process): Ditto.
 	(commands_prepare_for_command): Ditto.
-	* tgdb/annotate-two/src/globals.c (globals_initialize,
+	* annotate-two/src/globals.c (globals_initialize,
 	global_set_start_info_sources, global_reset_info_sources_started,
 	global_set_start_completion, global_reset_completion_started,
 	global_set_start_list, global_list_finished): Ditto.
-	* tgdb/annotate-two/src/annotate.c (handle_misc_prompt,
+	* annotate-two/src/annotate.c (handle_misc_prompt,
 	handle_misc_post_prompt, handle_prompt, handle_error_begin): Ditto.
-	* tgdb/gdbmi/src/gdbmi_tgdb.c (gdbmi_is_client_ready): Ditto.
+	* gdbmi/src/gdbmi_tgdb.c (gdbmi_is_client_ready): Ditto.
 	* tgdb-base/include/tgdb_types.h (TRUE, FALSE): Removed defines.
 	* tgdb-base/src/tgdb.c (struct tgdb): Comment fields.
 	(tgdb_deliver_command): Removed parameter fd.
