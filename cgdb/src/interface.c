@@ -880,8 +880,12 @@ static int
 capture_regex (struct sviewer *sview)
 {
   int c;
+  int orig_line; 
 
-  int orig_line = sview->cur->sel_line;
+  if (!sview || !sview->cur)
+    return 0; 
+  
+  orig_line = sview->cur->sel_line;
   /* Initialize the function for finding a regex and tell user */
   regex_search = 1;
   regex_line_pos = 0;

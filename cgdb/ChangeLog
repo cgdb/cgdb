@@ -1,3 +1,7 @@
+5/29/2006 Bob Rossi <bob@brasko.net>
+
+	* src/interface.c (capture_regex): Do NULL pointer checking.
+
 5/23/2006 Bob Rossi <bob@brasko.net>
 
 	* src/cgdb.c (GDB_SHELL_COMMAND): Removed variable.
