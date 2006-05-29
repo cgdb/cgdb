@@ -19,20 +19,6 @@ extern "C"
 {
 #endif
 
-/**
- * This should be depricated and removed from TGDB.
- */
-#ifndef TRUE
-#define TRUE  1
-#endif
-
-/**
- * This should be depricated and removed from TGDB.
- */
-#ifndef FALSE
-#define FALSE 0
-#endif
-
 #include "tgdb_list.h"
 
  /* A reference to a command that has been created by TGDB */

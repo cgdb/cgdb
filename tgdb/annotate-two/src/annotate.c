@@ -50,14 +50,14 @@ static int handle_misc_pre_prompt(struct annotate_two *a2, const char *buf, size
 }
 
 static int handle_misc_prompt(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list){
-   globals_set_misc_prompt_command( a2->g, TRUE);
+   globals_set_misc_prompt_command( a2->g, 1);
    data_set_state(a2, USER_AT_PROMPT );
    a2->command_finished = 1;
    return 0;
 }
 
 static int handle_misc_post_prompt(struct annotate_two *a2, const char *buf, size_t n, struct tgdb_list *list){
-   globals_set_misc_prompt_command( a2->g, FALSE);
+   globals_set_misc_prompt_command( a2->g, 0);
    data_set_state(a2, POST_PROMPT );
 
    return 0;
@@ -80,14 +80,14 @@ static int handle_prompt(struct annotate_two *a2, const char *buf, size_t n, str
    data_set_state(a2, USER_AT_PROMPT );
 
    /* 'info sources' is done, return the sources to the gui */
-   if(global_has_info_sources_started(a2->g) == TRUE){
+   if(global_has_info_sources_started(a2->g) == 1){
       global_reset_info_sources_started(a2->g);
       commands_send_gui_sources(a2->c, list);
       return 0;
    } 
 
    /* 'complete' is done, return the completions to the gui */
-   if(global_has_completion_started(a2->g) == TRUE){
+   if(global_has_completion_started(a2->g) == 1){
       global_reset_completion_started(a2->g);
       commands_send_gui_completions(a2->c, list);
       return 0;
@@ -158,9 +158,9 @@ static int handle_error_begin(struct annotate_two *a2, const char *buf, size_t n
    }
 
    /* if the user tried to list a file that does not exist */
-   if(global_has_list_started(a2->g) == TRUE){
+   if(global_has_list_started(a2->g) == 1){
       global_list_finished(a2->g);
-      global_set_list_error ( a2->g, TRUE );
+      global_set_list_error ( a2->g, 1 );
       commands_list_command_finished(a2->c, list, 0);
       return 0;
    }

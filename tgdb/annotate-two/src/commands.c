@@ -157,8 +157,8 @@ commands_initialize (void)
   c->breakpoint_list = tgdb_list_init ();
   c->breakpoint_string = ibuf_init ();
   c->breakpoint_table = 0;
-  c->breakpoint_enabled = FALSE;
-  c->breakpoint_started = FALSE;
+  c->breakpoint_enabled = 0;
+  c->breakpoint_started = 0;
   if (regcomp (&c->regex_bp, regex, REG_EXTENDED) != 0)
     return NULL;
 
@@ -403,7 +403,7 @@ parse_breakpoint (struct commands *c)
   tb->file = matches[2];
   tb->line = atoi (matches[3]);
 
-  if (c->breakpoint_enabled == TRUE)
+  if (c->breakpoint_enabled == 1)
     tb->enabled = 1;
   else
     tb->enabled = 0;
@@ -432,7 +432,7 @@ commands_set_state (struct commands *c,
 	    logger_write_pos (logger, __FILE__, __LINE__, "parse_breakpoint error");
 
 	  ibuf_clear (c->breakpoint_string);
-	  c->breakpoint_enabled = FALSE;
+	  c->breakpoint_enabled = 0;
 	}
       break;
     case BREAKPOINT_TABLE_END:
@@ -452,9 +452,9 @@ commands_set_state (struct commands *c,
       }
 
       ibuf_clear (c->breakpoint_string);
-      c->breakpoint_enabled = FALSE;
+      c->breakpoint_enabled = 0;
 
-      c->breakpoint_started = FALSE;
+      c->breakpoint_started = 0;
       break;
     case BREAKPOINT_HEADERS:
       c->breakpoint_table = 0;
@@ -463,7 +463,7 @@ commands_set_state (struct commands *c,
 
       /* The breakpoint queue should be empty at this point */
       c->breakpoint_table = 1;
-      c->breakpoint_started = TRUE;
+      c->breakpoint_started = 1;
       break;
     case INFO_SOURCE_FILENAME_PAIR:
       break;
@@ -812,7 +812,7 @@ commands_process (struct commands *c, char a, struct tgdb_list *list)
   else if (c->breakpoint_table && c->cur_command_state == FIELD
 	   && c->cur_field_num == 3 && a == 'y')
     {
-      c->breakpoint_enabled = TRUE;
+      c->breakpoint_enabled = 1;
     }
 }
 
@@ -926,10 +926,10 @@ commands_prepare_for_command (struct annotate_two *a2,
   /* The list command is no longer running */
   global_list_finished (a2->g);
 
-  if (global_list_had_error (a2->g) == TRUE
+  if (global_list_had_error (a2->g) == 1
       && commands_get_state (c) == INFO_LIST)
     {
-      global_set_list_error (a2->g, FALSE);
+      global_set_list_error (a2->g, 0);
       return -1;
     }
 

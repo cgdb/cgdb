@@ -1,7 +1,7 @@
 This is ../../cgdb/doc/cgdb.info, produced by makeinfo version 4.7 from
 ../../cgdb/doc/cgdb.texinfo.
 
-   This manual is for GNU CGDB (version 0.6.2-cvs, 17 May 2006), the
+   This manual is for GNU CGDB (version 0.6.2-cvs, 23 May 2006), the
 GNU ncurses based front end to GDB.
 
    Copyright (C) 2006 Free Software Foundation, Inc.
@@ -29,7 +29,7 @@ File: cgdb.info,  Node: Top,  Next: Summary,  Up: (dir)
 CGDB
 ****
 
-This manual is for GNU CGDB (version 0.6.2-cvs, 17 May 2006), the GNU
+This manual is for GNU CGDB (version 0.6.2-cvs, 23 May 2006), the GNU
 ncurses based front end to GDB.
 
    Copyright (C) 2006 Free Software Foundation, Inc.

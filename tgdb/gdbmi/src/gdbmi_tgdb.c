@@ -325,7 +325,7 @@ int gdbmi_shutdown ( void *ctx ) {
 #endif
 
 int gdbmi_is_client_ready(void *ctx) {
-    return TRUE;
+    return 1;
 }
 
 enum newlinestyle {

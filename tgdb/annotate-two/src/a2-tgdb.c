@@ -273,13 +273,13 @@ int a2_err_msg ( void *ctx ) {
 int a2_is_client_ready(void *ctx) {
 	struct annotate_two *a2 = (struct annotate_two *)ctx;
     if ( !a2->tgdb_initialized )
-        return FALSE;
+        return 0;
 
     /* If the user is at the prompt */
     if ( data_get_state(a2->data) == USER_AT_PROMPT )
-        return TRUE;
+        return 1;
 
-    return FALSE;
+    return 0;
 }
 
 int a2_parse_io ( 

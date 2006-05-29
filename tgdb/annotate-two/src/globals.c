@@ -43,11 +43,11 @@ struct globals {
 struct globals *globals_initialize ( void ) {
 	struct globals *g = (struct globals *)xmalloc ( sizeof ( struct globals ) );
 
-	g->info_sources_started = FALSE;
-	g->completion_started = FALSE;
-	g->list_started 		= FALSE;
-	g->list_had_error 		= FALSE;
-	g->misc_prompt_command  = FALSE;
+	g->info_sources_started = 0;
+	g->completion_started = 0;
+	g->list_started 		= 0;
+	g->list_had_error 		= 0;
+	g->misc_prompt_command  = 0;
 
 	return g;
 }
@@ -70,7 +70,7 @@ void globals_set_misc_prompt_command( struct globals *g, unsigned short set){
 }  
 
 void global_set_start_info_sources( struct globals *g){
-   g->info_sources_started = TRUE;
+   g->info_sources_started = 1;
 }
 
 int global_has_info_sources_started(struct globals *g){
@@ -78,11 +78,11 @@ int global_has_info_sources_started(struct globals *g){
 }
 
 void global_reset_info_sources_started(struct globals *g){
-   g->info_sources_started = FALSE;
+   g->info_sources_started = 0;
 }
 
 void global_set_start_completion( struct globals *g){
-   g->completion_started = TRUE;
+   g->completion_started = 1;
 }
 
 int global_has_completion_started(struct globals *g){
@@ -90,13 +90,13 @@ int global_has_completion_started(struct globals *g){
 }
 
 void global_reset_completion_started(struct globals *g){
-   g->completion_started = FALSE;
+   g->completion_started = 0;
 }
 
 /* For list_started */
 void global_set_start_list(struct globals *g){
-   g->list_started = TRUE;
-   g->list_had_error = FALSE;
+   g->list_started = 1;
+   g->list_had_error = 0;
 }
 
 int global_has_list_started(struct globals *g){
@@ -104,7 +104,7 @@ int global_has_list_started(struct globals *g){
 }
 
 void global_list_finished ( struct globals *g ){
-   g->list_started = FALSE;
+   g->list_started = 0;
 }
 
 /* For list_had_error */
