@@ -1,5 +1,15 @@
 5/29/2006 Bob Rossi <bob@brasko.net>
 
+	* tgdb-base/include/tgdb_command.h (enum tgdb_command): Remove
+	is_buffered_console_command field.
+	(tgdb_command_create): Remove is_buffered_console_command parameter.
+	* tgdb-base/src/tgdb_command.c (tgdb_command_create): Ditto.
+	* tgdb-base/src/tgdb.c (tgdb_process_client_commands): Remove unused
+	parameter.
+	(tgdb_send): Ditto.
+
+5/29/2006 Bob Rossi <bob@brasko.net>
+
 	* tgdb-base/include/tgdb_command.h (enum tgdb_command_choice): Comment
 	field.
 	(enum tgdb_command_action_choice): Remove type.

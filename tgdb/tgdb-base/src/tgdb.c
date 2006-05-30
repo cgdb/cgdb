@@ -225,8 +225,7 @@ tgdb_process_client_commands (struct tgdb *tgdb)
 	{
 	  command = tgdb_command_create (command_data,
 					 command_choice,
-					 client_command,
-					 0 /* No CONSOLE commands here */ );
+					 client_command);
 
 	  if (tgdb_run_or_queue_command (tgdb, command) == -1)
 	    {
@@ -613,7 +612,7 @@ tgdb_send (struct tgdb *tgdb, char *command,
   temp_command = NULL;
 
   /* Create the TGDB command */
-  tc = tgdb_command_create (NULL, command_choice, tcc, 0);
+  tc = tgdb_command_create (NULL, command_choice, tcc);
 
   if (tgdb_run_or_queue_command (tgdb, tc) == -1)
     {

@@ -66,12 +66,6 @@ struct tgdb_command {
 	 * The client command associated with this command.
 	 */
 	struct tgdb_client_command *client_command;
-
-	/**
-	 * If the command_choice was TGDB_COMMAND_CONSOLE, then
-	 * this data represents if the command was buffered.
-	 */
-	int is_buffered_console_command;
 };
 
 /**
@@ -89,19 +83,13 @@ struct tgdb_command {
  * \param tcc
  * This is the client command associated with the TGDB command.
  *
- * \param is_buffered_console_command
- * If this command represents a TGDB_COMMAND_CONSOLE command, then this
- * parameter will be 1 if the command was buffered and not run right away,
- * or 0 otherwise.
- *
  * @return
  * Always is successfull, will call exit on failed malloc
  */
 struct tgdb_command *tgdb_command_create (    
-		const char *tgdb_command_data,
-        enum tgdb_command_choice command_choice, 
-		struct tgdb_client_command *tcc,
-       int is_buffered_console_command	);
+  const char *tgdb_command_data,
+  enum tgdb_command_choice command_choice, 
+  struct tgdb_client_command *tcc);
         
 /** 
  * This will free a TGDB queue command.
