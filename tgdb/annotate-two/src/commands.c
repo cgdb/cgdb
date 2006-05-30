@@ -1137,21 +1137,18 @@ commands_issue_command (struct commands *c,
     {
       client_command = tgdb_client_command_create (ncom,
 						   TGDB_CLIENT_COMMAND_NORMAL,
-						   TGDB_CLIENT_COMMAND_ACTION_NONE,
 						   (void *) nacom);
     }
   else if (oob == 1)
     {
       client_command = tgdb_client_command_create (ncom,
 						   TGDB_CLIENT_COMMAND_PRIORITY,
-						   TGDB_CLIENT_COMMAND_ACTION_NONE,
 						   (void *) nacom);
     }
   else if (oob == 4)
     {
       client_command = tgdb_client_command_create (ncom,
 						   TGDB_CLIENT_COMMAND_NORMAL,
-						   TGDB_CLIENT_COMMAND_ACTION_NONE,
 						   (void *) nacom);
     }
 

@@ -42,23 +42,6 @@ enum tgdb_client_command_choice {
 	TGDB_CLIENT_COMMAND_PRIORITY,
 };
 
-/**
- * TGDB can do several actions for the client. The client is allowed to ask
- * TGDB to perform such action's through this interface.
- */
-enum tgdb_client_command_action_choice {
-
-	/**
-	 * This is relevant when there is no action for TGDB to take.
-	 */
-	TGDB_CLIENT_COMMAND_ACTION_NONE,
-
-	/**
-	 * This tells TGDB to change the current prompt.
-	 */
-	TGDB_CLIENT_COMMAND_ACTION_CONSOLE_SET_PROMPT
-};
-
 /** 
  * This is a client command. It can be used to send to TGDB-BASE.
  */
@@ -72,11 +55,6 @@ struct tgdb_client_command {
 	 * The type of command this one is.
 	 */
 	enum tgdb_client_command_choice command_choice;
-	
-	/**
-	 * What action should TGDB_BASE take?
-	 */
-	enum tgdb_client_command_action_choice action_choice;
 
 	/**
 	 * Private data, used by the client to keep track of there own state.
@@ -108,7 +86,6 @@ struct tgdb_client_command {
 struct tgdb_client_command *tgdb_client_command_create(    
         const char *data, 
         enum tgdb_client_command_choice command_choice, 
-        enum tgdb_client_command_action_choice action_choice,
         void *client_data);
 
 /** 

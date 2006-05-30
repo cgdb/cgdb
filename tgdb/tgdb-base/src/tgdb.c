@@ -604,8 +604,7 @@ tgdb_send (struct tgdb *tgdb, char *command,
 
   /* Create the client command */
   tcc = tgdb_client_command_create (ibuf_get (temp_command),
-				    TGDB_CLIENT_COMMAND_NORMAL,
-				    TGDB_CLIENT_COMMAND_ACTION_NONE, NULL);
+				    TGDB_CLIENT_COMMAND_NORMAL, NULL);
 
   ibuf_free (temp_command);
   temp_command = NULL;
