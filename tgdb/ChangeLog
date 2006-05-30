@@ -1,5 +1,16 @@
 5/29/2006 Bob Rossi <bob@brasko.net>
 
+	* annotate-two/src/commands.c (commands_issue_command): Remove unused 
+	parameter.
+	* tgdb-base/include/tgdb_client_command.h (enum
+	tgdb_client_command_display_choice): Remove type.
+	(tgdb_client_command_create): Remove display_choice parameter.
+	* tgdb-base/src/tgdb_client_command.c (tgdb_client_command_create):
+	Ditto.
+	* tgdb-base/src/tgdb.c (tgdb_send): Remove extra parameter.
+
+5/29/2006 Bob Rossi <bob@brasko.net>
+
 	* tgdb-base/include/tgdb_command.h (enum tgdb_command): Remove
 	is_buffered_console_command field.
 	(tgdb_command_create): Remove is_buffered_console_command parameter.

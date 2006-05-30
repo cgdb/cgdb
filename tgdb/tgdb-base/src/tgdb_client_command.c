@@ -35,7 +35,6 @@ int tgdb_client_command_destroy ( void* item) {
 struct tgdb_client_command *tgdb_client_command_create (    
         const char *ndata, 
         enum tgdb_client_command_choice command_choice, 
-        enum tgdb_client_command_display_choice display_choice,
         enum tgdb_client_command_action_choice action_choice,
         void *client_data) {
 
@@ -48,7 +47,6 @@ struct tgdb_client_command *tgdb_client_command_create (
         command->tgdb_client_command_data = NULL;
 
     command->command_choice       		= command_choice;
-    command->display_choice       		= display_choice;
     command->action_choice     			= action_choice;
     command->tgdb_client_private_data   = client_data;
       

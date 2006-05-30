@@ -1137,7 +1137,6 @@ commands_issue_command (struct commands *c,
     {
       client_command = tgdb_client_command_create (ncom,
 						   TGDB_CLIENT_COMMAND_NORMAL,
-						   TGDB_CLIENT_COMMAND_DISPLAY_NOTHING,
 						   TGDB_CLIENT_COMMAND_ACTION_NONE,
 						   (void *) nacom);
     }
@@ -1145,7 +1144,6 @@ commands_issue_command (struct commands *c,
     {
       client_command = tgdb_client_command_create (ncom,
 						   TGDB_CLIENT_COMMAND_PRIORITY,
-						   TGDB_CLIENT_COMMAND_DISPLAY_NOTHING,
 						   TGDB_CLIENT_COMMAND_ACTION_NONE,
 						   (void *) nacom);
     }
@@ -1153,7 +1151,6 @@ commands_issue_command (struct commands *c,
     {
       client_command = tgdb_client_command_create (ncom,
 						   TGDB_CLIENT_COMMAND_NORMAL,
-						   TGDB_CLIENT_COMMAND_DISPLAY_NOTHING,
 						   TGDB_CLIENT_COMMAND_ACTION_NONE,
 						   (void *) nacom);
     }

@@ -43,37 +43,6 @@ enum tgdb_client_command_choice {
 };
 
 /**
- * This determines what the user will see when TGDB parses a command.
- * Currently, the user can see either/or the command being sent through
- * the debugger and the results of the debugger from the particular command.
- */
-enum tgdb_client_command_display_choice {
-
-	/**
-	 * This will show only the command that should be sent to the debugger.
-	 */
-	TGDB_CLIENT_COMMAND_DISPLAY_COMMAND,
-
-	/**
-	 * This will show the command sent to the debugger.
-	 * It will also show the response from the debugger.
-	 */
-	TGDB_CLIENT_COMMAND_DISPLAY_COMMAND_AND_RESULTS,
-
-	/**
-	 * This will show just the response from the debugger.
-	 * It will not show the command.
-	 */
-	TGDB_CLIENT_COMMAND_DISPLAY_RESULTS,
-
-	/**
-	 * This hides the output from the user completly. The user will not
-	 * know that a command is being run.
-	 */
-	TGDB_CLIENT_COMMAND_DISPLAY_NOTHING
-};
-
-/**
  * TGDB can do several actions for the client. The client is allowed to ask
  * TGDB to perform such action's through this interface.
  */
@@ -104,11 +73,6 @@ struct tgdb_client_command {
 	 */
 	enum tgdb_client_command_choice command_choice;
 	
-	/**
-	 * What data to display to the user.
-	 */
-	enum tgdb_client_command_display_choice display_choice;
-
 	/**
 	 * What action should TGDB_BASE take?
 	 */
@@ -144,7 +108,6 @@ struct tgdb_client_command {
 struct tgdb_client_command *tgdb_client_command_create(    
         const char *data, 
         enum tgdb_client_command_choice command_choice, 
-        enum tgdb_client_command_display_choice display_choice,
         enum tgdb_client_command_action_choice action_choice,
         void *client_data);
 
