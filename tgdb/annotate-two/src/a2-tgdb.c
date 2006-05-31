@@ -431,7 +431,7 @@ int a2_user_ran_command ( void *ctx ) {
 	return commands_user_ran_command ( a2->c, a2->client_command_list );
 }
 
-int a2_prepare_for_command ( void *ctx, struct tgdb_client_command *com ) {
+int a2_prepare_for_command ( void *ctx, struct tgdb_command *com ) {
 	struct annotate_two *a2 = (struct annotate_two *)ctx;
 	return commands_prepare_for_command ( a2, a2->c, com );
 }

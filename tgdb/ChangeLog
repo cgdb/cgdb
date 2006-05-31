@@ -1,3 +1,49 @@
+5/30/2006 Bob Rossi <bob@brasko.net>
+
+	* annotate-two/include/data.h (#include "tgdb_client_command.h"):
+	Change to #include "tgdb_command.h".
+	* annotate-two/include/a2-tgdb.h (#include "tgdb_client_command.h"):
+	Ditto.
+	(a2_prepare_for_command): Change parameter type.
+	* annotate-two/include/commands.h (#include "tgdb_client_command.h"):
+	Change to #include "tgdb_command.h".
+	(commands_prepare_for_command): Change parameter type.
+	* annotate-two/include/annotate_two.h (#include
+	"tgdb_client_command.h"): Change to #include "tgdb_command.h".
+	* annotate-two/src/a2-tgdb.c (a2_prepare_for_command): Change
+	parameter type.
+	* annotate-two/src/commands.c (commands_prepare_for_command): 
+	Change parameter type.
+	(commands_issue_command): Ditto.
+	* gdbmi/include/gdbmi_tgdb.h (#include "tgdb_client_command.h"):
+	Change to #include "tgdb_command.h".
+	(gdbmi_prepare_for_command): Change parameter type.
+	* gdbmi/src/gdbmi_tgdb.c (gdbmi_prepare_for_command): Ditto.
+	* tgdb-base/include/tgdb_client_command.h: Removed file.
+	* tgdb-base/include/tgdb_client_interface.h (#include
+	"tgdb_client_interface.h"): Removed.
+	(#include "tgdb_client_command.h"): Changed to #include
+	"tgdb_command.h".
+	(tgdb_client_prepare_for_command): Changed parameter type.
+	* tgdb-base/include/tgdb_command.h (#include "tgdb_client_command.h"):
+	Remove.
+	(tgdb_command): Add field tgdb_client_private_data.
+	(tgdb_command_create): Add parameter client_data.
+	Remove parameter tcc.
+	* tgdb-base/src/tgdb_client_interface.c
+	(tgdb_client_debugger_interfaces): Change parameter type.
+	(tgdb_client_prepare_for_command): Ditto.
+	* tgdb-base/src/tgdb_command.c (#include "tgdb_client_command.h"):
+	Removed.
+	(tgdb_command_create): Change parameter type.
+	(tgdb_command_destroy): Remove no longer needed code.
+	* tgdb-base/src/tgdb.c (#include "tgdb_client_command.h"): Removed.
+	(tgdb_process_client_commands, tgdb_send, tgdb_deliver_command): 
+	Fixed to deal with removal of client command type.
+	* tgdb-base/src/Makefile.am (libtgdb_a_SOURCES): Remove
+	tgdb_client_command.c.
+	* tgdb-base/src/tgdb_client_command.c: Removed.
+
 5/29/2006 Bob Rossi <bob@brasko.net>
 
 	* annotate-two/src/commands.c (commands_issue_command): Remove unused

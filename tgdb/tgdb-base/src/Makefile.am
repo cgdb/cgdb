@@ -12,7 +12,6 @@ libtgdb_a_SOURCES = \
 tgdb.c \
 tgdb_types.c \
 tgdb_command.c \
-tgdb_client_command.c \
 tgdb_client_interface.c
 
 noinst_PROGRAMS = tgdb_driver

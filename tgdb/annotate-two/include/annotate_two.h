@@ -9,7 +9,7 @@
 #include <sys/types.h>
 #endif /* HAVE_SYS_TYPES_H */
 
-#include "tgdb_client_command.h"
+#include "tgdb_command.h"
 #include "fs_util.h"
 #include "fork_util.h" /* For pty_pair_ptr */
 

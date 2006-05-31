@@ -2,7 +2,7 @@
 #define __COMMANDS_H__
 
 #include "tgdb_types.h"
-#include "tgdb_client_command.h"
+#include "tgdb_command.h"
 #include "a2-tgdb.h"
 
 struct commands;
@@ -155,7 +155,7 @@ int commands_has_commnands_to_run(struct commands *c);
  *
  *  Returns: -1 if this command should not be run. 0 otherwise.
  */
-int commands_prepare_for_command ( struct annotate_two *a2, struct commands *c, struct tgdb_client_command *com );
+int commands_prepare_for_command ( struct annotate_two *a2, struct commands *c, struct tgdb_command *com );
 
 /* commands_finalize_command:
  * --------------------------

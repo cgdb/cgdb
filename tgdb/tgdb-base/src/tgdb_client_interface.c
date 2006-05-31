@@ -48,7 +48,7 @@ static struct tgdb_client_debugger_interfaces {
 
 	int (*tgdb_client_prepare_for_command) (
 			void *ctx,
-			struct tgdb_client_command *com );
+			struct tgdb_command *com );
 
 	int (*tgdb_client_can_tgdb_run_commands) ( 
 			void *ctx );
@@ -354,7 +354,7 @@ int tgdb_client_tgdb_ran_command ( struct tgdb_client_context *tcc ) {
 
 int tgdb_client_prepare_for_command ( 
 		struct tgdb_client_context *tcc, 
-		struct tgdb_client_command *com ) {
+		struct tgdb_command *com ) {
 	if ( tcc == NULL || tcc->tgdb_client_interface == NULL ) {
 		logger_write_pos ( logger, __FILE__, __LINE__, "tgdb_client_prepare_for_command unimplemented" );
 		return -1;

@@ -603,7 +603,7 @@ int gdbmi_user_ran_command ( void *ctx ) {
 	return 0;
 }
 
-int gdbmi_prepare_for_command ( void *ctx, struct tgdb_client_command *com ) {
+int gdbmi_prepare_for_command ( void *ctx, struct tgdb_command *com ) {
 	return 0;
 }
 

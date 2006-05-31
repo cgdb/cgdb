@@ -10,7 +10,6 @@
  */
 
 #include "tgdb_types.h"
-#include "tgdb_client_command.h"
 
 /**
  * The current command type. TGDB is capable of having any commands of this
@@ -66,6 +65,9 @@ struct tgdb_command {
 	 * The client command associated with this command.
 	 */
 	struct tgdb_client_command *client_command;
+
+	/** Private data the client context can use. */
+	void *tgdb_client_private_data;
 };
 
 /**
@@ -80,8 +82,8 @@ struct tgdb_command {
  * \param action_choice
  * The type of action TGDB would like to perform.
  *
- * \param tcc
- * This is the client command associated with the TGDB command.
+ * \param client_data
+ * Data that the client can use when prepare_client_for_command is called
  *
  * @return
  * Always is successfull, will call exit on failed malloc
@@ -89,7 +91,7 @@ struct tgdb_command {
 struct tgdb_command *tgdb_command_create (    
   const char *tgdb_command_data,
   enum tgdb_command_choice command_choice, 
-  struct tgdb_client_command *tcc);
+  void *client_data);
         
 /** 
  * This will free a TGDB queue command.

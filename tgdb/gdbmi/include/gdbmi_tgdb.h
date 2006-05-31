@@ -10,7 +10,7 @@
 #endif /* HAVE_SYS_TYPES_H */
 
 #include "tgdb_types.h"
-#include "tgdb_client_command.h"
+#include "tgdb_command.h"
 #include "logger.h"
 
 /*! \file
@@ -216,7 +216,7 @@ int gdbmi_user_ran_command ( void *ctx );
  * @return
  * -1 on error, 0 on success
  */
-int gdbmi_prepare_for_command ( void *ctx, struct tgdb_client_command *com );
+int gdbmi_prepare_for_command ( void *ctx, struct tgdb_command *com );
 
 /** 
  * This is a hack. It should be removed eventually.

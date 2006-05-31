@@ -9,8 +9,7 @@
 #include <sys/types.h>
 #endif /* HAVE_SYS_TYPES_H */
 
-#include "tgdb_client_command.h"
-#include "tgdb_client_interface.h"
+#include "tgdb_command.h"
 #include "logger.h"
 
 /*!
@@ -271,7 +270,7 @@ int tgdb_client_tgdb_ran_command ( struct tgdb_client_context *tcc );
  */
 int tgdb_client_prepare_for_command ( 
 		struct tgdb_client_context *tcc, 
-		struct tgdb_client_command *com );
+		struct tgdb_command *com );
 
 /** 
  * Determines if the client is capable of accepting TGDB commands. The client

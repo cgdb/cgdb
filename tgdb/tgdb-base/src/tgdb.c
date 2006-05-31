@@ -25,7 +25,6 @@
 
 #include "tgdb.h"
 #include "tgdb_command.h"
-#include "tgdb_client_command.h"
 #include "tgdb_client_interface.h"
 #include "fs_util.h"
 #include "ibuf.h"
@@ -189,10 +188,8 @@ tgdb_process_client_commands (struct tgdb *tgdb)
 {
   struct tgdb_list *client_command_list;
   tgdb_list_iterator *iterator;
-  struct tgdb_client_command *client_command;
   struct tgdb_command *command;
   char *command_data = NULL;
-  int add_command;
 
   client_command_list = tgdb_client_get_client_commands (tgdb->tcc);
   iterator = tgdb_list_get_first (client_command_list);
@@ -201,38 +198,14 @@ tgdb_process_client_commands (struct tgdb *tgdb)
     {
       enum tgdb_command_choice command_choice;
 
-      client_command =
-	(struct tgdb_client_command *) tgdb_list_get_item (iterator);
-      add_command = 0;
+      command =
+	(struct tgdb_command *) tgdb_list_get_item (iterator);
 
-      switch (client_command->command_choice)
+      if (tgdb_run_or_queue_command (tgdb, command) == -1)
 	{
-	case TGDB_CLIENT_COMMAND_NORMAL:
-	  command_choice = TGDB_COMMAND_TGDB_CLIENT;
-	  add_command = 1;
-	  break;
-	case TGDB_CLIENT_COMMAND_PRIORITY:
-	  command_choice = TGDB_COMMAND_TGDB_CLIENT_PRIORITY;
-	  add_command = 1;
-	  break;
-	default:
 	  logger_write_pos (logger, __FILE__, __LINE__,
-			    "unknown switch case");
+			    "tgdb_run_or_queue_command failed");
 	  return -1;
-	}
-
-      if (add_command)
-	{
-	  command = tgdb_command_create (command_data,
-					 command_choice,
-					 client_command);
-
-	  if (tgdb_run_or_queue_command (tgdb, command) == -1)
-	    {
-	      logger_write_pos (logger, __FILE__, __LINE__,
-				"tgdb_run_or_queue_command failed");
-	      return -1;
-	    }
 	}
 
       iterator = tgdb_list_next (iterator);
@@ -591,7 +564,6 @@ tgdb_send (struct tgdb *tgdb, char *command,
 	   enum tgdb_command_choice command_choice)
 {
 
-  struct tgdb_client_command *tcc;
   struct tgdb_command *tc;
   struct ibuf *temp_command = ibuf_init ();
   int length = strlen (command);
@@ -603,14 +575,10 @@ tgdb_send (struct tgdb *tgdb, char *command,
     ibuf_addchar (temp_command, '\n');
 
   /* Create the client command */
-  tcc = tgdb_client_command_create (ibuf_get (temp_command),
-				    TGDB_CLIENT_COMMAND_NORMAL, NULL);
+  tc = tgdb_command_create (ibuf_get (temp_command), command_choice, NULL);
 
   ibuf_free (temp_command);
   temp_command = NULL;
-
-  /* Create the TGDB command */
-  tc = tgdb_command_create (NULL, command_choice, tcc);
 
   if (tgdb_run_or_queue_command (tgdb, tc) == -1)
     {
@@ -697,8 +665,6 @@ tgdb_run_or_queue_command (struct tgdb *tgdb, struct tgdb_command *command)
 static int
 tgdb_deliver_command (struct tgdb *tgdb, struct tgdb_command *command)
 {
-  struct tgdb_client_command *client_command = command->client_command;
-
   tgdb->IS_SUBSYSTEM_READY_FOR_NEXT_COMMAND = 0;
 
   /* Here is where the command is actually given to the debugger.
@@ -708,19 +674,17 @@ tgdb_deliver_command (struct tgdb *tgdb, struct tgdb_command *command)
    * debugger is being given.
    */
   if (command->command_choice == TGDB_COMMAND_FRONT_END)
-    tgdb->last_gui_command =
-      xstrdup (client_command->tgdb_client_command_data);
+    tgdb->last_gui_command = xstrdup (command->tgdb_command_data);
 
   /* A command for the debugger */
-  if (tgdb_client_prepare_for_command (tgdb->tcc, client_command) == -1)
+  if (tgdb_client_prepare_for_command (tgdb->tcc, command) == -1)
     return -1;
 
   /* A regular command from the client */
-  io_debug_write_fmt ("<%s>", client_command->tgdb_client_command_data);
+  io_debug_write_fmt ("<%s>", command->tgdb_command_data);
 
-  io_writen (tgdb->debugger_stdin,
-	     client_command->tgdb_client_command_data,
-	     strlen (client_command->tgdb_client_command_data));
+  io_writen (tgdb->debugger_stdin, command->tgdb_command_data,
+	     strlen (command->tgdb_command_data));
 
   /* Uncomment this if you wish to see all of the commands, that are 
    * passed to GDB. */
