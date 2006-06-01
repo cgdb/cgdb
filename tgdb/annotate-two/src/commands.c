@@ -1101,6 +1101,17 @@ commands_user_ran_command (struct commands *c,
       return -1;
     }
 
+#if 0
+  /* This was added to allow support for TGDB to tell the FE when the user
+   * switched locations due to a 'list foo:1' command. The info line would
+   * get issued and the FE would know exactly what GDB was currently looking
+   * at. However, it was noticed that the FE couldn't distinguish between when
+   * a new file location should be displayed, or when a new file location 
+   * shouldn't be displayed. For instance, if the user moves around in the
+   * source window, and then types 'p argc' it would then get the original
+   * position it was just at and the FE would show that spot again, but this
+   * isn't necessarily what the FE wants.
+   */
   if (commands_issue_command (c,
 			      client_command_list,
 			      ANNOTATE_INFO_LINE, NULL, 0) == -1)
@@ -1109,6 +1120,7 @@ commands_user_ran_command (struct commands *c,
 			"commands_issue_command error");
       return -1;
     }
+#endif
 
   return 0;
 }
