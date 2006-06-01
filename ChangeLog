@@ -1,3 +1,7 @@
+6/01/2006 Bob Rossi <bob@brasko.net>
+
+	* configure.in (AC_INIT): Make version say it should be generated.
+
 5/31/2006 Bob Rossi <bob@brasko.net>
 
 	* autorelease.sh: Pass correct version number to autoregen.sh
