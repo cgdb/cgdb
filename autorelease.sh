@@ -2,7 +2,7 @@
 
 if [ "$1" = "" ]; then
   echo "Usage: $0 version"
-  echo "  Example: \"$0 0.6.1\" or \"$0 0.6.1-cvs\""
+  echo "  Example: \"$0 0.6.1\" or \"$0 0.6.1-svn\""
   exit
 fi
 
@@ -141,14 +141,15 @@ make install >> $CGDB_OUTPUT_LOG 2>&1
 ../target/bin/cgdb --version
 
 ################################################################################
-echo "-- Do a cvs update"
+echo "-- Do a svn update"
 ################################################################################
 # This fixes files that have a different time stamp, but are no different.
 cd $CGDB_SOURCE_DIR
-cvs update >> $CGDB_OUTPUT_LOG 2>&1
+svn update >> $CGDB_OUTPUT_LOG 2>&1
 
 ################################################################################
-echo "-- Create the cvs tag $CGDB_RELEASE"
+echo "-- Create the svn $CGDB_RELEASE tag/branch"
 ################################################################################
 # step 7, create the tag
-`echo "$CGDB_RELEASE" | perl -pi -e 's/\./_/g' | xargs echo cvs tag` >> $CGDB_OUTPUT_LOG 2>&1
+CGDB_RELEASE_STR=`"$CGDB_RELEASE" | perl -pi -e 's/\./_/g'`
+`svn copy https://svn.sourceforge.net/svnroot/cgdb/cgdb/trunk https://svn.sourceforge.net/svnroot/cgdb/cgdb/tags/$CGDB_RELEASE_STR` >> $CGDB_OUTPUT_LOG 2>&1
