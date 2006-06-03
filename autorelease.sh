@@ -171,11 +171,6 @@ cp version.texi.builddir/doc/cgdb-no-split.html $CGDB_RELEASE_DIR
 cp -r version.texi.builddir/doc/cgdb.html $CGDB_RELEASE_DIR
 cp $CGDB_BUILD_DIR/tmp/$CGDB_RELEASE.tar.gz $CGDB_RELEASE_DIR
 
-################################################################################
-echo "-- Modifing doc/htdocs/download.shtml"
-################################################################################
-perl -pi -e "s/cgdb-(.*?).tar.gz/$CGDB_RELEASE.tar.gz/g" doc/htdocs/download.shtml
-
 echo '#!/bin/sh' >> $CGDB_RELEASE_UPLOAD_SH
 echo "" >> $CGDB_RELEASE_UPLOAD_SH
 
@@ -242,3 +237,9 @@ perl -n -e '$capture_val; if ($_ =~/cgdb-.*/) { $capture_val++} if ($capture_val
 echo "" >> $CGDB_RELEASE_EMAIL
 echo "Enjoy," >> $CGDB_RELEASE_EMAIL
 echo "The CGDB Team" >> $CGDB_RELEASE_EMAIL
+
+################################################################################
+echo "-- Modifing doc/htdocs/download.shtml"
+################################################################################
+perl -pi -e "s/cgdb-(.*?).tar.gz/$CGDB_RELEASE.tar.gz/g" doc/htdocs/download.shtml
+
