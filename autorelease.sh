@@ -12,11 +12,20 @@ CGDB_SOURCE_DIR=$PWD
 CGDB_BUILD_DIR=$PWD/version.texi.builddir
 CGDB_C89_BUILD_DIR=$PWD/c89.builddir
 CGDB_OUTPUT_LOG=$PWD/output.log
+CGDB_RELEASE_DIR=$PWD/releasedir
+CGDB_RELEASE_UPLOAD_SH=$PWD/releasedir/upload.sh
+CGDB_RELEASE_EMAIL=$PWD/releasedir/cgdb.email
 
 ################################################################################
 echo "-- Writing results of all commands in $CGDB_OUTPUT_LOG"
 ################################################################################
 rm $CGDB_OUTPUT_LOG
+
+################################################################################
+echo "-- All release files will be written to $CGDB_RELEASE_DIR"
+echo "   Once this script finishes successfully, you can view the results"
+echo "   and upload them to sf with $CGDB_RELEASE_DIR/upload.sh"
+################################################################################
 
 ################################################################################
 echo "-- Update configure.in to reflect the new version number"
@@ -148,8 +157,87 @@ cd $CGDB_SOURCE_DIR
 svn update >> $CGDB_OUTPUT_LOG 2>&1
 
 ################################################################################
-echo "-- Create the svn $CGDB_RELEASE tag/branch"
+echo "-- Finished, creating the $CGDB_RELEASE_DIR"
 ################################################################################
-# step 7, create the tag
-CGDB_RELEASE_STR=`"$CGDB_RELEASE" | perl -pi -e 's/\./_/g'`
-`svn copy https://svn.sourceforge.net/svnroot/cgdb/cgdb/trunk https://svn.sourceforge.net/svnroot/cgdb/cgdb/tags/$CGDB_RELEASE_STR` >> $CGDB_OUTPUT_LOG 2>&1
+rm -fr $CGDB_RELEASE_DIR
+mkdir $CGDB_RELEASE_DIR
+touch $CGDB_RELEASE_UPLOAD_SH
+chmod +x $CGDB_RELEASE_UPLOAD_SH
+cp doc/cgdb.txt $CGDB_RELEASE_DIR
+cp doc/cgdb.info $CGDB_RELEASE_DIR
+cp version.texi.builddir/doc/cgdb.pdf $CGDB_RELEASE_DIR
+cp version.texi.builddir/doc/cgdb-no-split.html $CGDB_RELEASE_DIR
+cp -r version.texi.builddir/doc/cgdb.html $CGDB_RELEASE_DIR
+cp $CGDB_BUILD_DIR/tmp/$CGDB_RELEASE.tar.gz $CGDB_RELEASE_DIR
+
+################################################################################
+echo "-- Modifing doc/htdocs/download.shtml"
+################################################################################
+perl -pi -e "s/cgdb-(.*?).tar.gz/$CGDB_RELEASE.tar.gz/g" doc/htdocs/download.shtml
+
+echo '#!/bin/sh' >> $CGDB_RELEASE_UPLOAD_SH
+echo "" >> $CGDB_RELEASE_UPLOAD_SH
+
+echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
+echo 'echo "-- Create the svn $CGDB_RELEASE tag/branch"' >> $CGDB_RELEASE_UPLOAD_SH
+echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
+echo 'CGDB_RELEASE_STR=`echo "$CGDB_RELEASE" | perl -pi -e 's/\./_/g'`' >> $CGDB_RELEASE_UPLOAD_SH
+echo 'svn copy https://svn.sourceforge.net/svnroot/cgdb/cgdb/trunk https://svn.sourceforge.net/svnroot/cgdb/cgdb/tags/$CGDB_RELEASE_STR' >> $CGDB_RELEASE_UPLOAD_SH
+echo '' >>  $CGDB_RELEASE_UPLOAD_SH
+
+#echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
+#echo 'echo "-- uploading the file $CGDB_RELEASE.tar.gz"' >> $CGDB_RELEASE_UPLOAD_SH
+#echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
+#echo 'scp $CGDB_RELEASE.tar.gz bobbybrasko@upload.sf.net' >> $CGDB_RELEASE_UPLOAD_SH
+#echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
+#echo '' >>  $CGDB_RELEASE_UPLOAD_SH
+
+echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
+echo 'echo "-- uploading cgdb.txt"' >> $CGDB_RELEASE_UPLOAD_SH
+echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
+echo 'scp cgdb.txt bobbybrasko@cgdb.sf.net:/home/groups/c/cg/cgdb/htdocs/' >> $CGDB_RELEASE_UPLOAD_SH
+echo '' >> $CGDB_RELEASE_UPLOAD_SH
+
+echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
+echo 'echo "-- uploading cgdb.info"' >> $CGDB_RELEASE_UPLOAD_SH
+echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
+echo 'scp cgdb.info bobbybrasko@cgdb.sf.net:/home/groups/c/cg/cgdb/htdocs/' >> $CGDB_RELEASE_UPLOAD_SH
+echo '' >> $CGDB_RELEASE_UPLOAD_SH
+
+echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
+echo 'echo "-- uploading cgdb.pdf"' >> $CGDB_RELEASE_UPLOAD_SH
+echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
+echo 'scp cgdb.pdf bobbybrasko@cgdb.sf.net:/home/groups/c/cg/cgdb/htdocs/' >> $CGDB_RELEASE_UPLOAD_SH
+echo '' >> $CGDB_RELEASE_UPLOAD_SH
+
+echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
+echo 'echo "-- uploading cgdb-no-split.html"' >> $CGDB_RELEASE_UPLOAD_SH
+echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
+echo 'scp cgdb-no-split.html bobbybrasko@cgdb.sf.net:/home/groups/c/cg/cgdb/htdocs/' >> $CGDB_RELEASE_UPLOAD_SH
+echo '' >> $CGDB_RELEASE_UPLOAD_SH
+
+echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
+echo 'echo "-- uploading cgdb.html"' >> $CGDB_RELEASE_UPLOAD_SH
+echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
+echo 'scp -r cgdb.html bobbybrasko@cgdb.sf.net:/home/groups/c/cg/cgdb/htdocs/' >> $CGDB_RELEASE_UPLOAD_SH
+echo '' >> $CGDB_RELEASE_UPLOAD_SH
+
+################################################################################
+echo "-- Creating Email $CGDB_RELEASE_DIR/cgdb.email"
+################################################################################
+echo "CGDB $CGDB_RELEASE Released" >> $CGDB_RELEASE_EMAIL
+echo "-------------------" >> $CGDB_RELEASE_EMAIL
+echo "" >> $CGDB_RELEASE_EMAIL
+echo "Downloading:" >> $CGDB_RELEASE_EMAIL
+echo "" >> $CGDB_RELEASE_EMAIL
+echo "    Go to http://cgdb.sourceforge.net/download.shtml for download" >> $CGDB_RELEASE_EMAIL
+echo "    link and instructions." >> $CGDB_RELEASE_EMAIL
+echo "" >> $CGDB_RELEASE_EMAIL
+echo "This new version contains the following changes:" >> $CGDB_RELEASE_EMAIL
+echo "" >> $CGDB_RELEASE_EMAIL
+
+perl -n -e '$capture_val; if ($_ =~/cgdb-.*/) { $capture_val++} if ($capture_val == 1) { print $_}' NEWS >> $CGDB_RELEASE_EMAIL
+
+echo "" >> $CGDB_RELEASE_EMAIL
+echo "Enjoy," >> $CGDB_RELEASE_EMAIL
+echo "The CGDB Team" >> $CGDB_RELEASE_EMAIL

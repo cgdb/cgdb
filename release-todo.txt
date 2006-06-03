@@ -5,60 +5,32 @@ All of the steps below are automated by autorelease.sh, just check to make
 sure that it worked properly.
 
 - Run autorelease.sh version, where version could be '0.6.2'
+  ./autorelease.sh 0.6.2
 
-- This check for
-  * aclocal (GNU automake) 1.9.5
-  * autoconf (GNU Autoconf) 2.59
-  * m4      ( GNU m4 )     1.4.3
+- Look at tar file in releasedir to make sure it has the correct version.
+  untar it and run to make sure it shows the correct version and that it runs.
 
-- This updates configure.in to have new version number in the
-  AC_INIT macro.
+- Ensure tag is written. If the version is cgdb-0.3.3, name the tag
+  cgdb-0_3_3.
 
-- This step runs autoregen.sh
+- Ensure doc/htdocs/download.shtml has correct version links in download link.
 
--  This section generates all the applicable documentation. Make sure the file
-   doc/version.texi has the new version numbers. The date in this file is the 
-   date corresponding to the last time the file was modified.
-
-   Make sure that doc/cgdb.1, doc/cgdb.info and doc/cgdb.txt are all updated.
-   Also, version.texi.builddir/doc/cgdb.pdf, 
-   version.texi.builddir/doc/cgdb-no-split.html
-
--  Run version.texi.builddir/tmp/target/bin/cgdb --version to check 
-   version number.
-
--  Ensure tag is written. If the version is cgdb-0.3.3, name the tag
-   cgdb-0_3_3 .
-
---------------------------------------------------------------------------------
-Need to determine if this can be automated. What should be check in?
-
--  Update website cgdb.sourceforge.net:
-    * change webpage in cgdb/doc/htdocs
-    * Modify download page -> download.shtml
-      * Download link
-      * Optionally, put a note in the index.shtml file (News section)
-    * ssh cgdb.sourceforge.net
-    * cd /home/groups/c/cg/cgdb/htdocs
-	* run 'cvs update'
-
-- Update documentation on website. You will need to scp from your computer
-  to cgdb.sf.net to get files uploaded. Then you will need to copy over
-  cgdb.pdf, cgdb.html, cgdb.text, cgdb-split.html and cgdb.info.
-
-  scp doc/cgdb.txt user@cgdb.sf.net:/home/groups/c/cg/cgdb/htdocs/
-  scp doc/cgdb.info user@cgdb.sf.net:/home/groups/c/cg/cgdb/htdocs/
-  scp version.texi.builddir/doc/cgdb.pdf user@cgdb.sf.net:/home/groups/c/cg/cgdb/htdocs/
-  scp version.texi.builddir/doc/cgdb-no-split.html user@cgdb.sf.net:/home/groups/c/cg/cgdb/htdocs/
-  scp -r version.texi.builddir/doc/cgdb.html user@cgdb.sf.net:/home/groups/c/cg/cgdb/htdocs/
-
--  Test website by looking at it and attempting to download file.
-    
+- Verify documentation is correct. cgdb.pdf, cgdb.html, cgdb.text, 
+  cgdb-split.html and cgdb.info.
 
 --------------------------------------------------------------------------------
 These steps are manual.
 
+-  Update website cgdb.sourceforge.net:
+    * change webpage in cgdb/doc/htdocs
+      * Put a note in the index.shtml file (News section)
+    * ssh cgdb.sourceforge.net
+    * cd /home/groups/c/cg/cgdb/htdocs
+	* run 'cvs update'
+
 -  Commit all currently modified files (should only be ChangeLogs).
+
+-  Test website by looking at it and attempting to download file.
 
 -  Put a release on sourceforge.net/projects/cgdb
     * ftp upload.sourceforge.net
@@ -78,23 +50,4 @@ These steps are manual.
 -  Announce the release on freshmeat
 
 -  Announce the release on cgdb-announce@lists.sourceforge.net
-
-Subject:  CGDB (version) released
-Text of message:
-
-CGDB (version) Released
--------------------
-
-Downloading:
-
-    Go to http://cgdb.sourceforge.net/download.shtml for download
-    link and instructions.
-
-This new version contains the following changes:
-
-    * Changelog entry 1
-    * Changelog entry 2
-      (no long descriptions, just the part before the ':')
-
-Enjoy,
-The CGDB Team
+   with email from releasedir/cgdb.email.
