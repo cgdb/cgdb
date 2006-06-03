@@ -30,6 +30,7 @@ echo "   and upload them to sf with $CGDB_RELEASE_DIR/upload.sh"
 ################################################################################
 echo "-- Update configure.in to reflect the new version number"
 ################################################################################
+cp configure.init configure.in
 perl -pi -e "s/AC_INIT\(cgdb, (.*)\)/AC_INIT\(cgdb, $CGDB_VERSION\)/g" configure.in
 
 ################################################################################

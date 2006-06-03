@@ -1,5 +1,10 @@
 6/03/2006 Bob Rossi <bob@brasko.net>
 
+	* autorelease.sh: Copy configure.in over.
+	* autoregen.sh: Only generate configure.in if called standalone.
+
+6/03/2006 Bob Rossi <bob@brasko.net>
+
 	* configure.in: Deleted.
 	* configure.init: Added.
 	* autoregen.sh: Copy configure.init to configure.in.

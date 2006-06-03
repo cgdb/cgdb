@@ -7,14 +7,9 @@ echo "-- Update configure.in to reflect the new version number"
 ################################################################################
 if [ "$1" = "" ]; then
   CGDB_VERSION=`date +%Y%m%d`
-else
-  CGDB_VERSION=$1
+  cp configure.init configure.in
+  perl -pi -e "s/AC_INIT\(cgdb, (.*)\)/AC_INIT\(cgdb, $CGDB_VERSION\)/g" configure.in
 fi
-
-cp configure.init configure.in
-chmod +x configure.in
-
-perl -pi -e "s/AC_INIT\(cgdb, (.*)\)/AC_INIT\(cgdb, $CGDB_VERSION\)/g" configure.in
 
 ################################################################################
 echo "-- Running aclocal"
