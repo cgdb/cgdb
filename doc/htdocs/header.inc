@@ -43,7 +43,7 @@
     <A Href="documentation.shtml">Documentation</a><BR>
     <A Href="contact.shtml">Contact</a><BR>
     <A Href="http://www.sourceforge.net/projects/cgdb">SourceForge Project</a><BR>
-    <A Href="http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/cgdb/cgdb">CVS Browser</a><BR>
+    <A Href="http://svn.sourceforge.net/viewcvs.cgi/cgdb/cgdb/trunk/">SVN Browser</a><BR>
 
   </td>
 

@@ -60,12 +60,12 @@
     
       Latest version:
       <A Href="http://prdownloads.sourceforge.net/cgdb/cgdb-0.6.3.tar.gz?download">cgdb-0.6.3.tar.gz</a> -
-      <A Href="http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/*checkout*/cgdb/cgdb/cgdb/ChangeLog">ChangeLog</a> -
-      <A Href="http://cvs.sourceforge.net/viewcvs.py/cgdb/cgdb/NEWS">NEWS</a><P>
+      <A Href="http://svn.sourceforge.net/viewcvs.cgi/cgdb/cgdb/trunk/ChangeLog?view=log">ChangeLog</a> -
+      <A Href="http://svn.sourceforge.net/viewcvs.cgi/cgdb/cgdb/trunk/NEWS?view=log">NEWS</a>
 
     </blockquote>
 
-    <B>Anonymous CVS</b><P>
+    <B>Anonymous SVN</b><P>
 
     <BLOCKQUOTE>
       The most recent changes to CGDB can be found by checking out

@@ -33,8 +33,8 @@
      </P>
 
       <UL>
-        <LI><A Href="http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/*checkout*/cgdb/cgdb/README?rev=HEAD&amp;content-type=text/plain">README</a></li>
-        <LI><A Href="http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/*checkout*/cgdb/cgdb/NEWS?rev=HEAD&amp;content-type=text/plain">NEWS</a></li>
+        <LI><A Href="http://svn.sourceforge.net/viewcvs.cgi/cgdb/cgdb/trunk/README?view=log">README</a></li>
+        <LI><A Href="http://svn.sourceforge.net/viewcvs.cgi/cgdb/cgdb/trunk/NEWS?view=log">NEWS</a></li>
         <LI><A Href="faq.shtml">FAQ</a></li>
       </ul>
 
