@@ -11,6 +11,8 @@ else
   CGDB_VERSION=$1
 fi
 
+cp configure.init configure.in
+
 perl -pi -e "s/AC_INIT\(cgdb, (.*)\)/AC_INIT\(cgdb, $CGDB_VERSION\)/g" configure.in
 
 ################################################################################

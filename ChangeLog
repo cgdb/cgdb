@@ -2,6 +2,7 @@
 
 	* configure.in: Deleted.
 	* configure.init: Added.
+	* autoregen.sh: Copy configure.init to configure.in.
 
 6/03/2006 Bob Rossi <bob@brasko.net>
 
