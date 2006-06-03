@@ -1,3 +1,5 @@
+version 0.6.3 (03/06/2006):
+
 5/29/2006 Bob Rossi <bob@brasko.net>
 
 	* include/terminal.h (tty_set_echo): Added function.

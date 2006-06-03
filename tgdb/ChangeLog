@@ -1,3 +1,5 @@
+version 0.6.3 (03/06/2006):
+
 6/02/2006 Bob Rossi <bob@brasko.net>
 
 	* tgdb-base/include/tgdb_types.h (struct tgdb_request): Comment

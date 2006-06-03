@@ -1,3 +1,5 @@
+version 0.6.3 (03/06/2006):
+
 6/03/2006 Bob Rossi <bob@brasko.net>
 
 	* Makefile.am (dist-hook): Fix for svn, instead of CVS.

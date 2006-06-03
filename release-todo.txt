@@ -27,14 +27,14 @@ These steps are manual.
 - Ensure tag is written. If the version is cgdb-0.3.3, name the tag
   cgdb-0_3_3.
 
+- Modify doc/htdocs/index.shtml to add a release note.
+
+- Commit all currently modified files (should only be ChangeLogs).
+
 - Update website cgdb.sourceforge.net:
-    * change webpage in cgdb/doc/htdocs
-      * Put a note in the index.shtml file (News section)
     * ssh cgdb.sourceforge.net
     * cd /home/groups/c/cg/cgdb/htdocs
 	* run 'cvs update'
-
-- Commit all currently modified files (should only be ChangeLogs).
 
 - Test website by looking at it and attempting to download file.
 

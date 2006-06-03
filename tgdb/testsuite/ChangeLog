@@ -1,3 +1,5 @@
+version 0.6.3 (03/06/2006):
+
 05/21/2006 Bob Rossi <bob@brasko.net>
 
 	* tgdb.base/signals.exp: No longer use anchors.

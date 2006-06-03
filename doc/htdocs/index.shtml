@@ -35,6 +35,23 @@ Some features offered by CGDB are:<P>
 <B>News</b><BR>
 <BLOCKQUOTE>
 
+  <I>June 3, 2006</i><BR>
+  <BLOCKQUOTE>
+  CGDB v0.6.3 was released today, see the <A Href="download.shtml">download 
+  page</a> to try it out. This release changes the way CGDB starts GDB. CGDB
+  now puts GDB on a pty instead of a pipe. This allows GDB to ask several 
+  questions to the user that would not be asked on the pipe. This makes
+  using CGDB even more similar to just using GDB. There were some autoconf
+  configure problems that were reported involving readline. These have also
+  been fixed. Several other small bugs have been fixed.
+  <BR>
+  <BR>
+  At last! CGDB has finally converted to the subversion version control system.
+  Although this doesn't effect users that much, maybe I can lure more 
+  contributers into developing CGDB. :)
+  <BR>
+  <BR>
+
   <I>April 9, 2006</i><BR>
   <BLOCKQUOTE>
   CGDB v0.6.2 was released today, see the <A Href="download.shtml">download 
