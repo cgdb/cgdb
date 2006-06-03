@@ -4,27 +4,23 @@
 
     <BLOCKQUOTE>
       You may be able to get a binary of CGDB from your favorite distribution.
-      Currently, the below distribution's offer packaged binaries of CGDB.
+      Currently, the below distribution's offer packaged binaries of CGDB. If you
+      know of another distro that packages CGDB, please let us know so we can
+      add a link.
 
       <P><B>Debian CGDB binary</b></P>
       <P>
-      You can install CGDB in debian using the unstable distribution.
+      You can install CGDB in debian. It currently has an old version in
+      stable, so testing will get you a newer version. You can always 
+      see what versions are available <A Href="http://packages.qa.debian.org/c/cgdb.html">here</a>.
       </P>
 
-      <P><B>Cygwin CGDB binary</b></P>
+      <P><B>Gentoo CGDB binary</b></P>
       <P>
-      CGDB is packaged in Cygwin. However, it is not in the default list of
-      server's that Cygwin offers. Instead you will have to add 
-      http://rlc.unsane.co.uk/ to your list of servers. Then you should be able
-      to download the latest Cygwin binary. Ronald Landheer-Cieslak maintains
-      the package and can be reached at blytkerchan at users.sourceforge.net.
+      Gentoo's package system is usually pretty up to date. You can get
+      CGDB there pretty easily.
       </P>
-      <P>
-      Note that this server also contains experimental software for Cygwin
-      that should not be used as part of your normal Cygwin distribution.
-      When using this server, make sure to only use the "current" versions
-      of the packages on it.
-      </P>
+
     </blockquote>
 
 
@@ -36,10 +32,10 @@
       CGDB depends on
       </P>
       <OL>
-         <LI> CGDB depends on readline-development-4.2 or greater.
+         <LI> CGDB depends on readline-development-5.1 or greater.
          <P>
-         If you don't have this, you might get a link error that looks something
-	      like this, 'undefined symbol, rl_set_prompt'.
+	 CGDB will not work with out a version of 5.1 or greater. readline-5.1
+	 was specifically modified to work with CGDB.
          </P>
 	      <LI> CGDB depends on ncurses/curses.  
          <P>
@@ -53,12 +49,12 @@
          </P>
 	      <LI> CGDB uses autoconf/automake to build its configure scripts and 
 	      makefiles. So, if you change any of the autoconf/automake files, you 
-         will need this software installed.
+         will need this software installed. I use the below versions of the software.
+	 Other versions may work for you.
          <UL>
-            <LI> aclocal  (GNU automake)   1.7.9</li>
+            <LI> aclocal  (GNU automake)   1.9.6</li>
             <LI> autoconf (GNU Autoconf)   2.59</li>
-            <LI> libtool  (GNU libtool)    1.5.6</li>
-            <LI> m4       (GNU m4)         1.4.2</li>
+            <LI> m4       (GNU m4)         1.4.4</li>
          </ul>
       </ol>
     
@@ -73,22 +69,16 @@
 
     <BLOCKQUOTE>
       The most recent changes to CGDB can be found by checking out
-      a copy of the current CVS tree.  You may want to try this to see if
+      a copy of the current SVN tree.  You may want to try this to see if
       a bug is resolved before reporting the error.  It should be noted that
-      the CVS tree is not guaranteed to be stable and is not tested as well
+      the SVN tree is not guaranteed to be stable and is not tested as well
       as the latest tarball probably is.
 
-      To get a copy of the CVS tree, run the following commands:
+      To get a copy of the SVN tree, following the commands 
+      <A Href="http://sourceforge.net/svn/?group_id=72581">here</a>.
 
-      <P Style="font-family: Courier, monospace">
-        cvs -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/cgdb login<BR>
-        (blank password)<BR><BR>
-          
-        cvs -z3 -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/cgdb co cgdb
-      </p>
-
-      If you don't have CVS, visit their
-      <A Href="http://www.cvshome.org">home page</a>.
+      If you don't have SVN, visit their
+      <A Href="http://subversion.tigris.org/">home page</a>.
 
     </blockquote>
 
