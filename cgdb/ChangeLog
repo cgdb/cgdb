@@ -1,3 +1,7 @@
+6/02/2006 Bob Rossi <bob@brasko.net>
+
+	* src/cgdbrc.c (ConfigType): Remove trailing comma.
+
 5/29/2006 Bob Rossi <bob@brasko.net>
 
 	* src/interface.c (capture_regex): Do NULL pointer checking.

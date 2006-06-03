@@ -1,3 +1,10 @@
+6/02/2006 Bob Rossi <bob@brasko.net>
+
+	* autorelease.sh (configure): Remove --with-readline, ubuntu supports
+	readline-5.1 now.
+	* configure.in: Check in configure.in with number that describes that
+	the version is generated from autoregen.sh.
+    
 6/01/2006 Bob Rossi <bob@brasko.net>
 
 	* configure.in (AC_INIT): Make version say it should be generated.

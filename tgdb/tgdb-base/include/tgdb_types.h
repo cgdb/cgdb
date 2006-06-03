@@ -235,8 +235,7 @@ extern "C"
         const char *command;
       } console_command;
 
-      struct {
-      } info_sources;
+      /* info_sources; */
 
       struct {
 	const char *file;
@@ -373,8 +372,7 @@ extern "C"
       } update_source_files;
 
       /* header == TGDB_SOURCES_DENIED */
-      struct {
-      } sources_denied;
+      /* sources_denied; */
       
       /* header == TGDB_FILENAME_PAIR */
       struct {

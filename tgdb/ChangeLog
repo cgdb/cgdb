@@ -1,3 +1,9 @@
+6/02/2006 Bob Rossi <bob@brasko.net>
+
+	* tgdb-base/include/tgdb_types.h (struct tgdb_request): Comment
+	info_sources field.
+	(tgdb_response): Comment sources_denied field.
+
 5/31/2006 Bob Rossi <bob@brasko.net>
 
 	* annotate-two/src/commands.c (commands_user_ran_command): Temporarily

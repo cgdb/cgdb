@@ -47,7 +47,7 @@ enum ConfigType
     CONFIG_TYPE_FUNC_VOID,
     CONFIG_TYPE_FUNC_BOOL,
     CONFIG_TYPE_FUNC_INT,
-    CONFIG_TYPE_FUNC_STRING,
+    CONFIG_TYPE_FUNC_STRING
 };
 
 static int command_set_arrowstyle( const char *value );

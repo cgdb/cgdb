@@ -108,16 +108,16 @@ void ibuf_trim(struct ibuf *s) {
     if (!s)
         return;
 
-    // Find the first non-space character
+    /* Find the first non-space character */
     for (i = 0; i < s->cur_buf_pos && isspace(s->buf[i]); i++);
     
-    // If spaces were found, shift string leftward to overwrite them
+    /* If spaces were found, shift string leftward to overwrite them */
     if (i > 0) {
         for (j = 0; i < s->cur_buf_pos; j++, i++) {
             s->buf[j] = s->buf[i];
         }
 
-        // Update buf pos and null terminate
+        /* Update buf pos and null terminate */
         s->cur_buf_pos = j;
         s->buf[s->cur_buf_pos] = '\0';
         if (s->cur_buf_pos == 0) {
@@ -125,7 +125,7 @@ void ibuf_trim(struct ibuf *s) {
         }
     }
 
-    // Loop from the end, looking for spaces
+    /* Loop from the end, looking for spaces */
     for (i = s->cur_buf_pos - 1; i > 0 && isspace(s->buf[i]); i--);
 
     s->cur_buf_pos = i+1;

@@ -1,3 +1,8 @@
+6/02/2006 Bob Rossi <bob@brasko.net>
+
+	* src/gdbmi_parser.c (gdbmi_parser_parse_string): Make c89 compatible.
+	* src/gdbmi_oc.c (print_gdbmi_oc): Ditto.
+
 5/23/2006 Bob Rossi <bob@brasko.net>
 
 	* autoregen.sh: Remove the auto tool version checks.

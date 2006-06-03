@@ -168,8 +168,9 @@ print_gdbmi_oc (gdbmi_oc_ptr param)
 	  break;
 	case GDBMI_FILE_LIST_EXEC_SOURCE_FILES:
 	  {
+	    gdbmi_oc_file_path_info_ptr file_ptr;
 	    printf ("file-list-exec-source-files\n");
-	    gdbmi_oc_file_path_info_ptr file_ptr = 
+	    file_ptr = 
 	      cur->input_commands.file_list_exec_source_files.file_name_pair;
 	    if (print_gdbmi_file_path_info (file_ptr) == -1)
 	      {
@@ -180,9 +181,9 @@ print_gdbmi_oc (gdbmi_oc_ptr param)
 	  break;
 	case GDBMI_BREAK_LIST:
 	  {
+	    gdbmi_oc_breakpoint_ptr breakpoint_ptr;
 	    printf ("break-list\n");
-	    gdbmi_oc_breakpoint_ptr breakpoint_ptr = 
-	      cur->input_commands.break_list.breakpoint_ptr;
+	    breakpoint_ptr = cur->input_commands.break_list.breakpoint_ptr;
 	    if (print_gdbmi_breakpoint (breakpoint_ptr) == -1)
 	      {
 		fprintf (stderr, "%s:%d\n", __FILE__, __LINE__);

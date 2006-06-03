@@ -1,3 +1,7 @@
+6/02/2006 Bob Rossi <bob@brasko.net>
+
+	* src/ibuf.c (ibuf_trim): Change C++ comments to C comments.
+
 5/20/2006 Bob Rossi <bob@brasko.net>
 
 	* src/Makefile.am (ibuf_driver_LDFLAGS, ibuf_driver_LDADD,
