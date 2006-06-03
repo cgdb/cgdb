@@ -1,5 +1,9 @@
 6/03/2006 Bob Rossi <bob@brasko.net>
 
+	* cgdb.info, cgdb.txt, cgdb.1: Removed, no more generated files in svn.
+
+6/03/2006 Bob Rossi <bob@brasko.net>
+
 	* cgdb.texinfo: Change cvs to svn.
 
 4/14/2006 Bob Rossi <bob@brasko.net>
