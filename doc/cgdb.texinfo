@@ -961,7 +961,7 @@ readline, simply turn off control flow and start CGDB.
 
 Building CGDB from source requires several packages. First, CGDB is hosted
 at http://sf.net/projects/cgdb. You can determine how to get CGDB from source 
-by looking here: http://sourceforge.net/cvs/?group_id=72581.
+by looking here: http://sourceforge.net/svn/?group_id=72581.
 
 Once you have the source to CGDB, now you can begin to build it.  You will of 
 course need many packages to build CGDB. Below is a list of all of them 
