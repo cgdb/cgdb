@@ -178,7 +178,7 @@ echo '##########################################################################
 echo 'echo "-- Create the svn $CGDB_RELEASE tag/branch"' >> $CGDB_RELEASE_UPLOAD_SH
 echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
 echo 'CGDB_RELEASE_STR=`echo "$CGDB_RELEASE" | perl -pi -e 's/\./_/g'`' >> $CGDB_RELEASE_UPLOAD_SH
-echo 'svn copy https://svn.sourceforge.net/svnroot/cgdb/cgdb/trunk https://svn.sourceforge.net/svnroot/cgdb/cgdb/tags/$CGDB_RELEASE_STR' >> $CGDB_RELEASE_UPLOAD_SH
+echo "svn copy https://svn.sourceforge.net/svnroot/cgdb/cgdb/trunk https://svn.sourceforge.net/svnroot/cgdb/cgdb/tags/$CGDB_RELEASE_STR" >> $CGDB_RELEASE_UPLOAD_SH
 echo '' >>  $CGDB_RELEASE_UPLOAD_SH
 
 #echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
@@ -221,7 +221,7 @@ echo '' >> $CGDB_RELEASE_UPLOAD_SH
 ################################################################################
 echo "-- Creating Email $CGDB_RELEASE_DIR/cgdb.email"
 ################################################################################
-echo "CGDB $CGDB_RELEASE Released" >> $CGDB_RELEASE_EMAIL
+echo "$CGDB_RELEASE Released" >> $CGDB_RELEASE_EMAIL
 echo "-------------------" >> $CGDB_RELEASE_EMAIL
 echo "" >> $CGDB_RELEASE_EMAIL
 echo "Downloading:" >> $CGDB_RELEASE_EMAIL
@@ -242,4 +242,3 @@ echo "The CGDB Team" >> $CGDB_RELEASE_EMAIL
 echo "-- Modifing doc/htdocs/download.shtml"
 ################################################################################
 perl -pi -e "s/cgdb-(.*?).tar.gz/$CGDB_RELEASE.tar.gz/g" doc/htdocs/download.shtml
-

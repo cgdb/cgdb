@@ -21,6 +21,10 @@ sure that it worked properly.
 --------------------------------------------------------------------------------
 These steps are manual.
 
+ ** At this point, you should be ready to relesae, there is no going back.
+
+-  Go into releasedir and run upload.sh to upload all the files.
+
 -  Update website cgdb.sourceforge.net:
     * change webpage in cgdb/doc/htdocs
       * Put a note in the index.shtml file (News section)

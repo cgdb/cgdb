@@ -1,5 +1,10 @@
 6/03/2006 Bob Rossi <bob@brasko.net>
 
+	* autorelease.sh: Fix svn tag command. Fix cgdb.email.
+	* release-todo.txt: Update.
+
+6/03/2006 Bob Rossi <bob@brasko.net>
+
 	* autorelease.sh: Copy configure.in over.
 	* autoregen.sh: Only generate configure.in if called standalone.
 
