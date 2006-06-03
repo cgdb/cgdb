@@ -15,4 +15,4 @@ doxygen:
 	cd cgdb; doxygen Doxyfile
 
 dist-hook:
-	rm -rf `find $(distdir) -name CVS`
+	rm -rf `find $(distdir) -name .svn`

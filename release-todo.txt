@@ -10,10 +10,9 @@ sure that it worked properly.
 - Look at tar file in releasedir to make sure it has the correct version.
   untar it and run to make sure it shows the correct version and that it runs.
 
-- Ensure tag is written. If the version is cgdb-0.3.3, name the tag
-  cgdb-0_3_3.
-
 - Ensure doc/htdocs/download.shtml has correct version links in download link.
+  You can do 'svn diff' and notice only ChangeLog's, the NEWS file and the
+  download.shtml file modified.
 
 - Verify documentation is correct. cgdb.pdf, cgdb.html, cgdb.text, 
   cgdb-split.html and cgdb.info.
@@ -21,22 +20,25 @@ sure that it worked properly.
 --------------------------------------------------------------------------------
 These steps are manual.
 
- ** At this point, you should be ready to relesae, there is no going back.
+ ** At this point, you should be ready to release, there is no going back.
 
--  Go into releasedir and run upload.sh to upload all the files.
+- Go into releasedir and run upload.sh to upload all the files.
 
--  Update website cgdb.sourceforge.net:
+- Ensure tag is written. If the version is cgdb-0.3.3, name the tag
+  cgdb-0_3_3.
+
+- Update website cgdb.sourceforge.net:
     * change webpage in cgdb/doc/htdocs
       * Put a note in the index.shtml file (News section)
     * ssh cgdb.sourceforge.net
     * cd /home/groups/c/cg/cgdb/htdocs
 	* run 'cvs update'
 
--  Commit all currently modified files (should only be ChangeLogs).
+- Commit all currently modified files (should only be ChangeLogs).
 
--  Test website by looking at it and attempting to download file.
+- Test website by looking at it and attempting to download file.
 
--  Put a release on sourceforge.net/projects/cgdb
+- Put a release on sourceforge.net/projects/cgdb
     * ftp upload.sourceforge.net
       * user=anonymous, passwd=email
       * type bin
@@ -49,9 +51,9 @@ These steps are manual.
 	* you should be able to put whats new in the NEWS file into the
 	  release notes.
 
--  Download and test the new version from sourceforge.
+- Download and test the new version from sourceforge.
 
--  Announce the release on freshmeat
+- Announce the release on freshmeat
 
--  Announce the release on cgdb-announce@lists.sourceforge.net
-   with email from releasedir/cgdb.email.
+- Announce the release on cgdb-announce@lists.sourceforge.net
+  with email from releasedir/cgdb.email.

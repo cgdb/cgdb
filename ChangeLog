@@ -1,5 +1,10 @@
 6/03/2006 Bob Rossi <bob@brasko.net>
 
+	* release-todo.txt: Update procedure.
+	* Makefile.am (dist-hook): Fix for svn, instead of CVS.
+
+6/03/2006 Bob Rossi <bob@brasko.net>
+
 	* autorelease.sh: Another upload.sh fix.
 
 6/03/2006 Bob Rossi <bob@brasko.net>
