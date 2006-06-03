@@ -1,5 +1,10 @@
 6/03/2006 Bob Rossi <bob@brasko.net>
 
+	* configure.in: Deleted.
+	* configure.init: Added.
+
+6/03/2006 Bob Rossi <bob@brasko.net>
+
 	* autorelease.sh: Steps are even more automated.
 	* release-todo.txt: Describe manual steps needed to be taken for
 	release.
