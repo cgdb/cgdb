@@ -1,5 +1,10 @@
 6/03/2006 Bob Rossi <bob@brasko.net>
 
+	* Makefile.am (cgdb.txt, TEXTS, text-am, MAKEINFOTXT,
+	AM_MAKEINFOTXTFLAGS, .texinfo.txt): Added cgdb.txt.
+
+6/03/2006 Bob Rossi <bob@brasko.net>
+
 	* cgdb.info, cgdb.txt, cgdb.1: Removed, no more generated files in svn.
 
 6/03/2006 Bob Rossi <bob@brasko.net>
