@@ -20,21 +20,22 @@ sure that it worked properly.
 --------------------------------------------------------------------------------
 These steps are manual.
 
+- Modify doc/htdocs/index.shtml to add a release note.
+
+- Commit all currently modified files.
+
+ ** AUTOMATE THIS NEXT RELEASE IN UPLOAD.SH **
+- Update website cgdb.sourceforge.net:
+    * ssh cgdb.sourceforge.net
+    * cd /home/groups/c/cg/cgdb/htdocs
+	* run 'svn update'
+
  ** At this point, you should be ready to release, there is no going back.
 
 - Go into releasedir and run upload.sh to upload all the files.
 
 - Ensure tag is written. If the version is cgdb-0.3.3, name the tag
   cgdb-0_3_3.
-
-- Modify doc/htdocs/index.shtml to add a release note.
-
-- Commit all currently modified files (should only be ChangeLogs).
-
-- Update website cgdb.sourceforge.net:
-    * ssh cgdb.sourceforge.net
-    * cd /home/groups/c/cg/cgdb/htdocs
-	* run 'cvs update'
 
 - Test website by looking at it and attempting to download file.
 
