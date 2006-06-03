@@ -2,4 +2,4 @@ SUBDIRS=src
 DIST_SUBDIRS=src
 
 dist-hook:
-	rm -rf `find $(distdir) -name CVS`
+	rm -rf `find $(distdir) -name .svn`

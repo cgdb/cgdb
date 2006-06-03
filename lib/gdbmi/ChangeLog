@@ -1,3 +1,7 @@
+6/03/2006 Bob Rossi <bob@brasko.net>
+
+	* Makefile.am (dist-hook): Fix for svn, instead of CVS.
+
 6/02/2006 Bob Rossi <bob@brasko.net>
 
 	* src/gdbmi_parser.c (gdbmi_parser_parse_string): Make c89 compatible.
