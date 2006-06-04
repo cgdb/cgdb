@@ -19,4 +19,4 @@ I have used are documented in ./autoregen.sh. Other versions may work for you.
 Your patches should be indented properly. You can use the ./indent.sh script
 and it will indent the files appropriatly.
 
-Enjoy.
+Enjoy!
