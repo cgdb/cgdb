@@ -1,3 +1,8 @@
+6/09/2006 Bob Rossi <bob@brasko.net>
+
+	* src/io.c (io_data_ready): Change #ifdef from HAVE_SELECT to
+	HAVE_SYS_SELECT_H.
+
 version 0.6.3 (03/06/2006):
 
 5/29/2006 Bob Rossi <bob@brasko.net>

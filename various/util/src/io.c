@@ -235,7 +235,7 @@ void io_display_char(FILE *fd, char c){
 int io_data_ready ( int fd, int ms ) {
 	int ret;
 
-#if defined(HAVE_SELECT)
+#if defined(HAVE_SYS_SELECT_H)
     fd_set readfds, exceptfds;
     struct timeval timeout;
     
