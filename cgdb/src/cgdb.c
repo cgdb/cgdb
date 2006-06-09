@@ -839,12 +839,12 @@ user_input (void)
   /* Process the key */
   if (kui_term_is_cgdb_key (key))
     {
-      char *seqbuf = (char *) kui_manager_get_raw_data (kui_ctx);
-
+      char *seqbuf = kui_term_get_ascii_char_sequence_from_key (key);
       if (seqbuf == NULL)
 	{
 	  logger_write_pos (logger, __FILE__, __LINE__,
-			    "kui_manager_get_raw_data error");
+			    "kui_term_get_ascii_char_sequence_from_key error %d",
+			    key);
 	  return -1;
 	}
       else

@@ -378,14 +378,6 @@ struct kuictx {
 	 * The file descriptor to read from.
 	 */
 	int fd;
-
-	/**
-	 * The literal value of the last map completed.
-	 * This is so that when the client recieves a CGDB_KEY_PPAGE, they can map
-	 * it back to the ascii char's that made up the key, which would be 
-	 * something like "\027\80\81"
-	 */
-	char *last_maps_raw_data;
 };
 
 static int kui_ms_destroy_int_callback ( void *param ) {
@@ -416,7 +408,6 @@ struct kuictx *kui_create(
 	kctx->state_data = state_data;
 	kctx->kui_map_set_list = std_list_create ( NULL );
 	kctx->ms = ms;
-	kctx->last_maps_raw_data = NULL;
 
 	if ( !kctx->kui_map_set_list ) {
 		kui_destroy ( kctx );
@@ -878,32 +869,6 @@ static int kui_update_buffer (
 		}
 	}
 
-	/* This block is only here to set kctx->last_maps_raw_data.
-	 * Later, a client of the KUI, may want to know what was actually typed to 
-	 * get CGDB_KEY_*
-	 * If the map was found, save the literal_key. Otherwise, set it to NULL. 
-	 */
-	if ( map_was_found ) {
-		int length;
-
-		if ( kctx->last_maps_raw_data ) {
-			free ( kctx->last_maps_raw_data );
-			kctx->last_maps_raw_data = NULL;
-		}
-
-		length = intlen ( the_map_found->literal_key );
-
-		kctx->last_maps_raw_data = (char*)malloc ( sizeof(char)*(length+1) );
-
-		if ( !kctx->last_maps_raw_data )
-			return -1;
-
-		/* Copy null terminated char also */
-		for ( i = 0; i <= length; ++i )
-			kctx->last_maps_raw_data[i] = the_map_found->literal_key[i];
-
-	} 
-
 	return 0;
 }
 
@@ -1012,12 +977,6 @@ int kui_getkey ( struct kuictx *kctx ) {
 	int map_found; 
 	int key;
 
-	/* Set the last_maps raw data value to NULL */
-	if ( kctx->last_maps_raw_data ) {
-		free ( kctx->last_maps_raw_data );
-		kctx->last_maps_raw_data = NULL;
-	}
-
 	/* If a map was found, restart the algorithm. */
 	do {
 		key = kui_findkey ( kctx, &map_found );
@@ -1043,13 +1002,6 @@ int kui_cangetkey ( struct kuictx *kctx ) {
 		return 1;
 
 	return 0;
-}
-
-const char *kui_get_raw_data ( struct kuictx *kctx ) {
-	if ( !kctx )
-		return NULL;
-
-	return kctx->last_maps_raw_data;
 }
 
 int kui_set_blocking_ms ( struct kuictx *kctx, unsigned long msec ) {
@@ -1229,12 +1181,6 @@ int kui_manager_getkey ( struct kui_manager *kuim ) {
 
 	return kui_getkey ( kuim->normal_keys );
 
-}
-
-const char *kui_manager_get_raw_data ( struct kui_manager *kuim ) {
-	if (!kuim)
-		return NULL;
-	return kui_get_raw_data ( kuim->terminal_keys );
 }
 
 int kui_manager_set_terminal_escape_sequence_timeout ( 

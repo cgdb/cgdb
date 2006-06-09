@@ -1,3 +1,23 @@
+6/08/2006 Bob Rossi <bob@brasko.net>
+
+	* src/kui_term.c (struct tlist): Added fields key, tname_seq,
+	tiname_seq and removed field cgdb_key_code.
+	(add_keybindings): Use new tlist data structure.
+	(import_keyseq): Rewrite using new tlist data structure.
+	(kui_term_get_ascii_char_sequence_from_key): New function.
+	* src/kui_driver.c (main_loop): Replace function
+	kui_manager_get_raw_data with
+	kui_term_get_ascii_char_sequence_from_key.
+	* src/kui.c (struct kuictx): Remove field last_maps_raw_data.
+	(kui_create): No longer set last_maps_raw_data.
+	(kui_update_buffer): Remove code to set last_maps_raw_data.
+	(kui_getkey): Ditto.
+	(kui_get_raw_data, kui_manager_get_raw_data): Removed function.
+	* inc/kui_term.h (kui_term_get_ascii_char_sequence_from_key): Added
+	functions.
+	* inc/kui.h (kui_get_raw_data, kui_manager_get_raw_data): Removed 
+	functions.
+
 version 0.6.3 (03/06/2006):
 
 version 0.6.2 (04/09/2006):

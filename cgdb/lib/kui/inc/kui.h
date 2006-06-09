@@ -379,21 +379,6 @@ int kui_cangetkey ( struct kuictx *kctx );
 int kui_getkey ( struct kuictx *kctx );
 
 /**
- * This get's the last sequence of characters read in that made up a
- * CGDB_KEY_*
- * Basically, if CGDB_KEY_PPAGE is returned, this will give back the 
- * characters that made that happen. 
- *
- * \param kctx
- * The kui context.
- *
- * \return
- * NULL if there is no relevant data.
- * Otherwise a pointer to the sequence recieved.
- */
-const char *kui_get_raw_data ( struct kuictx *kctx );
-
-/**
  * Tell's the kui context the maximum number of milliseconds that it is allowed
  * to block while waiting to complete a mapping.
  *
@@ -516,25 +501,6 @@ int kui_manager_cangetkey ( struct kui_manager *kuim );
  */
 
 int kui_manager_getkey ( struct kui_manager *kuim );
-
-/**
- * This get's the last sequence of characters read in that made up a
- * CGDB_KEY_*
- * Basically, if CGDB_KEY_PPAGE is returned, this will give back the 
- * characters that made that happen. 
- *
- * NOTE: If the user mapped abc to F4, then there currently is no
- * raw data. There is only raw data when the actual terminal key is
- * read. This could potentially be a feature enhancement when needed.
- *
- * \param kuim
- * The kui context.
- *
- * \return
- * NULL if there is no relevant data.
- * Otherwise a pointer to the sequence recieved.
- */
-const char *kui_manager_get_raw_data ( struct kui_manager *kuim );
 
 /**
  * Set's the terminal escape seqeunce time out value.

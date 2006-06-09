@@ -41,306 +41,221 @@ extern char *tgoto();
  * termcap and terminfo.
  */
 struct tlist {
-	/* the termcap capability name  */
-    char *tname;
-	/* the terminfo capability name  */
-    char *tiname;
-	/* the ascii representation of this key  */
-    char *cgdb_key_code;
+  /* The key */
+  enum cgdb_key key;
+  /* the termcap capability name  */
+  char *tname;
+  /* the termcap key sequence */
+  char *tname_seq;
+  /* the terminfo capability name  */
+  char *tiname;
+  /* the terminfo key sequence */
+  char *tiname_seq;
 } seqlist[] = {
-  { "@7", "kend",   "<End>" },
-  { "kh", "khome",  "<Home>" },
-  { "kH", "kll",    "<Home>" },
-  { "dc", "dch1",   "<Del>" },
-  { "kD", "kdch1",  "<Del>" },
-  { "ic", "ich1",   "<Insert>" },
-  { "kI", "kich1",  "<Insert>" },
-  { "kN", "knp",    "<PageDown>" },
-  { "kP", "kpp",    "<PageUp>" },
+  { CGDB_KEY_END,   "@7", NULL, "kend",   NULL },
+  { CGDB_KEY_HOME,  "kh", NULL, "khome",  NULL },
+  { CGDB_KEY_HOME,  "kH", NULL, "kll",    NULL },
+  { CGDB_KEY_DC,    "dc", NULL, "dch1",   NULL },
+  { CGDB_KEY_DC,    "kD", NULL, "kdch1",  NULL },
+  { CGDB_KEY_IC,    "ic", NULL, "ich1",   NULL },
+  { CGDB_KEY_IC,    "kI", NULL, "kich1",  NULL },
+  { CGDB_KEY_NPAGE, "kN", NULL, "knp",    NULL },
+  { CGDB_KEY_PPAGE, "kP", NULL, "kpp",    NULL },
 
   /* For arrow keys */
-  { "kd", "kcud1",  "<Down>" },
-  { "kl", "kcub1",  "<Left>" },
-  { "kr", "kcuf1",  "<Right>" },
-  { "ku", "kcuu1",  "<Up>" },
-  { "le", "cub1",   "<Left>" },
-  { "nd", "cuf1",   "<Right>" },
-  { "up", "cuu1",   "<Up>" },
+  { CGDB_KEY_DOWN,  "kd", NULL, "kcud1",  NULL },
+  { CGDB_KEY_LEFT,  "kl", NULL, "kcub1",  NULL },
+  { CGDB_KEY_RIGHT, "kr", NULL, "kcuf1",  NULL },
+  { CGDB_KEY_UP,    "ku", NULL, "kcuu1",  NULL },
+  { CGDB_KEY_LEFT,  "le", NULL, "cub1",   NULL },
+  { CGDB_KEY_RIGHT, "nd", NULL, "cuf1",   NULL },
+  { CGDB_KEY_UP,    "up", NULL, "cuu1",   NULL },
 
   /* Function keys */
-  { "k1", "kf1",    "<F1>" },
-  { "k2", "kf2",    "<F2>" },
-  { "k3", "kf3",    "<F3>" },
-  { "k4", "kf4",    "<F4>" },
-  { "k5", "kf5",    "<F5>" },
-  { "k6", "kf6",    "<F6>" },
-  { "k7", "kf7",    "<F7>" },
-  { "k8", "kf8",    "<F8>" },
-  { "k9", "kf9",    "<F9>" },
-  { "k;", "kf10",   "<F10>" },
-  { "F1", "kf11",   "<F11>" },
-  { "F2", "kf12",   "<F12>" },
-  { NULL, NULL,     NULL }
+  { CGDB_KEY_F1,  "k1", NULL, "kf1",    NULL },
+  { CGDB_KEY_F2,  "k2", NULL, "kf2",    NULL },
+  { CGDB_KEY_F3,  "k3", NULL, "kf3",    NULL },
+  { CGDB_KEY_F4,  "k4", NULL, "kf4",    NULL },
+  { CGDB_KEY_F5,  "k5", NULL, "kf5",    NULL },
+  { CGDB_KEY_F6,  "k6", NULL, "kf6",    NULL },
+  { CGDB_KEY_F7,  "k7", NULL, "kf7",    NULL },
+  { CGDB_KEY_F8,  "k8", NULL, "kf8",    NULL },
+  { CGDB_KEY_F9,  "k9", NULL, "kf9",    NULL },
+  { CGDB_KEY_F10,  "k;", NULL, "kf10",   NULL },
+  { CGDB_KEY_F11,  "F1", NULL, "kf11",   NULL },
+  { CGDB_KEY_F12,  "F2", NULL, "kf12",   NULL },
+  { CGDB_KEY_ERROR,NULL, NULL, NULL,     NULL }
 };
 
-/** 
- * This adds key bindings that many terminals use. 
- *
- * @return
- * 0 on success, or -1 on error
- */
-static int add_keybindings( struct kui_map_set *map ) {
-	/* Testing */
-/*	if ( kui_ms_register_map ( map, "ab", "<ESC>xyz" ) == -1 ) return -1; */
-/*	if ( kui_ms_register_map ( map, "abcdf", "never_reached" ) == -1 ) return -1; */
+/* This represents all of the hard coded key data.  */
+struct keydata
+{
+  enum cgdb_key key;
+  char *key_seq;
+} hard_coded_bindings [] = 
+{
+  { CGDB_KEY_ESC, "\033" },
+
+  /* Arrow bindings */
+  /* These should be first, because readline hard codes them and when I
+   * walk this list to get the key bindings, I want these for the arrows */
+  { CGDB_KEY_UP, "\033[A" },
+  { CGDB_KEY_DOWN, "\033[B" },
+  { CGDB_KEY_RIGHT, "\033[C" },
+  { CGDB_KEY_LEFT, "\033[D" },
+  { CGDB_KEY_HOME, "\033[H" },
+  { CGDB_KEY_END, "\033[F" },
+
+  /* Arrow bindings, MSDOS */
+  { CGDB_KEY_UP, "\033[0A" },
+  { CGDB_KEY_LEFT, "\033[0B" },
+  { CGDB_KEY_RIGHT, "\033[0C" },
+  { CGDB_KEY_DOWN, "\033[0D" },
+
+  { CGDB_KEY_UP, "\033OA" },
+  { CGDB_KEY_DOWN, "\033OB" },
+  { CGDB_KEY_RIGHT, "\033OC" },
+  { CGDB_KEY_LEFT, "\033OD" },
+  { CGDB_KEY_HOME, "\033OH" },
+  { CGDB_KEY_END, "\033OF" },
+
+  /* Ctrl bindings */
+  { CGDB_KEY_CTRL_A, "\001" },
+  { CGDB_KEY_CTRL_B, "\002" },
+  { CGDB_KEY_CTRL_C, "\003" },
+  { CGDB_KEY_CTRL_D, "\004" },
+  { CGDB_KEY_CTRL_E, "\005" },
+  { CGDB_KEY_CTRL_F, "\006" },
+  { CGDB_KEY_CTRL_G, "\007" },
+  { CGDB_KEY_CTRL_H, "\010" },
+  { CGDB_KEY_CTRL_I, "\011" },
+  { CGDB_KEY_CTRL_J, "\012" },
+  { CGDB_KEY_CTRL_K, "\013" },
+  { CGDB_KEY_CTRL_L, "\014" },
+  { CGDB_KEY_CTRL_M, "\015" },
+  { CGDB_KEY_CTRL_N, "\016" },
+  { CGDB_KEY_CTRL_O, "\017" },
+  { CGDB_KEY_CTRL_P, "\020" },
+  { CGDB_KEY_CTRL_Q, "\021" },
+  { CGDB_KEY_CTRL_R, "\022" },
+  { CGDB_KEY_CTRL_S, "\023" },
+  { CGDB_KEY_CTRL_T, "\024" },
+  { CGDB_KEY_CTRL_U, "\025" },
+  { CGDB_KEY_CTRL_V, "\026" },
+  { CGDB_KEY_CTRL_W, "\027" },
+  { CGDB_KEY_CTRL_X, "\030" },
+  { CGDB_KEY_CTRL_Y, "\031" },
+  { CGDB_KEY_CTRL_Z, "\032" },
+
+  /* Alt bindings */
+  { CGDB_KEY_ALT_A, "\033a" },
+  { CGDB_KEY_ALT_B, "\033b" },
+  { CGDB_KEY_ALT_C, "\033c" },
+  { CGDB_KEY_ALT_D, "\033d" },
+  { CGDB_KEY_ALT_E, "\033e" },
+  { CGDB_KEY_ALT_F, "\033f" },
+  { CGDB_KEY_ALT_G, "\033g" },
+  { CGDB_KEY_ALT_H, "\033h" },
+  { CGDB_KEY_ALT_I, "\033i" },
+  { CGDB_KEY_ALT_J, "\033j" },
+  { CGDB_KEY_ALT_K, "\033k" },
+  { CGDB_KEY_ALT_L, "\033l" },
+  { CGDB_KEY_ALT_M, "\033m" },
+  { CGDB_KEY_ALT_N, "\033n" },
+  { CGDB_KEY_ALT_O, "\033o" },
+  { CGDB_KEY_ALT_P, "\033p" },
+  { CGDB_KEY_ALT_Q, "\033q" },
+  { CGDB_KEY_ALT_R, "\033r" },
+  { CGDB_KEY_ALT_S, "\033s" },
+  { CGDB_KEY_ALT_T, "\033t" },
+  { CGDB_KEY_ALT_U, "\033u" },
+  { CGDB_KEY_ALT_V, "\033v" },
+  { CGDB_KEY_ALT_W, "\033w" },
+  { CGDB_KEY_ALT_X, "\033x" },
+  { CGDB_KEY_ALT_Y, "\033y" },
+  { CGDB_KEY_ALT_Z, "\033z" },
+
+  /* Alt Shift bindings */
+  { CGDB_KEY_ALT_SHIFT_A, "\033A" },
+  { CGDB_KEY_ALT_SHIFT_B, "\033B" },
+  { CGDB_KEY_ALT_SHIFT_C, "\033C" },
+  { CGDB_KEY_ALT_SHIFT_D, "\033D" },
+  { CGDB_KEY_ALT_SHIFT_E, "\033E" },
+  { CGDB_KEY_ALT_SHIFT_F, "\033F" },
+  { CGDB_KEY_ALT_SHIFT_G, "\033G" },
+  { CGDB_KEY_ALT_SHIFT_H, "\033H" },
+  { CGDB_KEY_ALT_SHIFT_I, "\033I" },
+  { CGDB_KEY_ALT_SHIFT_J, "\033J" },
+  { CGDB_KEY_ALT_SHIFT_K, "\033K" },
+  { CGDB_KEY_ALT_SHIFT_L, "\033L" },
+  { CGDB_KEY_ALT_SHIFT_M, "\033M" },
+  { CGDB_KEY_ALT_SHIFT_N, "\033N" },
+  { CGDB_KEY_ALT_SHIFT_O, "\033O" },
+  { CGDB_KEY_ALT_SHIFT_P, "\033P" },
+  { CGDB_KEY_ALT_SHIFT_Q, "\033Q" },
+  { CGDB_KEY_ALT_SHIFT_R, "\033R" },
+  { CGDB_KEY_ALT_SHIFT_S, "\033S" },
+  { CGDB_KEY_ALT_SHIFT_T, "\033T" },
+  { CGDB_KEY_ALT_SHIFT_U, "\033U" },
+  { CGDB_KEY_ALT_SHIFT_V, "\033V" },
+  { CGDB_KEY_ALT_SHIFT_W, "\033W" },
+  { CGDB_KEY_ALT_SHIFT_X, "\033X" },
+  { CGDB_KEY_ALT_SHIFT_Y, "\033Y" },
+  { CGDB_KEY_ALT_SHIFT_Z, "\033Z" },
+
+  /* Alt Numbers */
+  { CGDB_KEY_ALT_1, "\0331" },
+  { CGDB_KEY_ALT_2, "\0332" },
+  { CGDB_KEY_ALT_3, "\0333" },
+  { CGDB_KEY_ALT_4, "\0334" },
+  { CGDB_KEY_ALT_5, "\0335" },
+  { CGDB_KEY_ALT_6, "\0336" },
+  { CGDB_KEY_ALT_7, "\0337" },
+  { CGDB_KEY_ALT_8, "\0338" },
+  { CGDB_KEY_ALT_9, "\0339" },
+  { CGDB_KEY_ALT_0, "\0330" },
+
+  /* Alt Shifted Numbers */
+  { CGDB_KEY_ALT_SHIFT_1, "\033!" },
+  { CGDB_KEY_ALT_SHIFT_2, "\033@" },
+  { CGDB_KEY_ALT_SHIFT_3, "\033#" },
+  { CGDB_KEY_ALT_SHIFT_4, "\033$" },
+  { CGDB_KEY_ALT_SHIFT_5, "\033%" },
+  { CGDB_KEY_ALT_SHIFT_6, "\033^" },
+  { CGDB_KEY_ALT_SHIFT_7, "\033&" },
+  { CGDB_KEY_ALT_SHIFT_8, "\033*" },
+  { CGDB_KEY_ALT_SHIFT_9, "\033(" },
+  { CGDB_KEY_ALT_SHIFT_0, "\033)" },
+
+  /* Alt Special */
+  { CGDB_KEY_ALT_MINUS, "\033-" },
+  { CGDB_KEY_ALT_EQUAL, "\033=" },
+  { CGDB_KEY_ALT_LEFT_BRACKET, "\033[" },
+  { CGDB_KEY_ALT_RIGHT_BRACKET, "\033]" },
+  { CGDB_KEY_ALT_BACKSLASH, "\033\\" },
+  { CGDB_KEY_ALT_SEMICOLON, "\033;" },
+  { CGDB_KEY_ALT_APOSTROPHE, "\033'" },
+  { CGDB_KEY_ALT_COMMA, "\033," },
+  { CGDB_KEY_ALT_PERIOD, "\033." },
+  { CGDB_KEY_ALT_DIVIDE, "\033/" },
+  { CGDB_KEY_ALT_ACCENT_MARK, "\033`" },
+
+  /* Alt Shifte Special */
+  { CGDB_KEY_ALT_SHIFT_UNDERSCORE, "\033_" },
+  { CGDB_KEY_ALT_SHIFT_PLUS, "\033+" },
+  { CGDB_KEY_ALT_SHIFT_LEFT_CURLY_BRACKET, "\033{" },
+  { CGDB_KEY_ALT_SHIFT_RIGHT_CURLY_BRACKET, "\033}" },
+  { CGDB_KEY_ALT_SHIFT_PIPE, "\033|" },
+  { CGDB_KEY_ALT_SHIFT_COLON, "\033:" },
+  { CGDB_KEY_ALT_SHIFT_QUOTE, "\033\"" },
+  { CGDB_KEY_ALT_SHIFT_LESS_THAN, "\033<" },
+  { CGDB_KEY_ALT_SHIFT_GREATER_THAN, "\033>" },
+  { CGDB_KEY_ALT_SHIFT_QUESTION_MARK, "\033?" },
+  { CGDB_KEY_ALT_SHIFT_TILDA, "\033~" },
+
+  { CGDB_KEY_ERROR, NULL }
+};
 	
-	if ( kui_ms_register_map ( map, "\033", "<Esc>" ) == -1 ) return -1;
-
-	/* Arrow bindings */
-	if ( kui_ms_register_map ( map, "\033[0A", "<Up>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033[0A", "<Up>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033[0B", "<Left>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033[0C", "<Right>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033[0D", "<Down>" ) == -1 ) return -1;
-
-	if ( kui_ms_register_map ( map, "\033[A", "<Up>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033[B", "<Down>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033[C", "<Right>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033[D", "<Left>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033[H", "<Home>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033[F", "<End>" ) == -1 ) return -1;
-
-	if ( kui_ms_register_map ( map, "\033OA", "<Up>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033OB", "<Down>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033OC", "<Right>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033OD", "<Left>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033OH", "<Home>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033OF", "<End>" ) == -1 ) return -1;
-
-	/* Ctrl bindings */
-	if ( kui_ms_register_map ( map, "\001", "<C-a>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\002", "<C-b>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\003", "<C-c>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\004", "<C-d>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\005", "<C-e>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\006", "<C-f>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\007", "<C-g>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\010", "<C-h>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\011", "<C-i>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\012", "<C-j>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\013", "<C-k>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\014", "<C-l>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\015", "<C-m>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\016", "<C-n>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\017", "<C-o>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\020", "<C-p>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\021", "<C-q>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\022", "<C-r>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\023", "<C-s>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\024", "<C-t>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\025", "<C-u>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\026", "<C-v>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\027", "<C-w>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\030", "<C-x>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\031", "<C-y>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\032", "<C-z>" ) == -1 ) return -1;
-
-    /* Alt bindings */
-	if ( kui_ms_register_map ( map, "\033a", "<A-a>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033b", "<A-b>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033c", "<A-c>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033d", "<A-d>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033e", "<A-e>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033f", "<A-f>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033g", "<A-g>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033h", "<A-h>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033i", "<A-i>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033j", "<A-j>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033k", "<A-k>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033l", "<A-l>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033m", "<A-m>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033n", "<A-n>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033o", "<A-o>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033p", "<A-p>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033q", "<A-q>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033r", "<A-r>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033s", "<A-s>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033t", "<A-t>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033u", "<A-u>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033v", "<A-v>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033w", "<A-w>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033x", "<A-x>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033y", "<A-y>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033z", "<A-z>" ) == -1 ) return -1;
-
-    /* Alt Shift bindings */
-	if ( kui_ms_register_map ( map, "\033A", "<A-A>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033B", "<A-B>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033C", "<A-C>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033D", "<A-D>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033E", "<A-E>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033F", "<A-F>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033G", "<A-G>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033H", "<A-H>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033I", "<A-I>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033J", "<A-J>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033K", "<A-K>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033L", "<A-L>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033M", "<A-M>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033N", "<A-N>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033O", "<A-O>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033P", "<A-P>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033Q", "<A-Q>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033R", "<A-R>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033S", "<A-S>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033T", "<A-T>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033U", "<A-U>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033V", "<A-V>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033W", "<A-W>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033X", "<A-X>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033Y", "<A-Y>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033Z", "<A-Z>" ) == -1 ) return -1;
-
-    /* Alt Numbers */
-	if ( kui_ms_register_map ( map, "\0331", "<A-1>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\0332", "<A-2>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\0333", "<A-3>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\0334", "<A-4>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\0335", "<A-5>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\0336", "<A-6>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\0337", "<A-7>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\0338", "<A-8>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\0339", "<A-9>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\0330", "<A-0>" ) == -1 ) return -1;
-
-    /* Alt Shifted Numbers */
-	if ( kui_ms_register_map ( map, "\033!", "<A-!>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033@", "<A-@>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033#", "<A-#>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033$", "<A-$>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033%", "<A-%>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033^", "<A-^>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033&", "<A-&>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033*", "<A-*>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033(", "<A-(>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033)", "<A-)>" ) == -1 ) return -1;
-
-    /* Alt Special */
-	if ( kui_ms_register_map ( map, "\033-", "<A-->" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033=", "<A-=>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033[", "<A-[>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033]", "<A-]>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033\\", "<A-\\>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033;", "<A-;>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033'", "<A-'>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033,", "<A-,>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033.", "<A-.>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033/", "<A-/>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033`", "<A-`>" ) == -1 ) return -1;
-
-    /* Alt Shifte Special */
-	if ( kui_ms_register_map ( map, "\033_", "<A-_>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033+", "<A-+>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033{", "<A-{>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033}", "<A-}>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033|", "<A-|>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033:", "<A-:>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033\"", "<A-\">" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033<", "<A-<>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033>", "<A->>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033?", "<A-?>" ) == -1 ) return -1;
-	if ( kui_ms_register_map ( map, "\033~", "<A-~>" ) == -1 ) return -1;
-	
-	return 0;
-}
-
-/* Gets a single key sequence */
-static int import_keyseq(struct tlist *i, struct kui_map_set *map) {
-    char *terminfo, *termcap;
-    int ret;
-    static char *term_buffer = (char *)NULL;
-    static char *buffer = (char *)NULL;
-    char *env;
-
-    if (term_buffer == 0)
-    {
-	   term_buffer = (char *)malloc(4080);
-	   buffer = (char *)malloc(4080);
-    }
-
-    env = getenv("TERM");
-
-    if ( !env ) {
-        fprintf ( stderr, "%s:%d TERM not set error", __FILE__, __LINE__);
-        return -1;
-    }
-    
-    if ( ( ret = tgetent(term_buffer, env)) == 0 ) {
-        fprintf ( stderr, "%s:%d tgetent 'No such entry' error", __FILE__, __LINE__);
-        return -1;
-    } else if ( ret == -1 ) {
-        fprintf ( stderr, "%s:%d tgetent 'terminfo database could not be found' error", __FILE__, __LINE__);
-        return -1;
-    }
-    
-    /* Set up the termcap seq */ 
-    if ( (termcap = tgetstr(i->tname, &buffer)) == 0 ) {
-        /*fprintf ( stderr, "CAPNAME (%s) is not present in this TERM's termcap description\n", i->tname);*/
-	} else if (termcap == (char*)-1 ) {
-        /* fprintf ( stderr, "CAPNAME (%s) is not a termcap string capability\n", i->tname); */
-    } else {
-		if ( kui_ms_register_map ( map, termcap, i->cgdb_key_code ) == -1 ) 
-			return -1;
-	}
-
-    /* Set up the terminfo seq */ 
-    if ( (terminfo = tigetstr(i->tiname)) == 0 ) {
-        /* fprintf ( stderr, "CAPNAME (%s) is not present in this TERM's terminfo description\n", i->tiname);*/
-	} else if (terminfo == (char*)-1 ) {
-       /* fprintf ( stderr, "CAPNAME (%s) is not a terminfo string capability\n", i->tiname); */
-    } else {
-		if ( kui_ms_register_map ( map, terminfo, i->cgdb_key_code ) == -1 ) 
-			return -1;
-	}
-
-    return 0;
-}
-
-/**
- * Read's in all of the termcap and terminfo key sequences.
- *
- * @return
- * 0 on success, or -1 on error
- */
-static int import_keyseqs(struct kui_map_set *map) {
-    int i;
-
-    for( i = 0; seqlist[i].tname != NULL; i++)
-        import_keyseq(&seqlist[i], map);
-
-	return 0;
-}
-
-struct kui_map_set *kui_term_get_terminal_mappings ( void ) {
-	struct kui_map_set *map;
-
-	map = kui_ms_create ();
-
-	if ( import_keyseqs ( map ) == -1 )
-		return  NULL;
-
-	if ( !map )
-		return NULL;
-
-	/* Add all the extra's */
-	if ( add_keybindings ( map ) == -1 ) {
-		/* TODO: Free map and return */
-		return  NULL;
-	}
-
-	return map;
-}
-
 /**
  * This is the main data structure in determining the string representation
  * of a terminal key sequence, or an unprintable char.
@@ -1080,6 +995,121 @@ struct cgdb_key_data {
 	}
 };
 
+
+/** 
+ * This adds key bindings that many terminals use. 
+ *
+ * @return
+ * 0 on success, or -1 on error
+ */
+static int 
+add_keybindings (struct kui_map_set *map)
+{
+  int i, val;
+  const char *keycode;
+  for (i = 0; hard_coded_bindings[i].key != CGDB_KEY_ERROR; ++i)
+  {
+    keycode = kui_term_get_keycode_from_cgdb_key (hard_coded_bindings[i].key);
+    val = kui_ms_register_map (map, hard_coded_bindings[i].key_seq, keycode);
+    if (val == -1)
+      return -1;
+  }
+
+  return 0;
+}
+
+/* Gets a single key sequence */
+static int 
+import_keyseq (struct tlist *list, struct kui_map_set *map)
+{
+  int ret;
+  static char *term_buffer = (char *)NULL;
+  static char *buffer = (char *)NULL;
+  char *env;
+
+  if (term_buffer == 0)
+  {
+    term_buffer = (char *)malloc(4080);
+    buffer = (char *)malloc(4080);
+  }
+
+  env = getenv("TERM");
+
+  if (!env)
+    return -1;
+    
+  ret = tgetent (term_buffer, env);
+  if (ret == 0)
+    return -1;
+  else if (ret == -1)
+    return -1;
+    
+  /* Set up the termcap seq */ 
+  list->tname_seq = tgetstr (list->tname, &buffer);
+  if (list->tname_seq == 0) {
+    /*fprintf ( stderr, "CAPNAME (%s) is not present in this TERM's termcap description\n", i->tname);*/
+  } else if (list->tname_seq == (char*)-1 ) {
+    /* fprintf ( stderr, "CAPNAME (%s) is not a termcap string capability\n", i->tname); */
+  } else {
+    const char *keycode;
+    keycode = kui_term_get_keycode_from_cgdb_key (list->key);
+    ret = kui_ms_register_map (map, list->tname_seq, keycode);
+    if (ret == -1)
+      return -1;
+  }
+
+  /* Set up the terminfo seq */ 
+  list->tiname_seq = tigetstr(list->tiname);
+  if (list->tiname_seq == 0) {
+    /* fprintf ( stderr, "CAPNAME (%s) is not present in this TERM's terminfo description\n", i->tiname);*/
+  } else if (list->tiname_seq == (char*)-1){
+    /* fprintf ( stderr, "CAPNAME (%s) is not a terminfo string capability\n", i->tiname); */
+  } else {
+    const char *keycode;
+    keycode = kui_term_get_keycode_from_cgdb_key (list->key);
+    ret = kui_ms_register_map (map, list->tiname_seq, keycode);
+    if (ret == -1 ) 
+      return -1;
+  }
+
+  return 0;
+}
+
+/**
+ * Read's in all of the termcap and terminfo key sequences.
+ *
+ * @return
+ * 0 on success, or -1 on error
+ */
+static int import_keyseqs(struct kui_map_set *map) {
+    int i;
+
+    for( i = 0; seqlist[i].tname != NULL; i++)
+        import_keyseq(&seqlist[i], map);
+
+	return 0;
+}
+
+struct kui_map_set *kui_term_get_terminal_mappings ( void ) {
+	struct kui_map_set *map;
+
+	map = kui_ms_create ();
+
+	if ( import_keyseqs ( map ) == -1 )
+		return  NULL;
+
+	if ( !map )
+		return NULL;
+
+	/* Add all the extra's */
+	if ( add_keybindings ( map ) == -1 ) {
+		/* TODO: Free map and return */
+		return  NULL;
+	}
+
+	return map;
+}
+
 int kui_term_get_cgdb_key_from_keycode ( const char *keycode ) {
 	int i;	
 
@@ -1126,6 +1156,40 @@ int kui_term_is_cgdb_key ( int key ) {
 		return 1;
 
 	return 0;
+}
+
+char *
+kui_term_get_ascii_char_sequence_from_key (int key)
+{
+  int i, val;
+  const char *keycode;
+
+  if (key <= CGDB_KEY_ESC || key >= CGDB_KEY_ERROR)
+    return NULL;
+
+  for (i = 0; hard_coded_bindings[i].key != CGDB_KEY_ERROR; ++i)
+  {
+    if (key == hard_coded_bindings[i].key)
+    {
+      return hard_coded_bindings[i].key_seq;
+    }
+  }
+
+  /* It wasn't one of the hardcoded values. The only thing left is the 
+   * termcap or terminfo entries. Try the termcap first, since that's 
+   * what readline uses. */
+  for (i = 0; seqlist[i].key != CGDB_KEY_ERROR; ++i)
+  {
+    if (key == seqlist[i].key)
+    {
+      if (seqlist[i].tname_seq)
+	return seqlist[i].tname_seq;
+      else if (seqlist[i].tiname_seq)
+	return seqlist[i].tiname_seq;
+    }
+  }
+
+  return NULL;
 }
 
 int kui_term_string_to_cgdb_key_array ( 

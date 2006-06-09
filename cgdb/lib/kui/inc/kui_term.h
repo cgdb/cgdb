@@ -261,6 +261,18 @@ struct kui_map_set *kui_term_get_terminal_mappings ( void );
 int kui_term_is_cgdb_key ( int key );
 
 /**
+ * This get's the ascii character representation of the key.
+ *
+ * \param key
+ * The cgdb_key to get the ascii character sequence of.
+ *
+ * \return
+ * The ascii charachter sequence on success. If key is not a cgdb_key
+ * or if this function fails, NULL will return.
+ */
+char *kui_term_get_ascii_char_sequence_from_key (int key);
+
+/**
  * Get's the cgdb_key from the keycode.
  *
  * \param keycode

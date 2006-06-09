@@ -89,7 +89,7 @@ void main_loop(struct kui_manager *i) {
 						fprintf ( stderr, "%s", val );
 
 						/* Print out the sequence recieved */
-						sequence = (char*)kui_manager_get_raw_data ( i );
+						sequence = (char*)kui_term_get_ascii_char_sequence_from_key (c);
 						while ( sequence && sequence[0] ) {
 							fprintf ( stderr, "[%d]", sequence[0]);
 							sequence = sequence+1;
