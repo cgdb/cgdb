@@ -16,7 +16,9 @@ dnl Checks for header files.
 AC_HEADER_STDC
 
 dnl determine other headers for tgdb, Error if they do not exist
-AC_CHECK_HEADERS(stdio.h stdlib.h string.h,,AC_MSG_ERROR)
+AC_CHECK_HEADERS([stdio.h],,[AC_MSG_ERROR([libgdbmi requires stdio.h to build.])])
+AC_CHECK_HEADERS([stdlib.h],,[AC_MSG_ERROR([libgdbmi requires stdlib.h to build.])])
+AC_CHECK_HEADERS([string.h],,[AC_MSG_ERROR([libgdbmi requires string.h to build.])])
 
 dnl Checks for library functions.
 AC_PROG_GCC_TRADITIONAL

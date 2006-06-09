@@ -1,3 +1,7 @@
+   * Fixed another bug in the configure script. If the curses.h header
+     file is not available on the system, then CGDB will fail to configure.
+     It would previously configure and then end up with a compile error.
+
 cgdb-0.6.3 (06/03/2006)
 
    * CGDB will no longer crash if you attempt to do a regular expression

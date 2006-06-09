@@ -44,6 +44,64 @@ esac
 
 AC_CONFIG_SUBDIRS([lib/gdbmi])
 
+dnl Checks for header files.
+AC_HEADER_STDC
+AC_HEADER_SYS_WAIT
+
+dnl determine if terminal headers are available for opening pty
+dnl these need only be optionally available
+AC_CHECK_HEADERS(pty.h sys/stropts.h util.h libutil.h)
+
+AC_CHECK_HEADERS([termios.h],,[AC_MSG_ERROR([CGDB requires termios.h to build.])])
+AC_CHECK_HEADERS([sys/select.h],,[AC_MSG_ERROR([CGDB requires sys/select.h to build.])])
+AC_CHECK_HEADERS([errno.h],,[AC_MSG_ERROR([CGDB requires errno.h to build.])])
+AC_CHECK_HEADERS([fcntl.h],,[AC_MSG_ERROR([CGDB requires fcntl.h to build.])])
+AC_CHECK_HEADERS([grp.h],,[AC_MSG_ERROR([CGDB requires grp.h to build.])])
+AC_CHECK_HEADERS([pwd.h],,[AC_MSG_ERROR([CGDB requires pwd.h to build.])])
+AC_CHECK_HEADERS([signal.h],,[AC_MSG_ERROR([CGDB requires signal.h to build.])])
+AC_CHECK_HEADERS([stdarg.h],,[AC_MSG_ERROR([CGDB requires stdarg.h to build.])])
+AC_CHECK_HEADERS([stdio.h],,[AC_MSG_ERROR([CGDB requires stdio.h to build.])])
+AC_CHECK_HEADERS([stdlib.h],,[AC_MSG_ERROR([CGDB requires stdlib.h to build.])])
+AC_CHECK_HEADERS([string.h],,[AC_MSG_ERROR([CGDB requires string.h to build.])])
+AC_CHECK_HEADERS([sys/ioctl.h],,[AC_MSG_ERROR([CGDB requires sys/ioctl.h to build.])])
+AC_CHECK_HEADERS([sys/stat.h],,[AC_MSG_ERROR([CGDB requires sys/stat.h to build.])])
+AC_CHECK_HEADERS([sys/time.h],,[AC_MSG_ERROR([CGDB requires sys/time.h to build.])])
+AC_CHECK_HEADERS([time.h],,[AC_MSG_ERROR([CGDB requires time.h to build.])])
+AC_CHECK_HEADERS([sys/types.h],,[AC_MSG_ERROR([CGDB requires sys/types.h to build.])])
+AC_CHECK_HEADERS([unistd.h],,[AC_MSG_ERROR([CGDB requires unistd.h to build.])])
+AC_CHECK_HEADERS([ctype.h],,[AC_MSG_ERROR([CGDB requires ctype.h to build.])])
+AC_CHECK_HEADERS([limits.h],,[AC_MSG_ERROR([CGDB requires limits.h to build.])])
+AC_CHECK_HEADERS([math.h],,[AC_MSG_ERROR([CGDB requires math.h to build.])])
+AC_CHECK_HEADERS([regex.h],,[AC_MSG_ERROR([CGDB requires regex.h to build.])])
+AC_CHECK_HEADERS([curses.h],,[AC_MSG_ERROR([CGDB requires curses.h to build.])])
+
+dnl Check for getopt.h, If this is here then getopt_long can be used.
+AC_CHECK_HEADERS([getopt.h],
+		 [AC_DEFINE(HAVE_GETOPT_H, 1, have getopt_long)],
+		 [AC_MSG_ERROR([CGDB requires getopt.h to build.])])
+
+dnl determine if /dev/ptmx is available for pseudo terminals
+AC_CHECK_FILE([/dev/ptmx],
+	      [AC_DEFINE(HAVE_DEV_PTMX, 1, have /dev/ptmx)])
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+AC_C_CONST
+AC_TYPE_UID_T
+AC_TYPE_MODE_T
+AC_TYPE_PID_T
+AC_TYPE_SIZE_T
+
+dnl Checks for library functions.
+AC_PROG_GCC_TRADITIONAL
+AC_FUNC_SETPGRP
+AC_TYPE_SIGNAL
+AC_FUNC_VPRINTF
+
+AC_CHECK_FUNC([putenv],,AC_MSG_ERROR([CGDB requires putenv to build.]))
+AC_CHECK_FUNC([select],,AC_MSG_ERROR([CGDB requires select to build.]))
+AC_CHECK_FUNC([strdup],,AC_MSG_ERROR([CGDB requires strdup to build.]))
+AC_CHECK_FUNC([strerror],,AC_MSG_ERROR([CGDB requires strerror to build.]))
+
 dnl Default variables
 dnl If ncurses is yes after arguments, than use ncurses. Otherwise, use curses
 opt_with_readline_prefix=no
@@ -143,44 +201,6 @@ dnl Add the ncurses/curses lib, if it's not the same as the termcap lib
 if test "$TERMCAP_LIB" != "-l$curses_lib_name"; then
   LIBS="-l$curses_lib_name $LIBS"
 fi
-
-dnl Checks for header files.
-AC_HEADER_STDC
-AC_HEADER_SYS_WAIT
-
-dnl determine if terminal headers are available for tgdb
-AC_CHECK_HEADERS(pty.h sys/stropts.h termios.h sys/select.h)
-
-dnl headers for pseudo.c -> don't know what these are for, I didn't write lib.
-AC_CHECK_HEADERS(util.h libutil.h)
-
-dnl determine other headers for tgdb, Error if they do not exist
-AC_CHECK_HEADERS(errno.h fcntl.h grp.h pwd.h signal.h \
-stdarg.h stdio.h stdlib.h string.h sys/ioctl.h \
-sys/stat.h sys/time.h sys/types.h unistd.h,,AC_MSG_ERROR)
-
-dnl determine headers for cgdb
-AC_CHECK_HEADERS(ctype.h curses.h limits.h math.h regex.h time.h)
-
-dnl Check for getopt.h, If this is here then getopt_long can be used.
-AC_CHECK_HEADER(getopt.h, AC_DEFINE(HAVE_GETOPT_H, 1, have getopt_long))
-
-dnl determine if /dev/ptmx is available for pseudo terminals
-AC_CHECK_FILE([/dev/ptmx], AC_DEFINE(HAVE_DEV_PTMX, 1, have /dev/ptmx))
-
-dnl Checks for typedefs, structures, and compiler characteristics.
-AC_C_CONST
-AC_TYPE_UID_T
-AC_TYPE_MODE_T
-AC_TYPE_PID_T
-AC_TYPE_SIZE_T
-
-dnl Checks for library functions.
-AC_PROG_GCC_TRADITIONAL
-AC_FUNC_SETPGRP
-AC_TYPE_SIGNAL
-AC_FUNC_VPRINTF
-AC_CHECK_FUNCS(mkdir putenv select strdup strerror)
 
 AC_OUTPUT(Makefile lib/Makefile \
 various/Makefile \

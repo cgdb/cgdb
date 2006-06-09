@@ -1,3 +1,8 @@
+6/08/2006 Bob Rossi <bob@brasko.net>
+
+	* NEWS: Update with new bug fix.
+	* configure.init: Change AC_CHECK_HEADERS to abort on error.
+
 6/03/2006 Bob Rossi <bob@brasko.net>
 
 	* release-todo.txt: Some modifications to make during the next
