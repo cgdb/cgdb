@@ -7,7 +7,7 @@
 #endif
 
 #if HAVE_STDIO_H
-#include <stdio.h> 
+#include <stdio.h>
 #endif /* HAVE_STDIO_H */
 
 #ifdef HAVE_SYS_TIME_H
@@ -41,185 +41,214 @@
 
 #if HAVE_UNISTD_H
 #include <unistd.h>
-#endif  /* HAVE_UNISTD_H */
+#endif /* HAVE_UNISTD_H */
 
 #include "kui.h"
 #include "kui_term.h"
 
 struct kui_map_set *map;
 
-void main_loop(struct kui_manager *i) {
-    int    max;
-    fd_set rfds;
-    int result;
+void
+main_loop (struct kui_manager *i)
+{
+  int max;
+  fd_set rfds;
+  int result;
 
-    max = STDIN_FILENO;
+  max = STDIN_FILENO;
 
-    while(1){
-        FD_ZERO(&rfds);
-        FD_SET(STDIN_FILENO, &rfds);
+  while (1)
+    {
+      FD_ZERO (&rfds);
+      FD_SET (STDIN_FILENO, &rfds);
 
-        result = select(max + 1, &rfds, NULL, NULL, NULL);
-      
-        /* if the signal interuppted system call keep going */
-        if(result == -1 && errno == EINTR)
-            continue;
-        else if(result == -1) /* on error ... must die -> stupid OS */
-            fprintf(stderr, "%s:%d select failed\n", __FILE__, __LINE__);
+      result = select (max + 1, &rfds, NULL, NULL, NULL);
 
-        if(FD_ISSET(STDIN_FILENO, &rfds)) {
-			while ( 1 ) {
-				int c = kui_manager_getkey(i);
+      /* if the signal interuppted system call keep going */
+      if (result == -1 && errno == EINTR)
+	continue;
+      else if (result == -1)	/* on error ... must die -> stupid OS */
+	fprintf (stderr, "%s:%d select failed\n", __FILE__, __LINE__);
 
-				if ( c == -1 ) {
-					fprintf ( stderr, "kui_manager_getkey failed\n" );
-					return;
-				}
+      if (FD_ISSET (STDIN_FILENO, &rfds))
+	{
+	  while (1)
+	    {
+	      int c = kui_manager_getkey (i);
 
-				if ( c == 'q' ) {
-					fprintf ( stderr, "User aborted\n" );
-					return;
-				} else {
-					if ( kui_term_is_cgdb_key ( c ) ) {
-						char *val;	
-                  char *sequence;
+	      if (c == -1)
+		{
+		  fprintf (stderr, "kui_manager_getkey failed\n");
+		  return;
+		}
 
-						val = (char*)kui_term_get_string_from_key ( c );
+	      if (c == 'q')
+		{
+		  fprintf (stderr, "User aborted\n");
+		  return;
+		}
+	      else
+		{
+		  if (kui_term_is_cgdb_key (c))
+		    {
+		      char *val;
+		      char *sequence;
 
-						fprintf ( stderr, "%s", val );
+		      val = (char *) kui_term_get_string_from_key (c);
 
-						/* Print out the sequence recieved */
-						sequence = (char*)kui_term_get_ascii_char_sequence_from_key (c);
-						while ( sequence && sequence[0] ) {
-							fprintf ( stderr, "[%d]", sequence[0]);
-							sequence = sequence+1;
-						}
-						fprintf ( stderr, "\r\n");
+		      fprintf (stderr, "%s", val);
 
-					} else
-						fprintf(stderr, "%c\r\n", c);
-				}
-
-				if ( kui_manager_cangetkey ( i ) == 1 )
-					continue;
-				else
-					break;
+		      /* Print out the sequence recieved */
+		      sequence =
+			(char *)
+			kui_term_get_ascii_char_sequence_from_key (c);
+		      while (sequence && sequence[0])
+			{
+			  fprintf (stderr, "[%d]", sequence[0]);
+			  sequence = sequence + 1;
 			}
-        }
+		      fprintf (stderr, "\r\n");
+
+		    }
+		  else
+		    fprintf (stderr, "%c\r\n", c);
+		}
+
+	      if (kui_manager_cangetkey (i) == 1)
+		continue;
+	      else
+		break;
+	    }
+	}
     }
 }
 
-static int create_mappings ( struct kui_manager *kuim ) {
+static int
+create_mappings (struct kui_manager *kuim)
+{
 
-	map = kui_ms_create ();
-	if ( !map )
-		return -1;
+  map = kui_ms_create ();
+  if (!map)
+    return -1;
 
 #if 1
 
-	if ( kui_ms_register_map ( map, "abc", "xyz" ) == -1 ) {
-		/* TODO: Free map and return */
-		return -1;
-	}
+  if (kui_ms_register_map (map, "abc", "xyz") == -1)
+    {
+      /* TODO: Free map and return */
+      return -1;
+    }
 
-	if ( kui_ms_deregister_map ( map, "abc" ) == -1 ) {
-		/* TODO: Free map and return */
-		return -1;
-	}
+  if (kui_ms_deregister_map (map, "abc") == -1)
+    {
+      /* TODO: Free map and return */
+      return -1;
+    }
 #endif
 
 #if 1
-	if ( kui_ms_register_map ( map, "abc", "xyz" ) == -1 ) {
-		/* TODO: Free map and return */
-		return -1;
-	}
+  if (kui_ms_register_map (map, "abc", "xyz") == -1)
+    {
+      /* TODO: Free map and return */
+      return -1;
+    }
 
-	if ( kui_ms_register_map ( map, "abc", "xyp" ) == -1 ) {
-		/* TODO: Free map and return */
-		return -1;
-	}
+  if (kui_ms_register_map (map, "abc", "xyp") == -1)
+    {
+      /* TODO: Free map and return */
+      return -1;
+    }
 
-	if ( kui_ms_register_map ( map, "xyzd", "<F4>" ) == -1 ) {
-		/* TODO: Free map and return */
-		return -1;
-	}
+  if (kui_ms_register_map (map, "xyzd", "<F4>") == -1)
+    {
+      /* TODO: Free map and return */
+      return -1;
+    }
 
-	if ( kui_ms_register_map ( map, "xyzd", "<F4>" ) == -1 ) {
-		/* TODO: Free map and return */
-		return -1;
-	}
+  if (kui_ms_register_map (map, "xyzd", "<F4>") == -1)
+    {
+      /* TODO: Free map and return */
+      return -1;
+    }
 
-	if ( kui_ms_register_map ( map, "a<F1>", "xyz" ) == -1 ) {
-		/* TODO: Free map and return */
-		return -1;
-	}
+  if (kui_ms_register_map (map, "a<F1>", "xyz") == -1)
+    {
+      /* TODO: Free map and return */
+      return -1;
+    }
 
-	if ( kui_ms_register_map ( map, "a<F1><F1>", "xxx" ) == -1 ) {
-		/* TODO: Free map and return */
-		return -1;
-	}
+  if (kui_ms_register_map (map, "a<F1><F1>", "xxx") == -1)
+    {
+      /* TODO: Free map and return */
+      return -1;
+    }
 
-	if ( kui_ms_register_map ( map, "a<F1><F1>", "xxx" ) == -1 ) {
-		/* TODO: Free map and return */
-		return -1;
-	}
+  if (kui_ms_register_map (map, "a<F1><F1>", "xxx") == -1)
+    {
+      /* TODO: Free map and return */
+      return -1;
+    }
 
-	if ( kui_ms_register_map ( map, "<Left><Right><F1><F1>", "<F2>" ) == -1 ) {
-		/* TODO: Free map and return */
-		return -1;
-	}
+  if (kui_ms_register_map (map, "<Left><Right><F1><F1>", "<F2>") == -1)
+    {
+      /* TODO: Free map and return */
+      return -1;
+    }
 
-	if ( kui_ms_register_map ( map, "<F6>", "p<Space>argc<CR>" ) == -1 ) {
-		/* TODO: Free map and return */
-		return -1;
-	}
+  if (kui_ms_register_map (map, "<F6>", "p<Space>argc<CR>") == -1)
+    {
+      /* TODO: Free map and return */
+      return -1;
+    }
 
 #endif
-	if ( kui_manager_add_map_set ( kuim, map ) == -1 )
-		return -1;
+  if (kui_manager_add_map_set (kuim, map) == -1)
+    return -1;
 
-	return 0;
+  return 0;
 
 }
 
-int main(int argc, char **argv){
+int
+main (int argc, char **argv)
+{
 
 #if 0
-	/* Test translating mappings to values */
-	int *a;
+  /* Test translating mappings to values */
+  int *a;
 
-	if ( kui_term_string_to_cgdb_key_array ( argv[1], &a ) == -1 )
-		return -1;
+  if (kui_term_string_to_cgdb_key_array (argv[1], &a) == -1)
+    return -1;
 
-	if ( kui_term_print_cgdb_key_array ( a ) == -1 )
-		return -1;
+  if (kui_term_print_cgdb_key_array (a) == -1)
+    return -1;
 
-	free ( a );
-	a = NULL;
-	return 0;
+  free (a);
+  a = NULL;
+  return 0;
 #endif
 
 #if 1
-    struct kui_manager *i;
-    /* Initalize curses */
-    initscr();
-    noecho();
-    raw();
-    refresh();
+  struct kui_manager *i;
+  /* Initalize curses */
+  initscr ();
+  noecho ();
+  raw ();
+  refresh ();
 
-    i = kui_manager_create ( STDIN_FILENO );
+  i = kui_manager_create (STDIN_FILENO);
 
-	create_mappings ( i );
+  create_mappings (i);
 
-    main_loop(i);
+  main_loop (i);
 
-	kui_manager_destroy ( i );
+  kui_manager_destroy (i);
 
-	kui_ms_destroy ( map ); 
+  kui_ms_destroy (map);
 
-    /* Shutdown curses */
-    echo();
-    endwin();
+  /* Shutdown curses */
+  echo ();
+  endwin ();
 #endif
-    return 0;
+  return 0;
 }
