@@ -84,7 +84,7 @@ void main_loop(struct kui_manager *i) {
 						char *val;	
                   char *sequence;
 
-						val = (char*)kui_term_get_string_from_cgdb_key ( c );
+						val = (char*)kui_term_get_string_from_key ( c );
 
 						fprintf ( stderr, "%s", val );
 
@@ -165,6 +165,11 @@ static int create_mappings ( struct kui_manager *kuim ) {
 	}
 
 	if ( kui_ms_register_map ( map, "<Left><Right><F1><F1>", "<F2>" ) == -1 ) {
+		/* TODO: Free map and return */
+		return -1;
+	}
+
+	if ( kui_ms_register_map ( map, "<F6>", "p<Space>argc<CR>" ) == -1 ) {
 		/* TODO: Free map and return */
 		return -1;
 	}

@@ -258,21 +258,213 @@ struct keydata
 	
 /**
  * This is the main data structure in determining the string representation
- * of a terminal key sequence, or an unprintable char.
- *
- * With the proper functions built on top of this data structure, the user
- * should be able to get the string representation from the CGDB_KEY and
- * vice versa.
+ * of a keycode that can be used in a map command. All of the hard coded 
+ * keycodes that can be used in a map is stored here. Some keycodes can not
+ * be hard coded and are read from the termcap/terminfo library.
  */
-struct cgdb_key_data {
+struct cgdb_keycode_data {
 	/* This is the "key" that can be converted to text.  */
-	enum cgdb_key key;
+	int key;
 	/* This is the text value associated with the key  */
 	const char *keycode;
 	/* This is here purely for debugging purposes, it is used to print out the key
 	 * in human readable form.  */
 	const char *key_as_string;
-} cgdb_keys[CGDB_KEY_ERROR-CGDB_KEY_ESC+1] = {
+} cgdb_keycodes [] = {
+        { 
+	        0,
+		"<Nul>",
+		"<Zero>"
+	},
+        { 
+	        CGDB_KEY_CTRL_H,
+		"<BS>",
+		"<Backspace>"
+	},
+        { 
+	        CGDB_KEY_CTRL_I,
+		"<Tab>",
+		"<Tab>"
+	},
+        { 
+	        CGDB_KEY_CTRL_J,
+		"<NL>",
+		"<linefeed>"
+	},
+        { 
+	        CGDB_KEY_CTRL_L,
+		"<FF>",
+		"<formfeed>"
+	},
+        { 
+	        CGDB_KEY_CTRL_M,
+		"<CR>",
+		"<carriage return>"
+	},
+        { 
+	        CGDB_KEY_CTRL_M,
+		"<Return>",
+		"<carriage return>"
+	},
+        { 
+	        CGDB_KEY_CTRL_M,
+		"<Enter>",
+		"<carriage return>"
+	},
+        { 
+	        32,
+		"<Space>",
+		"<space>"
+	},
+        { 
+	        60,
+		"<lt>",
+		"<less-than>"
+	},
+        { 
+	        92,
+		"<Bslash>",
+		"<backslash>"
+	},
+        { 
+	        124,
+		"<Bar>",
+		"<vertical bar>"
+	},
+        { 
+	        127,
+		"<Del>",
+		"<delete>"
+	},
+        { 
+	        127,
+		"<Del>",
+		"<delete>"
+	},
+
+	/* Shift keys */
+	{
+		'A',
+		"<S-a>",
+		"<shift a>"
+	},
+	{
+		'B',
+		"<S-b>",
+		"<shift b>"
+	},
+	{
+		'C',
+		"<S-c>",
+		"<shift c>"
+	},
+	{
+		'D',
+		"<S-d>",
+		"<shift d>"
+	},
+	{
+		'E',
+		"<S-e>",
+		"<shift e>"
+	},
+	{
+		'F',
+		"<S-f>",
+		"<shift f>"
+	},
+	{
+		'G',
+		"<S-g>",
+		"<shift g>"
+	},
+	{
+		'H',
+		"<S-h>",
+		"<shift h>"
+	},
+	{
+		'I',
+		"<S-i>",
+		"<shift i>"
+	},
+	{
+		'J',
+		"<S-j>",
+		"<shift j>"
+	},
+	{
+		'K',
+		"<S-k>",
+		"<shift k>"
+	},
+	{
+		'L',
+		"<S-l>",
+		"<shift l>"
+	},
+	{
+		'M',
+		"<S-m>",
+		"<shift m>"
+	},
+	{
+		'N',
+		"<S-n>",
+		"<shift n>"
+	},
+	{
+		'O',
+		"<S-o>",
+		"<shift o>"
+	},
+	{
+		'P',
+		"<S-p>",
+		"<shift p>"
+	},
+	{
+		'Q',
+		"<S-q>",
+		"<shift q>"
+	},
+	{
+		'R',
+		"<S-r>",
+		"<shift r>"
+	},
+	{
+		'S',
+		"<S-s>",
+		"<shift s>"
+	},
+	{
+		'T',
+		"<S-t>",
+		"<shift t>"
+	},
+	{
+		'U',
+		"<S-u>",
+		"<shift u>"
+	},
+	{
+		'V',
+		"<S-v>",
+		"<shift v>"
+	},
+	{
+		'W',
+		"<S-w>",
+		"<shift w>"
+	},
+	{
+		'Z',
+		"<S-z>",
+		"<shift z>"
+	},
+
+        /* The enum cgdb keys in order */
 	{
 		CGDB_KEY_ESC,
 		"<Esc>",
@@ -1113,8 +1305,8 @@ struct kui_map_set *kui_term_get_terminal_mappings ( void ) {
 int kui_term_get_cgdb_key_from_keycode ( const char *keycode ) {
 	int i;	
 
-	for ( i = 0; cgdb_keys[i].key != CGDB_KEY_ERROR; ++i ) {
-		struct cgdb_key_data *ckey = &cgdb_keys[i];
+	for ( i = 0; cgdb_keycodes[i].key != CGDB_KEY_ERROR; ++i ) {
+		struct cgdb_keycode_data *ckey = &cgdb_keycodes[i];
 
 		if ( strcasecmp ( keycode, ckey->keycode ) == 0 )
 			return ckey->key;
@@ -1123,11 +1315,11 @@ int kui_term_get_cgdb_key_from_keycode ( const char *keycode ) {
 	return CGDB_KEY_ERROR;
 }
 
-const char *kui_term_get_string_from_cgdb_key ( int key ) {
+const char *kui_term_get_string_from_key ( int key ) {
 	int i;	
 
-	for ( i = 0; cgdb_keys[i].key != CGDB_KEY_ERROR; ++i ) {
-		struct cgdb_key_data *ckey = &cgdb_keys[i];
+	for ( i = 0; cgdb_keycodes[i].key != CGDB_KEY_ERROR; ++i ) {
+		struct cgdb_keycode_data *ckey = &cgdb_keycodes[i];
 		int tkey = ckey->key;
 
 		if ( key == tkey )
@@ -1140,8 +1332,8 @@ const char *kui_term_get_string_from_cgdb_key ( int key ) {
 const char *kui_term_get_keycode_from_cgdb_key ( int key ) {
 	int i;	
 
-	for ( i = 0; cgdb_keys[i].key != CGDB_KEY_ERROR; ++i ) {
-		struct cgdb_key_data *ckey = &cgdb_keys[i];
+	for ( i = 0; cgdb_keycodes[i].key != CGDB_KEY_ERROR; ++i ) {
+		struct cgdb_keycode_data *ckey = &cgdb_keycodes[i];
 		int tkey = ckey->key;
 
 		if ( key == tkey )
@@ -1192,9 +1384,9 @@ kui_term_get_ascii_char_sequence_from_key (int key)
   return NULL;
 }
 
-int kui_term_string_to_cgdb_key_array ( 
-		const char *string,
-		int **cgdb_key_array ) {
+int 
+kui_term_string_to_key_array (const char *string, int **cgdb_key_array)
+{
 
 	int i;
     enum state_type { KUI_MAP_STATE_NORMAL, KUI_MAP_STATE_MACRO } state;
@@ -1322,7 +1514,9 @@ int kui_term_string_to_cgdb_key_array (
 	return 0;
 }
 
-int kui_term_print_cgdb_key_array ( int *cgdb_key_array ) {
+int 
+kui_term_print_key_array (int *cgdb_key_array)
+{
 	int i;
 
 	if ( !cgdb_key_array )
@@ -1337,7 +1531,7 @@ int kui_term_print_cgdb_key_array ( int *cgdb_key_array ) {
 		is_ckey = kui_term_is_cgdb_key ( cgdb_key_array[i] );
 
 		if ( is_ckey ) {
-			fprintf ( stderr, "%s", kui_term_get_string_from_cgdb_key ( cgdb_key_array[i] ) );	
+			fprintf ( stderr, "%s", kui_term_get_string_from_key (cgdb_key_array[i]));	
 		} else {
 			fprintf ( stderr, "%c", cgdb_key_array[i] );
 		}

@@ -27,7 +27,7 @@ const char * get_token( void )
 "macro"                                                    { return MACRO; } 
 
 (yes|YES|Yes|Y|y|no|NO|No|n|N)                             { return BOOLEAN; }
-((<({L}|{D}|[^>])*>)|({L}({L}|{D})*))\!?                   { return IDENTIFIER; }
+((<({L}|{D}|[^>])*>)|({L}({L}|{D})*))+\!?                   { return IDENTIFIER; }
 [+-]?{D}+                                                  { return NUMBER; }
 \"(\\.|[^\\"])*\"                                          { return STRING; }
 

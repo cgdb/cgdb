@@ -1,3 +1,15 @@
+6/10/2006 Bob Rossi <bob@brasko.net>
+
+	* src/cgdb.c (kui_map): Add new global that represents the only
+	available mapping.
+	(main_loop): Call user_input in a do-while to ensure all input from
+	the kui is used before returning.
+	(main): Create and add the new kui_map.
+	* src/cgdbrc.c (#include "sys_util.h"): Added.
+	(commands_parse_map): Added.
+	(COMMANDS): Added map.
+	* src/command_lexer.l: Modified IDENTIFIER return.
+
 6/08/2006 Bob Rossi <bob@brasko.net>
 
 	* src/cgdb.c (user_input): Replace call from kui_manager_get_raw_data

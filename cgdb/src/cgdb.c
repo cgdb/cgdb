@@ -107,6 +107,8 @@ static char *debugger_path = NULL;	/* Path to debugger to use */
 
 struct kui_manager *kui_ctx = NULL;	/* The key input package */
 
+struct kui_map_set *kui_map = NULL;
+
 int resize_pipe[2] = { -1, -1 };
 
 /* Readline interface */
@@ -1329,12 +1331,14 @@ main_loop (void)
 
       /* Input received:  Handle it */
       if (FD_ISSET (STDIN_FILENO, &rset))
-	if (user_input () == -1)
-	  {
-	    logger_write_pos (logger, __FILE__, __LINE__,
-			      "user_input failed");
-	    return -1;
-	  }
+	do {
+	    if (user_input () == -1)
+	      {
+		logger_write_pos (logger, __FILE__, __LINE__,
+				  "user_input failed");
+		return -1;
+	      }
+	} while (kui_manager_cangetkey (kui_ctx));
 
       /* child's ouptut -> stdout
        * The continue is important I think. It allows all of the child
@@ -1541,6 +1545,23 @@ main (int argc, char *argv[])
 
   kui_ctx = kui_manager_create (STDIN_FILENO);
   if (!kui_ctx)
+    {
+      logger_write_pos (logger, __FILE__, __LINE__,
+			"Unable to initialize input library");
+      cleanup ();
+      exit (-1);
+    }
+
+  kui_map = kui_ms_create ();
+  if (!kui_map)
+    {
+      logger_write_pos (logger, __FILE__, __LINE__,
+			"Unable to initialize input library");
+      cleanup ();
+      exit (-1);
+    }
+
+  if (kui_manager_add_map_set (kui_ctx, kui_map) == -1)
     {
       logger_write_pos (logger, __FILE__, __LINE__,
 			"Unable to initialize input library");

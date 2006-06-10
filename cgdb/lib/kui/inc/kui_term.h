@@ -46,7 +46,6 @@
  * <Bslash>			backslash
  * <Bar>			vertical bar
  * <Del>			delete
- * <EOL>			end-of-line
  * <Up>				cursor-up
  * <Down>			cursor-down
  * <Left>			cursor-left
@@ -276,13 +275,13 @@ char *kui_term_get_ascii_char_sequence_from_key (int key);
  * Get's the cgdb_key from the keycode.
  *
  * \param keycode
- * The code to get the corresponding cgdb_key from
+ * The code to get the corresponding key from
  *
  * @return
  * The new key, or -1 on error.
- * CGDB_KEY_ERROR is returned if no cgdb_key matches the keycode.
+ * CGDB_KEY_ERROR is returned if no key matches the keycode.
  */
-int kui_term_get_cgdb_key_from_keycode ( const char *keycode );
+int kui_term_get_key_from_keycode (const char *keycode);
 
 /**
  * Get's the key in string form.
@@ -294,7 +293,7 @@ int kui_term_get_cgdb_key_from_keycode ( const char *keycode );
  * The string form. or NULL on error.
  * if CGDB_KEY_ERROR is passed in, "CGDB_KEY_ERROR" will be returned.
  */
-const char *kui_term_get_string_from_cgdb_key ( int key );
+const char *kui_term_get_string_from_key (int key);
 
 /**
  * Get's the keycode associated with this key.
@@ -335,20 +334,18 @@ const char *kui_term_get_keycode_from_cgdb_key ( int key );
  * @return
  * 0 on success, or -1 on error.
  */
-int kui_term_string_to_cgdb_key_array (
-		const char *string,
-		int **cgdb_key_array );
+int kui_term_string_to_key_array (const char *string, int **key_array);
 
 /**
- * Print's a cgdb_key_array in human readable form. This is mostly used for
+ * Print's a key_array in human readable form. This is mostly used for
  * debugging purposes.
  *
- * \param cgdb_key_array
+ * \param key_array
  * The key array to print.
  *
  * @return
  * 0 on success, or -1 on error.
  */
-int kui_term_print_cgdb_key_array ( int *cgdb_key_array );
+int kui_term_print_key_array (int *key_array);
 
 #endif /* __INPUT_H__ */

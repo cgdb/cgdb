@@ -1,3 +1,28 @@
+6/10/2006 Bob Rossi <bob@brasko.net>
+
+	* src/kui_term.c (struct cgdb_key_data): Renamed to 'struct
+	cgdb_keycode_data.
+	(struct cgdb_keycode_data): Changed field key from type 'enum
+	cgdb_key' to int.
+	(cgdb_keys): Renamed to cgdb_keycodes. Remove size of array.
+	Added several more entries into the array.
+	(kui_term_get_string_from_cgdb_key): Renamed to
+	kui_term_get_string_from_key.
+	(kui_term_string_to_cgdb_key_array): Renamed to
+	kui_term_string_to_key_array.
+	(kui_term_print_cgdb_key_array): Renamed to kui_term_print_key_array.
+	* src/kui_driver.c (main_loop): Use newly named function.
+	(create_mappings): Add new test.
+	* src/kui.c (kui_map_create): Use newly named functions.
+	* inc/kui_term.h (enum cgdb_key): Remove <EOL> from list.
+	(kui_term_get_cgdb_key_from_keycode): Renamed to
+	kui_term_get_key_from_keycode. Changed comments.
+	(kui_term_get_string_from_cgdb_key): Renamed to
+	kui_term_get_string_from_key.
+	(kui_term_string_to_cgdb_key_array): Renamed to
+	kui_term_string_to_key_array.
+	(kui_term_print_cgdb_key_array): Renamed to kui_term_print_key_array.
+
 6/08/2006 Bob Rossi <bob@brasko.net>
 
 	* src/kui_term.c (struct tlist): Added fields key, tname_seq,

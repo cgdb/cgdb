@@ -22,6 +22,7 @@
 #include "tokenizer.h"
 #include "highlight_groups.h"
 #include "cgdb.h"
+#include "sys_util.h"
 
 extern struct tgdb *tgdb;
 
@@ -120,6 +121,7 @@ static int command_source_reload( void );
 
 static int command_parse_syntax( void );
 static int command_parse_highlight (void);
+static int command_parse_map (void);
 
 typedef int (*action_t)(void);
 static struct commands
@@ -139,6 +141,7 @@ static struct commands
     /* highlight   */ { "hi",          command_parse_highlight },
     /* highlight   */ { "highlight",   command_parse_highlight },
     /* insert      */ { "insert",      command_focus_gdb },
+    /* map         */ { "map",         command_parse_map },
     /* next        */ { "next",        command_do_next },
     /* q           */ { "q",           command_do_quit },
     /* quit        */ { "quit",        command_do_quit },
@@ -409,10 +412,50 @@ int command_parse_syntax( void )
   return 0;
 }
 
-int 
+static int 
 command_parse_highlight (void)
 {
   return hl_groups_parse_config (hl_groups_instance);
+}
+
+extern struct kui_map_set *kui_map;
+static int
+command_parse_map (void)
+{
+  int key, value, val;
+  char *key_token, value_token;
+
+  key = yylex ();
+  if (key != IDENTIFIER)
+    return -1;
+  key_token = xstrdup (get_token ());
+
+#if 0
+  if_print ("KEY=");
+  if_print (get_token ());
+  if_print ("\n");
+#endif
+
+  value = yylex ();
+  if (value != IDENTIFIER)
+  {
+    xfree (key_token);
+    return -1;
+  }
+
+#if 0
+  if_print ("VALUE=");
+  if_print (get_token ());
+  if_print ("\n");
+#endif
+  val = kui_ms_register_map (kui_map, key_token, get_token ());
+  if (val == -1)
+  {
+    free (key_token);
+    return -1;
+  }
+
+  return 0;
 }
 
 int command_parse_set( void )

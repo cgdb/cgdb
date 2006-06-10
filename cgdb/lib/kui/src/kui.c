@@ -91,12 +91,12 @@ struct kui_map *kui_map_create (
 	map->original_key = key;
 	map->original_value = value;
 
-	if ( kui_term_string_to_cgdb_key_array ( map->original_key, &map->literal_key ) == -1 ) {
+	if ( kui_term_string_to_key_array ( map->original_key, &map->literal_key ) == -1 ) {
 		kui_map_destroy ( map );
 		return NULL;
 	}
 
-	if ( kui_term_string_to_cgdb_key_array ( map->original_value, &map->literal_value ) == -1 ){
+	if ( kui_term_string_to_key_array ( map->original_value, &map->literal_value ) == -1 ){
 		kui_map_destroy ( map );
 		return NULL;
 	}
@@ -179,7 +179,7 @@ int kui_map_print_cgdb_key_array ( struct kui_map *map ) {
 	if ( !map )
 		return -1;
 
-	if ( kui_term_print_cgdb_key_array ( map->literal_value ) == -1 )
+	if ( kui_term_print_key_array ( map->literal_value ) == -1 )
 		return -1;
 
 	return 0;
