@@ -31,7 +31,7 @@ Software Foundation raise funds for GNU development.''
 
 @dircategory Software development
 @direntry
-* CGDB: (CGDB)GNU Ncurses front end to GDB.
+* CGDB: (CGDB).                   GNU Ncurses front end to GDB.
 @end direntry
 
 @titlepage
