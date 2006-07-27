@@ -15,7 +15,6 @@ bluffer_
 
 neosun_
  [ ] Upload mac osx binary.
-
  [ ] Setup nightly distribution for download.
  [ ] Add key mapping support to cgdbrc.
  [ ] Look into getopts, it generates the usage/getopts/man/texinfo data.
