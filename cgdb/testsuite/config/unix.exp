@@ -1,0 +1,54 @@
+# This file is in charge of starting up the kui_driver.
+# The rest of the tests assume that the program has already been started.
+
+set timeout 3
+
+global KUI_DRIVER
+
+if ![info exists TGDB_DRIVER] {
+  set KUI_DRIVER "../lib/kui/src/kui_driver"
+}
+
+if ![info exists kui_prompt] then {
+  set kui_prompt "(\r\n)?\[(\]kui\[)\] "
+}
+
+# kui_exit -- quit and cleanup
+proc tgdb_exit {} {
+  send "q\n"
+}
+
+#
+# kui_start -- start tgdb running
+#
+proc kui_start { map_path } {
+  global KUI_DRIVER
+  global kui_prompt
+  global spawn_id
+  global verbose
+  set kui_args ""
+
+  if { [llength $map_path] == 1} {
+    set kui_args [lindex $map_path 0]
+  }
+
+  if { $verbose > 1 } {
+    send_user "starting $KUI_DRIVER\n"
+  }
+  spawn $KUI_DRIVER $kui_args
+  expect {
+    -re "No such file.*" { 
+      perror "Can't start $KUI_DRIVER" ;
+      return -1;
+    }
+    -re ".*$kui_prompt$" { 
+      return 0;
+    }
+    timeout { 
+      perror "Failed to spawn $KUI_DRIVER (timeout)";
+      return -1;
+    }
+  }
+
+  return -1
+}

@@ -23,6 +23,10 @@
 #include <sys/types.h>
 #endif
 
+#ifdef HAVE_REGEX_H
+#include <regex.h>
+#endif
+
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -43,10 +47,185 @@
 #include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
+
 #include "kui.h"
 #include "kui_term.h"
 
 struct kui_map_set *map;
+struct kui_manager *manager;
+
+static void
+kui_shutdown (int use_endwin)
+{
+  kui_manager_destroy (manager);
+
+  kui_ms_destroy (map);
+
+  /* Shutdown curses */
+  echo ();
+  if (use_endwin)
+    endwin ();
+  exit (0);
+}
+
+static void 
+usage (void)
+{
+printf( 
+"KUI Usage:\r\n"      
+"   kui_driver [kui options]\r\n"
+"\r\n"
+"KUI Options:\r\n"
+#ifdef HAVE_GETOPT_H
+"   --file      Load an rc file consisting of map and unmap commands.\r\n"
+#else
+"   -f          Load an rc file consisting of map and unmap commands.\r\n"
+#endif
+#ifdef HAVE_GETOPT_H
+"   --help      Print help (this message) and then exit.\r\n"
+#else
+"   -h          Print help (this message) and then exit.\r\n"
+#endif
+
+"\r\nType 'q' to quit and Ctrl-z to send map or unmap command.\r\n"
+    );
+  fflush (stdout);
+}
+
+static int
+load_map (const char *line)
+{
+  /* Read a complete line, and check to see if it's a 
+   * map or umap command. */
+  regex_t regex_map_t, regex_unmap_t;
+  const char *regex_map = "map +([^ ]+) +([^ ]+)";
+  const char *regex_unmap = "unmap +([^ ]+)";
+  size_t nmatch = 3;
+  regmatch_t pmatch[3];
+
+  regcomp (&regex_map_t, regex_map, REG_EXTENDED);
+  regcomp (&regex_unmap_t, regex_unmap, REG_EXTENDED);
+
+  if (regexec (&regex_map_t, line, nmatch, pmatch, 0) == 0)
+  {
+    if (pmatch[0].rm_so != -1 && 
+	pmatch[1].rm_so != -1 &&
+	pmatch[2].rm_so != -1)
+    {
+      int size;
+      char *key, *value;
+
+      size = pmatch[1].rm_eo-pmatch[1].rm_so;
+      key = (char*)xmalloc (sizeof (char)*(size)+1);
+      strncpy (key, &line[pmatch[1].rm_so], size);
+      key[size] = 0;
+
+      size = pmatch[2].rm_eo-pmatch[2].rm_so;
+      value = (char*)xmalloc (sizeof (char)*(size)+1);
+      strncpy (value, &line[pmatch[2].rm_so], size);
+      value[size] = 0;
+
+      if (kui_ms_register_map (map, key, value) == 0)
+      {
+	fprintf (stderr, "\r\nregestered key=%s value=%s", key, value);
+	return 1;
+      }
+    }
+  } 
+  else if (regexec (&regex_unmap_t, line, nmatch, pmatch, 0) == 0)
+  {
+    if (pmatch[0].rm_so != -1 &&
+	pmatch[1].rm_so != -1)
+    {
+      int size;
+      char *key, *value;
+
+      size = pmatch[1].rm_eo-pmatch[1].rm_so;
+      key = (char*)xmalloc (sizeof (char)*(size)+1);
+      strncpy (key, &line[pmatch[1].rm_so], size);
+      key[size] = 0;
+
+      if (kui_ms_deregister_map (map, key) == 0)
+      {
+	fprintf (stderr, "\r\nderegister key=%s", key);
+	return 1;
+      }
+    }
+  }
+
+  regfree(&regex_map_t);
+  regfree(&regex_unmap_t);
+
+  return 0;
+}
+
+static int
+read_mappings (const char *file)
+{
+  FILE *fd = fopen (file, "r");
+  if (!fd)
+  {
+    fprintf (stderr, "%s:%d fopen failed\n", __FILE__, __LINE__);
+    return 0;
+  }
+
+  while (!feof (fd))
+    {
+      char line[4096];
+      if (fgets (line, 4096, fd)==NULL)
+	break;
+      line[strlen(line)-1] = '\0';
+      load_map (line);
+    }
+
+  fclose (fd);
+
+  return 0;
+}
+
+static void
+parse_long_options (int argc, char **argv)
+{
+  int opt, option_index = 0, n = 1;
+  const char *args = "hf:";
+
+#ifdef HAVE_GETOPT_H
+  static struct option long_options[] = {
+    {"file", 1, 0, 'f'},
+    {"help", 0, 0, 'h'},
+    {0, 0, 0, 0}
+  };
+#endif
+
+  while (1)
+    {
+#ifdef HAVE_GETOPT_H
+      opt = getopt_long (argc, argv, args, long_options, &option_index);
+#else
+      opt = getopt (argc, argv, args);
+#endif
+      if (opt == -1)
+	break;
+
+      switch (opt)
+	{
+	  case 'f':
+	    /* Load a file */
+	    read_mappings (optarg);
+	    break;
+	  case '?':
+	  case 'h':
+	    endwin ();
+	    usage ();
+	    kui_shutdown (0);
+	  default:
+	    break;
+	}
+    }
+}
 
 void
 main_loop (struct kui_manager *i)
@@ -61,6 +240,8 @@ main_loop (struct kui_manager *i)
     {
       FD_ZERO (&rfds);
       FD_SET (STDIN_FILENO, &rfds);
+
+      fprintf (stderr, "\r\n(kui) ");
 
       result = select (max + 1, &rfds, NULL, NULL, NULL);
 
@@ -84,9 +265,30 @@ main_loop (struct kui_manager *i)
 
 	      if (c == 'q')
 		{
-		  fprintf (stderr, "User aborted\n");
+		  fprintf (stderr, "User aborted\r\n");
 		  return;
 		}
+	      else if (kui_term_is_cgdb_key (c) && 
+		       c == CGDB_KEY_CTRL_Z)
+	        {
+		  /* Read a complete line, and check to see if it's a 
+		   * map or umap command. */
+		  char c;
+		  char line[4096];
+		  int pos = 0;
+
+		  fprintf (stderr, "\r\n(kui_map)");
+
+		  do
+		  {
+		    c = fgetc (stdin);
+		    line[pos++] = c;
+		    fprintf (stderr, "%c", c);
+		  } while (c != '\r' && c != '\n' && pos < 4095);
+		  line[pos++] = 0;
+
+		  load_map (line);
+	        }
 	      else
 		{
 		  if (kui_term_is_cgdb_key (c))
@@ -107,11 +309,9 @@ main_loop (struct kui_manager *i)
 			  fprintf (stderr, "[%d]", sequence[0]);
 			  sequence = sequence + 1;
 			}
-		      fprintf (stderr, "\r\n");
-
 		    }
 		  else
-		    fprintf (stderr, "%c\r\n", c);
+		    fprintf (stderr, "%c", c);
 		}
 
 	      if (kui_manager_cangetkey (i) == 1)
@@ -130,6 +330,7 @@ create_mappings (struct kui_manager *kuim)
   map = kui_ms_create ();
   if (!map)
     return -1;
+#if 0
 
 #if 1
 
@@ -146,7 +347,6 @@ create_mappings (struct kui_manager *kuim)
     }
 #endif
 
-#if 1
   if (kui_ms_register_map (map, "abc", "xyz") == -1)
     {
       /* TODO: Free map and return */
@@ -159,6 +359,7 @@ create_mappings (struct kui_manager *kuim)
       return -1;
     }
 
+#if 0
   if (kui_ms_register_map (map, "xyzd", "<F4>") == -1)
     {
       /* TODO: Free map and return */
@@ -202,6 +403,7 @@ create_mappings (struct kui_manager *kuim)
     }
 
 #endif
+#endif
   if (kui_manager_add_map_set (kuim, map) == -1)
     return -1;
 
@@ -212,43 +414,20 @@ create_mappings (struct kui_manager *kuim)
 int
 main (int argc, char **argv)
 {
-
-#if 0
-  /* Test translating mappings to values */
-  int *a;
-
-  if (kui_term_string_to_cgdb_key_array (argv[1], &a) == -1)
-    return -1;
-
-  if (kui_term_print_cgdb_key_array (a) == -1)
-    return -1;
-
-  free (a);
-  a = NULL;
-  return 0;
-#endif
-
-#if 1
-  struct kui_manager *i;
   /* Initalize curses */
   initscr ();
   noecho ();
   raw ();
   refresh ();
 
-  i = kui_manager_create (STDIN_FILENO);
+  manager = kui_manager_create (STDIN_FILENO);
 
-  create_mappings (i);
+  create_mappings (manager);
 
-  main_loop (i);
+  parse_long_options (argc, argv);
 
-  kui_manager_destroy (i);
+  main_loop (manager);
 
-  kui_ms_destroy (map);
-
-  /* Shutdown curses */
-  echo ();
-  endwin ();
-#endif
+  kui_shutdown (1);
   return 0;
 }

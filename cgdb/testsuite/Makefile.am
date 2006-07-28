@@ -1,0 +1,1 @@
+AUTOMAKE_OPTIONS = dejagnu

@@ -1,3 +1,16 @@
+7/26/2006 Bob Rossi <bob@brasko.net>
+
+	* src/kui_term.c (cgdb_keycodes): Moved elements to bottom of list and
+	changed keycode of CGDB_KEY_ALT_SHIFT_LESS_THAN and
+	CGDB_KEY_ALT_SHIFT_GREATER_THAN.
+	Fixed but in CGDB_KEY_ALT_ACCENT_MARK by changing keycode.
+	* src/kui_driver.c (#include <regex.h>): Added.
+	(#include <getopt.h>): Added.
+	(manager): Added global object.
+	(kui_shutdown, usage, load_map, read_mappings, parse_long_options):
+	Add new functions.
+	(main_loop): Support interactive map settings.
+
 6/10/2006 Bob Rossi <bob@brasko.net>
 
 	* src/kui_term.c (struct cgdb_key_data): Renamed to 'struct

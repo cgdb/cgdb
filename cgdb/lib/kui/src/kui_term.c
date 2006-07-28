@@ -271,77 +271,6 @@ struct cgdb_keycode_data {
 	 * in human readable form.  */
 	const char *key_as_string;
 } cgdb_keycodes [] = {
-        { 
-	        0,
-		"<Nul>",
-		"<Zero>"
-	},
-        { 
-	        CGDB_KEY_CTRL_H,
-		"<BS>",
-		"<Backspace>"
-	},
-        { 
-	        CGDB_KEY_CTRL_I,
-		"<Tab>",
-		"<Tab>"
-	},
-        { 
-	        CGDB_KEY_CTRL_J,
-		"<NL>",
-		"<linefeed>"
-	},
-        { 
-	        CGDB_KEY_CTRL_L,
-		"<FF>",
-		"<formfeed>"
-	},
-        { 
-	        CGDB_KEY_CTRL_M,
-		"<CR>",
-		"<carriage return>"
-	},
-        { 
-	        CGDB_KEY_CTRL_M,
-		"<Return>",
-		"<carriage return>"
-	},
-        { 
-	        CGDB_KEY_CTRL_M,
-		"<Enter>",
-		"<carriage return>"
-	},
-        { 
-	        32,
-		"<Space>",
-		"<space>"
-	},
-        { 
-	        60,
-		"<lt>",
-		"<less-than>"
-	},
-        { 
-	        92,
-		"<Bslash>",
-		"<backslash>"
-	},
-        { 
-	        124,
-		"<Bar>",
-		"<vertical bar>"
-	},
-        { 
-	        127,
-		"<Del>",
-		"<delete>"
-	},
-        { 
-	        127,
-		"<Del>",
-		"<delete>"
-	},
-
 	/* Shift keys */
 	{
 		'A',
@@ -1122,7 +1051,7 @@ struct cgdb_keycode_data {
 	},
 	{
 		CGDB_KEY_ALT_ACCENT_MARK,
-		"<A-'>",
+		"<A-`>",
 		"CGDB_KEY_ALT_ACCENT_MARK"
 	},
 	{
@@ -1160,14 +1089,17 @@ struct cgdb_keycode_data {
 		"<A-\">",
 		"CGDB_KEY_ALT_SHIFT_QUOTE"
 	},
+	/* The below 2 currently have an odd syntax. That is because I could
+	 * not determine how to write the keycode for these.
+	 */
 	{
 		CGDB_KEY_ALT_SHIFT_LESS_THAN,
-		"<A-<>",
+		"<A-lt>",
 		"CGDB_KEY_ALT_SHIFT_LESS_THAN"
 	},
 	{
 		CGDB_KEY_ALT_SHIFT_GREATER_THAN,
-		"<A->>",
+		"<A-gt>",
 		"CGDB_KEY_ALT_SHIFT_GREATER_THAN"
 	},
 	{
@@ -1184,6 +1116,76 @@ struct cgdb_keycode_data {
 		CGDB_KEY_ERROR,
 		"CGDB_KEY_ERROR",
 		"CGDB_KEY_ERROR"
+	},
+        { 
+	        0,
+		"<Nul>",
+		"<Zero>"
+	},
+        { 
+	        CGDB_KEY_CTRL_H,
+		"<BS>",
+		"<Backspace>"
+	},
+        { 
+	        CGDB_KEY_CTRL_I,
+		"<Tab>",
+		"<Tab>"
+	},
+        { 
+	        CGDB_KEY_CTRL_J,
+		"<NL>",
+		"<linefeed>"
+	},
+        { 
+	        CGDB_KEY_CTRL_L,
+		"<FF>",
+		"<formfeed>"
+	},
+        { 
+	        CGDB_KEY_CTRL_M,
+		"<CR>",
+		"<carriage return>"
+	},
+        { 
+	        CGDB_KEY_CTRL_M,
+		"<Return>",
+		"<carriage return>"
+	},
+        { 
+	        CGDB_KEY_CTRL_M,
+		"<Enter>",
+		"<carriage return>"
+	},
+        { 
+	        32,
+		"<Space>",
+		"<space>"
+	},
+        { 
+	        60,
+		"<lt>",
+		"<less-than>"
+	},
+        { 
+	        92,
+		"<Bslash>",
+		"<backslash>"
+	},
+        { 
+	        124,
+		"<Bar>",
+		"<vertical bar>"
+	},
+        { 
+	        127,
+		"<Del>",
+		"<delete>"
+	},
+        { 
+	        127,
+		"<Del>",
+		"<delete>"
 	}
 };
 

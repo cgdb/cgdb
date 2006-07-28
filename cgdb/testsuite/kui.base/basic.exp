@@ -1,0 +1,604 @@
+# Don't wait for more than 10 seconds
+set timeout 3 	
+
+# Create a mappings file to test the KUI
+set mapping_output [open /tmp/map.txt w 0600]
+# Simple map
+puts $mapping_output "map gg up"
+
+# Simple map that tests that the first map is replaced
+puts $mapping_output "map abc def"
+puts $mapping_output "map abc ghi"
+
+# Test 2 maps, where one is a subest of the other
+puts $mapping_output "map partial_abc     mmm"
+puts $mapping_output "map partial_abcdef  nnn"
+
+# Test the double mapping
+puts $mapping_output "map first second"
+puts $mapping_output "map second third"
+close $mapping_output
+
+# Start the KUI
+if [kui_start --file=/tmp/map.txt] then {
+  puts "Error starting program"	
+  exit 1
+}
+
+# Test ESC key
+set test "test ESC char"
+send "\033"
+expect {
+  -re "CGDB_KEY_ESC$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+# Test hardcoded up/down/rigt/left/home/end keys
+set test "test up key"
+send "\033\[A"
+expect {
+  -re "CGDB_KEY_UP\\\[27\\\]\\\[91\\\]\\\[65\\\]$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test down key"
+send "\033\[B"
+expect {
+  -re "CGDB_KEY_DOWN\\\[27\\\]\\\[91\\\]\\\[66\\\]$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test right key"
+send "\033\[C"
+expect {
+  -re "CGDB_KEY_RIGHT\\\[27\\\]\\\[91\\\]\\\[67\\\]$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test left key"
+send "\033\[D"
+expect {
+  -re "CGDB_KEY_LEFT\\\[27\\\]\\\[91\\\]\\\[68\\\]$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test home key"
+send "\033\[H"
+expect {
+  -re "CGDB_KEY_HOME\\\[27\\\]\\\[91\\\]\\\[72\\\]$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test end key"
+send "\033\[F"
+expect {
+  -re "CGDB_KEY_END\\\[27\\\]\\\[91\\\]\\\[70\\\]$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+# Test hardcoded msdos up/down/right/left keys
+# NOTE: The kui always returns the the keys with the same escape sequence as 
+#       above. This is be design. Readline expects these key sequences to mean the
+#       same thing. So these keys will always work, regardless of what the termcap
+#       says.
+set test "test msdos up key"
+send "\033\[0A"
+expect {
+  -re "CGDB_KEY_UP\\\[27\\\]\\\[91\\\]\\\[65\\\]$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test msdos left key"
+send "\033\[0B"
+expect {
+  -re "CGDB_KEY_LEFT\\\[27\\\]\\\[91\\\]\\\[68\\\]$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test msdos right key"
+send "\033\[0C"
+expect {
+  -re "CGDB_KEY_RIGHT\\\[27\\\]\\\[91\\\]\\\[67\\\]$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test msdos down key"
+send "\033\[0D"
+expect {
+  -re "CGDB_KEY_DOWN\\\[27\\\]\\\[91\\\]\\\[66\\\]$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+# Test second hardcoded up/down/rigt/left/home/end keys
+set test "test second up key"
+send "\033OA"
+expect {
+  -re "CGDB_KEY_UP\\\[27\\\]\\\[91\\\]\\\[65\\\]$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test second down key"
+send "\033OB"
+expect {
+  -re "CGDB_KEY_DOWN\\\[27\\\]\\\[91\\\]\\\[66\\\]$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test second right key"
+send "\033OC"
+expect {
+  -re "CGDB_KEY_RIGHT\\\[27\\\]\\\[91\\\]\\\[67\\\]$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test second left key"
+send "\033OD"
+expect {
+  -re "CGDB_KEY_LEFT\\\[27\\\]\\\[91\\\]\\\[68\\\]$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test second home key"
+send "\033OH"
+expect {
+  -re "CGDB_KEY_HOME\\\[27\\\]\\\[91\\\]\\\[72\\\]$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test second end key"
+send "\033OF"
+expect {
+  -re "CGDB_KEY_END\\\[27\\\]\\\[91\\\]\\\[70\\\]$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+# Test all X combinations, where X is all the characters.
+# not testing q, cause it shuts down the kui
+foreach {val} {a b c d e f g h i j k l m n o p r s t u v w x y z} {
+  set test "test simple char $val"
+  send "$val"
+  expect {
+    -re "$val$kui_prompt$" { pass "$test"}
+    timeout {
+      fail "timeout $test"
+    }
+  }
+}
+
+foreach {val} {A B C D E F G H I J K L M N O P Q R S T U V W X Y Z} {
+  set test "test simple upper case char $val"
+  send "$val"
+  expect {
+    -re "$val$kui_prompt$" { pass "$test"}
+    timeout {
+      fail "timeout $test"
+    }
+  }
+}
+
+# Test all <Ctrl-X> combinations, where X is all the characters.
+# h i j, is not in the list because it is currently broken
+# m is not in the list because ctrl-m starts a mapping.
+set counter 1
+foreach {val} {a b c d e f g h i j k l m n o p q r s t u v w x y} {
+  set testval [format %c $counter]
+  set test "test ctrl-$val"
+  set upper [string toupper $val]
+  set expected_testval "CGDB_KEY_CTRL_$upper\\\[$counter\\\]"
+  send "$testval"
+  expect {
+    -re "$expected_testval$kui_prompt$" { pass "$test"}
+    timeout {
+      fail "timeout $test"
+    }
+  }
+  set counter [expr $counter+1]
+}
+
+# Test all <Alt-X> combinations, where X is all the characters.
+foreach {val} {a b c d e f g h i j k l m n o p q r s t u v w x y z} {
+  set test "test alt-$val"
+  set testval "\033$val"
+  set upper [string toupper $val]
+  set expected_testval "CGDB_KEY_ALT_$upper\\\[27\\\]\\\[.*\\\]"
+  send "$testval"
+  expect {
+    -re "$expected_testval$kui_prompt$" { pass "$test"}
+    timeout {
+      fail "timeout $test"
+    }
+  }
+}
+
+# Test all <Alt-shift-X> combinations, where X is all the characters.
+foreach {val} {A B C D E F G H I J K L M N O P Q R S T U V W X Y Z} {
+  set test "test alt-shift-$val"
+  set testval "\033$val"
+  set upper [string toupper $val]
+  set expected_testval "CGDB_KEY_ALT_$upper\\\[27\\\]\\\[.*\\\]"
+  send "$testval"
+  expect {
+    -re "$expected_testval$kui_prompt$" { pass "$test"}
+    timeout {
+      fail "timeout $test"
+    }
+  }
+}
+
+# Test all <Alt-X> combinations, where X is all the numbers.
+foreach {val} {1 2 3 4 5 6 7 8 9 0} {
+  set test "test alt-$val"
+  set testval "\033$val"
+  set expected_testval "CGDB_KEY_ALT_$val\\\[27\\\]\\\[.*\\\]"
+  send "$testval"
+  expect {
+    -re "$expected_testval$kui_prompt$" { pass "$test"}
+    timeout {
+      fail "timeout $test"
+    }
+  }
+}
+
+# Test all <Alt-Shift-X> combinations, where X is all the numbers.
+set counter 0
+foreach {val} {) ! @ # $ % ^ & * (} {
+  set testval [format %c $counter]
+  set test "test ctrl-shift-$val"
+  set upper [string toupper $val]
+  set expected_testval "CGDB_KEY_ALT_SHIFT_$counter\\\[27\\\]\\\[.*\\\]"
+  send "\033$val"
+  expect {
+    -re "$expected_testval$kui_prompt$" { pass "$test"}
+    timeout {
+      fail "timeout $test"
+    }
+  }
+  set counter [expr $counter+1]
+}
+
+# Test particular Alt-values on the keyboard.
+set test "test alt minus"
+set expected_testval "CGDB_KEY_ALT_MINUS\\\[27\\\]\\\[.*\\\]"
+send "\033-"
+expect {
+  -re "$expected_testval$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test alt equal"
+set expected_testval "CGDB_KEY_ALT_EQUAL\\\[27\\\]\\\[.*\\\]"
+send "\033="
+expect {
+  -re "$expected_testval$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test alt left bracket"
+set expected_testval "CGDB_KEY_ALT_LEFT_BRACKET\\\[27\\\]\\\[.*\\\]"
+send "\033\["
+expect {
+  -re "$expected_testval$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test alt right bracket"
+set expected_testval "CGDB_KEY_ALT_RIGHT_BRACKET\\\[27\\\]\\\[.*\\\]"
+send "\033\]"
+expect {
+  -re "$expected_testval$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test alt backslash"
+set expected_testval "CGDB_KEY_ALT_BACKSLASH\\\[27\\\]\\\[.*\\\]"
+send "\033\\"
+expect {
+  -re "$expected_testval$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test alt semicolon"
+set expected_testval "CGDB_KEY_ALT_SEMICOLON\\\[27\\\]\\\[.*\\\]"
+send "\033;"
+expect {
+  -re "$expected_testval$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test alt apostrophe"
+set expected_testval "CGDB_KEY_ALT_APOSTROPHE\\\[27\\\]\\\[.*\\\]"
+send "\033'"
+expect {
+  -re "$expected_testval$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test alt comma"
+set expected_testval "CGDB_KEY_ALT_COMMA\\\[27\\\]\\\[.*\\\]"
+send "\033,"
+expect {
+  -re "$expected_testval$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test alt period"
+set expected_testval "CGDB_KEY_ALT_PERIOD\\\[27\\\]\\\[.*\\\]"
+send "\033."
+expect {
+  -re "$expected_testval$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test alt divide"
+set expected_testval "CGDB_KEY_ALT_DIVIDE\\\[27\\\]\\\[.*\\\]"
+send "\033/"
+expect {
+  -re "$expected_testval$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test alt accent mark"
+set expected_testval "CGDB_KEY_ALT_ACCENT_MARK\\\[27\\\]\\\[.*\\\]"
+send "\033\`"
+expect {
+  -re "$expected_testval$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+# Test particular Alt-Shift-values on the keyboard.
+set test "test alt shift underscore"
+set expected_testval "CGDB_KEY_ALT_SHIFT_UNDERSCORE\\\[27\\\]\\\[.*\\\]"
+send "\033_"
+expect {
+  -re "$expected_testval$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test alt shift plus"
+set expected_testval "CGDB_KEY_ALT_SHIFT_PLUS\\\[27\\\]\\\[.*\\\]"
+send "\033+"
+expect {
+  -re "$expected_testval$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test alt shift left curly bracket"
+set expected_testval "CGDB_KEY_ALT_SHIFT_LEFT_CURLY_BRACKET\\\[27\\\]\\\[.*\\\]"
+send "\033{"
+expect {
+  -re "$expected_testval$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test alt shift right curly bracket"
+set expected_testval "CGDB_KEY_ALT_SHIFT_RIGHT_CURLY_BRACKET\\\[27\\\]\\\[.*\\\]"
+send "\033}"
+expect {
+  -re "$expected_testval$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test alt shift pipe"
+set expected_testval "CGDB_KEY_ALT_SHIFT_PIPE\\\[27\\\]\\\[.*\\\]"
+send "\033|"
+expect {
+  -re "$expected_testval$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test alt shift colon"
+set expected_testval "CGDB_KEY_ALT_SHIFT_COLON\\\[27\\\]\\\[.*\\\]"
+send "\033:"
+expect {
+  -re "$expected_testval$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test alt shift quote"
+set expected_testval "CGDB_KEY_ALT_SHIFT_QUOTE\\\[27\\\]\\\[.*\\\]"
+send "\033\""
+expect {
+  -re "$expected_testval$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test alt shift less than"
+set expected_testval "CGDB_KEY_ALT_SHIFT_LESS_THAN\\\[27\\\]\\\[.*\\\]"
+send "\033<"
+expect {
+  -re "$expected_testval$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test alt shift greater than"
+set expected_testval "CGDB_KEY_ALT_SHIFT_GREATER_THAN\\\[27\\\]\\\[.*\\\]"
+send "\033>"
+expect {
+  -re "$expected_testval$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test alt shift question mark"
+set expected_testval "CGDB_KEY_ALT_SHIFT_QUESTION_MARK\\\[27\\\]\\\[.*\\\]"
+send "\033\?"
+expect {
+  -re "$expected_testval$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test alt shift tilda"
+set expected_testval "CGDB_KEY_ALT_SHIFT_TILDA\\\[27\\\]\\\[.*\\\]"
+send "\033~"
+expect {
+  -re "$expected_testval$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+# Test mappings
+set test "testing map from mapping file"
+send "gg"
+expect {
+  -re "up$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test simple map"
+send "abc"
+expect {
+  -re "ghi$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test simple partial matching map"
+send "abf"
+expect {
+  -re "abf$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test map that is a subset of another map"
+send "partial_abc"
+expect {
+  -re "mmm$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test map that is a subset of another map, plus another char"
+send "partial_abcd"
+expect {
+  -re "mmmd$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test map that is a subset of another map, plus two more char"
+send "partial_abcde"
+expect {
+  -re "mmmde$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test map that is a superset of another map"
+send "partial_abcdef"
+expect {
+  -re "nnn$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test map that is a superset of another map plus another char"
+send "partial_abcdefg"
+expect {
+  -re "nnn${kui_prompt}g$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test that mappings are recursive"
+send "first"
+expect {
+  -re "third$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "test that mappings are recursive plus extra chars"
+send "firstxyz"
+expect {
+  -re "third${kui_prompt}x${kui_prompt}y${kui_prompt}z${kui_prompt}$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
