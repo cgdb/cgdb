@@ -1,3 +1,9 @@
+10/03/2006 Bob Rossi <bob@brasko.net>
+
+	* src/Makefile.am (noinst_bindir): Removed.
+	(noinst_bin_PROGRAMS): Removed.
+	(noinst_PROGRAMS): Added.
+
 6/08/2006 Bob Rossi <bob@brasko.net>
 
 	* configure.init: Change AC_CHECK_HEADERS to abort on error.

@@ -1,3 +1,7 @@
+   * Fixed yet another bug in the auto tools scripts. cgdb-0.6.3 would
+     improperly install gdbmi_driver if make was invoked like 
+     'make DESTDIR=/foo install'.
+   
    * Fixed another bug in the configure script. If the curses.h header
      file is not available on the system, then CGDB will fail to configure.
      It would previously configure and then end up with a compile error.

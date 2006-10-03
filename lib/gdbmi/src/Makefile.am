@@ -13,8 +13,7 @@ gdbmi_parser.c
 EXTRA_DIST = gdbmi_parser.h  gdbmi_pt.h gdbmi_grammar.h gdbmi_oc.h
 
 # gdbmi driver program
-noinst_bin_PROGRAMS = gdbmi_driver
-noinst_bindir = $(top_builddir)/progs
+noinst_PROGRAMS = gdbmi_driver
 
 gdbmi_driver_LDFLAGS = -L.
 gdbmi_driver_LDADD = -lgdbmi
