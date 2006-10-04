@@ -1,3 +1,8 @@
+10/04/2006 Bob Rossi <bob@brasko.net>
+
+	* src/cgdb.c (parse_long_options): Fix 'd' case. Handle '--' case.
+	* src/usage.c (usage): Update usage.
+
 10/03/2006 Bob Rossi <bob@brasko.net>
 
 	* src/cgdb.c, src/sources.c, src/cgdbrc.c, src/highlight.c: Replace 

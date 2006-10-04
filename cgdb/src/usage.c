@@ -13,7 +13,7 @@ usage (void)
 {
 printf( 
 "CGDB Usage:\n"      
-"   cgdb [cgdb options] [gdb options]\n"
+"   cgdb [cgdb options] [--] [gdb options]\n"
 "\n"
 "CGDB Options:\n"
 #ifdef HAVE_GETOPT_H
@@ -27,5 +27,6 @@ printf(
 "   -h          Print help (this message) and then exit.\n"
 #endif
 "   -d          Set debugger to use.\n"
+"   --          Marks the end of CGDB's options.\n"
     );
 }

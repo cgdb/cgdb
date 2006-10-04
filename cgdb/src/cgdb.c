@@ -719,7 +719,13 @@ parse_long_options (int *argc, char ***argv)
 	  exit (0);
 	case 'd':
 	  debugger_path = strdup (optarg);
-	  n += 2;
+	  if (optarg == (*argv)[n + 1]) {
+	    /* optarg is in next argv (-d foo) */
+	    n += 2;
+	  } else {
+	    /* optarg is in this argv (-dfoo) */
+	    n++;
+	  }
 	  break;
 	case 'h':
 	  usage ();
@@ -731,6 +737,11 @@ parse_long_options (int *argc, char ***argv)
 
   *argc -= n;
   *argv += n;
+
+  if (**argv && strcmp(**argv, "--") == 0) {
+    (*argc)--;
+    (*argv)++;
+  }
 }
 
 /* init_home_dir: Attempts to create a config directory in the user's home
