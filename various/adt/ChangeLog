@@ -1,3 +1,8 @@
+10/03/2006 Bob Rossi <bob@brasko.net>
+      
+	* src/queue.c, src/ibuf.c, src/tgdb_list.c: Replace xmalloc with 
+	cgdb_malloc.
+
 version 0.6.3 (03/06/2006):
 
 6/02/2006 Bob Rossi <bob@brasko.net>

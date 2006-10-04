@@ -404,11 +404,11 @@ tab_completion_create (char **matches, int num_matches, int max_length)
   int i;
   tab_completion_ptr comptr;
 
-  comptr = (tab_completion_ptr) xmalloc (sizeof (struct tab_completion_ctx));
+  comptr = (tab_completion_ptr) cgdb_malloc (sizeof (struct tab_completion_ctx));
 
-  comptr->matches = xmalloc (sizeof (char *) * (num_matches + 1));
+  comptr->matches = cgdb_malloc (sizeof (char *) * (num_matches + 1));
   for (i = 0; i <= num_matches; ++i)
-    comptr->matches[i] = xstrdup (matches[i]);
+    comptr->matches[i] = cgdb_strdup (matches[i]);
 
   comptr->num_matches = num_matches;
   comptr->max_length = max_length;

@@ -276,7 +276,7 @@ struct tgdb_client_context *tgdb_client_create_context (
 	   ){
 
 		tcc = ( struct tgdb_client_context *) 
-			xmalloc ( sizeof ( struct tgdb_client_context) );
+			cgdb_malloc ( sizeof ( struct tgdb_client_context) );
 		tcc->debugger = debugger;
 		tcc->protocol = protocol;
 		tcc->logger   = logger;

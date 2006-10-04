@@ -12,7 +12,7 @@ struct queue {
 };
 
 struct queue *queue_init(void) {
-   struct queue *q = (struct queue *)xmalloc(sizeof(struct queue));
+   struct queue *q = (struct queue *)cgdb_malloc(sizeof(struct queue));
    q->size = 0;
    q->head = NULL;
    return q;
@@ -22,7 +22,7 @@ void queue_append(struct queue *q, void *item) {
     struct node *cur = q->head, *node;
 
     /* Allocate the new node */
-    node = (struct node *)xmalloc(sizeof(struct node));
+    node = (struct node *)cgdb_malloc(sizeof(struct node));
     node->data = item;
     node->next = NULL;
 

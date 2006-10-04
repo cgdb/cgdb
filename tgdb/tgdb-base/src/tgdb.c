@@ -220,7 +220,7 @@ tgdb_process_client_commands (struct tgdb *tgdb)
 static struct tgdb *
 initialize_tgdb_context (void)
 {
-  struct tgdb *tgdb = (struct tgdb *) xmalloc (sizeof (struct tgdb));
+  struct tgdb *tgdb = (struct tgdb *) cgdb_malloc (sizeof (struct tgdb));
 
   tgdb->tcc = NULL;
   tgdb->control_c = 0;
@@ -674,7 +674,7 @@ tgdb_deliver_command (struct tgdb *tgdb, struct tgdb_command *command)
    * debugger is being given.
    */
   if (command->command_choice == TGDB_COMMAND_FRONT_END)
-    tgdb->last_gui_command = xstrdup (command->tgdb_command_data);
+    tgdb->last_gui_command = cgdb_strdup (command->tgdb_command_data);
 
   /* A command for the debugger */
   if (tgdb_client_prepare_for_command (tgdb->tcc, command) == -1)
@@ -809,13 +809,13 @@ tgdb_add_quit_command (struct tgdb *tgdb)
   struct tgdb_response *response; 
 
   tstatus = (struct tgdb_debugger_exit_status *)
-    xmalloc (sizeof (struct tgdb_debugger_exit_status));
+    cgdb_malloc (sizeof (struct tgdb_debugger_exit_status));
 
   /* Child did not exit normally */
   tstatus->exit_status = -1;
   tstatus->return_value = 0;
 
-  response = (struct tgdb_response *) xmalloc (sizeof (struct tgdb_response));
+  response = (struct tgdb_response *) cgdb_malloc (sizeof (struct tgdb_response));
   response->header = TGDB_QUIT;
   response->choice.quit.exit_status = tstatus;
 
@@ -845,7 +845,7 @@ tgdb_get_quit_command (struct tgdb *tgdb, int *tgdb_will_quit)
   pid_t ret;
   struct tgdb_debugger_exit_status *tstatus;
   struct tgdb_response *response = (struct tgdb_response *)
-    xmalloc (sizeof (struct tgdb_response));
+    cgdb_malloc (sizeof (struct tgdb_response));
 
   if (!tgdb_will_quit)
     return -1;
@@ -853,7 +853,7 @@ tgdb_get_quit_command (struct tgdb *tgdb, int *tgdb_will_quit)
   *tgdb_will_quit = 0;
 
   tstatus = (struct tgdb_debugger_exit_status *)
-    xmalloc (sizeof (struct tgdb_debugger_exit_status));
+    cgdb_malloc (sizeof (struct tgdb_debugger_exit_status));
 
   ret = waitpid (pid, &status, WNOHANG);
 
@@ -1109,13 +1109,13 @@ tgdb_request_run_console_command (struct tgdb *tgdb, const char *command)
     return NULL;
 
   request_ptr = (tgdb_request_ptr)
-    xmalloc (sizeof (struct tgdb_request));
+    cgdb_malloc (sizeof (struct tgdb_request));
   if (!request_ptr)
     return NULL;
 
   request_ptr->header = TGDB_REQUEST_CONSOLE_COMMAND;
   request_ptr->choice.console_command.command = (const char *)
-    xstrdup (command);
+    cgdb_strdup (command);
 
   
   return request_ptr;
@@ -1129,7 +1129,7 @@ tgdb_request_inferiors_source_files (struct tgdb *tgdb)
     return NULL;
 
   request_ptr = (tgdb_request_ptr)
-    xmalloc (sizeof (struct tgdb_request));
+    cgdb_malloc (sizeof (struct tgdb_request));
   if (!request_ptr)
     return NULL;
 
@@ -1149,7 +1149,7 @@ tgdb_request_filename_pair (struct tgdb *tgdb, const char *file)
     return NULL;
 
   request_ptr = (tgdb_request_ptr)
-    xmalloc (sizeof (struct tgdb_request));
+    cgdb_malloc (sizeof (struct tgdb_request));
   if (!request_ptr)
     return NULL;
 
@@ -1157,7 +1157,7 @@ tgdb_request_filename_pair (struct tgdb *tgdb, const char *file)
 
   if (file) {
     request_ptr->choice.filename_pair.file = (const char *)
-      xstrdup (file);
+      cgdb_strdup (file);
   } else
     request_ptr->choice.filename_pair.file = NULL;
 
@@ -1173,7 +1173,7 @@ tgdb_request_current_location (struct tgdb *tgdb, int on_startup)
     return NULL;
 
   request_ptr = (tgdb_request_ptr)
-    xmalloc (sizeof (struct tgdb_request));
+    cgdb_malloc (sizeof (struct tgdb_request));
   if (!request_ptr)
     return NULL;
 
@@ -1191,7 +1191,7 @@ tgdb_request_run_debugger_command (struct tgdb *tgdb, enum tgdb_command_type c)
     return NULL;
 
   request_ptr = (tgdb_request_ptr)
-    xmalloc (sizeof (struct tgdb_request));
+    cgdb_malloc (sizeof (struct tgdb_request));
   if (!request_ptr)
     return NULL;
 
@@ -1210,13 +1210,13 @@ tgdb_request_modify_breakpoint (struct tgdb *tgdb, const char *file, int line,
     return NULL;
 
   request_ptr = (tgdb_request_ptr)
-    xmalloc (sizeof (struct tgdb_request));
+    cgdb_malloc (sizeof (struct tgdb_request));
   if (!request_ptr)
     return NULL;
 
   request_ptr->header = TGDB_REQUEST_MODIFY_BREAKPOINT;
   request_ptr->choice.modify_breakpoint.file = (const char *)
-    xstrdup (file);
+    cgdb_strdup (file);
   request_ptr->choice.modify_breakpoint.line = line;
   request_ptr->choice.modify_breakpoint.b = b;
 
@@ -1231,13 +1231,13 @@ tgdb_request_complete (struct tgdb *tgdb, const char *line)
     return NULL;
 
   request_ptr = (tgdb_request_ptr)
-    xmalloc (sizeof (struct tgdb_request));
+    cgdb_malloc (sizeof (struct tgdb_request));
   if (!request_ptr)
     return NULL;
 
   request_ptr->header = TGDB_REQUEST_COMPLETE;
   request_ptr->choice.complete.line = (const char *)
-    xstrdup (line);
+    cgdb_strdup (line);
 
   return request_ptr;
 }

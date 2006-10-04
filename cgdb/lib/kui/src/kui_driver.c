@@ -119,12 +119,12 @@ load_map (const char *line)
       char *key, *value;
 
       size = pmatch[1].rm_eo-pmatch[1].rm_so;
-      key = (char*)xmalloc (sizeof (char)*(size)+1);
+      key = (char*)cgdb_malloc (sizeof (char)*(size)+1);
       strncpy (key, &line[pmatch[1].rm_so], size);
       key[size] = 0;
 
       size = pmatch[2].rm_eo-pmatch[2].rm_so;
-      value = (char*)xmalloc (sizeof (char)*(size)+1);
+      value = (char*)cgdb_malloc (sizeof (char)*(size)+1);
       strncpy (value, &line[pmatch[2].rm_so], size);
       value[size] = 0;
 
@@ -144,7 +144,7 @@ load_map (const char *line)
       char *key, *value;
 
       size = pmatch[1].rm_eo-pmatch[1].rm_so;
-      key = (char*)xmalloc (sizeof (char)*(size)+1);
+      key = (char*)cgdb_malloc (sizeof (char)*(size)+1);
       strncpy (key, &line[pmatch[1].rm_so], size);
       key[size] = 0;
 

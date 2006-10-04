@@ -1,3 +1,8 @@
+10/03/2006 Bob Rossi <bob@brasko.net>
+
+	* src/cgdb.c, src/sources.c, src/cgdbrc.c, src/highlight.c: Replace 
+	xmalloc with cgdb_malloc. Replace xstrdup with cgdb_strdup.
+
 6/10/2006 Bob Rossi <bob@brasko.net>
 
 	* src/cgdb.c (kui_map): Add new global that represents the only

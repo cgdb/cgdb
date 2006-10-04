@@ -1,3 +1,8 @@
+10/03/2006 Bob Rossi <bob@brasko.net>
+
+	* configure.init: AC_CHECK_HEADERS for getopt should not abort.
+	* NEWS: Update with new bug fix.
+
 6/08/2006 Bob Rossi <bob@brasko.net>
 
 	* NEWS: Update with new bug fix.

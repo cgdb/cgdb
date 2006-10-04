@@ -139,7 +139,7 @@ a2_get_tty_name (void *ctx)
  */
 static struct annotate_two *initialize_annotate_two ( void ) {
 	struct annotate_two *a2 = (struct annotate_two *)
-		xmalloc ( sizeof ( struct annotate_two ) );
+		cgdb_malloc ( sizeof ( struct annotate_two ) );
 
 	a2->tgdb_initialized 	= 0;
 	a2->debugger_stdin 		= -1;
@@ -256,7 +256,7 @@ int a2_initialize (
 /* TODO: Implement shutdown properly */
 int a2_shutdown ( void *ctx ) {
 	struct annotate_two *a2 = (struct annotate_two *)ctx;
-    xclose(a2->debugger_stdin);
+    cgdb_close(a2->debugger_stdin);
 
 	data_shutdown ( a2->data );
 	state_machine_shutdown ( a2->sm );
@@ -391,7 +391,7 @@ char *a2_client_modify_breakpoint (
 		const char *file, 
 		int line, 
 		enum tgdb_breakpoint_action b ) {
-	char *val = (char*)xmalloc ( sizeof(char)* ( strlen(file) + 128 ) );
+	char *val = (char*)cgdb_malloc ( sizeof(char)* ( strlen(file) + 128 ) );
 
 	if ( b == TGDB_BREAKPOINT_ADD ) {
 		sprintf ( val, "break %s:%d", file, line );	

@@ -41,7 +41,7 @@ struct globals {
 };
 
 struct globals *globals_initialize ( void ) {
-	struct globals *g = (struct globals *)xmalloc ( sizeof ( struct globals ) );
+	struct globals *g = (struct globals *)cgdb_malloc ( sizeof ( struct globals ) );
 
 	g->info_sources_started = 0;
 	g->completion_started = 0;

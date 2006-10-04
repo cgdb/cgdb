@@ -145,7 +145,7 @@ struct commands
 struct commands *
 commands_initialize (void)
 {
-  struct commands *c = (struct commands *) xmalloc (sizeof (struct commands));
+  struct commands *c = (struct commands *) cgdb_malloc (sizeof (struct commands));
   const char *regex = "[io]n (.*) at (.*):([0-9]+)";
 
   c->absolute_path = ibuf_init ();
@@ -293,7 +293,7 @@ commands_parse_source (struct commands *c,
 	  if (i == 3)
 	    {
 	      int length = strlen (cur + 1);
-	      char *temp = xmalloc (sizeof (char) * (length + 1));
+	      char *temp = cgdb_malloc (sizeof (char) * (length + 1));
 
 	      if (sscanf (cur + 1, "%s", temp) != 1)
 		logger_write_pos (logger, __FILE__, __LINE__,
@@ -315,7 +315,7 @@ commands_parse_source (struct commands *c,
    */
   {
     int length = strlen (copy);
-    char *temp = xmalloc (sizeof (char) * (length + 1));
+    char *temp = cgdb_malloc (sizeof (char) * (length + 1));
 
     if (sscanf (copy, "source %s", temp) != 1)
       logger_write_pos (logger, __FILE__, __LINE__,
@@ -393,12 +393,12 @@ parse_breakpoint (struct commands *c)
     if (pmatch[cur].rm_so != -1)
       {
 	int size = pmatch[cur].rm_eo-pmatch[cur].rm_so;
-	matches[cur] = xmalloc (sizeof (char)*(size)+1);
+	matches[cur] = cgdb_malloc (sizeof (char)*(size)+1);
 	strncpy (matches[cur], &info_ptr[pmatch[cur].rm_so], size);
 	matches[cur][size] = 0;
       }
 
-  tb = (struct tgdb_breakpoint *) xmalloc (sizeof (struct tgdb_breakpoint));
+  tb = (struct tgdb_breakpoint *) cgdb_malloc (sizeof (struct tgdb_breakpoint));
   tb->funcname = matches[1];
   tb->file = matches[2];
   tb->line = atoi (matches[3]);
@@ -441,7 +441,7 @@ commands_set_state (struct commands *c,
 	  logger_write_pos (logger, __FILE__, __LINE__, "parse_breakpoint error");
       {
 	struct tgdb_response *response = (struct tgdb_response *)
-	  xmalloc (sizeof (struct tgdb_response));
+	  cgdb_malloc (sizeof (struct tgdb_response));
 	response->header = TGDB_UPDATE_BREAKPOINTS;
 	response->choice.update_breakpoints.breakpoint_list =
 	  c->breakpoint_list;
@@ -517,9 +517,9 @@ commands_list_command_finished (struct commands *c,
   /* The file does not exist and it can not be opened.
    * So we return that information to the gui.  */
   struct tgdb_source_file *rejected = (struct tgdb_source_file *)
-    xmalloc (sizeof (struct tgdb_source_file));
+    cgdb_malloc (sizeof (struct tgdb_source_file));
   struct tgdb_response *response = (struct tgdb_response *)
-    xmalloc (sizeof (struct tgdb_response));
+    cgdb_malloc (sizeof (struct tgdb_response));
 
   if (c->last_info_source_requested == NULL)
     rejected->absolute_path = NULL;
@@ -554,7 +554,7 @@ commands_send_source_absolute_source_file (struct commands *c,
 	rpath = ibuf_get (c->info_source_relative_path);
 
       response = (struct tgdb_response *)
-	xmalloc (sizeof (struct tgdb_response));
+	cgdb_malloc (sizeof (struct tgdb_response));
       response->header = TGDB_FILENAME_PAIR;
       response->choice.filename_pair.absolute_path = strdup (apath);
       response->choice.filename_pair.relative_path = strdup (rpath);
@@ -564,9 +564,9 @@ commands_send_source_absolute_source_file (struct commands *c,
   else
     {
       struct tgdb_source_file *rejected = (struct tgdb_source_file *)
-	xmalloc (sizeof (struct tgdb_source_file));
+	cgdb_malloc (sizeof (struct tgdb_source_file));
       struct tgdb_response *response = (struct tgdb_response *)
-	xmalloc (sizeof (struct tgdb_response));
+	cgdb_malloc (sizeof (struct tgdb_response));
       response->header = TGDB_ABSOLUTE_SOURCE_DENIED;
 
       if (c->last_info_source_requested == NULL)
@@ -591,9 +591,9 @@ commands_send_source_relative_source_file (struct commands *c,
    * All of its members will need to be freed later.
    */
   struct tgdb_file_position *tfp = (struct tgdb_file_position *)
-    xmalloc (sizeof (struct tgdb_file_position));
+    cgdb_malloc (sizeof (struct tgdb_file_position));
   struct tgdb_response *response = (struct tgdb_response *)
-    xmalloc (sizeof (struct tgdb_response));
+    cgdb_malloc (sizeof (struct tgdb_response));
   tfp->absolute_path = strdup (ibuf_get (c->absolute_path));
   tfp->relative_path = strdup (ibuf_get (c->info_source_relative_path));
   tfp->line_number = atoi (ibuf_get (c->line_number));
@@ -760,7 +760,7 @@ commands_send_gui_sources (struct commands *c, struct tgdb_list *list)
   if (tgdb_list_size (c->inferior_source_files) > 0)
     {
       struct tgdb_response *response = (struct tgdb_response *)
-	xmalloc (sizeof (struct tgdb_response));
+	cgdb_malloc (sizeof (struct tgdb_response));
       response->header = TGDB_UPDATE_SOURCE_FILES;
       response->choice.update_source_files.source_files =
 	c->inferior_source_files;
@@ -777,7 +777,7 @@ commands_send_gui_completions (struct commands *c, struct tgdb_list *list)
    * TGDB_UPDATE_SOURCE_FILES command. */
 /*  if (tgdb_list_size ( c->tab_completions ) > 0)*/
   struct tgdb_response *response = (struct tgdb_response *)
-    xmalloc (sizeof (struct tgdb_response));
+    cgdb_malloc (sizeof (struct tgdb_response));
   response->header = TGDB_UPDATE_COMPLETIONS;
   response->choice.update_completions.completion_list = c->tab_completions;
   tgdb_types_append_command (list, response);
@@ -885,9 +885,9 @@ commands_finalize_command (struct commands *c, struct tgdb_list *list)
       if (c->info_source_ready == 0)
 	{
 	  struct tgdb_source_file *rejected = (struct tgdb_source_file *)
-	    xmalloc (sizeof (struct tgdb_source_file));
+	    cgdb_malloc (sizeof (struct tgdb_source_file));
 	  struct tgdb_response *response = (struct tgdb_response *)
-	    xmalloc (sizeof (struct tgdb_response));
+	    cgdb_malloc (sizeof (struct tgdb_response));
 	  if (c->last_info_source_requested == NULL)
 	    rejected->absolute_path = NULL;
 	  else
@@ -1013,9 +1013,9 @@ commands_create_command (struct commands *c, enum annotate_commands com,
 	    ibuf_add (temp_file_name, data);
 	  }
 	if (data == NULL)
-	  ncom = (char *) xmalloc (sizeof (char) * (16));
+	  ncom = (char *) cgdb_malloc (sizeof (char) * (16));
 	else
-	  ncom = (char *) xmalloc (sizeof (char) * (16 + strlen (data)));
+	  ncom = (char *) cgdb_malloc (sizeof (char) * (16 + strlen (data)));
 	strcpy (ncom, "server list ");
 
 	if (temp_file_name != NULL)
@@ -1061,7 +1061,7 @@ commands_create_command (struct commands *c, enum annotate_commands com,
       {
 	struct ibuf *temp_tty_name = ibuf_init ();
 	ibuf_add (temp_tty_name, data);
-	ncom = (char *) xmalloc (sizeof (char) * (13 + strlen (data)));
+	ncom = (char *) cgdb_malloc (sizeof (char) * (13 + strlen (data)));
 	strcpy (ncom, "server tty ");
 	strcat (ncom, ibuf_get (temp_tty_name));
 	strcat (ncom, "\n");
@@ -1071,7 +1071,7 @@ commands_create_command (struct commands *c, enum annotate_commands com,
 	break;
       }
     case ANNOTATE_COMPLETE:
-      ncom = (char *) xmalloc (sizeof (char) * (18 + strlen (data)));
+      ncom = (char *) cgdb_malloc (sizeof (char) * (18 + strlen (data)));
       strcpy (ncom, "server complete ");
       strcat (ncom, data);
       strcat (ncom, "\n");
@@ -1133,7 +1133,7 @@ commands_issue_command (struct commands *c,
   char *ncom = commands_create_command (c, com, data);
   struct tgdb_command *client_command = NULL;
   enum annotate_commands *nacom =
-    (enum annotate_commands *) xmalloc (sizeof (enum annotate_commands));
+    (enum annotate_commands *) cgdb_malloc (sizeof (enum annotate_commands));
 
   *nacom = com;
 

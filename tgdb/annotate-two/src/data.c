@@ -49,7 +49,7 @@ struct data {
 };
 
 struct data *data_initialize ( void ) {
-	struct data *d = (struct data *)xmalloc ( sizeof ( struct data ) );
+	struct data *d = (struct data *)cgdb_malloc ( sizeof ( struct data ) );
 
 	d->data_state 		= VOID;
 	d->gdb_prompt_size 	= 0;
@@ -92,10 +92,10 @@ void data_set_state ( struct annotate_two *a2, enum internal_state state ) {
 	/* Update the prompt */
 	if (a2->cur_response_list) {
 	  struct tgdb_response *response = (struct tgdb_response *)
-	    xmalloc (sizeof (struct tgdb_response));
+	    cgdb_malloc (sizeof (struct tgdb_response));
 	  response->header = TGDB_UPDATE_CONSOLE_PROMPT_VALUE;
 	  response->choice.update_console_prompt_value.prompt_value = 
-	    xstrdup (a2->data->gdb_prompt_last);
+	    cgdb_strdup (a2->data->gdb_prompt_last);
 	  tgdb_list_append (a2->cur_response_list, response);
 	}
       }

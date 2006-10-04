@@ -64,7 +64,7 @@ struct state_machine {
 };
 
 struct state_machine *state_machine_initialize ( void ) {
-	struct state_machine *sm = (struct state_machine * ) xmalloc ( sizeof ( struct state_machine ) );	
+	struct state_machine *sm = (struct state_machine * ) cgdb_malloc ( sizeof ( struct state_machine ) );	
 
 	sm->tgdb_buffer = ibuf_init ();
 	sm->tgdb_state 	= DATA;

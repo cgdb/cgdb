@@ -1,3 +1,13 @@
+10/03/2006 Bob Rossi <bob@brasko.net>
+
+	* annotate-two/src/a2-tgdb.c, annotate-two/src/commands.c,
+	annotate-two/src/globals.c, annotate-two/src/state_machine.c,
+	annotate-two/src/annotate.c, annotate-two/src/data.c,
+	gdbmi/src/gdbmi_tgdb.c, tgdb/lib/types.c,
+	tgdb-base/src/tgdb_client_interface.c, tgdb-base/src/tgdb_command.c,
+	tgdb-base/src/tgdb.c : Replace xmalloc with cgdb_malloc.
+	Replace xclose with cgdb_close. Replace xstrdup with cgdb_strdup.
+
 version 0.6.3 (03/06/2006):
 
 6/02/2006 Bob Rossi <bob@brasko.net>

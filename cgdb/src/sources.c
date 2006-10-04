@@ -269,9 +269,9 @@ static int load_file(struct list_node *node)
         int i;
         node->buf.length = node->orig_buf.length;
         node->buf.max_width = node->orig_buf.max_width;
-        node->buf.tlines = xmalloc(sizeof(char *) * node->orig_buf.length);
+        node->buf.tlines = cgdb_malloc(sizeof(char *) * node->orig_buf.length);
         for ( i = 0; i < node->orig_buf.length; i++ )
-            node->buf.tlines[i] = xstrdup ( node->orig_buf.tlines[i] );
+            node->buf.tlines[i] = cgdb_strdup ( node->orig_buf.tlines[i] );
     }
 
     /* Allocate the breakpoints array */

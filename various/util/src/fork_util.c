@@ -51,7 +51,7 @@ pty_pair_create (void)
 {
   int val;
   static char local_slavename[SLAVE_SIZE];
-  pty_pair_ptr ptr = (pty_pair_ptr)xmalloc (sizeof (struct pty_pair));
+  pty_pair_ptr ptr = (pty_pair_ptr)cgdb_malloc (sizeof (struct pty_pair));
   if (!ptr)
     return NULL;
 
@@ -76,8 +76,8 @@ pty_pair_destroy (pty_pair_ptr pty_pair)
   if (!pty_pair)
     return -1;
 
-  xclose(pty_pair->masterfd);
-  xclose(pty_pair->slavefd);
+  cgdb_close(pty_pair->masterfd);
+  cgdb_close(pty_pair->slavefd);
 
   if (pty_release (pty_pair->slavename) == -1) {
     logger_write_pos ( logger, __FILE__, __LINE__, "pty_release error");
@@ -118,7 +118,7 @@ pty_pair_get_slavename (pty_pair_ptr pty_pair)
 
 int pty_free_process(int *masterfd, char *sname) {
 
-   xclose(*masterfd);
+   cgdb_close(*masterfd);
 
    if ( pty_release(sname) == -1 ) {
       logger_write_pos ( logger, __FILE__, __LINE__, "pty_release error");
@@ -198,30 +198,30 @@ int invoke_debugger(
 
     /* Copy the argv into the local_argv, and NULL terminate it.
      * sneak in the path name, the user did not type that */
-    local_argv = (char **) xmalloc((malloc_size) * sizeof(char *));
+    local_argv = (char **) cgdb_malloc((malloc_size) * sizeof(char *));
     if ( path )
-        local_argv[j++] = xstrdup(path);
+        local_argv[j++] = cgdb_strdup(path);
     else
-        local_argv[j++] = xstrdup(GDB);
+        local_argv[j++] = cgdb_strdup(GDB);
 
 	/* NOTE: These options have to come first, since if the user
 	 * typed '--args' to GDB, everything at the end of the 
 	 * users options become parameters to the inferior.
 	 */
-    local_argv[j++] = xstrdup(NW);
+    local_argv[j++] = cgdb_strdup(NW);
 
     /* add the init file that the user did not type */    
     if ( choice == 0 )
-      local_argv[j++] = xstrdup(ANNOTATE_TWO);
+      local_argv[j++] = cgdb_strdup(ANNOTATE_TWO);
     else if ( choice == 1 )
-      local_argv[j++] = xstrdup(GDBMI);
+      local_argv[j++] = cgdb_strdup(GDBMI);
 
-    local_argv[j++] = xstrdup(X);
-    local_argv[j++] = xstrdup(F);
+    local_argv[j++] = cgdb_strdup(X);
+    local_argv[j++] = cgdb_strdup(F);
 
     /* copy in all the data the user entered */ 
     for (i = 0; i < argc; i++)
-        local_argv[j++] = xstrdup(argv[i]);
+        local_argv[j++] = cgdb_strdup(argv[i]);
 
     local_argv[j] = NULL;
     

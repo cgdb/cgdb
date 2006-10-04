@@ -428,7 +428,7 @@ command_parse_map (void)
   key = yylex ();
   if (key != IDENTIFIER)
     return -1;
-  key_token = xstrdup (get_token ());
+  key_token = cgdb_strdup (get_token ());
 
 #if 0
   if_print ("KEY=");

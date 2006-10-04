@@ -1,3 +1,13 @@
+10/03/2006 Bob Rossi <bob@brasko.net>
+
+	* include/sys_util.h, src/sys_util.c (xcalloc): Rename to cgdb_calloc.
+	(xmalloc): Rename to cgdb_malloc.
+	(xrealloc): Rename to cgdb_realloc.
+	(xstrdup): Rename to cgdb_strdup.
+	(xclose): Rename to cgdb_xclose.
+	* src/fork_util.c: Replace xmalloc with cgdb_malloc. 
+	Replace xclose with cgdb_close. Replace xstrdup with cgdb_strdup.
+
 6/09/2006 Bob Rossi <bob@brasko.net>
 
 	* src/io.c (io_data_ready): Change #ifdef from HAVE_SELECT to

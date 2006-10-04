@@ -151,7 +151,7 @@ static int handle_error_begin(struct annotate_two *a2, const char *buf, size_t n
     * for the debugged program ) then send a denied response. */
    if ( commands_get_state(a2->c) == INFO_SOURCES ) {
         struct tgdb_response *response = (struct tgdb_response *)
-     	  xmalloc (sizeof (struct tgdb_response));
+     	  cgdb_malloc (sizeof (struct tgdb_response));
 	response->header = TGDB_SOURCES_DENIED;
         tgdb_types_append_command (list, response);
         return 0;
@@ -189,7 +189,7 @@ static int handle_exited(struct annotate_two *a2, const char *buf, size_t n, str
   free ( tmp );
   tmp = NULL;
   response = (struct tgdb_response *)
-    xmalloc (sizeof (struct tgdb_response));
+    cgdb_malloc (sizeof (struct tgdb_response));
   response->header = TGDB_INFERIOR_EXITED;
   response->choice.inferior_exited.exit_status = i;
   tgdb_types_append_command(list, response);

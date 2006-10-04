@@ -1,3 +1,7 @@
+   * Fixed another bug in the configure script. If the getopt.h header
+     file is not available on the system, then CGDB will fail to configure.
+     It should finish, and most likely build successfully.
+   
    * Fixed yet another bug in the auto tools scripts. cgdb-0.6.3 would
      improperly install gdbmi_driver if make was invoked like 
      'make DESTDIR=/foo install'.

@@ -74,7 +74,7 @@ void tgdb_delete_commands(struct queue *q) {
 int tgdb_append_command(struct queue *q, 
                         enum INTERFACE_COMMANDS new_header, 
                         char *buf, char *buf2, char *buf3){
-    struct Command *item = (struct Command *)xmalloc(sizeof(struct Command));
+    struct Command *item = (struct Command *)cgdb_malloc(sizeof(struct Command));
     item->data[0] = '\0';
 
     if(buf != NULL)

@@ -16,7 +16,7 @@ struct tgdb_list {
 struct tgdb_list *tgdb_list_init ( void ) {
 	struct tgdb_list *list;
 
-	list = (struct tgdb_list *)xmalloc ( sizeof ( struct tgdb_list ) );
+	list = (struct tgdb_list *)cgdb_malloc ( sizeof ( struct tgdb_list ) );
 
 	/* Initialize all data members */
 	list->size = 0;
@@ -184,7 +184,7 @@ static void tgdb_list_delete (
 
 static struct tgdb_list_node* tgdb_list_new_node ( void ) {
 	struct tgdb_list_node *node;
-	node = (struct tgdb_list_node *)xmalloc ( sizeof ( struct tgdb_list_node ));
+	node = (struct tgdb_list_node *)cgdb_malloc ( sizeof ( struct tgdb_list_node ));
 
 	node->data = (void*) NULL;
 	node->next = NULL;

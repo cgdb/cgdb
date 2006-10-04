@@ -26,7 +26,7 @@ struct tokenizer {
 };
 
 struct tokenizer *tokenizer_init ( void ) {
-	struct tokenizer *n = ( struct tokenizer * ) xmalloc ( sizeof ( struct tokenizer ) );
+	struct tokenizer *n = ( struct tokenizer * ) cgdb_malloc ( sizeof ( struct tokenizer ) );
 	n->i = ibuf_init ();
 	n->lang = TOKENIZER_LANGUAGE_UNKNOWN;
 	n->tokenizer_lex = NULL;

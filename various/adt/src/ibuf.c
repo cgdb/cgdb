@@ -17,12 +17,12 @@ struct ibuf {
 };
 
 struct ibuf *ibuf_init(void) {
-    struct ibuf *s = (struct ibuf *)xmalloc(sizeof(struct ibuf));
+    struct ibuf *s = (struct ibuf *)cgdb_malloc(sizeof(struct ibuf));
 
     s->BLOCK_SIZE       = 4096;
     s->cur_block_size   = 1;
     s->cur_buf_pos      = 0;
-    s->buf = (char *)xmalloc(sizeof(char)*(s->BLOCK_SIZE));
+    s->buf = (char *)cgdb_malloc(sizeof(char)*(s->BLOCK_SIZE));
     s->buf[s->cur_buf_pos] = '\0';
 
     return s;

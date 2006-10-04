@@ -142,14 +142,14 @@ struct tgdb_gdbmi {
 //	struct annotate_two *a2 = (struct annotate_two *)ctx;
 //
 //	if ( a2->inferior_stdin != -1 )
-//		xclose ( a2->inferior_stdin );
+//		cgdb_close ( a2->inferior_stdin );
 //
 //	a2->inferior_stdin = -1;
 //	a2->inferior_out   = -1;
 //	
 //	/* close tty connection */
 //	if ( a2->inferior_slave_fd != -1 )
-//		xclose ( a2->inferior_slave_fd );
+//		cgdb_close ( a2->inferior_slave_fd );
 //
 //	a2->inferior_slave_fd = -1;
 //
@@ -197,7 +197,7 @@ struct tgdb_gdbmi {
  */
 static struct tgdb_gdbmi *initialize_tgdb_gdbmi ( void ) {
 	struct tgdb_gdbmi *gdbmi = (struct tgdb_gdbmi *)
-		xmalloc ( sizeof ( struct tgdb_gdbmi ) );
+		cgdb_malloc ( sizeof ( struct tgdb_gdbmi ) );
 
 	gdbmi->tgdb_initialized 	= 0;
 	gdbmi->debugger_stdin 		= -1;
@@ -309,7 +309,7 @@ int gdbmi_initialize (
 
 int gdbmi_shutdown ( void *ctx ) {
 	struct tgdb_gdbmi *gdbmi = (struct tgdb_gdbmi *)ctx;
-    xclose(gdbmi->debugger_stdin);
+    cgdb_close(gdbmi->debugger_stdin);
 
 	ibuf_free ( gdbmi->tgdb_cur_output_command );
 	gdbmi->tgdb_cur_output_command = NULL;
@@ -564,7 +564,7 @@ struct tgdb_list *gdbmi_get_client_commands ( void *ctx ) {
 //		const char *file, 
 //		int line, 
 //		enum tgdb_breakpoint_action b ) {
-//	char *val = (char*)xmalloc ( sizeof(char)* ( strlen(file) + 128 ) );
+//	char *val = (char*)cgdb_malloc ( sizeof(char)* ( strlen(file) + 128 ) );
 //
 //	if ( b == TGDB_BREAKPOINT_ADD ) {
 //		sprintf ( val, "break %s:%d", file, line );	

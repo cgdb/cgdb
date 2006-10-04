@@ -16,7 +16,7 @@
 
 #include "sys_util.h"
 
-void *xcalloc(size_t nmemb, size_t size) {
+void *cgdb_calloc(size_t nmemb, size_t size) {
     void *t = calloc(nmemb, size);
     if (t)
         return t;
@@ -24,7 +24,7 @@ void *xcalloc(size_t nmemb, size_t size) {
     exit(-1);
 }
 
-void *xmalloc(size_t size) {
+void *cgdb_malloc(size_t size) {
     void *t = malloc(size);
     if (t)
         return t;
@@ -32,7 +32,7 @@ void *xmalloc(size_t size) {
     exit(-1);
 }
 
-void *xrealloc(void *ptr, size_t size) {
+void *cgdb_realloc(void *ptr, size_t size) {
     void *t = realloc(ptr, size);
     if (t)
         return t;
@@ -40,7 +40,7 @@ void *xrealloc(void *ptr, size_t size) {
     exit(-1);
 }
 
-char *xstrdup(const char *s) {
+char *cgdb_strdup(const char *s) {
     char *t = strdup(s);
     if (t)
         return t;
@@ -48,11 +48,11 @@ char *xstrdup(const char *s) {
     exit(-1);
 }
 
-int xclose(int fd) {
+int cgdb_close(int fd) {
     int ret;
-xclose_start:
+cgdb_close_start:
     if ( ( ret = close(fd)) == -1 && errno == EINTR)
-        goto xclose_start;
+        goto cgdb_close_start;
     else if ( ret == -1 )
         exit(-1);
     

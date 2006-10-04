@@ -25,7 +25,7 @@ tgdb_command_create (const char *tgdb_command_data,
 {
   struct tgdb_command *tc;
 
-  tc = (struct tgdb_command *)xmalloc ( sizeof ( struct tgdb_command ) );
+  tc = (struct tgdb_command *)cgdb_malloc ( sizeof ( struct tgdb_command ) );
 
   if (tgdb_command_data)
     tc->tgdb_command_data = strdup (tgdb_command_data);

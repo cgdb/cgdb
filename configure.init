@@ -77,8 +77,7 @@ AC_CHECK_HEADERS([curses.h],,[AC_MSG_ERROR([CGDB requires curses.h to build.])])
 
 dnl Check for getopt.h, If this is here then getopt_long can be used.
 AC_CHECK_HEADERS([getopt.h],
-		 [AC_DEFINE(HAVE_GETOPT_H, 1, have getopt_long)],
-		 [AC_MSG_ERROR([CGDB requires getopt.h to build.])])
+		 [AC_DEFINE(HAVE_GETOPT_H, 1, have getopt_long)])
 
 dnl determine if /dev/ptmx is available for pseudo terminals
 AC_CHECK_FILE([/dev/ptmx],

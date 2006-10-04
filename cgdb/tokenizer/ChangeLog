@@ -1,3 +1,8 @@
+10/03/2006 Bob Rossi <bob@brasko.net>
+
+	* src/tokenizer.c: Replace xmalloc with cgdb_malloc. Replace xstrdup 
+	with cgdb_strdup.
+
 version 0.6.3 (03/06/2006):
 
 version 0.6.2 (04/09/2006):

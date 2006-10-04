@@ -13,10 +13,10 @@
  * If a memory allocation fails cgdb will exit
  * They act identical to the POSIX calls
  */
-void *xcalloc(size_t nmemb, size_t size);
-void *xmalloc(size_t size);
-void *xrealloc(void *ptr, size_t size);
-char *xstrdup(const char *s);
-int xclose(int fd);
+void *cgdb_calloc(size_t nmemb, size_t size);
+void *cgdb_malloc(size_t size);
+void *cgdb_realloc(void *ptr, size_t size);
+char *cgdb_strdup(const char *s);
+int cgdb_close(int fd);
 
 #endif
