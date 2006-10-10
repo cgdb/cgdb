@@ -58,9 +58,6 @@
 #include "highlight_groups.h"
 
 int sources_syntax_on = 1;
-int auto_source_reload = 0;
-enum ArrowStyle config_arrowstyle = ARROWSTYLE_SHORT;
-extern int highlight_tabstop;
 
 /* --------------- */
 /* Local Functions */
@@ -303,6 +300,8 @@ static void draw_current_line(struct sviewer *sview, int line, int lwidth) {
     int column_offset = 0;              /* Text to skip due to arrow */
     int arrow_attr;
     int highlight_attr;
+    enum ArrowStyle config_arrowstyle = cgdbrc_get (CGDBRC_ARROWSTYLE)->variant.arrow_style;
+    int highlight_tabstop = cgdbrc_get (CGDBRC_TABSTOP)->variant.int_val;
 
     if (hl_groups_get_attr (hl_groups_instance, HLG_ARROW, &arrow_attr) == -1)
       return;
@@ -898,6 +897,7 @@ int source_reload ( struct sviewer *sview, const char *path, int force ) {
     time_t timestamp;
     struct list_node *cur;
     struct list_node *prev = NULL;
+    int auto_source_reload = cgdbrc_get (CGDBRC_AUTOSOURCERELOAD)->variant.int_val;
 
     if ( !path )
         return -1;

@@ -114,9 +114,6 @@ static char regex_line[MAX_LINE];	/* The regex the user enters */
 static int regex_line_pos;	/* The index into the current regex */
 static int regex_search;	/* Currently searching text ? */
 static int regex_direction;	/* Direction to search */
-/*static*/ int regex_icase = 0; /* Case insensitive (0), sensitive */
-/*static*/ int shortcut_option = 0; /* Flag: Shortcut options enabled */
-int config_wrapscan = 1;	/* Wrap around searching */
 
 static char last_key_pressed = 0;	/* Last key user entered in cgdb mode */
 
@@ -881,6 +878,7 @@ capture_regex (struct sviewer *sview)
 {
   int c;
   int orig_line; 
+  int regex_icase = cgdbrc_get (CGDBRC_IGNORECASE)->variant.int_val;
 
   if (!sview || !sview->cur)
     return 0; 
@@ -1074,6 +1072,8 @@ toggle_breakpoint (struct sviewer *sview, enum tgdb_breakpoint_action t)
 static void
 source_input (struct sviewer *sview, int key)
 {
+  int shortcut_option = cgdbrc_get (CGDBRC_SHORTCUT)->variant.int_val;
+
   switch (key)
     {
     case CGDB_KEY_UP:
@@ -1285,6 +1285,9 @@ if_init (void)
 int
 internal_if_input (int key)
 {
+  int regex_icase = cgdbrc_get (CGDBRC_IGNORECASE)->variant.int_val;
+  int shortcut_option = cgdbrc_get (CGDBRC_SHORTCUT)->variant.int_val;
+
   /* The ESC Key, puts the debugger into command mode */
   if (focus != CGDB && key == CGDB_KEY_ESC)
     {

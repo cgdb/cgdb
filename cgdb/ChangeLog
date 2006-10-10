@@ -1,3 +1,35 @@
+10/07/2006 Bob Rossi <bob@brasko.net>
+
+	* include/interface.h (#include cgdbrc.h"): Added.
+	(WIN_SPLIT_TYPE): Moved to cgdbrc.h.
+	* include/cgdbrc.h (#include "tokenizer.h"): Added.
+	(command_parse_string, command_parse_file): Commented and reformated.
+	(enum ArrowStyle, WIN_SPLIT_TYPE, enum cgdbrc_option_kind, struct
+	cgdbrc_config_option, cgdbrc_config_option_ptr): Added types.
+	(cgdbrc_get): Added function.
+	* src/interface.c (regex_icase, shortcut_option, config_wrapscan): 
+	Removed globals.
+	(capture_regex, source_input, internal_if_input): Use cgdbrc_get
+	instead of globals.
+	* src/sources.c (auto_source_reload, config_arrowstyle,
+	highlight_tabstop): Remove globals.
+	(draw_current_line, source_reload): Use cgdbrc_get instead of globals.
+	* src/cgdbrc.c (auto_source_reload, regex_icase, shortcut_option,
+	highlight_tabstop, config_wrapscan, config_arrowstyle): Remove
+	globals.
+	(cgdbrc_config_options): Added new struct to store all config options.
+	(VARIABLES): Removed focus. Modified to use cgdbrc_config_option.
+	(command_do_focus): Added.
+	(COMMANDS): Added focus.
+	(command_set_arrowstyle, command_set_stc,
+	command_set_esc_sequence_timeout, command_set_winsplit,
+	command_set_winminheight, command_set_syntax_type, command_do_focus):
+	Modified for new cgdbrc_config_option.
+	(cgdbrc_get): New function.
+	* src/highlight.c (highlight_tabstop, config_wrapscan): Remove
+	globals.
+	(hl_wprintw, hl_regex): Use cgdbrc_get instead of globals.
+
 10/04/2006 Bob Rossi <bob@brasko.net>
 
 	* src/cgdb.c (parse_long_options): Fix 'd' case. Handle '--' case.

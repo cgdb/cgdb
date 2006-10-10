@@ -33,13 +33,6 @@ extern struct tgdb *tgdb;
  *
  */
 
-extern int auto_source_reload;
-extern int regex_icase ;
-extern int shortcut_option ;
-extern int highlight_tabstop;
-extern int config_wrapscan;
-extern enum ArrowStyle config_arrowstyle;
-
 enum ConfigType
 {
     CONFIG_TYPE_BOOL, /* set ic / set noic */
@@ -59,6 +52,25 @@ static int command_set_syntax_type( const char *value );
 static int command_set_esc_sequence_timeout( int msec );
 static int command_set_stc ( int value );
 
+/**
+ * This data structure stores all the values of all the config options.
+ * It is initialized with the default values.
+ */
+static struct cgdbrc_config_option cgdbrc_config_options[CGDBRC_WRAPSCAN+1] =
+{
+  {CGDBRC_ARROWSTYLE, {ARROWSTYLE_SHORT}},
+  {CGDBRC_AUTOSOURCERELOAD, {0}},
+  {CGDBRC_ESCDELAY, {40}},
+  {CGDBRC_IGNORECASE, {0}},
+  {CGDBRC_SHORTCUT, {0}},
+  {CGDBRC_SHOWTGDBCOMMANDS, {0}},
+  {CGDBRC_SYNTAX, {TOKENIZER_LANGUAGE_UNKNOWN}},
+  {CGDBRC_TABSTOP, {8}},
+  {CGDBRC_WINMINHEIGHT, {0}},
+  {CGDBRC_WINSPLIT, {WIN_SPLIT_EVEN}},
+  {CGDBRC_WRAPSCAN, {1}}
+};
+
 static struct ConfigVariable
 {
     const char *name, *s_name;
@@ -70,20 +82,16 @@ static struct ConfigVariable
     { "arrowstyle", "as", CONFIG_TYPE_FUNC_STRING, command_set_arrowstyle},
 
     /* autosourcereload */  
-    { "autosourcereload", "asr", CONFIG_TYPE_BOOL, &auto_source_reload },
+    { "autosourcereload", "asr", CONFIG_TYPE_BOOL, &cgdbrc_config_options[CGDBRC_AUTOSOURCERELOAD].variant.int_val },
 
     /* escdelay   */
-    { "escdelay", "escdelay", CONFIG_TYPE_FUNC_INT, 
-      command_set_esc_sequence_timeout },
-
-    /* focus      */
-    { "focus", "fo", CONFIG_TYPE_FUNC_STRING, command_set_focus },
+    { "escdelay", "escdelay", CONFIG_TYPE_FUNC_INT, command_set_esc_sequence_timeout },
 
     /* ignorecase */
-    { "ignorecase", "ic", CONFIG_TYPE_BOOL, &regex_icase },
+    { "ignorecase", "ic", CONFIG_TYPE_BOOL, &cgdbrc_config_options[CGDBRC_IGNORECASE].variant.int_val },
 
     /* shortcut   */
-    { "shortcut", "sc", CONFIG_TYPE_BOOL, &shortcut_option },
+    { "shortcut", "sc", CONFIG_TYPE_BOOL, &cgdbrc_config_options[CGDBRC_SHORTCUT].variant.int_val },
 
     /* showtgdbcommands */
     { "showtgdbcommands", "stc", CONFIG_TYPE_FUNC_BOOL, &command_set_stc },
@@ -92,7 +100,7 @@ static struct ConfigVariable
     { "syntax", "syn", CONFIG_TYPE_FUNC_STRING, command_set_syntax_type }, 
 
     /* tabstop   */
-    { "tabstop", "ts", CONFIG_TYPE_INT, &highlight_tabstop },
+    { "tabstop", "ts", CONFIG_TYPE_INT, &cgdbrc_config_options[CGDBRC_TABSTOP].variant.int_val },
 
     /* winminheight */
     { "winminheight", "wmh", CONFIG_TYPE_FUNC_INT, &command_set_winminheight },
@@ -101,7 +109,7 @@ static struct ConfigVariable
     { "winsplit", "winsplit", CONFIG_TYPE_FUNC_STRING, command_set_winsplit }, 
 
     /* wrapscan */
-    { "wrapscan", "ws", CONFIG_TYPE_BOOL, &config_wrapscan },
+    { "wrapscan", "ws", CONFIG_TYPE_BOOL, &cgdbrc_config_options[CGDBRC_WRAPSCAN].variant.int_val },
 };
 
 static int command_focus_cgdb( void );
@@ -111,6 +119,7 @@ static int command_focus_tty( void );
 static int command_do_bang( void );
 static int command_do_continue( void );
 static int command_do_finish( void );
+static int command_do_focus (void);
 static int command_do_help( void );
 static int command_do_next( void );
 static int command_do_quit( void );
@@ -137,6 +146,7 @@ static struct commands
     /* edit        */ { "e",           command_source_reload },
     /* edit        */ { "edit",        command_source_reload },
     /* finish      */ { "finish",      command_do_finish },
+    /* focus      */  { "focus",       command_do_focus },
     /* help        */ { "help",        command_do_help },
     /* highlight   */ { "hi",          command_parse_highlight },
     /* highlight   */ { "highlight",   command_parse_highlight },
@@ -178,92 +188,96 @@ struct ConfigVariable* get_variable( const char *variable )
     return NULL;
 }
 
-int command_set_arrowstyle( const char *value ) {
-
-    if (strcasecmp(value, "short") == 0) {
-        config_arrowstyle = ARROWSTYLE_SHORT;
-    } else if (strcasecmp(value, "long") == 0) {
-        config_arrowstyle = ARROWSTYLE_LONG;
-    } else if (strcasecmp(value, "highlight") == 0) {
-        config_arrowstyle = ARROWSTYLE_HIGHLIGHT;
-    } else {
-        return 1;
-    }
-
-    return 0;
-}
-
-int command_set_focus( const char *value )
+int 
+command_set_arrowstyle (const char *value)
 {
-    if( strcasecmp( value, "cgdb" ) == 0 ) {
-        command_focus_cgdb();
-    } else if (strcasecmp( value, "gdb" ) == 0 ) {
-        command_focus_gdb();
-    } else if( strcasecmp( value, "tty" ) == 0 ) {
-        command_focus_tty();
-    } else {
-        return 1;
-    }
+  if (strcasecmp(value, "short") == 0)
+    cgdbrc_config_options[CGDBRC_ARROWSTYLE].variant.arrow_style = ARROWSTYLE_SHORT;
+  else if (strcasecmp (value, "long") == 0)
+    cgdbrc_config_options[CGDBRC_ARROWSTYLE].variant.arrow_style = ARROWSTYLE_LONG;
+  else if (strcasecmp(value, "highlight") == 0)
+    cgdbrc_config_options[CGDBRC_ARROWSTYLE].variant.arrow_style = ARROWSTYLE_HIGHLIGHT;
+  else
+    return 1;
 
-    return 0;
+  return 0;
 }
 
-static int command_set_stc ( int value ) {
-    if ( (value == 0) || (value == 1) ) 
-        tgdb_set_verbose_gui_command_output ( tgdb, value );
-    else
-        return 1;
+static int 
+command_set_stc (int value)
+{
+  if ((value == 0) || (value == 1)) 
+  {
+    cgdbrc_config_options[CGDBRC_SHOWTGDBCOMMANDS].variant.arrow_style = value;
+    /* TODO: Make this not a member function. */
+    tgdb_set_verbose_gui_command_output (tgdb, value);
+  }
+  else
+    return 1;
 
-    return 0;
+  return 0;
 }
 
 int command_set_esc_sequence_timeout( int msec )
 {
     if ( msec >= 0 && msec <= 10000)
+    {
+	cgdbrc_config_options[CGDBRC_ESCDELAY].variant.int_val = msec;
+	/* TODO: Make this not a member function. */
         return cgdb_set_esc_sequence_timeout ( msec );
-
-    return 0;
-}
-
-int command_set_winsplit( const char *value )
-{
-   if( strcasecmp( value, "top_big" ) == 0 ) {
-      if_set_winsplit( WIN_SPLIT_TOP_BIG );
-   } else if( strcasecmp( value, "top_full" ) == 0 ) {
-      if_set_winsplit( WIN_SPLIT_TOP_FULL );
-   } else if( strcasecmp( value, "bottom_big" ) == 0 ) {
-      if_set_winsplit( WIN_SPLIT_BOTTOM_BIG );
-   } else if( strcasecmp( value, "bottom_full" ) == 0 ) {
-      if_set_winsplit( WIN_SPLIT_BOTTOM_FULL );
-   } else {
-      if_set_winsplit( WIN_SPLIT_EVEN );
-   } /* end if*/
-
-   return 0;
-}
-
-static int command_set_winminheight( int value ) {
-   if ( if_change_winminheight ( value ) == -1 )
-      return -1;
-
-    return 0;
-}
-
-int command_set_syntax_type ( const char *value )
-{
-    enum tokenizer_language_support l = TOKENIZER_LANGUAGE_UNKNOWN;
-
-    if( strcasecmp( value, "c" ) == 0 ) {
-        l = TOKENIZER_LANGUAGE_C;
-    } else if( strcasecmp( value, "ada" ) == 0 ) {
-        l = TOKENIZER_LANGUAGE_ADA;
-    } else if( strcasecmp( value, "off" ) == 0 ) {
-        l = TOKENIZER_LANGUAGE_UNKNOWN;
     }
-    
-    if_highlight_sviewer ( l );
 
     return 0;
+}
+
+int
+command_set_winsplit (const char *value)
+{
+  WIN_SPLIT_TYPE split_type = WIN_SPLIT_EVEN;
+
+  if (strcasecmp (value, "top_big") == 0)
+    split_type = WIN_SPLIT_TOP_BIG;
+  else if (strcasecmp (value, "top_full") == 0)
+    split_type = WIN_SPLIT_TOP_FULL;
+  else if (strcasecmp (value, "bottom_big") == 0)
+    split_type = WIN_SPLIT_BOTTOM_BIG;
+  else if (strcasecmp (value, "bottom_full") == 0)
+    split_type = WIN_SPLIT_BOTTOM_FULL;
+  else
+    split_type = WIN_SPLIT_EVEN;
+
+  cgdbrc_config_options[CGDBRC_WINSPLIT].variant.win_split_val = split_type;
+  if_set_winsplit (split_type);
+
+  return 0;
+}
+
+static int 
+command_set_winminheight (int value)
+{
+  if (if_change_winminheight (value) == -1)
+    return -1;
+
+  cgdbrc_config_options[CGDBRC_WINMINHEIGHT].variant.int_val = value;
+
+  return 0;
+}
+
+int 
+command_set_syntax_type (const char *value)
+{
+  enum tokenizer_language_support lang;
+  if (strcasecmp (value, "c") == 0)
+    lang = TOKENIZER_LANGUAGE_C;
+  else if( strcasecmp( value, "ada" ) == 0 )
+    lang = TOKENIZER_LANGUAGE_ADA;
+  else if( strcasecmp( value, "off" ) == 0 )
+    lang = TOKENIZER_LANGUAGE_UNKNOWN;
+    
+  cgdbrc_config_options[CGDBRC_SYNTAX].variant.language_support_val = lang;
+  if_highlight_sviewer (lang);
+
+  return 0;
 }
 
 int command_focus_cgdb( void )
@@ -309,6 +323,28 @@ int command_do_finish( void )
     handle_request (tgdb, request_ptr);
 
     return 0;
+}
+
+int 
+command_do_focus (void)
+{
+  int token = yylex ();
+  const char *value;
+
+  if (token != IDENTIFIER)
+    return 1;
+  value = get_token ();
+
+  if (strcasecmp (value, "cgdb") == 0)
+    command_focus_cgdb();
+  else if (strcasecmp (value, "gdb") == 0)
+    command_focus_gdb();
+  else if (strcasecmp (value, "tty") == 0)
+    command_focus_tty();
+  else
+    return 1;
+
+  return 0;
 }
 
 int command_do_help( void )
@@ -673,4 +709,10 @@ int command_parse_file( FILE *fp )
     }
 
     return 0;
+}
+
+cgdbrc_config_option_ptr 
+cgdbrc_get (enum cgdbrc_option_kind option)
+{
+  return &cgdbrc_config_options[option];
 }
