@@ -1,3 +1,8 @@
+12/27/2006 Bob Rossi <bob@brasko.net>
+
+	* src/kui.c (kui_manager_cangetkey): Check the terminal_keys buffer
+	too.
+
 10/03/2006 Bob Rossi <bob@brasko.net>
 
 	* src/kui_driver.c: Replace xmalloc with cgdb_malloc.

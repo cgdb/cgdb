@@ -1167,12 +1167,23 @@ int kui_manager_add_map_set (
 	return kui_add_map_set ( kuim->normal_keys, kui_ms );
 }
 
-int kui_manager_cangetkey ( struct kui_manager *kuim ) {
+int 
+kui_manager_cangetkey (struct kui_manager *kuim)
+{
+  if (!kuim)
+    return -1;
 
-	if ( !kuim )
-		return -1;
-
-	return kui_cangetkey ( kuim->normal_keys );
+  /* I'm not sure if checking the terminal keys here is the best solution.
+   *
+   * It might make more sense to flow the extra characters read from during
+   * the terminal keys processing up to the normal keys buffer after a 
+   * mapping is found.
+   *
+   * For now this seems to work. Essentially, the next read get's the buffered 
+   * terminal keys first which is what should happen anyways.
+   */
+  return kui_cangetkey (kuim->terminal_keys) || 
+	 kui_cangetkey (kuim->normal_keys);
 }
 
 int kui_manager_getkey ( struct kui_manager *kuim ) {

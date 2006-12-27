@@ -319,3 +319,13 @@ expect {
     fail "timeout $test"
   }
 }
+
+# Test previously broken functionality
+set test "key not detected until next key hit"
+send "\033o"
+expect {
+  -re "CGDB_KEY_ESCo${kui_prompt}$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}

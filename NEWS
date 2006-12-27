@@ -1,3 +1,7 @@
+   * Fixed a bug in libkui. If the user quickly typed ESC followed
+     by an 'o' while in the GDB window, the 'o' character would not
+     get processed by CGDB until another character was hit.
+
    * CGDB has improved it's -d (Set debugger to use) command line 
      option. CGDB used to force the user to have a space between the 
      -d and the debugger to use, like "cgdb -d /usr/bin/gdb". Now the 

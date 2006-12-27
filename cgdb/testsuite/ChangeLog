@@ -1,3 +1,7 @@
+12/27/2006 Bob Rossi <bob@brasko.net>
+
+	* kui.base/basic.exp: Add a regression test.
+
 7/26/2006 Bob Rossi <bob@brasko.net>
 
 	* Add initial testsuite.
