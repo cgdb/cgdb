@@ -161,30 +161,27 @@ static int command_parse_map (void);
 typedef int (*action_t)(void);
 static struct commands
 {
-    const char *name;
+    const char *name, *s_name;
     /* these functions will return 0 on success and 1 on error.  */
     /* Should the configuration file processing continue after an error?*/
     action_t action;
 } COMMANDS[] = {
     /* keep this stuff sorted, you can use !sort in vi*/
-    /* bang        */ { "bang",        command_do_bang },
-    /* continue    */ { "continue",    command_do_continue },
-    /* edit        */ { "e",           command_source_reload },
-    /* edit        */ { "edit",        command_source_reload },
-    /* finish      */ { "finish",      command_do_finish },
-    /* focus      */  { "focus",       command_do_focus },
-    /* help        */ { "help",        command_do_help },
-    /* highlight   */ { "hi",          command_parse_highlight },
-    /* highlight   */ { "highlight",   command_parse_highlight },
-    /* insert      */ { "insert",      command_focus_gdb },
-    /* map         */ { "map",         command_parse_map },
-    /* next        */ { "next",        command_do_next },
-    /* q           */ { "q",           command_do_quit },
-    /* quit        */ { "quit",        command_do_quit },
-    /* run         */ { "run",         command_do_run },
-    /* shell       */ { "shell",       command_do_shell },
-    /* step        */ { "step",        command_do_step },
-    /* syntax      */ { "syntax",      command_parse_syntax },
+    /* bang        */ { "bang",        "bang",	    command_do_bang },
+    /* continue    */ { "continue",    "continue",  command_do_continue },
+    /* edit        */ { "edit",        "e",	    command_source_reload },
+    /* finish      */ { "finish",      "finish",    command_do_finish },
+    /* focus      */  { "focus",       "focus",	    command_do_focus },
+    /* help        */ { "help",        "help",	    command_do_help },
+    /* highlight   */ { "highlight",   "hi",	    command_parse_highlight },
+    /* insert      */ { "insert",      "insert",    command_focus_gdb },
+    /* map         */ { "map",         "map",	    command_parse_map },
+    /* next        */ { "next",        "next",	    command_do_next },
+    /* quit        */ { "quit",        "q",	    command_do_quit },
+    /* run         */ { "run",         "run",	    command_do_run },
+    /* shell       */ { "shell",       "sh",	    command_do_shell },
+    /* step        */ { "step",        "step",	    command_do_step },
+    /* syntax      */ { "syntax",      "syntax",    command_parse_syntax },
 };
 
 action_t get_command( const char *cmd )
@@ -192,7 +189,8 @@ action_t get_command( const char *cmd )
     /* FIXME: replace with binary search */
     int i;
     for ( i = 0; i < (sizeof( COMMANDS )/sizeof( COMMANDS[0] )); ++i ) {
-        if ( strcmp( cmd, COMMANDS[i].name ) == 0 ) {
+        if ( strcmp( cmd, COMMANDS[i].name ) == 0 ||
+             strcmp( cmd, COMMANDS[i].s_name ) == 0) {
             return COMMANDS[i].action;
         }
     }

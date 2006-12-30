@@ -1,4 +1,9 @@
 12/29/2006 Bob Rossi <bob@brasko.net>
+      
+	* src/cgdbrc.c (COMMANDS): Add s_name field.
+	(get_command): Search s_name field, as well as name field.
+
+12/29/2006 Bob Rossi <bob@brasko.net>
 
 	* include/cgdb.h (cgdb_set_esc_sequence_timeout): Removed.
 	* include/cgdbrc.h (brief): Improve documentation.
