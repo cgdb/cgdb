@@ -1,3 +1,7 @@
+   * Removed the escdelay option. It has been replaced by the 
+     timeout, timeoutlen, ttimeout and ttimeoutlen options. Please
+     see the CGDB manual for more documentation on these options.
+
    * Fixed a bug in libkui. If the user quickly typed ESC followed
      by an 'o' while in the GDB window, the 'o' character would not
      get processed by CGDB until another character was hit.

@@ -1,3 +1,32 @@
+12/29/2006 Bob Rossi <bob@brasko.net>
+
+	* include/cgdb.h (cgdb_set_esc_sequence_timeout): Removed.
+	* include/cgdbrc.h (brief): Improve documentation.
+	(cgdbrc_option_kind): Remove CGDBRC_ESCDELAY, add CGDBRC_TIMEOUT,
+	CGDBRC_TIMEOUT_LEN, CGDBRC_TTIMEOUT, CGDBRC_TTIMEOUT_LEN.
+	(cgdbrc_notify, cgdbrc_attach, cgdbrc_detach): Add.
+	(cgdbrc_attach): Add paramater to return handle.
+	(cgdbrc_get_key_code_timeoutlen, cgdbrc_get_mapped_key_timeoutlen):
+	Add.
+	* src/cgdb.c (update_kui, init_kui): Added.
+	(main): Call init_kui, and remove code in main that originaly did
+	this.
+	* src/cgdbrc.c (#include "std_list.h"): Added.
+	(command_set_timeout, command_set_timeoutlen, command_set_ttimeout,
+	command_set_ttimeoutlen, cgdbrc_set_val): Added.
+	(command_set_esc_sequence_timeout): Removed.
+	(cgdbrc_config_options): Remove CGDBRC_ESCDELAY, add CGDBRC_TIMEOUT,
+	CGDBRC_TIMEOUT_LEN, CGDBRC_TTIMEOUT, CGDBRC_TTIMEOUT_LEN.
+	(VARIABLES): Ditto.
+	(cgdbrc_attach_list, cgdbrc_attach_handle, cgdbrc_attach_item): Added.
+	(command_set_arrowstyle, command_set_stc, command_set_winsplit,
+	command_set_winminheight, command_set_syntax_type): Use
+	cgdbrc_set_val.
+	(destroy_notify, cgdbrc_attach, cgdbrc_detach,
+	cgdbrc_get_key_code_timeoutlen, cgdbrc_get_mapped_key_timeoutlen):
+	Added.
+
+
 10/07/2006 Bob Rossi <bob@brasko.net>
 
 	* include/interface.h (#include cgdbrc.h"): Added.

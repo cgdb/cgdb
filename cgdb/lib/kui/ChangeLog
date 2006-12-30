@@ -1,3 +1,13 @@
+12/29/2006 Bob Rossi <bob@brasko.net>
+
+	* src/kui_driver.c (main): Init kui manager with default time outs.
+	* src/kui.c (kui_manager_create): Add parameters keycode_timeout and
+	mapping_timeout.
+	(kui_manager_set_key_mapping_timeout): Added.
+	* inc/kui.h (kui_manager_create):  Add parameters keycode_timeout and
+	mapping_timeout.
+	(kui_manager_set_key_mapping_timeout): Added.
+
 12/27/2006 Bob Rossi <bob@brasko.net>
 
 	* src/kui.c (kui_manager_cangetkey): Check the terminal_keys buffer

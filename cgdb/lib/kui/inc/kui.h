@@ -419,11 +419,19 @@ struct kui_manager;
  *
  * \param stdinfd 
  * The descriptor to read from when looking for the next char
+ * 
+ * \param keycode_timeout
+ * The timeout to use while waiting to match a keyboard code.
+ *
+ * \param mapping_timeout
+ * The timeout to use while waiting to match a mapping sequence.
  *
  * @return
  * A new instance on success, or NULL on error. 
  */
-struct kui_manager *kui_manager_create(int stdinfd );
+struct kui_manager *kui_manager_create (int stdinfd, 
+					unsigned int keycode_timeout,
+					unsigned int mapping_timeout);
 
 /**
  * Destroys a kui context
@@ -503,12 +511,12 @@ int kui_manager_cangetkey ( struct kui_manager *kuim );
 int kui_manager_getkey ( struct kui_manager *kuim );
 
 /**
- * Set's the terminal escape seqeunce time out value.
+ * Set's the terminal escape sequence time out value.
  * This is used to tell CGDB how long to block when looking to match terminal
  * escape sequences. For instance, in order to get F11, Maybe it's necessary
  * for the charachters 27(ESC) 80(P) 81(Q) to get sent. So, if the user types 
- * these * within msec each, then CGDB_KEY_F11 get's returned, otherwise the 
- * key's * are returned as typed.
+ * these within msec each, then CGDB_KEY_F11 get's returned, otherwise the 
+ * key's are returned as typed.
  *
  * \param kuim
  * The kui context
@@ -521,6 +529,23 @@ int kui_manager_getkey ( struct kui_manager *kuim );
  * 0 on success, or -1 on error.
  */
 int kui_manager_set_terminal_escape_sequence_timeout ( 
+		struct kui_manager *kuim, 
+		unsigned int msec );
+
+/**
+ * Set's the timeout that will be used when matching a mapping.
+ *
+ * \param kuim
+ * The kui context
+ *
+ * \param msec
+ * The maximum number of milliseconds to block while waiting to complete a 
+ * mapping sequence.
+ *
+ * \return
+ * 0 on success, or -1 on error.
+ */
+int kui_manager_set_key_mapping_timeout ( 
 		struct kui_manager *kuim, 
 		unsigned int msec );
 /*@}*/

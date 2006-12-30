@@ -59,6 +59,7 @@ Software Foundation raise funds for GNU development.''
 * Controlling CGDB::            CGDB commands
 * Configuring CGDB::            CGDB configuration commands
 * Highlighting Groups::         CGDB highlighting groups
+* Key User Interface::          CGDB key user interface
 * Sending I/O to Inferior::     Sending I/O to the program being debugged
 * Terminal Control Flow::       Allowing terminal control flow in CGDB
 
@@ -595,16 +596,6 @@ the timestamp of the source file to determine if it has changed. So if
 you modify the source file, and didn't recompile yet, CGDB will still 
 pick up on the changes.
 
-@item :set escdelay=@var{delay}
-Set the length of time to wait before timing out and treating the @key{ESC}
-keystroke as the @key{ESC} character rather than combining it with other 
-characters in the buffer to create a key sequence.  The variable is 
-measured in milli seconds.  If @var{delay} is 0, the system immediately 
-composes the ESCAPE response without waiting for more information 
-from the buffer.  @var{delay} may be any value between 0 and 10000, 
-inclusive.  The default setting for the @var{delay} variable is 
-40 (forty hundredths of a second).
-
 @item :set ic
 @itemx :set ignorecase
 Sets searching case insensitive.  The default is off.
@@ -628,6 +619,49 @@ Sets the current highlighting mode of the current file to have the syntax
 automatically detects what syntax a file should be based on its file 
 extension.  However, this feature can currently be useful for debugging 
 purposes.
+
+@item :set to
+@itemx :set timeout
+This option is used along with the @var{ttimeout} option to determine the 
+behavior CGDB should have when it receives part of a mapped key sequence or 
+a keyboard code sequence.  If this option is on, CGDB will time out on both
+user defined mappings and on key codes from the keyboard.  If this option 
+is off, user defined mappings will not be timed out on.  In this case, CGDB
+will determine if it should time out on key codes from the keyboard by
+examining the @var{ttimeout} option.  To determine how CGDB will time out
+on mappings and key codes, and what time out lengths CGDB will use, please 
+refer to the chart in @ref{Key User Interface}.  The default value for this
+option is on.
+
+@item :set tm=@var{delay}
+@itemx :set timeoutlen=@var{delay}
+This option is used along with the @var{ttimeoutlen} option.  It 
+represents the number of milliseconds that CGDB should wait for a key code
+from the keyboard or for a mapped key sequence to complete.  If @var{delay} is 
+0, CGDB immediately accepts each character it receives.  This will prevent any
+mappings or key codes to complete.  @var{delay} may be any value between 
+0 and 10000, inclusive.  The default setting for the @var{delay} variable is 
+1000 (one second).
+
+@item :set ttimeout
+This option is used along with the @var{timeout} option to determine the 
+behavior CGDB should have when it receives part of keyboard code sequence.  
+If this option is on, CGDB will time out on key codes from the keyboard.  If
+this option is off, CGDB will determine if it should time out on key codes
+from the keyboard by examining the @var{timeout} option.  To determine how
+CGDB will time out on key codes, what what time length it will use, please
+refer to the chart in @ref{Key User Interface}.  The default value for this 
+option is on.
+
+
+@item :set ttm=@var{delay}
+@itemx :set ttimeoutlen=@var{delay}
+This option is used along with the @var{ttimeoutlen} option.  It 
+represents the number of milliseconds that CGDB should wait for a key code
+from the keyboard.  If @var{delay} is 0, CGDB immediately accepts each character 
+it receives.  This will prevent any key codes to complete.  @var{delay} may 
+be any value between 0 and 10000, inclusive.  The default setting for the 
+@var{delay} variable is 100 (one tenth of a second).
 
 @item :set ts=@var{number}
 @itemx :set tabstop=@var{number}
@@ -899,6 +933,117 @@ function init_pair() to ask curses to create a new color.
 @tab 7
 @tab Yes
 @end multitable
+
+@node Key User Interface
+@chapter CGDB key user interface
+@cindex CGDB key user interface
+
+The Key User Interface is how CGDB receives input from the user.  It is 
+usually referred to as the @dfn{KUI}.  CGDB simply asks the KUI for the next 
+key the user typed and the KUI will provide it.  
+
+The KUI has 2 major responsibilities besides reading normal user input 
+and providing it to CGDB.  It needs to detect when the user has typed a 
+user defined macro or when the user has hit a special key on the keyboard.
+
+A user defined macro, or simply @dfn{macro}, is used to change the meaning
+of typed keys.  This can also be refered to as a @dfn{map}.  An example would 
+be @code{map a b}.  If the user then typed the @key{a} character, the KUI 
+would detect that it was mapped to @key{b} and return @key{b} to CGDB.
+
+When the user types a special key on the keyboard, a @dfn{key code} is
+sent to CGDB.  Typically, keys like  @kbd{HOME}, @kbd{DEL}, @key{F1}, etc,
+when pressed will send several characters to the application instead of just
+one character like a normal key does.  These characters combined are called a
+@dfn{key sequence}.  The KUI is responsible for assembling the key sequences 
+back together and reporting to CGDB that a particular key was typed by the 
+user.  The @kbd{ESC} key is special because typically most key codes start with 
+that key.  This usually gives all key codes a common first key in its key 
+sequence.  The KUI uses the terminfo database to determine what key sequences 
+are sent by which special keys.  There are a few commonly used key sequences 
+that are hard coded into CGDB.
+
+A major challenge the KUI has to overcome is determining when a macro or a 
+key sequence is received.  The KUI sometimes will need to read more than
+one character to determine this.  For example, if the user has 2 maps, 
+@code{map abc def} and @code{map abd def}, the KUI would have to buffer at 
+least the characters @key{a} and @key{b} before it could determine if the 
+user was going to type a macro.  After the next key press, if the user types 
+@key{c} or @key{d} then a map was received and the KUI will return 
+@kbd{d e f} to CGDB.  Otherwise, no map was received and the KUI must return 
+@kbd{a b} to CGDB.
+
+The options @var{timeout}, @var{ttimeout}, @var{timeoutlen} and 
+@var{ttimeoutlen} can be used to tell the KUI if it should timeout on
+partial mappings or key sequences, and if so, how long it should wait before
+timing out.  
+
+@menu
+* Configuring the KUI Time Out Options::        The KUI's time out options.
+@end menu
+
+@node Configuring the KUI Time Out Options
+@section The KUI's time out options.
+@cindex timeout
+@cindex ttimeout
+@cindex timeoutlen
+@cindex ttimeoutlen
+
+The KUI may be configured to time out on either macros or key sequences.
+
+When the KUI is matching a partial macro or key sequence it is capable
+of timing out.  This means it will simply accepts the keys it has received so 
+far if a certain amount of time elapses between key presses.  This is 
+obvious when the user is typing a macro because the user must press each key
+individually.  For partial key sequences, this is less obvious.  That is 
+because the user only presses a single key, but multiple characters are sent 
+to the KUI.  The table below describes how the user can configure the KUI
+to time out on key codes or macros.  The @var{timeout} and @var{ttimeout}
+options control this functionality.
+
+@multitable @columnfractions .15 .15 .45
+@headitem timeout @tab ttimeout @tab action
+@item off
+@tab off
+@tab do not time out
+@item on
+@tab on or off
+@tab time out on macros and key codes
+@item off
+@tab on
+@tab time out on key codes
+@end multitable
+
+It is also possible to tell the KUI how long to wait before timing out on 
+a partial match.  If @var{timeout} is on, then the KUI will wait a certain
+amount of time for the next character, when matching a map, before it 
+decides a match is no longer possible.  If @var{timeout} or 
+@var{ttimeout} is on, then the KUI will wait a certain amount of time for 
+the next character, when matching a key sequence, before it decides a 
+match is no longer possible.  The @var{timeoutlen} and @var{ttimeoutlen}
+options can be configured by the user to tell the KUI how long to wait
+before timing out.  The table below describes when the KUI uses which 
+option.
+
+@multitable @columnfractions .15 .2 .2
+@headitem timeoutlen @tab mapping delay @tab key code delay
+@item < 0
+@tab @var{timeoutlen}
+@tab @var{timeoutlen}
+@item >= 0
+@tab @var{timeoutlen}
+@tab @var{ttimeoutlen}
+@end multitable
+
+A value of 0 means that the KUI will time out right away.  It will not be 
+possible to match a macro or key code in this circumstance.
+
+A common problem could be that when the user types a special key like 
+the left or right arrows, CGDB will go into the source mode and not 
+perform the action requested by the user.  This typically means that the
+key code delay is to small.  If you try setting the option 
+@code{set ttimeoutlen=1000} CGDB should start acting like the user expects.
+If not, please report this to the CGDB mailing list.
 
 @node Sending I/O to Inferior
 @chapter Sending I/O to the program being debugged

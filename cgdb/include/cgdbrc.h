@@ -20,8 +20,21 @@
  *
  * \brief
  * An interface for dealing with config parameters. A client can determine
- * the value of a configuration option by calling cgdbrc_get.
+ * the value of a configuration option by calling cgdbrc_get. A client can
+ * also ask to be notified when a particular option is changed. This gives
+ * them two benefits. They can determine if the new value the user is trying
+ * to set the option to is valid, and they can be kept up to date when
+ * the option is changed.
+ *
+ * This package is currently not context driven. That is because at this
+ * point there is only need for one cgdbrc package. Feel free to make
+ * a 'struct cgdbrc' if it's needed in the future.
+ *
+ * Also, the higlight_group package is really part of the configuration too.
+ * Feel free to integrate the two files somehow.
  */
+
+// Parse options {{{
 
 /** 
  * Parse a string of command data and execute the commands that it represents.
@@ -45,6 +58,10 @@ int command_parse_string (const char *buffer);
  * Currently only returns 0.
  */
 int command_parse_file (FILE * fp);
+
+// }}}
+
+// Options types {{{
 
 /** 
  * The different ways to highlight the current line the debugger is at.
@@ -74,12 +91,15 @@ enum cgdbrc_option_kind
 {
   CGDBRC_ARROWSTYLE,
   CGDBRC_AUTOSOURCERELOAD,
-  CGDBRC_ESCDELAY,
   CGDBRC_IGNORECASE,
   CGDBRC_SHORTCUT,
   CGDBRC_SHOWTGDBCOMMANDS,
   CGDBRC_SYNTAX,
   CGDBRC_TABSTOP,
+  CGDBRC_TIMEOUT,
+  CGDBRC_TIMEOUT_LEN,
+  CGDBRC_TTIMEOUT,
+  CGDBRC_TTIMEOUT_LEN,
   CGDBRC_WINMINHEIGHT,
   CGDBRC_WINSPLIT,
   CGDBRC_WRAPSCAN
@@ -94,7 +114,6 @@ struct cgdbrc_config_option
     /* option_kind == CGDBRC_ARROWSTYLE */
     enum ArrowStyle arrow_style;
     /* option_kind == CGDBRC_AUTOSOURCERELOAD */
-    /* option_kind == CGDBRC_ESCDELAY */
     /* option_kind == CGDBRC_IGNORECASE */
     /* option_kind == CGDBRC_SHORTCUT */
     /* option_kind == CGDBRC_SHOWTGDBCOMMANDS */
@@ -113,9 +132,12 @@ struct cgdbrc_config_option
   } variant;
 };
 
+// }}}
+
+// Attach/Detach options {{{
+
 typedef struct cgdbrc_config_option *cgdbrc_config_option_ptr;
 
-#if 0
 /**
  * If the notify function fails, this tells the configuration package
  * that the option was not acceptable. The option will not be kept.
@@ -125,27 +147,46 @@ typedef struct cgdbrc_config_option *cgdbrc_config_option_ptr;
  * new values, but want to validate the values, in order to not tightly
  * couple the config reader with the other parts of CGDB.
  */
-typedef int (*cgdbrc_notify) (struct cgdbrc_config_option * option);
+typedef int (*cgdbrc_notify) (cgdbrc_config_option_ptr option);
 
 /**
  * This will attach a new callback function for a particular option.
- * The client will be notified when the value is changed, and also
- * on program startup.
+ * The client will be notified when the value is changed.
+ * The handle returned from this function should be used if the 
+ * client ever wishes to disable the callback function from being called when 
+ * an option is changed.
  *
  * \param option
  * The new option to attach a callback to.
  *
  * \param notify
  * The callback function to call when the state of the data changes.
+ * 
+ * \param handle
+ * The unique identifier to use when detaching this notification
+ * If the handle is passed in as NULL, it will not be set on the way out. This
+ * callback can never be removed.
  *
  * \return
- * 0 on success, or -1 on error.
+ * 0 on success or -1 on error
  */
-int cgdbrc_attach (enum cgdbrc_option_kind option, cgdbrc_notify notify);
+int cgdbrc_attach (enum cgdbrc_option_kind option, cgdbrc_notify notify, int *handle);
 
-/* NOTE: There is currently no need to detach, when this becomes necessary,
- * you'll have to add the functionality. */
-#endif
+/**
+ * This will detach a notify function so that it will no longer be called
+ * when an option is updated.
+ *
+ * \param handle
+ * The value returned from cgdbrc_attach when the notify request was made.
+ *
+ * \return
+ * 0 on success, -1 if it couldn't be detached (error)
+ */
+int cgdbrc_detach (int handle);
+
+// }}}
+
+// Get options {{{
 
 /**
  * Get a configuration option.
@@ -159,5 +200,27 @@ int cgdbrc_attach (enum cgdbrc_option_kind option, cgdbrc_notify notify);
  * to the option asked for is returned.
  */
 cgdbrc_config_option_ptr cgdbrc_get (enum cgdbrc_option_kind option);
+
+/**
+ * A convience function for determining the timeout that should be used to
+ * allow a key code sequence to complete. This function can not fail.
+ *
+ * \return
+ * The number of milliseconds to delay before timing out. If 0, then do not 
+ * timeout.
+ */
+int cgdbrc_get_key_code_timeoutlen (void);
+
+/**
+ * A convience function for determining the timeout that should be used to
+ * allow a mapped key sequence to complete. This function can not fail.
+ *
+ * \return
+ * The number of milliseconds to delay before timing out. If 0, then do not 
+ * timeout.
+ */
+int cgdbrc_get_mapped_key_timeoutlen (void);
+
+// }}}
 
 #endif /* __CGDBRC_H__ */

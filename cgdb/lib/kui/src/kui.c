@@ -1097,7 +1097,9 @@ int kui_callback (
 	return 1;
 }
 
-struct kui_manager *kui_manager_create(int stdinfd ) {
+struct kui_manager *
+kui_manager_create (int stdinfd, unsigned int keycode_timeout, unsigned int mapping_timeout)
+{
 	struct kui_manager *man;
 
 	man = ( struct kui_manager* )malloc ( sizeof ( struct kui_manager ) );
@@ -1106,7 +1108,7 @@ struct kui_manager *kui_manager_create(int stdinfd ) {
 		return NULL;
 
 	man->normal_keys = NULL;
-	man->terminal_keys = kui_create ( stdinfd, char_callback, 40, NULL );
+	man->terminal_keys = kui_create ( stdinfd, char_callback, keycode_timeout, NULL );
 
 	if ( !man->terminal_keys ) {
 		kui_manager_destroy ( man );
@@ -1118,7 +1120,7 @@ struct kui_manager *kui_manager_create(int stdinfd ) {
 		return NULL;
 	}
 
-	man->normal_keys = kui_create ( -1, kui_callback, 1000, man->terminal_keys );
+	man->normal_keys = kui_create ( -1, kui_callback, mapping_timeout, man->terminal_keys );
 
 	if ( !man->normal_keys ) {
 		kui_manager_destroy ( man );
@@ -1201,6 +1203,15 @@ int kui_manager_set_terminal_escape_sequence_timeout (
 		return -1;
 
 	return kui_set_blocking_ms ( kuim->terminal_keys, msec );
+}
+
+int 
+kui_manager_set_key_mapping_timeout (struct kui_manager *kuim, unsigned int msec)
+{
+  if (!kuim)
+    return -1;
+
+  return kui_set_blocking_ms (kuim->normal_keys, msec);
 }
 
 /* }}} */

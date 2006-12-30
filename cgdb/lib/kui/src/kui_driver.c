@@ -420,7 +420,7 @@ main (int argc, char **argv)
   raw ();
   refresh ();
 
-  manager = kui_manager_create (STDIN_FILENO);
+  manager = kui_manager_create (STDIN_FILENO, 40, 1000);
 
   create_mappings (manager);
 

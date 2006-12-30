@@ -1503,6 +1503,56 @@ create_and_init_pair ()
 }
 
 int
+update_kui (cgdbrc_config_option_ptr option)
+{
+  kui_manager_set_terminal_escape_sequence_timeout (kui_ctx, cgdbrc_get_key_code_timeoutlen ());
+  kui_manager_set_key_mapping_timeout (kui_ctx, cgdbrc_get_mapped_key_timeoutlen ());
+
+  return 0;
+}
+
+int
+init_kui (void)
+{
+  kui_ctx = kui_manager_create (STDIN_FILENO, cgdbrc_get_key_code_timeoutlen (),
+					      cgdbrc_get_mapped_key_timeoutlen ());
+  if (!kui_ctx)
+    {
+      logger_write_pos (logger, __FILE__, __LINE__,
+			"Unable to initialize input library");
+      cleanup ();
+      exit (-1);
+    }
+
+  kui_map = kui_ms_create ();
+  if (!kui_map)
+    {
+      logger_write_pos (logger, __FILE__, __LINE__,
+			"Unable to initialize input library");
+      cleanup ();
+      exit (-1);
+    }
+
+  if (kui_manager_add_map_set (kui_ctx, kui_map) == -1)
+    {
+      logger_write_pos (logger, __FILE__, __LINE__,
+			"Unable to initialize input library");
+      cleanup ();
+      exit (-1);
+    }
+
+  /* Combine the cgdbrc config package with libkui. If any of the options
+   * below change, update the KUI.  Currently, the handles are not kept around,
+   * because CGDB never plans on detaching. */
+  cgdbrc_attach (CGDBRC_TIMEOUT, &update_kui, NULL);
+  cgdbrc_attach (CGDBRC_TIMEOUT_LEN, &update_kui, NULL);
+  cgdbrc_attach (CGDBRC_TTIMEOUT, &update_kui, NULL);
+  cgdbrc_attach (CGDBRC_TTIMEOUT_LEN, &update_kui, NULL);
+
+  return 0;
+}
+
+int
 main (int argc, char *argv[])
 {
 /* Uncomment to debug and attach */
@@ -1554,28 +1604,9 @@ main (int argc, char *argv[])
       exit (-1);
     }
 
-  kui_ctx = kui_manager_create (STDIN_FILENO);
-  if (!kui_ctx)
+  if (init_kui () == -1)
     {
-      logger_write_pos (logger, __FILE__, __LINE__,
-			"Unable to initialize input library");
-      cleanup ();
-      exit (-1);
-    }
-
-  kui_map = kui_ms_create ();
-  if (!kui_map)
-    {
-      logger_write_pos (logger, __FILE__, __LINE__,
-			"Unable to initialize input library");
-      cleanup ();
-      exit (-1);
-    }
-
-  if (kui_manager_add_map_set (kui_ctx, kui_map) == -1)
-    {
-      logger_write_pos (logger, __FILE__, __LINE__,
-			"Unable to initialize input library");
+      logger_write_pos (logger, __FILE__, __LINE__, "init_kui error");
       cleanup ();
       exit (-1);
     }
@@ -1631,10 +1662,4 @@ main (int argc, char *argv[])
   /* Shut down curses and exit */
   cleanup ();
   return 0;
-}
-
-int
-cgdb_set_esc_sequence_timeout (int msec)
-{
-  return kui_manager_set_terminal_escape_sequence_timeout (kui_ctx, msec);
 }
