@@ -1,3 +1,7 @@
+01/17/2007 Bob Rossi <bob@brasko.net>
+
+	* NEWS: Fix bug with whitespace in path.
+
 12/29/2006 Bob Rossi <bob@brasko.net>
 
 	* NEWS: Note about escdelay removal, and new options.

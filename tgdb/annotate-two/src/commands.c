@@ -310,18 +310,17 @@ commands_parse_source (struct commands *c,
       --cur;
     }				/* end while */
 
-  /*TODO: I don't think this will work with filenames that contain spaces.
-   * It should be changed. Look at the algorithm in the function below.
-   */
   {
     int length = strlen (copy);
     char *temp = cgdb_malloc (sizeof (char) * (length + 1));
+    if (strncmp ("source ", copy, 7) == 0 && length > 7) {
+      int j;
+      for (j = 7; j < length; j++)
+	ibuf_addchar (file, copy[j]);
+    } else {
+      logger_write_pos (logger, __FILE__, __LINE__, "Could not get file name");
+    }
 
-    if (sscanf (copy, "source %s", temp) != 1)
-      logger_write_pos (logger, __FILE__, __LINE__,
-			"Could not get file name");
-
-    ibuf_add (file, temp);
     free (temp);
     temp = NULL;
   }

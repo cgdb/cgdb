@@ -1,3 +1,8 @@
+01/17/2007 Bob Rossi <bob@brasko.net>
+
+	* annotate-two/src/commands.c (commands_parse_source): Change to work
+	with paths with a whitespace in them.
+
 10/03/2006 Bob Rossi <bob@brasko.net>
 
 	* annotate-two/src/a2-tgdb.c, annotate-two/src/commands.c,
