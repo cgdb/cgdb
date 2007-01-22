@@ -337,6 +337,18 @@ int kui_destroy ( struct kuictx *kctx );
 std_list kui_get_map_sets ( struct kuictx *kctx );
 
 /**
+ * This will clear all of the map sets from the KUI.
+ * It will not release the memory associated with these sets.
+ *
+ * \param kctx
+ * The KUI context to clear the sets from
+ *
+ * \return 
+ * 0 on success or -1 on error.
+ */
+int kui_clear_map_sets (struct kuictx *kctx);
+
+/**
  * Add's a kui map set to the kui context.
  *
  * \param kctx
@@ -467,6 +479,18 @@ int kui_manager_destroy ( struct kui_manager *kuim );
  * If there are no map sets, of course the empty list will be returned.
  */
 std_list kui_manager_get_map_sets ( struct kui_manager *kuim );
+
+/**
+ * This will clear all of the map sets from the KUI manager.
+ * It will not release the memory associated with these sets.
+ *
+ * \param kuim
+ * The KUI context to clear the sets from
+ *
+ * \return 
+ * 0 on success or -1 on error.
+ */
+int kui_manager_clear_map_sets (struct kui_manager *kuim);
 
 /**
  * Add's a kui map set to the kui context.

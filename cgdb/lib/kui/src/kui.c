@@ -470,6 +470,15 @@ std_list kui_get_map_sets ( struct kuictx *kctx ) {
 	return kctx->kui_map_set_list;
 }
 
+int 
+kui_clear_map_sets (struct kuictx *kctx)
+{
+  if (!kctx)
+    return -1;
+
+  return std_list_remove_all (kctx->kui_map_set_list);
+}
+
 int kui_add_map_set ( 
 		struct kuictx *kctx, 
 		struct kui_map_set *kui_ms ) {
@@ -1157,6 +1166,15 @@ std_list kui_manager_get_map_sets ( struct kui_manager *kuim ) {
 		return NULL;
 
 	return kui_get_map_sets ( kuim->normal_keys );
+}
+
+int 
+kui_manager_clear_map_sets (struct kui_manager *kuim)
+{
+  if (!kuim)
+    return -1;
+
+  return kui_clear_map_sets (kuim->normal_keys);
 }
 
 int kui_manager_add_map_set ( 

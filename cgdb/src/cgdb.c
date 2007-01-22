@@ -108,6 +108,7 @@ static char *debugger_path = NULL;	/* Path to debugger to use */
 struct kui_manager *kui_ctx = NULL;	/* The key input package */
 
 struct kui_map_set *kui_map = NULL;
+struct kui_map_set *kui_imap = NULL;
 
 int resize_pipe[2] = { -1, -1 };
 
@@ -828,6 +829,21 @@ user_input (void)
 {
   static int key, val;
 
+  /* Clear the current map sets. Give the KUI the map sets 
+   * that should be used with the current focus.
+   */
+  val = kui_manager_clear_map_sets (kui_ctx);
+  if (val == -1)
+  {
+    logger_write_pos (logger, __FILE__, __LINE__, "user_input error");
+    return -1;
+  }
+
+  if (if_get_focus () == CGDB)
+    val = kui_manager_add_map_set (kui_ctx, kui_map);
+  else if (if_get_focus () == GDB)
+    val = kui_manager_add_map_set (kui_ctx, kui_imap);
+
   key = kui_manager_getkey (kui_ctx);
   if (key == -1)
     {
@@ -869,6 +885,25 @@ user_input (void)
     }
   else
     send_key (val, key);
+
+  return 0;
+}
+
+/**
+ * This will process all the input that the KUI has.
+ *
+ * \return
+ * 0 on success or -1 on error
+ */
+static int
+user_input_loop ()
+{
+  do {
+    if (user_input () == -1) {
+      logger_write_pos (logger, __FILE__, __LINE__, "user_input_loop failed");
+      return -1;
+    }
+  } while (kui_manager_cangetkey (kui_ctx));
 
   return 0;
 }
@@ -1342,14 +1377,8 @@ main_loop (void)
 
       /* Input received:  Handle it */
       if (FD_ISSET (STDIN_FILENO, &rset))
-	do {
-	    if (user_input () == -1)
-	      {
-		logger_write_pos (logger, __FILE__, __LINE__,
-				  "user_input failed");
-		return -1;
-	      }
-	} while (kui_manager_cangetkey (kui_ctx));
+        if (user_input_loop () == -1)
+          return -1;
 
       /* child's ouptut -> stdout
        * The continue is important I think. It allows all of the child
@@ -1526,6 +1555,15 @@ init_kui (void)
 
   kui_map = kui_ms_create ();
   if (!kui_map)
+    {
+      logger_write_pos (logger, __FILE__, __LINE__,
+			"Unable to initialize input library");
+      cleanup ();
+      exit (-1);
+    }
+
+  kui_imap = kui_ms_create ();
+  if (!kui_imap)
     {
       logger_write_pos (logger, __FILE__, __LINE__,
 			"Unable to initialize input library");

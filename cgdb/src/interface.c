@@ -1291,8 +1291,7 @@ internal_if_input (int key)
   /* The ESC Key, puts the debugger into command mode */
   if (focus != CGDB && key == CGDB_KEY_ESC)
     {
-      focus = CGDB;
-      if_draw ();
+      if_set_focus (CGDB);
       return 0;
     }
   else if (key == CGDB_KEY_ESC)
@@ -1305,15 +1304,10 @@ internal_if_input (int key)
       switch (key)
 	{
 	case 'i':
-	  focus = GDB;
-	  if_draw ();
+	  if_set_focus (GDB);
 	  return 0;
 	case 'I':
-	  if (tty_win_on)
-	    {
-	      focus = TTY;
-	      if_draw ();
-	    }
+	  if_set_focus (TTY);
 	  return 0;
 	case '/':
 	case '?':

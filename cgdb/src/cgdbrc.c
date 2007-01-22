@@ -157,6 +157,7 @@ static int command_source_reload( void );
 static int command_parse_syntax( void );
 static int command_parse_highlight (void);
 static int command_parse_map (void);
+static int command_parse_unmap (void);
 
 typedef int (*action_t)(void);
 static struct commands
@@ -174,6 +175,8 @@ static struct commands
     /* focus      */  { "focus",       "focus",	    command_do_focus },
     /* help        */ { "help",        "help",	    command_do_help },
     /* highlight   */ { "highlight",   "hi",	    command_parse_highlight },
+    /* imap	   */ { "imap",	       "im",	    command_parse_map },
+    /* iunmap	   */ { "iunmap",      "iu",	    command_parse_unmap },
     /* insert      */ { "insert",      "insert",    command_focus_gdb },
     /* map         */ { "map",         "map",	    command_parse_map },
     /* next        */ { "next",        "next",	    command_do_next },
@@ -182,6 +185,7 @@ static struct commands
     /* shell       */ { "shell",       "sh",	    command_do_shell },
     /* step        */ { "step",        "step",	    command_do_step },
     /* syntax      */ { "syntax",      "syntax",    command_parse_syntax },
+    /* unmap       */ { "unmap",       "unm",	    command_parse_unmap },
 };
 
 action_t get_command( const char *cmd )
@@ -544,23 +548,23 @@ command_parse_highlight (void)
   return hl_groups_parse_config (hl_groups_instance);
 }
 
-extern struct kui_map_set *kui_map;
+extern struct kui_map_set *kui_map, *kui_imap;
 static int
 command_parse_map (void)
 {
+  struct kui_map_set *kui_map_choice;
   int key, value, val;
-  char *key_token, value_token;
+  char *key_token;
+
+  if (strcmp (get_token (), "map") == 0)
+    kui_map_choice = kui_map;
+  else
+    kui_map_choice = kui_imap;
 
   key = yylex ();
   if (key != IDENTIFIER)
     return -1;
   key_token = cgdb_strdup (get_token ());
-
-#if 0
-  if_print ("KEY=");
-  if_print (get_token ());
-  if_print ("\n");
-#endif
 
   value = yylex ();
   if (value != IDENTIFIER)
@@ -569,12 +573,35 @@ command_parse_map (void)
     return -1;
   }
 
-#if 0
-  if_print ("VALUE=");
-  if_print (get_token ());
-  if_print ("\n");
-#endif
-  val = kui_ms_register_map (kui_map, key_token, get_token ());
+  val = kui_ms_register_map (kui_map_choice, key_token, get_token ());
+  if (val == -1)
+  {
+    free (key_token);
+    return -1;
+  }
+
+  return 0;
+}
+
+static int
+command_parse_unmap (void)
+{
+  struct kui_map_set *kui_map_choice;
+  int key, val;
+  char *key_token;
+
+  if ((strcmp (get_token (), "unmap") == 0) || 
+      (strcmp (get_token (), "unm") == 0))
+    kui_map_choice = kui_map;
+  else
+    kui_map_choice = kui_imap;
+
+  key = yylex ();
+  if (key != IDENTIFIER)
+    return -1;
+  key_token = cgdb_strdup (get_token ());
+
+  val = kui_ms_deregister_map (kui_map_choice, key_token);
   if (val == -1)
   {
     free (key_token);
