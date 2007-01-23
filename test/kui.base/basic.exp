@@ -18,8 +18,17 @@ puts $mapping_output "map partial_abcdef  nnn"
 puts $mapping_output "map first second"
 puts $mapping_output "map second third"
 
+# This section attempts to test the builtin macro extensions like,
+# <Space>, <S-a>, ...
 # Test the special character mappings
 puts $mapping_output "map special_space_cr p<Space>argc<CR>"
+
+# Test each <S-X> pattern, where X is a lowercase letter
+foreach {val} {a b c d e f g h i j k l m n o p q r s t u v w x y z} {
+  set upperValue [string toupper $val]
+  puts $mapping_output "map special_shift_$upperValue <S-$val>"
+  puts $mapping_output "map special_ctrl_$upperValue <C-$val>"
+}
 
 close $mapping_output
 
@@ -332,6 +341,37 @@ expect {
   timeout {
     fail "timeout $test"
   }
+}
+
+# Test each <S-X> pattern, where X is a lowercase letter
+set counter 1
+foreach {val} {a b c d e f g h i j k l m n o p q r s t u v w x y z} {
+  set upperValue [string toupper $val]
+  set shift_special_value "special_shift_$upperValue"
+  set ctrl_special_value "special_ctrl_$upperValue"
+
+  set test "testing <S-$val> in a map"
+  send "$shift_special_value"
+  expect {
+    -re "$upperValue${kui_prompt}$" { pass "$test"}
+    timeout {
+      fail "timeout $test"
+    }
+  }
+
+  # If you send a ^z, the process will be put in the background
+  if {$val != "z"} {
+    set test "testing <C-$val> in a map"
+    send "$ctrl_special_value"
+    expect {
+      -re "CGDB_KEY_CTRL_$upperValue\\\[$counter\\\]${kui_prompt}$" { pass "$test"}
+      timeout {
+        fail "timeout $test"
+      }
+    }
+  }
+
+  set counter [expr $counter+1]
 }
 
 # Test previously broken functionality

@@ -282,6 +282,16 @@ struct cgdb_keycode_data {
 		"<shift w>"
 	},
 	{
+		'X',
+		"<S-x>",
+		"<shift x>"
+	},
+	{
+		'Y',
+		"<S-y>",
+		"<shift y>"
+	},
+	{
 		'Z',
 		"<S-z>",
 		"<shift z>"
