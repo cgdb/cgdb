@@ -608,11 +608,6 @@ struct cgdb_keycode_data {
 		"<Del>",
 		"<delete>"
 	},
-        { 
-	        127,
-		"<Del>",
-		"<delete>"
-	},
 	{
 		CGDB_KEY_ERROR,
 		"CGDB_KEY_ERROR",
