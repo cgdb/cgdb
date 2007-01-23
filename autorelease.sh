@@ -37,7 +37,7 @@ perl -pi -e "s/AC_INIT\(cgdb, (.*)\)/AC_INIT\(cgdb, $CGDB_VERSION\)/g" configure
 ################################################################################
 echo "-- Regenerate the autoconf files"
 ################################################################################
-./autoregen.sh $CGDB_VERSION >> $CGDB_OUTPUT_LOG 2>&1
+./autogen.sh $CGDB_VERSION >> $CGDB_OUTPUT_LOG 2>&1
 
 ################################################################################
 echo "-- Verify CGDB works with --std=c89"

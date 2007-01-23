@@ -35,4 +35,4 @@ automake -a
 echo "-- Generating autotool files for lib/gdbmi"
 ################################################################################
 cd ./lib/gdbmi
-./autoregen.sh
+./autogen.sh

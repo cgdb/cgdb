@@ -2,6 +2,6 @@ This package implements the gdbmi protocol. Currently, it simply parses an MI
 output command into a parse tree.
 
 If you want to build this package, you need to have the auto tools installed. 
-Once that is done, run ./autoregen.sh to generate the ./configure script.
+Once that is done, run ./autogen.sh to generate the ./configure script.
 Alternativly, you can download CGDB, which has a version of this library with
 the auto files already created.
