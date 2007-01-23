@@ -1,8 +1,8 @@
 # The difference between SUBDIRS and DIST_SUBDIRS is that the
 # readline directory simply needs to be copied as is, where as
 # the rest of the directories have a make dist rule run on them
-SUBDIRS=lib various tgdb cgdb doc
-DIST_SUBDIRS=lib various tgdb cgdb doc
+SUBDIRS=lib various tgdb cgdb doc test
+DIST_SUBDIRS=lib various tgdb cgdb doc test
 EXTRA_DIST=config
 
 # The order is important here.
