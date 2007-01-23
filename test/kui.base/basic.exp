@@ -17,6 +17,10 @@ puts $mapping_output "map partial_abcdef  nnn"
 # Test the double mapping
 puts $mapping_output "map first second"
 puts $mapping_output "map second third"
+
+# Test the special character mappings
+puts $mapping_output "map special_space_cr p<Space>argc<CR>"
+
 close $mapping_output
 
 # Start the KUI
@@ -315,6 +319,16 @@ set test "test that mappings are recursive plus extra chars"
 send "firstxyz"
 expect {
   -re "third${kui_prompt}x${kui_prompt}y${kui_prompt}z${kui_prompt}$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+# Test the use of CGDB hard coded values
+set test 
+send "special_space_cr"
+expect {
+  -re "p argcCGDB_KEY_CTRL_M\\\[.*\\\]${kui_prompt}$" { pass "$test"}
   timeout {
     fail "timeout $test"
   }

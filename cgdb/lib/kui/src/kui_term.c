@@ -533,11 +533,6 @@ struct cgdb_keycode_data {
 		"<C-z>",
 		"CGDB_KEY_CTRL_Z"
 	},
-	{
-		CGDB_KEY_ERROR,
-		"CGDB_KEY_ERROR",
-		"CGDB_KEY_ERROR"
-	},
         { 
 	        0,
 		"<Nul>",
@@ -607,6 +602,11 @@ struct cgdb_keycode_data {
 	        127,
 		"<Del>",
 		"<delete>"
+	},
+	{
+		CGDB_KEY_ERROR,
+		"CGDB_KEY_ERROR",
+		"CGDB_KEY_ERROR"
 	}
 };
 
