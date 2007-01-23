@@ -4,6 +4,7 @@ Bug fixes/improvement for cgdb-0.6.3
      Document in manual that bison is required and that yacc is not good enough.
      - This is fixed, however, users will not need bison installed to build CGDB.
 
+
 bluffer_
  [ ] Look at passing ^z to GDB
  [ ] Look at how CGDB could allow itself to debug curses applications by
