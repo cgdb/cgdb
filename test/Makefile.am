@@ -1,3 +1,3 @@
 AUTOMAKE_OPTIONS = dejagnu
-DIST_SUBDIRS = kui.base
+EXTRA_DIST = kui.base
 DEJATOOL = kui.base
