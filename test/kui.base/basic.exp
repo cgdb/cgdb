@@ -60,6 +60,18 @@ puts $mapping_output "map special_Lt <Lt>"
 puts $mapping_output "map special_Bslash <Bslash>"
 puts $mapping_output "map special_Bar <Bar>"
 
+# Test that unmap works
+# First, unmap something that doesn't exist
+puts $mapping_output "unmap does_not_exist"
+# Then, map something, and then unmap it
+puts $mapping_output "map map_to_unmap bar"
+puts $mapping_output "unmap map_to_unmap"
+
+# Then, map something, and then unmap it twice
+puts $mapping_output "map map_to_unmap2 bar"
+puts $mapping_output "unmap map_to_unmap2"
+puts $mapping_output "unmap map_to_unmap2"
+
 close $mapping_output
 
 # Start the KUI
@@ -630,5 +642,15 @@ expect {
   -re "CGDB_KEY_ESCo${kui_prompt}$" { pass "$test"}
   timeout {
     fail "timeout $test"
+  }
+}
+
+# Make sure that maps that have been unmapped no longer work
+set test "check that unmapping works"
+send "map_to_unmap"
+expect {
+  -re "bar${kui_prompt}$" { fail "$test"}
+  timeout {
+    pass "$test"
   }
 }

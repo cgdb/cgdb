@@ -324,14 +324,17 @@ int kui_ms_deregister_map (
 	if ( std_list_get_data ( iter, &data ) == -1 )
 		return -1;
 
-	map = (struct kui_map*)data;
+        // If the mapping exists, remove it.
+        if (data) {
+          map = (struct kui_map*)data;
 
-	/* Delete from the tree */
-	if ( kui_tree_delete ( kui_ms->ktree, map->literal_key ) == -1 )
-		return -1;
+          /* Delete from the tree */
+          if ( kui_tree_delete ( kui_ms->ktree, map->literal_key ) == -1 )
+                  return -1;
 
-	if ( std_list_remove ( kui_ms->maps, iter ) == NULL )
-		return -1;
+          if ( std_list_remove ( kui_ms->maps, iter ) == NULL )
+                  return -1;
+        }
 
 	return 0;
 }
