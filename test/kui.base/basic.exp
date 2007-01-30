@@ -71,6 +71,9 @@ puts $mapping_output "unmap map_to_unmap"
 puts $mapping_output "map map_to_unmap2 bar"
 puts $mapping_output "unmap map_to_unmap2"
 puts $mapping_output "unmap map_to_unmap2"
+# Test the example in the documenation
+puts $mapping_output "map a<Space>b foo"
+puts $mapping_output "unmap a<Space>b"
 
 close $mapping_output
 
@@ -650,6 +653,16 @@ set test "check that unmapping works"
 send "map_to_unmap"
 expect {
   -re "bar${kui_prompt}$" { fail "$test"}
+  timeout {
+    pass "$test"
+  }
+}
+
+# Make sure the example in the documentation is OK
+set test "check that unmapping example in the documentation works"
+send "a b"
+expect {
+  -re "foo${kui_prompt}$" { fail "$test"}
   timeout {
     pass "$test"
   }
