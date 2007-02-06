@@ -318,7 +318,7 @@ commands_parse_source (struct commands *c,
       for (j = 7; j < length; j++)
 	ibuf_addchar (file, copy[j]);
     } else {
-      logger_write_pos (logger, __FILE__, __LINE__, "Could not get file name");
+      logger_write_pos (logger, __FILE__, __LINE__, "Could not get file name out of line (%s)", buf);
     }
 
     free (temp);
