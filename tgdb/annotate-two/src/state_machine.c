@@ -84,8 +84,6 @@ int a2_handle_data(
         char *gui_data, size_t *gui_size, 
 		struct tgdb_list *command_list){
    int i, counter = 0;
-
-   ibuf_clear ( sm->tgdb_buffer );
    
    /* track state to find next file and line number */
    for(i = 0; i < size; ++i){

@@ -1,3 +1,9 @@
+   * Fixed a serious bug in CGDB. After the user entered a command
+     CGDB would not accept any more commands. This would only 
+     happen sometimes, if at all. This is due to the fact that CGDB
+     had a bug in it that was sensitive to the amount of data that
+     the read system call returns to it.
+
    * Fixed a bug in CGDB where it would not show a file in the 
      source viewer if there was a space in the path.
 
