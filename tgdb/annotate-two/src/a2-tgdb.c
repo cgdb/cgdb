@@ -178,7 +178,7 @@ static int tgdb_setup_config_file ( struct annotate_two *a2, const char *dir ) {
         fprintf( fp, 
             "set annotate 2\n"
             "set height 0\n"
-            "set prompt (tgdb) \n");
+            "set prompt (gdb) \n");
         fclose( fp );
     } else {
         logger_write_pos ( logger, __FILE__, __LINE__, "fopen error '%s'", a2->a2_gdb_init_file);

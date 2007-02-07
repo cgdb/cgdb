@@ -1,3 +1,6 @@
+   * Changed the GDB prompt from "(tgdb)" to "(gdb)". I think users
+     will be more comfortable with "(gdb)".
+
    * Fixed a serious bug in CGDB. After the user entered a command
      CGDB would not accept any more commands. This would only 
      happen sometimes, if at all. This is due to the fact that CGDB

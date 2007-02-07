@@ -107,7 +107,7 @@ rline_initialize (int slavefd, command_cb *command, completion_cb *completion, c
   rl_catch_sigwinch = 0;
 
   /* Tell readline what the prompt is if it needs to put it back */
-  rl_callback_handler_install("(tgdb) ", command);
+  rl_callback_handler_install("(gdb) ", command);
   rl_bind_key ('\t', completion);
 
   /* Set the terminal type to dumb so the output of readline can be
@@ -360,7 +360,7 @@ rline_rl_complete (struct rline *rline, struct tgdb_list *list, display_callback
    * Basically, rl_complete is working fine. After the call to rl_complete,
    * rl_line_buffer contains the proper data. However, the CGDB main loop
    * always call rline_rl_forced_update_display, which in the case of tab 
-   * completion does this, (tgdb) b ma(tgdb) b main
+   * completion does this, (gdb) b ma(gdb) b main
    *
    * Normally, this works fine because the user hits '\n', which puts the prompt
    * on the next line. In this case, the user hit's \t.
