@@ -300,7 +300,10 @@ rlctx_send_user_command (char *line)
 
   /* This happens when rl_callback_read_char gets EOF */
   if (line == NULL)
-    return;
+  {
+    cleanup ();
+    exit (0);
+  }
 
   /* Add the line passed in to the current line */
   ibuf_add (current_line, line);

@@ -1,3 +1,6 @@
+   * CGDB shuts down now when it receives C-d (control d), just like GDB 
+     does.
+    
    * Changed the GDB prompt from "(tgdb)" to "(gdb)". I think users
      will be more comfortable with "(gdb)".
 
