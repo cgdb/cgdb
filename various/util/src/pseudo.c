@@ -39,6 +39,7 @@
 #include <fcntl.h>
 #include <grp.h>
 #include <pwd.h>
+#include <stdint.h>
 #ifdef HAVE_PTY_H
 #include <pty.h>
 #endif

@@ -1,3 +1,5 @@
+   * CGDB should now build on freebsd with out any patches.
+
    * Added a new highlighting group, SelectedLineNr. From the documentation:
      This represents the group that is used when CGDB is displaying the 
      currently selected line.  This is the line that the cursor is on.
