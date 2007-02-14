@@ -16,6 +16,5 @@ EXTRA_DIST = gdbmi_parser.h  gdbmi_pt.h gdbmi_grammar.h gdbmi_oc.h
 noinst_PROGRAMS = gdbmi_driver
 
 gdbmi_driver_LDFLAGS = -L.
-gdbmi_driver_LDADD = -lgdbmi
+gdbmi_driver_LDADD = libgdbmi.a
 gdbmi_driver_SOURCES = gdbmi_driver.c
-gdbmi_driver_DEPENDENCIES = $(top_builddir)/src

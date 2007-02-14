@@ -7,9 +7,6 @@ AM_CFLAGS = -I$(srcdir)/../include \
 # create the input library
 noinst_LIBRARIES = libtokenizer.a
 libtokenizer_a_SOURCES = tokenizer.c clexer.l adalexer.l
-libtokenizer_a_DEPENDENCIES= \
-$(top_builddir)/various/adt/src \
-$(top_builddir)/various/util/src
 
 # Installs the driver programs into progs directory
 noinst_PROGRAMS = tokenizer_driver
@@ -18,7 +15,8 @@ noinst_PROGRAMS = tokenizer_driver
 tokenizer_driver_LDFLAGS = -L. \
 -L$(top_builddir)/various/adt/src \
 -L$(top_builddir)/various/util/src
-tokenizer_driver_LDADD = -ltokenizer -ladt -lutil
+tokenizer_driver_LDADD = ./libtokenizer.a \
+$(top_builddir)/various/adt/src/libadt.a \
+$(top_builddir)/various/util/src/libutil.a
 tokenizer_driver_SOURCES = tokenizer_driver.c
-tokenizer_driver_DEPENDENCIES = libtokenizer.a
 input_driver_CFLAGS = $(AM_CFLAGS)

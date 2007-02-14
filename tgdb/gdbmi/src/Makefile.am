@@ -9,7 +9,3 @@ AM_CFLAGS = \
 noinst_LIBRARIES = libtgdb_mi.a
 
 libtgdb_mi_a_SOURCES = gdbmi_tgdb.c
-
-libtgdb_mi_a_DEPENDENCIES = \
-$(top_builddir)/various/util/src \
-$(top_builddir)/various/adt/src

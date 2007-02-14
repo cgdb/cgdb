@@ -1,4 +1,4 @@
-AM_CFLAGS = \
+libtgdb_a2_a_CFLAGS = \
 -I$(top_srcdir)/various/util/include \
 -I$(top_srcdir)/various/adt/include \
 -I$(top_srcdir)/tgdb/tgdb-base/include \
@@ -15,7 +15,3 @@ commands.c \
 data.c \
 globals.c \
 state_machine.c
-
-libtgdb_a2_a_DEPENDENCIES = \
-$(top_builddir)/various/util/src \
-$(top_builddir)/various/adt/src

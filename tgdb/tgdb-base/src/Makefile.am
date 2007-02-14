@@ -24,14 +24,12 @@ tgdb_driver_LDFLAGS = \
 -L$(top_builddir)/various/util/src \
 -L$(top_builddir)/various/rline/src
 
-tgdb_driver_LDADD = -ltgdb -ltgdb_a2 -ltgdb_mi -lrline -ladt -lutil
+tgdb_driver_LDADD = \
+$(top_builddir)/tgdb/tgdb-base/src/libtgdb.a \
+$(top_builddir)/tgdb/annotate-two/src/libtgdb_a2.a \
+$(top_builddir)/tgdb/gdbmi/src/libtgdb_mi.a \
+$(top_builddir)/various/rline/src/librline.a \
+$(top_builddir)/various/adt/src/libadt.a \
+$(top_builddir)/various/util/src/libutil.a
 
 tgdb_driver_SOURCES = driver.c
-
-tgdb_driver_DEPENDENCIES = \
-$(top_builddir)/various/util/src \
-$(top_builddir)/various/adt/src \
-$(top_builddir)/various/rline/src \
-$(top_builddir)/tgdb/annotate-two/src \
-$(top_builddir)/tgdb/gdbmi/src \
-$(top_builddir)/tgdb/tgdb-base/src

@@ -23,7 +23,15 @@ cgdb_LDFLAGS = \
 -L$(top_builddir)/cgdb/tokenizer/src \
 -L$(top_builddir)/tgdb/gdbmi/src
 
-cgdb_LDADD = -ltgdb -ltgdb_a2 -ltgdb_mi -ltokenizer -lkui -lrline -ladt -lutil
+cgdb_LDADD = \
+$(top_builddir)/tgdb/tgdb-base/src/libtgdb.a \
+$(top_builddir)/tgdb/annotate-two/src/libtgdb_a2.a \
+$(top_builddir)/tgdb/gdbmi/src/libtgdb_mi.a \
+$(top_builddir)/cgdb/tokenizer/src/libtokenizer.a \
+$(top_builddir)/cgdb/lib/kui/src/libkui.a \
+$(top_builddir)/various/rline/src/librline.a \
+$(top_builddir)/various/adt/src/libadt.a \
+$(top_builddir)/various/util/src/libutil.a
 
 cgdb_SOURCES = \
 cgdb.c \
@@ -37,14 +45,3 @@ command_lexer.l \
 cgdbrc.c \
 highlight_groups.c \
 usage.c
-
-# links cgdb if common is changed
-cgdb_DEPENDENCIES = \
-$(top_srcdir)/various/util/src \
-$(top_srcdir)/various/adt/src \
-$(top_srcdir)/various/rline/src \
-$(top_srcdir)/cgdb/lib/kui/src \
-$(top_srcdir)/cgdb/tokenizer/src \
-$(top_srcdir)/tgdb/annotate-two/src \
-$(top_srcdir)/tgdb/gdbmi/src \
-$(top_srcdir)/tgdb/tgdb-base/src
