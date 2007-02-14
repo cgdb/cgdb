@@ -553,7 +553,10 @@ int source_display(struct sviewer *sview, int focus)
     int lwidth;
     int line;
     int i;
-		int attr = 0;
+    int attr = 0, sellineno;
+
+    if (hl_groups_get_attr (hl_groups_instance, HLG_SELECTED_LINE_NUMBER, &sellineno) == -1)
+      return -1;
 
     /* Check that a file is loaded */
     if (sview->cur == NULL || sview->cur->buf.tlines == NULL){
@@ -674,12 +677,12 @@ int source_display(struct sviewer *sview, int focus)
             /* Ordinary lines */
             else{
                 if ( focus && sview->cur->sel_line == line )
-                    wattron(sview->win, A_BOLD);
+                    wattron(sview->win, sellineno);
                     
                 wprintw(sview->win, fmt, line+1);
                 
                 if ( focus && sview->cur->sel_line == line )
-                    wattroff(sview->win, A_BOLD);
+                    wattroff(sview->win, sellineno);
 
                 if (focus)
                     wattron(sview->win, A_BOLD);
