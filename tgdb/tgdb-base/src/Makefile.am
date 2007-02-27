@@ -25,7 +25,7 @@ tgdb_driver_LDFLAGS = \
 -L$(top_builddir)/various/rline/src
 
 tgdb_driver_LDADD = \
-$(top_builddir)/tgdb/tgdb-base/src/libtgdb.a \
+libtgdb.a \
 $(top_builddir)/tgdb/annotate-two/src/libtgdb_a2.a \
 $(top_builddir)/tgdb/gdbmi/src/libtgdb_mi.a \
 $(top_builddir)/various/rline/src/librline.a \

@@ -1,3 +1,5 @@
+   * CGDB can now be compiled with -jN option. It would fail previously.
+
    * CGDB should now build on freebsd with out any patches.
 
    * Added a new highlighting group, SelectedLineNr. From the documentation:
