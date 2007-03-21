@@ -143,7 +143,7 @@ static struct hl_group_name hl_group_names[] = {
   {HLG_DISABLED_BREAKPOINT, "DisabledBreakpoint"},
   {HLG_SELECTED_LINE_NUMBER, "SelectedLineNr"},
   {HLG_LOGO, "Logo"},
-  {HLG_LAST, "NULL"}
+  {HLG_LAST, NULL}
 };
 
 /**
