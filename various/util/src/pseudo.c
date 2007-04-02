@@ -39,7 +39,10 @@
 #include <fcntl.h>
 #include <grp.h>
 #include <pwd.h>
+// With out this, cgdb will crash on gentoo when built with a 64 bit machine
+#ifdef HAVE_STDINT_H
 #include <stdint.h>
+#endif
 #ifdef HAVE_PTY_H
 #include <pty.h>
 #endif

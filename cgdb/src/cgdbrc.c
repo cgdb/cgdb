@@ -259,8 +259,9 @@ int
 command_set_winsplit (const char *value)
 {
   struct cgdbrc_config_option option;
-  option.option_kind = CGDBRC_WINSPLIT;
   WIN_SPLIT_TYPE split_type = WIN_SPLIT_EVEN;
+
+  option.option_kind = CGDBRC_WINSPLIT;
 
   if (strcasecmp (value, "top_big") == 0)
     split_type = WIN_SPLIT_TOP_BIG;
