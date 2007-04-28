@@ -868,7 +868,7 @@ cgdbrc_set_val (struct cgdbrc_config_option config_option)
   return 0;
 }
 
-// Attach/Detach options {{{
+/* Attach/Detach options {{{ */
 
 static int
 destroy_notify (void *data)
@@ -923,9 +923,9 @@ cgdbrc_detach (int handle)
   return 0;
 }
 
-// }}}
+/* }}} */
 
-// Get options {{{
+/* Get options {{{ */
 
 cgdbrc_config_option_ptr 
 cgdbrc_get (enum cgdbrc_option_kind option)
@@ -962,4 +962,4 @@ cgdbrc_get_mapped_key_timeoutlen (void)
   return cgdbrc_get (CGDBRC_TIMEOUT_LEN)->variant.int_val;
 }
 
-// }}}
+/* }}} */
