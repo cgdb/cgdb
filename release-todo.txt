@@ -32,13 +32,6 @@ These steps are manual.
 
  ** At this point, you should be ready to release, there is no going back.
 
-- Go into releasedir and run upload.sh to upload all the files.
-
-- Ensure tag is written. If the version is cgdb-0.3.3, name the tag
-  cgdb-0_3_3.
-
-- Test website by looking at it and attempting to download file.
-
 - Put a release on sourceforge.net/projects/cgdb
     * ftp upload.sourceforge.net
       * user=anonymous, passwd=email
@@ -51,6 +44,13 @@ These steps are manual.
     * New release name (ie. cgdb-0.5.1)
 	* you should be able to put whats new in the NEWS file into the
 	  release notes.
+
+- Go into releasedir and run upload.sh to upload all the files.
+
+- Ensure tag is written. If the version is cgdb-0.3.3, name the tag
+  cgdb-0_3_3.
+
+- Test website by looking at it and attempting to download file.
 
 - Download and test the new version from sourceforge.
 

@@ -176,7 +176,7 @@ echo '#!/bin/sh' >> $CGDB_RELEASE_UPLOAD_SH
 echo "" >> $CGDB_RELEASE_UPLOAD_SH
 
 echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
-echo 'echo "-- Create the svn $CGDB_RELEASE tag/branch"' >> $CGDB_RELEASE_UPLOAD_SH
+echo "echo \"-- Create the svn $CGDB_RELEASE_STR tag/branch\"" >> $CGDB_RELEASE_UPLOAD_SH
 echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
 echo "svn copy https://svn.sourceforge.net/svnroot/cgdb/cgdb/trunk \\" >> $CGDB_RELEASE_UPLOAD_SH
 echo "         https://svn.sourceforge.net/svnroot/cgdb/cgdb/tags/$CGDB_RELEASE_STR \\" >> $CGDB_RELEASE_UPLOAD_SH
