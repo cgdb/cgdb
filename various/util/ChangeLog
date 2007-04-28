@@ -1,3 +1,5 @@
+version 0.6.4 (28/04/2007):
+
 10/03/2006 Bob Rossi <bob@brasko.net>
 
 	* include/sys_util.h, src/sys_util.c (xcalloc): Rename to cgdb_calloc.

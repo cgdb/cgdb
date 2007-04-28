@@ -116,7 +116,7 @@ fi
 echo "-- Update the ChangeLogs"
 ################################################################################
 cd $CGDB_SOURCE_DIR
-echo -e "version $CGDB_VERSION (`date +%d/%m/%Y`):\n" > datetmp.txt
+echo "version $CGDB_VERSION (`date +%d/%m/%Y`):\n" > datetmp.txt
 for I in `find . -name ChangeLog`; 
 do 
   cp $I $I.bak; 
@@ -128,7 +128,7 @@ rm datetmp.txt
 ################################################################################
 echo "-- Update the NEWS file"
 ################################################################################
-echo -e "$CGDB_RELEASE (`date +%m/%d/%Y`)\n" > datetmp.txt
+echo "$CGDB_RELEASE (`date +%m/%d/%Y`)\n" > datetmp.txt
 cp NEWS NEWS.bak
 cat datetmp.txt NEWS.bak > NEWS
 rm NEWS.bak
@@ -138,7 +138,7 @@ rm datetmp.txt
 echo "-- Creating the distrobution $CGDB_BUILD_DIR/tmp"
 ################################################################################
 cd $CGDB_BUILD_DIR
-make dist >> $CGDB_OUTPUT_LOG 2>&1
+make distcheck >> $CGDB_OUTPUT_LOG 2>&1
 rm -fr tmp
 mkdir tmp
 mv $CGDB_RELEASE.tar.gz tmp/

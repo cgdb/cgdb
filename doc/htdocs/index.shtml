@@ -35,6 +35,33 @@ Some features offered by CGDB are:<P>
 <B>News</b><BR>
 <BLOCKQUOTE>
 
+  <I>April 28, 2007</i><BR>
+  <BLOCKQUOTE>
+  CGDB v0.6.4 was released today, see the <A Href="download.shtml">download 
+  page</a> to try it out. This release is mostly important because it 
+  implements the vim 'map' command. The functionality is not entirely
+  polished off, so mappings like 'map a a' will cause CGDB to loop 
+  infinitely. The next release of CGDB will most likely provide the 
+  finishing touches to this functionality, along with the documentation
+  in the manual.
+  <BR>
+  <BR>
+  A few interesting features that have been added in this release are
+  <UL>
+    <LI>Added a new highlighting group, SelectedLineNr. This is the 
+    line that the cursor is on.</li>
+    <LI>CGDB's build system should compile with the -j option.</li>
+    <LI>CGDB shuts down now when it receives ctrl-d, just like GDB</li>
+    <LI>CGDB no longer displays (tgdb) at the gdb prompt. It now displays (gdb)</li>
+  </UL>
+  <BR>
+  <BR>
+  Finally, this release also has some pretty important bug fixes. There was
+  a bug in the communication between CGDB and gdb that would cause it to
+  sometimes simply work improperly. As always see the NEWS file for a complete
+  list of changes since the last release.
+  </blockquote>
+
   <I>June 3, 2006</i><BR>
   <BLOCKQUOTE>
   CGDB v0.6.3 was released today, see the <A Href="download.shtml">download 

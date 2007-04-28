@@ -1,3 +1,5 @@
+version 0.6.4 (28/04/2007):
+
 01/17/2007 Bob Rossi <bob@brasko.net>
 
 	* annotate-two/src/commands.c (commands_parse_source): Change to work
