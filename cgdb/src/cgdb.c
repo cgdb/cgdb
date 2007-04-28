@@ -1381,11 +1381,11 @@ main_loop (void)
       /* Input received:  Handle it */
       if (FD_ISSET (STDIN_FILENO, &rset)) {
         int val = user_input_loop ();
-        // The below condition happens on cygwin when user types ctrl-z
-        // select returns (when it shouldn't) with the value of 1. the
-        // user input loop gets called, the kui gets called and does a
-        // non blocking read which returns EAGAIN. The kui then passes
-        // the -1 up the stack with out making any more system calls.
+        /* The below condition happens on cygwin when user types ctrl-z
+         * select returns (when it shouldn't) with the value of 1. the
+         * user input loop gets called, the kui gets called and does a
+         * non blocking read which returns EAGAIN. The kui then passes
+         * the -1 up the stack with out making any more system calls. */
         if (val == -1 && errno == EAGAIN)
           continue;
         else if (val == -1)

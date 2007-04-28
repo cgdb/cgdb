@@ -34,7 +34,7 @@
  * Feel free to integrate the two files somehow.
  */
 
-// Parse options {{{
+/* Parse options {{{ */
 
 /** 
  * Parse a string of command data and execute the commands that it represents.
@@ -59,9 +59,9 @@ int command_parse_string (const char *buffer);
  */
 int command_parse_file (FILE * fp);
 
-// }}}
+/* }}} */
 
-// Options types {{{
+/* Options types {{{ */
 
 /** 
  * The different ways to highlight the current line the debugger is at.
@@ -132,9 +132,9 @@ struct cgdbrc_config_option
   } variant;
 };
 
-// }}}
+/* }}} */
 
-// Attach/Detach options {{{
+/* Attach/Detach options {{{ */
 
 typedef struct cgdbrc_config_option *cgdbrc_config_option_ptr;
 
@@ -184,9 +184,9 @@ int cgdbrc_attach (enum cgdbrc_option_kind option, cgdbrc_notify notify, int *ha
  */
 int cgdbrc_detach (int handle);
 
-// }}}
+/* }}} */
 
-// Get options {{{
+/* Get options {{{ */
 
 /**
  * Get a configuration option.
@@ -221,6 +221,6 @@ int cgdbrc_get_key_code_timeoutlen (void);
  */
 int cgdbrc_get_mapped_key_timeoutlen (void);
 
-// }}}
+/* }}} */
 
 #endif /* __CGDBRC_H__ */
