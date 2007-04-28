@@ -324,7 +324,7 @@ int kui_ms_deregister_map (
 	if ( std_list_get_data ( iter, &data ) == -1 )
 		return -1;
 
-        // If the mapping exists, remove it.
+        /* If the mapping exists, remove it. */
         if (data) {
           map = (struct kui_map*)data;
 
