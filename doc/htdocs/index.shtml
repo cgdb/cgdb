@@ -60,8 +60,9 @@ Some features offered by CGDB are:<P>
   sometimes simply work improperly. As always see the NEWS file for a complete
   list of changes since the last release.
   <BR>
+  <BR>
   Please also note that the escdelay option has been removed. A user should
-  not use the timeout, ttimeout, timeoutlen and ttimeoutlen options. They
+  now use the timeout, ttimeout, timeoutlen and ttimeoutlen options. They
   are described in the manual.
   </blockquote>
 
