@@ -55,11 +55,14 @@ Some features offered by CGDB are:<P>
     <LI>CGDB no longer displays (tgdb) at the gdb prompt. It now displays (gdb)</li>
   </UL>
   <BR>
-  <BR>
   Finally, this release also has some pretty important bug fixes. There was
   a bug in the communication between CGDB and gdb that would cause it to
   sometimes simply work improperly. As always see the NEWS file for a complete
   list of changes since the last release.
+  <BR>
+  Please also note that the escdelay option has been removed. A user should
+  not use the timeout, ttimeout, timeoutlen and ttimeoutlen options. They
+  are described in the manual.
   </blockquote>
 
   <I>June 3, 2006</i><BR>
