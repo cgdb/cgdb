@@ -30,6 +30,15 @@
       CGDB there pretty easily.
       </P>
 
+      <P><B>Windows Cygwin Standalone CGDB binary</b></P>
+      <P>
+      This binary can be run on a windows machine that does not have cygwin
+      installed. It will run in a dos shell. If cygwin is installed on the 
+      matchine you want to run this binary, then just delete the extra dll's
+      in the bin/ directory. The binary for cgdb-0.6.4 is 
+      <A Href="http://cgdb.sf.net/downloads/windows/cgdb-0.6.4.tar.gz">here</a>.
+      </P>
+
     </blockquote>
 
 
