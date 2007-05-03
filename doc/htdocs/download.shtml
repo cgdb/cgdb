@@ -17,10 +17,11 @@
 
       <P><B>Mac CGDB binary</b></P>
       <P>
-      You can get a CGDB Mac PPC binary by using Jens Frederich's prebuilt
-      static binary. This is beneficial, since he has done all the work of
-      finding the correct readline version and statically linking it to CGDB.
-      You can see what versions he has available <A Href="http://codingsaloon.com/cs/">here</a>.
+      You can get a CGDB macosx universal binary by using Jens Frederich's prebuilt
+      binary. Here is the binary for cgdb-0.6.4 in a tar.gz format,
+      <A Href="http://cgdb.sf.net/downloads/mac/cgdb-0.6.4-osx-universal.tar.gz">cgdb-0.6.4-osx-universal.tar.gz</a>.
+      You can also download the disk image file 
+      <A Href="http://cgdb.sf.net/downloads/mac/cgdb-0.6.4-osx-universal.dmg">cgdb-0.6.4-osx-universal.dmg</a>.
       If you would like to contact him, his address is jfrederich *at* gmail *dot* com.
       </P>
 
