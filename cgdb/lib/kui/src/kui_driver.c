@@ -51,6 +51,7 @@
 #include <getopt.h>
 #endif
 
+#include <sys_util.h>
 #include "kui.h"
 #include "kui_term.h"
 
