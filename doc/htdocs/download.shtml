@@ -22,10 +22,12 @@
       <A Href="http://cgdb.sf.net/downloads/mac/cgdb-0.6.4-osx-universal.tar.gz">cgdb-0.6.4-osx-universal.tar.gz</a>.
       You can also download the disk image file 
       <A Href="http://cgdb.sf.net/downloads/mac/cgdb-0.6.4-osx-universal.dmg">cgdb-0.6.4-osx-universal.dmg</a>.
-      If you want use a package system, then CGDB can also installed with the 
-      <A Href="http://www.macports.org">MacPorts</a> system. Simply install MacPorts and enter the command 
-      $ sudo port install cgdb at terminal.
-      If you would like to contact him, his address is jfrederich *at* gmail *dot* com.
+      If you want to use a package system, then CGDB can also be installed with the 
+      <A Href="http://www.macports.org">MacPorts</a> system. Simply install MacPorts 
+      and enter the command 
+      <B>$ sudo port install cgdb</B>
+      at the terminal.
+      If you would like to contact Jens, his address is jfrederich *at* gmail *dot* com.
       </P>
 
       <P><B>Gentoo CGDB binary</b></P>
