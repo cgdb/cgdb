@@ -292,7 +292,7 @@ static int find_first     (void* key,
 
 static void direct_hash_test (void)
 {
-     int       i, rc;
+     long       i, rc;
      struct std_hashtable     *h;
 
      h = std_hash_table_new (NULL, NULL);
@@ -307,7 +307,7 @@ static void direct_hash_test (void)
 
      for (i=1; i<=20; i++)
           {
-          rc = ((int) (
+          rc = ((long) (
 	  	std_hash_table_lookup (h, ((void*) (i)))));
 
 	  assert (rc != 0);
