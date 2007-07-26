@@ -1,3 +1,6 @@
+   * Fixed a bug in CGDB where the Insert and Delete keys were not 
+     recognized properly all of the time.
+
 cgdb-0.6.4 (04/28/2007)
 
    * CGDB can now be compiled with -jN option. It would fail previously.
