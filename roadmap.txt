@@ -1,0 +1,60 @@
+CGDB is a lightweight front end to GDB. It is intended to be easy to use
+and quick to respond to the user. CGDB is currently stable and usable. It 
+unfortunately is not very full of features. The goal is to add necessary 
+features to CGDB while continuing to keep it lightweight.
+
+CGDB is broken up into two major components. Mainly, CGDB itself and libtgdb. 
+libtgdb is a library that is intended to handle the communication hurdle with 
+GDB. There is two major communication possibilities when communicating with
+GDB. The old annotation interface, and the new MI interface. tgdb is still
+only capable of speaking the annotation protocol. This is currently why 
+there is not a lot of functionality at the CGDB level. I have attempted to
+implement the gdb/mi protocol by writing libgdbmi in cgdb/lib/gdbmi. I had
+to modify bison to allow it to work as a push parser. In general, the 
+work left on tgdb is,
+
+  - get bison to have push parser support in next release of bison
+  - test and polish libgdbmi
+  - stuff libgdbmi into libtgdb. This could be by rewriting libtgdb into
+    a nicer interface and then plugging in libgdbmi or by back fitting
+    libgdbmi into libtgdb. Either way, the interface should be nice, and
+    the annotate 2 interface needs to stay supported.
+  - extend either libgdbmi or libtgdb to be available from a scripting
+    language. Tcl or perl would be a good choice. This would give 
+    developers an easy way to script particular functionality of GDB.
+
+CGDB was written quickly over a period of about a year. It is obvious to 
+us now that we made a trade off, which is: to get CGDB working fast instead of
+designing CGDB so it could be easily extended in the future. Because of that
+CGDB essentially has no window manager. A window manager is the main feature
+that CGDB requires in order to better be able to easily display more 
+information to the user. At this point, a programmer has no way to easily
+display new types of information. The main features that are of interest
+at this point are,
+
+  - Write a new window manager for CGDB. Something that will be as flexible
+    as vim's window manager. This includes, splitting horizontally and 
+    vertically, and resizing.
+  - Finish writing the map functionality. This is actually 90% done. With
+    a little more testing of the boundry cases, and some documentation, 
+    this will be done.
+  - Write an interface on top of the kui that will determine exactly how
+    multiple keys are bound together to form a command. That way, we can
+    provide high level functionality in a bindings file. For instance,
+    currently CGDB has no way to associate Ctrl-w,j to a window move 
+    command. That's because it only understands one char at a time.
+  - Add readline support to the status bar.
+  - Move the status bar to the bottom of the window like vim does. This 
+    should probably be done after the window manager is made, since there
+    are multiple status bars per file.
+  - Provide stack trace frame window when the new window manager is ready.
+  - Provide variable display if someone is clever enough to figure out
+    how to display this information in a curses window.
+ 
+In general, the rules for hacking CGDB are
+
+  - Rewriting code is fine, but must provide the same functionality that
+    previously existed.
+  - Make code easy to understand. Remember, it must pass peer review.
+  - Test, Test, Test.
+  - When necessary, need to provide documentation.
