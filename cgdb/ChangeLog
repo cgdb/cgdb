@@ -1,3 +1,10 @@
+07/31/2007 Gilboa Davara <gilboad@gmail.com>
+
+	* include/cgdbrc.h (cgdbrc_init): Added.
+	* src/cgdb.c (main): Call cgdbrc_init.
+	* src/cgdbrc.c (COMMANDS): Replace linear data structure with
+	binary data structure.
+
 version 0.6.4 (28/04/2007):
 
 12/29/2006 Bob Rossi <bob@brasko.net>

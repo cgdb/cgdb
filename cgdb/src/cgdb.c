@@ -1615,6 +1615,8 @@ main (int argc, char *argv[])
 
   current_line = ibuf_init ();
 
+  cgdbrc_init ();
+
   if (create_and_init_pair () == -1)
     {
       fprintf (stderr, "%s:%d Unable to create PTY pair", __FILE__, __LINE__);

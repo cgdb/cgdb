@@ -34,6 +34,21 @@
  * Feel free to integrate the two files somehow.
  */
 
+/* Initialization {{{ */
+
+/** 
+ * Initialize the cgdbrc interface. 
+ *
+ * TODO: This interface should become instance driven instead of having
+ * a global context.
+ *
+ * \return
+ * 0 on success, otherwise error.
+ */
+void cgdbrc_init (void);
+
+/* }}} */
+
 /* Parse options {{{ */
 
 /** 

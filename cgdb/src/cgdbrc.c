@@ -138,68 +138,90 @@ static struct ConfigVariable
     { "wrapscan", "ws", CONFIG_TYPE_BOOL, &cgdbrc_config_options[CGDBRC_WRAPSCAN].variant.int_val },
 };
 
-static int command_focus_cgdb( void );
-static int command_focus_gdb( void );
-static int command_focus_tty( void );
+static int command_do_tgdbcommand( int param );
 
-static int command_do_bang( void );
-static int command_do_continue( void );
-static int command_do_finish( void );
-static int command_do_focus (void);
-static int command_do_help( void );
-static int command_do_next( void );
-static int command_do_quit( void );
-static int command_do_run( void );
-static int command_do_shell( void );
-static int command_do_step( void );
-static int command_source_reload( void );
+static int command_focus_cgdb( int param );
+static int command_focus_gdb( int param );
+static int command_focus_tty( int param );
 
-static int command_parse_syntax( void );
-static int command_parse_highlight (void);
-static int command_parse_map (void);
-static int command_parse_unmap (void);
+static int command_do_bang( int param );
+static int command_do_focus ( int param );
+static int command_do_help( int param );
+static int command_do_quit( int param );
+static int command_do_shell( int param );
+static int command_source_reload( int param );
 
-typedef int (*action_t)(void);
-static struct commands
+static int command_parse_syntax( int param );
+static int command_parse_highlight ( int param );
+static int command_parse_map ( int param );
+static int command_parse_unmap ( int param );
+
+typedef int (*action_t)( int param );
+typedef struct COMMANDS
 {
-    const char *name, *s_name;
-    /* these functions will return 0 on success and 1 on error.  */
-    /* Should the configuration file processing continue after an error?*/
-    action_t action;
-} COMMANDS[] = {
-    /* keep this stuff sorted, you can use !sort in vi*/
-    /* bang        */ { "bang",        "bang",	    command_do_bang },
-    /* continue    */ { "continue",    "continue",  command_do_continue },
-    /* edit        */ { "edit",        "e",	    command_source_reload },
-    /* finish      */ { "finish",      "finish",    command_do_finish },
-    /* focus      */  { "focus",       "focus",	    command_do_focus },
-    /* help        */ { "help",        "help",	    command_do_help },
-    /* highlight   */ { "highlight",   "hi",	    command_parse_highlight },
-    /* imap	   */ { "imap",	       "im",	    command_parse_map },
-    /* iunmap	   */ { "iunmap",      "iu",	    command_parse_unmap },
-    /* insert      */ { "insert",      "insert",    command_focus_gdb },
-    /* map         */ { "map",         "map",	    command_parse_map },
-    /* next        */ { "next",        "next",	    command_do_next },
-    /* quit        */ { "quit",        "q",	    command_do_quit },
-    /* run         */ { "run",         "run",	    command_do_run },
-    /* shell       */ { "shell",       "sh",	    command_do_shell },
-    /* step        */ { "step",        "step",	    command_do_step },
-    /* syntax      */ { "syntax",      "syntax",    command_parse_syntax },
-    /* unmap       */ { "unmap",       "unm",	    command_parse_unmap },
+	const char *name;
+	/* these functions will return 0 on success and 1 on error.	*/
+	/* Should the configuration file processing continue after an error?*/
+	action_t action;
+	int param;
+} COMMANDS;
+
+COMMANDS commands[] =
+{
+	/* bang			*/ { "bang",		command_do_bang,		0 },
+	/* edit			*/ { "edit",		command_source_reload,	0 },
+	/* edit			*/ { "e",			command_source_reload,	0 },
+	/* focus		*/ { "focus",		command_do_focus,		0 },
+	/* help			*/ { "help",		command_do_help,		0 },
+	/* highlight	*/         { "highlight",	command_parse_highlight,0 },
+	/* highlight	*/ { "hi",			command_parse_highlight,0 },
+	/* imap			*/ { "imap",		command_parse_map,		0 },
+	/* imap			*/ { "im",			command_parse_map,		0 },
+	/* iunmap		*/ { "iunmap",		command_parse_unmap,	0 },
+	/* iunmap		*/ { "iu",			command_parse_unmap,	0 },
+	/* insert		*/ { "insert",		command_focus_gdb,		0 },
+	/* map			*/ { "map",			command_parse_map,		0 },
+	/* quit			*/ { "quit",		command_do_quit,		0 },
+	/* quit			*/ { "q",			command_do_quit,		0 },
+	/* shell		*/ { "shell",		command_do_shell,		0 },
+	/* shell		*/ { "sh",			command_do_shell,		0 },
+	/* syntax		*/ { "syntax",		command_parse_syntax,	0 },
+	/* unmap		*/ { "unmap",		command_parse_unmap,	0 },
+	/* unmap		*/ { "unm",			command_parse_unmap,	0 },
+	/* continue		*/ { "continue",	command_do_tgdbcommand,	TGDB_CONTINUE },
+	/* finish		*/ { "finish",		command_do_tgdbcommand,	TGDB_FINISH },
+	/* next			*/ { "next",		command_do_tgdbcommand,	TGDB_NEXT },
+	/* run			*/ { "run",			command_do_tgdbcommand,	TGDB_RUN },
+	/* step			*/ { "step",		command_do_tgdbcommand,	TGDB_STEP }
 };
 
-action_t get_command( const char *cmd )
+int command_sort_find(const void *_left_cmd, const void *_right_cmd)
 {
-    /* FIXME: replace with binary search */
-    int i;
-    for ( i = 0; i < (sizeof( COMMANDS )/sizeof( COMMANDS[0] )); ++i ) {
-        if ( strcmp( cmd, COMMANDS[i].name ) == 0 ||
-             strcmp( cmd, COMMANDS[i].s_name ) == 0) {
-            return COMMANDS[i].action;
-        }
-    }
+	COMMANDS *right_cmd = (COMMANDS *)_right_cmd;
+	COMMANDS *left_cmd = (COMMANDS *)_left_cmd;
 
-    return NULL;
+	return strcmp(left_cmd->name,right_cmd->name);
+}
+
+#define COMMANDS_SIZE		(sizeof(COMMANDS))
+#define COMMANDS_COUNT		(sizeof(commands) / sizeof(COMMANDS))
+
+void cgdbrc_init (void)
+{
+	qsort((void *)commands,
+			COMMANDS_COUNT,
+			COMMANDS_SIZE,
+			command_sort_find);
+}
+
+COMMANDS *get_command( const char *cmd )
+{
+	COMMANDS command = { cmd, NULL, 0 };
+
+	return bsearch((void *)&command,(void *)commands,
+					COMMANDS_COUNT,
+					COMMANDS_SIZE,
+					command_sort_find);
 }
 
 struct ConfigVariable* get_variable( const char *variable ) 
@@ -375,33 +397,34 @@ command_set_syntax_type (const char *value)
   return 0;
 }
 
-int command_focus_cgdb( void )
+int command_focus_cgdb( int param )
 {
     if_set_focus( CGDB );
     return 0;
 }
 
-int command_focus_gdb( void )
+int command_focus_gdb( int param )
 {
     if_set_focus( GDB );
     return 0;
 }
 
-int command_focus_tty( void )
+int command_focus_tty( int param )
 {
     if_set_focus( TTY );
     return 0;
 }
 
-int command_do_bang( void )
+int command_do_bang( int param )
 {
     return 0;
 }
 
-int command_do_continue( void )
+int command_do_tgdbcommand( int param )
 {
     tgdb_request_ptr request_ptr;
-    request_ptr = tgdb_request_run_debugger_command (tgdb, TGDB_CONTINUE);
+
+    request_ptr = tgdb_request_run_debugger_command (tgdb, param );
     if (!request_ptr)
         return -1;
     handle_request (tgdb, request_ptr);
@@ -409,19 +432,7 @@ int command_do_continue( void )
     return 0;
 }
 
-int command_do_finish( void )
-{
-    tgdb_request_ptr request_ptr;
-    request_ptr = tgdb_request_run_debugger_command (tgdb, TGDB_FINISH);
-    if (!request_ptr)
-        return -1;
-    handle_request (tgdb, request_ptr);
-
-    return 0;
-}
-
-int 
-command_do_focus (void)
+int command_do_focus ( int param )
 {
   int token = yylex ();
   const char *value;
@@ -431,35 +442,24 @@ command_do_focus (void)
   value = get_token ();
 
   if (strcasecmp (value, "cgdb") == 0)
-    command_focus_cgdb();
+    command_focus_cgdb(0);
   else if (strcasecmp (value, "gdb") == 0)
-    command_focus_gdb();
+    command_focus_gdb(0);
   else if (strcasecmp (value, "tty") == 0)
-    command_focus_tty();
+    command_focus_tty(0);
   else
     return 1;
 
   return 0;
 }
 
-int command_do_help( void )
+int command_do_help( int param )
 {
     if_display_help();
     return 0;
 }
 
-int command_do_next( void )
-{
-    tgdb_request_ptr request_ptr;
-    request_ptr = tgdb_request_run_debugger_command  (tgdb, TGDB_NEXT);
-    if (!request_ptr)
-        return -1;
-    handle_request (tgdb, request_ptr);
-
-    return 0;
-}
-
-int command_do_quit( void )
+int command_do_quit( int param )
 {
     /* FIXME: Test to see if debugged program is still running */
     cleanup();
@@ -467,35 +467,12 @@ int command_do_quit( void )
     return 0;
 }
 
-int command_do_run( void )
-{
-    /* FIXME: see if there are any other arguments to pass to the run command */
-    tgdb_request_ptr request_ptr;
-    request_ptr = tgdb_request_run_debugger_command (tgdb, TGDB_RUN);
-    if (!request_ptr)
-        return -1;
-    handle_request (tgdb, request_ptr);
-
-    return 0;
-}
-
-int command_do_shell( void )
+int command_do_shell( int param )
 {
     return run_shell_command(NULL);
 }
 
-int command_do_step( void )
-{
-    tgdb_request_ptr request_ptr;
-    request_ptr = tgdb_request_run_debugger_command (tgdb, TGDB_STEP);
-    if (!request_ptr)
-        return -1;
-    handle_request (tgdb, request_ptr);
-
-    return 0;
-}
-
-int command_source_reload( void )
+int command_source_reload( int param )
 {
     struct sviewer *sview = if_get_sview ();
 
@@ -512,7 +489,7 @@ int command_source_reload( void )
     return 0;
 }
 
-int command_parse_syntax( void )
+int command_parse_syntax( int param )
 {
   /* This is something like: 
      :syntax
@@ -543,15 +520,14 @@ int command_parse_syntax( void )
   return 0;
 }
 
-static int 
-command_parse_highlight (void)
+static int command_parse_highlight ( int param )
 {
   return hl_groups_parse_config (hl_groups_instance);
 }
 
 extern struct kui_map_set *kui_map, *kui_imap;
-static int
-command_parse_map (void)
+
+static int command_parse_map ( int param )
 {
   struct kui_map_set *kui_map_choice;
   int key, value, val;
@@ -584,8 +560,7 @@ command_parse_map (void)
   return 0;
 }
 
-static int
-command_parse_unmap (void)
+static int command_parse_unmap ( int param )
 {
   struct kui_map_set *kui_map_choice;
   int key, val;
@@ -776,9 +751,9 @@ int command_parse_string( const char *buffer )
     } break;
 
     case IDENTIFIER: {
-        action_t action = get_command( get_token() );
-        if ( action ) {
-            action();
+        COMMANDS *command = get_command( get_token() );
+        if ( command ) {
+            command->action(command->param);
             rv = 0;
         } else {
             rv = 1;
