@@ -1,3 +1,8 @@
+   * Added the cgdbmodekey configuration option. This allows the user to
+     change the key that switches them from GDB mode to CGDB mode. The
+     default value is the Escape key. This is useful for users that want
+     to use readline in vi-mode.
+
    * Fixed a bug in CGDB where the Insert and Delete keys were not 
      recognized properly all of the time.
 

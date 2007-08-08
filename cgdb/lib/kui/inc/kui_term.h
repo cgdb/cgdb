@@ -175,7 +175,7 @@ char *kui_term_get_ascii_char_sequence_from_key (int key);
  * The new key, or -1 on error.
  * CGDB_KEY_ERROR is returned if no key matches the keycode.
  */
-int kui_term_get_key_from_keycode (const char *keycode);
+int kui_term_get_cgdb_key_from_keycode (const char *keycode);
 
 /**
  * Get's the key in string form.

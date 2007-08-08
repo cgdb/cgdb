@@ -24,6 +24,7 @@
 #include "cgdb.h"
 #include "sys_util.h"
 #include "std_list.h"
+#include "kui_term.h"
 
 extern struct tgdb *tgdb;
 
@@ -47,6 +48,7 @@ enum ConfigType
 
 static int command_set_arrowstyle( const char *value );
 static int command_set_focus( const char *value );
+static int command_set_cgdb_mode_key( const char *value );
 static int command_set_winsplit( const char *value );
 static int command_set_timeout( int value );
 static int command_set_timeoutlen( int value );
@@ -65,6 +67,7 @@ static struct cgdbrc_config_option cgdbrc_config_options[CGDBRC_WRAPSCAN+1] =
 {
   {CGDBRC_ARROWSTYLE, {ARROWSTYLE_SHORT}},
   {CGDBRC_AUTOSOURCERELOAD, {0}},
+  {CGDBRC_CGDB_MODE_KEY, {CGDB_KEY_ESC}},
   {CGDBRC_IGNORECASE, {0}},
   {CGDBRC_SHORTCUT, {0}},
   {CGDBRC_SHOWTGDBCOMMANDS, {0}},
@@ -100,6 +103,9 @@ static struct ConfigVariable
 
     /* autosourcereload */  
     { "autosourcereload", "asr", CONFIG_TYPE_BOOL, &cgdbrc_config_options[CGDBRC_AUTOSOURCERELOAD].variant.int_val },
+
+    /* cgdbmodekey */
+    { "cgdbmodekey", "cgdbmodekey", CONFIG_TYPE_FUNC_STRING, command_set_cgdb_mode_key },
 
     /* ignorecase */
     { "ignorecase", "ic", CONFIG_TYPE_BOOL, &cgdbrc_config_options[CGDBRC_IGNORECASE].variant.int_val },
@@ -252,6 +258,31 @@ command_set_arrowstyle (const char *value)
     option.variant.arrow_style = ARROWSTYLE_HIGHLIGHT;
   else
     return 1;
+
+  return cgdbrc_set_val (option);
+}
+
+int
+command_set_cgdb_mode_key (const char *value)
+{
+  struct cgdbrc_config_option option;
+  option.option_kind = CGDBRC_CGDB_MODE_KEY;
+
+  if (value) {
+    // If the user typed in a single key, use it.
+    if (strlen (value) == 1) {
+      option.variant.int_val = value[0];
+    } else {
+      // The user may have typed in a keycode. (e.g. <Esc>)
+      // attempt to translate it.
+      int key = kui_term_get_cgdb_key_from_keycode (value);
+      if (key == -1)
+        return -1;
+      option.variant.int_val = key;
+    }
+  } else {
+    return -1;
+  }
 
   return cgdbrc_set_val (option);
 }

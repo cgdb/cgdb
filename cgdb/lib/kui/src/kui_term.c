@@ -782,7 +782,7 @@ kui_term_get_ascii_char_sequence_from_key (int key)
   int i, val;
   const char *keycode;
 
-  if (key <= CGDB_KEY_ESC || key >= CGDB_KEY_ERROR)
+  if (key < CGDB_KEY_ESC || key >= CGDB_KEY_ERROR)
     return NULL;
 
   for (i = 0; hard_coded_bindings[i].key != CGDB_KEY_ERROR; ++i)

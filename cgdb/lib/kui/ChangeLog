@@ -1,3 +1,10 @@
+08/08/2007 Bob Rossi <bob@brasko.net>
+
+	* inc/kui_term.h (kui_term_get_key_from_keycode): Renamed to
+	kui_term_get_cgdb_key_from_keycode.
+	* src/kui_term.c (kui_term_get_ascii_char_sequence_from_key): Off by 1
+	error.
+
 version 0.6.4 (28/04/2007):
 
 12/29/2006 Bob Rossi <bob@brasko.net>

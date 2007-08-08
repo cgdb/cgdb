@@ -1,3 +1,10 @@
+08/08/2006 Bob Rossi <bob@brasko.net>
+
+	* cgdb.texinfo (Switching Windows): Update with cgdbmodekey info.
+	(CGDB Mode, GDB Mode, File Dialog Mode): Ditto.
+	(Configuring CGDB): Add cgdbmodekey documentation.
+	(Sending I/O to Inferior): Update with cgdbmodekey info.
+
 version 0.6.4 (28/04/2007):
 
 12/27/2006 Bob Rossi <bob@brasko.net>

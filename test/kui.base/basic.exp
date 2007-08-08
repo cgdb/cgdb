@@ -87,7 +87,7 @@ if [kui_start --file=/tmp/map.txt] then {
 set test "test ESC char"
 send "\033"
 expect {
-  -re "CGDB_KEY_ESC$kui_prompt$" { pass "$test"}
+  -re "CGDB_KEY_ESC\\\[27\\\]$kui_prompt$" { pass "$test"}
   timeout {
     fail "timeout $test"
   }
@@ -423,7 +423,7 @@ foreach {val} {a b c d e f g h i j k l m n o p q r s t u v w x y z} {
 set test "testing <Esc>"
 send "special_Esc"
 expect {
-  -re "CGDB_KEY_ESC${kui_prompt}$" { pass "$test"}
+  -re "CGDB_KEY_ESC\\\[27\\\]${kui_prompt}$" { pass "$test"}
   timeout {
     fail "timeout $test"
   }
@@ -642,7 +642,7 @@ expect {
 set test "key not detected until next key hit"
 send "\033o"
 expect {
-  -re "CGDB_KEY_ESCo${kui_prompt}$" { pass "$test"}
+  -re "CGDB_KEY_ESC\\\[27\\\]o${kui_prompt}$" { pass "$test"}
   timeout {
     fail "timeout $test"
   }

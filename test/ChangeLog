@@ -1,3 +1,8 @@
+08/08/2007 Bob Rossi <bob@brasko.net>
+
+	* kui.base/basic.exp: Update the regression tests now that the ESC key
+	is treated as a keycode in the kui (for printing purposes).
+
 version 0.6.4 (28/04/2007):
 
 12/27/2006 Bob Rossi <bob@brasko.net>

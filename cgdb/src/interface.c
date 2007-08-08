@@ -1287,14 +1287,17 @@ internal_if_input (int key)
 {
   int regex_icase = cgdbrc_get (CGDBRC_IGNORECASE)->variant.int_val;
   int shortcut_option = cgdbrc_get (CGDBRC_SHORTCUT)->variant.int_val;
+  /* Normally, CGDB_KEY_ESC, but can be configured by the user */
+  int cgdb_mode_key = cgdbrc_get (CGDBRC_CGDB_MODE_KEY)->variant.int_val;
 
-  /* The ESC Key, puts the debugger into command mode */
-  if (focus != CGDB && key == CGDB_KEY_ESC)
+  /* The cgdb mode key, puts the debugger into command mode */
+  if (focus != CGDB && key == cgdb_mode_key)
     {
       if_set_focus (CGDB);
       return 0;
     }
-  else if (key == CGDB_KEY_ESC)
+  /* If you are already in cgdb mode, the cgdb mode key does nothing */
+  else if (key == cgdb_mode_key)
     return 0;
 
   /* Check for global keystrokes */

@@ -295,11 +295,14 @@ The full list of commands that are available in the source window is in
 
 When CGDB is invoked, the interface is in @dfn{GDB mode}.  A @samp{*} at the 
 right of the status bar indicates that input will be passed to GDB.  To change
-the focus to the source window, hit @key{ESC}.  The interface is now in 
-@dfn{CGDB mode}.
+the focus to the source window, hit the @key{ESC} key.  The 
+@dfn{cgdb mode key} is the key that is responsible for switching the user
+into @dfn{CGDB mode} from a different mode.  The cgdb mode 
+key is defaulted to the @key{ESC} key.  To change this value, look at the 
+configuration options for CGDB.  @xref{Configuring CGDB}.
 
-To switch back into @dfn{GDB mode}, press @kbd{i}.  This syntax is based on 
-the popular Unix text-editor, vi.
+The interface is now in @dfn{CGDB mode}.  To switch back into @dfn{GDB mode}, 
+press @kbd{i}.  This syntax is based on the popular Unix text-editor, vi.
 
 @node Controlling CGDB
 @chapter CGDB commands
@@ -327,8 +330,9 @@ primarily available for the user to view the current source file, search it,
 or switch to a different mode.
 
 @table @kbd
-@item ESC
+@item cgdbmodekey
 Puts the user into command mode. However, you are already in this mode.
+This is defaulted to the @key{ESC} key.
 
 @item i
 Puts the user into @dfn{GDB mode}.
@@ -458,8 +462,8 @@ interested in the keys, it will handle them. Below is a list of keys that
 CGDB is interested in, and does not pass along any further.
 
 @table @kbd
-@item ESC
-Switch back to source window.
+@item cgdbmodekey
+Switch back to source window.  This is defaulted to the @key{ESC} key.
 
 @item page up
 Move up a page.
@@ -542,9 +546,8 @@ Select the current file.
 @cindex commands, in TTY mode
 
 @table @kbd
-@item ESC
-Switch back to source window.
-
+@item cgdbmodekey
+Switch back to source window. This is defaulted to the @key{ESC} key.
 @item page up
 Move up a page.
 
@@ -595,6 +598,15 @@ this case will be updated to show the new version.  Note, CGDB only looks at
 the timestamp of the source file to determine if it has changed. So if 
 you modify the source file, and didn't recompile yet, CGDB will still 
 pick up on the changes.
+
+@item :set cgdbmodekey=@var{key}
+This option is used to determine what key puts CGDB into @dfn{CGDB Mode}.
+By default, the @kbd{ESC} key is used.  @var{key} can be any normal key
+on the keyboard.  It can also be any keycode, as long as the keycode notation 
+is used.  This option is especially useful when the user wants to use
+readline in vi mode.  If the user types @code{set cgdbmodekey=<PageUp>} 
+then the @kbd{Page Up} key will put CGDB into CGDB mode and the @kbd{ESC}
+key will flow through to readline.
 
 @item :set ic
 @itemx :set ignorecase
@@ -1071,13 +1083,13 @@ and the @dfn{gdb window}.  This is called the @dfn{tty window}. You will also
 see a new status bar called the tty status bar.  There will be a @samp{*} on 
 the tty status bar after the @kbd{T} was hit.  This is because when the 
 window is opened with the @kbd{T} command, CGDB automatically puts the user 
-into @dfn{TTY mode}.  To get out of this window hit @key{ESC}.  This will put 
-you back into command mode.  To make the tty window appear and disappear hit 
-the @kbd{T} key while in command mode.  It is a toggle.
+into @dfn{TTY mode}.  To get out of this window hit the cgdb mode key.  
+This will put you back into command mode.  To make the tty window appear and 
+disappear hit the @kbd{T} key while in command mode.  It is a toggle.
 
 Once the tty window is already open, the user can then hit @kbd{I} in
-command mode to get into @dfn{TTY mode}.  The user can then hit @key{ESC} in 
-@dfn{TTY mode} to get back into command mode.
+command mode to get into @dfn{TTY mode}.  The user can then hit the 
+cgdb mode key in the @dfn{TTY mode} to get back into command mode.
 
 When the tty window is open, all data that comes from the program, goes
 there.  Any data typed into the tty window will ONLY go to the program

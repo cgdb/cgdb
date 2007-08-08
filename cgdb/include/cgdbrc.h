@@ -106,6 +106,7 @@ enum cgdbrc_option_kind
 {
   CGDBRC_ARROWSTYLE,
   CGDBRC_AUTOSOURCERELOAD,
+  CGDBRC_CGDB_MODE_KEY,
   CGDBRC_IGNORECASE,
   CGDBRC_SHORTCUT,
   CGDBRC_SHOWTGDBCOMMANDS,
@@ -129,6 +130,7 @@ struct cgdbrc_config_option
     /* option_kind == CGDBRC_ARROWSTYLE */
     enum ArrowStyle arrow_style;
     /* option_kind == CGDBRC_AUTOSOURCERELOAD */
+    /* option_kind == CGDBRC_CGDB_MODE_KEY */
     /* option_kind == CGDBRC_IGNORECASE */
     /* option_kind == CGDBRC_SHORTCUT */
     /* option_kind == CGDBRC_SHOWTGDBCOMMANDS */
