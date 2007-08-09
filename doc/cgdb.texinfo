@@ -749,6 +749,30 @@ Send a step command to GDB.
 
 @item :syntax
 Turn the syntax on or off.
+
+@item :map @var{lhs} @var{rhs}
+Create a new mapping or overwrite an existing mapping in CGDB mode.  
+After the command is run, if @var{lhs} is typed, CGDB will get @var{rhs} 
+instead.  For more details on how to use the map command look in 
+@ref{Using Maps}.
+@item :unm @var{lhs}
+@item :unmap @var{lhs}
+Delete an existing mapping from CGDB mode.  @var{lhs} is what was typed
+in the left hand side when the user created the mapping.  For example, if 
+the user typed @code{:map a<Space>b foo} then the user could delete the
+existing mapping with @code{:unmap a<Space>b}.
+@item :im @var{lhs} @var{rhs}
+@itemx :imap @var{lhs} @var{rhs}
+Create a new mapping or overwrite an existing mapping in GDB mode.  
+After the command is run, if @var{lhs} is typed, CGDB will get @var{rhs} 
+instead.  For more details on how to use the map command look in 
+@ref{Using Maps}.
+@item :iu @var{lhs}
+@item :iunmap @var{lhs}
+Delete an existing mapping from GDB mode.  @var{lhs} is what was typed
+in the left hand side when the user created the mapping.  For example, if 
+the user typed @code{:imap a<Space>b foo} then the user could delete the
+existing mapping with @code{:iunmap a<Space>b}.
 @end table
 
 @node Highlighting Groups
@@ -959,12 +983,13 @@ key the user typed and the KUI will provide it.
 
 The KUI has 2 major responsibilities besides reading normal user input 
 and providing it to CGDB.  It needs to detect when the user has typed a 
-user defined macro or when the user has hit a special key on the keyboard.
+user defined map or when the user has hit a special key on the keyboard.
 
-A user defined macro, or simply @dfn{macro}, is used to change the meaning
-of typed keys.  This can also be refered to as a @dfn{map}.  An example would 
-be @code{map a b}.  If the user then typed the @key{a} character, the KUI 
-would detect that it was mapped to @key{b} and return @key{b} to CGDB.
+A user defined map, or simply @dfn{map}, is used to change the meaning
+of typed keys.  Some users may refer to this type of functionality as a 
+@dfn{macro}.  An example would be @code{map a b}.  If the user then typed 
+the @key{a} character, the KUI would detect that it was mapped to @key{b} 
+and return @key{b} to CGDB.
 
 When the user types a special key on the keyboard, a @dfn{key code} is
 sent to CGDB.  Typically, keys like  @kbd{HOME}, @kbd{DEL}, @key{F1}, etc,
@@ -975,15 +1000,15 @@ back together and reporting to CGDB that a particular key was typed by the
 user.  The @kbd{ESC} key is special because typically most key codes start with 
 that key.  This usually gives all key codes a common first key in its key 
 sequence.  The KUI uses the terminfo database to determine what key sequences 
-are sent by which special keys.  There are a few commonly used key sequences 
+are sent by which keycodes.  There are a few commonly used key sequences 
 that are hard coded into CGDB.
 
-A major challenge the KUI has to overcome is determining when a macro or a 
+A major challenge the KUI has to overcome is determining when a map or a 
 key sequence is received.  The KUI sometimes will need to read more than
 one character to determine this.  For example, if the user has 2 maps, 
 @code{map abc def} and @code{map abd def}, the KUI would have to buffer at 
 least the characters @key{a} and @key{b} before it could determine if the 
-user was going to type a macro.  After the next key press, if the user types 
+user was going to type a map.  After the next key press, if the user types 
 @key{c} or @key{d} then a map was received and the KUI will return 
 @kbd{d e f} to CGDB.  Otherwise, no map was received and the KUI must return 
 @kbd{a b} to CGDB.
@@ -994,26 +1019,28 @@ partial mappings or key sequences, and if so, how long it should wait before
 timing out.  
 
 @menu
-* Configuring the KUI Time Out Options::        The KUI's time out options.
+* Configuring the KUI Time Out Options::        The KUI's time out options
+* Using Maps::                                  Using maps
+* Understanding Keycodes::                      Understanding keycodes
 @end menu
 
 @node Configuring the KUI Time Out Options
-@section The KUI's time out options.
+@section The KUI's time out options
 @cindex timeout
 @cindex ttimeout
 @cindex timeoutlen
 @cindex ttimeoutlen
 
-The KUI may be configured to time out on either macros or key sequences.
+The KUI may be configured to time out on either maps or key sequences.
 
-When the KUI is matching a partial macro or key sequence it is capable
+When the KUI is matching a partial map or key sequence it is capable
 of timing out.  This means it will simply accepts the keys it has received so 
 far if a certain amount of time elapses between key presses.  This is 
-obvious when the user is typing a macro because the user must press each key
+obvious when the user is typing a map because the user must press each key
 individually.  For partial key sequences, this is less obvious.  That is 
 because the user only presses a single key, but multiple characters are sent 
-to the KUI.  The table below describes how the user can configure the KUI
-to time out on key codes or macros.  The @var{timeout} and @var{ttimeout}
+to CGDB.  The table below describes how the user can configure the KUI
+to time out on key codes or maps.  The @var{timeout} and @var{ttimeout}
 options control this functionality.
 
 @multitable @columnfractions .15 .15 .45
@@ -1023,7 +1050,7 @@ options control this functionality.
 @tab do not time out
 @item on
 @tab on or off
-@tab time out on macros and key codes
+@tab time out on maps and key codes
 @item off
 @tab on
 @tab time out on key codes
@@ -1051,7 +1078,7 @@ option.
 @end multitable
 
 A value of 0 means that the KUI will time out right away.  It will not be 
-possible to match a macro or key code in this circumstance.
+possible to match a map or key code in this circumstance.
 
 A common problem could be that when the user types a special key like 
 the left or right arrows, CGDB will go into the source mode and not 
@@ -1059,6 +1086,96 @@ perform the action requested by the user.  This typically means that the
 key code delay is to small.  If you try setting the option 
 @code{set ttimeoutlen=1000} CGDB should start acting like the user expects.
 If not, please report this to the CGDB mailing list.
+
+@node Using Maps
+@section Using maps
+
+CGDB fully supports the use of maps.  It allows the user to change the 
+meaning of typed keys. For example, you could have the following map 
+@code{:map <F2> ip<Space>argc<CR>}.
+
+When the user is in CGDB mode and they hit @key{F2}, the value of the map
+will be used instead.  The @kbd{i} key will first be received by CGDB, and
+it will put the user into insert mode.  Next, CGDB will get @kbd{p argc}
+followed by the @key{Enter} key.
+
+CGDB currently supports two mapping lists.  Any mapping that was added 
+with the @var{map} command will be used by CGDB when it is in CGDB mode.
+You can delete a mapping that you have created with the @var{map} command
+with the @var{unmap} command.  If you want to have mappings in GDB mode, you 
+can use the @var{imap} command.  Similarly, @var{iunmap} will delete a
+mapping in the @var{imap} set.  Some examples of this would be 
+@example
+map a<Space>b foo
+unmap a<Space>b
+
+imap a<CR>b foo
+iunmap a<CR>b
+@end example
+
+@node Understanding Keycodes
+@section Understanding keycodes
+
+The above example could use a little more explaining for people unfamiliar
+with vim maps.  The map takes a key and a value.  They are separated by
+a space.  Neither the key or value can have a space in them, or it is
+considered to be the separator between the key and value.  If the user 
+desires to have a space in either the key or value part of a map, they can
+use the keycode notation <Space>.  Below is a table of the
+keycodes in @dfn{keycode notation} form.  The keycode notation can be 
+used in any mapping command.
+
+@multitable @columnfractions .15 .4
+@headitem notation @tab meaning
+@item <Esc>
+@tab escape key
+@item <Up>
+@tab cursor up key
+@item <Down>
+@tab cursor down key
+@item <Left>
+@tab cursor left key
+@item <Right>
+@tab cursor right key
+@item <Home>
+@tab home key
+@item <End>
+@tab end key
+@item <PageUp>
+@tab page up key
+@item <PageDown>
+@tab page down key
+@item <Del>
+@tab delete key
+@item <Insert>
+@tab insert key
+@item <Nul>
+@tab zero
+@item <Bs>
+@tab backspace key
+@item <Tab>
+@tab tab key
+@item <NL>
+@tab linefeed
+@item <FF>
+@tab formfeed
+@item <CR>
+@tab carriage return
+@item <Space>
+@tab space
+@item <Lt>
+@tab less-than
+@item <Bslash>
+@tab backslash
+@item <Bar>
+@tab vertical bar
+@item <F1> - <F12>
+@tab function keys 1 to 12
+@item <C-...>
+@tab control keys
+@item <S-...>
+@tab shift keys
+@end multitable
 
 @node Sending I/O to Inferior
 @chapter Sending I/O to the program being debugged

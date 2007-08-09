@@ -1,3 +1,9 @@
+08/09/2006 Bob Rossi <bob@brasko.net>
+
+	* cgdb.texinfo (Configuring CGDB): Add :map, :unmap, :imap, :iunmap 
+	commands.
+	(Using Maps, Understanding Keycodes): Added.
+
 08/08/2006 Bob Rossi <bob@brasko.net>
 
 	* cgdb.texinfo (Switching Windows): Update with cgdbmodekey info.
