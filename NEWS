@@ -1,3 +1,8 @@
+   * CGDB fully supports the use of maps now. The feature is similar in 
+     nature to those that use vim maps.  It supports map, unmap, imap
+     and iunmap. The map/unmap work in CGDB mode and the imap/iunmap
+     work in GDB mode.
+
    * Added the cgdbmodekey configuration option. This allows the user to
      change the key that switches them from GDB mode to CGDB mode. The
      default value is the Escape key. This is useful for users that want
