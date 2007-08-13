@@ -110,10 +110,12 @@ static struct winsize screen_size;	/* Screen size */
 
 struct filedlg *fd;		/* The file dialog structure */
 
-static char regex_line[MAX_LINE];	/* The regex the user enters */
-static int regex_line_pos;	/* The index into the current regex */
-static int regex_search;	/* Currently searching text ? */
-static int regex_direction;	/* Direction to search */
+/* The regex the user is entering */
+static struct ibuf *regex_line = NULL;
+/* Direction to search */
+static int regex_direction;
+/* The position of the source file, before regex was applied. */
+static int orig_line_regex; 
 
 static char last_key_pressed = 0;	/* Last key user entered in cgdb mode */
 
@@ -122,7 +124,9 @@ static struct ibuf *cur_sbc = NULL;
 
 enum StatusBarCommandKind {
     /* This is represented by a : */
-    SBC_NORMAL
+    SBC_NORMAL,
+    /* This is set when a regular expression is being entered */
+    SBC_REGEX
 }; 
 
 static enum StatusBarCommandKind sbc_kind;
@@ -345,15 +349,15 @@ update_status_win (void)
     wattroff (tty_status_win, attr);
 
   /* Print the regex that the user is looking for Forward */
-  if (regex_search && regex_direction)
+  if (focus == CGDB_STATUS_BAR && sbc_kind == SBC_REGEX && regex_direction)
     {
-      if_display_message ("/", WIDTH - 1, "%s", regex_line);
+      if_display_message ("/", WIDTH - 1, "%s", ibuf_get (regex_line));
       curs_set (1);
     }
   /* Regex backwards */
-  else if (regex_search)
+  else if (focus == CGDB_STATUS_BAR && sbc_kind == SBC_REGEX)
     {
-      if_display_message ("?", WIDTH - 1, "%s", regex_line);
+      if_display_message ("?", WIDTH - 1, "%s", ibuf_get (regex_line));
       curs_set (1);
     }
   /* A colon command typed at the status bar */
@@ -806,94 +810,6 @@ if_run_command (struct sviewer *sview, struct ibuf *ibuf_command)
   if_draw ();
 }
 
-/* capture_regex: Captures a regular expression from the user.
- * ---------------
- *
- *   sview:  Source viewer object
- *
- *  Side Effect: 
- *
- *  regex_line: The regex the user has entered.
- *  regex_line_pos: The next available index into regex_line.
- *
- * Return Value: 0 if user gave a regex, otherwise 1.
- */
-static int
-capture_regex (struct sviewer *sview)
-{
-  int c;
-  int orig_line; 
-  int regex_icase = cgdbrc_get (CGDBRC_IGNORECASE)->variant.int_val;
-
-  if (!sview || !sview->cur)
-    return 0; 
-  
-  orig_line = sview->cur->sel_line;
-  /* Initialize the function for finding a regex and tell user */
-  regex_search = 1;
-  regex_line_pos = 0;
-  regex_line[regex_line_pos] = '\0';
-  if_draw ();
-
-  while ((c = wgetch (sview->win)) != ERR)
-    {
-      if (regex_line_pos == (MAX_LINE - 1)
-	  && !(c == CGDB_KEY_ESC || c == 8 || c == 127))
-	continue;
-
-      /* Quit the search if the user hit escape */
-      if (c == 27)
-	{
-	  regex_line_pos = 0;
-	  *regex_line = '\0';
-	  regex_search = 0;
-	  source_search_regex (sview, regex_line, 2, regex_direction,
-			       regex_icase);
-	  sview->cur->sel_line = orig_line;
-	  if_draw ();
-	  return 1;
-	}
-
-      /* If the user hit enter, then a successful regex has been recieved */
-      if (c == '\r' || c == '\n')
-	{
-	  regex_line[regex_line_pos] = '\0';
-	  regex_search = 0;
-	  source_search_regex (sview, regex_line, 2, regex_direction,
-			       regex_icase);
-	  if_draw ();
-	  return 0;
-	}
-
-      /* If the user hit backspace or delete remove a char */
-      if (CGDB_BACKSPACE_KEY (c) || c == 8 || c == 127)
-	{
-	  if (regex_line_pos > 0)
-	    --regex_line_pos;
-
-	  regex_line[regex_line_pos] = '\0';
-	  source_search_regex (sview, regex_line, 1, regex_direction,
-			       regex_icase);
-	  if_draw ();
-
-	  update_status_win ();
-	  continue;
-	}
-
-      /* Add a char, search and draw */
-      regex_line[regex_line_pos++] = c;
-      regex_line[regex_line_pos] = '\0';
-      source_search_regex (sview, regex_line, 1, regex_direction,
-			   regex_icase);
-      if_draw ();
-      update_status_win ();
-    }
-
-  /* Finished */
-  regex_search = 0;
-  return 0;
-}
-
 /* tty_input: Handles user input to the tty I/O window.
  * ----------
  *
@@ -964,6 +880,105 @@ gdb_input (int key)
   if_draw ();
 
   return 0;
+}
+
+/**
+ * Capture a regular expression from the user, one key at a time.
+ * This modifies the global variable regex_line.
+ *
+ * \param sview
+ * The source viewer.
+ *
+ * \return
+ * 0 if user gave a regex, otherwise 1.
+ */
+static int
+status_bar_regex_input (struct sviewer *sview, int key)
+{
+  int regex_icase = cgdbrc_get (CGDBRC_IGNORECASE)->variant.int_val;
+
+
+  /* Recieve a regex from the user. */
+  switch (key) {
+    case '\r':
+    case '\n':
+    case CGDB_KEY_CTRL_M:
+      source_search_regex (sview, ibuf_get (regex_line), 2, regex_direction, regex_icase);
+      if_draw ();
+      /* Can't delete the regex line here, because the user can later type 'n' or 'N'
+       * which will do another search on the last regex entered. */
+      if_set_focus (CGDB);
+      return 0;
+    case 8:
+    case 127:
+      /* Backspace or DEL key */
+      ibuf_delchar (regex_line);
+      source_search_regex (sview, ibuf_get (regex_line), 1, regex_direction, regex_icase);
+      if_draw ();
+      update_status_win ();
+      return 0;
+    default:
+      if (kui_term_is_cgdb_key (key)) {
+        const char *keycode = kui_term_get_keycode_from_cgdb_key (key);
+        int length = strlen (keycode), i;
+        for (i = 0; i < length; i++)
+          ibuf_addchar (regex_line, keycode[i]);
+      } else {
+        ibuf_addchar (regex_line, key);
+      }
+      source_search_regex (sview, ibuf_get (regex_line), 1, regex_direction, regex_icase);
+      if_draw ();
+      update_status_win ();
+  };
+  return 0;
+}
+
+static int
+status_bar_normal_input (int key)
+{
+  /* The goal of this state is to recieve a command from the user. */
+  switch (key) {
+    case '\r':
+    case '\n':
+    case CGDB_KEY_CTRL_M:
+      /* Found a command */
+      if_run_command (src_win, cur_sbc);
+      ibuf_free (cur_sbc);
+      cur_sbc = NULL;
+      if_set_focus (CGDB);
+      break;
+    case 8:
+    case 127:
+      /* Backspace or DEL key */
+      ibuf_delchar (cur_sbc);
+      update_status_win ();
+      break;
+    default:
+      if (kui_term_is_cgdb_key (key)) {
+        const char *keycode = kui_term_get_keycode_from_cgdb_key (key);
+        int length = strlen (keycode), i;
+        for (i = 0; i < length; i++)
+          ibuf_addchar (cur_sbc, keycode[i]);
+      } else {
+        ibuf_addchar (cur_sbc, key);
+      }
+      update_status_win ();
+      break;
+  };
+  return 0;
+}
+
+static int
+status_bar_input (struct sviewer *sview, int key)
+{
+  switch (sbc_kind) {
+    case SBC_NORMAL:
+      return status_bar_normal_input (key);
+    case SBC_REGEX:
+      return status_bar_regex_input (sview, key);
+  };
+
+  return -1;
 }
 
 /**
@@ -1236,9 +1251,15 @@ internal_if_input (int key)
     {
       // Depending on which cgdb was in, it can free some memory here that
       // it was previously using.
-      if (focus == CGDB_STATUS_BAR) {
+      if (focus == CGDB_STATUS_BAR && sbc_kind == SBC_NORMAL) {
         ibuf_free (cur_sbc);
         cur_sbc = NULL;
+      } else if (focus == CGDB_STATUS_BAR && sbc_kind == SBC_REGEX) {
+	  source_search_regex (src_win, ibuf_get (regex_line), 2, regex_direction, regex_icase);
+          ibuf_free (regex_line);
+          regex_line = NULL;
+	  src_win->cur->sel_line = orig_line_regex;
+	  if_draw ();
       }
       if_set_focus (CGDB);
       return 0;
@@ -1261,30 +1282,42 @@ internal_if_input (int key)
 	  return 0;
         case ':':
           if_set_focus (CGDB_STATUS_BAR);
+          // Set the type of the command the user is typing in the status bar
+          sbc_kind = SBC_NORMAL;
           // Since the user is about to type in a command, allocate a buffer 
           // in which this command can be stored.
 	  cur_sbc = ibuf_init ();
-          // Set the type of the command the user is typing in the status bar
-          sbc_kind = SBC_NORMAL;
           return 0;
 	case '/':
 	case '?':
+          /* Free the users last regex, before allocating a new one */
+          if (regex_line) {
+            ibuf_free (regex_line);
+          }
+
+          regex_line = ibuf_init ();
 	  regex_direction = ('/' == key);
+          orig_line_regex = src_win->cur->sel_line;
+
+          sbc_kind = SBC_REGEX;
+          if_set_focus (CGDB_STATUS_BAR);
 
 	  /* Capturing regular expressions */
 	  source_search_regex_init (src_win);
-	  capture_regex (src_win);
+
+          /* Initialize the function for finding a regex and tell user */
+          if_draw ();
 	  return 0;
 	case 'n':
 	  if (!shortcut_option)
 	    {
-	      source_search_regex (src_win, regex_line, 2, regex_direction,
+	      source_search_regex (src_win, ibuf_get (regex_line), 2, regex_direction,
 				   regex_icase);
 	      if_draw ();
 	    }
 	  break;
 	case 'N':
-	  source_search_regex (src_win, regex_line, 2, !regex_direction,
+	  source_search_regex (src_win, ibuf_get (regex_line), 2, !regex_direction,
 			       regex_icase);
 	  if_draw ();
 	  break;
@@ -1399,36 +1432,7 @@ internal_if_input (int key)
       }
       return 0;
     case CGDB_STATUS_BAR:
-      /* The goal of this state is to recieve a command from the user. */
-      switch (key) {
-        case '\r':
-        case '\n':
-        case CGDB_KEY_CTRL_M:
-          /* Found a command */
-          if_run_command (src_win, cur_sbc);
-          ibuf_free (cur_sbc);
-          cur_sbc = NULL;
-          if_set_focus (CGDB);
-          break;
-        case 8:
-        case 127:
-          /* Backspace or DEL key */
-          ibuf_delchar (cur_sbc);
-          update_status_win ();
-          break;
-        default:
-          if (kui_term_is_cgdb_key (key)) {
-            const char *keycode = kui_term_get_keycode_from_cgdb_key (key);
-            int length = strlen (keycode), i;
-            for (i = 0; i < length; i++)
-              ibuf_addchar (cur_sbc, keycode[i]);
-          } else {
-            ibuf_addchar (cur_sbc, key);
-          }
-          update_status_win ();
-          break;
-      };
-      return 0;
+      return status_bar_input (src_win, key);
     }
 
   /* Never gets here */
