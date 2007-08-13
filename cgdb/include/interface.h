@@ -127,9 +127,10 @@ void if_shutdown(void);
  *  GDB: focus on the gdb i/o window
  *  TTY: focus on the debugged program i/o window
  *  CGDB: focus on source window, accepts command input.
+ *  CGDB_STATUS_BAR: focus on the status bar, accepts commands.
  *  FILE_DLG: focus on file dialog window
  */
-typedef enum Focus { GDB, TTY, CGDB, FILE_DLG } Focus;
+typedef enum Focus { GDB, TTY, CGDB, CGDB_STATUS_BAR, FILE_DLG } Focus;
 
 /* if_set_focus: Sets the current input focus to a different window 
  * ------------

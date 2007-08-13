@@ -1,3 +1,15 @@
+08/13/2007 Bob Rossi <bob@brasko.net>
+
+	* include/interface.h (Focus): Add CGDB_STATUS_BAR.
+	* src/interface.c (cur_sbc, StatusBarCommandKind, sbc_kind): Added.
+	(if_get_command): Removed.
+	(update_status_win, if_run_command, internal_if_input, if_set_focus): 
+	Update for CGDB_STATUS_BAR.
+	* src/cgdbrc.c (command_parse_map, command_parse_unmap): Update to
+	work with new flex parser.
+	* src/command_lexer.l: Allow for multiple little parsers, in one flex
+	parser file.
+
 08/08/2007 Bob Rossi <bob@brasko.net>
 
 	* include/cgdbrc.h (cgdbrc_option_kind, cgdbrc_config_option): Add

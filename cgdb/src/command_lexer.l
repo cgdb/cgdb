@@ -18,8 +18,19 @@ const char * get_token( void )
 
 %}
 
-%%
+        int enter_map_id = 0;
 
+/* An identifier used in a map like command */
+%x MAP_ID
+
+%%
+        if (enter_map_id)
+                BEGIN (MAP_ID);
+        else
+                BEGIN (INITIAL);
+
+<INITIAL>
+{
 #[^\n]*                                                    { /* ignore comments */ }
 "unset"                                                    { return UNSET; }
 "set"                                                      { return SET; }
@@ -39,6 +50,14 @@ const char * get_token( void )
 (\r\n|\n\r|\n|\r)                                          { return EOL; }
 [ \t\v\f]                                                  { /* ignore white-space */ }
 .                                                          { /* ignore bad-characters */ }
+}
+
+<MAP_ID>
+{
+" "     { /* ignore white space */ }
+[^ ]+   { return IDENTIFIER; }
+.       { /* ignore bad-characters */ }
+}
 
 %%
 

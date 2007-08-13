@@ -284,7 +284,10 @@ are valid in CGDB's configuration file.  Simply type @kbd{:} in the source
 window, and you will see the colon, and the rest of the command you type 
 appear in the status bar.  When you are finished typing the command that 
 you are interested in, type @code{enter}.  This will alert CGDB to execute 
-the command.
+the command.  If at any point you would like to cancel the current
+command typed so far, type the cgdb mode key.  This will put you back
+into CGDB mode.  For a description of the cgdb mode key, see 
+@ref{Switching Windows}.
 
 The full list of commands that are available in the source window is in
 @ref{Configuring CGDB}.

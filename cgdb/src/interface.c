@@ -117,9 +117,15 @@ static int regex_direction;	/* Direction to search */
 
 static char last_key_pressed = 0;	/* Last key user entered in cgdb mode */
 
-static char cur_com_line[MAX_LINE];	/* The line number the user entered */
-static int cur_com_pos;		/* The index into the current line */
-static int display_command;	/* Currently going to a line number */
+/* The cgdb status bar command */
+static struct ibuf *cur_sbc = NULL;
+
+enum StatusBarCommandKind {
+    /* This is represented by a : */
+    SBC_NORMAL
+}; 
+
+static enum StatusBarCommandKind sbc_kind;
 
 /* --------------- */
 /* Local Functions */
@@ -332,7 +338,7 @@ update_status_win (void)
     mvwprintw (status_win, 0, WIDTH - 1, "*");
   else if (focus == TTY && tty_win_on)
     mvwprintw (tty_status_win, 0, WIDTH - 1, "*");
-  else if (focus == CGDB)
+  else if (focus == CGDB || focus == CGDB_STATUS_BAR)
     mvwprintw (status_win, 0, WIDTH - 1, " ");
   wattroff (status_win, attr);
   if (tty_win_on)
@@ -350,10 +356,13 @@ update_status_win (void)
       if_display_message ("?", WIDTH - 1, "%s", regex_line);
       curs_set (1);
     }
-  /* Line number search */
-  else if (display_command)
+  /* A colon command typed at the status bar */
+  else if (focus == CGDB_STATUS_BAR && sbc_kind == SBC_NORMAL)
     {
-      if_display_message (":", WIDTH - 1, "%s", cur_com_line);
+      char *command = ibuf_get (cur_sbc);
+      if (!command)
+        command = "";
+      if_display_message (":", WIDTH - 1, "%s", command);
       curs_set (1);
     }
   /* Default: Current Filename */
@@ -773,85 +782,21 @@ signal_handler (int signo)
     }
 }
 
-/* if_get_command: Gets a command from the user
- * -----------------
- */
 static void
-if_get_command (struct sviewer *sview)
+if_run_command (struct sviewer *sview, struct ibuf *ibuf_command)
 {
-  int c;
-  cur_com_pos = 0;
-  cur_com_line[cur_com_pos] = '\0';
-  display_command = 1;
-  if_draw ();
-
-  while ((c = wgetch (sview->win)) != ERR)
-    {
-      if (cur_com_pos == (MAX_LINE - 1)
-	  && !(c == CGDB_KEY_ESC || c == 8 || c == 127))
-	continue;
-
-      /* Quit the search if the user hit escape */
-      if (c == 27)
-	{
-	  cur_com_pos = 0;
-	  cur_com_line[cur_com_pos] = '\0';
-	  display_command = 0;
-	  if_draw ();
-	  return;
-	}
-
-      /* If the user hit enter, then a successful regex has been recieved */
-      if (c == '\r' || c == '\n')
-	{
-	  cur_com_line[cur_com_pos] = '\0';
-	  display_command = 0;
-	  return;
-	}
-
-      /* If the user hit backspace or delete remove a char */
-      if (CGDB_BACKSPACE_KEY (c) || c == 8 || c == 127)
-	{
-	  if (cur_com_pos > 0)
-	    --cur_com_pos;
-
-	  cur_com_line[cur_com_pos] = '\0';
-	  if_draw ();
-
-	  update_status_win ();
-	  wrefresh (status_win);
-	  continue;
-	}
-
-      /* Add a char, search and draw */
-      cur_com_line[cur_com_pos++] = c;
-      cur_com_line[cur_com_pos] = '\0';
-      if_draw ();
-      update_status_win ();
-      wrefresh (status_win);
-    }
-
-  /* Finished */
-  display_command = 0;
-  if_draw ();
-}
-
-static void
-if_run_command (struct sviewer *sview)
-{
-  /* Get a command and then try to process it */
-  if_get_command (sview);
+  char *command = ibuf_get (ibuf_command);
 
   /* refresh and return if the user entered no data */
-  if (cur_com_pos == 0)
+  if (ibuf_length (ibuf_command) == 0)
     {
       if_draw ();
       return;
     }
 
-  if (command_parse_string (cur_com_line))
+  if (command_parse_string (command))
     {
-      if_display_message ("Unknown command: ", 0, "%s", cur_com_line);
+      if_display_message ("Unknown command: ", 0, "%s", command);
     }
   else
     {
@@ -1137,10 +1082,6 @@ source_input (struct sviewer *sview, int key)
 	handle_request (tgdb, request_ptr);
       }
       break;
-    case ':':
-      /* Allows user to go to a line number */
-      if_run_command (sview);
-      return;
     case ' ':
       {
 	enum tgdb_breakpoint_action t = TGDB_BREAKPOINT_ADD;
@@ -1293,6 +1234,12 @@ internal_if_input (int key)
   /* The cgdb mode key, puts the debugger into command mode */
   if (focus != CGDB && key == cgdb_mode_key)
     {
+      // Depending on which cgdb was in, it can free some memory here that
+      // it was previously using.
+      if (focus == CGDB_STATUS_BAR) {
+        ibuf_free (cur_sbc);
+        cur_sbc = NULL;
+      }
       if_set_focus (CGDB);
       return 0;
     }
@@ -1312,6 +1259,14 @@ internal_if_input (int key)
 	case 'I':
 	  if_set_focus (TTY);
 	  return 0;
+        case ':':
+          if_set_focus (CGDB_STATUS_BAR);
+          // Since the user is about to type in a command, allocate a buffer 
+          // in which this command can be stored.
+	  cur_sbc = ibuf_init ();
+          // Set the type of the command the user is typing in the status bar
+          sbc_kind = SBC_NORMAL;
+          return 0;
 	case '/':
 	case '?':
 	  regex_direction = ('/' == key);
@@ -1442,9 +1397,37 @@ internal_if_input (int key)
 	    return 0;
 	  }
       }
-    default:
-      /* Focus is screwed up, fix it */
-      fprintf (stderr, "KEYBOARD ERROR\r\n");
+      return 0;
+    case CGDB_STATUS_BAR:
+      /* The goal of this state is to recieve a command from the user. */
+      switch (key) {
+        case '\r':
+        case '\n':
+        case CGDB_KEY_CTRL_M:
+          /* Found a command */
+          if_run_command (src_win, cur_sbc);
+          ibuf_free (cur_sbc);
+          cur_sbc = NULL;
+          if_set_focus (CGDB);
+          break;
+        case 8:
+        case 127:
+          /* Backspace or DEL key */
+          ibuf_delchar (cur_sbc);
+          update_status_win ();
+          break;
+        default:
+          if (kui_term_is_cgdb_key (key)) {
+            const char *keycode = kui_term_get_keycode_from_cgdb_key (key);
+            int length = strlen (keycode), i;
+            for (i = 0; i < length; i++)
+              ibuf_addchar (cur_sbc, keycode[i]);
+          } else {
+            ibuf_addchar (cur_sbc, key);
+          }
+          update_status_win ();
+          break;
+      };
       return 0;
     }
 
@@ -1607,6 +1590,9 @@ if_set_focus (Focus f)
       focus = f;
       if_draw ();
       break;
+    case CGDB_STATUS_BAR:
+      focus = f;
+      if_draw ();
     default:
       return;
     }

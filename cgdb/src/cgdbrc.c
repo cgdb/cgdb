@@ -563,6 +563,9 @@ static int command_parse_map ( int param )
   struct kui_map_set *kui_map_choice;
   int key, value, val;
   char *key_token;
+  extern int enter_map_id;
+
+  enter_map_id = 1;
 
   if (strcmp (get_token (), "map") == 0)
     kui_map_choice = kui_map;
@@ -571,13 +574,17 @@ static int command_parse_map ( int param )
 
   key = yylex ();
   if (key != IDENTIFIER)
+  {
+    enter_map_id = 0;
     return -1;
+  }
   key_token = cgdb_strdup (get_token ());
 
   value = yylex ();
   if (value != IDENTIFIER)
   {
     xfree (key_token);
+    enter_map_id = 0;
     return -1;
   }
 
@@ -585,8 +592,11 @@ static int command_parse_map ( int param )
   if (val == -1)
   {
     free (key_token);
+    enter_map_id = 0;
     return -1;
   }
+
+  enter_map_id = 0;
 
   return 0;
 }
@@ -596,6 +606,9 @@ static int command_parse_unmap ( int param )
   struct kui_map_set *kui_map_choice;
   int key, val;
   char *key_token;
+  extern int enter_map_id;
+
+  enter_map_id = 1;
 
   if ((strcmp (get_token (), "unmap") == 0) || 
       (strcmp (get_token (), "unm") == 0))
@@ -605,15 +618,21 @@ static int command_parse_unmap ( int param )
 
   key = yylex ();
   if (key != IDENTIFIER)
+  {
+    enter_map_id = 0;
     return -1;
+  }
   key_token = cgdb_strdup (get_token ());
 
   val = kui_ms_deregister_map (kui_map_choice, key_token);
   if (val == -1)
   {
     free (key_token);
+    enter_map_id = 0;
     return -1;
   }
+
+  enter_map_id = 0;
 
   return 0;
 }
