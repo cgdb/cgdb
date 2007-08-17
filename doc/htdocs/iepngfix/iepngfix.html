@@ -1,0 +1,132 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+ <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+ <title>IE PNG Alpha Fix Demonstration</title>
+
+ <style type="text/css">
+
+ /*
+  USAGE: All you have to do is include this one line in your CSS file, with the
+  tag names to which you want the script applied:
+ */
+
+ img, div { behavior: url(iepngfix.htc) }
+
+ /*
+  Alternatively, you can specify that this will apply to all tags like so:
+   * { behavior: url(iepngfix.htc) }
+ */
+
+ </style>
+
+ <script type="text/javascript">
+ //<![CDATA[
+
+ // If you don't want to put unstandard properties in your stylesheet, here's yet
+ // another means of activating the script. This assumes that you have at least one
+ // stylesheet included already. Remove the /* and */ lines to activate.
+
+ /*
+ if (document.all && document.styleSheets && document.styleSheets[0] &&
+  document.styleSheets[0].addRule)
+ {
+  // Feel free to add rules for specific tags only, you just have to call it several times.
+  document.styleSheets[0].addRule('*', 'behavior: url(iepngfix.htc)');
+ }
+ */
+
+ //]]>
+ </script>
+</head>
+
+<body style="font: 10pt/14pt sans-serif; background-color: #FFFFFF">
+
+<div style="text-align: center; margin-top: 10pt">
+ <h1 style="font-size: 20pt">IE PNG Alpha Fix v1.0 RC4</h1>
+ by Angus Turnbull - <a href="http://www.twinhelix.com">http://www.twinhelix.com</a>.
+ Updated: 15 November 2005.
+ <hr />
+</div>
+
+
+<h4>What is it?</h4>
+<p>As you are no doubt aware, IE/Windows has very poor PNG support with regards to transparency.
+That's where this script fits in. It's an IE5.5+ 'behaviour' that you can upload, place
+one line in your CSS file, and forget. The HTC file will then automatically add near-native PNG
+support to IMG elements and (unlike many other PNG fix scripts) also supports any element with a
+"background-image:" CSS property, with <b>no alterations to the page HTML!</b></p>
+<p>You can even change IMG SRC or backgroundImage url() after runtime exactly as you would
+normally, and the script will handle any changes to the transparency filter automatically,
+disabling and enabling as required. See below for a demo.</p>
+
+
+<h4>License:</h4>
+<blockquote>
+ <p>IE5.5+ PNG Alpha Fix v1.0RC4</p>
+ <p>(c) 2004-2005 Angus Turnbull http://www.twinhelix.com</p>
+ <p>This is licensed under the <a href="http://creativecommons.org/licenses/LGPL/2.1/">CC-GNU LGPL,
+  version 2.1 or later</a>.</p>
+</blockquote>
+<p>If you want to link my <a href="http://www.twinhelix.com">site</a>
+or make a <a href="http://www.twinhelix.com/donate/">donation</a>, you're more than welcome :).</p>
+
+
+<h4>Tech Specs</h4>
+<p>IE5.5+ includes support for an 'AlphaImageLoader' filter, that can take an element on the page
+and insert a correctly-rendered PNG image inbetween the element's content and background. This
+script automatically scans all IMG SRCs and element backgroundImages for .PNG files, and if it
+finds them, it removes the regular image and substitutes this filter in place. See the source if
+you want, but I've coded it quite compactly to keep download time down to a minimum.</p>
+
+
+<h4>Usage Notes</h4>
+<p>It's essentially automatic, see the source of this page for the line of CSS you need.
+The only other thing is that it needs a blank .GIF file uploaded to the server, and you have
+to set the 'blankImg' variable in the HTC file to point to this GIF, otherwise you'll get the
+"broken image" marker with your PNGs.</p>
+
+
+<h4>Known Issues</h4>
+<p>Tell me about them as you encounter them :). Currently I can only think of these:</p>
+<ul>
+ <li>Can't help IE versions prior to 5.5, sorry.</li>
+ <li>Users can't right-click-save processed PNG images, they'll save the blank GIF file if
+  they try that. In some cases this might be a feature, not a bug...</li>
+ <li>The script detects the ".png" extension in image URLs. So if you have a CGI script that
+  generates a PNG image, you may have to rewrite parts of the script, or just cache them as PNG
+  files somewhere.</li>
+ <li>It's most reliable on elements with non-'auto' dimensions set. So, give images and
+  other elements width/height values; '100%', '10em' and '200px' and so on are all OK.</li>
+ <li>Background PNG images can't be tiled. This is a limitation of the IE filter.</li>
+ <li>Similarly, padding and borders don't indent the PNG image. An easy fix for
+  this is wrapping your PNG images in container DIVs or similar.</li>
+ <li>There may be about a short time as soon as the image loads when images are not
+  transparent, before the IE filter kicks in.</li>
+</ul>
+
+<h4>Demo:</h4>
+
+<div style="background-image: url(checkerboard.gif)">
+
+ <!-- As you can see, regular image/background swapping works automatically, too! -->
+
+ <strong>REGULAR IMAGE TAG:</strong>
+ <a href="javascript:void(document.images.testImg.src='helix.gif')">gif</a> |
+ <a href="javascript:void(document.images.testImg.src='opacity.png')">png</a>
+ <br />
+ <img name="testImg" src="opacity.png" />
+
+ <p>&nbsp;</p>
+ <strong>BACKGROUND IMAGE</strong>:
+ <a href="javascript:void(document.getElementById('d').style.background='url(helix.gif)')">gif</a> |
+ <a href="javascript:void(document.getElementById('d').style.background='url(opacity.png)')">png</a>
+ <div id="d" style="height: 200px; width: 200px; background: url(opacity.png)">
+  <p>&nbsp;</p>
+  <p>Div Content</p>
+ </div>
+
+</div>
+
+</body>
+</html>

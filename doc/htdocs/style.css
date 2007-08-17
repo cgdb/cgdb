@@ -1,25 +1,269 @@
-BODY {
-    background-color: #FFFFFF;
-    color:            #000000;
-    font-family:      Verdana, Arial, sans-serif;
+/* Global whitespace reset */
+* {
+    padding: 0;
+    margin: 0;
+
 }
 
-a:link    { color: #000070 }
-a:visited { color: #000070 }
-a:hover   { color: #505050 }
-a:active  { color: #505050 }
-A { text-decoration:none }
+/* Global element styles */
 
-.Menu {
-    background-color: #B0C0F0;       /* Indigo */
-    border-style: solid;
-    border-width: 1px;
-    border-color: #000000;
-    line-height: 22pt;
+body {
+    background-color: #312e2b;
+}
+
+a:link, a:visited, a:active {
+    color: #3020a0;
+    text-decoration: none;
+    border-bottom: 1px dotted #c0c0c0;
+}
+
+a:hover {
+    color: #4030a0;
+    text-decoration: none;
+    border-bottom: 1px solid #4030a0;
+}
+
+h3 {
+    padding-bottom: 1em;
+    padding-top: 1em;
+}
+
+h4 {
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+}
+
+h5 {
+    padding-bottom: 0.3em;
+}
+
+p {
+    margin-bottom: 0.5em;
+}
+
+code {
+    display: block;
+    border: 1px dashed black;
+    background-color: #ffffe0;
+    margin: 0.5em;
+    padding: 0.5em;
+}
+
+/* Page-specific styles */
+
+#wrapper {
+    font-family: helvetica, arial, sans-serif;
+    width: 760px;
+    background-image: url('images/cgdb_session.jpg');
+    background-repeat: no-repeat;
+    background-position: 360px 0px;
+    /* IE PNG Transparency Fix */
+    behavior: url("iepngfix/iepngfix.htc");
+}
+
+.header {
+    height: 135px;
+    position: relative;
+}
+
+#logo {
+    background-image: url('images/cgdblogo.png');
+    height: 100px;
+    width: 200px;
+    position: relative;
+    left: 25px;
+    top: 7px;
+    /* IE PNG Transparency Fix */
+    behavior: url("iepngfix/iepngfix.htc");
+}
+
+#menu {
+    position: absolute;
+    display: block;
+    top: 116px;
+    left: 24px;
+    height: 18px;
+    width: 736px;
+}
+
+.menu ul {
+    list-style-image: none;
+    list-style-position: outside;
+    list-style-type: none;
+}
+
+.menu a {
+    /* Hide menu item text */
+    position: relative;
+    display: block;
+    height: 0px !important;
+    overflow: hidden;
+    padding-top: 19px;
+    width: 105px;
+    /* IE PNG Transparency Fix */
+    behavior: url("iepngfix/iepngfix.htc");
+}
+
+/* In the top menu, don't do the border "underlining" effect */
+.menu a:link, .menu a:visited, .menu a:active, .menu a:hover {
+    border-bottom: none;
+}
+
+.menu li {
+    float: left;
+    margin-right: 1px;
+    width: 105px;
+    height: 19px;
+    background-image: url('images/inactive_tab.png');
+    /* IE PNG Transparency Fix */
+    behavior: url("iepngfix/iepngfix.htc");
+}
+
+.menu li:hover {
+    background-image: url('images/hover_tab.png');
+}
+
+/* Menu item text images */
+
+.menu li#home a {
+    background-image: url('images/menu_home.png');
+}
+
+.menu li#download a {
+    background-image: url('images/menu_download.png');
+}
+
+.menu li#screenshots a {
+    background-image: url('images/menu_screenshots.png');
+}
+
+.menu li#documentation a {
+    background-image: url('images/menu_documentation.png');
+}
+
+.menu li#support a {
+    background-image: url('images/menu_support.png');
+}
+
+/* For the page we're currently on, override the inactive tab background
+ * image specified above with the active tab image. */
+
+#home_page .menu li#home {
+    background-image: url('images/active_tab.png');
+}
+
+#download_page .menu li#download {
+    background-image: url('images/active_tab.png');
+}
+
+#screenshots_page .menu li#screenshots {
+    background-image: url('images/active_tab.png');
+}
+
+#documentation_page .menu li#documentation {
+    background-image: url('images/active_tab.png');
+}
+
+#support_page .menu li#support {
+    background-image: url('images/active_tab.png');
+}
+
+#content {
+    background-color: #ffffff;
+    color: #312e2b;
+    margin-left: 24px;
+    padding-left: 10px;
+    padding-right: 1em;
+    border-left: 1px solid black;
+    border-bottom: 1px solid black;
+    border-right: 1px solid black;
+}
+
+.pagetext {
+    margin-left: 1em;
+}
+
+.pagetext ol, .pagetext ul {
+    margin-left: 1.5em;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+#sourceforge_logo {
+    text-align: right;
+    margin-right: 5px;
+    margin-bottom: 5px;
+}
+
+#footer {
+    color: #ffffff;
+    padding-left: 30px;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+    text-align: left;
+    font-size: small;
+}
+
+/* Home page styles */
+
+.news_entry {
+    margin-left: 1.5em;
+}
+
+.news_date {
+    font-style: italic;
+    font-weight: bold;
+}
+
+.news_text {
+    margin: 1em;
+}
+
+.news_text div {
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+
+.news_text ol, .news_text ul {
+    margin-left: 1.5em;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+/* Screenshots page styles */
+
+#ss_spacer {
+    clear: both;
+    padding-bottom: 1em;
+}
+
+#ss_thumbs {
+    padding-top: 1em;
+    text-align: center;
+}
+
+.ss_thumb {
+    float: left;
+    padding-left: 28px;
+    padding-right: 28px;
+    width: 118px;
+    cursor: pointer;
+}
+
+.ss_thumb a:hover {
+    border-bottom: none;
+}
+
+/* Support page styles */
+
+#maintainers th {
     text-align: left;
 }
 
-.Main {
-    background-color: #FFFFFF;
-    margin: 1em 1em 1em 1em;
+#maintainers td {
+    padding: 0.2em 2em 0 0;
+}
+
+#maintainers {
+    margin-bottom: 1em;
 }
