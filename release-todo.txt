@@ -10,9 +10,10 @@ sure that it worked properly.
 - Look at tar file in releasedir to make sure it has the correct version.
   untar it and run to make sure it shows the correct version and that it runs.
 
-- Ensure doc/htdocs/download.shtml has correct version links in download link.
+- Ensure doc/htdocs/download.php has correct version set in the definition
+  of 'LATEST' at the top of the file.
   You can do 'svn diff' and notice only ChangeLog's, the NEWS file and the
-  download.shtml file modified.
+  download.php file modified.
 
 - Verify documentation is correct. cgdb.pdf, cgdb.html, cgdb.text, 
   cgdb-split.html and cgdb.info.
@@ -20,7 +21,7 @@ sure that it worked properly.
 --------------------------------------------------------------------------------
 These steps are manual.
 
-- Modify doc/htdocs/index.shtml to add a release note.
+- Modify doc/htdocs/index.php to add a release note.
 
 - Commit all currently modified files.
 
@@ -58,3 +59,5 @@ These steps are manual.
 
 - Announce the release on cgdb-announce@lists.sourceforge.net
   with email from releasedir/cgdb.email.
+
+- Create a new Gentoo ebuild file (or ask Mike to)
