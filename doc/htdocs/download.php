@@ -1,5 +1,6 @@
 <?
     define('PAGE_ID', "download_page");
+    define('LATEST', "0.6.4");
 
     include "header.php";
 ?>
@@ -27,7 +28,7 @@
           maintained by
           <a href="http://www.semistable.com/debian.html">Robert Lemmen</a>.
           The stable version is fairly recent (0.6.3 as of this writing),
-          testing will get you the latest (0.6.4).
+          testing will get you the latest (<?= LATEST ?>).
         </p>
 
         <p>
@@ -62,7 +63,8 @@
 
         <p>
           We also provide a 
-          <a href="files/cgdb-0.6.4.ebuild">current Gentoo ebuild</a> (0.6.4)
+          <a href="files/cgdb-<?= LATEST ?>.ebuild">current Gentoo ebuild</a>
+          (<?= LATEST ?>)
           that you can use instead.  If you've never installed an ebuild before,
           check out the <a href=
           "http://gentoo-wiki.com/HOWTO_Installing_3rd_Party_Ebuilds">Gentoo
@@ -71,24 +73,37 @@
         </p>
       </div>
 
+      <h4>Windows</h4>
+
+      <div class="pagetext">
+        <p>
+          Windows users can use this
+          <a href="files/cgdb-<?= LATEST ?>-win32.tar.gz">win32 binary</a>,
+          which will work in a command window or a Cygwin terminal.
+          For Cygwin users, you may need to delete the DLLs in the
+          'bin' directory.
+        </p>
+      </div>
+
       <h4>MacOS X</h4>
 
       <div class="pagetext">
         <p>
-          <em>
-            <b>Update:</b> Currently unavailable, we're working to
-            reach the maintainer.
-          </em>
+          You can get a CGDB Mac PPC binary by using Jens Frederich's prebuilt
+          <a href="files/cgdb-<?= LATEST ?>-osx-universal.tar.gz">universal
+          binary</a>, also available as a
+          <a href="files/cgdb-<?= LATEST ?>-osx-universal.dmg">disk image</a>.
+          If you would like to contact him, his address is jfrederich (at)
+          gmail (dot) com.  Thanks Jens!
         </p>
 
         <p>
-          You can get a CGDB Mac PPC binary by using Jens Frederich's prebuilt
-          static binary. This is beneficial, since he has done all the work of
-          finding the correct readline version and statically linking it to
-          CGDB. You can see the builds he has available
-          <a href="http://codingsaloon.com/cs/">here</a>.
-          If you would like to contact him, his address is jfrederich (at)
-          gmail (dot) com.  Thanks Jens!
+          Alternatively, CGDB may be installed via the
+          <a href="http://www.macports.org/">MacPorts</a> package system.
+          Install MacPorts, then run:
+          <code>
+            sudo port install cgdb
+          </code>
         </p>
       </div>
 
@@ -116,7 +131,7 @@
         <!-- Update this link every release -->
         <h5>Stable Release:</h5>
         <p>
-        <a href="http://prdownloads.sourceforge.net/cgdb/cgdb-0.6.4.tar.gz?download">cgdb-0.6.4.tar.gz</a> -
+        <a href="http://prdownloads.sourceforge.net/cgdb/cgdb-<?= LATEST ?>.tar.gz?download">cgdb-<?= LATEST ?>.tar.gz</a> -
         <a href="http://cgdb.svn.sourceforge.net/viewvc/cgdb/cgdb/trunk/ChangeLog?view=markup">ChangeLog</a> -
         <a href="http://cgdb.svn.sourceforge.net/viewvc/cgdb/cgdb/trunk/NEWS?view=markup">NEWS</a>
         </p>
