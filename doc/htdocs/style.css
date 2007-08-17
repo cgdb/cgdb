@@ -2,7 +2,6 @@
 * {
     padding: 0;
     margin: 0;
-
 }
 
 /* Global element styles */
@@ -84,6 +83,11 @@ code {
     left: 24px;
     height: 18px;
     width: 736px;
+
+    /* Preload the hover images for snappiness, displays 
+     * behind "home" menu item, so it's unseen */
+    background-image: url('images/hover_tab.png');
+    background-repeat: no-repeat;
 }
 
 .menu ul {
