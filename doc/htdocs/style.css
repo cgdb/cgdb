@@ -193,10 +193,9 @@ code {
     margin-bottom: 0.5em;
 }
 
-#sourceforge_logo {
-    text-align: right;
-    margin-right: 5px;
-    margin-bottom: 5px;
+#spacer {
+    clear: both;
+    padding-bottom: 1em;
 }
 
 #footer {
@@ -234,12 +233,19 @@ code {
     margin-bottom: 0.5em;
 }
 
-/* Screenshots page styles */
-
-#ss_spacer {
-    clear: both;
-    padding-bottom: 1em;
+#sourceforge_logo {
+    float: right;
+    margin-right: 5px;
+    margin-bottom: 5px;
 }
+
+#cgdb_guy {
+    float: right;
+    margin-right: 5px;
+    margin-bottom: 5px;
+}
+
+/* Screenshots page styles */
 
 #ss_thumbs {
     padding-top: 1em;

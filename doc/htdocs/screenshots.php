@@ -37,7 +37,7 @@
         </div>
       </div>
 
-      <div id="ss_spacer">
+      <div id="spacer">
       </div>
 
     </div>

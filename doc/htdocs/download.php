@@ -153,7 +153,7 @@
         <p>
           To get a copy of the svn repository, use the following command:
           <code>
-            svn co https://svn.sourceforge.net/svnroot/cgdb/cgdb/trunk cgdb
+            svn co https://cgdb.svn.sourceforge.net/svnroot/cgdb/cgdb/trunk cgdb
           </code>
           After checking out the tree, you will need to generate the configure
           script before you can configure and build the code.  Use the script
