@@ -7,7 +7,7 @@
 
     <div class="pagetext">
       <p>
-        CGDB is a curses-based (i.e. terminal-based) interface to the GNU
+        CGDB is a curses (terminal-based) interface to the GNU
         Debugger (GDB).  Its goal is to be lightweight and responsive; not
         encumbered with unnecessary features.
       </p>
@@ -23,6 +23,19 @@
       <p>
         <a href="download.php">Download</a> CGDB today!
       </p>
+
+      <h4>Features</h4>
+      
+      <ul>
+        <li>Syntax-highlighted source window</li>
+        <li>Visual breakpoint setting</li>
+        <li>Keyboard shortcuts for common functions</li>
+        <li>Searching source window (using regexp)</li>
+        <li>Scrollable gdb history of entire session</li>
+        <li>Tab completion</li>
+        <li>Macros (automation)</li>
+      </ul>
+
     </div>
 
     <h3>Recent News</h3>
