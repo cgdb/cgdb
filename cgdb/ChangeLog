@@ -1,3 +1,11 @@
+08/17/2007 Bob Rossi <bob@brasko.net>
+
+	* src/cgdb.c (kui_input_acceptable): Added global variable.
+	(user_input_loop): Use new global variable.
+	(main_loop): Add call to user_input_loop after reading gdb data.
+	* src/interface.c (source_input): Use new global variable.
+	* src/filedlg.c (capture_regex): Replace wgetch with kui.
+
 08/13/2007 Bob Rossi <bob@brasko.net>
 
 	* include/interface.h (Focus): Add CGDB_STATUS_BAR.

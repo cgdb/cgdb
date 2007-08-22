@@ -1,3 +1,8 @@
+08/17/2007 Bob Rossi <bob@brasko.net>
+
+	* include/io.h (io_data_ready, io_getchar): Modify comment.
+	* src/io.c (io_data_ready): Add blocking capability.
+
 version 0.6.4 (28/04/2007):
 
 10/03/2006 Bob Rossi <bob@brasko.net>

@@ -1092,6 +1092,8 @@ source_input (struct sviewer *sview, int key)
     case 'o':
       /* Causes file dialog to be opened */
       {
+        extern int kui_input_acceptable;
+        kui_input_acceptable = 0;
 	tgdb_request_ptr request_ptr;
 	request_ptr = tgdb_request_inferiors_source_files (tgdb);
 	handle_request (tgdb, request_ptr);

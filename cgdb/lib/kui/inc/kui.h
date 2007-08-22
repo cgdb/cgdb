@@ -399,11 +399,28 @@ int kui_getkey ( struct kuictx *kctx );
  *
  * \param msec
  * The maximum number of milliseconds to block while waiting to complete a map
+ * The value 0 causes no waiting.
+ * The value -1 causes an indefinate amount of blocking.
  *
  * \return
  * 0 on success, or -1 on error.
  */
 int kui_set_blocking_ms ( struct kuictx *kctx, unsigned long msec );
+
+/**
+ * Get the number of milliseconds that the kui should block while waiting to
+ * complete a mapping. This value is set with kui_set_blocking_ms.
+ *
+ * \param kctx
+ * The kui context.
+ *
+ * \param msec
+ * The number of milliseconds.
+ *
+ * \return
+ * 0 on success, or -1 on error.
+ */
+int kui_get_blocking_ms ( struct kuictx *kctx, unsigned long *msec );
 
 /*@}*/
 
@@ -522,7 +539,12 @@ int kui_manager_add_map_set (
 int kui_manager_cangetkey ( struct kui_manager *kuim );
 
 /**
- * Get's the next key for the application to process.
+ * Get's the next key for the application to process. 
+ *
+ * In the event that this is called when kui_manager_cangetkey returns 0, 
+ * and the caller didn't check the input file handle to determine if there
+ * was input, this is a non-blocking call. Use kui_manager_getkey_blocking
+ * if you want the semantics to be a blocking call.
  *
  * \param kuim
  * The kui context.
@@ -531,8 +553,20 @@ int kui_manager_cangetkey ( struct kui_manager *kuim );
  * -1 on error, otherwise, a valid key.
  *  A key can either be a normal ascii key, or a CGDB_KEY_* value.
  */
-
 int kui_manager_getkey ( struct kui_manager *kuim );
+
+/**
+ * This is the same as kui_manager_getkey excpet that if no data is ready
+ * to be read, this call will block until data is ready.
+ *
+ * \param kuim
+ * The kui context.
+ *
+ * \return
+ * -1 on error, otherwise, a valid key.
+ *  A key can either be a normal ascii key, or a CGDB_KEY_* value.
+ */
+int kui_manager_getkey_blocking ( struct kui_manager *kuim );
 
 /**
  * Set's the terminal escape sequence time out value.

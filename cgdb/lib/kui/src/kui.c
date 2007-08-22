@@ -1024,6 +1024,14 @@ int kui_set_blocking_ms ( struct kuictx *kctx, unsigned long msec ) {
 	return 0;
 }
 
+int kui_get_blocking_ms ( struct kuictx *kctx, unsigned long *msec ) {
+	if ( !kctx || !msec )
+		return -1;
+
+        *msec = kctx->ms;
+	return 0;
+}
+
 /* }}} */
 
 /* struct kui_manager {{{ */
@@ -1215,6 +1223,32 @@ int kui_manager_getkey ( struct kui_manager *kuim ) {
 
 	return kui_getkey ( kuim->normal_keys );
 
+}
+
+int
+kui_manager_getkey_blocking ( struct kui_manager *kuim )
+{
+  if (!kuim)
+    return -1;
+
+  int terminal_keys_msec, normal_keys_msec, val;
+
+  /* Get the original values */
+  kui_get_blocking_ms (kuim->terminal_keys, &terminal_keys_msec);
+  kui_get_blocking_ms (kuim->normal_keys, &normal_keys_msec);
+
+  /* Set the values to be blocking */
+  kui_set_blocking_ms (kuim->terminal_keys, -1);
+  kui_set_blocking_ms (kuim->normal_keys, -1);
+
+  /* Get the key */
+  val = kui_getkey ( kuim->normal_keys );
+
+  /* Restore the values */
+  kui_set_blocking_ms (kuim->terminal_keys, terminal_keys_msec);
+  kui_set_blocking_ms (kuim->normal_keys, normal_keys_msec);
+
+  return val;
 }
 
 int kui_manager_set_terminal_escape_sequence_timeout ( 

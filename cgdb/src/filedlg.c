@@ -395,6 +395,7 @@ void filedlg_display_message(struct filedlg *fd, char *message) {
  */
 static int capture_regex(struct filedlg *fd) {
    int c;
+   extern struct kui_manager *kui_ctx;
 
    /* Initialize the function for finding a regex and tell user */
    regex_search = 1;
@@ -402,12 +403,14 @@ static int capture_regex(struct filedlg *fd) {
    regex_line[regex_line_pos] = '\0';
    filedlg_display(fd);
 
-   while ( ( c = wgetch(fd->win) ) != ERR ) {
+   do {
+      c = kui_manager_getkey_blocking (kui_ctx);
+
       if ( regex_line_pos == (MAX_LINE - 1) && !(c == CGDB_KEY_ESC || c == 8 || c == 127 ))
           continue;
       
       /* Quit the search if the user hit escape */
-      if ( c == 27 ) {
+      if ( c == CGDB_KEY_ESC ) {
          regex_line_pos = 0;
          regex_line[regex_line_pos] = '\0';
          regex_search = 0;
@@ -417,12 +420,12 @@ static int capture_regex(struct filedlg *fd) {
       }
 
       /* If the user hit enter, then a successful regex has been recieved */
-      if ( c == '\r' || c == '\n') {
+      if ( c == '\r' || c == '\n' || c == CGDB_KEY_CTRL_M) {
          regex_line[regex_line_pos] = '\0';
          regex_search = 0;
          filedlg_search_regex(fd, regex_line, 2, regex_direction, 1);
          filedlg_display(fd);
-         return 0;
+         break;
       }
 
       /* If the user hit backspace or delete remove a char */
@@ -441,7 +444,7 @@ static int capture_regex(struct filedlg *fd) {
       regex_line[regex_line_pos] = '\0';
       filedlg_search_regex(fd, regex_line, 1, regex_direction, 1);
       filedlg_display(fd);
-    }
+    } while (1);
 
    /* Finished */
    regex_search = 0;

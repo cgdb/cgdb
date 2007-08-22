@@ -110,6 +110,29 @@ struct kui_manager *kui_ctx = NULL;	/* The key input package */
 struct kui_map_set *kui_map = NULL;
 struct kui_map_set *kui_imap = NULL;
 
+/**
+ * This allows CGDB to know if it is acceptable to read more input from
+ * the KUI at this particular moment. Under certain circumstances, CGDB may 
+ * have to complete a particular communication message to GDB, in while doing
+ * so, may not want to process's the users keystrokes. This flag is purely for
+ * CGDB to keep track of if it wants to read from the KUI. The KUI is always
+ * ready.
+ *
+ * If kui_input_acceptable is set to 1, then input can be read from
+ * the kui. Otherwise, some part of CGDB is waiting for more events to happen.
+ *
+ * For example, when the user types 'o' at the CGDB source window, the
+ * user is requesting the file dialog to open. CGDB must first ask GDB for 
+ * the list of files. While it is retreiving these files, CGDB shouldn't 
+ * shoot through the rest of the kui keys available. If the user had
+ * typed 'o /main' they would want to open the file dialog and start 
+ * searching for a file that had the substring 'main' in it. So, CGDB must
+ * first ensure all the files are retrieved, displayed in the file
+ * dialog, and ensure the file dialog is ready to recieve keys from the 
+ * user before the input is allowed to hit the file dialog.
+ */
+int kui_input_acceptable = 1;
+
 int resize_pipe[2] = { -1, -1 };
 
 /* Readline interface */
@@ -893,7 +916,13 @@ user_input (void)
 }
 
 /**
- * This will process all the input that the KUI has.
+ * This will usually process all the input that the KUI has.
+ *
+ * However, it's possible that one of the keys the user sends to CGDB 
+ * switches the state of CGDB in such a way, that CGDB has to do some I/O
+ * with GDB before the keys can continue to be sent to CGDB. For this reason,
+ * this loop can return before all the KUI's data has been used, in order to
+ * give the main loop a chance to run a GDB command.
  *
  * \return
  * 0 on success or -1 on error
@@ -902,6 +931,11 @@ static int
 user_input_loop ()
 {
   do {
+    /* There are reasons that CGDB should wait to get more info from the kui.
+     * See the documentation for kui_input_acceptable */
+    if (!kui_input_acceptable)
+      return 0;
+
     if (user_input () == -1) {
       logger_write_pos (logger, __FILE__, __LINE__, "user_input_loop failed");
       return -1;
@@ -971,7 +1005,7 @@ process_commands (struct tgdb *tgdb)
 
 	  /* This is a list of all the source files */
 	case TGDB_UPDATE_SOURCE_FILES:
-	  {
+	  { 
 	    struct tgdb_list *list =
 	      item->choice.update_source_files.source_files;
 	    tgdb_list_iterator *i = tgdb_list_get_first (list);
@@ -987,6 +1021,7 @@ process_commands (struct tgdb *tgdb)
 	      }
 
 	    if_set_focus (FILE_DLG);
+            kui_input_acceptable = 1;
 	    break;
 	  }
 
@@ -1337,10 +1372,8 @@ main_loop (void)
 
   for (;;)
     {
-
       /* Reset the fd_set, and watch for input from GDB or stdin */
       FD_ZERO (&rset);
-
       FD_SET (STDIN_FILENO, &rset);
       FD_SET (gdb_fd, &rset);
       FD_SET (tty_fd, &rset);
@@ -1405,9 +1438,21 @@ main_loop (void)
 	}
 
       /* gdb's output -> stdout */
-      if (FD_ISSET (gdb_fd, &rset))
-	if (gdb_input () == -1)
+      if (FD_ISSET (gdb_fd, &rset)) {
+	if (gdb_input () == -1) {
 	  return -1;
+        }
+
+        /* When the file dialog is opened, the user input is blocked, 
+         * until GDB returns all the files that should be displayed,
+         * and the file dialog can open, and be prepared to receive 
+         * input. So, if we are in the file dialog, and are no longer
+         * waiting for the gdb command, then read the input.
+         */
+        if (kui_manager_cangetkey (kui_ctx)) {
+            user_input_loop ();
+        }
+      }
 
       /* A resize signal occured */
       if (FD_ISSET (resize_pipe[0], &rset))

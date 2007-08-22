@@ -238,6 +238,7 @@ int io_data_ready ( int fd, int ms ) {
 #if defined(HAVE_SYS_SELECT_H)
     fd_set readfds, exceptfds;
     struct timeval timeout;
+    struct timeval *timeout_ptr = &timeout;
     
 	FD_ZERO(&readfds);
     FD_ZERO (&exceptfds);
@@ -247,7 +248,11 @@ int io_data_ready ( int fd, int ms ) {
     timeout.tv_sec = ms/1000;
     timeout.tv_usec = (ms%1000)*1000;
 
-    ret = select (fd + 1, &readfds, (fd_set *)NULL, &exceptfds, &timeout);
+    /* Enforce blocking semantics if the user requested it */
+    if (ms == -1)
+      timeout_ptr = NULL;
+
+    ret = select (fd + 1, &readfds, (fd_set *)NULL, &exceptfds, timeout_ptr);
     if (ret == -1) {
       logger_write_pos ( logger, __FILE__, __LINE__, "Errno(%d)\n", errno);
       return -1;
@@ -269,17 +274,7 @@ int io_getchar (int fd, unsigned int ms, int *key) {
     if (!key)
       return -1;
 
-    /* This is the timeout that readline uses, so it must be good.
-     * However, when I hit ESC and then o from the gdb window, the input lib 
-     * returns the key binding Alt-o which doesn't cause the filedlg to be 
-     * opened. This is very annoying.
-     */
-    /*timeout.tv_usec = 100000; */  /* 0.1 seconds; it's in usec */
-
-    /* This is a good value that causes Alt-o to be returned when it should
-     * be and ESC, o when it should be.
-     */
-	val = io_data_ready ( fd, ms );
+    val = io_data_ready ( fd, ms );
     if (val == -1) {
       logger_write_pos ( logger, __FILE__, __LINE__, "Errno(%d)\n", errno);
       return -1;

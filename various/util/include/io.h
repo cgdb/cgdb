@@ -80,6 +80,7 @@ void io_display_char(FILE *fd, char c);
  * fd 	the descriptor to check for.
  * ms 	the amount of time in milliseconds to wait.
  * 		pass 0, if you do not want to wait.
+ * 		pass -1, if you want the read to block.
  *
  * This function checks to see if data is ready on FD.
  * If this function returns 1 then at least one byte can be read.
@@ -103,6 +104,7 @@ int io_data_ready ( int fd, int ms );
  * \param ms
  * The The amount of time in milliseconds to wait for input.
  * Pass 0, if you do not want to wait.
+ * Pass -1, if you want to block indefinately.
  *
  * \param key
  * The character read if the return value is successful
