@@ -8,6 +8,24 @@
     <h3>Downloading CGDB</h3>
 
     <div class="pagetext">
+      <p>Choose your preferred installation mechanism:</p>
+      <ul>
+        <li>
+          <a href="#packages">Binary packages (platform-specific)</a>
+        </li>
+        <li>
+          <a href="#tarball">Source tarball</a>
+        </li>
+        <li>
+          <a href="#subversion">Subversion repository access</a>
+        </li>
+      </ul>
+    </div>
+
+    <a name="packages"></a>
+    <h4>Binary Packages</h4>
+
+    <div class="pagetext">
       <p>
         The following distributions offer native packages for CGDB.
         If you know of another distribution that packages CGDB, please let us
@@ -19,7 +37,7 @@
          indented below this point -->
     <div class="pagetext">
 
-      <h4>Debian</h4>
+      <h5>Debian</h5>
 
       <div class="pagetext">
         <p>
@@ -37,7 +55,7 @@
         </p>
       </div>
 
-      <h4>Ubuntu</h4>
+      <h5>Ubuntu</h5>
 
       <div class="pagetext">
         <p>
@@ -46,7 +64,7 @@
         </p>
       </div>
 
-      <h4>Gentoo</h4>
+      <h5>Gentoo</h5>
 
       <div class="pagetext">
         <p>
@@ -73,7 +91,29 @@
         </p>
       </div>
 
-      <h4>Windows</h4>
+      <h5>Fedora</h5>
+
+      <div class="pagetext">
+        <p>
+          Fedora's extra repository has an up-to-date CGDB package.
+          To install it, as root:
+          <code>yum install cgdb</code>
+        </p>
+      </div>
+
+      <h5>Red Hat/CentOS (5.0)</h5>
+
+      <div class="pagetext">
+        <p>
+          <a href="http://fedoraproject.org/wiki/EPEL">Fedora EPEL</a>
+          repository has an up-to-date CGDB package. To install it, add
+          <a href="http://fedoraproject.org/wiki/EPEL/FAQ#howtouse">EPEL
+          support</a> to your existing RedHat/CentOS installation, then
+          install as you would in Fedora (above).
+        </p>
+      </div>
+
+      <h5>Windows</h5>
 
       <div class="pagetext">
         <p>
@@ -85,7 +125,7 @@
         </p>
       </div>
 
-      <h4>MacOS X</h4>
+      <h5>MacOS X</h5>
 
       <div class="pagetext">
         <p>
@@ -106,38 +146,43 @@
           </code>
         </p>
       </div>
+    </div>
 
-      <h4>Installing CGDB from sources</h4>
+    <a name="tarball"></a>
+    <h4>Install from Sources</h4>
+
+    <div class="pagetext">
+      <h5>Prerequisites</h5>
+
+      <ol>
+        <li>
+          <a
+          href="http://tiswww.case.edu/~chet/readline/rltop.html">readline</a>
+          5.1 or greater.  An important design problem was fixed in version
+          5.1, any older version will not support CGDB.
+        </li>
+
+        <li>
+          <a
+          href="http://www.gnu.org/software/ncurses/ncurses.html">ncurses</a>
+          (or curses, but it doesn't always look pretty), any recent version
+          (i.e. 5+) will do.
+        </li>
+      </ol>
+
+      <h5>Stable Release:</h5>
 
       <div class="pagetext">
-        <h5>Prerequisites</h5>
-
-        <ol>
-          <li>
-            <a
-            href="http://tiswww.case.edu/~chet/readline/rltop.html">readline</a>
-            5.1 or greater.  An important design problem was fixed in version
-            5.1, any older version will not support CGDB.
-          </li>
-
-          <li>
-            <a
-            href="http://www.gnu.org/software/ncurses/ncurses.html">ncurses</a>
-            (or curses, but it doesn't always look pretty), any recent version
-            (i.e. 5+) will do.
-          </li>
-        </ol>
-
-        <!-- Update this link every release -->
-        <h5>Stable Release:</h5>
         <p>
         <a href="http://prdownloads.sourceforge.net/cgdb/cgdb-<?= LATEST ?>.tar.gz?download">cgdb-<?= LATEST ?>.tar.gz</a> -
         <a href="http://cgdb.svn.sourceforge.net/viewvc/cgdb/cgdb/trunk/ChangeLog?view=markup">ChangeLog</a> -
         <a href="http://cgdb.svn.sourceforge.net/viewvc/cgdb/cgdb/trunk/NEWS?view=markup">NEWS</a>
         </p>
       </div>
+    </div>
 
-      <h4>Subversion Access</h4>
+    <a name="subversion"></a>
+    <h4>Subversion Access</h4>
 
       <div class="pagetext">
 
@@ -180,7 +225,6 @@
         </p>
 
       </div>
-    </div>
 
 <?
     include "footer.php";
