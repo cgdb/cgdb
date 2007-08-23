@@ -165,12 +165,13 @@
           <b>Note:</b> Building the code checked out from svn will require
           additional tools installed to generate the autoconf script.  We use
           the following versions, although others may work for you:
-          <ul>
-            <li>aclocal  (GNU automake)   1.9.6</li>
-            <li>autoconf (GNU Autoconf)   2.59</li>
-            <li>m4       (GNU m4)         1.4.4</li>
-          </ul>
         </p>
+
+        <ul>
+          <li>aclocal  (GNU automake)   1.9.6</li>
+          <li>autoconf (GNU Autoconf)   2.59</li>
+          <li>m4       (GNU m4)         1.4.4</li>
+        </ul>
 
         <p>
           Finally, if you decide to modify the tokenizer library or the config

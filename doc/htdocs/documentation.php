@@ -10,6 +10,8 @@
     <div class="pagetext">
       <p>
       The CGDB manual is available in the following formats:
+      </p>
+
       <ul>
         <li>
           <a href="docs/cgdb.txt">ASCII text</a> entirely on one web page.
@@ -21,7 +23,6 @@
         <li><a href="docs/cgdb.html">HTML</a> with one web page per node.</li>
         <li><a href="docs/cgdb.pdf">PDF</a></li>
       </ul>
-      </p>
     </div>
 
     <h4>Other Documents</h4>

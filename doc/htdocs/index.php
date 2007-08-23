@@ -51,12 +51,12 @@
       </div>
 
       <div class="news_text">
-        <div>
+        <p>
           The new CGDB web site has been deployed!  We hope you like it.
           The page has been tested in Internet Explorer, Firefox, and
           Opera, but if you encounter problems, please report them to
           mike(at)subfocal(dot)net.  Thanks!
-        </div>
+        </p>
       </div>
     </div>
 
@@ -66,44 +66,45 @@
       </div>
 
       <div class="news_text">
-        <div>
+        <p>
           CGDB v0.6.4 was released today, see the download page to try it out.
           This release is mostly important because it implements the vim 'map'
           command. The functionality is not entirely polished off, so mappings
           like 'map a a' will cause CGDB to loop infinitely. The next release
           of CGDB will most likely provide the finishing touches to this
           functionality, along with the documentation in the manual.
-        </div>
+        </p>
 
-        <div>
+        <p>
           A few interesting features that have been added in this release are:
-          <ul>
-            <li>
-              Added a new highlighting group, SelectedLineNr. This is the
-              line that the cursor is on.
-            </li>
-            <li>CGDB's build system should compile with the -j option</li>
-            <li>CGDB shuts down now when it receives ctrl-d, just like GDB</li>
-            <li>
-              CGDB no longer displays (tgdb) at the gdb prompt. It now
-              displays (gdb)
-            </li>
-          </ul>
-        </div>
+        </p>
 
-        <div>
+        <ul>
+          <li>
+            Added a new highlighting group, SelectedLineNr. This is the
+            line that the cursor is on.
+          </li>
+          <li>CGDB's build system should compile with the -j option</li>
+          <li>CGDB shuts down now when it receives ctrl-d, just like GDB</li>
+          <li>
+            CGDB no longer displays (tgdb) at the gdb prompt. It now
+            displays (gdb)
+          </li>
+        </ul>
+
+        <p>
           Finally, this release also has some pretty important bug fixes.
           There was a bug in the communication between CGDB and gdb that
           would cause it to sometimes simply work improperly. As always
           see the NEWS file for a complete list of changes since the last
           release.
-        </div>
+        </p>
 
-        <div>
+        <p>
           Please also note that the escdelay option has been removed. A
           user should now use the timeout, ttimeout, timeoutlen and
           ttimeoutlen options. They are described in the manual. 
-        </div>
+        </p>
       </div>
     </div>
 
@@ -113,7 +114,7 @@
       </div>
 
       <div class="news_text">
-        <div>
+        <p>
           CGDB v0.6.3 was released today, see the
           <a href="download.php">download page</a> to try it out. This release
           changes the way CGDB starts GDB. CGDB now puts GDB on a pty instead
@@ -122,13 +123,13 @@
           similar to just using GDB. There were some autoconf configure
           problems that were reported involving readline. These have also been
           fixed. Several other small bugs have been fixed.
-        </div>
+        </p>
       
-        <div>
+        <p>
           At last! CGDB has finally converted to the subversion version
           control system.  Although this doesn't effect users that much,
           maybe I can lure more contributers into developing CGDB. :)
-        </div>
+        </p>
       </div>
     </div>
 
@@ -138,7 +139,7 @@
       </div>
 
       <div class="news_text">
-        <div>
+        <p>
           CGDB v0.6.2 was released today, see the
           <a href="download.php">download page</a> to try it out. This
           release get's CGDB working on Solaris again.  Also, it fixes
@@ -147,11 +148,11 @@
           &quot;CGDB had unexpected results, ...&quot; will no longer be
           displayed when shutting CGDB down if you set a watch point while
           debugging.
-        </div>
+        </p>
 
-        <div>
+        <p>
           Enjoy.
-        </div>
+        </p>
       </div>
     </div>
 

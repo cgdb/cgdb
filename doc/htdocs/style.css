@@ -43,6 +43,14 @@ p {
     margin: 0 0 1em 0;
 }
 
+ul {
+    margin: 0 0 1em 1.5em;
+}
+
+ol {
+    margin: 0 0 1em 2em;
+}
+
 code {
     display: block;
     border: 1px dashed black;
@@ -100,6 +108,7 @@ code {
     list-style-image: none;
     list-style-position: outside;
     list-style-type: none;
+    margin: 0;
 }
 
 .menu a {
@@ -200,10 +209,6 @@ code {
 
 .pagetext {
     margin-left: 1em;
-}
-
-.pagetext ol, .pagetext ul {
-    margin: 0.5em 0em 0.5em 1.5em;
 }
 
 #spacer {
