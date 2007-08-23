@@ -22,22 +22,25 @@ a:hover {
     border-bottom: 1px solid #4030a0;
 }
 
+a img {
+    /* Don't put borders around images that are links */
+    border: none;
+}
+
 h3 {
-    padding-bottom: 1em;
-    padding-top: 1em;
+    padding: 0.6em 0;
 }
 
 h4 {
-    padding-top: 0.5em;
-    padding-bottom: 0.5em;
+    margin: 0 0 0.8em 0;
 }
 
 h5 {
-    padding-bottom: 0.3em;
+    margin: 0 0 0.3em 0;
 }
 
 p {
-    margin-bottom: 0.5em;
+    margin: 0 0 1em 0;
 }
 
 code {
@@ -48,7 +51,7 @@ code {
     padding: 0.5em;
 }
 
-/* Page-specific styles */
+/* Common styles to all site pages */
 
 #wrapper {
     font-family: helvetica, arial, sans-serif;
@@ -56,13 +59,20 @@ code {
     background-image: url('images/cgdb_session.jpg');
     background-repeat: no-repeat;
     background-position: 360px 0px;
-    /* IE PNG Transparency Fix */
+
+    /* IE6 PNG Transparency Fix */
     behavior: url("iepngfix/iepngfix.htc");
 }
 
 .header {
     height: 135px;
     position: relative;
+
+    /* Preload the menu hover images for snappiness, position 
+     * is set offscreen, so it's unseen */
+    background-image: url('images/hover_tab.png');
+    background-repeat: no-repeat;
+    background-position: 0px -20px;
 }
 
 #logo {
@@ -72,7 +82,8 @@ code {
     position: relative;
     left: 25px;
     top: 7px;
-    /* IE PNG Transparency Fix */
+
+    /* IE6 PNG Transparency Fix */
     behavior: url("iepngfix/iepngfix.htc");
 }
 
@@ -83,11 +94,6 @@ code {
     left: 24px;
     height: 18px;
     width: 736px;
-
-    /* Preload the hover images for snappiness, displays 
-     * behind "home" menu item, so it's unseen */
-    background-image: url('images/hover_tab.png');
-    background-repeat: no-repeat;
 }
 
 .menu ul {
@@ -98,14 +104,17 @@ code {
 
 .menu a {
     /* Hide menu item text */
-    position: relative;
     display: block;
     height: 0px !important;
+    width: 105px;
     overflow: hidden;
     padding-top: 19px;
-    width: 105px;
-    /* IE PNG Transparency Fix */
+
+    /* IE6 PNG Transparency Fix */
     behavior: url("iepngfix/iepngfix.htc");
+
+    /* IE6 hover pointer fix */
+    cursor: pointer;
 }
 
 /* In the top menu, don't do the border "underlining" effect */
@@ -119,7 +128,8 @@ code {
     width: 105px;
     height: 19px;
     background-image: url('images/inactive_tab.png');
-    /* IE PNG Transparency Fix */
+
+    /* IE6 PNG Transparency Fix */
     behavior: url("iepngfix/iepngfix.htc");
 }
 
@@ -150,7 +160,7 @@ code {
 }
 
 /* For the page we're currently on, override the inactive tab background
- * image specified above with the active tab image. */
+ * image (specified above) with the active tab image. */
 
 #home_page .menu li#home {
     background-image: url('images/active_tab.png');
@@ -181,6 +191,11 @@ code {
     border-left: 1px solid black;
     border-bottom: 1px solid black;
     border-right: 1px solid black;
+
+    /* IE6 "has layout" workaround (peekaboo content):
+     * http://www.satzansatz.de/cssd/onhavinglayout.html
+     */
+    width: 760px;
 }
 
 .pagetext {
@@ -188,21 +203,22 @@ code {
 }
 
 .pagetext ol, .pagetext ul {
-    margin-left: 1.5em;
-    margin-top: 0.5em;
-    margin-bottom: 0.5em;
+    margin: 0.5em 0em 0.5em 1.5em;
 }
 
 #spacer {
     clear: both;
     padding-bottom: 1em;
+
+    /* IE6 float/spacer bug fix:
+     * http://www.positioniseverything.net/explorer/floatIndent.html
+     */
+    _display: inline;
 }
 
 #footer {
     color: #ffffff;
-    padding-left: 30px;
-    padding-top: 0.5em;
-    padding-bottom: 0.5em;
+    padding: 0.5em 0em 0.5em 30px;
     text-align: left;
     font-size: small;
 }
@@ -223,41 +239,49 @@ code {
 }
 
 .news_text div {
-    margin-top: 1em;
-    margin-bottom: 1em;
+    margin-top: 1em 0em;
 }
 
 .news_text ol, .news_text ul {
-    margin-left: 1.5em;
-    margin-top: 0.5em;
-    margin-bottom: 0.5em;
+    margin: 0.5em 0em 0.5em 1.5em;
 }
 
 #sourceforge_logo {
     float: right;
-    margin-right: 5px;
-    margin-bottom: 5px;
+    margin: 0px 5px 5px 0px;
+
+    /* IE6 float/spacer bug fix:
+     * http://www.positioniseverything.net/explorer/floatIndent.html
+     */
+    _display: inline;
 }
 
 #cgdb_guy {
     float: right;
-    margin-right: 5px;
-    margin-bottom: 5px;
+    margin: 0px 5px 5px 0px;
+
+    /* IE6 float/spacer bug fix:
+     * http://www.positioniseverything.net/explorer/floatIndent.html
+     */
+    _display: inline;
 }
 
 /* Screenshots page styles */
 
 #ss_thumbs {
-    padding-top: 1em;
     text-align: center;
 }
 
 .ss_thumb {
     float: left;
-    padding-left: 28px;
-    padding-right: 28px;
+    margin: 1em 26px;
     width: 118px;
     cursor: pointer;
+
+    /* IE6 float/spacer bug fix:
+     * http://www.positioniseverything.net/explorer/floatIndent.html
+     */
+    _display: inline;
 }
 
 .ss_thumb a:hover {

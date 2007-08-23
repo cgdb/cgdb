@@ -7,7 +7,7 @@
 
     <div id="cgdb_guy">
       <a href="images/cgdb_guy.png"><img src="images/cgdb_guy_tn.png"
-        width="60" height="60" border="0" alt="CGDB Guy" /></a>
+        width="60" height="60" alt="CGDB Guy" /></a>
     </div>
 
     <div class="pagetext">
@@ -156,7 +156,7 @@
     </div>
 
     <div id="sourceforge_logo">
-      <a href="http://sourceforge.net"><img src="http://sflogo.sourceforge.net/sflogo.php?group_id=72581&amp;type=3" width="125" height="37" border="0" alt="SourceForge.net Logo" /></a>
+      <a href="http://sourceforge.net"><img src="http://sflogo.sourceforge.net/sflogo.php?group_id=72581&amp;type=3" width="125" height="37" alt="SourceForge.net Logo" /></a>
     </div>
 
     <div id="spacer">
