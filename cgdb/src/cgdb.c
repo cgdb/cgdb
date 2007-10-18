@@ -1031,6 +1031,7 @@ process_commands (struct tgdb *tgdb)
 	case TGDB_SOURCES_DENIED:
 	  if_display_message ("Error:", 0,
 			      " No sources available! Was the program compiled with debug?");
+     kui_input_acceptable = 1;
 	  break;
 
 	  /* This is the absolute path to the last file the user requested */
