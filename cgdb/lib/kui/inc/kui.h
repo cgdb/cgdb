@@ -32,6 +32,7 @@
 /*@{*/
 
 struct kui_map;
+enum cgdb_key;
 
 /**
  * Create a kui map.
@@ -606,6 +607,38 @@ int kui_manager_set_terminal_escape_sequence_timeout (
 int kui_manager_set_key_mapping_timeout ( 
 		struct kui_manager *kuim, 
 		unsigned int msec );
+
+/**
+ * Allow the user to make terminal key bindings.
+ *
+ * This API doesn't really fit in. It's due to the fact that some
+ * of the terminfo entries are incorrect on some machines but
+ * readline knows the key sequences because the OS vendors decided
+ * to hard code the terminal key sequences into the /etc/inputrc.
+ *
+ * Therefor, I'm creating an API that is specific to the task, 
+ * rather than a general API that allows the user to modify
+ * the terminal key mappings. If this is needed in the future
+ * it can be added.
+ *
+ * \param kuim
+ * The kui context
+ *
+ * \param key
+ * The key to bind the key sequences too.
+ *
+ * \param keyseq_list
+ * The list of key sequences to bind to the key. Instead of just
+ * making this a 'char*', it's a list, so that multiple sequences
+ * can be bound in a single function call.
+ *
+ * \return
+ * 0 on success or -1 on error
+ */
+int kui_manager_get_terminal_keys_kui_map (
+      struct kui_manager *kuim,
+      enum cgdb_key key,
+      std_list kui_map_set);
 /*@}*/
 
 /* }}} */

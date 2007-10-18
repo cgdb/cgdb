@@ -1597,6 +1597,37 @@ update_kui (cgdbrc_config_option_ptr option)
   return 0;
 }
 
+static int
+destroyReadlineKeySeq (void *data)
+{
+   char *keyseq = (char*)data;
+   free (keyseq);
+   return 0;
+}
+
+int
+add_readline_key_sequence (const char *readline_str, enum cgdb_key key)
+{
+  int ret_val;
+
+  std_list keyseq_list = std_list_create (destroyReadlineKeySeq);
+
+  ret_val = rline_get_keyseq (rline, readline_str, keyseq_list);
+  if (ret_val == -1) {
+     std_list_destroy (keyseq_list);
+     return -1;
+  }
+
+  ret_val = kui_manager_get_terminal_keys_kui_map (kui_ctx, key, keyseq_list);
+  if (ret_val == -1) {
+     std_list_destroy (keyseq_list);
+     return -1;
+  }
+  std_list_destroy (keyseq_list);
+
+  return 0;
+}
+
 int
 init_kui (void)
 {
@@ -1643,6 +1674,26 @@ init_kui (void)
   cgdbrc_attach (CGDBRC_TIMEOUT_LEN, &update_kui, NULL);
   cgdbrc_attach (CGDBRC_TTIMEOUT, &update_kui, NULL);
   cgdbrc_attach (CGDBRC_TTIMEOUT_LEN, &update_kui, NULL);
+
+  /* It's important that CGDB uses readline's view of 
+   * Home and End keys. A few distros I've run into (redhat e3
+   * and ubuntu) provide incorrect terminfo entries for xterm.
+   * So, Home and End do not work. The distro's fixed readline
+   * by modifing /etc/inputrc to hard code the terminal sequences.
+   * I have no idea why they wouldn't just fix the terminfo 
+   * database, but they didn't! Therefor, readline, bash, gdb all
+   * work but cgdb doesn't. So, I'm going to simply ask readline
+   * what it thinks the Home and End keys are and add them to 
+   * CGDB's mappings.
+   */
+
+  /* For now, I've decided it's OK for these functions to fail as they
+   * only add functionality to CGDB. */
+  
+  /* Home key */
+  add_readline_key_sequence ("beginning-of-line", CGDB_KEY_HOME);
+  /* End key */
+  add_readline_key_sequence ("end-of-line", CGDB_KEY_END);
 
   return 0;
 }

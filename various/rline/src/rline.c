@@ -426,5 +426,47 @@ rline_get_rl_completion_query_items (struct rline *rline)
   return rline->rline_rl_completion_query_items;
 }
 
+int
+rline_get_keyseq (struct rline *rline, const char *named_function,
+      std_list keyseq_list)
+{
+  rl_command_func_t *func;
+  char **invoking_keyseqs = NULL; 
+  char **invoking_keyseqs_cur = NULL;
+  char *new_keyseq = NULL;
+  int len;
+
+  if (!keyseq_list)
+     return -1;
+
+  func = rl_named_function (named_function);
+  if (func == 0)
+    return 0;
+
+  invoking_keyseqs = rl_invoking_keyseqs (func);
+  invoking_keyseqs_cur = invoking_keyseqs;
+
+  while (invoking_keyseqs_cur && (*invoking_keyseqs_cur)) {
+
+    new_keyseq = (char *)cgdb_malloc ((2 * strlen (*invoking_keyseqs_cur)) + 1);
+    if (rl_translate_keyseq (*invoking_keyseqs_cur, new_keyseq, &len))
+    {
+       xfree (new_keyseq);
+       xfree (*invoking_keyseqs_cur);
+       /* Can't do much about readline failing, just continue on. */
+       continue;
+    }
+
+    /* If the append function breaks, in serious trouble */
+    std_list_append (keyseq_list, new_keyseq);
+
+    xfree (*invoking_keyseqs_cur);
+    invoking_keyseqs_cur++;
+  }
+  xfree (invoking_keyseqs);
+
+  return 0;
+}
+
 /*@}*/
 /* }}}*/

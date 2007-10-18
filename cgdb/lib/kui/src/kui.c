@@ -1231,7 +1231,7 @@ kui_manager_getkey_blocking ( struct kui_manager *kuim )
   if (!kuim)
     return -1;
 
-  int terminal_keys_msec, normal_keys_msec, val;
+  unsigned long terminal_keys_msec, normal_keys_msec, val;
 
   /* Get the original values */
   kui_get_blocking_ms (kuim->terminal_keys, &terminal_keys_msec);
@@ -1269,4 +1269,48 @@ kui_manager_set_key_mapping_timeout (struct kui_manager *kuim, unsigned int msec
   return kui_set_blocking_ms (kuim->normal_keys, msec);
 }
 
+int
+kui_manager_get_terminal_keys_kui_map (
+      struct kui_manager *kuim,
+      enum cgdb_key key,
+      std_list kui_map_set)
+{
+   struct kui_map_set *map_set;
+   struct kuictx *terminalkeys;
+   std_list map_sets; 
+	std_list_iterator iter, kui_map_set_iter;
+	void *data;
+   const char *keycode_str;
+
+   if (!kuim)
+      return -1;
+
+   keycode_str = kui_term_get_keycode_from_cgdb_key (key);
+   if (keycode_str == NULL)
+      return -1;
+
+   /* The first map set in the terminal_keys */
+   terminalkeys = kuim->terminal_keys;
+   map_sets = kui_get_map_sets (terminalkeys);
+
+   if (std_list_length (map_sets) > 0) {
+	   iter = std_list_begin (map_sets);
+		if ( std_list_get_data ( iter, &data ) == -1 ) {
+         return -1;
+      }
+      map_set = (struct kui_map_set *)data;
+   }
+
+   // At this point, the kui_map_set is available
+   // Add each kui_map_set into it.
+   for (kui_map_set_iter = std_list_begin (kui_map_set);
+        kui_map_set_iter != std_list_end (kui_map_set);
+        kui_map_set_iter = std_list_next ( kui_map_set_iter ) ) {
+      if (std_list_get_data (kui_map_set_iter, &data) == -1)
+         return -1;
+      kui_ms_register_map (map_set, data, keycode_str);
+   }
+
+   return 0;
+}
 /* }}} */

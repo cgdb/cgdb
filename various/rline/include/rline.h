@@ -13,6 +13,7 @@
  */
 
 #include "tgdb_list.h"
+#include "std_list.h"
 
 /* Createing and Destroying a librline context. {{{ */
 /******************************************************************************/
@@ -279,6 +280,32 @@ int rline_resize_terminal_and_redisplay (struct rline *rline, int rows, int cols
  * The value of rl_completion_query_items, if rline is NULL then -1.
  */
 int rline_get_rl_completion_query_items (struct rline *rline);
+
+/**
+ * This will get the key sequences that readline uses for a certain key.
+ *
+ * \param rline
+ * The readline context to operate on.
+ *
+ * \param named_function
+ * The readline function to get the key sequences for.
+ * Examples are "beginning-of-line" and "end-of-line"
+ *
+ * \param keyseq_list
+ * A list of key sequences (char*) that can be used to map to
+ * the named_function the user requested. This variable should
+ * be allocated before calling this function and must be destroyed
+ * by the caller later. Each item put into this list must also 
+ * be destroyed. You can use xfree to do this.
+ *
+ * NOTE: If rline_get_keyseq fails with a -1, it's important for
+ * this function to clean up the memory already put into the keyseq_list
+ *
+ * \return
+ * 0 on success or -1 on error
+ */
+int rline_get_keyseq (struct rline *rline, const char *named_function,
+      std_list keyseq_list);
 
 /*@}*/
 /* }}}*/
