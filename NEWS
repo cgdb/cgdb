@@ -1,3 +1,8 @@
+   * Added a feature to CGDB which allows it to ask readline what key
+     sequence it uses for the Home and End keys. That way, if the terminfo
+     database is wrong, but the OS vendor modified /etc/inputrc, CGDB will
+     have a working Home and End key.
+
    * CGDB fully supports the use of maps now. The feature is similar in 
      nature to the vim map feature.  It supports map, unmap, imap
      and iunmap. The map/unmap work in CGDB mode and the imap/iunmap
