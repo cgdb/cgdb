@@ -1,3 +1,10 @@
+   * When the shortcut option is turned on, then,
+     F5 is now the same as 'r'.
+     F6 is now the same as 'c'.
+     F7 is now the same as 'f'.
+     F8 is now the same as 'n'.
+     F10 is now the same as 's'.
+
    * Added a feature to CGDB which allows it to ask readline what key
      sequence it uses for the Home and End keys. That way, if the terminfo
      database is wrong, but the OS vendor modified /etc/inputrc, CGDB will

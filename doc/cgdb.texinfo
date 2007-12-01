@@ -420,6 +420,21 @@ Grow source window 25% (or, grow tty window 1 line, if visible).
 
 @item Ctrl-l
 Clear and redraw the screen.
+
+@item F5
+Send a run command to GDB.
+
+@item F6
+Send a continue command to GDB.
+
+@item F7
+Send a finish command to GDB.
+
+@item F8
+Send a next command to GDB.
+
+@item F10
+Send a step command to GDB.
 @end table
 
 @cindex shortcut commands
@@ -429,18 +444,23 @@ above commands.
 
 @table @kbd
 @item r
+@itemx F5
 Send a run command to GDB.
 
 @item n
+@itemx F8
 Send a next command to GDB.
 
 @item s
+@itemx F10
 Send a step command to GDB.
 
 @item c
+@itemx F6
 Send a continue command to GDB.
 
 @item f
+@itemx F7
 Send a finish command to GDB.
 
 @item u

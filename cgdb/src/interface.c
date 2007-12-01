@@ -1122,19 +1122,24 @@ source_input (struct sviewer *sview, int key)
       switch (key)
 	{
 	case 'r':
+	case CGDB_KEY_F5:
 	  request_ptr = tgdb_request_run_debugger_command (tgdb, TGDB_RUN);
 	  break;
 	case 'n':
+	case CGDB_KEY_F8:
 	  request_ptr = tgdb_request_run_debugger_command (tgdb, TGDB_NEXT);
 	  break;
 	case 's':
+	case CGDB_KEY_F10:
 	  request_ptr = tgdb_request_run_debugger_command (tgdb, TGDB_STEP);
 	  break;
 	case 'c':
+	case CGDB_KEY_F6:
 	  request_ptr =
 	    tgdb_request_run_debugger_command (tgdb, TGDB_CONTINUE);
 	  break;
 	case 'f':
+	case CGDB_KEY_F7:
 	  request_ptr = tgdb_request_run_debugger_command (tgdb, TGDB_FINISH);
 	  break;
 	case 'u':
