@@ -1,27 +1,37 @@
-/* A Bison parser, made by GNU Bison 2.0.  */
 
-/* Skeleton parser for Yacc-like parsing with Bison,
-   Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+/* A Bison parser, made by GNU Bison 2.3a+.  */
 
-   This program is free software; you can redistribute it and/or modify
+/* Skeleton interface for Bison's Yacc-like parsers in C
+   
+      Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Free Software Foundation, Inc.
+   
+   This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+   
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-
+   
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-/* As a special exception, when this file is copied by Bison into a
-   Bison output file, you may use that output file without restriction.
-   This special exception was added by the Free Software Foundation
-   in version 1.24 of Bison.  */
+/* As a special exception, you may create a larger work that contains
+   part or all of the Bison parser skeleton and distribute that work
+   under terms of your choice, so long as that work isn't itself a
+   parser generator using the skeleton or a modified version thereof
+   as a parser skeleton.  Alternatively, if you modify or redistribute
+   the parser skeleton itself, you may (at your option) remove this
+   special exception, which will cause the skeleton and the resulting
+   Bison output files to be licensed under the GNU General Public
+   License without this special exception.
+   
+   This special exception was added by the Free Software Foundation in
+   version 2.2 of Bison.  */
+
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
@@ -49,6 +59,7 @@
      CARROT = 275
    };
 #endif
+/* Tokens.  */
 #define OPEN_BRACE 258
 #define CLOSED_BRACE 259
 #define OPEN_PAREN 260
@@ -71,9 +82,13 @@
 
 
 
-#if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
-#line 51 "../../../../cgdb/lib/gdbmi/src/gdbmi_grammar.y"
-typedef union YYSTYPE {
+#if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
+typedef union YYSTYPE
+{
+
+/* Line 1685 of yacc.c  */
+#line 53 "../../../../cgdb/lib/gdbmi/src/gdbmi_grammar.y"
+
   struct gdbmi_output *u_output;
   struct gdbmi_oob_record *u_oob_record;
   struct gdbmi_result_record *u_result_record;
@@ -89,15 +104,40 @@ typedef union YYSTYPE {
   struct gdbmi_tuple *u_tuple;
   struct gdbmi_list *u_list;
   int u_stream_record_choice;
+
+
+
+/* Line 1685 of yacc.c  */
+#line 112 "../../../../cgdb/lib/gdbmi/src/gdbmi_grammar.h"
 } YYSTYPE;
-/* Line 1318 of yacc.c.  */
-#line 95 "gdbmi_grammar.h"
+# define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
-# define YYSTYPE_IS_TRIVIAL 1
 #endif
 
-extern YYSTYPE gdbmi_lval;
 
 
+
+#ifndef YYPUSH_DECLS
+#  define YYPUSH_DECLS
+struct gdbmi_pstate;
+typedef struct gdbmi_pstate gdbmi_pstate;
+enum { YYPUSH_MORE = 4 };
+#if defined __STDC__ || defined __cplusplus
+int gdbmi_push_parse (gdbmi_pstate *yyps, int yypushed_char, YYSTYPE const *yypushed_val, int *gdbmi_parsed_one);
+#else
+int gdbmi_push_parse ();
+#endif
+
+#if defined __STDC__ || defined __cplusplus
+gdbmi_pstate * gdbmi_pstate_new (void);
+#else
+gdbmi_pstate * gdbmi_pstate_new ();
+#endif
+#if defined __STDC__ || defined __cplusplus
+void gdbmi_pstate_delete (gdbmi_pstate *yyps);
+#else
+void gdbmi_pstate_delete ();
+#endif
+#endif
 

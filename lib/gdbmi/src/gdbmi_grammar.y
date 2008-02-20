@@ -1,5 +1,8 @@
 %name-prefix="gdbmi_"
+%define api.pure
+%define api.push_pull "push"
 %defines
+%parse-param { int *gdbmi_parsed_one }
 
 %{
 #include <string.h>
@@ -9,11 +12,10 @@
 
 extern char *gdbmi_text;
 extern int gdbmi_lex (void);
-void gdbmi_error (const char *s);
 extern int gdbmi_lineno;
 gdbmi_output_ptr tree;
 
-void gdbmi_error (const char *s)
+void gdbmi_error (int *gdbmi_parsed_one, const char *s)
 { 
   fprintf (stderr, "%s:%d Error %s", __FILE__, __LINE__, s);
   if (strcmp (gdbmi_text, "\n") == 0)
@@ -66,7 +68,6 @@ void gdbmi_error (const char *s)
   int u_stream_record_choice;
 }
 
-%type <u_output> opt_output_list
 %type <u_output> output_list
 %type <u_output> output
 %type <u_oob_record> oob_record
@@ -89,23 +90,16 @@ void gdbmi_error (const char *s)
 %type <u_list> list
 %type <u_stream_record_choice> stream_record_class
 
-%start opt_output_list
+%start output_list
 %%
 
-opt_output_list: {
-  tree = NULL;
-};
-
-opt_output_list: output_list {
-  tree = $1;	
-};
-
 output_list: output {
-  $$ = $1;
+  tree = $1;
 };
 
 output_list: output_list output {
-  $$ = append_gdbmi_output ($1, $2);
+  tree = append_gdbmi_output (tree, $2);
+  *gdbmi_parsed_one = 1;
 };
 
 output: opt_oob_record_list opt_result_record OPEN_PAREN variable CLOSED_PAREN NEWLINE { 
@@ -114,7 +108,7 @@ output: opt_oob_record_list opt_result_record OPEN_PAREN variable CLOSED_PAREN N
   $$->result_record = $2;
 
   if (strcmp ("gdb", $4) != 0)
-    gdbmi_error ("Syntax error, expected 'gdb'");
+    gdbmi_error (gdbmi_parsed_one, "Syntax error, expected 'gdb'");
 
   free ($4);
 } ;
@@ -200,12 +194,12 @@ result_class: STRING_LITERAL {
   else if (strcmp ("exit", gdbmi_text) == 0)
     $$ = GDBMI_EXIT;
   else
-    gdbmi_error ("Syntax error, expected 'done|running|connected|error|exit");
+    gdbmi_error (gdbmi_parsed_one, "Syntax error, expected 'done|running|connected|error|exit");
 };
 
 async_class: STRING_LITERAL {
   if (strcmp ("stopped", gdbmi_text) != 0)
-    gdbmi_error ( "Syntax error, expected 'stopped'" );
+    gdbmi_error (gdbmi_parsed_one,  "Syntax error, expected 'stopped'" );
 
   $$ = GDBMI_STOPPED;
 };

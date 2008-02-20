@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
+#include "gdbmi_grammar.h"
 #include "gdbmi_parser.h"
 
 int gdbmi_parse (void);
@@ -18,6 +20,7 @@ extern gdbmi_output_ptr tree;
 struct gdbmi_parser
 {
   char *last_error;
+  gdbmi_pstate *mips;
 };
 
 gdbmi_parser_ptr
@@ -33,6 +36,13 @@ gdbmi_parser_create (void)
       fprintf (stderr, "%s:%d", __FILE__, __LINE__);
       return NULL;
     }
+
+  /* Create a new parser instance */
+  parser->mips = gdbmi_pstate_new ();
+  if (!parser) {
+      fprintf (stderr, "%s:%d", __FILE__, __LINE__);
+      return NULL;
+  }
 
   return parser;
 }
@@ -50,6 +60,12 @@ gdbmi_parser_destroy (gdbmi_parser_ptr parser)
       parser->last_error = NULL;
     }
 
+  if (parser->mips) {
+    /* Free the parser instance */
+    gdbmi_pstate_delete (parser->mips);
+    parser->mips = NULL;
+  }
+
   free (parser);
   parser = NULL;
   return 0;
@@ -61,6 +77,9 @@ gdbmi_parser_parse_string (gdbmi_parser_ptr parser,
 			   gdbmi_output_ptr * pt, int *parse_failed)
 {
   YY_BUFFER_STATE state;
+  int pattern;
+  int mi_status;
+  int finished = 0;
 
   if (!parser)
     return -1;
@@ -71,30 +90,31 @@ gdbmi_parser_parse_string (gdbmi_parser_ptr parser,
   if (!parse_failed)
     return -1;
 
+  /* Initialize output parameters */
+  *pt = 0;
   *parse_failed = 0;
 
   /* Create a new input buffer for flex. */
-  state = gdbmi__scan_string ((char *) mi_command);
+  state = gdbmi__scan_string (strdup (mi_command));
 
-  /* Create a new input buffer for flex. */
-  if (gdbmi_parse () == 1)
+  /* Create a new input buffer for flex and
+   * iterate over all the tokens. */
+  do {
+    pattern = gdbmi_lex ();
+    if (pattern == 0)
+      break;
+    mi_status = gdbmi_push_parse (parser->mips, pattern, NULL, &finished);
+  } while (mi_status == YYPUSH_MORE);
+
+  /* Parser is done, this should never happen */
+  if (mi_status != YYPUSH_MORE && mi_status != 0) {
     *parse_failed = 1;
-  else
-    *parse_failed = 0;
+  } else if (finished) {
+      *pt = tree;
+      tree = NULL;
+  }
 
-  *pt = tree;
-
-  if (*parse_failed == 0)
-    *pt = tree;
-  else
-    {
-      if (destroy_gdbmi_output (tree) == -1)
-	{
-	  fprintf (stderr, "%s:%d", __FILE__, __LINE__);
-	  return -1;
-	}
-    }
-
+  /* Free the scanners buffer */
   gdbmi__delete_buffer (state);
 
   return 0;
@@ -103,8 +123,11 @@ gdbmi_parser_parse_string (gdbmi_parser_ptr parser,
 int
 gdbmi_parser_parse_file (gdbmi_parser_ptr parser,
 			 const char *mi_command_file,
-			 gdbmi_output_ptr * pt, int *parse_failed)
+			 gdbmi_output_ptr *pt, int *parse_failed)
 {
+  int pattern;
+  int mi_status;
+  int found_one = 0;
 
   if (!parser)
     return -1;
@@ -115,6 +138,7 @@ gdbmi_parser_parse_file (gdbmi_parser_ptr parser,
   if (!parse_failed)
     return -1;
 
+  *pt = 0;
   *parse_failed = 0;
 
   /* Initialize data */
@@ -126,22 +150,21 @@ gdbmi_parser_parse_file (gdbmi_parser_ptr parser,
       return -1;
     }
 
-  if (gdbmi_parse () == 1)
+  /* Create a new input buffer for flex and
+   * iterate over all the tokens. */
+  do {
+    pattern = gdbmi_lex ();
+    if (pattern == 0)
+      break;
+    mi_status = gdbmi_push_parse (parser->mips, pattern, NULL, &found_one);
+  } while (mi_status == YYPUSH_MORE);
+
+  /* Parser is done, this should never happen */
+  if (mi_status != YYPUSH_MORE && mi_status != 0) {
     *parse_failed = 1;
-  else
-    *parse_failed = 0;
-
-  if (*parse_failed == 0)
-    *pt = tree;
-  else
-    {
-      if (destroy_gdbmi_output (tree) == -1)
-	{
-	  fprintf (stderr, "%s:%d", __FILE__, __LINE__);
-	  return -1;
-	}
-    }
-
+  } else {
+      *pt = tree;
+  }
 
   fclose (gdbmi_in);
 

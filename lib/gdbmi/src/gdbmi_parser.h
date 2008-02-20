@@ -61,18 +61,29 @@ int gdbmi_parser_destroy (gdbmi_parser_ptr parser);
 /*@{*/
 
 /**
- * tell the MI parser to parse the mi_command.
+ * Tell the MI parser to parse the data.
+ *
+ * The data must be either a full line or multiple full lines. (ending in \n)
+ * The normal usage of this function is to call it over and over again with
+ * more data and wait for it to return an mi output command.
+ *
+ * It would be more convienent to allow the parser to parse any random
+ * data but that would require flex to be a push flexer. It may even have
+ * this feature but since I already changed bison, I don't want to think
+ * anymore right now about how to improve this interface. It's good enough
+ * for a first shot.
  *
  * \param parser
  * The gdbmi_parser context to operate on.
  *
- * \param mi_command
- * The null terminated mi command. This consists of one line,
- * or multiple lines, in either case, it should be a complete command.
+ * \param mi_data
+ * The null terminated mi data. This consists of one or more lines.
  *
  * \param pt
- * If this function is successful (returns 0), then pt will be
- * the parse tree representing the mi_command.
+ * If this function is successful (returns 0), then pt may be set.
+ * If the mi_data parameter completes an mi output command, than pt will
+ * be non-null and represent the command parsed. Otherwise, if it is waiting
+ * for more intput, it will be returned as NULL.
  *
  * The user is responsible for freeing this data structure on there own.
  *
@@ -85,11 +96,11 @@ int gdbmi_parser_destroy (gdbmi_parser_ptr parser);
  * 0 on succes, or -1 on error.
  */
 int gdbmi_parser_parse_string (gdbmi_parser_ptr parser,
-			       const char *mi_command,
-			       gdbmi_output_ptr * pt, int *parse_failed);
+			       const char *mi_data,
+			       gdbmi_output_ptr *pt, int *parse_failed);
 
 /**
- * tell the MI parser to parse the mi_command from a file.
+ * Tell the MI parser to parse the mi_command from a file.
  *
  * \param parser
  * The gdbmi_parser context to operate on.
