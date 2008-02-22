@@ -207,6 +207,10 @@ struct gdbmi_stream_record
 /* Print result class  */
 int print_gdbmi_result_class (enum gdbmi_result_class param);
 
+/* Creating and  Destroying */
+gdbmi_pdata_ptr create_gdbmi_pdata (void);
+int destroy_gdbmi_pdata (gdbmi_pdata_ptr param);
+
 /* Creating, Destroying and printing output  */
 gdbmi_output_ptr create_gdbmi_output (void);
 int destroy_gdbmi_output (gdbmi_output_ptr param);

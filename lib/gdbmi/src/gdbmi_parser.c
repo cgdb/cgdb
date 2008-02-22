@@ -20,6 +20,7 @@ struct gdbmi_parser
 {
   char *last_error;
   gdbmi_pstate *mips;
+  gdbmi_pdata_ptr pdata_ptr;
 };
 
 gdbmi_parser_ptr
@@ -43,6 +44,13 @@ gdbmi_parser_create (void)
       return NULL;
   }
 
+  /* Create the data the parser parses into */
+  parser->pdata_ptr = create_gdbmi_pdata ();
+  if (!parser->pdata_ptr) {
+      fprintf (stderr, "%s:%d", __FILE__, __LINE__);
+      return NULL;
+  }
+  
   return parser;
 }
 
@@ -65,6 +73,11 @@ gdbmi_parser_destroy (gdbmi_parser_ptr parser)
     parser->mips = NULL;
   }
 
+  if (parser->pdata_ptr) {
+    destroy_gdbmi_pdata (parser->pdata_ptr);
+    parser->pdata_ptr = NULL;
+  }
+
   free (parser);
   parser = NULL;
   return 0;
@@ -78,7 +91,6 @@ gdbmi_parser_parse_string (gdbmi_parser_ptr parser,
   YY_BUFFER_STATE state;
   int pattern;
   int mi_status;
-  struct gdbmi_pdata pdata;
 
   if (!parser)
     return -1;
@@ -92,8 +104,8 @@ gdbmi_parser_parse_string (gdbmi_parser_ptr parser,
   /* Initialize output parameters */
   *pt = 0;
   *parse_failed = 0;
-  pdata.parsed_one = 0;
-  pdata.tree = 0;
+
+  parser->pdata_ptr->parsed_one = 0;
 
   /* Create a new input buffer for flex. */
   state = gdbmi__scan_string (strdup (mi_command));
@@ -104,15 +116,15 @@ gdbmi_parser_parse_string (gdbmi_parser_ptr parser,
     pattern = gdbmi_lex ();
     if (pattern == 0)
       break;
-    mi_status = gdbmi_push_parse (parser->mips, pattern, NULL, &pdata);
+    mi_status = gdbmi_push_parse (parser->mips, pattern, NULL, parser->pdata_ptr);
   } while (mi_status == YYPUSH_MORE);
 
   /* Parser is done, this should never happen */
   if (mi_status != YYPUSH_MORE && mi_status != 0) {
     *parse_failed = 1;
-  } else if (pdata.parsed_one) {
-      *pt = pdata.tree;
-      pdata.tree = NULL;
+  } else if (parser->pdata_ptr->parsed_one) {
+      *pt = parser->pdata_ptr->tree;
+      parser->pdata_ptr->tree = NULL;
   }
 
   /* Free the scanners buffer */
@@ -128,7 +140,6 @@ gdbmi_parser_parse_file (gdbmi_parser_ptr parser,
 {
   int pattern;
   int mi_status;
-  struct gdbmi_pdata pdata;
 
   if (!parser)
     return -1;
@@ -141,8 +152,6 @@ gdbmi_parser_parse_file (gdbmi_parser_ptr parser,
 
   *pt = 0;
   *parse_failed = 0;
-  pdata.parsed_one = 0;
-  pdata.tree = 0;
 
   /* Initialize data */
   gdbmi_in = fopen (mi_command_file, "r");
@@ -159,14 +168,15 @@ gdbmi_parser_parse_file (gdbmi_parser_ptr parser,
     pattern = gdbmi_lex ();
     if (pattern == 0)
       break;
-    mi_status = gdbmi_push_parse (parser->mips, pattern, NULL, &pdata);
+    mi_status = gdbmi_push_parse (parser->mips, pattern, NULL, parser->pdata_ptr);
   } while (mi_status == YYPUSH_MORE);
 
   /* Parser is done, this should never happen */
   if (mi_status != YYPUSH_MORE && mi_status != 0) {
     *parse_failed = 1;
   } else {
-      *pt = pdata.tree;
+      *pt = parser->pdata_ptr->tree;
+      parser->pdata_ptr->tree = NULL;
   }
 
   fclose (gdbmi_in);
