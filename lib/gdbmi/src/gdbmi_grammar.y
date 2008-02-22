@@ -2,7 +2,8 @@
 %define api.pure
 %define api.push_pull "push"
 %defines
-%parse-param { int *gdbmi_parsed_one }
+%code requires { struct gdbmi_pdata; }
+%parse-param { struct gdbmi_pdata *gdbmi_pdata }
 
 %{
 #include <string.h>
@@ -13,9 +14,8 @@
 extern char *gdbmi_text;
 extern int gdbmi_lex (void);
 extern int gdbmi_lineno;
-gdbmi_output_ptr tree;
 
-void gdbmi_error (int *gdbmi_parsed_one, const char *s)
+void gdbmi_error (gdbmi_pdata_ptr gdbmi_pdata, const char *s)
 { 
   fprintf (stderr, "%s:%d Error %s", __FILE__, __LINE__, s);
   if (strcmp (gdbmi_text, "\n") == 0)
@@ -94,12 +94,12 @@ void gdbmi_error (int *gdbmi_parsed_one, const char *s)
 %%
 
 output_list: output {
-  tree = $1;
+  gdbmi_pdata->tree = $1;
 };
 
 output_list: output_list output {
-  tree = append_gdbmi_output (tree, $2);
-  *gdbmi_parsed_one = 1;
+  gdbmi_pdata->tree = append_gdbmi_output (gdbmi_pdata->tree, $2);
+  gdbmi_pdata->parsed_one = 1;
 };
 
 output: opt_oob_record_list opt_result_record OPEN_PAREN variable CLOSED_PAREN NEWLINE { 
@@ -108,7 +108,7 @@ output: opt_oob_record_list opt_result_record OPEN_PAREN variable CLOSED_PAREN N
   $$->result_record = $2;
 
   if (strcmp ("gdb", $4) != 0)
-    gdbmi_error (gdbmi_parsed_one, "Syntax error, expected 'gdb'");
+    gdbmi_error (gdbmi_pdata, "Syntax error, expected 'gdb'");
 
   free ($4);
 } ;
@@ -194,12 +194,12 @@ result_class: STRING_LITERAL {
   else if (strcmp ("exit", gdbmi_text) == 0)
     $$ = GDBMI_EXIT;
   else
-    gdbmi_error (gdbmi_parsed_one, "Syntax error, expected 'done|running|connected|error|exit");
+    gdbmi_error (gdbmi_pdata, "Syntax error, expected 'done|running|connected|error|exit");
 };
 
 async_class: STRING_LITERAL {
   if (strcmp ("stopped", gdbmi_text) != 0)
-    gdbmi_error (gdbmi_parsed_one,  "Syntax error, expected 'stopped'" );
+    gdbmi_error (gdbmi_pdata,  "Syntax error, expected 'stopped'" );
 
   $$ = GDBMI_STOPPED;
 };

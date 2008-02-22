@@ -79,7 +79,7 @@
 /* Copy the first part of user declarations.  */
 
 /* Line 189 of yacc.c  */
-#line 7 "../../../../cgdb/lib/gdbmi/src/gdbmi_grammar.y"
+#line 8 "../../../../cgdb/lib/gdbmi/src/gdbmi_grammar.y"
 
 #include <string.h>
 #include <stdlib.h>
@@ -89,9 +89,8 @@
 extern char *gdbmi_text;
 extern int gdbmi_lex (void);
 extern int gdbmi_lineno;
-gdbmi_output_ptr tree;
 
-void gdbmi_error (int *gdbmi_parsed_one, const char *s)
+void gdbmi_error (gdbmi_pdata_ptr gdbmi_pdata, const char *s)
 { 
   fprintf (stderr, "%s:%d Error %s", __FILE__, __LINE__, s);
   if (strcmp (gdbmi_text, "\n") == 0)
@@ -108,7 +107,7 @@ void gdbmi_error (int *gdbmi_parsed_one, const char *s)
 
 
 /* Line 189 of yacc.c  */
-#line 112 "../../../../cgdb/lib/gdbmi/src/gdbmi_grammar.c"
+#line 111 "../../../../cgdb/lib/gdbmi/src/gdbmi_grammar.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -128,6 +127,15 @@ void gdbmi_error (int *gdbmi_parsed_one, const char *s)
 # define YYTOKEN_TABLE 0
 #endif
 
+/* "%code requires" blocks.  */
+
+/* Line 209 of yacc.c  */
+#line 5 "../../../../cgdb/lib/gdbmi/src/gdbmi_grammar.y"
+ struct gdbmi_pdata; 
+
+
+/* Line 209 of yacc.c  */
+#line 139 "../../../../cgdb/lib/gdbmi/src/gdbmi_grammar.c"
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
@@ -204,7 +212,7 @@ typedef union YYSTYPE
 
 
 /* Line 214 of yacc.c  */
-#line 208 "../../../../cgdb/lib/gdbmi/src/gdbmi_grammar.c"
+#line 216 "../../../../cgdb/lib/gdbmi/src/gdbmi_grammar.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -218,7 +226,7 @@ typedef struct yypstate yypstate;
 enum { YYPUSH_MORE = 4 };
 
 #if defined __STDC__ || defined __cplusplus
-int yypush_parse (yypstate *yyps, int yypushed_char, YYSTYPE const *yypushed_val, int *gdbmi_parsed_one);
+int yypush_parse (yypstate *yyps, int yypushed_char, YYSTYPE const *yypushed_val, struct gdbmi_pdata *gdbmi_pdata);
 #else
 int yypush_parse ();
 #endif
@@ -240,7 +248,7 @@ void yypstate_delete ();
 
 
 /* Line 264 of yacc.c  */
-#line 244 "../../../../cgdb/lib/gdbmi/src/gdbmi_grammar.c"
+#line 252 "../../../../cgdb/lib/gdbmi/src/gdbmi_grammar.c"
 
 #ifdef short
 # undef short
@@ -678,7 +686,7 @@ do								\
     }								\
   else								\
     {								\
-      yyerror (gdbmi_parsed_one, YY_("syntax error: cannot back up")); \
+      yyerror (gdbmi_pdata, YY_("syntax error: cannot back up")); \
       YYERROR;							\
     }								\
 while (YYID (0))
@@ -758,7 +766,7 @@ do {									  \
     {									  \
       YYFPRINTF (stderr, "%s ", Title);					  \
       yy_symbol_print (stderr,						  \
-		  Type, Value, gdbmi_parsed_one); \
+		  Type, Value, gdbmi_pdata); \
       YYFPRINTF (stderr, "\n");						  \
     }									  \
 } while (YYID (0))
@@ -772,19 +780,19 @@ do {									  \
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, int *gdbmi_parsed_one)
+yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, struct gdbmi_pdata *gdbmi_pdata)
 #else
 static void
-yy_symbol_value_print (yyoutput, yytype, yyvaluep, gdbmi_parsed_one)
+yy_symbol_value_print (yyoutput, yytype, yyvaluep, gdbmi_pdata)
     FILE *yyoutput;
     int yytype;
     YYSTYPE const * const yyvaluep;
-    int *gdbmi_parsed_one;
+    struct gdbmi_pdata *gdbmi_pdata;
 #endif
 {
   if (!yyvaluep)
     return;
-  YYUSE (gdbmi_parsed_one);
+  YYUSE (gdbmi_pdata);
 # ifdef YYPRINT
   if (yytype < YYNTOKENS)
     YYPRINT (yyoutput, yytoknum[yytype], *yyvaluep);
@@ -806,14 +814,14 @@ yy_symbol_value_print (yyoutput, yytype, yyvaluep, gdbmi_parsed_one)
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, int *gdbmi_parsed_one)
+yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, struct gdbmi_pdata *gdbmi_pdata)
 #else
 static void
-yy_symbol_print (yyoutput, yytype, yyvaluep, gdbmi_parsed_one)
+yy_symbol_print (yyoutput, yytype, yyvaluep, gdbmi_pdata)
     FILE *yyoutput;
     int yytype;
     YYSTYPE const * const yyvaluep;
-    int *gdbmi_parsed_one;
+    struct gdbmi_pdata *gdbmi_pdata;
 #endif
 {
   if (yytype < YYNTOKENS)
@@ -821,7 +829,7 @@ yy_symbol_print (yyoutput, yytype, yyvaluep, gdbmi_parsed_one)
   else
     YYFPRINTF (yyoutput, "nterm %s (", yytname[yytype]);
 
-  yy_symbol_value_print (yyoutput, yytype, yyvaluep, gdbmi_parsed_one);
+  yy_symbol_value_print (yyoutput, yytype, yyvaluep, gdbmi_pdata);
   YYFPRINTF (yyoutput, ")");
 }
 
@@ -864,13 +872,13 @@ do {								\
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_reduce_print (YYSTYPE *yyvsp, int yyrule, int *gdbmi_parsed_one)
+yy_reduce_print (YYSTYPE *yyvsp, int yyrule, struct gdbmi_pdata *gdbmi_pdata)
 #else
 static void
-yy_reduce_print (yyvsp, yyrule, gdbmi_parsed_one)
+yy_reduce_print (yyvsp, yyrule, gdbmi_pdata)
     YYSTYPE *yyvsp;
     int yyrule;
-    int *gdbmi_parsed_one;
+    struct gdbmi_pdata *gdbmi_pdata;
 #endif
 {
   int yynrhs = yyr2[yyrule];
@@ -884,7 +892,7 @@ yy_reduce_print (yyvsp, yyrule, gdbmi_parsed_one)
       YYFPRINTF (stderr, "   $%d = ", yyi + 1);
       yy_symbol_print (stderr, yyrhs[yyprhs[yyrule] + yyi],
 		       &(yyvsp[(yyi + 1) - (yynrhs)])
-		       		       , gdbmi_parsed_one);
+		       		       , gdbmi_pdata);
       YYFPRINTF (stderr, "\n");
     }
 }
@@ -892,7 +900,7 @@ yy_reduce_print (yyvsp, yyrule, gdbmi_parsed_one)
 # define YY_REDUCE_PRINT(Rule)		\
 do {					\
   if (yydebug)				\
-    yy_reduce_print (yyvsp, Rule, gdbmi_parsed_one); \
+    yy_reduce_print (yyvsp, Rule, gdbmi_pdata); \
 } while (YYID (0))
 
 /* Nonzero means print parse trace.  It is left uninitialized so that
@@ -1143,18 +1151,18 @@ yysyntax_error (char *yyresult, int yystate, int yychar)
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, int *gdbmi_parsed_one)
+yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, struct gdbmi_pdata *gdbmi_pdata)
 #else
 static void
-yydestruct (yymsg, yytype, yyvaluep, gdbmi_parsed_one)
+yydestruct (yymsg, yytype, yyvaluep, gdbmi_pdata)
     const char *yymsg;
     int yytype;
     YYSTYPE *yyvaluep;
-    int *gdbmi_parsed_one;
+    struct gdbmi_pdata *gdbmi_pdata;
 #endif
 {
   YYUSE (yyvaluep);
-  YYUSE (gdbmi_parsed_one);
+  YYUSE (gdbmi_pdata);
 
   if (!yymsg)
     yymsg = "Deleting";
@@ -1263,14 +1271,14 @@ yypstate_delete (yyps)
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 int
-yypush_parse (yypstate *yyps, int yypushed_char, YYSTYPE const *yypushed_val, int *gdbmi_parsed_one)
+yypush_parse (yypstate *yyps, int yypushed_char, YYSTYPE const *yypushed_val, struct gdbmi_pdata *gdbmi_pdata)
 #else
 int
-yypush_parse (yyps, yypushed_char, yypushed_val, gdbmi_parsed_one)
+yypush_parse (yyps, yypushed_char, yypushed_val, gdbmi_pdata)
     yypstate *yyps;
     int yypushed_char;
     YYSTYPE const *yypushed_val;
-    int *gdbmi_parsed_one;
+    struct gdbmi_pdata *gdbmi_pdata;
 #endif
 {
 /* The lookahead symbol.  */
@@ -1519,7 +1527,7 @@ yyreduce:
 /* Line 1464 of yacc.c  */
 #line 96 "../../../../cgdb/lib/gdbmi/src/gdbmi_grammar.y"
     {
-  tree = (yyvsp[(1) - (1)].u_output);
+  gdbmi_pdata->tree = (yyvsp[(1) - (1)].u_output);
 }
     break;
 
@@ -1528,8 +1536,8 @@ yyreduce:
 /* Line 1464 of yacc.c  */
 #line 100 "../../../../cgdb/lib/gdbmi/src/gdbmi_grammar.y"
     {
-  tree = append_gdbmi_output (tree, (yyvsp[(2) - (2)].u_output));
-  *gdbmi_parsed_one = 1;
+  gdbmi_pdata->tree = append_gdbmi_output (gdbmi_pdata->tree, (yyvsp[(2) - (2)].u_output));
+  gdbmi_pdata->parsed_one = 1;
 }
     break;
 
@@ -1543,7 +1551,7 @@ yyreduce:
   (yyval.u_output)->result_record = (yyvsp[(2) - (6)].u_result_record);
 
   if (strcmp ("gdb", (yyvsp[(4) - (6)].u_variable)) != 0)
-    gdbmi_error (gdbmi_parsed_one, "Syntax error, expected 'gdb'");
+    gdbmi_error (gdbmi_pdata, "Syntax error, expected 'gdb'");
 
   free ((yyvsp[(4) - (6)].u_variable));
 }
@@ -1699,7 +1707,7 @@ yyreduce:
   else if (strcmp ("exit", gdbmi_text) == 0)
     (yyval.u_result_class) = GDBMI_EXIT;
   else
-    gdbmi_error (gdbmi_parsed_one, "Syntax error, expected 'done|running|connected|error|exit");
+    gdbmi_error (gdbmi_pdata, "Syntax error, expected 'done|running|connected|error|exit");
 }
     break;
 
@@ -1709,7 +1717,7 @@ yyreduce:
 #line 200 "../../../../cgdb/lib/gdbmi/src/gdbmi_grammar.y"
     {
   if (strcmp ("stopped", gdbmi_text) != 0)
-    gdbmi_error (gdbmi_parsed_one,  "Syntax error, expected 'stopped'" );
+    gdbmi_error (gdbmi_pdata,  "Syntax error, expected 'stopped'" );
 
   (yyval.u_async_class) = GDBMI_STOPPED;
 }
@@ -1922,7 +1930,7 @@ yyreduce:
 
 
 /* Line 1464 of yacc.c  */
-#line 1926 "../../../../cgdb/lib/gdbmi/src/gdbmi_grammar.c"
+#line 1934 "../../../../cgdb/lib/gdbmi/src/gdbmi_grammar.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1957,7 +1965,7 @@ yyerrlab:
     {
       ++yynerrs;
 #if ! YYERROR_VERBOSE
-      yyerror (gdbmi_parsed_one, YY_("syntax error"));
+      yyerror (gdbmi_pdata, YY_("syntax error"));
 #else
       {
 	YYSIZE_T yysize = yysyntax_error (0, yystate, yychar);
@@ -1981,11 +1989,11 @@ yyerrlab:
 	if (0 < yysize && yysize <= yymsg_alloc)
 	  {
 	    (void) yysyntax_error (yymsg, yystate, yychar);
-	    yyerror (gdbmi_parsed_one, yymsg);
+	    yyerror (gdbmi_pdata, yymsg);
 	  }
 	else
 	  {
-	    yyerror (gdbmi_parsed_one, YY_("syntax error"));
+	    yyerror (gdbmi_pdata, YY_("syntax error"));
 	    if (yysize != 0)
 	      goto yyexhaustedlab;
 	  }
@@ -2009,7 +2017,7 @@ yyerrlab:
       else
 	{
 	  yydestruct ("Error: discarding",
-		      yytoken, &yylval, gdbmi_parsed_one);
+		      yytoken, &yylval, gdbmi_pdata);
 	  yychar = YYEMPTY;
 	}
     }
@@ -2065,7 +2073,7 @@ yyerrlab1:
 
 
       yydestruct ("Error: popping",
-		  yystos[yystate], yyvsp, gdbmi_parsed_one);
+		  yystos[yystate], yyvsp, gdbmi_pdata);
       YYPOPSTACK (1);
       yystate = *yyssp;
       YY_STACK_PRINT (yyss, yyssp);
@@ -2100,7 +2108,7 @@ yyabortlab:
 | yyexhaustedlab -- memory exhaustion comes here.  |
 `-------------------------------------------------*/
 yyexhaustedlab:
-  yyerror (gdbmi_parsed_one, YY_("memory exhausted"));
+  yyerror (gdbmi_pdata, YY_("memory exhausted"));
   yyresult = 2;
   /* Fall through.  */
 #endif
@@ -2108,7 +2116,7 @@ yyexhaustedlab:
 yyreturn:
   if (yychar != YYEMPTY)
      yydestruct ("Cleanup: discarding lookahead",
-		 yytoken, &yylval, gdbmi_parsed_one);
+		 yytoken, &yylval, gdbmi_pdata);
   /* Do not reclaim the symbols of the rule which action triggered
      this YYABORT or YYACCEPT.  */
   YYPOPSTACK (yylen);
@@ -2116,7 +2124,7 @@ yyreturn:
   while (yyssp != yyss)
     {
       yydestruct ("Cleanup: popping",
-		  yystos[*yyssp], yyvsp, gdbmi_parsed_one);
+		  yystos[*yyssp], yyvsp, gdbmi_pdata);
       YYPOPSTACK (1);
     }
 #ifndef yyoverflow

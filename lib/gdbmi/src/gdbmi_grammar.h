@@ -32,6 +32,15 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
+/* "%code requires" blocks.  */
+
+/* Line 1685 of yacc.c  */
+#line 5 "../../../../cgdb/lib/gdbmi/src/gdbmi_grammar.y"
+ struct gdbmi_pdata; 
+
+
+/* Line 1685 of yacc.c  */
+#line 44 "../../../../cgdb/lib/gdbmi/src/gdbmi_grammar.h"
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
@@ -108,7 +117,7 @@ typedef union YYSTYPE
 
 
 /* Line 1685 of yacc.c  */
-#line 112 "../../../../cgdb/lib/gdbmi/src/gdbmi_grammar.h"
+#line 121 "../../../../cgdb/lib/gdbmi/src/gdbmi_grammar.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -124,7 +133,7 @@ struct gdbmi_pstate;
 typedef struct gdbmi_pstate gdbmi_pstate;
 enum { YYPUSH_MORE = 4 };
 #if defined __STDC__ || defined __cplusplus
-int gdbmi_push_parse (gdbmi_pstate *yyps, int yypushed_char, YYSTYPE const *yypushed_val, int *gdbmi_parsed_one);
+int gdbmi_push_parse (gdbmi_pstate *yyps, int yypushed_char, YYSTYPE const *yypushed_val, struct gdbmi_pdata *gdbmi_pdata);
 #else
 int gdbmi_push_parse ();
 #endif

@@ -11,6 +11,12 @@ typedef struct gdbmi_stream_record *gdbmi_stream_record_ptr;
 typedef struct gdbmi_value *gdbmi_value_ptr;
 typedef struct gdbmi_tuple *gdbmi_tuple_ptr;
 typedef struct gdbmi_list *gdbmi_list_ptr;
+typedef struct gdbmi_pdata *gdbmi_pdata_ptr;
+
+struct gdbmi_pdata {
+  int parsed_one;
+  gdbmi_output_ptr tree;
+};
 
 /* A choice of result's that GDB is capable of producing  */
 enum gdbmi_result_class
