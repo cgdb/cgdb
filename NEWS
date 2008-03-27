@@ -1,9 +1,17 @@
-   * When the shortcut option is turned on, then,
-     F5 is now the same as 'r'.
-     F6 is now the same as 'c'.
-     F7 is now the same as 'f'.
-     F8 is now the same as 'n'.
-     F10 is now the same as 's'.
+   * Shortcut mode has been removed from cgdb. If you liked it, you can
+     put these commands in your cgdbrc file,
+       map r :run<CR>
+       map c :continue<CR>
+       map f :finish<CR>
+       map n :next<CR>
+       map s :step<CR>
+     and you will get the same functionality. Do not forget that,
+       F5 is the same as 'run'.
+       F6 is the same as 'continue'.
+       F7 is the same as 'finish'.
+       F8 is the same as 'next'.
+       F10 is the same as 'step'.
+     are always available.
 
    * Added a feature to CGDB which allows it to ask readline what key
      sequence it uses for the Home and End keys. That way, if the terminfo

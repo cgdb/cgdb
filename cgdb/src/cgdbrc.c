@@ -69,7 +69,6 @@ static struct cgdbrc_config_option cgdbrc_config_options[CGDBRC_WRAPSCAN+1] =
   {CGDBRC_AUTOSOURCERELOAD, {0}},
   {CGDBRC_CGDB_MODE_KEY, {CGDB_KEY_ESC}},
   {CGDBRC_IGNORECASE, {0}},
-  {CGDBRC_SHORTCUT, {0}},
   {CGDBRC_SHOWTGDBCOMMANDS, {0}},
   {CGDBRC_SYNTAX, {TOKENIZER_LANGUAGE_UNKNOWN}},
   {CGDBRC_TABSTOP, {8}},
@@ -109,9 +108,6 @@ static struct ConfigVariable
 
     /* ignorecase */
     { "ignorecase", "ic", CONFIG_TYPE_BOOL, &cgdbrc_config_options[CGDBRC_IGNORECASE].variant.int_val },
-
-    /* shortcut   */
-    { "shortcut", "sc", CONFIG_TYPE_BOOL, &cgdbrc_config_options[CGDBRC_SHORTCUT].variant.int_val },
 
     /* showtgdbcommands */
     { "showtgdbcommands", "stc", CONFIG_TYPE_FUNC_BOOL, &command_set_stc },

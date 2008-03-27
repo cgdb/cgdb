@@ -1032,8 +1032,6 @@ toggle_breakpoint (struct sviewer *sview, enum tgdb_breakpoint_action t)
 static void
 source_input (struct sviewer *sview, int key)
 {
-  int shortcut_option = cgdbrc_get (CGDBRC_SHORTCUT)->variant.int_val;
-
   switch (key)
     {
     case CGDB_KEY_UP:
@@ -1116,45 +1114,6 @@ source_input (struct sviewer *sview, int key)
     }
 
   /* Some extended features that are set by :set sc */
-  if (shortcut_option)
-    {
-      tgdb_request_ptr request_ptr = NULL;
-      switch (key)
-	{
-	case 'r':
-	case CGDB_KEY_F5:
-	  request_ptr = tgdb_request_run_debugger_command (tgdb, TGDB_RUN);
-	  break;
-	case 'n':
-	case CGDB_KEY_F8:
-	  request_ptr = tgdb_request_run_debugger_command (tgdb, TGDB_NEXT);
-	  break;
-	case 's':
-	case CGDB_KEY_F10:
-	  request_ptr = tgdb_request_run_debugger_command (tgdb, TGDB_STEP);
-	  break;
-	case 'c':
-	case CGDB_KEY_F6:
-	  request_ptr =
-	    tgdb_request_run_debugger_command (tgdb, TGDB_CONTINUE);
-	  break;
-	case 'f':
-	case CGDB_KEY_F7:
-	  request_ptr = tgdb_request_run_debugger_command (tgdb, TGDB_FINISH);
-	  break;
-	case 'u':
-	  request_ptr = tgdb_request_run_debugger_command (tgdb, TGDB_UP);
-	  break;
-	case 'd':
-	  request_ptr = tgdb_request_run_debugger_command (tgdb, TGDB_DOWN);
-	  break;
-	default:
-	  break;
-	}
-      if (request_ptr)
-	handle_request (tgdb, request_ptr);
-    }
-
   if_draw ();
 }
 
@@ -1249,7 +1208,6 @@ int
 internal_if_input (int key)
 {
   int regex_icase = cgdbrc_get (CGDBRC_IGNORECASE)->variant.int_val;
-  int shortcut_option = cgdbrc_get (CGDBRC_SHORTCUT)->variant.int_val;
   /* Normally, CGDB_KEY_ESC, but can be configured by the user */
   int cgdb_mode_key = cgdbrc_get (CGDBRC_CGDB_MODE_KEY)->variant.int_val;
 
@@ -1316,12 +1274,9 @@ internal_if_input (int key)
           if_draw ();
 	  return 0;
 	case 'n':
-	  if (!shortcut_option)
-	    {
-	      source_search_regex (src_win, ibuf_get (regex_line), 2, regex_direction,
-				   regex_icase);
-	      if_draw ();
-	    }
+	  source_search_regex (src_win, ibuf_get (regex_line), 2, regex_direction,
+			       regex_icase);
+	  if_draw ();
 	  break;
 	case 'N':
 	  source_search_regex (src_win, ibuf_get (regex_line), 2, !regex_direction,

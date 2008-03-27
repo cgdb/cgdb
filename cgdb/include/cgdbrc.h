@@ -108,7 +108,6 @@ enum cgdbrc_option_kind
   CGDBRC_AUTOSOURCERELOAD,
   CGDBRC_CGDB_MODE_KEY,
   CGDBRC_IGNORECASE,
-  CGDBRC_SHORTCUT,
   CGDBRC_SHOWTGDBCOMMANDS,
   CGDBRC_SYNTAX,
   CGDBRC_TABSTOP,
@@ -132,7 +131,6 @@ struct cgdbrc_config_option
     /* option_kind == CGDBRC_AUTOSOURCERELOAD */
     /* option_kind == CGDBRC_CGDB_MODE_KEY */
     /* option_kind == CGDBRC_IGNORECASE */
-    /* option_kind == CGDBRC_SHORTCUT */
     /* option_kind == CGDBRC_SHOWTGDBCOMMANDS */
     /* option_kind == CGDBRC_TABSTOP */
     /* option_kind == CGDBRC_TIMEOUT */

@@ -437,39 +437,6 @@ Send a next command to GDB.
 Send a step command to GDB.
 @end table
 
-@cindex shortcut commands
-If you have the @samp{shortcut} option turned on, then the source window 
-will have several more commands available.  These commands override the
-above commands.
-
-@table @kbd
-@item r
-@itemx F5
-Send a run command to GDB.
-
-@item n
-@itemx F8
-Send a next command to GDB.
-
-@item s
-@itemx F10
-Send a step command to GDB.
-
-@item c
-@itemx F6
-Send a continue command to GDB.
-
-@item f
-@itemx F7
-Send a finish command to GDB.
-
-@item u
-Send an up command to GDB.
-
-@item d
-Send a down command to GDB.
-@end table
-
 @node GDB Mode
 @section Commands available during GDB mode
 @cindex commands, in GDB mode
@@ -634,11 +601,6 @@ key will flow through to readline.
 @item :set ic
 @itemx :set ignorecase
 Sets searching case insensitive.  The default is off.
-
-@item :set sc
-@itemx :set shortcut
-Enables shortcut commands typed in source window.  The default is off.
-@xref{CGDB Mode}.
 
 @item :set stc
 @itemx :set showtgdbcommands
