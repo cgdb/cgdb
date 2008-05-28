@@ -1,3 +1,8 @@
+05/28/2008 Bob Rossi <bob@brasko.net>
+
+   * NEWS: Updating NEWS about new cgdb command synonyms, and some new 
+   commands.
+
 03/27/2008 Bob Rossi <bob@brasko.net>
 
    * NEWS: Updating NEWS about removing the shortcut option.

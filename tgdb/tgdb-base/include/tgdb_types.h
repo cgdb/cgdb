@@ -91,9 +91,19 @@ extern "C"
     TGDB_NEXT,
 
     /** 
-     * This will instruct TGDB to tell the debugger to run the program again.  
+     * This will instruct TGDB to tell the debugger to (re-)start the program. 
+     */
+    TGDB_START,
+
+    /** 
+     * This will instruct TGDB to tell the debugger to (re-)run the program.
      */
     TGDB_RUN,
+
+    /** 
+     * This will instruct TGDB to tell the debugger to kill the program.
+     */
+    TGDB_KILL,
 
     /** This will instruct TGDB to tell the debugger to step.  */
     TGDB_STEP,

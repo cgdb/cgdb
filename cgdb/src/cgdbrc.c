@@ -175,8 +175,8 @@ COMMANDS commands[] =
 	/* edit			*/ { "e",			command_source_reload,	0 },
 	/* focus		*/ { "focus",		command_do_focus,		0 },
 	/* help			*/ { "help",		command_do_help,		0 },
-	/* highlight	*/         { "highlight",	command_parse_highlight,0 },
-	/* highlight	*/ { "hi",			command_parse_highlight,0 },
+	/* highlight	        */ { "highlight",	command_parse_highlight,0 },
+	/* highlight	        */ { "hi",			command_parse_highlight,0 },
 	/* imap			*/ { "imap",		command_parse_map,		0 },
 	/* imap			*/ { "im",			command_parse_map,		0 },
 	/* iunmap		*/ { "iunmap",		command_parse_unmap,	0 },
@@ -191,10 +191,18 @@ COMMANDS commands[] =
 	/* unmap		*/ { "unmap",		command_parse_unmap,	0 },
 	/* unmap		*/ { "unm",			command_parse_unmap,	0 },
 	/* continue		*/ { "continue",	command_do_tgdbcommand,	TGDB_CONTINUE },
+	/* continue		*/ { "c",			command_do_tgdbcommand,	TGDB_CONTINUE },
 	/* finish		*/ { "finish",		command_do_tgdbcommand,	TGDB_FINISH },
+	/* finish		*/ { "f",			command_do_tgdbcommand,	TGDB_FINISH },
 	/* next			*/ { "next",		command_do_tgdbcommand,	TGDB_NEXT },
+	/* next			*/ { "n",			command_do_tgdbcommand,	TGDB_NEXT },
 	/* run			*/ { "run",			command_do_tgdbcommand,	TGDB_RUN },
-	/* step			*/ { "step",		command_do_tgdbcommand,	TGDB_STEP }
+	/* run			*/ { "r",			command_do_tgdbcommand,	TGDB_RUN },
+	/* kill			*/ { "kill",		command_do_tgdbcommand,	TGDB_KILL },
+	/* kill			*/ { "k",			command_do_tgdbcommand,	TGDB_KILL },
+	/* step			*/ { "step",		command_do_tgdbcommand,	TGDB_STEP },
+	/* step			*/ { "s",			command_do_tgdbcommand,	TGDB_STEP },
+	/* start		*/ { "start",		command_do_tgdbcommand,	TGDB_START }
 };
 
 int command_sort_find(const void *_left_cmd, const void *_right_cmd)

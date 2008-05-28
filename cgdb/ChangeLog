@@ -1,3 +1,7 @@
+05/28/2008 Bob Rossi <bob@brasko.net>
+	* src/cgdbrc.c (commands): Add new command synonyms and new 
+	commands.
+
 08/17/2007 Bob Rossi <bob@brasko.net>
 
 	* src/cgdb.c (kui_input_acceptable): Added global variable.

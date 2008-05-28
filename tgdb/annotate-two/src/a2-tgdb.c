@@ -68,17 +68,6 @@ a2_set_inferior_tty (void *ctx)
     return 0;
 }
 
-/* This is ok as static, all references will use the same data. */
-static char *a2_tgdb_commands[] = {
-	"continue",
-	"finish",
-	"next",
-	"run",
-	"step",
-	"up",
-	"down"
-};
-
 
 static int 
 close_inferior_connection (void *ctx)
@@ -379,11 +368,42 @@ int a2_get_inferior_sources ( void *ctx) {
 	return 0;
 }
 
-char *a2_return_client_command ( void *ctx, enum tgdb_command_type c ) {
-	if ( c < TGDB_CONTINUE || c >= TGDB_ERROR )
-		return NULL;
+char *
+a2_return_client_command(void *ctx, enum tgdb_command_type c)
+{
+    char *ret = NULL;
+    switch (c)
+    {
+        case TGDB_CONTINUE:
+            ret = "continue";
+            break;
+        case TGDB_FINISH:
+            ret = "finish";
+            break;
+        case TGDB_NEXT:
+            ret = "next";
+            break;
+        case TGDB_START:
+            ret = "start";
+            break;
+        case TGDB_RUN:
+            ret = "run";
+            break;
+        case TGDB_KILL:
+            ret = "kill";
+            break;
+        case TGDB_STEP:
+            ret = "step";
+            break;
+        case TGDB_UP:
+            ret = "up";
+            break;
+        case TGDB_DOWN:
+            ret = "down";
+            break;
+    }
 
-	return a2_tgdb_commands[c];
+    return ret;
 }
 
 char *a2_client_modify_breakpoint ( 

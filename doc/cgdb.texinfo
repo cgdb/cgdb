@@ -680,7 +680,8 @@ possible values for @var{style} are @samp{top_full}, @samp{top_big},
 @itemx :set wrapscan
 Searches wrap around the end of file.  The default is on.
 
-@item :continue
+@item :c
+@itemx :continue
 Send a continue command to GDB.
 
 @item :e
@@ -688,7 +689,8 @@ Send a continue command to GDB.
 reloads the file in the source window.  this can be useful if the file has 
 changed since it was opened by cgdb.
 
-@item :finish
+@item :f
+@itemx :finish
 Send a finish command to GDB.
 
 @item :help
@@ -719,17 +721,27 @@ the video attributes for monochrome terminals.  Some examples are,
 @item :insert
 Move focus to the GDB window.
 
-@item :next
+@item :n
+@itemx :next
 Send a next command to GDB.
 
 @item :q
 @itemx :quit
 Quit CGDB.
 
-@item :run
+@item :r
+@itemx :run
 Send a run command to GDB.
 
-@item :step
+@item :start
+Send a start command to GDB.
+
+@item :k
+@itemx :kill
+Send a kill command to GDB.
+
+@item :s
+@itemx :step
 Send a step command to GDB.
 
 @item :syntax

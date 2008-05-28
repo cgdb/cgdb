@@ -1,3 +1,8 @@
+05/28/2008 Bob Rossi <bob@brasko.net>
+
+	* cgdb.texinfo (Configuring CGDB): Add new command synonyms and
+	new commands.
+
 08/13/2006 Bob Rossi <bob@brasko.net>
 
 	* cgdb.texinfo (Status Bar): Describe how to cancel a command in 
