@@ -1,4 +1,14 @@
+05/28/2008 Mike Mueller <mike@subfocal.net>
+
+    * src/interface.c: Globally rename regex_line to regex_last, add regex_cur.
+	(status_bar_regex_input): Now aborts on backspacing an empty input.
+	(status_bar_normal_input): Now aborts on backspacing an empty input.
+	(toggle_breakpoint): Fix warning casting pointer to int.
+	(internal_if_input): Cleanup regex_cur, not regex_line.
+	(internal_if_input): Set status bar kind *before* if_set_focus.
+
 05/28/2008 Bob Rossi <bob@brasko.net>
+
 	* src/cgdbrc.c (commands): Add new command synonyms and new 
 	commands.
 

@@ -111,9 +111,15 @@ static struct winsize screen_size;	/* Screen size */
 struct filedlg *fd;		/* The file dialog structure */
 
 /* The regex the user is entering */
-static struct ibuf *regex_line = NULL;
+static struct ibuf *regex_cur = NULL;
+
+/* The last regex the user searched for */
+static struct ibuf *regex_last = NULL;
+
 /* Direction to search */
-static int regex_direction;
+static int regex_direction_cur;
+static int regex_direction_last;
+
 /* The position of the source file, before regex was applied. */
 static int orig_line_regex; 
 
@@ -349,15 +355,15 @@ update_status_win (void)
     wattroff (tty_status_win, attr);
 
   /* Print the regex that the user is looking for Forward */
-  if (focus == CGDB_STATUS_BAR && sbc_kind == SBC_REGEX && regex_direction)
+  if (focus == CGDB_STATUS_BAR && sbc_kind == SBC_REGEX && regex_direction_cur)
     {
-      if_display_message ("/", WIDTH - 1, "%s", ibuf_get (regex_line));
+      if_display_message ("/", WIDTH - 1, "%s", ibuf_get (regex_cur));
       curs_set (1);
     }
   /* Regex backwards */
   else if (focus == CGDB_STATUS_BAR && sbc_kind == SBC_REGEX)
     {
-      if_display_message ("?", WIDTH - 1, "%s", ibuf_get (regex_line));
+      if_display_message ("?", WIDTH - 1, "%s", ibuf_get (regex_cur));
       curs_set (1);
     }
   /* A colon command typed at the status bar */
@@ -884,7 +890,7 @@ gdb_input (int key)
 
 /**
  * Capture a regular expression from the user, one key at a time.
- * This modifies the global variable regex_line.
+ * This modifies the global variables regex_cur and regex_last.
  *
  * \param sview
  * The source viewer.
@@ -897,45 +903,68 @@ status_bar_regex_input (struct sviewer *sview, int key)
 {
   int regex_icase = cgdbrc_get (CGDBRC_IGNORECASE)->variant.int_val;
 
+  /* Flag to indicate we're done with regex mode, need to switch back */
+  int done = 0;
 
   /* Recieve a regex from the user. */
   switch (key) {
     case '\r':
     case '\n':
     case CGDB_KEY_CTRL_M:
-      source_search_regex (sview, ibuf_get (regex_line), 2, regex_direction, regex_icase);
+      /* Save for future searches via 'n' or 'N' */
+      if (regex_last != NULL) {
+        ibuf_free (regex_last);
+      }
+      regex_last = ibuf_dup (regex_cur);
+      regex_direction_last = regex_direction_cur;
+      source_search_regex (sview, ibuf_get (regex_last), 2,
+          regex_direction_last, regex_icase);
       if_draw ();
-      /* Can't delete the regex line here, because the user can later type 'n' or 'N'
-       * which will do another search on the last regex entered. */
-      if_set_focus (CGDB);
-      return 0;
+      done = 1;
+      break;
     case 8:
     case 127:
       /* Backspace or DEL key */
-      ibuf_delchar (regex_line);
-      source_search_regex (sview, ibuf_get (regex_line), 1, regex_direction, regex_icase);
-      if_draw ();
-      update_status_win ();
-      return 0;
+      if (ibuf_length (regex_cur) == 0) {
+        done = 1;
+      } else {
+        ibuf_delchar (regex_cur);
+        source_search_regex (sview, ibuf_get (regex_cur), 1,
+            regex_direction_cur, regex_icase);
+        if_draw ();
+        update_status_win ();
+      }
+      break;
     default:
       if (kui_term_is_cgdb_key (key)) {
         const char *keycode = kui_term_get_keycode_from_cgdb_key (key);
         int length = strlen (keycode), i;
         for (i = 0; i < length; i++)
-          ibuf_addchar (regex_line, keycode[i]);
+          ibuf_addchar (regex_cur, keycode[i]);
       } else {
-        ibuf_addchar (regex_line, key);
+        ibuf_addchar (regex_cur, key);
       }
-      source_search_regex (sview, ibuf_get (regex_line), 1, regex_direction, regex_icase);
+      source_search_regex (sview, ibuf_get (regex_cur), 1,
+          regex_direction_cur, regex_icase);
       if_draw ();
       update_status_win ();
   };
+
+  if (done) {
+    ibuf_free (regex_cur);
+    regex_cur = NULL;
+    if_set_focus (CGDB);
+  }
+
   return 0;
 }
 
 static int
 status_bar_normal_input (int key)
 {
+  /* Flag to indicate we're done with status mode, need to switch back */
+  int done = 0;
+
   /* The goal of this state is to recieve a command from the user. */
   switch (key) {
     case '\r':
@@ -943,15 +972,17 @@ status_bar_normal_input (int key)
     case CGDB_KEY_CTRL_M:
       /* Found a command */
       if_run_command (src_win, cur_sbc);
-      ibuf_free (cur_sbc);
-      cur_sbc = NULL;
-      if_set_focus (CGDB);
+      done = 1;
       break;
     case 8:
     case 127:
       /* Backspace or DEL key */
-      ibuf_delchar (cur_sbc);
-      update_status_win ();
+      if (ibuf_length (cur_sbc) == 0) {
+        done = 1;
+      } else {
+        ibuf_delchar (cur_sbc);
+        update_status_win ();
+      }
       break;
     default:
       if (kui_term_is_cgdb_key (key)) {
@@ -965,6 +996,13 @@ status_bar_normal_input (int key)
       update_status_win ();
       break;
   };
+
+  if (done) {
+    ibuf_free (cur_sbc);
+    cur_sbc = NULL;
+    if_set_focus (CGDB);
+  }
+
   return 0;
 }
 
@@ -1007,7 +1045,7 @@ toggle_breakpoint (struct sviewer *sview, enum tgdb_breakpoint_action t)
 
   /* Get filename (strip path off -- GDB is dumb) */
   path = strrchr (sview->cur->path, '/') + 1;
-  if ((int) path == 1)
+  if (path == NULL + 1)
     path = sview->cur->path;
 
   /* delete an existing breakpoint */
@@ -1220,11 +1258,12 @@ internal_if_input (int key)
         ibuf_free (cur_sbc);
         cur_sbc = NULL;
       } else if (focus == CGDB_STATUS_BAR && sbc_kind == SBC_REGEX) {
-	  source_search_regex (src_win, ibuf_get (regex_line), 2, regex_direction, regex_icase);
-          ibuf_free (regex_line);
-          regex_line = NULL;
-	  src_win->cur->sel_line = orig_line_regex;
-	  if_draw ();
+        ibuf_free (regex_cur);
+        regex_cur = NULL;
+        free(src_win->cur->buf.cur_line);
+        src_win->cur->buf.cur_line = NULL;
+        src_win->cur->sel_rline = orig_line_regex;
+	src_win->cur->sel_line = orig_line_regex;
       }
       if_set_focus (CGDB);
       return 0;
@@ -1246,41 +1285,38 @@ internal_if_input (int key)
 	  if_set_focus (TTY);
 	  return 0;
         case ':':
-          if_set_focus (CGDB_STATUS_BAR);
-          // Set the type of the command the user is typing in the status bar
+          /* Set the type of the command the user is typing in the status bar */
           sbc_kind = SBC_NORMAL;
-          // Since the user is about to type in a command, allocate a buffer 
-          // in which this command can be stored.
+          if_set_focus (CGDB_STATUS_BAR);
+          /* Since the user is about to type in a command, allocate a buffer 
+           * in which this command can be stored. */
 	  cur_sbc = ibuf_init ();
           return 0;
 	case '/':
 	case '?':
-          /* Free the users last regex, before allocating a new one */
-          if (regex_line) {
-            ibuf_free (regex_line);
+          if (src_win->cur != NULL) {
+            regex_cur = ibuf_init ();
+	    regex_direction_cur = ('/' == key);
+            orig_line_regex = src_win->cur->sel_line;
+
+            sbc_kind = SBC_REGEX;
+            if_set_focus (CGDB_STATUS_BAR);
+
+	    /* Capturing regular expressions */
+	    source_search_regex_init (src_win);
+
+            /* Initialize the function for finding a regex and tell user */
+            if_draw ();
           }
-
-          regex_line = ibuf_init ();
-	  regex_direction = ('/' == key);
-          orig_line_regex = src_win->cur->sel_line;
-
-          sbc_kind = SBC_REGEX;
-          if_set_focus (CGDB_STATUS_BAR);
-
-	  /* Capturing regular expressions */
-	  source_search_regex_init (src_win);
-
-          /* Initialize the function for finding a regex and tell user */
-          if_draw ();
 	  return 0;
 	case 'n':
-	  source_search_regex (src_win, ibuf_get (regex_line), 2, regex_direction,
-			       regex_icase);
+	  source_search_regex (src_win, ibuf_get (regex_last), 2,
+              regex_direction_last, regex_icase);
 	  if_draw ();
 	  break;
 	case 'N':
-	  source_search_regex (src_win, ibuf_get (regex_line), 2, !regex_direction,
-			       regex_icase);
+	  source_search_regex (src_win, ibuf_get (regex_last), 2,
+              !regex_direction_last, regex_icase);
 	  if_draw ();
 	  break;
 	case 'T':
