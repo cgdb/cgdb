@@ -96,6 +96,7 @@ rline_initialize (int slavefd, command_cb *command, completion_cb *completion, c
   rline->rline_rl_last_func = NULL;
   rline->rline_rl_completion_query_items = rl_completion_query_items;
 
+  rl_readline_name = "cgdb";
   rl_instream = rline->input;
   rl_outstream = rline->output;
 
