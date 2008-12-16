@@ -1,3 +1,6 @@
+   * Enhanced tgdb in a2 mode. It now understands GNAT's 
+     pre-instance-choice, instance-choice, post-instance-choice extension.
+
    * Made searching and :commands a little more vi-like. If you abort a
      search, you can still recall the last search with 'n' or 'N'.  If you
      backspace to the beginning of the line, a :command or /search is

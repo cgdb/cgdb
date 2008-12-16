@@ -253,6 +253,21 @@ static struct annotation {
       handle_misc_post_prompt
   },
   {
+      "pre-instance-choice",
+      19,
+      handle_misc_pre_prompt 
+  },
+  {
+      "instance-choice",
+      15,
+      handle_misc_prompt
+  },
+  {
+      "post-instance-choice",
+      20,
+      handle_misc_post_prompt
+  },
+  {
       "pre-query",
       9,
       handle_misc_pre_prompt 
