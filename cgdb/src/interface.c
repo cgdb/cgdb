@@ -879,6 +879,26 @@ gdb_input (int key)
     case CGDB_KEY_F12:
       scr_end (gdb_win);
       break;
+    case CGDB_KEY_CTRL_L: 
+    {
+      int height = get_gdb_height(), i;
+
+      // Allocate and print enough newlines to clear the gdb buffer.
+      char *buf = (char*)cgdb_malloc(sizeof(char*)*height);
+      for (i = 0; i < height-1; ++i) {
+        buf[i] = '\n';
+      }
+      buf[i] = '\0';
+      if_print(buf);
+      free(buf);
+
+      // Sneaky return 1 here. Basically, this allows tricks readline to think
+      // that gdb did not handle the Ctrl-l. That way readline will also handle
+      // it. Because readline uses TERM=dumb, that means that it will clear a 
+      // single line and put out the prompt.
+      return 1;
+      break;
+    }
     default:
       return 1;
     }
