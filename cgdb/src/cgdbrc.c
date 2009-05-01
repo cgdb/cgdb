@@ -192,6 +192,7 @@ COMMANDS commands[] =
 	/* unmap		*/ { "unm",			command_parse_unmap,	0 },
 	/* continue		*/ { "continue",	command_do_tgdbcommand,	TGDB_CONTINUE },
 	/* continue		*/ { "c",			command_do_tgdbcommand,	TGDB_CONTINUE },
+	/* down	         	*/ { "down",			command_do_tgdbcommand,	TGDB_DOWN },
 	/* finish		*/ { "finish",		command_do_tgdbcommand,	TGDB_FINISH },
 	/* finish		*/ { "f",			command_do_tgdbcommand,	TGDB_FINISH },
 	/* next			*/ { "next",		command_do_tgdbcommand,	TGDB_NEXT },
@@ -202,7 +203,8 @@ COMMANDS commands[] =
 	/* kill			*/ { "k",			command_do_tgdbcommand,	TGDB_KILL },
 	/* step			*/ { "step",		command_do_tgdbcommand,	TGDB_STEP },
 	/* step			*/ { "s",			command_do_tgdbcommand,	TGDB_STEP },
-	/* start		*/ { "start",		command_do_tgdbcommand,	TGDB_START }
+	/* start		*/ { "start",		command_do_tgdbcommand,	TGDB_START },
+	/* up	        	*/ { "up",		command_do_tgdbcommand,	TGDB_UP },
 };
 
 int command_sort_find(const void *_left_cmd, const void *_right_cmd)
