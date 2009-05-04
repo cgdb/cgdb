@@ -18,21 +18,24 @@
 
       <div id="ss_thumbs">
         <div class="ss_thumb">
-          <a onclick="javascript:shot.src='images/ss_welcome.png'">
+          <a onclick="javascript:document.getElementById('shot').
+              src='images/ss_welcome.png'">
           <img src="images/ss_welcome.png" height="120" width="118"
                alt="Welcome screen" /><br/>
           Welcome</a>
         </div>
 
         <div class="ss_thumb">
-          <a onclick="javascript:shot.src='images/ss_debugging.png'">
+          <a onclick="javascript:document.getElementById('shot').
+              src='images/ss_debugging.png'">
           <img src="images/ss_debugging.png" height="120" width="118"
                alt="Debugging view" /><br />
           Debugging</a>
         </div>
 
         <div class="ss_thumb">
-          <a onclick="javascript:shot.src='images/ss_filedlg.png'">
+          <a onclick="javascript:document.getElementById('shot').
+              src='images/ss_filedlg.png'">
           <img src="images/ss_filedlg.png" height="120" width="118"
                alt="File dialog" /><br />
           File Dialog</a>
