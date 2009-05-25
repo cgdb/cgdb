@@ -37,7 +37,7 @@
       </tr>
       <tr>
         <td>Bob Rossi</td>
-        <td>bob_rossi (at) cox.net</td>
+        <td>bob (at) brasko.net</td>
       </tr>
       <tr>
         <td>Mike Mueller</td>
