@@ -100,6 +100,7 @@ AC_CHECK_FUNC([putenv],,AC_MSG_ERROR([CGDB requires putenv to build.]))
 AC_CHECK_FUNC([select],,AC_MSG_ERROR([CGDB requires select to build.]))
 AC_CHECK_FUNC([strdup],,AC_MSG_ERROR([CGDB requires strdup to build.]))
 AC_CHECK_FUNC([strerror],,AC_MSG_ERROR([CGDB requires strerror to build.]))
+AC_CHECK_FUNC([openpty],[AC_DEFINE(HAVE_OPENPTY, 1, [Define to 1 if you have the openpty function])],)
 
 dnl Default variables
 dnl If ncurses is yes after arguments, than use ncurses. Otherwise, use curses

@@ -1,3 +1,6 @@
+   * CGDB should successfully build on Mac OS X 10.5.
+     Thanks Kyle McKay for sending in this patch.
+
    * Add support for :up and :down in the cgdb status bar.
      Thanks Benoit Pierre for reporting this.
 
