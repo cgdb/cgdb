@@ -684,6 +684,9 @@ Searches wrap around the end of file.  The default is on.
 @itemx :continue
 Send a continue command to GDB.
 
+@itemx :down
+Send a down command to GDB.
+
 @item :e
 @itemx :edit
 reloads the file in the source window.  this can be useful if the file has 
@@ -746,6 +749,9 @@ Send a step command to GDB.
 
 @item :syntax
 Turn the syntax on or off.
+
+@itemx :up
+Send an up command to GDB.
 
 @item :map @var{lhs} @var{rhs}
 Create a new mapping or overwrite an existing mapping in CGDB mode.  
