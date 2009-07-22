@@ -134,7 +134,7 @@ struct tgdb
    *
    * It will either be NULL when it is not set or it should be
    * the last GUI command run. If it is non-NULL it should be from the heap.
-   * As anyone is allowed to call xfree on it.  */
+   * As anyone is allowed to call free on it.  */
   char *last_gui_command;
 
   /**

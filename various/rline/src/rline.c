@@ -452,8 +452,8 @@ rline_get_keyseq (struct rline *rline, const char *named_function,
     new_keyseq = (char *)cgdb_malloc ((2 * strlen (*invoking_keyseqs_cur)) + 1);
     if (rl_translate_keyseq (*invoking_keyseqs_cur, new_keyseq, &len))
     {
-       xfree (new_keyseq);
-       xfree (*invoking_keyseqs_cur);
+       free (new_keyseq);
+       free (*invoking_keyseqs_cur);
        /* Can't do much about readline failing, just continue on. */
        continue;
     }
@@ -461,10 +461,10 @@ rline_get_keyseq (struct rline *rline, const char *named_function,
     /* If the append function breaks, in serious trouble */
     std_list_append (keyseq_list, new_keyseq);
 
-    xfree (*invoking_keyseqs_cur);
+    free (*invoking_keyseqs_cur);
     invoking_keyseqs_cur++;
   }
-  xfree (invoking_keyseqs);
+  free (invoking_keyseqs);
 
   return 0;
 }

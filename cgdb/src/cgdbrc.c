@@ -589,7 +589,7 @@ static int command_parse_map ( int param )
   value = yylex ();
   if (value != IDENTIFIER)
   {
-    xfree (key_token);
+    free (key_token);
     enter_map_id = 0;
     return -1;
   }

@@ -39,6 +39,7 @@
 #include "fs_util.h"
 #include "pseudo.h"
 #include "logger.h"
+#include "terminal.h"
 
 struct pty_pair {
   int masterfd;
