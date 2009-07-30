@@ -66,7 +66,7 @@ static int cgdbrc_set_val (struct cgdbrc_config_option config_option);
 static struct cgdbrc_config_option cgdbrc_config_options[CGDBRC_WRAPSCAN+1] =
 {
   {CGDBRC_ARROWSTYLE, {ARROWSTYLE_SHORT}},
-  {CGDBRC_AUTOSOURCERELOAD, {0}},
+  {CGDBRC_AUTOSOURCERELOAD, {1}},
   {CGDBRC_CGDB_MODE_KEY, {CGDB_KEY_ESC}},
   {CGDBRC_IGNORECASE, {0}},
   {CGDBRC_SHOWTGDBCOMMANDS, {0}},

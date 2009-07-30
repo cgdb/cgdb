@@ -581,7 +581,7 @@ instead drawing the entire line in inverse video.
 @itemx :set autosourcereload
 If this is on, CGDB will automatically reload a source file if it has 
 changed since CGDB has opened it.  If it is off, the file will never be 
-reloaded, until you start CGDB again. The default is off.
+reloaded, until you start CGDB again. The default is on.
 This feature is useful when you are debugging a program, then you modify 
 a source file, recompile, and type @kbd{r} in GDB's CLI window. The file in 
 this case will be updated to show the new version.  Note, CGDB only looks at 
