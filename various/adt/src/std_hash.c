@@ -746,5 +746,5 @@ std_hash_nodes_destroy (struct ghashnode *hash_node,
 }
 
 unsigned int std_direct_hash ( const void *v ) {
-	return ((unsigned int)(v));
+	return (size_t) v;
 }

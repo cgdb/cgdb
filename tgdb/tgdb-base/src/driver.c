@@ -138,7 +138,7 @@ readline_completion_display_func (char **matches, int num_matches, int max_lengt
   int i;
   printf ("\n");
   for (i=1; i<=num_matches; ++i) {
-    printf (matches[i]);
+    printf ("%s", matches[i]);
     printf ("\n");
   }
 }
@@ -254,11 +254,11 @@ gdb_input (void)
 	struct tgdb_request *request = tgdb_queue_pop (tgdb);
 	char *prompt;
 	rline_get_prompt (rline, &prompt);
-	printf (prompt);
+	printf ("%s", prompt);
 
 	if (request->header == TGDB_REQUEST_CONSOLE_COMMAND)
 	  {
-	    printf (request->choice.console_command.command);
+	    printf ("%s", request->choice.console_command.command);
 	    printf ("\n");
 	  }
 
