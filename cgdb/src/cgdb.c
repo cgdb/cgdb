@@ -321,15 +321,13 @@ rlctx_send_user_command (char *line)
   tgdb_request_ptr request_ptr;
   int i;
 
-  /* This happens when rl_callback_read_char gets EOF */
-  if (line == NULL)
-  {
-    cleanup ();
-    exit (0);
+  if (line == NULL) {
+    /* NULL line means rl_callback_read_char received EOF */
+    ibuf_add(current_line, "quit");
+  } else {
+    /* Add the line passed in to the current line */
+    ibuf_add (current_line, line);
   }
-
-  /* Add the line passed in to the current line */
-  ibuf_add (current_line, line);
 
   /* Get current line, and current line length */
   cline = ibuf_get (current_line);
