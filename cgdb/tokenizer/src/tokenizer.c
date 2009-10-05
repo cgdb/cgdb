@@ -4,7 +4,8 @@
 #include <string.h>
 
 /* Some default file extensions */
-char *c_extensions[] = { ".c", ".C", ".cc", ".cpp", ".cxx", ".h", ".hpp" };
+char *c_extensions[] = {
+    ".c", ".C", ".cc", ".cpp", ".cxx", ".h", ".hpp", ".hxx" };
 char *ada_extensions[] = { ".adb", ".ads", ".ada",".ADB", ".ADS", ".ADA" };
 
 extern int c_lex ( void );
