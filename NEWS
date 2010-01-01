@@ -6,10 +6,6 @@
    * Add support for :up and :down in the cgdb status bar.
      Thanks Benoit Pierre for reporting this.
 
-   * Add support for handling control-l better. CGDB now clears the
-     entire GDB windows buffer, filling it with all newlines. The history
-     of the GDB buffer is still available with page up and page down.
-
    * Enhanced tgdb in a2 mode. It now understands GNAT's 
      pre-instance-choice, instance-choice, post-instance-choice extension.
 

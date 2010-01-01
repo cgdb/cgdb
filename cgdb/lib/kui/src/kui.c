@@ -1301,8 +1301,8 @@ kui_manager_get_terminal_keys_kui_map (
       map_set = (struct kui_map_set *)data;
    }
 
-   // At this point, the kui_map_set is available
-   // Add each kui_map_set into it.
+   /* At this point, the kui_map_set is available
+    * Add each kui_map_set into it. */
    for (kui_map_set_iter = std_list_begin (kui_map_set);
         kui_map_set_iter != std_list_end (kui_map_set);
         kui_map_set_iter = std_list_next ( kui_map_set_iter ) ) {

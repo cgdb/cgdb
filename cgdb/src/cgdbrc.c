@@ -275,12 +275,12 @@ command_set_cgdb_mode_key (const char *value)
   option.option_kind = CGDBRC_CGDB_MODE_KEY;
 
   if (value) {
-    // If the user typed in a single key, use it.
+    /* If the user typed in a single key, use it. */
     if (strlen (value) == 1) {
       option.variant.int_val = value[0];
     } else {
-      // The user may have typed in a keycode. (e.g. <Esc>)
-      // attempt to translate it.
+      /* The user may have typed in a keycode. (e.g. <Esc>)
+       * attempt to translate it. */
       int key = kui_term_get_cgdb_key_from_keycode (value);
       if (key == -1)
         return -1;

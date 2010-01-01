@@ -879,11 +879,23 @@ gdb_input (int key)
     case CGDB_KEY_F12:
       scr_end (gdb_win);
       break;
+#if 0
+    /* I would like to add better support for control-l in the GDB
+     * window, but this patch didn't make me happy enough to release it.
+     * The problem is, when it clears the screen, it adds a lot of 
+     * whitespace in the buffer. If you hit page-up to look back in
+     * the buffer, it's visible. This is really unacceptable.
+     *
+     * The approach I believe I would like to take with this, is to
+     * have the GDB window behave more like the terminal. That is,
+     * have GDB start at the top line, and move down as input 
+     * becomes available. Then, when you hit ctrl-l, you just move
+     * the prompt to the top line. */
     case CGDB_KEY_CTRL_L: 
     {
       int height = get_gdb_height(), i;
 
-      // Allocate and print enough newlines to clear the gdb buffer.
+      /* Allocate and print enough newlines to clear the gdb buffer. */
       char *buf = (char*)cgdb_malloc(sizeof(char*)*height);
       for (i = 0; i < height-1; ++i) {
         buf[i] = '\n';
@@ -892,13 +904,14 @@ gdb_input (int key)
       if_print(buf);
       free(buf);
 
-      // Sneaky return 1 here. Basically, this allows tricks readline to think
-      // that gdb did not handle the Ctrl-l. That way readline will also handle
-      // it. Because readline uses TERM=dumb, that means that it will clear a 
-      // single line and put out the prompt.
+      /* Sneaky return 1 here. Basically, this allows tricks readline to think
+       * that gdb did not handle the Ctrl-l. That way readline will also handle
+       * it. Because readline uses TERM=dumb, that means that it will clear a 
+       * single line and put out the prompt. */
       return 1;
       break;
     }
+#endif
     default:
       return 1;
     }
@@ -1272,8 +1285,8 @@ internal_if_input (int key)
   /* The cgdb mode key, puts the debugger into command mode */
   if (focus != CGDB && key == cgdb_mode_key)
     {
-      // Depending on which cgdb was in, it can free some memory here that
-      // it was previously using.
+      /* Depending on which cgdb was in, it can free some memory here that
+       * it was previously using. */
       if (focus == CGDB_STATUS_BAR && sbc_kind == SBC_NORMAL) {
         ibuf_free (cur_sbc);
         cur_sbc = NULL;
