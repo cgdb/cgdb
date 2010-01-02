@@ -1,3 +1,5 @@
+version 0.6.5 (01/01/2010):
+
 08/17/2007 Bob Rossi <bob@brasko.net>
 
 	* include/io.h (io_data_ready, io_getchar): Modify comment.

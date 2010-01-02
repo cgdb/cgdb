@@ -1,3 +1,5 @@
+version 0.6.5 (01/01/2010):
+
 05/28/2008 Bob Rossi <bob@brasko.net>
 
 	* annotate-two/src/a2-tgdb.c (a2_tgdb_commands): Removed.

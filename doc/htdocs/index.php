@@ -44,6 +44,50 @@
     </div>
 
     <h3>Recent News</h3>
+
+    <div class="news_entry">
+      <div class="news_date">
+        January 1st, 2010
+      </div>
+
+      <div class="news_text">
+        <p>
+          CGDB v0.6.5 was released today, see the download page to try it out.
+        </p>
+
+        <p>
+          One change that will likely get a lot of attention is that the
+          CGDB shortcut mode has been removed from cgdb. If you were using
+          it, you can get the same functionality by adding these commands
+          into your .cgdbrc,
+          <ul>
+            <li>map r :run<CR></li>
+            <li>map c :continue<CR></li>
+            <li>map f :finish<CR></li>
+            <li>map n :next<CR></li>
+            <li>map s :step<CR></li>
+          </ul>
+        </p>
+
+        <p>
+          A few interesting features that have been added in this release are:
+        </p>
+
+        <ul>
+          <li>The autosourcereload option is turned on by default</li>
+          <li>CGDB should successfully build on Mac OS X 10.5</li>
+          <li>Add support for :up and :down in the cgdb status bar</li>
+          <li>Add support for GNAT annotations (see NOTES)</li>
+          <li>Made searching and :commands a little more vi-like (see NOTES)</li>
+        </ul>
+
+        <p>
+          This release also has serveral bug fixes and features that can
+          be seen in the NEWS file. As always, happy CGDB'ing.
+        </p>
+      </div>
+    </div>
+
     
     <div class="news_entry">
       <div class="news_date">

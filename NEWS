@@ -1,3 +1,5 @@
+cgdb-0.6.5 (01/01/2010)
+
    * Turn autosourcereload to on by default. This matches GDB's behavior.
 
    * CGDB should successfully build on Mac OS X 10.5.

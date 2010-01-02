@@ -135,7 +135,7 @@ rm NEWS.bak
 rm datetmp.txt
 
 ################################################################################
-echo "-- Creating the distrobution $CGDB_BUILD_DIR/tmp"
+echo "-- Creating the distribution $CGDB_BUILD_DIR/tmp"
 ################################################################################
 cd $CGDB_BUILD_DIR
 make distcheck >> $CGDB_OUTPUT_LOG 2>&1
@@ -146,21 +146,15 @@ cd tmp
 tar -zxvf $CGDB_RELEASE.tar.gz >> $CGDB_OUTPUT_LOG 2>&1
 mkdir builddir
 cd builddir
-../$CGDB_RELEASE/configure --with-readline=/home/bob/download/readline/readline-5.1/target --prefix=$PWD/../target >> $CGDB_OUTPUT_LOG 2>&1
+../$CGDB_RELEASE/configure --prefix=$PWD/../target >> $CGDB_OUTPUT_LOG 2>&1
 make -s >> $CGDB_OUTPUT_LOG 2>&1
 make install >> $CGDB_OUTPUT_LOG 2>&1
 ../target/bin/cgdb --version
 
 ################################################################################
-echo "-- Do a svn update"
-################################################################################
-# This fixes files that have a different time stamp, but are no different.
-cd $CGDB_SOURCE_DIR
-svn update >> $CGDB_OUTPUT_LOG 2>&1
-
-################################################################################
 echo "-- Finished, creating the $CGDB_RELEASE_DIR"
 ################################################################################
+cd $CGDB_SOURCE_DIR
 rm -fr $CGDB_RELEASE_DIR
 mkdir $CGDB_RELEASE_DIR
 touch $CGDB_RELEASE_UPLOAD_SH
@@ -176,12 +170,18 @@ echo '#!/bin/sh' >> $CGDB_RELEASE_UPLOAD_SH
 echo "" >> $CGDB_RELEASE_UPLOAD_SH
 
 echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
-echo "echo \"-- Create the svn $CGDB_RELEASE_STR tag/branch\"" >> $CGDB_RELEASE_UPLOAD_SH
+echo "echo \"-- Create the git $CGDB_RELEASE_STR tag/branch\"" >> $CGDB_RELEASE_UPLOAD_SH
 echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
-echo "svn copy https://cgdb.svn.sourceforge.net/svnroot/cgdb/cgdb/trunk \\" >> $CGDB_RELEASE_UPLOAD_SH
-echo "         https://cgdb.svn.sourceforge.net/svnroot/cgdb/cgdb/tags/$CGDB_RELEASE_STR \\" >> $CGDB_RELEASE_UPLOAD_SH
-echo "         -m \"Add $CGDB_RELEASE_STR tag.\"" >> $CGDB_RELEASE_UPLOAD_SH
-echo '' >>  $CGDB_RELEASE_UPLOAD_SH
+
+echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
+echo "echo \"-- Commit the release $CGDB_RELEASE_STR\"" >> $CGDB_RELEASE_UPLOAD_SH
+echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
+echo "git commit -a -m \"Committing $CGDB_RELEASE_STR release.\"" >> $CGDB_RELEASE_UPLOAD_SH
+
+echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
+echo "echo \"-- Tag the release $CGDB_RELEASE_STR\"" >> $CGDB_RELEASE_UPLOAD_SH
+echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
+echo "git tag -m \"Tag $CGDB_RELEASE_STR release.\"" >> $CGDB_RELEASE_UPLOAD_SH
 
 #echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
 #echo 'echo "-- uploading the file $CGDB_RELEASE.tar.gz"' >> $CGDB_RELEASE_UPLOAD_SH
@@ -228,7 +228,7 @@ echo "-------------------" >> $CGDB_RELEASE_EMAIL
 echo "" >> $CGDB_RELEASE_EMAIL
 echo "Downloading:" >> $CGDB_RELEASE_EMAIL
 echo "" >> $CGDB_RELEASE_EMAIL
-echo "    Go to http://cgdb.sourceforge.net/download.shtml for download" >> $CGDB_RELEASE_EMAIL
+echo "    Go to http://cgdb.sourceforge.net/download.php for download" >> $CGDB_RELEASE_EMAIL
 echo "    link and instructions." >> $CGDB_RELEASE_EMAIL
 echo "" >> $CGDB_RELEASE_EMAIL
 echo "This new version contains the following changes:" >> $CGDB_RELEASE_EMAIL
@@ -241,6 +241,6 @@ echo "Enjoy," >> $CGDB_RELEASE_EMAIL
 echo "The CGDB Team" >> $CGDB_RELEASE_EMAIL
 
 ################################################################################
-echo "-- Modifing doc/htdocs/download.shtml"
+echo "-- Modifing doc/htdocs/download.php"
 ################################################################################
-perl -pi -e "s/cgdb-(.*?).tar.gz/$CGDB_RELEASE.tar.gz/g" doc/htdocs/download.shtml
+perl -pi -e "s/define\('LATEST', \".*?\"\)/define\('LATEST', \"$CGDB_VERSION\"\)/g" doc/htdocs/download.php
