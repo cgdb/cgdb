@@ -34,17 +34,8 @@ These steps are manual.
  ** At this point, you should be ready to release, there is no going back.
 
 - Put a release on sourceforge.net/projects/cgdb
-    * ftp upload.sourceforge.net
-      * user=anonymous, passwd=email
-      * type bin
-      * cd incoming
-      * put the file up
-    * go to sourceforge.net/projects/cgdb
-    * go to admin, then "file releases"
-    * Click "Add release"
-    * New release name (ie. cgdb-0.5.1)
-	* you should be able to put whats new in the NEWS file into the
-	  release notes.
+  mkdir /home/frs/project/c/cg/cgdb/cgdb-0.6.5
+  scp cgdb-0.6.5.tar.gz bobbybrasko,cgdb@frs.sourceforge.net:/home/frs/project/c/cg/cgdb/cgdb-0.6.5
 
 - Go into releasedir and run upload.sh to upload all the files.
 
@@ -59,5 +50,4 @@ These steps are manual.
 
 - Announce the release on cgdb-announce@lists.sourceforge.net
   with email from releasedir/cgdb.email.
-
-- Create a new Gentoo ebuild file (or ask Mike to)
+  Subject: CGDB 0.Major.Minor released

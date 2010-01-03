@@ -175,30 +175,30 @@
       <div class="pagetext">
         <p>
         <a href="http://prdownloads.sourceforge.net/cgdb/cgdb-<?= LATEST ?>.tar.gz?download">cgdb-<?= LATEST ?>.tar.gz</a> -
-        <a href="http://cgdb.svn.sourceforge.net/viewvc/cgdb/cgdb/trunk/ChangeLog?view=markup">ChangeLog</a> -
-        <a href="http://cgdb.svn.sourceforge.net/viewvc/cgdb/cgdb/trunk/NEWS?view=markup">NEWS</a>
+        <a href="http://cgdb.git.sourceforge.net/git/gitweb.cgi?p=cgdb/cgdb;a=blob;f=ChangeLog;hb=HEAD">ChangeLog</a> -
+        <a href="http://cgdb.git.sourceforge.net/git/gitweb.cgi?p=cgdb/cgdb;a=blob;f=NEWS;hb=HEAD">NEWS</a>
         </p>
       </div>
     </div>
 
-    <a name="subversion"></a>
-    <h4>Subversion Access</h4>
+    <a name="git"></a>
+    <h4>Git Access</h4>
 
       <div class="pagetext">
 
         <p>
-          The most recent changes to CGDB can be found by checking out
-          a copy of the current
-          <a href="http://subversion.tigris.org/">Subversion</a> tree.  You may
+          The most recent changes to CGDB can be found by cloning
+          a copy of the current repository, 
+          <a href="http://git-scm.com/">Git</a> tree.  You may
           want to try this to see if a bug is resolved before reporting the
-          error. It should be noted that the svn tree is not guaranteed to
+          error. It should be noted that the git tree is not guaranteed to
           be stable and is not tested as well as the latest stable release.
         </p>
 
         <p>
-          To get a copy of the svn repository, use the following command:
+          To get a copy of the git repository, use the following command:
           <code>
-            svn co https://cgdb.svn.sourceforge.net/svnroot/cgdb/cgdb/trunk cgdb
+            git clone git://cgdb.git.sourceforge.net/gitroot/cgdb/cgdb
           </code>
           After checking out the tree, you will need to generate the configure
           script before you can configure and build the code.  Use the script
@@ -207,7 +207,7 @@
         </p>
 
         <p>
-          <b>Note:</b> Building the code checked out from svn will require
+          <b>Note:</b> Building the code checked out from git will require
           additional tools installed to generate the autoconf script.  We use
           the following versions, although others may work for you:
         </p>
