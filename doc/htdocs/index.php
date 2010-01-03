@@ -61,11 +61,11 @@
           it, you can get the same functionality by adding these commands
           into your .cgdbrc,
           <ul>
-            <li>map r :run<CR></li>
-            <li>map c :continue<CR></li>
-            <li>map f :finish<CR></li>
-            <li>map n :next<CR></li>
-            <li>map s :step<CR></li>
+            <li>map r :run&lt;CR&gt;</li>
+            <li>map c :continue&lt;CR&gt;</li>
+            <li>map f :finish&lt;CR&gt;</li>
+            <li>map n :next&lt;CR&gt;</li>
+            <li>map s :step&lt;CR&gt;</li>
           </ul>
         </p>
 
