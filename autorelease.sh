@@ -181,7 +181,7 @@ echo "git commit -a -m \"Committing $CGDB_RELEASE_STR release.\"" >> $CGDB_RELEA
 echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
 echo "echo \"-- Tag the release $CGDB_RELEASE_STR\"" >> $CGDB_RELEASE_UPLOAD_SH
 echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
-echo "git tag -m \"Tag $CGDB_RELEASE_STR release.\"" >> $CGDB_RELEASE_UPLOAD_SH
+echo "git tag -m \"Tag $CGDB_RELEASE_STR release.\" $CGDB_RELEASE_STR" >> $CGDB_RELEASE_UPLOAD_SH
 
 #echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
 #echo 'echo "-- uploading the file $CGDB_RELEASE.tar.gz"' >> $CGDB_RELEASE_UPLOAD_SH
@@ -193,31 +193,31 @@ echo "git tag -m \"Tag $CGDB_RELEASE_STR release.\"" >> $CGDB_RELEASE_UPLOAD_SH
 echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
 echo 'echo "-- uploading cgdb.txt"' >> $CGDB_RELEASE_UPLOAD_SH
 echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
-echo 'scp cgdb.txt bobbybrasko@cgdb.sf.net:/home/groups/c/cg/cgdb/htdocs/' >> $CGDB_RELEASE_UPLOAD_SH
+echo 'scp cgdb.txt bobbybrasko,cgdb@web.sourceforge.net:htdocs/docs' >> $CGDB_RELEASE_UPLOAD_SH
 echo '' >> $CGDB_RELEASE_UPLOAD_SH
 
 echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
 echo 'echo "-- uploading cgdb.info"' >> $CGDB_RELEASE_UPLOAD_SH
 echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
-echo 'scp cgdb.info bobbybrasko@cgdb.sf.net:/home/groups/c/cg/cgdb/htdocs/' >> $CGDB_RELEASE_UPLOAD_SH
+echo 'scp cgdb.info bobbybrasko,cgdb@web.sourceforge.net:htdocs/docs' >> $CGDB_RELEASE_UPLOAD_SH
 echo '' >> $CGDB_RELEASE_UPLOAD_SH
 
 echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
 echo 'echo "-- uploading cgdb.pdf"' >> $CGDB_RELEASE_UPLOAD_SH
 echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
-echo 'scp cgdb.pdf bobbybrasko@cgdb.sf.net:/home/groups/c/cg/cgdb/htdocs/' >> $CGDB_RELEASE_UPLOAD_SH
+echo 'scp cgdb.pdf bobbybrasko,cgdb@web.sourceforge.net:htdocs/docs' >> $CGDB_RELEASE_UPLOAD_SH
 echo '' >> $CGDB_RELEASE_UPLOAD_SH
 
 echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
 echo 'echo "-- uploading cgdb-no-split.html"' >> $CGDB_RELEASE_UPLOAD_SH
 echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
-echo 'scp cgdb-no-split.html bobbybrasko@cgdb.sf.net:/home/groups/c/cg/cgdb/htdocs/' >> $CGDB_RELEASE_UPLOAD_SH
+echo 'scp cgdb-no-split.html bobbybrasko,cgdb@web.sourceforge.net:htdocs/docs' >> $CGDB_RELEASE_UPLOAD_SH
 echo '' >> $CGDB_RELEASE_UPLOAD_SH
 
 echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
 echo 'echo "-- uploading cgdb.html"' >> $CGDB_RELEASE_UPLOAD_SH
 echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
-echo 'scp -r cgdb.html bobbybrasko@cgdb.sf.net:/home/groups/c/cg/cgdb/htdocs/' >> $CGDB_RELEASE_UPLOAD_SH
+echo 'scp -r cgdb.html bobbybrasko,cgdb@web.sourceforge.net:htdocs/docs' >> $CGDB_RELEASE_UPLOAD_SH
 echo '' >> $CGDB_RELEASE_UPLOAD_SH
 
 ################################################################################

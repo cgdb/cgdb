@@ -27,9 +27,9 @@ These steps are manual.
 
  ** AUTOMATE THIS NEXT RELEASE IN UPLOAD.SH **
 - Update website cgdb.sourceforge.net:
-    * ssh cgdb.sourceforge.net
+    * ssh -t USER,cgdb@shell.sourceforge.net create
     * cd /home/groups/c/cg/cgdb/htdocs
-	* run 'svn update'
+	* run 'git pull --rebase'
 
  ** At this point, you should be ready to release, there is no going back.
 

@@ -47,7 +47,7 @@
 
     <div class="news_entry">
       <div class="news_date">
-        January 1st, 2010
+        January 3rd, 2010
       </div>
 
       <div class="news_text">
