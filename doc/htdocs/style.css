@@ -211,6 +211,28 @@ code {
     margin-left: 1em;
 }
 
+#features {
+    float: left;
+    width: 480px;
+}
+
+#sponsor {
+    float: right;
+    border: 1px outset #808080;
+    width: 220px;
+    text-align: center;
+    padding: 0.7em;
+}
+
+#sponsor p {
+    margin-bottom: 0.5em;
+}
+
+#sponsor a {
+    text-decoration: underline;
+    border-bottom: none;
+}
+
 #spacer {
     clear: both;
     padding-bottom: 1em;

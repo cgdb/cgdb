@@ -29,6 +29,7 @@
         <a href="download.php">Download</a> CGDB today!
       </p>
 
+      <div id="features">
       <h4>Features</h4>
       
       <ul>
@@ -40,6 +41,25 @@
         <li>Tab completion</li>
         <li>Key mappings (macros)</li>
       </ul>
+      </div>
+
+      <div id="sponsor">
+      <p style="color: #888; font-size: smaller;">
+        &mdash; Sponsor &mdash;
+      </p>
+      <p>
+        <a href="http://www.vigilantsw.com/"><b>Vigilant Software</b></a>
+      </p>
+      <p>
+        <small>
+          Advanced static code analysis for C and C++.
+          Try Vigilant Sentry and start finding bugs today.
+        </small>
+      </p>
+      </p>
+      </div>
+
+      <div style="clear:both"></div>
 
     </div>
 
