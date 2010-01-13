@@ -11,6 +11,10 @@ config/texinfo.tex
 config/ylwrap
 configure
 configure.in
+doc/cgdb.1
+doc/cgdb.info
+doc/stamp-vti
+doc/version.texi
 lib/gdbmi/config.h.in
 lib/gdbmi/configure
 lib/gdbmi/depcomp
