@@ -17,7 +17,7 @@
           <a href="#tarball">Source tarball</a>
         </li>
         <li>
-          <a href="#subversion">Subversion repository access</a>
+          <a href="#git">Git repository</a>
         </li>
       </ul>
     </div>
@@ -182,7 +182,7 @@
     </div>
 
     <a name="git"></a>
-    <h4>Git Access</h4>
+    <h4>Git Repository</h4>
 
       <div class="pagetext">
 
