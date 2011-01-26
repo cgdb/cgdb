@@ -7,8 +7,16 @@
 
 #ifndef DOXYGEN
 
-/* Standard Includes */
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
+#if HAVE_CURSES_H
 #include <curses.h>
+#elif HAVE_NCURSES_CURSES_H
+#include <ncurses/curses.h>
+#endif /* HAVE_CURSES_H */
+
 #include <stdlib.h>
 
 /* Local Includes */

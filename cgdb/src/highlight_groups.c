@@ -1,7 +1,17 @@
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
 #include "highlight_groups.h"
 #include "command_lexer.h"
 #include "logger.h"
+
+#if HAVE_CURSES_H
 #include <curses.h>
+#elif HAVE_NCURSES_CURSES_H
+#include <ncurses/curses.h>
+#endif /* HAVE_CURSES_H */
+
 #include <strings.h>
 #include <stdlib.h>
 

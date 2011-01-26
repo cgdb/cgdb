@@ -2,8 +2,17 @@
  * ---------
  */
 
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
 /* System Includes */
 #include <curses.h>
+#if HAVE_CURSES_H
+#include <curses.h>
+#elif HAVE_NCURSES_CURSES_H
+#include <ncurses/curses.h>
+#endif /* HAVE_CURSES_H */
 
 /* Colors */
 #define CGDB_COLOR_GREEN            1

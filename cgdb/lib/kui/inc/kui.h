@@ -3,6 +3,7 @@
 
 /* includes {{{ */
 #include "std_list.h"
+#include "kui_cgdb_key.h"
 /* }}} */
 
 /* Doxygen headers {{{ */
@@ -32,7 +33,6 @@
 /*@{*/
 
 struct kui_map;
-enum cgdb_key;
 
 /**
  * Create a kui map.

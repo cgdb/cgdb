@@ -21,6 +21,8 @@
 /* System Includes */
 #if HAVE_CURSES_H
 #include <curses.h>
+#elif HAVE_NCURSES_CURSES_H
+#include <ncurses/curses.h>
 #endif /* HAVE_CURSES_H */
 
 /* System Includes */
