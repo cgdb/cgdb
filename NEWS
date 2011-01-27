@@ -1,3 +1,7 @@
+  * Fixed a bug in the file dialog. When searching for a file,
+    and you hit enter to select it, CGDB would sometimes skip to
+    the next file that matches and open that file instead.
+
   * CGDB should now build out of the box on Cygwin again.
     CGDB used to only support building against curses.h. Now
     it also supports building against ncurses/curses.h.
