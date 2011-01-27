@@ -410,7 +410,7 @@ static int capture_regex(struct filedlg *fd) {
 
       if ( regex_line_pos == (MAX_LINE - 1) && !(c == CGDB_KEY_ESC || c == 8 || c == 127 ))
           continue;
-      
+
       /* Quit the search if the user hit escape */
       if ( c == CGDB_KEY_ESC ) {
          regex_line_pos = 0;
@@ -424,9 +424,6 @@ static int capture_regex(struct filedlg *fd) {
       /* If the user hit enter, then a successful regex has been recieved */
       if ( c == '\r' || c == '\n' || c == CGDB_KEY_CTRL_M) {
          regex_line[regex_line_pos] = '\0';
-         regex_search = 0;
-         filedlg_search_regex(fd, regex_line, 2, regex_direction, 1);
-         filedlg_display(fd);
          break;
       }
 
