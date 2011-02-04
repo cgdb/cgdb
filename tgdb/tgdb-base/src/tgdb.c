@@ -189,15 +189,12 @@ tgdb_process_client_commands (struct tgdb *tgdb)
   struct tgdb_list *client_command_list;
   tgdb_list_iterator *iterator;
   struct tgdb_command *command;
-  char *command_data = NULL;
 
   client_command_list = tgdb_client_get_client_commands (tgdb->tcc);
   iterator = tgdb_list_get_first (client_command_list);
 
   while (iterator)
     {
-      enum tgdb_command_choice command_choice;
-
       command =
 	(struct tgdb_command *) tgdb_list_get_item (iterator);
 
@@ -616,7 +613,6 @@ tgdb_send (struct tgdb *tgdb, char *command,
 static int
 tgdb_run_or_queue_command (struct tgdb *tgdb, struct tgdb_command *command)
 {
-  int ret = 0;
   int can_issue;
 
   can_issue = tgdb_can_issue_command (tgdb);
@@ -1249,7 +1245,6 @@ tgdb_request_complete (struct tgdb *tgdb, const char *line)
 static int
 tgdb_process_console_command (struct tgdb *tgdb, tgdb_request_ptr request)
 {
-  int ret;
   struct ibuf *command;
 
   if (!tgdb || !request)

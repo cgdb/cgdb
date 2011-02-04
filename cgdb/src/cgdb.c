@@ -321,7 +321,6 @@ rlctx_send_user_command (char *line)
   int length;
   char *rline_prompt;
   tgdb_request_ptr request_ptr;
-  int i;
 
   if (line == NULL) {
     /* NULL line means rl_callback_read_char received EOF */

@@ -781,8 +781,7 @@ int kui_term_is_cgdb_key ( int key ) {
 char *
 kui_term_get_ascii_char_sequence_from_key (int key)
 {
-  int i, val;
-  const char *keycode;
+  int i;
 
   if (key < CGDB_KEY_ESC || key >= CGDB_KEY_ERROR)
     return NULL;

@@ -47,7 +47,6 @@ enum ConfigType
 };
 
 static int command_set_arrowstyle( const char *value );
-static int command_set_focus( const char *value );
 static int command_set_cgdb_mode_key( const char *value );
 static int command_set_winsplit( const char *value );
 static int command_set_timeout( int value );

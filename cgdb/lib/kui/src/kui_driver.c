@@ -144,7 +144,7 @@ load_map (const char *line)
 	pmatch[1].rm_so != -1)
     {
       int size;
-      char *key, *value;
+      char *key;
 
       size = pmatch[1].rm_eo-pmatch[1].rm_so;
       key = (char*)cgdb_malloc (sizeof (char)*(size)+1);
@@ -192,7 +192,7 @@ read_mappings (const char *file)
 static void
 parse_long_options (int argc, char **argv)
 {
-  int opt, option_index = 0, n = 1;
+  int opt, option_index = 0;
   const char *args = "hf:";
 
 #ifdef HAVE_GETOPT_H
