@@ -1,3 +1,4 @@
+#include <sys_util.h>
 #include "rline.h"
 
 #if HAVE_CONFIG_H
