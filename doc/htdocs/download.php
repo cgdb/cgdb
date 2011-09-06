@@ -17,8 +17,9 @@
       MacOS X.
     </p>
     <p>
-      <b>Windows binary:</b> <a href="files/cgdb-<?= LATEST ?>-win32.tar.gz"
-      >cgdb-<?= LATEST ?>-win32.tar.gz</a>.
+      <b>Windows binary:</b>
+      <a href="http://prdownloads.sourceforge.net/cgdb/cgdb-<?= LATEST
+      ?>-win32.tar.gz?download">cgdb-<?= LATEST ?>-win32.tar.gz</a>
     </p>
     <p>
       This is a Cygwin executable that will run in a command window

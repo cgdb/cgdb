@@ -35,7 +35,7 @@ These steps are manual.
 
 - Put a release on sourceforge.net/projects/cgdb
   mkdir /home/frs/project/c/cg/cgdb/cgdb-0.6.5
-  scp cgdb-0.6.5.tar.gz bobbybrasko,cgdb@frs.sourceforge.net:/home/frs/project/c/cg/cgdb/cgdb-0.6.5
+  scp cgdb-0.6.5.tar.gz bobbybrasko,cgdb@frs.sourceforge.net:/home/frs/project/c/cg/cgdb/cgdb/cgdb-0.6.5
 
 - Go into releasedir and run upload.sh to upload all the files.
 
