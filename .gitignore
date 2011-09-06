@@ -15,6 +15,7 @@ configure
 configure.in
 doc/cgdb.1
 doc/cgdb.info
+doc/cgdb.txt
 doc/stamp-vti
 doc/version.texi
 lib/gdbmi/config.h.in
@@ -24,4 +25,8 @@ lib/gdbmi/install-sh
 lib/gdbmi/missing
 lib/gdbmi/ylwrap
 Makefile.in
+output.log
 build/
+c89.builddir/
+releasedir/
+version.texi.builddir/
