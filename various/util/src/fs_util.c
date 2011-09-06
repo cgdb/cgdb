@@ -30,15 +30,20 @@
 #include <errno.h>
 #endif /* HAVE_ERRNO_H */
 
+#if HAVE_CYGWIN
+#include <sys/cygwin.h>
+#endif /* HAVE_CYGWIN */
+
 #include "fs_util.h"
 #include "logger.h"
 
 #define MAXLINE 4096
 
+/* TODO: The cgywin_conv functions used here are deprecated. */
+
 int fs_util_is_valid ( const char *dir ) {
     char actual_dir[FSUTIL_PATH_MAX];
 #ifdef HAVE_CYGWIN
-    extern void cygwin_conv_to_full_win32_path(const char *path, char *win32_path);
     char cygwin_actual_dir[FSUTIL_PATH_MAX];
 #endif
 
@@ -75,7 +80,6 @@ int fs_util_create_dir ( const char *dir ) {
     struct stat st;
 
 #ifdef HAVE_CYGWIN
-    extern void cygwin_conv_to_full_win32_path(const char *path, char *win32_path);
     char cygwin_actual_dir[FSUTIL_PATH_MAX];
 #endif
 
