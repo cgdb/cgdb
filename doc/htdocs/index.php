@@ -67,6 +67,26 @@
 
     <div class="news_entry">
       <div class="news_date">
+        September 6, 2011
+      </div>
+
+      <div class="news_text">
+        <p>
+          CGDB v0.6.6 was released today, see the download page to try it out.
+        </p>
+        <p>
+          This release is primarily a bug-fix release and contains no major
+          new features.  It fixes a segfault on some 64-bit systems, a compile
+          error on Cygwin 1.7, and some search issues in the file dialog.
+        </p>
+        <p>
+          We encourage anyone running cgdb-0.6.5 or older to update.
+        </p>
+      </div>
+    </div>
+
+    <div class="news_entry">
+      <div class="news_date">
         January 3rd, 2010
       </div>
 
