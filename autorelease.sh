@@ -21,6 +21,7 @@ CGDB_RELEASE_EMAIL=$PWD/releasedir/cgdb.email
 echo "-- Writing results of all commands in $CGDB_OUTPUT_LOG"
 ################################################################################
 rm -f $CGDB_OUTPUT_LOG
+touch doc/cgdb.texinfo
 
 ################################################################################
 echo "-- All release files will be written to $CGDB_RELEASE_DIR"
