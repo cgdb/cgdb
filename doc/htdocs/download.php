@@ -1,6 +1,6 @@
 <?
     define('PAGE_ID', "download_page");
-    define('LATEST', "0.6.5");
+    define('LATEST', "0.6.6");
 
     include "header.php";
 ?>
