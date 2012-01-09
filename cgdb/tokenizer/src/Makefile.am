@@ -6,7 +6,7 @@ AM_CFLAGS = -I$(srcdir)/../include \
 
 # create the input library
 noinst_LIBRARIES = libtokenizer.a
-libtokenizer_a_SOURCES = tokenizer.c clexer.l adalexer.l
+libtokenizer_a_SOURCES = tokenizer.c clexer.l adalexer.l dlexer.l
 
 # Installs the driver programs into progs directory
 noinst_PROGRAMS = tokenizer_driver

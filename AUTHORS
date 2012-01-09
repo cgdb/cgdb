@@ -25,4 +25,7 @@ Contributors
   the way for letting cgdb run with a white background color.
   He can be reached at "steve *at* folta *dot* net".
 
+  Iain Buclaw provided a syntax highlighter for the D language,
+  so cgdb plays nicely in a gdc development environment.
+
 For more information please see http://cgdb.sourceforge.net/

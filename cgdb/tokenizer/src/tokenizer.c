@@ -6,11 +6,16 @@
 /* Some default file extensions */
 char *c_extensions[] = {
     ".c", ".C", ".cc", ".cpp", ".cxx", ".h", ".hpp", ".hxx" };
+char *d_extensions[] = { ".d", ".di" };
 char *ada_extensions[] = { ".adb", ".ads", ".ada",".ADB", ".ADS", ".ADA" };
 
 extern int c_lex ( void );
 extern FILE *c_in;
 extern char *c_text;
+
+extern int d_lex ( void );
+extern FILE *d_in;
+extern char *d_text;
 
 extern int ada_lex ( void );
 extern FILE *ada_in;
@@ -47,6 +52,10 @@ int tokenizer_set_file ( struct tokenizer *t, const char *file, enum tokenizer_l
 		t->tokenizer_lex 	= c_lex;
 		t->tokenizer_in  	= &c_in;
 		t->tokenizer_text 	= &c_text;
+	} else if ( l == TOKENIZER_LANGUAGE_D ) {
+		t->tokenizer_lex 	= d_lex;
+		t->tokenizer_in  	= &d_in;
+		t->tokenizer_text 	= &d_text;
 	} else {
 		t->tokenizer_lex 	= ada_lex;
 		t->tokenizer_in  	= &ada_in;
@@ -119,6 +128,10 @@ enum tokenizer_language_support tokenizer_get_default_file_type (
     for (i = 0; i < sizeof(c_extensions) / sizeof(char *); i++)
         if (strcmp(file_extension, c_extensions[i]) == 0)
             l = TOKENIZER_LANGUAGE_C;
+
+    for (i = 0; i < sizeof(d_extensions) / sizeof(char *); i++)
+        if (strcmp(file_extension, d_extensions[i]) == 0)
+            l = TOKENIZER_LANGUAGE_D;
 
     for (i = 0; i < sizeof(ada_extensions) / sizeof(char *); i++)
         if (strcmp(file_extension, ada_extensions[i]) == 0)
