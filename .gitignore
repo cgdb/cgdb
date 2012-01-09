@@ -27,6 +27,7 @@ lib/gdbmi/ylwrap
 Makefile.in
 output.log
 build/
+install/
 c89.builddir/
 releasedir/
 version.texi.builddir/
