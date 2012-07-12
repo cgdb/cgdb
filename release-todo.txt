@@ -12,7 +12,7 @@ sure that it worked properly.
 
 - Ensure doc/htdocs/download.php has correct version set in the definition
   of 'LATEST' at the top of the file.
-  You can do 'git diff' and notice only ChangeLog's, the NEWS file and the
+  You can do 'git diff' and notice only the NEWS file and the
   download.php file modified.
 
 - Verify documentation is correct. cgdb.pdf, cgdb.html, cgdb.text, 

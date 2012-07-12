@@ -114,19 +114,6 @@ if [ "$?" != "0" ]; then
 fi
 
 ################################################################################
-echo "-- Update the ChangeLogs"
-################################################################################
-cd $CGDB_SOURCE_DIR
-echo "version $CGDB_VERSION (`date +%d/%m/%Y`):\n" > datetmp.txt
-for I in `find . -name ChangeLog`; 
-do 
-  cp $I $I.bak; 
-  cat datetmp.txt $I.bak > $I; 
-  rm $I.bak; 
-done
-rm datetmp.txt
-
-################################################################################
 echo "-- Update the NEWS file"
 ################################################################################
 echo "$CGDB_RELEASE (`date +%m/%d/%Y`)\n" > datetmp.txt
