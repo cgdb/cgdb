@@ -1469,12 +1469,14 @@ tgdb_signal_notification (struct tgdb *tgdb, int signum)
     {				/* ^c */
       tgdb->control_c = 1;
       sig_char = &t.c_cc[VINTR];
-      write (tgdb->debugger_stdin, sig_char, 1);
+      if (write(tgdb->debugger_stdin, sig_char, 1) < 1)
+          return -1;
     }
   else if (signum == SIGQUIT)
     {				/* ^\ */
       sig_char = &t.c_cc[VQUIT];
-      write (tgdb->debugger_stdin, sig_char, 1);
+      if (write(tgdb->debugger_stdin, sig_char, 1) < 1)
+          return -1;
     }
   else if (signum == SIGCHLD)
     {

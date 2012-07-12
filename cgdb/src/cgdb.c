@@ -269,9 +269,7 @@ handle_request (struct tgdb *tgdb, struct tgdb_request *request)
  * \return The exit status of the system() call.
  */
 int run_shell_command(const char *command) {
-
     int rv;
-    char buf[64];
 
     /* Cleanly scroll the screen up for a prompt */
     scrl (1);
@@ -300,7 +298,7 @@ int run_shell_command(const char *command) {
 
     /* Press any key to continue... */
     fprintf(stderr, "Hit ENTER to continue...");
-    fgets(buf, 64, stdin);
+    while (fgetc(stdin) != '\n') {}
 
     /* Turn off echo and put the terminal back into raw mode */
     tty_cbreak(STDIN_FILENO, &term_attributes);
@@ -1310,7 +1308,10 @@ static int
 cgdb_resize_term (int fd)
 {
   int c, result;
-  read (resize_pipe[0], &c, sizeof (int));
+  if (read(resize_pipe[0], &c, sizeof (int)) < sizeof(int)) {
+      logger_write_pos (logger, __FILE__, __LINE__, "read from resize pipe");
+      return -1;
+  }
 
   /* If there is more input in the pipe, that means another resize has
    * been recieved, and we still have not handled this one. So, skip this

@@ -784,7 +784,9 @@ signal_handler (int signo)
   if (signo == SIGWINCH)
     {
       int c = CGDB_KEY_RESIZE;
-      write (resize_pipe[1], &c, sizeof (int));
+      if (write(resize_pipe[1], &c, sizeof(int)) < sizeof(int)) {
+        logger_write_pos (logger, __FILE__, __LINE__, "write resize pipe");
+      }
     }
   else if (signo == SIGINT || signo == SIGTERM ||
 	   signo == SIGQUIT || signo == SIGCHLD)
