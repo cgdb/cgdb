@@ -3,6 +3,7 @@ aclocal.m4
 autom4te.cache
 config.h.in
 config.h.in~
+config/compile
 config/config.guess
 config/config.sub
 config/depcomp
@@ -25,9 +26,6 @@ lib/gdbmi/install-sh
 lib/gdbmi/missing
 lib/gdbmi/ylwrap
 Makefile.in
-output.log
 build/
 install/
-c89.builddir/
-releasedir/
-version.texi.builddir/
+release/
