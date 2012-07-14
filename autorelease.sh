@@ -1,11 +1,24 @@
 #!/bin/sh
 
-if [ "$1" = "" ]; then
-  echo "Usage: $0 version"
-  echo "  Example: \"$0 0.6.1\" or \"$0 0.6.1-svn\""
-  exit
+if [ "$2" = "" ]; then
+  echo "Usage: $0 [version] [web repository]"
+  echo "  Examples:"
+  echo "    $0 0.6.6 ../cgdb.github.com"
+  echo "    $0 0.7.0-svn ../cgdb.github.com"
+  exit 1
 fi
 
+CGDB_WEB=`readlink -f $PWD/$2`
+if [ ! -e $CGDB_WEB ]; then
+    echo "Repository path '$2' does not exist."
+    exit 1
+elif [ ! -d $CGDB_WEB ]; then
+    echo "Repository path '$2' is not a directory."
+    exit 1
+fi
+
+set -e
+ 
 CGDB_VERSION=$1
 CGDB_RELEASE=cgdb-$CGDB_VERSION
 CGDB_RELEASE_STR=`echo "$CGDB_RELEASE" | perl -pi -e 's/\./_/g'`
@@ -14,7 +27,8 @@ CGDB_BUILD_DIR=$PWD/version.texi.builddir
 CGDB_C89_BUILD_DIR=$PWD/c89.builddir
 CGDB_OUTPUT_LOG=$PWD/output.log
 CGDB_RELEASE_DIR=$PWD/releasedir
-CGDB_RELEASE_UPLOAD_SH=$PWD/releasedir/upload.sh
+CGDB_RELEASE_TAG_SH=$PWD/releasedir/tag.sh
+CGDB_RELEASE_DOCS_SH=$PWD/releasedir/update_docs.sh
 CGDB_RELEASE_EMAIL=$PWD/releasedir/cgdb.email
 
 ################################################################################
@@ -113,6 +127,8 @@ if [ "$?" != "0" ]; then
   exit
 fi
 
+cd $CGDB_SOURCE_DIR
+
 ################################################################################
 echo "-- Update the NEWS file"
 ################################################################################
@@ -145,8 +161,8 @@ echo "-- Finished, creating the $CGDB_RELEASE_DIR"
 cd $CGDB_SOURCE_DIR
 rm -fr $CGDB_RELEASE_DIR
 mkdir $CGDB_RELEASE_DIR
-touch $CGDB_RELEASE_UPLOAD_SH
-chmod +x $CGDB_RELEASE_UPLOAD_SH
+touch $CGDB_RELEASE_TAG_SH $CGDB_RELEASE_DOCS_SH
+chmod +x $CGDB_RELEASE_TAG_SH $CGDB_RELEASE_DOCS_SH
 cp doc/cgdb.txt $CGDB_RELEASE_DIR
 cp doc/cgdb.info $CGDB_RELEASE_DIR
 cp version.texi.builddir/doc/cgdb.pdf $CGDB_RELEASE_DIR
@@ -154,23 +170,19 @@ cp version.texi.builddir/doc/cgdb-no-split.html $CGDB_RELEASE_DIR
 cp -r version.texi.builddir/doc/cgdb.html $CGDB_RELEASE_DIR
 cp $CGDB_BUILD_DIR/tmp/$CGDB_RELEASE.tar.gz $CGDB_RELEASE_DIR
 
-echo '#!/bin/sh' >> $CGDB_RELEASE_UPLOAD_SH
-echo "" >> $CGDB_RELEASE_UPLOAD_SH
+# Create releasedir/tag.sh
+TAG_NAME=v$CGDB_VERSION
+echo "#!/bin/sh" >> $CGDB_RELEASE_TAG_SH
+echo "" >> $CGDB_RELEASE_TAG_SH
+echo "echo \"-- Commit the release $CGDB_RELEASE_STR\"" >> $CGDB_RELEASE_TAG_SH
+echo "git commit -a -m \"Committing $CGDB_RELEASE_STR release.\"" >> $CGDB_RELEASE_TAG_SH
+echo "" >> $CGDB_RELEASE_TAG_SH
+echo "echo \"-- Tag release $TAG_NAME\"" >> $CGDB_RELEASE_TAG_SH
+echo "git tag -m \"Tag $TAG_NAME release.\" $TAG_NAME" >> $CGDB_RELEASE_TAG_SH
+echo "echo \"-- Push this tag with: git push $TAG_NAME\"" >> $CGDB_RELEASE_TAG_SH 
 
-echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
-echo "echo \"-- Create the git $CGDB_RELEASE_STR tag/branch\"" >> $CGDB_RELEASE_UPLOAD_SH
-echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
-
-echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
-echo "echo \"-- Commit the release $CGDB_RELEASE_STR\"" >> $CGDB_RELEASE_UPLOAD_SH
-echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
-echo "git commit -a -m \"Committing $CGDB_RELEASE_STR release.\"" >> $CGDB_RELEASE_UPLOAD_SH
-
-echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
-echo "echo \"-- Tag the release $CGDB_RELEASE_STR\"" >> $CGDB_RELEASE_UPLOAD_SH
-echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
-echo "git tag -m \"Tag $CGDB_RELEASE_STR release.\" $CGDB_RELEASE_STR" >> $CGDB_RELEASE_UPLOAD_SH
-
+# TODO: Github file uploads
+#       see: https://github.com/wereHamster/ghup
 #echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
 #echo 'echo "-- uploading the file $CGDB_RELEASE.tar.gz"' >> $CGDB_RELEASE_UPLOAD_SH
 #echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
@@ -178,35 +190,19 @@ echo "git tag -m \"Tag $CGDB_RELEASE_STR release.\" $CGDB_RELEASE_STR" >> $CGDB_
 #echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
 #echo '' >>  $CGDB_RELEASE_UPLOAD_SH
 
-echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
-echo 'echo "-- uploading cgdb.txt"' >> $CGDB_RELEASE_UPLOAD_SH
-echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
-echo 'scp cgdb.txt bobbybrasko,cgdb@web.sourceforge.net:htdocs/docs' >> $CGDB_RELEASE_UPLOAD_SH
-echo '' >> $CGDB_RELEASE_UPLOAD_SH
-
-echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
-echo 'echo "-- uploading cgdb.info"' >> $CGDB_RELEASE_UPLOAD_SH
-echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
-echo 'scp cgdb.info bobbybrasko,cgdb@web.sourceforge.net:htdocs/docs' >> $CGDB_RELEASE_UPLOAD_SH
-echo '' >> $CGDB_RELEASE_UPLOAD_SH
-
-echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
-echo 'echo "-- uploading cgdb.pdf"' >> $CGDB_RELEASE_UPLOAD_SH
-echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
-echo 'scp cgdb.pdf bobbybrasko,cgdb@web.sourceforge.net:htdocs/docs' >> $CGDB_RELEASE_UPLOAD_SH
-echo '' >> $CGDB_RELEASE_UPLOAD_SH
-
-echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
-echo 'echo "-- uploading cgdb-no-split.html"' >> $CGDB_RELEASE_UPLOAD_SH
-echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
-echo 'scp cgdb-no-split.html bobbybrasko,cgdb@web.sourceforge.net:htdocs/docs' >> $CGDB_RELEASE_UPLOAD_SH
-echo '' >> $CGDB_RELEASE_UPLOAD_SH
-
-echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
-echo 'echo "-- uploading cgdb.html"' >> $CGDB_RELEASE_UPLOAD_SH
-echo '################################################################################' >> $CGDB_RELEASE_UPLOAD_SH
-echo 'scp -r cgdb.html bobbybrasko,cgdb@web.sourceforge.net:htdocs/docs' >> $CGDB_RELEASE_UPLOAD_SH
-echo '' >> $CGDB_RELEASE_UPLOAD_SH
+# Create releasedir/update_docs.sh
+echo '#!/bin/sh' >> $CGDB_RELEASE_DOCS_SH
+echo "" >> $CGDB_RELEASE_DOCS_SH
+echo 'echo "-- updating cgdb.pdf"' >> $CGDB_RELEASE_DOCS_SH
+echo "cp cgdb.pdf $CGDB_WEB/docs" >> $CGDB_RELEASE_DOCS_SH
+echo '' >> $CGDB_RELEASE_DOCS_SH
+echo 'echo "-- updating single page HTML"' >> $CGDB_RELEASE_DOCS_SH
+echo "cp cgdb-no-split.html $CGDB_WEB/docs/cgdb.html" >> $CGDB_RELEASE_DOCS_SH
+echo '' >> $CGDB_RELEASE_DOCS_SH
+echo 'echo "-- uploading multiple page HTML"' >> $CGDB_RELEASE_DOCS_SH
+echo "cp -r cgdb.html/* $CGDB_WEB/docs/" >> $CGDB_RELEASE_DOCS_SH
+echo '' >> $CGDB_RELEASE_DOCS_SH
+echo "echo \"Verify and commit the changes in $CGDB_WEB to update the site.\"" >> $CGDB_RELEASE_DOCS_SH
 
 ################################################################################
 echo "-- Creating Email $CGDB_RELEASE_DIR/cgdb.email"
@@ -228,7 +224,8 @@ echo "" >> $CGDB_RELEASE_EMAIL
 echo "Enjoy," >> $CGDB_RELEASE_EMAIL
 echo "The CGDB Team" >> $CGDB_RELEASE_EMAIL
 
+# TODO: Use jekyll in the web site and then set a variable for the version
 ################################################################################
-echo "-- Modifing doc/htdocs/download.php"
+#echo "-- Modifing doc/htdocs/download.php"
 ################################################################################
-perl -pi -e "s/define\('LATEST', \".*?\"\)/define\('LATEST', \"$CGDB_VERSION\"\)/g" doc/htdocs/download.php
+#perl -pi -e "s/define\('LATEST', \".*?\"\)/define\('LATEST', \"$CGDB_VERSION\"\)/g" doc/htdocs/download.php
