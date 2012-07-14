@@ -26,24 +26,23 @@
  *
  * If you modify this enumeration, update the manual!
  */
-enum hl_group_kind
-{
-  HLG_KEYWORD = 1,
-  HLG_TYPE,
-  HLG_LITERAL,
-  HLG_COMMENT,
-  HLG_DIRECTIVE,
-  HLG_TEXT,
-  HLG_SEARCH,
-  HLG_STATUS_BAR,
-  HLG_ARROW,
-  HLG_LINE_HIGHLIGHT,
-  HLG_ENABLED_BREAKPOINT,
-  HLG_DISABLED_BREAKPOINT,
-  HLG_SELECTED_LINE_NUMBER,
-  HLG_LOGO,
+enum hl_group_kind {
+    HLG_KEYWORD = 1,
+    HLG_TYPE,
+    HLG_LITERAL,
+    HLG_COMMENT,
+    HLG_DIRECTIVE,
+    HLG_TEXT,
+    HLG_SEARCH,
+    HLG_STATUS_BAR,
+    HLG_ARROW,
+    HLG_LINE_HIGHLIGHT,
+    HLG_ENABLED_BREAKPOINT,
+    HLG_DISABLED_BREAKPOINT,
+    HLG_SELECTED_LINE_NUMBER,
+    HLG_LOGO,
 
-  HLG_LAST
+    HLG_LAST
 };
 
 /* }}}*/
@@ -81,7 +80,7 @@ extern hl_groups_ptr hl_groups_instance;
  * @return
  * NULL on error, a valid context on success.
  */
-hl_groups_ptr hl_groups_initialize (void);
+hl_groups_ptr hl_groups_initialize(void);
 
 /**
  * This will terminate a hl_groups session. No functions should be called on
@@ -93,7 +92,7 @@ hl_groups_ptr hl_groups_initialize (void);
  * @return
  * 0 on success or -1 on error
  */
-int hl_groups_shutdown (hl_groups_ptr hl_groups);
+int hl_groups_shutdown(hl_groups_ptr hl_groups);
 
 /*@}*/
 /* }}}*/
@@ -117,7 +116,7 @@ int hl_groups_shutdown (hl_groups_ptr hl_groups);
  * \return
  * 0 on success or -1 on error
  */
-int hl_groups_setup (hl_groups_ptr hl_groups);
+int hl_groups_setup(hl_groups_ptr hl_groups);
 
 /**
  * Get the attributes that may be passed to wattron to tell the curses library
@@ -135,7 +134,8 @@ int hl_groups_setup (hl_groups_ptr hl_groups);
  * \return
  * 0 on success or -1 on error
  */
-int hl_groups_get_attr (hl_groups_ptr hl_groups, enum hl_group_kind kind, int *attr);
+int hl_groups_get_attr(hl_groups_ptr hl_groups, enum hl_group_kind kind,
+        int *attr);
 
 /**
  * Parse a particular command. This may move into the cgdbrc file later on.
@@ -146,9 +146,9 @@ int hl_groups_get_attr (hl_groups_ptr hl_groups, enum hl_group_kind kind, int *a
  * \return
  * 0 on success or -1 on error
  */
-int hl_groups_parse_config (hl_groups_ptr hl_groups);
+int hl_groups_parse_config(hl_groups_ptr hl_groups);
 
 /*@}*/
 /* }}}*/
 
-#endif 	/* __HIGHLIGHT_GROUPS_H__ */
+#endif /* __HIGHLIGHT_GROUPS_H__ */

@@ -11,15 +11,15 @@
 /* Definitions */
 /* ----------- */
 
-#define GDB_MAXBUF 4096               /* GDB input buffer size */
+#define GDB_MAXBUF 4096         /* GDB input buffer size */
 
 /* Special char to use for vertical line 
  * CYGWIN does not support this character 
  */
 #ifdef HAVE_CYGWIN
-    #define VERT_LINE ':'
+#define VERT_LINE ':'
 #else
-    #define VERT_LINE ACS_VLINE
+#define VERT_LINE ACS_VLINE
 #endif
 
 /* Keys */
@@ -34,7 +34,7 @@
  */
 struct tgdb;
 struct tgdb_request;
-int handle_request (struct tgdb *tgdb, struct tgdb_request *request);
+int handle_request(struct tgdb *tgdb, struct tgdb_request *request);
 
 void cleanup();
 

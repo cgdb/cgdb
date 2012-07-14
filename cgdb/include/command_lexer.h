@@ -26,7 +26,7 @@ enum TOKENS {
     IDENTIFIER,
     COMMAND,
     STRING,
-	EOL
+    EOL
 };
 
 /* yylex: retreive the next token from the current scan buffer
@@ -34,11 +34,11 @@ enum TOKENS {
  *  return: an integer value representing the token type (enum TOKEN).  0 when
  *          no more input.
  */
-int yylex( void );
+int yylex(void);
 
 /* get_token: Get the scanned token.  This value will change the next time yylex is called 
  * --------------
  */
-const char *get_token( void );
+const char *get_token(void);
 
 #endif

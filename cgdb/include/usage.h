@@ -4,6 +4,6 @@
 /**
  * This will generate the usage message for CGDB.
  */
-void usage (void);
+void usage(void);
 
 #endif /* __USAGE_H__ */

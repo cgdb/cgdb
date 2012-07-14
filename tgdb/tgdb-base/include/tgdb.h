@@ -11,18 +11,17 @@
  */
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 /* includes {{{*/
 #if HAVE_CONFIG_H
 #include "config.h"
-#endif				/* HAVE_CONFIG_H */
+#endif                          /* HAVE_CONFIG_H */
 
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
-#endif				/* HAVE_SYS_TYPES_H */
+#endif                          /* HAVE_SYS_TYPES_H */
 
 #include "tgdb_types.h"
 /* }}}*/
@@ -40,7 +39,7 @@ extern "C"
   /**
    *  This struct is a reference to a libtgdb instance.
    */
-  struct tgdb;
+    struct tgdb;
 
   /**
    * This initializes a tgdb library instance. It starts up the debugger and 
@@ -68,9 +67,8 @@ extern "C"
    * @return
    * NULL on error, a valid context on success.
    */
-  struct tgdb *tgdb_initialize (const char *debugger,
-				int argc, char **argv,
-				int *debugger_fd, int *inferior_fd);
+    struct tgdb *tgdb_initialize(const char *debugger,
+            int argc, char **argv, int *debugger_fd, int *inferior_fd);
 
   /**
    * This will terminate a libtgdb session. No functions should be called on
@@ -82,7 +80,7 @@ extern "C"
    * @return
    * 0 on success or -1 on error
    */
-  int tgdb_shutdown (struct tgdb *tgdb);
+    int tgdb_shutdown(struct tgdb *tgdb);
 
 /*@}*/
 /* }}}*/
@@ -107,7 +105,7 @@ extern "C"
    * @return
    * Error Message or NULL on error
    */
-  char *tgdb_err_msg (struct tgdb *tgdb);
+    char *tgdb_err_msg(struct tgdb *tgdb);
 
   /**
    * This will check to see if TGDB is currently capable of receiving another command.
@@ -121,7 +119,7 @@ extern "C"
    * \return
    * 0 on success, or -1 on error
    */
-  int tgdb_is_busy (struct tgdb *tgdb, int *is_busy);
+    int tgdb_is_busy(struct tgdb *tgdb, int *is_busy);
 
 /*@}*/
 /* }}}*/
@@ -148,8 +146,8 @@ extern "C"
    * \return
    * 0 on success or -1 on error
    */
-  int tgdb_process_command (struct tgdb *tgdb, tgdb_request_ptr request);
-  
+    int tgdb_process_command(struct tgdb *tgdb, tgdb_request_ptr request);
+
   /**
    * This function does most of the dirty work in TGDB. It is capable of 
    * processing the output of the debugger, to either satisfy a previously 
@@ -178,7 +176,8 @@ extern "C"
    * @return
    * The number of valid bytes in BUF on success, or -1 on error.
    */
-  size_t tgdb_process (struct tgdb *tgdb, char *buf, size_t n, int *is_finished);
+    size_t tgdb_process(struct tgdb *tgdb, char *buf, size_t n,
+            int *is_finished);
 
   /**
    * This sends a byte of data to the program being debugged.
@@ -192,7 +191,7 @@ extern "C"
    * @return
    * 0 on success or -1 on error
    */
-  int tgdb_send_inferior_char (struct tgdb *tgdb, char c);
+    int tgdb_send_inferior_char(struct tgdb *tgdb, char c);
 
   /**
    * Gets the ouput from the program being debugged.
@@ -209,7 +208,7 @@ extern "C"
    * @return
    * The number of valid bytes in BUF on success, or 0 on error.
    */
-  size_t tgdb_recv_inferior_data (struct tgdb *tgdb, char *buf, size_t n);
+    size_t tgdb_recv_inferior_data(struct tgdb *tgdb, char *buf, size_t n);
 
 /*@}*/
 /* }}}*/
@@ -235,7 +234,7 @@ extern "C"
    * A valid response if responses still exist.
    * Null if no more responses exist.
    */
-  struct tgdb_response *tgdb_get_response (struct tgdb *tgdb);
+    struct tgdb_response *tgdb_get_response(struct tgdb *tgdb);
 
   /**
    * This will traverse all of the responses that the context tgdb currently
@@ -244,7 +243,7 @@ extern "C"
    * \param tgdb
    * An instance of the tgdb library to operate on.
    */
-  void tgdb_traverse_responses (struct tgdb *tgdb);
+    void tgdb_traverse_responses(struct tgdb *tgdb);
 
   /**
    * This will free all of the memory used by the responses that tgdb returns.
@@ -252,7 +251,7 @@ extern "C"
    * \param tgdb
    * An instance of the tgdb library to operate on.
    */
-  void tgdb_delete_responses (struct tgdb *tgdb);
+    void tgdb_delete_responses(struct tgdb *tgdb);
 
 /*@}*/
 /* }}}*/
@@ -287,7 +286,7 @@ extern "C"
    * @return
    * 0 on success or -1 on error
    */
-  int tgdb_tty_new (struct tgdb *tgdb);
+    int tgdb_tty_new(struct tgdb *tgdb);
 
   /**
    * Gets the name of file that debugger is using for I/O with the program
@@ -299,7 +298,7 @@ extern "C"
    * @return
    * Name of tty or NULL on error.
    */
-  const char *tgdb_tty_name (struct tgdb *tgdb);
+    const char *tgdb_tty_name(struct tgdb *tgdb);
 
 /*@}*/
 /* }}}*/
@@ -326,8 +325,8 @@ extern "C"
    * \return
    * Will return as a tgdb request command on success, otherwise NULL.
    */
-  tgdb_request_ptr tgdb_request_run_console_command (struct tgdb *tgdb, 
-						     const char *command);
+    tgdb_request_ptr tgdb_request_run_console_command(struct tgdb *tgdb,
+            const char *command);
 
   /**
    * Gets a list of source files that make up the program being debugged.
@@ -347,7 +346,7 @@ extern "C"
    * \return
    * Will return as a tgdb request command on success, otherwise NULL.
    */
-  tgdb_request_ptr tgdb_request_inferiors_source_files (struct tgdb *tgdb);
+    tgdb_request_ptr tgdb_request_inferiors_source_files(struct tgdb *tgdb);
 
   /**
    * This gets the absolute path and the relative path from the given file, 
@@ -372,8 +371,8 @@ extern "C"
    * \return
    * Will return as a tgdb request command on success, otherwise NULL.
    */
-  tgdb_request_ptr tgdb_request_filename_pair (struct tgdb *tgdb, 
-					       const char *file);
+    tgdb_request_ptr tgdb_request_filename_pair(struct tgdb *tgdb,
+            const char *file);
 
   /**
    * This will ask the debugger for it's current file and line number.
@@ -393,8 +392,8 @@ extern "C"
    * \return
    * Will return as a tgdb request command on success, otherwise NULL.
    */
-  tgdb_request_ptr tgdb_request_current_location (struct tgdb *tgdb, 
-						  int on_startup);
+    tgdb_request_ptr tgdb_request_current_location(struct tgdb *tgdb,
+            int on_startup);
 
   /**
    * This tells libtgdb to run a command through the debugger.
@@ -408,8 +407,8 @@ extern "C"
    * @return
    * Will return as a tgdb request command on success, otherwise NULL.
    */
-  tgdb_request_ptr tgdb_request_run_debugger_command (
-		     struct tgdb *tgdb, enum tgdb_command_type c);
+    tgdb_request_ptr tgdb_request_run_debugger_command(struct tgdb *tgdb,
+            enum tgdb_command_type c);
 
   /**
    * Modify's a breakpoint.
@@ -429,10 +428,8 @@ extern "C"
    * @return
    * Will return as a tgdb request command on success, otherwise NULL.
    */
-  tgdb_request_ptr tgdb_request_modify_breakpoint (struct tgdb *tgdb,
-			      const char *file,
-			      int line, 
-			      enum tgdb_breakpoint_action b);
+    tgdb_request_ptr tgdb_request_modify_breakpoint(struct tgdb *tgdb,
+            const char *file, int line, enum tgdb_breakpoint_action b);
 
   /**
    * Used to get all of the possible tab completion options for LINE.
@@ -446,7 +443,7 @@ extern "C"
    * \return
    * Will return as a tgdb request command on success, otherwise NULL.
    */
-  tgdb_request_ptr tgdb_request_complete (struct tgdb *tgdb, const char *line);
+    tgdb_request_ptr tgdb_request_complete(struct tgdb *tgdb, const char *line);
 
 /*@}*/
 /* }}}*/
@@ -472,7 +469,7 @@ extern "C"
    * \return
    * 0 on success or -1 on error
    */
-  int tgdb_queue_append (struct tgdb *tgdb, tgdb_request_ptr request);
+    int tgdb_queue_append(struct tgdb *tgdb, tgdb_request_ptr request);
 
   /**
    * Get a tgdb_request command back from TGDB.
@@ -485,7 +482,7 @@ extern "C"
    * Popping a command when the queue is empty is also considered an error,
    * and NULL will be returned.
    */
-  tgdb_request_ptr tgdb_queue_pop (struct tgdb *tgdb);
+    tgdb_request_ptr tgdb_queue_pop(struct tgdb *tgdb);
 
   /**
    * Get's the number of items that are in the queue for TGDB to run.
@@ -499,7 +496,7 @@ extern "C"
    * \return
    * 0 on success or -1 on error
    */
-  int tgdb_queue_size (struct tgdb *tgdb, int *size);
+    int tgdb_queue_size(struct tgdb *tgdb, int *size);
 
 /* }}}*/
 
@@ -531,7 +528,7 @@ extern "C"
    * @return
    * 0 on success or -1 on error
    */
-  int tgdb_signal_notification (struct tgdb *tgdb, int signum);
+    int tgdb_signal_notification(struct tgdb *tgdb, int signum);
 
 /*@}*/
 /* }}}*/
@@ -563,7 +560,7 @@ extern "C"
    * @return
    * 1 if option is set, otherwise 0
    */
-  int tgdb_set_verbose_gui_command_output (struct tgdb *tgdb, int value);
+    int tgdb_set_verbose_gui_command_output(struct tgdb *tgdb, int value);
 
   /**
    * This will make TGDB handle error's in a verbose mode.
@@ -583,7 +580,7 @@ extern "C"
    * @return
    * 1 if option is set, otherwise 0
    */
-  int tgdb_set_verbose_error_handling (struct tgdb *tgdb, int value);
+    int tgdb_set_verbose_error_handling(struct tgdb *tgdb, int value);
 
 /*@}*/
 /* }}}*/
@@ -591,5 +588,4 @@ extern "C"
 #ifdef __cplusplus
 }
 #endif
-
-#endif				/* __TGDB_H__ */
+#endif                          /* __TGDB_H__ */

@@ -47,39 +47,39 @@
 /* --------------- */
 
 /* Source viewer object */
-struct sviewer{
-    struct list_node *list_head;       /* File list */    
-    struct list_node *cur;             /* Current node we're displaying */
-    WINDOW *win;                       /* Curses window */
+struct sviewer {
+    struct list_node *list_head;    /* File list */
+    struct list_node *cur;      /* Current node we're displaying */
+    WINDOW *win;                /* Curses window */
 };
 
-struct buffer{
-    int    length;                     /* Number of lines in buffer */
-    char **tlines;                     /* Array containing file ( lines of text ) */
-    char *cur_line;                    /* cur line may have unique color */
-    char  *breakpts;                   /* Breakpoints */
-    int    max_width;                  /* Width of longest line in file */
-};       
-             
+struct buffer {
+    int length;                 /* Number of lines in buffer */
+    char **tlines;              /* Array containing file ( lines of text ) */
+    char *cur_line;             /* cur line may have unique color */
+    char *breakpts;             /* Breakpoints */
+    int max_width;              /* Width of longest line in file */
+};
+
 struct list_node;
-struct list_node{
-    char             *path;            /* Full path to source file */
-    char             *lpath;           /* Relative path to source file */
-    struct buffer     buf;             /* File buffer */
-    struct buffer     orig_buf;        /* Original File buffer ( no color ) */
-    int               sel_line;        /* Current line selected in viewer */
-    int               sel_col;         /* Current column selected in viewer */
-    int               exe_line;        /* Current line executing */
+struct list_node {
+    char *path;                 /* Full path to source file */
+    char *lpath;                /* Relative path to source file */
+    struct buffer buf;          /* File buffer */
+    struct buffer orig_buf;     /* Original File buffer ( no color ) */
+    int sel_line;               /* Current line selected in viewer */
+    int sel_col;                /* Current column selected in viewer */
+    int exe_line;               /* Current line executing */
 
-    int               sel_col_rbeg;    /* Current beg column matched in regex */
-    int               sel_col_rend;    /* Current end column matched in regex */
-    int               sel_rline;       /* Current line used by regex */
+    int sel_col_rbeg;           /* Current beg column matched in regex */
+    int sel_col_rend;           /* Current end column matched in regex */
+    int sel_rline;              /* Current line used by regex */
 
-	enum tokenizer_language_support language; /* The language type of this file */
+    enum tokenizer_language_support language;   /* The language type of this file */
 
-	time_t last_modification; /* timestamp of last modification */
+    time_t last_modification;   /* timestamp of last modification */
 
-    struct list_node *next;            /* Pointer to next link in list */
+    struct list_node *next;     /* Pointer to next link in list */
 };
 
 /* --------- */
@@ -119,10 +119,8 @@ int source_add(struct sviewer *sview, const char *path);
  *
  * Return Value:  Zero on success, non-zero on error.
  */
-int source_set_relative_path(
-            struct sviewer *sview, 
-            const char *path, 
-            const char *lpath);
+int source_set_relative_path(struct sviewer *sview,
+        const char *path, const char *lpath);
 
 /* source_del:  Remove a file from the list of source files.
  * -----------
@@ -132,7 +130,7 @@ int source_set_relative_path(
  *           file is buffered in memory, it'll be freed.
  *
  * Return Value:  Zero on success, non-zero on error.
- */ 
+ */
 int source_del(struct sviewer *sview, const char *path);
 
 /* source_length:  Get the length of a source file.  If the source file hasn't
@@ -175,7 +173,7 @@ int source_display(struct sviewer *sview, int focus);
  *   width:   Width (in columns) of the viewer
  */
 void source_move(struct sviewer *sview,
-                 int pos_r, int pos_c, int height, int width);
+        int pos_r, int pos_c, int height, int width);
 
 /* source_vscroll:  Change current position in source file.
  * --------------
@@ -244,7 +242,7 @@ void source_search_regex_init(struct sviewer *sview);
  *               non-zero on failure.
  */
 int source_search_regex(struct sviewer *sview, const char *regex, int opt,
-                        int direction, int icase);
+        int direction, int icase);
 
 /* source_free:  Release the memory associated with a source viewer.
  * ------------
@@ -252,7 +250,7 @@ int source_search_regex(struct sviewer *sview, const char *regex, int opt,
  *   sview:  The source viewer to free.
  */
 void source_free(struct sviewer *sview);
- 
+
 /* ----------- */
 /* Breakpoints */
 /* ----------- */
@@ -298,6 +296,6 @@ void source_clear_breaks(struct sviewer *sview);
  * \return
  * 0 on success or -1 on error
  */
-int source_reload ( struct sviewer *sview, const char *path, int force );
+int source_reload(struct sviewer *sview, const char *path, int force);
 
 #endif

@@ -15,7 +15,7 @@ typedef struct pty_pair *pty_pair_ptr;
  * \return
  * A new pty_pair on success, NULL on error.
  */
-pty_pair_ptr pty_pair_create (void);
+pty_pair_ptr pty_pair_create(void);
 
 /**
  * Destroy the pty pair context.
@@ -26,7 +26,7 @@ pty_pair_ptr pty_pair_create (void);
  * \return
  * 0 on success or -1 on error
  */
-int pty_pair_destroy (pty_pair_ptr pty_pair);
+int pty_pair_destroy(pty_pair_ptr pty_pair);
 
 /**
  * Get the masterfd from the pty pair.
@@ -37,7 +37,7 @@ int pty_pair_destroy (pty_pair_ptr pty_pair);
  * \return
  * The master fd on success or -1 on error.
  */
-int pty_pair_get_masterfd (pty_pair_ptr pty_pair);
+int pty_pair_get_masterfd(pty_pair_ptr pty_pair);
 
 /**
  * Get the slavefd from the pty pair.
@@ -48,7 +48,7 @@ int pty_pair_get_masterfd (pty_pair_ptr pty_pair);
  * \return
  * The slave fd on success or -1 on error.
  */
-int pty_pair_get_slavefd (pty_pair_ptr pty_pair);
+int pty_pair_get_slavefd(pty_pair_ptr pty_pair);
 
 /**
  * Get the slave device name from the pty pair.
@@ -60,7 +60,7 @@ int pty_pair_get_slavefd (pty_pair_ptr pty_pair);
  * The slave device name or NULL on error.
  * The return data should not be modified.
  */
-const char *pty_pair_get_slavename (pty_pair_ptr pty_pair);
+const char *pty_pair_get_slavename(pty_pair_ptr pty_pair);
 
 /* invoke_debugger: Forks and execs the path.
  *      path: The path to the path.
@@ -77,10 +77,7 @@ const char *pty_pair_get_slavename (pty_pair_ptr pty_pair);
  *
  *      Return: -1 on error, pid of child on success
  */
-int invoke_debugger(
-        const char *path, 
-        int argc, char *argv[], 
-        int *in, int *out, 
-        int choice, char *filename);
+int invoke_debugger(const char *path,
+        int argc, char *argv[], int *in, int *out, int choice, char *filename);
 
 #endif

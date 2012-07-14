@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2004, Mike Mueller & Bob Rossi
  * Subject to the terms of the GNU General Public Licence
- */ 
+ */
 
 /* Standard Includes */
 #include <stdio.h>
@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
     /* Create a tree */
     debug("Creating tree... ");
     tree = std_btree_create((STDDestroyNotify) destructor);
-    if (tree == NULL){
+    if (tree == NULL) {
         printf("FAILED\n");
         return 1;
     }
@@ -79,6 +79,7 @@ int main(int argc, char *argv[])
 static int test_add(std_btree tree)
 {
     std_btree_iterator i = NULL;
+
     debug("Test starting: Add\n");
 
     if (std_btree_add(tree, NULL, STD_BTREE_LEFT, "First string")) {
@@ -87,7 +88,7 @@ static int test_add(std_btree tree)
     }
 
     i = std_btree_root(tree);
-    if (i == NULL){
+    if (i == NULL) {
         debug("Added root node, but root came back as NULL\n");
         return 2;
     }
@@ -97,8 +98,8 @@ static int test_add(std_btree tree)
         return 3;
     }
 
-    if (std_btree_add(tree, std_btree_child(i, STD_BTREE_RIGHT), 
-        STD_BTREE_LEFT, "Left of 2nd node (right of root)")) {
+    if (std_btree_add(tree, std_btree_child(i, STD_BTREE_RIGHT),
+                    STD_BTREE_LEFT, "Left of 2nd node (right of root)")) {
         debug("Add \"Left of 2nd node\" failed\n");
         return 4;
     }
@@ -116,6 +117,7 @@ static int test_add(std_btree tree)
 static int test_remove(std_btree tree)
 {
     std_btree_iterator i = std_btree_root(tree);
+
     debug("Test starting: Remove\n");
 
     std_btree_add(tree, i, STD_BTREE_LEFT, "Left of root");
@@ -141,6 +143,7 @@ static int test_remove(std_btree tree)
 static int test_replace(std_btree tree)
 {
     std_btree_iterator i = std_btree_root(tree);
+
     debug("Test starting: Replace\n");
 
     if (std_btree_replace(i, "New root in town, baby!")) {
@@ -155,6 +158,7 @@ static int test_replace(std_btree tree)
 static int test_isroot(std_btree tree)
 {
     std_btree_iterator i = std_btree_root(tree);
+
     debug("Test starting: Isroot\n");
 
     if (!std_btree_isroot(i)) {
@@ -174,6 +178,7 @@ static int test_isroot(std_btree tree)
 static int test_isleaf(std_btree tree)
 {
     std_btree_iterator i = std_btree_root(tree);
+
     debug("Test starting: Isleaf\n");
 
     if (std_btree_isleaf(i)) {
@@ -196,6 +201,6 @@ static int test_isleaf(std_btree tree)
 
 static int destructor(char *string)
 {
-    debug("Destructor called on: %s\n", string); 
+    debug("Destructor called on: %s\n", string);
     return 0;
 }

@@ -29,10 +29,7 @@
  */
 struct std_hashtable;
 
-typedef int  (*STDHRFunc)  (
-	void* key,
-    void* value,
-    void* user_data );
+typedef int (*STDHRFunc) (void *key, void *value, void *user_data);
 
 /**
  * Creates a new hash table.
@@ -57,9 +54,8 @@ typedef int  (*STDHRFunc)  (
  * @return
  * A new hash table
  */
-struct std_hashtable* std_hash_table_new (
-	STDHashFunc	hash_func,
-	STDEqualFunc key_equal_func );
+struct std_hashtable *std_hash_table_new(STDHashFunc hash_func,
+        STDEqualFunc key_equal_func);
 
 /**
  * Creates a new hash table like std_hash_table_new() and allows to specify 
@@ -85,11 +81,9 @@ struct std_hashtable* std_hash_table_new (
  * @return
  * A new hash table
  */
-struct std_hashtable* std_hash_table_new_full (
-	STDHashFunc	hash_func,
-	STDEqualFunc key_equal_func,
-	STDDestroyNotify key_destroy_func,
-	STDDestroyNotify value_destroy_func);
+struct std_hashtable *std_hash_table_new_full(STDHashFunc hash_func,
+        STDEqualFunc key_equal_func,
+        STDDestroyNotify key_destroy_func, STDDestroyNotify value_destroy_func);
 
 /**
  * Destroys the hash table. If keys and/or values are dynamically allocated, 
@@ -101,7 +95,7 @@ struct std_hashtable* std_hash_table_new_full (
  * \param hash_table
  * The hash table to destroy
  */
-void std_hash_table_destroy	( struct std_hashtable *hash_table );
+void std_hash_table_destroy(struct std_hashtable *hash_table);
 
 /**
  * Inserts a new key and value into a hash table.
@@ -121,10 +115,8 @@ void std_hash_table_destroy	( struct std_hashtable *hash_table );
  * \param value
  * The value to associate with the key.
  */
-void std_hash_table_insert ( 
-	struct std_hashtable *hash_table,
-	void *key,
-	void *value );
+void std_hash_table_insert(struct std_hashtable *hash_table,
+        void *key, void *value);
 
 /**
  * Inserts a new key and value into a hash table similar to 
@@ -143,10 +135,8 @@ void std_hash_table_insert (
  * \param value
  * The value to associate with the key.
  */
-void std_hash_table_replace ( 
-	struct std_hashtable *hash_table,
-	void *key,
-	void *value );
+void std_hash_table_replace(struct std_hashtable *hash_table,
+        void *key, void *value);
 
 /**
  * Removes a key and its associated value from a hash table.
@@ -164,9 +154,7 @@ void std_hash_table_replace (
  * @return
  * 1 if the key was found and removed from the hash table. 
  */
-int std_hash_table_remove ( 
-	struct std_hashtable *hash_table,
-	const void *key );
+int std_hash_table_remove(struct std_hashtable *hash_table, const void *key);
 
 /**
  * Removes a key and its associated value from a hash table without calling 
@@ -181,9 +169,7 @@ int std_hash_table_remove (
  * @return
  * 1 if the key was found and removed from the hash table. 
  */
-int std_hash_table_steal (
-	struct std_hashtable *hash_table,
-	const void *key );
+int std_hash_table_steal(struct std_hashtable *hash_table, const void *key);
 
 /**
  * Looks up a key in a hash table.
@@ -197,9 +183,7 @@ int std_hash_table_steal (
  * @return
  * The associated value, or NULL if the key is not found.
  */
-void* std_hash_table_lookup	(
-	struct std_hashtable *hash_table,
-	const void *key );
+void *std_hash_table_lookup(struct std_hashtable *hash_table, const void *key);
 
 /**
  * Looks up a key in the hash table, returning the original key and the 
@@ -222,11 +206,8 @@ void* std_hash_table_lookup	(
  * @return
  * 1 if the key was found in the hash table.
  */
-int std_hash_table_lookup_extended (
-	struct std_hashtable *hash_table,
-	const void *lookup_key,
-	void **oristd_key,
-	void **value);
+int std_hash_table_lookup_extended(struct std_hashtable *hash_table,
+        const void *lookup_key, void **oristd_key, void **value);
 
 /**
  * Calls the given function for each of the key/value pairs in the hash table. 
@@ -245,10 +226,8 @@ int std_hash_table_lookup_extended (
  * \param user_data
  * user data to pass to the function.
  */
-void std_hash_table_foreach	(
-	struct std_hashtable *hash_table,
-	STDHFunc func,
-	void *user_data );
+void std_hash_table_foreach(struct std_hashtable *hash_table,
+        STDHFunc func, void *user_data);
 
 /**
  * Calls the given function for key/value pairs in the hash table until 
@@ -270,10 +249,8 @@ void std_hash_table_foreach	(
  * evaluates to 1. If no pair with the requested property is found, 
  * NULL is returned.
  */
-void* std_hash_table_find (
-	struct std_hashtable *hash_table,
-	STDHRFunc predicate,
-	void *user_data );
+void *std_hash_table_find(struct std_hashtable *hash_table,
+        STDHRFunc predicate, void *user_data);
 
 /**
  * Calls the given function for each key/value pair in the hash table. If the 
@@ -293,10 +270,8 @@ void* std_hash_table_find (
  * @return
  * The number of key/value pairs removed.
  */
-unsigned int std_hash_table_foreach_remove (
-	struct std_hashtable *hash_table,
-	STDHRFunc func,
-	void *user_data );
+unsigned int std_hash_table_foreach_remove(struct std_hashtable *hash_table,
+        STDHRFunc func, void *user_data);
 
 /**
  * Calls the given function for each key/value pair in the hash table. If the 
@@ -315,10 +290,8 @@ unsigned int std_hash_table_foreach_remove (
  * @return
  * the number of key/value pairs removed.
  */
-unsigned int std_hash_table_foreach_steal (
-	struct std_hashtable *hash_table,
-	STDHRFunc func,
-	void *user_data );
+unsigned int std_hash_table_foreach_steal(struct std_hashtable *hash_table,
+        STDHRFunc func, void *user_data);
 
 /**
  * Returns the number of elements contained in the hash table.
@@ -329,17 +302,17 @@ unsigned int std_hash_table_foreach_steal (
  * @return
  * The number of key/value pairs in the hash table.
  */
-unsigned int std_hash_table_size ( struct std_hashtable *hash_table );
+unsigned int std_hash_table_size(struct std_hashtable *hash_table);
 
 /* 
  * Some standard hash functions 
  * TODO: These are unimplemented. Please implement them when needed.
  */
 
-int std_str_equal (const void *  v, const void *  v2);
-unsigned int std_str_hash  (const void *  v);
-int std_int_equal (const void *  v, const void *  v2);
-unsigned int    std_int_hash  (const void *  v);
+int std_str_equal(const void *v, const void *v2);
+unsigned int std_str_hash(const void *v);
+int std_int_equal(const void *v, const void *v2);
+unsigned int std_int_hash(const void *v);
 
 /** 
  * This "hash" function will just return the key's address as an
@@ -358,7 +331,7 @@ unsigned int    std_int_hash  (const void *  v);
  * @return
  * A hash value corresponding to the key.
  */
-unsigned int    std_direct_hash  (const void *  v);
+unsigned int std_direct_hash(const void *v);
 
 /**
  * Compares two void* arguments and returns 1 if they are equal. It can be 
@@ -374,7 +347,6 @@ unsigned int    std_direct_hash  (const void *  v);
  * @return
  * 1 if the two keys match
  */
-int std_direct_equal (const void *  v, const void *  v2);
+int std_direct_equal(const void *v, const void *v2);
 
 #endif /* __STD_HASH_H__ */
-

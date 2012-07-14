@@ -7,6 +7,7 @@
  * the rationale.
  */
 
+--blank-lines-after-declarations
 --blank-lines-after-procedures
 --braces-on-if-line
 --braces-on-struct-decl-line
@@ -14,6 +15,7 @@
 --case-brace-indentation0
 --cuddle-do-while
 --cuddle-else
+--continue-at-parentheses
 --continuation-indentation8
 --case-indentation4
 --space-after-cast
@@ -21,7 +23,6 @@
 --indent-level4
 --line-length80
 --comment-line-length80
---no-blank-lines-after-declarations
 --no-blank-lines-after-commas
 --dont-break-function-decl-args
 --no-comment-delimiters-on-blank-lines
@@ -34,4 +35,5 @@
 --space-after-for
 --space-after-if
 --space-after-while
+--swallow-optional-blank-lines
 --tab-size4

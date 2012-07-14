@@ -68,7 +68,7 @@ typedef struct wm_widget *wm_widget;
  * creating a new widget.
  */
 struct wm_widget {
-    
+
     /**
      * Constructor function, called when the window is initially created.
      * Although the widget is already created by the time the window is created,
@@ -81,7 +81,7 @@ struct wm_widget {
      * @param  widget  The widget being created
      * @return Zero on success, non-zero on failure.
      */
-    int (*create)(wm_widget widget);
+    int (*create) (wm_widget widget);
 
     /**
      * Destructor function, called when window is destroyed.  This function
@@ -94,7 +94,7 @@ struct wm_widget {
      * @param  widget  The widget to destroy
      * @return Zero on success, non-zero on failure.
      */
-    int (*destroy)(wm_widget widget);
+    int (*destroy) (wm_widget widget);
 
     /**
      * Input function, called when keyboard input is received for this widget.
@@ -107,7 +107,7 @@ struct wm_widget {
      * @param  len     The size of the data array
      * @return Zero on success, non-zero on failure.
      */
-    int (*input)(wm_widget widget, int *data, int len); 
+    int (*input) (wm_widget widget, int *data, int len);
 
     /**
      * Resize function, called when the window containing this widget is
@@ -118,7 +118,7 @@ struct wm_widget {
      * @param  widget  The widget receiving the resize event
      * @return Zero on success, non-zero on failure.
      */
-    int (*resize)(wm_widget widget);
+    int (*resize) (wm_widget widget);
 
     /**
      * The curses window assigned to the widget.  The widget should do all
@@ -162,7 +162,7 @@ typedef struct wm_window {
  * @return A newly allocated wm_window is returned, or NULL on error.
  */
 wm_window window_create(wm_widget widget);
- 
+
 /**
  * Destroys the specified window.  Calls the destroy function of the associated
  * widget before deallocating.
@@ -176,4 +176,3 @@ int window_destroy(wm_window window);
 //@}
 
 #endif
-

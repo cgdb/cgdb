@@ -25,14 +25,14 @@
 /* --------------- */
 
 struct scroller {
-    char **buffer;       /* The text buffer */
-    int length;          /* Number of lines in buffer */
+    char **buffer;              /* The text buffer */
+    int length;                 /* Number of lines in buffer */
     struct {
-        int r;           /* Current line (row) number */
-        int c;           /* Current column number */
-        int pos;         /* Cursor position in last line */
+        int r;                  /* Current line (row) number */
+        int c;                  /* Current column number */
+        int pos;                /* Cursor position in last line */
     } current;
-    WINDOW *win;         /* The scoller's own window */
+    WINDOW *win;                /* The scoller's own window */
 };
 
 /* --------- */
@@ -105,8 +105,8 @@ void scr_add(struct scroller *scr, const char *buf);
  *   height:  Height of the scroller on the screen (rows)
  *   width:   Width of the scroller on the screen (columns)
  */
-void scr_move(struct scroller *scr, 
-              int pos_r, int pos_c, int height, int width);
+void scr_move(struct scroller *scr,
+        int pos_r, int pos_c, int height, int width);
 
 /* scr_refresh: Refreshes the scroller on the screen, in case the caller
  * ------------ damages the screen area where the scroller is written (or,
@@ -118,4 +118,3 @@ void scr_move(struct scroller *scr,
 void scr_refresh(struct scroller *scr, int focus);
 
 #endif
-

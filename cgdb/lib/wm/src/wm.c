@@ -25,7 +25,7 @@
  * windows management.
  */
 struct wmctx {
-    
+
     /** 
      * Windows is the list of windows in memory.  Not all windows are on the
      * screen at a given time, so the locations of the windows are stored in
@@ -108,8 +108,8 @@ wmctx wm_create(wm_widget widget)
     /* Parameter bounds check */
     assert(widget != NULL)
 
-    /* Allocate a new context and initial window */
-    wmctx context    = (wmctx) malloc(sizeof(struct wmctx));
+            /* Allocate a new context and initial window */
+    wmctx context = (wmctx) malloc(sizeof (struct wmctx));
     wm_window window = window_create(widget);
 
     /* Be extra paranoid */
@@ -122,7 +122,7 @@ wmctx wm_create(wm_widget widget)
 
         /* TODO: Verify that this is the safest way to destroy our lists. */
         context->windows = std_list_create((STDDestroyNotify) window_destroy);
-        context->grid    = std_list_create((STDDestroyNotify) wm_row_destroy);
+        context->grid = std_list_create((STDDestroyNotify) wm_row_destroy);
 
         /* Populate the window list and grid with an initial window */
         window->id = 0;
@@ -203,10 +203,10 @@ int wm_option_set(wm_option option, wm_optval value)
 
 static tree_node tree_node_create()
 {
-    tree_node node = malloc(sizeof(struct tree_node));
+    tree_node node = malloc(sizeof (struct tree_node));
 
     /* Be extra paranoid */
-    if (node){
+    if (node) {
         node->window = NULL;
     }
 

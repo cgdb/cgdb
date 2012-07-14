@@ -32,27 +32,27 @@ struct tgdb_client_context;
  */
 enum tgdb_client_commands {
 
-	/**
+    /**
 	 * The client can currently ignore this command.
 	 */
     TGDB_CLIENT_VOID = 0,
 
-	/**
+    /**
  	 * Get a list of breakpoints
 	 */
     TGDB_CLIENT_GET_BREAKPOINTS,
 
-	/**
+    /**
      * Complete the current console line
 	 */
     TGDB_CLIENT_COMPLETE_COMMAND_LINE,
 
-	/**
+    /**
      * Get a list of all the source files the inferior is made up of
 	 */
     TGDB_CLIENT_GET_INFERIOR_SOURCE_FILES,
 
-	/**
+    /**
      * Set the debugger's prompt
 	 */
     TGDB_CLIENT_SET_DEBUGGER_PROMPT
@@ -62,16 +62,16 @@ enum tgdb_client_commands {
  * All of the debuggers that TGDB supports.
  */
 enum tgdb_client_supported_debuggers {
-	
-	/**
+
+    /**
 	 * An unsupported debugger.
 	 */
-	TGDB_CLIENT_DEBUGGER_UNSUPPORTED = 0,
+    TGDB_CLIENT_DEBUGGER_UNSUPPORTED = 0,
 
-	/**
+    /**
      * This is of course the gnu debugger (GDB).
 	 */
-	TGDB_CLIENT_DEBUGGER_GNU_GDB
+    TGDB_CLIENT_DEBUGGER_GNU_GDB
 };
 
 /**
@@ -81,30 +81,30 @@ enum tgdb_client_supported_debuggers {
  */
 enum tgdb_client_supported_protocols {
 
-	/**
+    /**
 	 * An unsupported protocol.
 	 */
-	TGDB_CLIENT_PROTOCOL_UNSUPPORTED = 0,
+    TGDB_CLIENT_PROTOCOL_UNSUPPORTED = 0,
 
-	/**
+    /**
      * TGDB will try to negotiate with the debugger in order to choose the
      * most appropriate protocol to communicate with GDB.
  	 */
-	TGDB_CLIENT_PROTOCOL_AUTO,
+    TGDB_CLIENT_PROTOCOL_AUTO,
 
-	/**
+    /**
      * This is a functional protocol to communicate with GDB. This protocol is
  	 * depricated. The annotate two protocol does not allow a lot of GDB's 
      * functionality to be used. However, it works with really old GDB's.
 	 */
-	TGDB_CLIENT_PROTOCOL_GNU_GDB_ANNOTATE_TWO,
+    TGDB_CLIENT_PROTOCOL_GNU_GDB_ANNOTATE_TWO,
 
- 	/**
+    /**
 	 * This is currently the best protocol to use when communicating with GDB.
      * It allows for the most functionality to be retrieved from GDB and 
  	 * sent back to the front end.
 	 */
-	TGDB_CLIENT_PROTOCOL_GNU_GDB_GDBMI
+    TGDB_CLIENT_PROTOCOL_GNU_GDB_GDBMI
 };
 
 /******************************************************************************/
@@ -148,13 +148,10 @@ enum tgdb_client_supported_protocols {
  * @return
  * NULL on error or a valid client context upon success.
  */
-struct tgdb_client_context *tgdb_client_create_context ( 
-	const char *debugger_path, 
-	int argc, char **argv,
-	const char *config_dir,
-	enum tgdb_client_supported_debuggers debugger,
-	enum tgdb_client_supported_protocols protocol,
-	struct logger *logger);
+struct tgdb_client_context *tgdb_client_create_context(const char
+        *debugger_path, int argc, char **argv, const char *config_dir,
+        enum tgdb_client_supported_debuggers debugger,
+        enum tgdb_client_supported_protocols protocol, struct logger *logger);
 
 /** 
  * This will initialize a client context.
@@ -181,10 +178,9 @@ struct tgdb_client_context *tgdb_client_create_context (
  * debugger_stdin, debugger_stdout, inferior_stdin, inferior_stdout 
  * are all set.
  */
-int tgdb_client_initialize_context ( 
-	struct tgdb_client_context *tcc,
-	int *debugger_stdin, int *debugger_stdout,
-	int *inferior_stdin, int *inferior_stdout );
+int tgdb_client_initialize_context(struct tgdb_client_context *tcc,
+        int *debugger_stdin, int *debugger_stdout,
+        int *inferior_stdin, int *inferior_stdout);
 
 /** 
  * Shuts down the client context. No more calls can be made on the
@@ -197,7 +193,7 @@ int tgdb_client_initialize_context (
  * @return
  * 0 on success, otherwise -1 on error.
  */
-int tgdb_client_destroy_context ( struct tgdb_client_context *tcc );
+int tgdb_client_destroy_context(struct tgdb_client_context *tcc);
 
 /*@}*/
 
@@ -221,7 +217,7 @@ int tgdb_client_destroy_context ( struct tgdb_client_context *tcc );
  * @return
  * 0 on success, otherwise -1 on error.
  */
-int tgdb_client_err_msg ( struct tgdb_client_context *tcc );
+int tgdb_client_err_msg(struct tgdb_client_context *tcc);
 
 /** 
  * This determines if the client context is ready to allow TGDB to run
@@ -233,7 +229,7 @@ int tgdb_client_err_msg ( struct tgdb_client_context *tcc );
  * @return
  * 1 if it is ready to allow TGDB to run another command, 0 if not.
  */
-int tgdb_client_is_client_ready ( struct tgdb_client_context *tcc );
+int tgdb_client_is_client_ready(struct tgdb_client_context *tcc);
 
 /** 
  * This is currently called after TGDB has sent a command to the debugger.
@@ -253,7 +249,7 @@ int tgdb_client_is_client_ready ( struct tgdb_client_context *tcc );
  * \post
  * command_container is set.
  */
-int tgdb_client_tgdb_ran_command ( struct tgdb_client_context *tcc );
+int tgdb_client_tgdb_ran_command(struct tgdb_client_context *tcc);
 
 /** 
  * This is currently called by TGDB before TGDB runs the command.
@@ -268,9 +264,8 @@ int tgdb_client_tgdb_ran_command ( struct tgdb_client_context *tcc );
  * @return
  * -1 on error, 0 on success
  */
-int tgdb_client_prepare_for_command ( 
-		struct tgdb_client_context *tcc, 
-		struct tgdb_command *com );
+int tgdb_client_prepare_for_command(struct tgdb_client_context *tcc,
+        struct tgdb_command *com);
 
 /** 
  * Determines if the client is capable of accepting TGDB commands. The client
@@ -284,7 +279,7 @@ int tgdb_client_prepare_for_command (
  * @return
  * 1 if TGDB can run its internal commands, 0 if TGDB can't.
  */
-int tgdb_client_can_tgdb_run_commands ( struct tgdb_client_context *tcc );
+int tgdb_client_can_tgdb_run_commands(struct tgdb_client_context *tcc);
 
 /*@}*/
 
@@ -338,12 +333,11 @@ int tgdb_client_can_tgdb_run_commands ( struct tgdb_client_context *tcc );
   * debugger_output, debugger_output_size, inferior_output, 
   * inferior_output_size are all set.
   */
-int tgdb_client_parse_io ( 
-		struct tgdb_client_context *tcc,
-		const char *input_data, const size_t input_data_size,
-		char *debugger_output, size_t *debugger_output_size,
-		char *inferior_output, size_t *inferior_output_size,
-	    struct tgdb_list *list );
+int tgdb_client_parse_io(struct tgdb_client_context *tcc,
+        const char *input_data, const size_t input_data_size,
+        char *debugger_output, size_t * debugger_output_size,
+        char *inferior_output, size_t * inferior_output_size,
+        struct tgdb_list *list);
 
 /**
  * Get's all of the commands that the client generated during the last call.
@@ -356,10 +350,9 @@ int tgdb_client_parse_io (
  * Otherwise a list of tgdb_client_commands.
  * The order of these commands must be preserved.
  */
-struct tgdb_list *tgdb_client_get_client_commands ( 
-		struct tgdb_client_context *tcc );
+struct tgdb_list *tgdb_client_get_client_commands(struct tgdb_client_context
+        *tcc);
 /*@}*/
-
 
 /******************************************************************************/
 /**
@@ -382,9 +375,8 @@ struct tgdb_list *tgdb_client_get_client_commands (
  * @return
  * 0 on success, otherwise -1 on error.
  */
-int tgdb_client_get_filename_pair ( 
-		struct tgdb_client_context *tcc, 
-		const char *path );
+int tgdb_client_get_filename_pair(struct tgdb_client_context *tcc,
+        const char *path);
 
 /**
  * Get's the current fullname, filename and line number that the debugger is 
@@ -402,8 +394,8 @@ int tgdb_client_get_filename_pair (
  * @return
  * 0 on success, otherwise -1 on error.
  */
-int tgdb_client_get_current_location (struct tgdb_client_context *tcc, 
-				      int on_startup);
+int tgdb_client_get_current_location(struct tgdb_client_context *tcc,
+        int on_startup);
 
 /** 
  * Gets all of the source files that the inferior is made of.
@@ -414,7 +406,7 @@ int tgdb_client_get_current_location (struct tgdb_client_context *tcc,
  * @return
  * 0 on success, otherwise -1 on error.
  */
-int tgdb_client_get_inferior_source_files ( struct tgdb_client_context *tcc );
+int tgdb_client_get_inferior_source_files(struct tgdb_client_context *tcc);
 
 /** 
  * TGDB calls this function when it determines a command needs to be completed.
@@ -428,9 +420,8 @@ int tgdb_client_get_inferior_source_files ( struct tgdb_client_context *tcc );
  * @return
  * 0 on success, otherwise -1 on error.
  */
-int tgdb_client_completion_callback(
-		struct tgdb_client_context *tcc,
-		const char *completion_command);
+int tgdb_client_completion_callback(struct tgdb_client_context *tcc,
+        const char *completion_command);
 
 /** 
  * This returns the command to send to gdb for the enum C.
@@ -445,9 +436,8 @@ int tgdb_client_completion_callback(
  * @return
  * Command on success, otherwise NULL on error.
  */
-char *tgdb_client_return_command ( 
-		struct tgdb_client_context *tcc, 
-		enum tgdb_command_type c );
+char *tgdb_client_return_command(struct tgdb_client_context *tcc,
+        enum tgdb_command_type c);
 
 /** 
  * \param tcc
@@ -465,11 +455,8 @@ char *tgdb_client_return_command (
  * @return
  * -1 on error, or 0 on success
  */
-char *tgdb_client_modify_breakpoint ( 
-		struct tgdb_client_context *tcc, 
-		const char *file, 
-		int line, 
-		enum tgdb_breakpoint_action b );
+char *tgdb_client_modify_breakpoint(struct tgdb_client_context *tcc,
+        const char *file, int line, enum tgdb_breakpoint_action b);
 
 /** 
  * \param tcc
@@ -478,7 +465,7 @@ char *tgdb_client_modify_breakpoint (
  * @return 
  * -1 on error or pid on success.
  */
-pid_t tgdb_client_get_debugger_pid ( struct tgdb_client_context *tcc );
+pid_t tgdb_client_get_debugger_pid(struct tgdb_client_context *tcc);
 
 /*@}*/
 
@@ -510,10 +497,8 @@ pid_t tgdb_client_get_debugger_pid ( struct tgdb_client_context *tcc );
  * inferior_stdin and inferior_stdout are set if the return value 
  * of tgdb_client_open_new_tty is acceptable.
  */
-int tgdb_client_open_new_tty ( 
-		struct tgdb_client_context *tcc,
-		int *inferior_stdin, 
-		int *inferior_stdout );
+int tgdb_client_open_new_tty(struct tgdb_client_context *tcc,
+        int *inferior_stdin, int *inferior_stdout);
 
 /** 
  * \param tcc
@@ -522,7 +507,7 @@ int tgdb_client_open_new_tty (
  * @return
  * tty name on success, otherwise NULL on error.
  */
-const char *tgdb_client_get_tty_name ( struct tgdb_client_context *tcc );
+const char *tgdb_client_get_tty_name(struct tgdb_client_context *tcc);
 
 /*@}*/
 

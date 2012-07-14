@@ -24,28 +24,18 @@
  *              = 0 if a == b,
  *              > 0 if a > b
  */
-typedef int 		(*STDCompareFunc)( 
-	const void *a, 
-	const void *b);
+typedef int (*STDCompareFunc) (const void *a, const void *b);
 
-typedef int 		(*STDFunc) ( 
-	void *data, 
-	void *user_data);
+typedef int (*STDFunc) (void *data, void *user_data);
 
-typedef int     	(*STDCompareDataFunc) (
-	const void *a,
-	const void *b,
-	void *user_data);
+typedef int (*STDCompareDataFunc) (const void *a,
+        const void *b, void *user_data);
 
-typedef unsigned int (*STDHashFunc) (const void*key);
-typedef int          (*STDEqualFunc)(const void*a, const void*b);
-typedef int         (*STDDestroyNotify) (void *data);
-typedef void         (*STDHFunc) (
-	void * key,
-        void * value,
-        void * user_data);
+typedef unsigned int (*STDHashFunc) (const void *key);
+typedef int (*STDEqualFunc) (const void *a, const void *b);
+typedef int (*STDDestroyNotify) (void *data);
+typedef void (*STDHFunc) (void *key, void *value, void *user_data);
 
-typedef int (*STDFreeFunc) (void * data);
+typedef int (*STDFreeFunc) (void *data);
 
 #endif /* __STD_TYPES_H__ */
-

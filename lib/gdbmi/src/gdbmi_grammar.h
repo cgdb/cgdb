@@ -36,37 +36,36 @@
 
 /* Line 1685 of yacc.c  */
 #line 5 "../../../../cgdb/lib/gdbmi/src/gdbmi_grammar.y"
- struct gdbmi_pdata; 
-
+struct gdbmi_pdata;
 
 /* Line 1685 of yacc.c  */
 #line 44 "../../../../cgdb/lib/gdbmi/src/gdbmi_grammar.h"
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
-# define YYTOKENTYPE
+#define YYTOKENTYPE
    /* Put the tokens into the symbol table, so that GDB and other debuggers
       know about them.  */
-   enum yytokentype {
-     OPEN_BRACE = 258,
-     CLOSED_BRACE = 259,
-     OPEN_PAREN = 260,
-     CLOSED_PAREN = 261,
-     ADD_OP = 262,
-     MULT_OP = 263,
-     EQUAL_SIGN = 264,
-     TILDA = 265,
-     AT_SYMBOL = 266,
-     AMPERSAND = 267,
-     OPEN_BRACKET = 268,
-     CLOSED_BRACKET = 269,
-     NEWLINE = 270,
-     INTEGER_LITERAL = 271,
-     STRING_LITERAL = 272,
-     CSTRING = 273,
-     COMMA = 274,
-     CARROT = 275
-   };
+enum yytokentype {
+    OPEN_BRACE = 258,
+    CLOSED_BRACE = 259,
+    OPEN_PAREN = 260,
+    CLOSED_PAREN = 261,
+    ADD_OP = 262,
+    MULT_OP = 263,
+    EQUAL_SIGN = 264,
+    TILDA = 265,
+    AT_SYMBOL = 266,
+    AMPERSAND = 267,
+    OPEN_BRACKET = 268,
+    CLOSED_BRACKET = 269,
+    NEWLINE = 270,
+    INTEGER_LITERAL = 271,
+    STRING_LITERAL = 272,
+    CSTRING = 273,
+    COMMA = 274,
+    CARROT = 275
+};
 #endif
 /* Tokens.  */
 #define OPEN_BRACE 258
@@ -88,65 +87,58 @@
 #define COMMA 274
 #define CARROT 275
 
-
-
-
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef union YYSTYPE
-{
+typedef union YYSTYPE {
 
 /* Line 1685 of yacc.c  */
 #line 53 "../../../../cgdb/lib/gdbmi/src/gdbmi_grammar.y"
 
-  struct gdbmi_output *u_output;
-  struct gdbmi_oob_record *u_oob_record;
-  struct gdbmi_result_record *u_result_record;
-  int u_result_class;
-  int u_async_record_choice;
-  struct gdbmi_result *u_result;
-  long u_token;
-  struct gdbmi_async_record *u_async_record;
-  struct gdbmi_stream_record *u_stream_record;
-  int u_async_class;
-  char *u_variable;
-  struct gdbmi_value *u_value;
-  struct gdbmi_tuple *u_tuple;
-  struct gdbmi_list *u_list;
-  int u_stream_record_choice;
-
-
+    struct gdbmi_output *u_output;
+    struct gdbmi_oob_record *u_oob_record;
+    struct gdbmi_result_record *u_result_record;
+    int u_result_class;
+    int u_async_record_choice;
+    struct gdbmi_result *u_result;
+    long u_token;
+    struct gdbmi_async_record *u_async_record;
+    struct gdbmi_stream_record *u_stream_record;
+    int u_async_class;
+    char *u_variable;
+    struct gdbmi_value *u_value;
+    struct gdbmi_tuple *u_tuple;
+    struct gdbmi_list *u_list;
+    int u_stream_record_choice;
 
 /* Line 1685 of yacc.c  */
 #line 121 "../../../../cgdb/lib/gdbmi/src/gdbmi_grammar.h"
 } YYSTYPE;
-# define YYSTYPE_IS_TRIVIAL 1
-# define yystype YYSTYPE /* obsolescent; will be withdrawn */
-# define YYSTYPE_IS_DECLARED 1
+
+#define YYSTYPE_IS_TRIVIAL 1
+#define yystype YYSTYPE         /* obsolescent; will be withdrawn */
+#define YYSTYPE_IS_DECLARED 1
 #endif
 
-
-
-
 #ifndef YYPUSH_DECLS
-#  define YYPUSH_DECLS
+#define YYPUSH_DECLS
 struct gdbmi_pstate;
 typedef struct gdbmi_pstate gdbmi_pstate;
 enum { YYPUSH_MORE = 4 };
+
 #if defined __STDC__ || defined __cplusplus
-int gdbmi_push_parse (gdbmi_pstate *yyps, int yypushed_char, YYSTYPE const *yypushed_val, struct gdbmi_pdata *gdbmi_pdata);
+int gdbmi_push_parse(gdbmi_pstate * yyps, int yypushed_char,
+        YYSTYPE const *yypushed_val, struct gdbmi_pdata *gdbmi_pdata);
 #else
-int gdbmi_push_parse ();
+int gdbmi_push_parse();
 #endif
 
 #if defined __STDC__ || defined __cplusplus
-gdbmi_pstate * gdbmi_pstate_new (void);
+gdbmi_pstate *gdbmi_pstate_new(void);
 #else
-gdbmi_pstate * gdbmi_pstate_new ();
+gdbmi_pstate *gdbmi_pstate_new();
 #endif
 #if defined __STDC__ || defined __cplusplus
-void gdbmi_pstate_delete (gdbmi_pstate *yyps);
+void gdbmi_pstate_delete(gdbmi_pstate * yyps);
 #else
-void gdbmi_pstate_delete ();
+void gdbmi_pstate_delete();
 #endif
 #endif
-

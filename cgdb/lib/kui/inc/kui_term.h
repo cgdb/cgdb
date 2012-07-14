@@ -30,7 +30,7 @@
  * @return
  * The new kui_map, or NULL on error.
  */
-struct kui_map_set *kui_term_get_terminal_mappings ( void );
+struct kui_map_set *kui_term_get_terminal_mappings(void);
 
 /**
  * Determine if a key is a cgdb_key. This is true if the key passed in is in
@@ -43,7 +43,7 @@ struct kui_map_set *kui_term_get_terminal_mappings ( void );
  * 1 if the key is a cgdb_key, otherwise 0
  *
  */
-int kui_term_is_cgdb_key ( int key );
+int kui_term_is_cgdb_key(int key);
 
 /**
  * This get's the ascii character representation of the key.
@@ -55,7 +55,7 @@ int kui_term_is_cgdb_key ( int key );
  * The ascii charachter sequence on success. If key is not a cgdb_key
  * or if this function fails, NULL will return.
  */
-char *kui_term_get_ascii_char_sequence_from_key (int key);
+char *kui_term_get_ascii_char_sequence_from_key(int key);
 
 /**
  * Get's the cgdb_key from the keycode.
@@ -67,7 +67,7 @@ char *kui_term_get_ascii_char_sequence_from_key (int key);
  * The new key, or -1 on error.
  * CGDB_KEY_ERROR is returned if no key matches the keycode.
  */
-int kui_term_get_cgdb_key_from_keycode (const char *keycode);
+int kui_term_get_cgdb_key_from_keycode(const char *keycode);
 
 /**
  * Get's the key in string form.
@@ -79,7 +79,7 @@ int kui_term_get_cgdb_key_from_keycode (const char *keycode);
  * The string form. or NULL on error.
  * if CGDB_KEY_ERROR is passed in, "CGDB_KEY_ERROR" will be returned.
  */
-const char *kui_term_get_string_from_key (int key);
+const char *kui_term_get_string_from_key(int key);
 
 /**
  * Get's the keycode associated with this key.
@@ -91,7 +91,7 @@ const char *kui_term_get_string_from_key (int key);
  * The keycode. or NULL on error.
  * if CGDB_KEY_ERROR is passed in, "CGDB_KEY_ERROR" will be returned.
  */
-const char *kui_term_get_keycode_from_cgdb_key ( int key );
+const char *kui_term_get_keycode_from_cgdb_key(int key);
 
 /*
  * Parses the original buffer, and if successful
@@ -120,7 +120,7 @@ const char *kui_term_get_keycode_from_cgdb_key ( int key );
  * @return
  * 0 on success, or -1 on error.
  */
-int kui_term_string_to_key_array (const char *string, int **key_array);
+int kui_term_string_to_key_array(const char *string, int **key_array);
 
 /**
  * Print's a key_array in human readable form. This is mostly used for
@@ -132,6 +132,6 @@ int kui_term_string_to_key_array (const char *string, int **key_array);
  * @return
  * 0 on success, or -1 on error.
  */
-int kui_term_print_key_array (int *key_array);
+int kui_term_print_key_array(int *key_array);
 
 #endif /* __INPUT_H__ */

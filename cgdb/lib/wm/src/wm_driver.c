@@ -43,7 +43,7 @@ test_widget *get_test_widget(wm_widget widget)
 /* test_create: Constructor function. */
 int test_create(wm_widget widget)
 {
-    wprintw(widget->win, "%d: Constructor function called\r\n", 
+    wprintw(widget->win, "%d: Constructor function called\r\n",
             get_test_widget(widget)->lines = 1);
     get_test_widget(widget)->lines++;
     return 0;
@@ -63,7 +63,7 @@ int test_input(wm_widget widget, int *data, int len)
 
     /* Display data we received */
     wprintw(widget->win, "%d: ", get_test_widget(widget)->lines++);
-    for (i=0; i<len; i++){
+    for (i = 0; i < len; i++) {
         wprintw(widget->win, "%c", (char) data[i]);
     }
     wprintw(widget->win, "\r\n");
@@ -93,14 +93,14 @@ int main(int argc, char *argv[])
 #if 0
     test_widget mywidget;
 
-    mywidget.widget = (wm_widget) malloc(sizeof(struct wm_widget));
-    mywidget.widget->create  = test_create;
+    mywidget.widget = (wm_widget) malloc(sizeof (struct wm_widget));
+    mywidget.widget->create = test_create;
     mywidget.widget->destroy = test_destroy;
-    mywidget.widget->input   = test_input;
-    mywidget.widget->resize  = test_resize;
+    mywidget.widget->input = test_input;
+    mywidget.widget->resize = test_resize;
 
     /* Create a Window Manager context */
-    wmctx wm_ctx = wm_create((wm_widget) &mywidget);
+    wmctx wm_ctx = wm_create((wm_widget) & mywidget);
 
     /* Destroy the Window Manager context */
     wm_destroy(wm_ctx);
@@ -110,4 +110,3 @@ int main(int argc, char *argv[])
 }
 
 #endif /* DOXYGEN */
-

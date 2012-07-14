@@ -40,7 +40,7 @@ void ibuf_delchar(struct ibuf *s);
  *  return  - the string returned is valid until ibuf_free is called 
  *  NOTE: This function adds a '\0' to the end of the string if it is not 
  *        the last char
- */ 
+ */
 char *ibuf_get(struct ibuf *s);
 
 /* ibuf_length: Returns the length of string s */
@@ -52,7 +52,7 @@ unsigned long ibuf_length(struct ibuf *s);
  * Returns
  *    New string on success, NULL on error.
  */
-struct ibuf *ibuf_dup ( struct ibuf *s );
+struct ibuf *ibuf_dup(struct ibuf *s);
 
 /**
  * Trim whitespace from the head and tail of the string.

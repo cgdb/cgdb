@@ -97,7 +97,6 @@ struct sviewer *if_get_sview();
  */
 void if_display_message(const char *msg, int width, const char *fmt, ...);
 
-
 /* if_clear_filedlg: Clears all the files the file dialog has to show the user.
  * -----------------
  */
@@ -136,13 +135,13 @@ typedef enum Focus { GDB, TTY, CGDB, CGDB_STATUS_BAR, FILE_DLG } Focus;
  * ------------
  *  f: The region to focus
  */
-void if_set_focus( Focus f );
+void if_set_focus(Focus f);
 
 /* if_get_focus: Sets the current input focus to a different window 
  * ------------
  *  Return: The region thats focused
  */
-Focus if_get_focus( void );
+Focus if_get_focus(void);
 
 /* if_display_help: Displays the help on the screen.
  * ------------
@@ -152,22 +151,22 @@ void if_display_help(void);
 /* if_search_next: finds the next match in a given direction.
  * ------------
  */
-void if_search_next( void );
+void if_search_next(void);
 
 /* if_tty_toggle: 
  * ------------
  */
-void if_tty_toggle( void );
+void if_tty_toggle(void);
 
 /* if_draw:
  * -----------
  */
- void if_draw( void );
+void if_draw(void);
 
  /* if_set_winsplit:
   * ________________
   */
-void if_set_winsplit( WIN_SPLIT_TYPE newSplit );
+void if_set_winsplit(WIN_SPLIT_TYPE newSplit);
 
 /* if_highlight_sviewer:
  * ---------------------
@@ -177,7 +176,7 @@ void if_set_winsplit( WIN_SPLIT_TYPE newSplit );
  *
  *  l 	The new langugage type to highlight.
  */
-void if_highlight_sviewer ( enum tokenizer_language_support l );
+void if_highlight_sviewer(enum tokenizer_language_support l);
 
 /* if_change_winminheight:
  * -----------------------
@@ -186,7 +185,7 @@ void if_highlight_sviewer ( enum tokenizer_language_support l );
  *
  * Returns -1 if value is not acceptable. Otherwise, 0.
  */
-int if_change_winminheight ( int value );
+int if_change_winminheight(int value);
 
 /**
  * This get's the height size of the GDB window.
@@ -194,7 +193,7 @@ int if_change_winminheight ( int value );
  * \return
  * The size of the window.
  */
-int get_gdb_height (void);
+int get_gdb_height(void);
 
 /**
  * Will clear the last line in the GDB window. This function is slightly slow
@@ -203,7 +202,6 @@ int get_gdb_height (void);
  * \return
  * 0 on success or -1 on error
  */
-int if_clear_line (void);
+int if_clear_line(void);
 
 #endif
-

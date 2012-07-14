@@ -3,19 +3,19 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif 
+#endif
 
 #if HAVE_CONFIG_H
 #include "config.h"
-#endif /* HAVE_CONFIG_H */
+#endif                          /* HAVE_CONFIG_H */
 
 #if HAVE_TERMIOS_H
 #include <termios.h>
-#endif /* HAVE_TERMIOS_H */
+#endif                          /* HAVE_TERMIOS_H */
 
 #if HAVE_UNISTD_H
 #include <unistd.h>
-#endif  /* HAVE_UNISTD_H */
+#endif                          /* HAVE_UNISTD_H */
 
 /** 
  * Sets terminal to cbreak mode. Also known as noncanonical mode.
@@ -34,7 +34,7 @@ extern "C" {
  * \return
  * 0 on success, -1 on error
  */
-int tty_cbreak(int fd, struct termios *orig);
+    int tty_cbreak(int fd, struct termios *orig);
 
 /** 
  * set the pseudo - terminal to not map NL to CR NL.
@@ -45,7 +45,7 @@ int tty_cbreak(int fd, struct termios *orig);
  * \return
  * 0 on success, -1 on error
  */
-int tty_output_nl (int fd);
+    int tty_output_nl(int fd);
 
 /**
  * Turn off control flow on the terminal descriptor.
@@ -56,7 +56,7 @@ int tty_output_nl (int fd);
  * \return
  * 0 on success, -1 on error
  */
-int tty_off_xon_xoff (int fd);
+    int tty_off_xon_xoff(int fd);
 
 /**
  * Either turn echo on or off for the PTY.
@@ -70,7 +70,7 @@ int tty_off_xon_xoff (int fd);
  * \return
  * 0 on success, -1 on error
  */
-int tty_set_echo (int fd, int echo_on);
+    int tty_set_echo(int fd, int echo_on);
 
 /**
  * This will get the terminal attributes and store them into the buffer buf.
@@ -85,7 +85,7 @@ int tty_set_echo (int fd, int echo_on);
  * \return
  * 0 on success, -1 on error
  */
-int tty_get_attributes (int fd, struct termios *buf);
+    int tty_get_attributes(int fd, struct termios *buf);
 
 /** 
  * Sets the terminal attributes back to their previous state.
@@ -99,10 +99,9 @@ int tty_get_attributes (int fd, struct termios *buf);
  * \return
  * 0 on success, -1 on error
  */
-int tty_set_attributes (int fd, struct termios *buf);
+    int tty_set_attributes(int fd, struct termios *buf);
 
 #ifdef __cplusplus
 }
 #endif
-
 #endif

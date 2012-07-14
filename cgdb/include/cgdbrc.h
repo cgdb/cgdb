@@ -45,7 +45,7 @@
  * \return
  * 0 on success, otherwise error.
  */
-void cgdbrc_init (void);
+void cgdbrc_init(void);
 
 /* }}} */
 
@@ -60,7 +60,7 @@ void cgdbrc_init (void);
  * \return
  * 0 on success, otherwise error.
  */
-int command_parse_string (const char *buffer);
+int command_parse_string(const char *buffer);
 
 /**
  * Parse a configuration file, and execute teh commands that it contains.
@@ -72,7 +72,7 @@ int command_parse_string (const char *buffer);
  * \return
  * Currently only returns 0.
  */
-int command_parse_file (FILE * fp);
+int command_parse_file(FILE * fp);
 
 /* }}} */
 
@@ -83,68 +83,63 @@ int command_parse_file (FILE * fp);
  * This enum name is incorrect, it should be renamed to something like,
  * 'enum HighlightStyle'.
  */
-enum ArrowStyle
-{
-  ARROWSTYLE_SHORT,
-  ARROWSTYLE_LONG,
-  ARROWSTYLE_HIGHLIGHT
+enum ArrowStyle {
+    ARROWSTYLE_SHORT,
+    ARROWSTYLE_LONG,
+    ARROWSTYLE_HIGHLIGHT
 };
 
 /** window split type enumeration*/
-typedef enum
-{ WIN_SPLIT_FREE = -3,		/* split point not on quarter mark */
+typedef enum { WIN_SPLIT_FREE = -3, /* split point not on quarter mark */
 
-  WIN_SPLIT_BOTTOM_FULL = -2,	/* src window is 0%   of screen */
-  WIN_SPLIT_BOTTOM_BIG = -1,	/* src window is 25%  of screen */
-  WIN_SPLIT_EVEN = 0,		/* src window is 50%  of screen */
-  WIN_SPLIT_TOP_BIG = 1,	/* src window is 75%  of screen */
-  WIN_SPLIT_TOP_FULL = 2	/* src window is 100% of screen */
+    WIN_SPLIT_BOTTOM_FULL = -2, /* src window is 0%   of screen */
+    WIN_SPLIT_BOTTOM_BIG = -1,  /* src window is 25%  of screen */
+    WIN_SPLIT_EVEN = 0,         /* src window is 50%  of screen */
+    WIN_SPLIT_TOP_BIG = 1,      /* src window is 75%  of screen */
+    WIN_SPLIT_TOP_FULL = 2      /* src window is 100% of screen */
 } WIN_SPLIT_TYPE;
 
 /** All of the different configuration options */
-enum cgdbrc_option_kind
-{
-  CGDBRC_ARROWSTYLE,
-  CGDBRC_AUTOSOURCERELOAD,
-  CGDBRC_CGDB_MODE_KEY,
-  CGDBRC_IGNORECASE,
-  CGDBRC_SHOWTGDBCOMMANDS,
-  CGDBRC_SYNTAX,
-  CGDBRC_TABSTOP,
-  CGDBRC_TIMEOUT,
-  CGDBRC_TIMEOUT_LEN,
-  CGDBRC_TTIMEOUT,
-  CGDBRC_TTIMEOUT_LEN,
-  CGDBRC_WINMINHEIGHT,
-  CGDBRC_WINSPLIT,
-  CGDBRC_WRAPSCAN
+enum cgdbrc_option_kind {
+    CGDBRC_ARROWSTYLE,
+    CGDBRC_AUTOSOURCERELOAD,
+    CGDBRC_CGDB_MODE_KEY,
+    CGDBRC_IGNORECASE,
+    CGDBRC_SHOWTGDBCOMMANDS,
+    CGDBRC_SYNTAX,
+    CGDBRC_TABSTOP,
+    CGDBRC_TIMEOUT,
+    CGDBRC_TIMEOUT_LEN,
+    CGDBRC_TTIMEOUT,
+    CGDBRC_TTIMEOUT_LEN,
+    CGDBRC_WINMINHEIGHT,
+    CGDBRC_WINSPLIT,
+    CGDBRC_WRAPSCAN
 };
 
 /** This represents a single configuration option. */
-struct cgdbrc_config_option
-{
-  enum cgdbrc_option_kind option_kind;
-  union
-  {
-    /* option_kind == CGDBRC_ARROWSTYLE */
-    enum ArrowStyle arrow_style;
-    /* option_kind == CGDBRC_AUTOSOURCERELOAD */
-    /* option_kind == CGDBRC_CGDB_MODE_KEY */
-    /* option_kind == CGDBRC_IGNORECASE */
-    /* option_kind == CGDBRC_SHOWTGDBCOMMANDS */
-    /* option_kind == CGDBRC_TABSTOP */
-    /* option_kind == CGDBRC_TIMEOUT */
-    /* option_kind == CGDBRC_TIMEOUTLEN */
-    /* option_kind == CGDBRC_TTIMEOUT */
-    /* option_kind == CGDBRC_TTIMEOUTLEN */
-    /* option_kind == CGDBRC_WINMINHEIGHT */
-    /* option_kind == CGDBRC_WRAPSCAN */
-    int int_val;
-    /* option_kind == CGDBRC_SYNTAX */
-    enum tokenizer_language_support language_support_val;
-    /* option_kind == CGDBRC_WINSPLIT */
-    WIN_SPLIT_TYPE win_split_val;
-  } variant;
+struct cgdbrc_config_option {
+    enum cgdbrc_option_kind option_kind;
+    union {
+        /* option_kind == CGDBRC_ARROWSTYLE */
+        enum ArrowStyle arrow_style;
+        /* option_kind == CGDBRC_AUTOSOURCERELOAD */
+        /* option_kind == CGDBRC_CGDB_MODE_KEY */
+        /* option_kind == CGDBRC_IGNORECASE */
+        /* option_kind == CGDBRC_SHOWTGDBCOMMANDS */
+        /* option_kind == CGDBRC_TABSTOP */
+        /* option_kind == CGDBRC_TIMEOUT */
+        /* option_kind == CGDBRC_TIMEOUTLEN */
+        /* option_kind == CGDBRC_TTIMEOUT */
+        /* option_kind == CGDBRC_TTIMEOUTLEN */
+        /* option_kind == CGDBRC_WINMINHEIGHT */
+        /* option_kind == CGDBRC_WRAPSCAN */
+        int int_val;
+        /* option_kind == CGDBRC_SYNTAX */
+        enum tokenizer_language_support language_support_val;
+        /* option_kind == CGDBRC_WINSPLIT */
+        WIN_SPLIT_TYPE win_split_val;
+    } variant;
 };
 
 /* }}} */
@@ -185,7 +180,8 @@ typedef int (*cgdbrc_notify) (cgdbrc_config_option_ptr option);
  * \return
  * 0 on success or -1 on error
  */
-int cgdbrc_attach (enum cgdbrc_option_kind option, cgdbrc_notify notify, int *handle);
+int cgdbrc_attach(enum cgdbrc_option_kind option, cgdbrc_notify notify,
+        int *handle);
 
 /**
  * This will detach a notify function so that it will no longer be called
@@ -197,7 +193,7 @@ int cgdbrc_attach (enum cgdbrc_option_kind option, cgdbrc_notify notify, int *ha
  * \return
  * 0 on success, -1 if it couldn't be detached (error)
  */
-int cgdbrc_detach (int handle);
+int cgdbrc_detach(int handle);
 
 /* }}} */
 
@@ -214,7 +210,7 @@ int cgdbrc_detach (int handle);
  * pass the entire structure back. The configuration option corresponding
  * to the option asked for is returned.
  */
-cgdbrc_config_option_ptr cgdbrc_get (enum cgdbrc_option_kind option);
+cgdbrc_config_option_ptr cgdbrc_get(enum cgdbrc_option_kind option);
 
 /**
  * A convience function for determining the timeout that should be used to
@@ -224,7 +220,7 @@ cgdbrc_config_option_ptr cgdbrc_get (enum cgdbrc_option_kind option);
  * The number of milliseconds to delay before timing out. If 0, then do not 
  * timeout.
  */
-int cgdbrc_get_key_code_timeoutlen (void);
+int cgdbrc_get_key_code_timeoutlen(void);
 
 /**
  * A convience function for determining the timeout that should be used to
@@ -234,7 +230,7 @@ int cgdbrc_get_key_code_timeoutlen (void);
  * The number of milliseconds to delay before timing out. If 0, then do not 
  * timeout.
  */
-int cgdbrc_get_mapped_key_timeoutlen (void);
+int cgdbrc_get_mapped_key_timeoutlen(void);
 
 /* }}} */
 

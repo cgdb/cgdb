@@ -46,9 +46,7 @@ struct kui_map;
  * @return
  * A new instance on success, or NULL on error. 
  */
-struct kui_map *kui_map_create (
-		const char *key_data, 
-		const char *value_data );
+struct kui_map *kui_map_create(const char *key_data, const char *value_data);
 
 /**
  * Destroy a kui map.
@@ -59,7 +57,7 @@ struct kui_map *kui_map_create (
  * @return
  * 0 on success, -1 on error
  */
-int kui_map_destroy ( struct kui_map *map );
+int kui_map_destroy(struct kui_map *map);
 
 /*@}*/
 
@@ -86,7 +84,7 @@ int kui_map_destroy ( struct kui_map *map );
  * @return
  * 0 on success, -1 on error
  */
-int kui_map_get_key ( struct kui_map *map, char **key );
+int kui_map_get_key(struct kui_map *map, char **key);
 
 /**
  * Get's the maps value.
@@ -102,7 +100,7 @@ int kui_map_get_key ( struct kui_map *map, char **key );
  * @return
  * 0 on success, -1 on error
  */
-int kui_map_get_value ( struct kui_map *map, char **value );
+int kui_map_get_value(struct kui_map *map, char **value);
 
 /**
  * Used for debugging.
@@ -114,7 +112,7 @@ int kui_map_get_value ( struct kui_map *map, char **value );
  * @return
  * 0 on success, -1 on error
  */
-int kui_map_print_cgdb_key_array ( struct kui_map *map );
+int kui_map_print_cgdb_key_array(struct kui_map *map);
 
 /*@}*/
 
@@ -150,7 +148,7 @@ struct kui_map_set;
  * @return
  * A new instance on success, or NULL on error. 
  */
-struct kui_map_set *kui_ms_create ( void );
+struct kui_map_set *kui_ms_create(void);
 
 /**
  * Destroys a kui map set.
@@ -161,7 +159,7 @@ struct kui_map_set *kui_ms_create ( void );
  * @return
  * 0 on success or -1 on error
  */
-int kui_ms_destroy ( struct kui_map_set *kui_ms );
+int kui_ms_destroy(struct kui_map_set *kui_ms);
 
 /*@}*/
 
@@ -189,11 +187,9 @@ int kui_ms_destroy ( struct kui_map_set *kui_ms );
  *
  * @return
  * 0 on success, or -1 on error
- */ 
-int kui_ms_register_map ( 
-		struct kui_map_set *kui_ms,
-		const char *key, 
-		const char *value );
+ */
+int kui_ms_register_map(struct kui_map_set *kui_ms,
+        const char *key, const char *value);
 
 /**
  * Remove a map from the map set.
@@ -209,9 +205,7 @@ int kui_ms_register_map (
  * or -1 on error 
  * or -2 if map did not exist.
  */
-int kui_ms_deregister_map (
-		struct kui_map_set *kui_ms,
-		const char *key );
+int kui_ms_deregister_map(struct kui_map_set *kui_ms, const char *key);
 
 /**
  * Get's a list of kui_map's. This way, someone can iterate through
@@ -224,7 +218,7 @@ int kui_ms_deregister_map (
  * The list of maps, or NULL on error.
  * If there are no maps, of course the empty list will be returned.
  */
-std_list kui_ms_get_maps ( struct kui_map_set *kui_ms );
+std_list kui_ms_get_maps(struct kui_map_set *kui_ms);
 
 /*@}*/
 
@@ -269,11 +263,8 @@ struct kuictx;
  * 0 if no more input, 
  * or -1 on error.
  */
-typedef int (*kui_getkey_callback)( 
-		const int fd, 
-		const unsigned int ms,
-		const void *obj,
-      int *key);
+typedef int (*kui_getkey_callback) (const int fd,
+        const unsigned int ms, const void *obj, int *key);
 
 /**
  * Initializes the Key User Interface unit
@@ -296,11 +287,8 @@ typedef int (*kui_getkey_callback)(
  * @return
  * A new instance on success, or NULL on error. 
  */
-struct kuictx *kui_create(
-		int stdinfd, 
-		kui_getkey_callback callback,
-		int ms,
-	    void *state_data	);
+struct kuictx *kui_create(int stdinfd,
+        kui_getkey_callback callback, int ms, void *state_data);
 
 /**
  * Destroys a kui context
@@ -311,8 +299,7 @@ struct kuictx *kui_create(
  * @return
  * 0 on success, -1 on error
  */
-int kui_destroy ( struct kuictx *kctx );
-
+int kui_destroy(struct kuictx *kctx);
 
 /*@}*/
 
@@ -335,7 +322,7 @@ int kui_destroy ( struct kuictx *kctx );
  * The list of map sets, or NULL on error.
  * If there are no map sets, of course the empty list will be returned.
  */
-std_list kui_get_map_sets ( struct kuictx *kctx );
+std_list kui_get_map_sets(struct kuictx *kctx);
 
 /**
  * This will clear all of the map sets from the KUI.
@@ -347,7 +334,7 @@ std_list kui_get_map_sets ( struct kuictx *kctx );
  * \return 
  * 0 on success or -1 on error.
  */
-int kui_clear_map_sets (struct kuictx *kctx);
+int kui_clear_map_sets(struct kuictx *kctx);
 
 /**
  * Add's a kui map set to the kui context.
@@ -361,9 +348,7 @@ int kui_clear_map_sets (struct kuictx *kctx);
  * @return
  * 0 on success, or -1 on error.
  */
-int kui_add_map_set ( 
-		struct kuictx *kctx, 
-		struct kui_map_set *kui_ms );
+int kui_add_map_set(struct kuictx *kctx, struct kui_map_set *kui_ms);
 
 /**
  * Determine's if libkui has data ready to read. It has already been
@@ -376,7 +361,7 @@ int kui_add_map_set (
  * @return
  * -1 on error, otherwise 1 if can get a key, or 0 if nothing available.
  */
-int kui_cangetkey ( struct kuictx *kctx );
+int kui_cangetkey(struct kuictx *kctx);
 
 /**
  * Get's the next key for the application to process.
@@ -389,7 +374,7 @@ int kui_cangetkey ( struct kuictx *kctx );
  *  A key can either be a normal ascii key, or a CGDB_KEY_* value.
  */
 
-int kui_getkey ( struct kuictx *kctx );
+int kui_getkey(struct kuictx *kctx);
 
 /**
  * Tell's the kui context the maximum number of milliseconds that it is allowed
@@ -406,7 +391,7 @@ int kui_getkey ( struct kuictx *kctx );
  * \return
  * 0 on success, or -1 on error.
  */
-int kui_set_blocking_ms ( struct kuictx *kctx, unsigned long msec );
+int kui_set_blocking_ms(struct kuictx *kctx, unsigned long msec);
 
 /**
  * Get the number of milliseconds that the kui should block while waiting to
@@ -421,7 +406,7 @@ int kui_set_blocking_ms ( struct kuictx *kctx, unsigned long msec );
  * \return
  * 0 on success, or -1 on error.
  */
-int kui_get_blocking_ms ( struct kuictx *kctx, unsigned long *msec );
+int kui_get_blocking_ms(struct kuictx *kctx, unsigned long *msec);
 
 /*@}*/
 
@@ -459,9 +444,8 @@ struct kui_manager;
  * @return
  * A new instance on success, or NULL on error. 
  */
-struct kui_manager *kui_manager_create (int stdinfd, 
-					unsigned int keycode_timeout,
-					unsigned int mapping_timeout);
+struct kui_manager *kui_manager_create(int stdinfd,
+        unsigned int keycode_timeout, unsigned int mapping_timeout);
 
 /**
  * Destroys a kui context
@@ -472,8 +456,7 @@ struct kui_manager *kui_manager_create (int stdinfd,
  * @return
  * 0 on success, -1 on error
  */
-int kui_manager_destroy ( struct kui_manager *kuim );
-
+int kui_manager_destroy(struct kui_manager *kuim);
 
 /*@}*/
 
@@ -496,7 +479,7 @@ int kui_manager_destroy ( struct kui_manager *kuim );
  * The list of map sets, or NULL on error.
  * If there are no map sets, of course the empty list will be returned.
  */
-std_list kui_manager_get_map_sets ( struct kui_manager *kuim );
+std_list kui_manager_get_map_sets(struct kui_manager *kuim);
 
 /**
  * This will clear all of the map sets from the KUI manager.
@@ -508,7 +491,7 @@ std_list kui_manager_get_map_sets ( struct kui_manager *kuim );
  * \return 
  * 0 on success or -1 on error.
  */
-int kui_manager_clear_map_sets (struct kui_manager *kuim);
+int kui_manager_clear_map_sets(struct kui_manager *kuim);
 
 /**
  * Add's a kui map set to the kui context.
@@ -522,9 +505,8 @@ int kui_manager_clear_map_sets (struct kui_manager *kuim);
  * @return
  * 0 on success, or -1 on error.
  */
-int kui_manager_add_map_set ( 
-		struct kui_manager *kuim, 
-		struct kui_map_set *kui_ms ); 
+int kui_manager_add_map_set(struct kui_manager *kuim,
+        struct kui_map_set *kui_ms);
 
 /**
  * Determine's if libkui has data ready to read. It has already been
@@ -537,7 +519,7 @@ int kui_manager_add_map_set (
  * @return
  * -1 on error, otherwise 1 if can get a key, or 0 if nothing available.
  */
-int kui_manager_cangetkey ( struct kui_manager *kuim );
+int kui_manager_cangetkey(struct kui_manager *kuim);
 
 /**
  * Get's the next key for the application to process. 
@@ -554,7 +536,7 @@ int kui_manager_cangetkey ( struct kui_manager *kuim );
  * -1 on error, otherwise, a valid key.
  *  A key can either be a normal ascii key, or a CGDB_KEY_* value.
  */
-int kui_manager_getkey ( struct kui_manager *kuim );
+int kui_manager_getkey(struct kui_manager *kuim);
 
 /**
  * This is the same as kui_manager_getkey excpet that if no data is ready
@@ -567,7 +549,7 @@ int kui_manager_getkey ( struct kui_manager *kuim );
  * -1 on error, otherwise, a valid key.
  *  A key can either be a normal ascii key, or a CGDB_KEY_* value.
  */
-int kui_manager_getkey_blocking ( struct kui_manager *kuim );
+int kui_manager_getkey_blocking(struct kui_manager *kuim);
 
 /**
  * Set's the terminal escape sequence time out value.
@@ -587,9 +569,8 @@ int kui_manager_getkey_blocking ( struct kui_manager *kuim );
  * \return
  * 0 on success, or -1 on error.
  */
-int kui_manager_set_terminal_escape_sequence_timeout ( 
-		struct kui_manager *kuim, 
-		unsigned int msec );
+int kui_manager_set_terminal_escape_sequence_timeout(struct kui_manager *kuim,
+        unsigned int msec);
 
 /**
  * Set's the timeout that will be used when matching a mapping.
@@ -604,9 +585,8 @@ int kui_manager_set_terminal_escape_sequence_timeout (
  * \return
  * 0 on success, or -1 on error.
  */
-int kui_manager_set_key_mapping_timeout ( 
-		struct kui_manager *kuim, 
-		unsigned int msec );
+int kui_manager_set_key_mapping_timeout(struct kui_manager *kuim,
+        unsigned int msec);
 
 /**
  * Allow the user to make terminal key bindings.
@@ -635,10 +615,8 @@ int kui_manager_set_key_mapping_timeout (
  * \return
  * 0 on success or -1 on error
  */
-int kui_manager_get_terminal_keys_kui_map (
-      struct kui_manager *kuim,
-      enum cgdb_key key,
-      std_list kui_map_set);
+int kui_manager_get_terminal_keys_kui_map(struct kui_manager *kuim,
+        enum cgdb_key key, std_list kui_map_set);
 /*@}*/
 
 /* }}} */

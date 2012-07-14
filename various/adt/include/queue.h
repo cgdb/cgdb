@@ -11,7 +11,7 @@
 
 struct queue;
 
-typedef void (*item_func)(void *item);
+typedef void (*item_func) (void *item);
 
 /* queue_init: Initializes a new empty queue.
  *      returns     - The new head of the queue

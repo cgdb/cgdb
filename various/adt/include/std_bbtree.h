@@ -27,10 +27,7 @@
  */
 struct std_bbtree;
 
-typedef int (*STDTraverseFunc) (
-	void* key,
-        void* value,
-        void* data);
+typedef int (*STDTraverseFunc) (void *key, void *value, void *data);
 
 /**
  * Create a new tree.
@@ -45,7 +42,7 @@ typedef int (*STDTraverseFunc) (
  * @return
  * A new tree on success, or NULL on error.
  */
-struct std_bbtree* std_bbtree_new ( STDCompareFunc key_compare_func );
+struct std_bbtree *std_bbtree_new(STDCompareFunc key_compare_func);
 
 /**
  * Creates a new std_bbtree with a comparison function that accepts user data.
@@ -60,9 +57,8 @@ struct std_bbtree* std_bbtree_new ( STDCompareFunc key_compare_func );
  * @return
  * A new tree on success, or NULL on error.
  */
-struct std_bbtree* std_bbtree_new_with_data (
-	STDCompareDataFunc key_compare_func,
-	void * key_compare_data );
+struct std_bbtree *std_bbtree_new_with_data(STDCompareDataFunc key_compare_func,
+        void *key_compare_data);
 
 /**
  * Creates a new std_bbtree like std_bbtree_new() and allows to specify functions 
@@ -83,11 +79,9 @@ struct std_bbtree* std_bbtree_new_with_data (
  * @return
  * A new tree on success, or NULL on error.
  */
-struct std_bbtree* std_bbtree_new_full (
-	STDCompareDataFunc key_compare_func,
-    void *key_compare_data,
-	STDDestroyNotify key_destroy_func,
-	STDDestroyNotify value_destroy_func );
+struct std_bbtree *std_bbtree_new_full(STDCompareDataFunc key_compare_func,
+        void *key_compare_data,
+        STDDestroyNotify key_destroy_func, STDDestroyNotify value_destroy_func);
 
 /**
  * Destroys the tree. If keys and/or values are dynamically allocated, you 
@@ -101,7 +95,7 @@ struct std_bbtree* std_bbtree_new_full (
  * @return
  * 0 on success, or -1 on error.
  */
-int std_bbtree_destroy ( struct std_bbtree *tree );
+int std_bbtree_destroy(struct std_bbtree *tree);
 
 /**
  * Inserts a key/value pair into a std_bbtree. If the given key already exists 
@@ -125,10 +119,7 @@ int std_bbtree_destroy ( struct std_bbtree *tree );
  * @return
  * 0 on success, or -1 on error.
  */
-int std_bbtree_insert (
-	struct std_bbtree *tree,
-	void *key,
-	void *value );
+int std_bbtree_insert(struct std_bbtree *tree, void *key, void *value);
 
 /**
  * Inserts a new key and value into a std_bbtree similar to std_bbtree_insert(). 
@@ -153,10 +144,7 @@ int std_bbtree_insert (
  * @return
  * 0 on success, or -1 on error.
  */
-int std_bbtree_replace (
-	struct std_bbtree *tree,
-    void *key,
-    void *value );
+int std_bbtree_replace(struct std_bbtree *tree, void *key, void *value);
 
 /**
  * Removes a key/value pair from a std_bbtree.
@@ -174,9 +162,7 @@ int std_bbtree_replace (
  * @return
  * 0 on success, or -1 on error.
  */
-int std_bbtree_remove ( 
-	struct std_bbtree *tree,
-	const void *key );
+int std_bbtree_remove(struct std_bbtree *tree, const void *key);
 
 /**
  * Removes a key and its associated value from a std_bbtree without calling 
@@ -191,9 +177,7 @@ int std_bbtree_remove (
  * @return
  * 0 on success, or -1 on error.
  */
-int std_bbtree_steal (
-	struct std_bbtree *tree,
-	const void *key );
+int std_bbtree_steal(struct std_bbtree *tree, const void *key);
 
 /**
  * Gets the value corresponding to the given key. Since a std_bbtree is 
@@ -209,9 +193,7 @@ int std_bbtree_steal (
  * @return
  * The value corresponding to the key, or NULL on error.
  */
-void* std_bbtree_lookup ( 
-	struct std_bbtree *tree,
-    const void *key );
+void *std_bbtree_lookup(struct std_bbtree *tree, const void *key);
 
 /**
  * Looks up a key in the std_bbtree, returning the original key and the
@@ -234,11 +216,8 @@ void* std_bbtree_lookup (
  * @return
  * 1 if the key was found in the std_bbtree, otherwise 0.
  */
-int std_bbtree_lookup_extended (
-	struct std_bbtree *tree,
-    const void *lookup_key,
-    void **orig_key,
-    void **value );
+int std_bbtree_lookup_extended(struct std_bbtree *tree,
+        const void *lookup_key, void **orig_key, void **value);
 
 /**
  * Calls the given function for each of the key/value pairs in the std_bbtree.
@@ -263,10 +242,8 @@ int std_bbtree_lookup_extended (
  * @return
  * 0 on success, or -1 on error.
  */
-int std_bbtree_foreach (
-	struct std_bbtree *tree,
-    STDTraverseFunc func,
-    void *user_data );
+int std_bbtree_foreach(struct std_bbtree *tree,
+        STDTraverseFunc func, void *user_data);
 
 /**
  * Searches a std_bbtree using search_func.
@@ -290,10 +267,8 @@ int std_bbtree_foreach (
  * @return
  * The value corresponding to the found key, or NULL if the key was not found.
  */
-void* std_bbtree_search (
-	struct std_bbtree *tree,
-    STDCompareFunc search_func,
-    const void *user_data );
+void *std_bbtree_search(struct std_bbtree *tree,
+        STDCompareFunc search_func, const void *user_data);
 
 /**
  * Gets the height of a std_bbtree.
@@ -308,7 +283,7 @@ void* std_bbtree_search (
  * @return
  * The height of the std_bbtree.
  */
-int std_bbtree_height ( struct std_bbtree *tree );
+int std_bbtree_height(struct std_bbtree *tree);
 
 /**
  * Gets the number of nodes in a std_bbtree.
@@ -319,7 +294,6 @@ int std_bbtree_height ( struct std_bbtree *tree );
  * @return
  * The number of nodes in the tree.
  */
-int std_bbtree_nnodes ( struct std_bbtree *tree );
+int std_bbtree_nnodes(struct std_bbtree *tree);
 
 #endif /* __G_TREE_H__ */
-

@@ -9,7 +9,6 @@
  * All ouput from gdb must be filtered through this function.
  */
 
-
 #ifndef __STATE_MACHINE_H__
 #define __STATE_MACHINE_H__
 
@@ -26,8 +25,8 @@
 
 struct state_machine;
 
-struct state_machine *state_machine_initialize ( void );
-void state_machine_shutdown ( struct state_machine *sm );
+struct state_machine *state_machine_initialize(void);
+void state_machine_shutdown(struct state_machine *sm);
 
 /**
  * \param data
@@ -45,11 +44,9 @@ void state_machine_shutdown ( struct state_machine *sm );
  * \param command_list
  * If a command was generated from an annotation, its put in here.
  */
-int a2_handle_data ( 
-		struct annotate_two *a2, 
-		struct state_machine *sm, 
-		const char *data, const size_t size, 
-		char *gui_data, size_t *gui_size, 
-		struct tgdb_list *command_list);
+int a2_handle_data(struct annotate_two *a2,
+        struct state_machine *sm,
+        const char *data, const size_t size,
+        char *gui_data, size_t * gui_size, struct tgdb_list *command_list);
 
 #endif

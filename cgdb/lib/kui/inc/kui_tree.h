@@ -45,7 +45,7 @@ struct kui_tree;
  * @return
  * A new instance on success, or NULL on error. 
  */
-struct kui_tree *kui_tree_create ( void );
+struct kui_tree *kui_tree_create(void);
 
 /**
  * Destroy a kui map.
@@ -56,7 +56,7 @@ struct kui_tree *kui_tree_create ( void );
  * @return 
  * 0 on success, or -1 on error.
  */
-int kui_tree_destroy ( struct kui_tree *ktree );
+int kui_tree_destroy(struct kui_tree *ktree);
 
 /*@}*/
 
@@ -85,7 +85,7 @@ int kui_tree_destroy ( struct kui_tree *ktree );
  * @return
  * 0 on success, or -1 on error.
  */
-int kui_tree_insert ( struct kui_tree *ktree, int *klist, void *data );
+int kui_tree_insert(struct kui_tree *ktree, int *klist, void *data);
 
 /**
  * Adding a key from the kui tree.
@@ -100,10 +100,9 @@ int kui_tree_insert ( struct kui_tree *ktree, int *klist, void *data );
  * @return
  * 0 on success, or -1 on error.
  */
-int kui_tree_delete ( struct kui_tree *ktree, int *klist );
+int kui_tree_delete(struct kui_tree *ktree, int *klist);
 
 /*@}*/
-
 
 /******************************************************************************/
 /**
@@ -116,10 +115,10 @@ int kui_tree_delete ( struct kui_tree *ktree, int *klist );
 /*@{*/
 
 enum kui_tree_state {
-	KUI_TREE_FOUND = 0,
-	KUI_TREE_MATCHING,
-	KUI_TREE_NOT_FOUND,
-	KUI_TREE_ERROR
+    KUI_TREE_FOUND = 0,
+    KUI_TREE_MATCHING,
+    KUI_TREE_NOT_FOUND,
+    KUI_TREE_ERROR
 };
 
 /**
@@ -131,7 +130,7 @@ enum kui_tree_state {
  * @return
  * 0 on success, or -1 on error.
  */
-int kui_tree_reset_state ( struct kui_tree *ktree );
+int kui_tree_reset_state(struct kui_tree *ktree);
 
 /**
  * To finish searching for a macro, finalize the state of the tree.
@@ -145,7 +144,7 @@ int kui_tree_reset_state ( struct kui_tree *ktree );
  * @return
  * 0 on success, or -1 on error.
  */
-int kui_tree_finalize_state ( struct kui_tree *ktree );
+int kui_tree_finalize_state(struct kui_tree *ktree);
 
 /**
  * Get's the state of the current tree.
@@ -159,7 +158,7 @@ int kui_tree_finalize_state ( struct kui_tree *ktree );
  * @return
  * 0 on success, or -1 on error.
  */
-int kui_tree_get_state ( struct kui_tree *ktree, enum kui_tree_state *state );
+int kui_tree_get_state(struct kui_tree *ktree, enum kui_tree_state *state);
 
 /**
  * Get's the data if the state is KUI_TREE_FOUND.
@@ -173,7 +172,7 @@ int kui_tree_get_state ( struct kui_tree *ktree, enum kui_tree_state *state );
  * \return
  * 0 on success, or -1 on error.
  */
-int kui_tree_get_data ( struct kui_tree *ktree, void *data );
+int kui_tree_get_data(struct kui_tree *ktree, void *data);
 
 /*@}*/
 
@@ -201,10 +200,7 @@ int kui_tree_get_data ( struct kui_tree *ktree, void *data );
  * @return
  * 0 on success, or -1 on error.
  */
-int kui_tree_push_key ( 
-		struct kui_tree *ktree, 
-		int key,
-	    int *map_found );
+int kui_tree_push_key(struct kui_tree *ktree, int key, int *map_found);
 
 /*@}*/
 

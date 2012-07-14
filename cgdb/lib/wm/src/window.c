@@ -22,10 +22,10 @@ wm_window window_create(wm_widget widget)
     assert(widget != NULL);
 
     /* Allocate a new window */
-    wm_window window = (wm_window) malloc(sizeof(struct wm_window));
-    
+    wm_window window = (wm_window) malloc(sizeof (struct wm_window));
+
     /* In such low level code, be extra paranoid */
-    if (window != NULL){
+    if (window != NULL) {
         window->widget = widget;
     }
 

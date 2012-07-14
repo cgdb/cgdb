@@ -120,7 +120,7 @@ int wm_close(wid_t win_id);
  */
 
 //@{
-    
+
 /**
  * Set of options that affect window manager behavior.
  */
@@ -175,7 +175,6 @@ typedef enum {
      * Option "winwidth" (shorthand: "wiw") is of type: integer
      */
     WINWIDTH
-
 } wm_option;
 
 /** 
@@ -220,7 +219,7 @@ typedef struct {
         /** if (type == WM_EADIR) */
         wm_eadir ead_val;
     } variant;
-    
+
 } wm_optval;
 
 /**

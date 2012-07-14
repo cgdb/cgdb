@@ -19,27 +19,27 @@
  */
 enum tgdb_command_choice {
 
-	/**
+    /**
 	 * A command from the front end
 	 */
-	TGDB_COMMAND_FRONT_END,
+    TGDB_COMMAND_FRONT_END,
 
-	/**
+    /**
 	 * A command from the console
 	 */
-	TGDB_COMMAND_CONSOLE,
+    TGDB_COMMAND_CONSOLE,
 
-	/**
+    /**
 	 * A command from a client of TGDB
 	 */
-	TGDB_COMMAND_TGDB_CLIENT,
+    TGDB_COMMAND_TGDB_CLIENT,
 
-	/**
+    /**
 	 * A priority command is a command that the client context needs
 	 * to run before it can finish getting the data necessary for a 
 	 * TGDB_COMMAND_TGDB_CLIENT command.
 	 */
-	TGDB_COMMAND_TGDB_CLIENT_PRIORITY
+    TGDB_COMMAND_TGDB_CLIENT_PRIORITY
 };
 
 /* This is here to add new client_command/command faster */
@@ -51,23 +51,23 @@ enum tgdb_command_choice {
  * with it.
  */
 struct tgdb_command {
-	/**
+    /**
 	 * The actual command to give.
 	 */
-	char *tgdb_command_data;
-	
-	/**
+    char *tgdb_command_data;
+
+    /**
 	 * The type of command this one is.
 	 */
-	enum tgdb_command_choice command_choice;
+    enum tgdb_command_choice command_choice;
 
-	/**
+    /**
 	 * The client command associated with this command.
 	 */
-	struct tgdb_client_command *client_command;
+    struct tgdb_client_command *client_command;
 
-	/** Private data the client context can use. */
-	void *tgdb_client_private_data;
+    /** Private data the client context can use. */
+    void *tgdb_client_private_data;
 };
 
 /**
@@ -88,11 +88,9 @@ struct tgdb_command {
  * @return
  * Always is successfull, will call exit on failed malloc
  */
-struct tgdb_command *tgdb_command_create (    
-  const char *tgdb_command_data,
-  enum tgdb_command_choice command_choice, 
-  void *client_data);
-        
+struct tgdb_command *tgdb_command_create(const char *tgdb_command_data,
+        enum tgdb_command_choice command_choice, void *client_data);
+
 /** 
  * This will free a TGDB queue command.
  * These are the commands given by TGDB to the debugger.
@@ -101,7 +99,7 @@ struct tgdb_command *tgdb_command_create (
  * \param item
  * The command to free
  */
-void tgdb_command_destroy ( void *item);
+void tgdb_command_destroy(void *item);
 
 /**
  * This will print a TGDB queue command to stderr.
@@ -111,6 +109,6 @@ void tgdb_command_destroy ( void *item);
  * \param item
  * The command to print
  */
-void tgdb_command_print ( void *item );
+void tgdb_command_print(void *item);
 
 #endif

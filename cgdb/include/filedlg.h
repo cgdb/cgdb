@@ -60,6 +60,6 @@ void filedlg_display_message(struct filedlg *fd, char *message);
  *
  * Returns 0 on success or -1 on error
  */
-int filedlg_display( struct filedlg *fd );
+int filedlg_display(struct filedlg *fd);
 
 #endif /* _FILEDLG_H_ */

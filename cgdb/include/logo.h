@@ -21,6 +21,6 @@
  *   win:  The curses window to use.  If the logo won't fit in the given
  *         window, only the title is shown.
  */
-void logo_display(WINDOW *win);
+void logo_display(WINDOW * win);
 
 #endif

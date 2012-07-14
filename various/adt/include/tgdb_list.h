@@ -5,7 +5,7 @@ struct tgdb_list;
 struct tgdb_list_node;
 typedef struct tgdb_list_node tgdb_list_iterator;
 
-typedef int (*tgdb_list_func)(void *item);
+typedef int (*tgdb_list_func) (void *item);
 
 /* 
  * Initializes a new empty list.
@@ -13,7 +13,7 @@ typedef int (*tgdb_list_func)(void *item);
  * Returns
  *    The new list, or NULL on error.
  */
-struct tgdb_list *tgdb_list_init ( void );
+struct tgdb_list *tgdb_list_init(void);
 
 /*
  * Destory a list
@@ -24,7 +24,7 @@ struct tgdb_list *tgdb_list_init ( void );
  * \return
  * 0 on success or -1 on error.
  */
-int tgdb_list_destroy (struct tgdb_list *list);
+int tgdb_list_destroy(struct tgdb_list *list);
 
 /* 
  * Appends item to the end of the list.
@@ -38,7 +38,7 @@ int tgdb_list_destroy (struct tgdb_list *list);
  * returns
  *    0 on success, or -1 on error
  */
-int tgdb_list_append ( struct tgdb_list *tlist, void *item );
+int tgdb_list_append(struct tgdb_list *tlist, void *item);
 
 /* 
  * Prepends item to the beggining of the list.
@@ -52,7 +52,7 @@ int tgdb_list_append ( struct tgdb_list *tlist, void *item );
  * returns
  *    0 on success, or -1 on error
  */
-int tgdb_list_prepend ( struct tgdb_list *tlist, void *item );
+int tgdb_list_prepend(struct tgdb_list *tlist, void *item);
 
 /* 
  * appends the item after the position of the iterator.
@@ -69,10 +69,8 @@ int tgdb_list_prepend ( struct tgdb_list *tlist, void *item );
  * returns
  *    0 on success, or -1 on error
  */
-int tgdb_list_insert_after ( 
-		struct tgdb_list *tlist, 
-		tgdb_list_iterator *i, 
-		void *item );
+int tgdb_list_insert_after(struct tgdb_list *tlist,
+        tgdb_list_iterator * i, void *item);
 
 /* 
  * prepands the item before the position of the iterator.
@@ -89,10 +87,8 @@ int tgdb_list_insert_after (
  * returns
  *    0 on success, or -1 on error
  */
-int tgdb_list_insert_before ( 
-		struct tgdb_list *tlist,
-		tgdb_list_iterator *i, 
-		void *item );
+int tgdb_list_insert_before(struct tgdb_list *tlist,
+        tgdb_list_iterator * i, void *item);
 
 /* Traversing the tree */
 
@@ -109,7 +105,7 @@ int tgdb_list_insert_before (
  *    -1 on error, 0 on success. If func returns -1, then the list will stop
  *    traversing and return -1.
  */
-int tgdb_list_foreach ( struct tgdb_list *tlist, tgdb_list_func func );
+int tgdb_list_foreach(struct tgdb_list *tlist, tgdb_list_func func);
 
 /* Freeing the tree */
 
@@ -128,7 +124,7 @@ int tgdb_list_foreach ( struct tgdb_list *tlist, tgdb_list_func func );
  *    -1 on error, 0 on success. If func returns -1, then the list will stop
  *    traversing and return -1.
  */
-int tgdb_list_free ( struct tgdb_list *tlist, tgdb_list_func func );
+int tgdb_list_free(struct tgdb_list *tlist, tgdb_list_func func);
 
 /*
  * This will clear a list.
@@ -139,7 +135,7 @@ int tgdb_list_free ( struct tgdb_list *tlist, tgdb_list_func func );
  * returns
  *    -1 on error, 0 on success.
  */
-int tgdb_list_clear ( struct tgdb_list *tlist );
+int tgdb_list_clear(struct tgdb_list *tlist);
 
 /* 
  * Gets the size of the list.
@@ -150,7 +146,7 @@ int tgdb_list_clear ( struct tgdb_list *tlist );
  * Returns
  * 	  The size of the list, 0 if empty, -1 on error.
  */
-int tgdb_list_size ( struct tgdb_list *tlist );
+int tgdb_list_size(struct tgdb_list *tlist);
 
 /* Moving through the list */
 
@@ -166,7 +162,7 @@ int tgdb_list_size ( struct tgdb_list *tlist );
  * Returns
  * 	  the iterator on success, or NULL on error
  */
-tgdb_list_iterator *tgdb_list_get_first ( struct tgdb_list *tlist );
+tgdb_list_iterator *tgdb_list_get_first(struct tgdb_list *tlist);
 
 /*
  * Gets a hold of the last iterator in the list
@@ -180,7 +176,7 @@ tgdb_list_iterator *tgdb_list_get_first ( struct tgdb_list *tlist );
  * Returns
  * 	  the iterator on success, or NULL on error
  */
-tgdb_list_iterator *tgdb_list_get_last ( struct tgdb_list *tlist );
+tgdb_list_iterator *tgdb_list_get_last(struct tgdb_list *tlist);
 
 /* 
  * Moves the iterator one step forward through the list
@@ -191,7 +187,7 @@ tgdb_list_iterator *tgdb_list_get_last ( struct tgdb_list *tlist );
  * Returns
  * 	  the iterator on success, or NULL on error
  */
-tgdb_list_iterator *tgdb_list_next ( tgdb_list_iterator *i );
+tgdb_list_iterator *tgdb_list_next(tgdb_list_iterator * i);
 
 /* 
  * Moves the iterator one step backwards through the list
@@ -202,7 +198,7 @@ tgdb_list_iterator *tgdb_list_next ( tgdb_list_iterator *i );
  * Returns
  * 	  the iterator on success, or NULL on error
  */
-tgdb_list_iterator *tgdb_list_previous ( tgdb_list_iterator *i );
+tgdb_list_iterator *tgdb_list_previous(tgdb_list_iterator * i);
 
 /*
  * Gets the data at the iterator's position.
@@ -213,6 +209,6 @@ tgdb_list_iterator *tgdb_list_previous ( tgdb_list_iterator *i );
  * return
  *    The item at the iterator, or NULL on error
  */
-void *tgdb_list_get_item ( tgdb_list_iterator *i );
+void *tgdb_list_get_item(tgdb_list_iterator * i);
 
 #endif /* __TGDB_LIST_H__ */

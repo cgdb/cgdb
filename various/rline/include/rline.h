@@ -33,11 +33,12 @@ struct rline;
 /** 
  * The signature of the callback function that rline calls when it detects 
  * that a command has been typed by the user. */
-typedef void command_cb (char *);
+typedef void command_cb(char *);
+
 /** 
  * The signature of the callback function that rline calls when it detects 
  * that the user has requested completion on the current line. */
-typedef int completion_cb (int, int);
+typedef int completion_cb(int, int);
 
 /**
  * This initializes an rline library instance.
@@ -60,8 +61,8 @@ typedef int completion_cb (int, int);
  * @return
  * NULL on error, a valid context on success.
  */
-struct rline* rline_initialize (int slavefd, command_cb *command, completion_cb *completion, 
-				char *TERM);
+struct rline *rline_initialize(int slavefd, command_cb * command,
+        completion_cb * completion, char *TERM);
 
 /**
  * This will terminate a librline session. No functions should be called on
@@ -73,7 +74,7 @@ struct rline* rline_initialize (int slavefd, command_cb *command, completion_cb 
  * @return
  * 0 on success or -1 on error
  */
-int rline_shutdown (struct rline *rline);
+int rline_shutdown(struct rline *rline);
 
 /*@}*/
 /* }}}*/
@@ -100,7 +101,7 @@ int rline_shutdown (struct rline *rline);
  * \return
  * 0 on success or -1 on error
  */
-int rline_read_history (struct rline *rline, const char *file);
+int rline_read_history(struct rline *rline, const char *file);
 
 /**
  * Write readline history to file.
@@ -114,7 +115,7 @@ int rline_read_history (struct rline *rline, const char *file);
  * \return
  * 0 on success or -1 on error
  */
-int rline_write_history (struct rline *rline, const char *file);
+int rline_write_history(struct rline *rline, const char *file);
 
 /*@}*/
 /* }}}*/
@@ -141,7 +142,7 @@ int rline_write_history (struct rline *rline, const char *file);
  * \return
  * 0 on success or -1 on error.
  */
-int rline_set_prompt (struct rline *rline, const char *prompt);
+int rline_set_prompt(struct rline *rline, const char *prompt);
 
 /**
  * Get the current prompt that readline is using.
@@ -157,7 +158,7 @@ int rline_set_prompt (struct rline *rline, const char *prompt);
  * \return
  * 0 on success or -1 on error.
  */
-int rline_get_prompt (struct rline *rline, char **prompt);
+int rline_get_prompt(struct rline *rline, char **prompt);
 
 /**
  * Get the current line that readline has.
@@ -171,7 +172,7 @@ int rline_get_prompt (struct rline *rline, char **prompt);
  * \return
  * 0 on success or -1 on error.
  */
-int rline_get_current_line (struct rline *rline, char **current_line);
+int rline_get_current_line(struct rline *rline, char **current_line);
 
 /**
  * Clear the data currently entered at the prompt. This function currently
@@ -185,7 +186,7 @@ int rline_get_current_line (struct rline *rline, char **current_line);
  * \return
  * 0 on success or -1 on error.
  */
-int rline_clear (struct rline *rline);
+int rline_clear(struct rline *rline);
 
 /**
  * Add a history entry to the list of history items.
@@ -201,7 +202,7 @@ int rline_clear (struct rline *rline);
  * \return
  * 0 on success or -1 on error.
  */
-int rline_add_history (struct rline *rline, const char *line);
+int rline_add_history(struct rline *rline, const char *line);
 
 /**
  * Force the update of readline. This will write the contents of its
@@ -213,7 +214,7 @@ int rline_add_history (struct rline *rline, const char *line);
  * \return
  * 0 on success or -1 on error.
  */
-int rline_rl_forced_update_display (struct rline *rline);
+int rline_rl_forced_update_display(struct rline *rline);
 
 /**
  * This tells readline to read from it's input. The caller of this function
@@ -226,9 +227,9 @@ int rline_rl_forced_update_display (struct rline *rline);
  * \return
  * 0 on success or -1 on error.
  */
-int rline_rl_callback_read_char (struct rline *rline);
+int rline_rl_callback_read_char(struct rline *rline);
 
-typedef void (*display_callback)(char **,int,int);
+typedef void (*display_callback) (char **, int, int);
 
 /**
  * This function will complete the current line that readline has. It will 
@@ -248,7 +249,8 @@ typedef void (*display_callback)(char **,int,int);
  * \return
  * 0 on success or -1 on error.
  */
-int rline_rl_complete (struct rline *rline, struct tgdb_list *list, display_callback display_cb);
+int rline_rl_complete(struct rline *rline, struct tgdb_list *list,
+        display_callback display_cb);
 
 /**
  * This will adjust the size of the PTY that readline is working on, then 
@@ -266,7 +268,8 @@ int rline_rl_complete (struct rline *rline, struct tgdb_list *list, display_call
  * \return
  * 0 on success or -1 on error.
  */
-int rline_resize_terminal_and_redisplay (struct rline *rline, int rows, int cols);
+int rline_resize_terminal_and_redisplay(struct rline *rline, int rows,
+        int cols);
 
 /**
  * Get's the value of rl_completion_query_items.
@@ -279,7 +282,7 @@ int rline_resize_terminal_and_redisplay (struct rline *rline, int rows, int cols
  * \return
  * The value of rl_completion_query_items, if rline is NULL then -1.
  */
-int rline_get_rl_completion_query_items (struct rline *rline);
+int rline_get_rl_completion_query_items(struct rline *rline);
 
 /**
  * This will get the key sequences that readline uses for a certain key.
@@ -304,8 +307,8 @@ int rline_get_rl_completion_query_items (struct rline *rline);
  * \return
  * 0 on success or -1 on error
  */
-int rline_get_keyseq (struct rline *rline, const char *named_function,
-      std_list keyseq_list);
+int rline_get_keyseq(struct rline *rline, const char *named_function,
+        std_list keyseq_list);
 
 /*@}*/
 /* }}}*/

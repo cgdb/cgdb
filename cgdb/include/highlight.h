@@ -40,7 +40,7 @@ void highlight(struct list_node *node);
  *   width:   The maximum width of a line
  *   offset:  Character (in line) to start at (0..length-1)
  */
-void hl_wprintw(WINDOW *win, const char *line, int width, int offset);
+void hl_wprintw(WINDOW * win, const char *line, int width, int offset);
 
 /* hl_regex: Matches a regular expression to some lines.
  * ---------
@@ -57,17 +57,10 @@ void hl_wprintw(WINDOW *win, const char *line, int width, int offset);
  *  direction:      1 if forward, 0 if reverse
  *  icase:          1 if case insensitive, 0 otherwise
  */
-int hl_regex(  const char *regex,    
-                const char **highlighted_lines, 
-                const char **tlines, 
-                const int length, 
-                char **cur_line, /* Returns the correct highlighted line */
-                int   *sel_line, /* Returns new cur line if regex matches */
-                int   *sel_rline, /* Used for internal purposes */
-                int   *sel_col_rbeg, 
-                int   *sel_col_rend,
-                int   opt,
-                int   direction,
-                int   icase);
+int hl_regex(const char *regex, const char **highlighted_lines, const char **tlines, const int length, char **cur_line, /* Returns the correct highlighted line */
+        int *sel_line,          /* Returns new cur line if regex matches */
+        int *sel_rline,         /* Used for internal purposes */
+        int *sel_col_rbeg,
+        int *sel_col_rend, int opt, int direction, int icase);
 
 #endif /* _HIGHLIGHT_H_ */

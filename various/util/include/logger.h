@@ -40,7 +40,7 @@ typedef struct logger *logger_ptr;
  * \return
  * The new instance of a logger, or NULL on error
  */
-struct logger *logger_create ( void );
+struct logger *logger_create(void);
 
 /**
  * Destroy a logger context.
@@ -51,7 +51,7 @@ struct logger *logger_create ( void );
  * \return
  * 0 on succes, or -1 on error.
  */
-int logger_destroy ( struct logger *log );
+int logger_destroy(struct logger *log);
 
 /*@}*/
 
@@ -80,7 +80,7 @@ int logger_destroy ( struct logger *log );
  * \return
  * 0 on success, or -1 on error
  */
-int logger_set_file ( struct logger *log, const char *file );
+int logger_set_file(struct logger *log, const char *file);
 
 /**
  * Get's the file that the logger is writting to.
@@ -97,7 +97,7 @@ int logger_set_file ( struct logger *log, const char *file );
  * \return
  * 0 on success, or -1 on error
  */
-int logger_get_file ( struct logger *log, char **file );
+int logger_get_file(struct logger *log, char **file);
 
 /**
  * Set's the stream that the logger should write to.
@@ -120,7 +120,7 @@ int logger_get_file ( struct logger *log, char **file );
  * \return
  * 0 on success, or -1 on error
  */
-int logger_set_fd ( struct logger *log, FILE *fd );
+int logger_set_fd(struct logger *log, FILE * fd);
 
 /*@}*/
 
@@ -152,12 +152,8 @@ int logger_set_fd ( struct logger *log, FILE *fd );
  * \return
  * 0 on succes, -1 on error
  */
-int logger_write_pos ( 
-		struct logger *log, 
-		const char *file,
-	    int line,
-		const char *fmt,
-		...);
+int logger_write_pos(struct logger *log,
+        const char *file, int line, const char *fmt, ...);
 
 /*@}*/
 
@@ -181,7 +177,7 @@ int logger_write_pos (
  * \return
  * 0 on succes, -1 on error
  */
-int logger_has_recv_data ( struct logger *log, int *has_recv_data );
+int logger_has_recv_data(struct logger *log, int *has_recv_data);
 
 /**
  * This tells the logger if it should be recording the data that
@@ -198,7 +194,7 @@ int logger_has_recv_data ( struct logger *log, int *has_recv_data );
  * \return
  * 0 on succes, -1 on error
  */
-int logger_set_record ( struct logger *log, int record );
+int logger_set_record(struct logger *log, int record);
 
 /**
  * Checks to see if the logger is currently recording.
@@ -209,7 +205,7 @@ int logger_set_record ( struct logger *log, int record );
  * \return
  * 1 if it is recording, 0 otherwise.
  */
-int logger_is_recording ( struct logger *log );
+int logger_is_recording(struct logger *log);
 
 /*@}*/
 

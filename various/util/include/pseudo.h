@@ -44,11 +44,16 @@
 
 #define SLAVE_SIZE 64
 
-int pty_open(int *masterfd, int *slavefd, char *slavename, size_t slavenamesize, const struct termios *slave_termios, const struct winsize *slave_winsize);
+int pty_open(int *masterfd, int *slavefd, char *slavename, size_t slavenamesize,
+        const struct termios *slave_termios,
+        const struct winsize *slave_winsize);
 int pty_release(const char *slavename);
 int pty_set_owner(const char *slavename, uid_t uid);
 int pty_make_controlling_tty(int *slavefd, const char *slavename);
-int pty_change_window_size(int masterfd, int row, int col, int xpixel, int ypixel);
-pid_t pty_fork(int *masterfd, char *slavename, size_t slavenamesize, const struct termios *slave_termios, const struct winsize *slave_winsize);
+int pty_change_window_size(int masterfd, int row, int col, int xpixel,
+        int ypixel);
+pid_t pty_fork(int *masterfd, char *slavename, size_t slavenamesize,
+        const struct termios *slave_termios,
+        const struct winsize *slave_winsize);
 
 #endif

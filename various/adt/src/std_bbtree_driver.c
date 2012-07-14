@@ -50,78 +50,69 @@ else \
 #define GLIB_TEST_STRING_5 "el do"
 
 typedef struct {
-	unsigned int age;
-	char name[40];
+    unsigned int age;
+    char name[40];
 } GlibTestInfo;
 
-
-static int
-my_compare (const void* a,
-	    const void* b)
+static int my_compare(const void *a, const void *b)
 {
-  const char *cha = a;
-  const char *chb = b;
+    const char *cha = a;
+    const char *chb = b;
 
-  return *cha - *chb;
+    return *cha - *chb;
 }
 
-static int
-my_traverse (void* key,
-	     void* value,
-	     void* data)
+static int my_traverse(void *key, void *value, void *data)
 {
-  char *ch = key;
-  assert ((*ch) > 0);
-  return 0;
+    char *ch = key;
+
+    assert((*ch) > 0);
+    return 0;
 }
 
-int runtreetest ( struct std_bbtree *tree ) {
-  int i, j;
-  char chars[62];
+int runtreetest(struct std_bbtree *tree)
+{
+    int i, j;
+    char chars[62];
 
-  tree = std_bbtree_new (my_compare);
-  i = 0;
-  for (j = 0; j < 10; j++, i++)
-    {
-      chars[i] = '0' + j;
-      std_bbtree_insert (tree, &chars[i], &chars[i]);
+    tree = std_bbtree_new(my_compare);
+    i = 0;
+    for (j = 0; j < 10; j++, i++) {
+        chars[i] = '0' + j;
+        std_bbtree_insert(tree, &chars[i], &chars[i]);
     }
-  for (j = 0; j < 26; j++, i++)
-    {
-      chars[i] = 'A' + j;
-      std_bbtree_insert (tree, &chars[i], &chars[i]);
+    for (j = 0; j < 26; j++, i++) {
+        chars[i] = 'A' + j;
+        std_bbtree_insert(tree, &chars[i], &chars[i]);
     }
-  for (j = 0; j < 26; j++, i++)
-    {
-      chars[i] = 'a' + j;
-      std_bbtree_insert (tree, &chars[i], &chars[i]);
+    for (j = 0; j < 26; j++, i++) {
+        chars[i] = 'a' + j;
+        std_bbtree_insert(tree, &chars[i], &chars[i]);
     }
 
-  std_bbtree_foreach (tree, my_traverse, NULL);
+    std_bbtree_foreach(tree, my_traverse, NULL);
 
-  assert (std_bbtree_nnodes (tree) == (10 + 26 + 26));
+    assert(std_bbtree_nnodes(tree) == (10 + 26 + 26));
 
-  for (i = 0; i < 10; i++)
-    std_bbtree_remove (tree, &chars[i]);
+    for (i = 0; i < 10; i++)
+        std_bbtree_remove(tree, &chars[i]);
 
-  std_bbtree_foreach (tree, my_traverse, NULL);
+    std_bbtree_foreach(tree, my_traverse, NULL);
 
-  std_bbtree_destroy ( tree );
+    std_bbtree_destroy(tree);
 
-  return 0;
+    return 0;
 }
 
-int
-main (int   argc,
-      char *argv[])
+int main(int argc, char *argv[])
 {
-  struct std_bbtree *tree = NULL;
-  int i;
+    struct std_bbtree *tree = NULL;
+    int i;
 
-  for ( i = 0; i < 10000; i++ )
-	  runtreetest ( tree );
+    for (i = 0; i < 10000; i++)
+        runtreetest(tree);
 
-  printf ( "PASSED\n" );
+    printf("PASSED\n");
 
-  return 0;
+    return 0;
 }

@@ -112,9 +112,8 @@ int std_btree_get_data(std_btree_iterator iter, void *data);
  * @return
  * An iterator pointing to the specified child node, NULL if no child exists.
  */
-std_btree_iterator std_btree_child(
-    const std_btree_iterator iter,
-    enum std_btree_child child);
+std_btree_iterator std_btree_child(const std_btree_iterator iter,
+        enum std_btree_child child);
 
 /**
  * Access the parent of the current node.
@@ -147,11 +146,8 @@ std_btree_iterator std_btree_parent(const std_btree_iterator iter);
  * @return
  * Zero on success, non-zero on failure.
  */
-int std_btree_add(
-    std_btree tree,
-    std_btree_iterator iter,
-    enum std_btree_child child,
-    void *data);                             
+int std_btree_add(std_btree tree,
+        std_btree_iterator iter, enum std_btree_child child, void *data);
 
 /**
  * Removes a subtree from the tree.

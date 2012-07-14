@@ -22,7 +22,7 @@ struct std_btree {
      * A pointer to the root node of the tree.
      */
     std_btree_node root;
-    
+
     /**
      * A pointer to the destructor for data elements in this tree.
      */
@@ -41,7 +41,7 @@ struct std_btree_node {
      * root node.
      */
     std_btree tree;
-    
+
     /**
      * The parent of this node.
      */
@@ -84,7 +84,7 @@ static void std_btree_unlink(std_btree_node node);
 /* std_btree_create */
 std_btree std_btree_create(const STDDestroyNotify destroy_func)
 {
-    std_btree tree = (std_btree) malloc(sizeof(struct std_btree));
+    std_btree tree = (std_btree) malloc(sizeof (struct std_btree));
 
     /* Be extra paranoid */
     if (tree) {
@@ -122,15 +122,14 @@ int std_btree_get_data(std_btree_iterator iter, void *data)
     assert(iter != NULL);
     assert(data != NULL);
 
-    * (void **) data = iter->data;
+    *(void **) data = iter->data;
 
     return 0;
 }
 
 /* std_btree_child */
-std_btree_iterator std_btree_child(
-    const std_btree_iterator iter,
-    enum std_btree_child child)
+std_btree_iterator std_btree_child(const std_btree_iterator iter,
+        enum std_btree_child child)
 {
     /* Bounds check */
     assert(iter != NULL);
@@ -149,11 +148,8 @@ std_btree_iterator std_btree_parent(const std_btree_iterator iter)
 }
 
 /* std_btree_add */
-int std_btree_add(
-    std_btree tree,
-    std_btree_iterator iter,
-    enum std_btree_child child,
-    void *data)
+int std_btree_add(std_btree tree,
+        std_btree_iterator iter, enum std_btree_child child, void *data)
 {
     /* Declarations */
     std_btree_node new_node = NULL;
@@ -168,13 +164,13 @@ int std_btree_add(
     }
 
     /* Create the new node */
-    new_node = (std_btree_node) malloc(sizeof(struct std_btree_node));
+    new_node = (std_btree_node) malloc(sizeof (struct std_btree_node));
 
-    new_node->tree                      = tree;
-    new_node->parent                    = iter;
-    new_node->children[STD_BTREE_LEFT]  = NULL;
+    new_node->tree = tree;
+    new_node->parent = iter;
+    new_node->children[STD_BTREE_LEFT] = NULL;
     new_node->children[STD_BTREE_RIGHT] = NULL;
-    new_node->data                      = data;
+    new_node->data = data;
 
     /* Link it to the parent */
     if (iter == NULL) {
@@ -183,7 +179,7 @@ int std_btree_add(
         iter->children[child] = new_node;
     }
 
-    return 0;    
+    return 0;
 }
 
 /* std_btree_remove:
@@ -246,9 +242,9 @@ int std_btree_isleaf(std_btree_iterator iter)
     /* Bounds check */
     assert(iter != NULL);
 
-    return (iter->children[STD_BTREE_LEFT] == NULL 
-        && iter->children[STD_BTREE_RIGHT] == NULL);
-}           
+    return (iter->children[STD_BTREE_LEFT] == NULL
+            && iter->children[STD_BTREE_RIGHT] == NULL);
+}
 
 /* 
  * Local Function Implementations
@@ -278,6 +274,7 @@ static void std_btree_unlink(std_btree_node node)
          * has been removed (set appropriate child pointer to NULL).
          */
         int i;
+
         for (i = STD_BTREE_LEFT; i <= STD_BTREE_RIGHT; i++) {
             if (node->parent->children[i] == node) {
                 node->parent->children[i] = NULL;
@@ -287,4 +284,3 @@ static void std_btree_unlink(std_btree_node node)
 
     }
 }
-

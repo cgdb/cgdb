@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2006, Mike Mueller & Bob Rossi
  * Subject to the terms of the GNU General Public Licence
- */ 
+ */
 
 /* Standard Includes */
 #if HAVE_CONFIG_H
@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
     /* Create a tree */
     debug("Creating string... ");
     s = ibuf_init();
-    if (s == NULL){
+    if (s == NULL) {
         printf("FAILED\n");
         return 1;
     }
@@ -86,7 +86,8 @@ int main(int argc, char *argv[])
  * Local function implementations
  */
 
-static int test_add(ibuf s) {
+static int test_add(ibuf s)
+{
 
     /* Add the strings "hello" and " world" to the ibuf */
     ibuf_add(s, "hello");
@@ -94,7 +95,7 @@ static int test_add(ibuf s) {
 
     /* Make sure that's what got added */
     if (strcmp(ibuf_get(s), "hello world") != 0) {
-        debug("test_add: Mismatch, expected \"hello world\", got: %s\n", 
+        debug("test_add: Mismatch, expected \"hello world\", got: %s\n",
                 ibuf_get(s));
         return 1;
     }
@@ -103,7 +104,8 @@ static int test_add(ibuf s) {
     return 0;
 }
 
-static int test_addchar(ibuf s) {
+static int test_addchar(ibuf s)
+{
 
     /* Add an exclamation to the hello world string. */
     ibuf_addchar(s, '!');
@@ -119,7 +121,8 @@ static int test_addchar(ibuf s) {
     return 0;
 }
 
-static int test_delchar(ibuf s) {
+static int test_delchar(ibuf s)
+{
 
     /* Delete the last '!' from the string. */
     ibuf_delchar(s);
@@ -138,8 +141,7 @@ static int test_delchar(ibuf s) {
 
     /* Make sure s is now an empty string. */
     if (strcmp(ibuf_get(s), "") != 0) {
-        debug("test_delchar: Expected empty string, got: %s\n",
-                ibuf_get(s));
+        debug("test_delchar: Expected empty string, got: %s\n", ibuf_get(s));
         return 2;
     }
 
@@ -147,7 +149,8 @@ static int test_delchar(ibuf s) {
     return 0;
 }
 
-static int test_dup(ibuf s) {
+static int test_dup(ibuf s)
+{
 
     ibuf t;
 
@@ -161,12 +164,11 @@ static int test_dup(ibuf s) {
     }
 
     if (strcmp(ibuf_get(s), ibuf_get(t)) != 0) {
-        debug("test_dup: Strings mismatched: \"%s\" != \"%s\"\n", 
+        debug("test_dup: Strings mismatched: \"%s\" != \"%s\"\n",
                 ibuf_get(s), ibuf_get(t));
         return 1;
     }
     ibuf_free(t);
-
 
     /* Corner case: duplicate an empty string */
     ibuf_clear(s);
@@ -187,7 +189,8 @@ static int test_dup(ibuf s) {
     return 0;
 }
 
-static int test_trim(ibuf s) {
+static int test_trim(ibuf s)
+{
 
     /* Test #1: Empty string. */
     ibuf_clear(s);
@@ -211,8 +214,7 @@ static int test_trim(ibuf s) {
     ibuf_add(s, "hello world");
     ibuf_trim(s);
     if (strcmp(ibuf_get(s), "hello world") != 0) {
-        debug("test_trim: 3: expected \"hello world\", got: %s\n",
-                ibuf_get(s));
+        debug("test_trim: 3: expected \"hello world\", got: %s\n", ibuf_get(s));
         return 3;
     }
 
@@ -221,8 +223,7 @@ static int test_trim(ibuf s) {
     ibuf_add(s, "  hello world  \t");
     ibuf_trim(s);
     if (strcmp(ibuf_get(s), "hello world") != 0) {
-        debug("test_trim: 4: expected \"hello world\", got: %s\n",
-                ibuf_get(s));
+        debug("test_trim: 4: expected \"hello world\", got: %s\n", ibuf_get(s));
         return 3;
     }
 

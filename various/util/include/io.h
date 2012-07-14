@@ -7,10 +7,10 @@
 
 #if HAVE_UNISTD_H
 #include <unistd.h>
-#endif  /* HAVE_UNISTD_H */
+#endif /* HAVE_UNISTD_H */
 
 #if HAVE_STDIO_H
-#include <stdio.h> 
+#include <stdio.h>
 #endif /* HAVE_STDIO_H */
 
 #define MAX_LINE 4096
@@ -72,7 +72,7 @@ void io_debug_write_fmt(const char *fmt, ...);
  *    This is usefull when c is a '\r' or '\n' because it will be displayed
  *    that way in the file.
  */
-void io_display_char(FILE *fd, char c);
+void io_display_char(FILE * fd, char c);
 
 /* io_data_ready:
  * --------------
@@ -87,7 +87,7 @@ void io_display_char(FILE *fd, char c);
  *
  * Return: 1 if data is ready, 0 if it's not, or -1 on error
  */
-int io_data_ready ( int fd, int ms );
+int io_data_ready(int fd, int ms);
 
 /**
  * Read in 1 charachter.
@@ -112,6 +112,6 @@ int io_data_ready ( int fd, int ms );
  * @return
  * -1 on error, 0 if no data is ready, 1 on success
  */
-int io_getchar (int fd, unsigned int ms, int *key);
+int io_getchar(int fd, unsigned int ms, int *key);
 
 #endif /* __IO_H__ */

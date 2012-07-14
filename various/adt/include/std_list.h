@@ -42,7 +42,7 @@ typedef struct std_list_node *std_list_iterator;
  * @return
  * A new list on success, or NULL on error.
  */
-struct std_list *std_list_create ( STDDestroyNotify destroy_func );
+struct std_list *std_list_create(STDDestroyNotify destroy_func);
 
 /**
  * Destroy a list.
@@ -55,7 +55,7 @@ struct std_list *std_list_create ( STDDestroyNotify destroy_func );
  * @return
  * 0 on success, or -1 on error.
  */
-int std_list_destroy ( struct std_list *list );
+int std_list_destroy(struct std_list *list);
 
 /**
  * Append the item to the end of the list.
@@ -69,9 +69,7 @@ int std_list_destroy ( struct std_list *list );
  * @return
  * 0 on success, or -1 on error.
  */
-int std_list_append ( 
-    struct std_list *list,
-    void *data );
+int std_list_append(struct std_list *list, void *data);
 
 /**
  * Prepend the item to the end of the list.
@@ -85,9 +83,7 @@ int std_list_append (
  * @return
  * 0 on success, or -1 on error.
  */
-int std_list_prepend ( 
-    struct std_list *list,
-    void *data );
+int std_list_prepend(struct std_list *list, void *data);
 
 /**
  * Inserts a new element into the list before the iterator.
@@ -104,10 +100,8 @@ int std_list_prepend (
  * @return
  * 0 on success, or -1 on error.
  */
-int std_list_insert (
-	struct std_list *list,
-	const std_list_iterator iter,
-	void *data);
+int std_list_insert(struct std_list *list,
+        const std_list_iterator iter, void *data);
 
 /**
  * Inserts a new element into the list, using the given comparison 
@@ -127,10 +121,8 @@ int std_list_insert (
  * @return
  * 0 on success, or -1 on error.
  */
-int std_list_insert_sorted (
-	struct std_list *list,
-    void *data,
-	const STDCompareFunc func);
+int std_list_insert_sorted(struct std_list *list,
+        void *data, const STDCompareFunc func);
 
 /**
  * Like std_list_sort(), but the comparison function accepts a user data argument.
@@ -169,9 +161,8 @@ int std_list_insert_sorted (
  * @return
  * The iterator after the one being removed, or NULL on error.
  */
-std_list_iterator std_list_remove (
-	struct std_list *list,
-	std_list_iterator iter );
+std_list_iterator std_list_remove(struct std_list *list,
+        std_list_iterator iter);
 
 /**
  * Removes all the elements from a list. 
@@ -182,7 +173,7 @@ std_list_iterator std_list_remove (
  * @return
  * 0 on success, or -1 on error.
  */
-int std_list_remove_all ( struct std_list *list );
+int std_list_remove_all(struct std_list *list);
 
 /**
  * Finds an element in a list, using a supplied function to find the 
@@ -206,10 +197,8 @@ int std_list_remove_all ( struct std_list *list );
  * std_list_end if not found,
  * NULL on error
  */
-std_list_iterator std_list_find (
-	const struct std_list *list,
-	const void *data,
-	const STDCompareFunc func );
+std_list_iterator std_list_find(const struct std_list *list,
+        const void *data, const STDCompareFunc func);
 
 /**
  * Gets the first element in a list.
@@ -220,7 +209,7 @@ std_list_iterator std_list_find (
  * @return
  * The first iterator, or NULL on error.
  */
-std_list_iterator std_list_begin ( const struct std_list *list );
+std_list_iterator std_list_begin(const struct std_list *list);
 
 /**
  * Gets the position after the last element.
@@ -231,7 +220,7 @@ std_list_iterator std_list_begin ( const struct std_list *list );
  * @return
  * The last iterator, or NULL on error.
  */
-std_list_iterator std_list_end ( const struct std_list *list );
+std_list_iterator std_list_end(const struct std_list *list);
 
 /**
  * Gets the next iterator.
@@ -242,7 +231,7 @@ std_list_iterator std_list_end ( const struct std_list *list );
  * @return
  * The next iterator, or NULL on error.
  */
-std_list_iterator std_list_next ( const std_list_iterator iter );
+std_list_iterator std_list_next(const std_list_iterator iter);
 
 /**
  * Gets the previous iterator.
@@ -253,7 +242,7 @@ std_list_iterator std_list_next ( const std_list_iterator iter );
  * @return
  * The previous iterator, or NULL on error.
  */
-std_list_iterator std_list_previous ( const std_list_iterator iter );
+std_list_iterator std_list_previous(const std_list_iterator iter);
 
 /**
  * Gets the number of elements in a list.
@@ -264,7 +253,7 @@ std_list_iterator std_list_previous ( const std_list_iterator iter );
  * @return
  * The number of elements in the list, or -1 on error.
  */
-int std_list_length ( struct std_list *list );
+int std_list_length(struct std_list *list);
 
 /**
  * Calls a function for each element of a list.
@@ -282,10 +271,8 @@ int std_list_length ( struct std_list *list );
  * @return
  * 0 on success, or -1 on error.
  */
-int std_list_foreach ( 
-	const struct std_list *list,
-	const STDFunc func,
-	void *user_data );
+int std_list_foreach(const struct std_list *list,
+        const STDFunc func, void *user_data);
 
 /**
  * Get's the data at the specified list position.
@@ -300,9 +287,6 @@ int std_list_foreach (
  * @return
  * 0 on success, or -1 on error.
  */
-int std_list_get_data ( 
-    std_list_iterator iter,
-    void *data	);
+int std_list_get_data(std_list_iterator iter, void *data);
 
 #endif /* __STD_LIST_H__ */
-

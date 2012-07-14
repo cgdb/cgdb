@@ -35,7 +35,7 @@
  */
 
 #include "config.h"
-#define _GNU_SOURCE /* ptsname_r() under Linux */
+#define _GNU_SOURCE             /* ptsname_r() under Linux */
 #include <fcntl.h>
 #include <grp.h>
 #include <pwd.h>
@@ -91,7 +91,6 @@
 
 #define set_errno(errnum) (errno = (errnum), -1)
 
-
 /* strlcpy_local: Used instead of strcpy. Copies src into dst size bytes long.
  *
  * dst: destination
@@ -106,59 +105,64 @@
  * (If this is >= size, truncation occurred).
  */
 
-static size_t strlcpy_local(char *dst, const char *src, size_t size) {
+static size_t strlcpy_local(char *dst, const char *src, size_t size)
+{
     const char *s = src;
     char *d = dst;
     size_t n = size;
 
     if (n)
-        while (--n && (*d++ = *s++)) {}
+        while (--n && (*d++ = *s++)) {
+        }
 
     if (n == 0) {
         if (size)
             *d = '\0';
 
-        while (*s++) {}
+        while (*s++) {
+        }
     }
 
     return s - src - 1;
 }
 
-static int groupname2gid(const char *groupname) {
-	FILE *group = fopen("/etc/group", "r");
-	char line[BUFSIZ], *gid;
-	int ret = -1;
+static int groupname2gid(const char *groupname)
+{
+    FILE *group = fopen("/etc/group", "r");
+    char line[BUFSIZ], *gid;
+    int ret = -1;
 
-	while (fgets(line, BUFSIZ, group)) {
-		if (!strncmp(line, "tty:", 4)) {
-			if ((gid = strchr(line + 4, ':')))
-				ret = atoi(gid + 1);
+    while (fgets(line, BUFSIZ, group)) {
+        if (!strncmp(line, "tty:", 4)) {
+            if ((gid = strchr(line + 4, ':')))
+                ret = atoi(gid + 1);
 
-			break;
-		}
-	}
+            break;
+        }
+    }
 
-	fclose(group);
+    fclose(group);
 
-	return ret;
+    return ret;
 }
 
-static int uid2gid(uid_t uid) {
-	FILE *passwd = fopen("/etc/passwd", "r");
-	char line[BUFSIZ], *ptr;
-	int ret = -1;
+static int uid2gid(uid_t uid)
+{
+    FILE *passwd = fopen("/etc/passwd", "r");
+    char line[BUFSIZ], *ptr;
+    int ret = -1;
 
-	while (fgets(line, BUFSIZ, passwd)) {
-		if ((ptr = strchr(line, ':')) && (ptr = strchr(ptr + 1, ':')) &&
-			atoi(ptr + 1) == (int)uid && (ptr = strchr(ptr + 1, ':'))) {
-			ret = atoi(ptr + 1);
-			break;
-		}
-	}
+    while (fgets(line, BUFSIZ, passwd)) {
+        if ((ptr = strchr(line, ':')) && (ptr = strchr(ptr + 1, ':')) &&
+                atoi(ptr + 1) == (int) uid && (ptr = strchr(ptr + 1, ':'))) {
+            ret = atoi(ptr + 1);
+            break;
+        }
+    }
 
-	fclose(passwd);
+    fclose(passwd);
 
-	return ret;
+    return ret;
 }
 
 /* pty_open: A safe version of openpty. 
@@ -176,186 +180,172 @@ static int uid2gid(uid_t uid) {
  * TIOCSWINSZ to set the window size of the slave device. On success, 
  * returns 0. On error, returns -1 with errno set appropriately.
  */
-int pty_open(int *masterfd, int *slavefd, char *slavename, size_t slavenamesize, const struct termios *slave_termios, const struct winsize *slave_winsize) {
+int pty_open(int *masterfd, int *slavefd, char *slavename, size_t slavenamesize,
+        const struct termios *slave_termios,
+        const struct winsize *slave_winsize)
+{
 #if defined(HAVE_OPENPTY) || defined(BSD4_4)
-	/* openpty(3) exists in OSF/1 and some other os'es */
+    /* openpty(3) exists in OSF/1 and some other os'es */
 
 #ifdef HAVE_TTYNAME_R
-	char buf[64], *name = buf;
-	int err;
+    char buf[64], *name = buf;
+    int err;
 #else
-	char *name;
+    char *name;
 #endif
 
-	if (!masterfd || !slavefd || !slavename || slavenamesize < 64)
-		return set_errno(EINVAL);
+    if (!masterfd || !slavefd || !slavename || slavenamesize < 64)
+        return set_errno(EINVAL);
 
-	/* Open the master and slave descriptors, set ownership and permissions */
+    /* Open the master and slave descriptors, set ownership and permissions */
 
-	if (openpty(masterfd, slavefd, NULL, NULL, NULL) == -1)
-		return -1;
+    if (openpty(masterfd, slavefd, NULL, NULL, NULL) == -1)
+        return -1;
 
-	/* Retrieve the device name of the slave */
+    /* Retrieve the device name of the slave */
 
 #ifdef HAVE_TTYNAME_R
-	if ((err = ttyname_r(*slavefd, buf, 64)))
-	{
-		close(*masterfd);
-		close(*slavefd);
-		return set_errno(err);
-	}
+    if ((err = ttyname_r(*slavefd, buf, 64))) {
+        close(*masterfd);
+        close(*slavefd);
+        return set_errno(err);
+    }
 #else
-	if (!(name = ttyname(*slavefd)))
-	{
-		close(*masterfd);
-		close(*slavefd);
-		return set_errno(ENOTTY);
-	}
+    if (!(name = ttyname(*slavefd))) {
+        close(*masterfd);
+        close(*slavefd);
+        return set_errno(ENOTTY);
+    }
 #endif
 
-	/* Return it to the caller */
+    /* Return it to the caller */
 
-	if (strlcpy_local(slavename, name, slavenamesize) >= slavenamesize)
-	{
-		close(*masterfd);
-		close(*slavefd);
-		return set_errno(ENOSPC);
-	}
-
+    if (strlcpy_local(slavename, name, slavenamesize) >= slavenamesize) {
+        close(*masterfd);
+        close(*slavefd);
+        return set_errno(ENOSPC);
+    }
 #else /* HAVE_OPENPTY */
 #ifdef HAVE__GETPTY
 
-	/*
-	 * _getpty(3) exists in SGI Irix 4.x, 5.x & 6.x -- it generates more
-	 * pty's automagically when needed
-	 */
+    /*
+     * _getpty(3) exists in SGI Irix 4.x, 5.x & 6.x -- it generates more
+     * pty's automagically when needed
+     */
 
-	char *slave;
+    char *slave;
 
-	if (!masterfd || !slavefd || !slavename || slavenamesize < 64)
-		return set_errno(EINVAL);
+    if (!masterfd || !slavefd || !slavename || slavenamesize < 64)
+        return set_errno(EINVAL);
 
-	/* Open the master descriptor and get the slave's device name */
+    /* Open the master descriptor and get the slave's device name */
 
-	if (!(slave = _getpty(masterfd, O_RDWR, 0622, 0)))
-		return -1;
+    if (!(slave = _getpty(masterfd, O_RDWR, 0622, 0)))
+        return -1;
 
-	/* Return it to the caller */
+    /* Return it to the caller */
 
-	if (strlcpy_local(slavename, name, slavenamesize) >= slavenamesize)
-	{
-		close(*masterfd);
-		return set_errno(ENOSPC);
-	}
+    if (strlcpy_local(slavename, name, slavenamesize) >= slavenamesize) {
+        close(*masterfd);
+        return set_errno(ENOSPC);
+    }
 
-	/* Open the slave descriptor */
+    /* Open the slave descriptor */
 
-	if ((*slavefd = open(slavename, O_RDWR | O_NOCTTY)) == -1)
-	{
-		close(*masterfd);
-		return -1;
-	}
-
+    if ((*slavefd = open(slavename, O_RDWR | O_NOCTTY)) == -1) {
+        close(*masterfd);
+        return -1;
+    }
 #else /* HAVE__GETPTY */
 #if defined(HAVE_DEV_PTMX)
 
-	/*
-	 * This code is used e.g. on Solaris 2.x.  (Note that Solaris 2.3
-	 * also has bsd-style ptys, but they simply do not work.)
-	 */
+    /*
+     * This code is used e.g. on Solaris 2.x.  (Note that Solaris 2.3
+     * also has bsd-style ptys, but they simply do not work.)
+     */
 
 #ifdef HAVE_PTSNAME_R
-	char buf[64], *name = buf;
-	int err;
+    char buf[64], *name = buf;
+    int err;
 #else
-	char *name;
+    char *name;
 #endif
 
-	if (!masterfd || !slavefd || !slavename || slavenamesize < 64)
-		return set_errno(EINVAL);
+    if (!masterfd || !slavefd || !slavename || slavenamesize < 64)
+        return set_errno(EINVAL);
 
-	/* Open the master descriptor */
+    /* Open the master descriptor */
 
-	if ((*masterfd = open("/dev/ptmx", O_RDWR | O_NOCTTY)) == -1)
-		return -1;
+    if ((*masterfd = open("/dev/ptmx", O_RDWR | O_NOCTTY)) == -1)
+        return -1;
 
-	/* Set slave ownership and permissions to real uid of process */
+    /* Set slave ownership and permissions to real uid of process */
 
-	if (grantpt(*masterfd) == -1)
-	{
-		close(*masterfd);
-		return -1;
-	}
+    if (grantpt(*masterfd) == -1) {
+        close(*masterfd);
+        return -1;
+    }
 
-	/* Unlock the slave so it can be opened */
+    /* Unlock the slave so it can be opened */
 
-	if (unlockpt(*masterfd) == -1)
-	{
-		close(*masterfd);
-		return -1;
-	}
+    if (unlockpt(*masterfd) == -1) {
+        close(*masterfd);
+        return -1;
+    }
 
-	/* Retrieve the device name of the slave */
+    /* Retrieve the device name of the slave */
 
 #ifdef HAVE_PTSNAME_R
-	if ((err = ptsname_r(*masterfd, buf, 64)))
-	{
-		close(*masterfd);
-		return set_errno(err);
-	}
+    if ((err = ptsname_r(*masterfd, buf, 64))) {
+        close(*masterfd);
+        return set_errno(err);
+    }
 #else
-	if (!(name = ptsname(*masterfd)))
-	{
-		close(*masterfd);
-		return set_errno(ENOTTY);
-	}
+    if (!(name = ptsname(*masterfd))) {
+        close(*masterfd);
+        return set_errno(ENOTTY);
+    }
 #endif
 
-	/* Return it to the caller */
+    /* Return it to the caller */
 
-	if (strlcpy_local(slavename, name, slavenamesize) >= slavenamesize)
-	{
-		close(*masterfd);
-		return set_errno(ENOSPC);
-	}
+    if (strlcpy_local(slavename, name, slavenamesize) >= slavenamesize) {
+        close(*masterfd);
+        return set_errno(ENOSPC);
+    }
 
-	/* Open the slave descriptor */
+    /* Open the slave descriptor */
 
-	if ((*slavefd = open(slavename, O_RDWR | O_NOCTTY)) == -1)
-	{
-		close(*masterfd);
-		return -1;
-	}
+    if ((*slavefd = open(slavename, O_RDWR | O_NOCTTY)) == -1) {
+        close(*masterfd);
+        return -1;
+    }
 
-	/* Turn the slave into a terminal */
+    /* Turn the slave into a terminal */
 
-#ifndef HAVE_CYGWIN 
-#ifndef HAVE_LINUX /* linux does not use the streams module */
-	/*
-	 * Push the appropriate streams modules, as described in Solaris pts(7).
-	 * HP-UX pts(7) doesn't have ttcompat module.
-	 */
-	if (ioctl(*slavefd, I_PUSH, "ptem") == -1)
-	{
-		close(*masterfd);
-		close(*slavefd);
-		return -1;
-	}
+#ifndef HAVE_CYGWIN
+#ifndef HAVE_LINUX              /* linux does not use the streams module */
+    /*
+     * Push the appropriate streams modules, as described in Solaris pts(7).
+     * HP-UX pts(7) doesn't have ttcompat module.
+     */
+    if (ioctl(*slavefd, I_PUSH, "ptem") == -1) {
+        close(*masterfd);
+        close(*slavefd);
+        return -1;
+    }
 
-	if (ioctl(*slavefd, I_PUSH, "ldterm") == -1)
-	{
-		close(*masterfd);
-		close(*slavefd);
-		return -1;
-	}
-
+    if (ioctl(*slavefd, I_PUSH, "ldterm") == -1) {
+        close(*masterfd);
+        close(*slavefd);
+        return -1;
+    }
 #ifndef __hpux
-	if (ioctl(*slavefd, I_PUSH, "ttcompat") == -1)
-	{
-		close(*masterfd);
-		close(*slavefd);
-		return -1;
-	}
+    if (ioctl(*slavefd, I_PUSH, "ttcompat") == -1) {
+        close(*masterfd);
+        close(*slavefd);
+        return -1;
+    }
 #endif
 #endif
 #endif
@@ -363,127 +353,120 @@ int pty_open(int *masterfd, int *slavefd, char *slavename, size_t slavenamesize,
 #else /* HAVE_DEV_PTMX */
 #ifdef HAVE_DEV_PTS_AND_PTC
 
-	/* AIX-style pty code */
+    /* AIX-style pty code */
 
 #ifdef HAVE_TTYNAME_R
-	char buf[64], *name = buf;
-	int err;
+    char buf[64], *name = buf;
+    int err;
 #else
-	char *name;
+    char *name;
 #endif
 
-	if (!masterfd || !slavefd || !slavename || slavenamesize < 64)
-		return set_errno(EINVAL);
+    if (!masterfd || !slavefd || !slavename || slavenamesize < 64)
+        return set_errno(EINVAL);
 
-	/* Open the master descriptor */
+    /* Open the master descriptor */
 
-	if ((*masterfd = open("/dev/ptc", O_RDWR | O_NOCTTY)) == -1)
-		return -1;
+    if ((*masterfd = open("/dev/ptc", O_RDWR | O_NOCTTY)) == -1)
+        return -1;
 
-	/* Retrieve the device name of the slave */
+    /* Retrieve the device name of the slave */
 
 #ifdef HAVE_TTYNAME_R
-	if ((err = ttyname_r(*masterfd, buf, 64)))
-	{
-		close(*masterfd);
-		return set_errno(err);
-	}
+    if ((err = ttyname_r(*masterfd, buf, 64))) {
+        close(*masterfd);
+        return set_errno(err);
+    }
 #else
-	if (!(name = ttyname(*masterfd)))
-	{
-		close(*masterfd);
-		return set_errno(ENOTTY);
-	}
+    if (!(name = ttyname(*masterfd))) {
+        close(*masterfd);
+        return set_errno(ENOTTY);
+    }
 #endif
 
-	/* Return it to the caller */
+    /* Return it to the caller */
 
-	if (strlcpy_local(slavename, name, slavenamesize) >= slavenamesize)
-	{
-		close(*masterfd);
-		return set_errno(ENOSPC);
-	}
+    if (strlcpy_local(slavename, name, slavenamesize) >= slavenamesize) {
+        close(*masterfd);
+        return set_errno(ENOSPC);
+    }
 
-	/* Open the slave descriptor */
+    /* Open the slave descriptor */
 
-	if ((*slavefd = open(name, O_RDWR | O_NOCTTY)) == -1)
-	{
-		close(*masterfd);
-		return -1;
-	}
-
+    if ((*slavefd = open(name, O_RDWR | O_NOCTTY)) == -1) {
+        close(*masterfd);
+        return -1;
+    }
 #else /* HAVE_DEV_PTS_AND_PTC */
 
-	/* BSD-style pty code */
-	const char * const ptymajors = "pqrstuvwxyzabcdefghijklmnoABCDEFGHIJKLMNOPQRSTUVWXYZ";
-	const char * const ptyminors = "0123456789abcdef";
-	int num_minors = strlen(ptyminors);
-	int num_ptys = strlen(ptymajors) * num_minors;
-	char buf[64];
-	int found = 0;
-	int i;
+    /* BSD-style pty code */
+    const char *const ptymajors =
+            "pqrstuvwxyzabcdefghijklmnoABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const char *const ptyminors = "0123456789abcdef";
+    int num_minors = strlen(ptyminors);
+    int num_ptys = strlen(ptymajors) * num_minors;
+    char buf[64];
+    int found = 0;
+    int i;
 
-	/* Identify the first available pty master device */
+    /* Identify the first available pty master device */
 
-	for (i = 0; !found && i < num_ptys; i++)
-	{
-		snprintf(buf, sizeof buf, "/dev/pty%c%c", ptymajors[i / num_minors], ptyminors[i % num_minors]);
-		snprintf(slavename, slavenamesize, "/dev/tty%c%c", ptymajors[i / num_minors], ptyminors[i % num_minors]);
+    for (i = 0; !found && i < num_ptys; i++) {
+        snprintf(buf, sizeof buf, "/dev/pty%c%c", ptymajors[i / num_minors],
+                ptyminors[i % num_minors]);
+        snprintf(slavename, slavenamesize, "/dev/tty%c%c",
+                ptymajors[i / num_minors], ptyminors[i % num_minors]);
 
-		/* Open the master descriptor */
+        /* Open the master descriptor */
 
-		if ((*masterfd = open(buf, O_RDWR | O_NOCTTY)) == -1)
-		{
-			/* Try SCO style naming */
-			snprintf(buf, sizeof buf, "/dev/ptyp%d", i);
-			snprintf(slavename, slavenamesize, "/dev/ttyp%d", i);
+        if ((*masterfd = open(buf, O_RDWR | O_NOCTTY)) == -1) {
+            /* Try SCO style naming */
+            snprintf(buf, sizeof buf, "/dev/ptyp%d", i);
+            snprintf(slavename, slavenamesize, "/dev/ttyp%d", i);
 
-			if ((*masterfd = open(buf, O_RDWR | O_NOCTTY)) == -1)
-				continue;
-		}
+            if ((*masterfd = open(buf, O_RDWR | O_NOCTTY)) == -1)
+                continue;
+        }
 
-		/* Set slave ownership and permissions to real uid of process */
+        /* Set slave ownership and permissions to real uid of process */
 
-		pty_set_owner(slavename, getuid());
+        pty_set_owner(slavename, getuid());
 
-		/* Open the slave descriptor */
+        /* Open the slave descriptor */
 
-		if ((*slavefd = open(slavename, O_RDWR | O_NOCTTY)) == -1)
-		{
-			close(*masterfd);
-			return -1;
-		}
+        if ((*slavefd = open(slavename, O_RDWR | O_NOCTTY)) == -1) {
+            close(*masterfd);
+            return -1;
+        }
 
-		found = 1;
-	}
+        found = 1;
+    }
 
-	if (!found)
-		return set_errno(ENOENT);
+    if (!found)
+        return set_errno(ENOENT);
 
 #endif /* HAVE_DEV_PTS_AND_PTC */
 #endif /* HAVE_DEV_PTMX */
 #endif /* HAVE__GETPTY */
 #endif /* HAVE_OPENPTY */
 
-	/* Set the slave's terminal attributes if requested */
+    /* Set the slave's terminal attributes if requested */
 
-	if (slave_termios && tcsetattr(*slavefd, TCSANOW, slave_termios) == -1)
-	{
-		close(*masterfd);
-		close(*slavefd);
-		return -1;
-	}
+    if (slave_termios && tcsetattr(*slavefd, TCSANOW, slave_termios) == -1) {
+        close(*masterfd);
+        close(*slavefd);
+        return -1;
+    }
 
-	/* Set the slave's window size if required */
+    /* Set the slave's window size if required */
 
-	if (slave_winsize && ioctl(*slavefd, TIOCSWINSZ, slave_winsize) == -1)
-	{
-		close(*masterfd);
-		close(*slavefd);
-		return -1;
-	}
+    if (slave_winsize && ioctl(*slavefd, TIOCSWINSZ, slave_winsize) == -1) {
+        close(*masterfd);
+        close(*slavefd);
+        return -1;
+    }
 
-	return 0;
+    return 0;
 }
 
 /* pty_release: Releases the slave tty device whose name is in slavename.
@@ -497,16 +480,18 @@ int pty_open(int *masterfd, int *slavefd, char *slavename, size_t slavenamesize,
  */
 int pty_release(const char *slavename)
 {
-	if (!slavename)
-		return set_errno(EINVAL);
+    if (!slavename)
+        return set_errno(EINVAL);
 
-	if (chown(slavename, (uid_t)0, (gid_t)0) == -1)
-		return -1;
+    if (chown(slavename, (uid_t) 0, (gid_t) 0) == -1)
+        return -1;
 
-	if (chmod(slavename, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH) == -1)
-		return -1;
+    if (chmod(slavename,
+                    S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH)
+            == -1)
+        return -1;
 
-	return 0;
+    return 0;
 }
 
 /* pty_set_owner: Changes the ownership of the slave pty device referred to by
@@ -528,30 +513,29 @@ int pty_release(const char *slavename)
  */
 int pty_set_owner(const char *slavename, uid_t uid)
 {
-	mode_t mode = S_IRUSR | S_IWUSR | S_IWGRP;
-	struct stat status[1];
-	int gid;
+    mode_t mode = S_IRUSR | S_IWUSR | S_IWGRP;
+    struct stat status[1];
+    int gid;
 
-	if (stat(slavename, status) == -1)
-		return -1;
+    if (stat(slavename, status) == -1)
+        return -1;
 
-	if ((gid = groupname2gid("tty")) == -1)
-	{
-		gid = uid2gid(uid);
-		mode |= S_IWOTH;
-	}
+    if ((gid = groupname2gid("tty")) == -1) {
+        gid = uid2gid(uid);
+        mode |= S_IWOTH;
+    }
 
-	if (status->st_uid != uid || status->st_gid != (unsigned int)gid)
-		if (chown(slavename, uid, gid) == -1)
-			if (errno != EROFS || status->st_uid != uid)
-				return -1;
+    if (status->st_uid != uid || status->st_gid != (unsigned int) gid)
+        if (chown(slavename, uid, gid) == -1)
+            if (errno != EROFS || status->st_uid != uid)
+                return -1;
 
-	if ((status->st_mode & (S_IRWXU | S_IRWXG | S_IRWXO)) != mode)
-		if (chmod(slavename, mode) == -1)
-			if (errno != EROFS || (status->st_mode & (S_IRGRP | S_IROTH)))
-				return -1;
+    if ((status->st_mode & (S_IRWXU | S_IRWXG | S_IRWXO)) != mode)
+        if (chmod(slavename, mode) == -1)
+            if (errno != EROFS || (status->st_mode & (S_IRGRP | S_IROTH)))
+                return -1;
 
-	return 0;
+    return 0;
 }
 
 /* pty_make_controlling_tty: Makes the slave pty the controlling terminal. 
@@ -565,68 +549,66 @@ int pty_set_owner(const char *slavename, uid_t uid)
  */
 int pty_make_controlling_tty(int *slavefd, const char *slavename)
 {
-	int fd;
+    int fd;
+
 #ifdef USE_VHANGUP
-	void (*old)(int);
+    void (*old) (int);
 #endif /* USE_VHANGUP */
 
-	if (!slavefd || *slavefd < 0 || !slavename)
-		return set_errno(EINVAL);
+    if (!slavefd || *slavefd < 0 || !slavename)
+        return set_errno(EINVAL);
 
-	/* First disconnect from the old controlling tty */
+    /* First disconnect from the old controlling tty */
 #ifdef TIOCNOTTY
-	if ((fd = open(PATH_TTY, O_RDWR | O_NOCTTY)) >= 0)
-	{
-		ioctl(fd, TIOCNOTTY, NULL);
-		close(fd);
-	}
+    if ((fd = open(PATH_TTY, O_RDWR | O_NOCTTY)) >= 0) {
+        ioctl(fd, TIOCNOTTY, NULL);
+        close(fd);
+    }
 #endif /* TIOCNOTTY */
 
-	setsid();
+    setsid();
 
-	/*
-	 * Verify that we are successfully disconnected from the controlling
-	 * tty.
-	 */
+    /*
+     * Verify that we are successfully disconnected from the controlling
+     * tty.
+     */
 #if 0
-	if ((fd = open(PATH_TTY, O_RDWR | O_NOCTTY)) >= 0)
-	{
-		close(fd);
-		return set_errno(ENXIO);
-	}
+    if ((fd = open(PATH_TTY, O_RDWR | O_NOCTTY)) >= 0) {
+        close(fd);
+        return set_errno(ENXIO);
+    }
 #endif
 
-	/* Make it our controlling tty */
+    /* Make it our controlling tty */
 #ifdef TIOCSCTTY
-	if (ioctl(*slavefd, TIOCSCTTY, NULL) == -1)
-		return -1;
+    if (ioctl(*slavefd, TIOCSCTTY, NULL) == -1)
+        return -1;
 #endif /* TIOCSCTTY */
 #ifdef HAVE_NEWS4
-	setpgrp(0, 0);
+    setpgrp(0, 0);
 #endif /* HAVE_NEWS4 */
 #ifdef USE_VHANGUP
-	old = signal(SIGHUP, SIG_IGN);
-	vhangup();
-	signal(SIGHUP, old);
+    old = signal(SIGHUP, SIG_IGN);
+    vhangup();
+    signal(SIGHUP, old);
 #endif /* USE_VHANGUP */
-	/* Why do this? */
-	if ((fd = open(slavename, O_RDWR)) >= 0)
-	{
+    /* Why do this? */
+    if ((fd = open(slavename, O_RDWR)) >= 0) {
 #ifdef USE_VHANGUP
-	close(*slavefd);
-	*slavefd = fd;
+        close(*slavefd);
+        *slavefd = fd;
 #else /* USE_VHANGUP */
-	close(fd);
+        close(fd);
 #endif /* USE_VHANGUP */
-	}
+    }
 
-	/* Verify that we now have a controlling tty */
-	if ((fd = open(PATH_TTY, O_RDWR)) == -1)
-		return -1;
+    /* Verify that we now have a controlling tty */
+    if ((fd = open(PATH_TTY, O_RDWR)) == -1)
+        return -1;
 
-	close(fd);
+    close(fd);
 
-	return 0;
+    return 0;
 }
 
 /* pty_change_window_size: Changes the window size of the pseudo terminal
@@ -639,19 +621,20 @@ int pty_make_controlling_tty(int *slavefd, const char *slavename)
  * Returns  : 0 on success or -1 on error.
  *
  */
-int pty_change_window_size(int masterfd, int row, int col, int xpixel, int ypixel)
+int pty_change_window_size(int masterfd, int row, int col, int xpixel,
+        int ypixel)
 {
-	struct winsize win;
+    struct winsize win;
 
-	if (masterfd < 0 || row < 0 || col < 0 || xpixel < 0 || ypixel < 0)
-		return set_errno(EINVAL);
+    if (masterfd < 0 || row < 0 || col < 0 || xpixel < 0 || ypixel < 0)
+        return set_errno(EINVAL);
 
-	win.ws_row = row;
-	win.ws_col = col;
-	win.ws_xpixel = xpixel;
-	win.ws_ypixel = ypixel;
+    win.ws_row = row;
+    win.ws_col = col;
+    win.ws_xpixel = xpixel;
+    win.ws_ypixel = ypixel;
 
-	return ioctl(masterfd, TIOCSWINSZ, &win);
+    return ioctl(masterfd, TIOCSWINSZ, &win);
 }
 
 /* pty_fork:  Creates a pseudo terminal and then calls fork. In the parent 
@@ -672,65 +655,68 @@ int pty_change_window_size(int masterfd, int row, int col, int xpixel, int ypixe
  * id of the child process to the parent process. On error, returns -1 with 
  * errno set appropriately.
  */
-pid_t pty_fork(int *masterfd, char *slavename, size_t slavenamesize, const struct termios *slave_termios, const struct winsize *slave_winsize)
+pid_t pty_fork(int *masterfd, char *slavename, size_t slavenamesize,
+        const struct termios * slave_termios,
+        const struct winsize * slave_winsize)
 {
-	int slavefd = 0;
-	pid_t pid = 0;
+    int slavefd = 0;
+    pid_t pid = 0;
 
-	/*
-	** Note: we don't use forkpty() because it closes the master in the
-	** child process before making the slave the controlling terminal of the
-	** child proces and this can prevent the slave from becoming the
-	** controlling terminal (but I have no idea why).
-	*/
+    /*
+     ** Note: we don't use forkpty() because it closes the master in the
+     ** child process before making the slave the controlling terminal of the
+     ** child proces and this can prevent the slave from becoming the
+     ** controlling terminal (but I have no idea why).
+     */
 
-	if (pty_open(masterfd, &slavefd, slavename, slavenamesize, slave_termios, slave_winsize) == -1)
-		return -1;
+    if (pty_open(masterfd, &slavefd, slavename, slavenamesize, slave_termios,
+                    slave_winsize) == -1)
+        return -1;
 
-	switch (pid = fork())
-	{
-		case -1:
-			pty_release(slavename);
-			close(slavefd);
-			close(*masterfd);
-			return -1;
+    switch (pid = fork()) {
+        case -1:
+            pty_release(slavename);
+            close(slavefd);
+            close(*masterfd);
+            return -1;
 
-		case 0:
-		{
-			/* Make the slave our controlling tty */
-			if (pty_make_controlling_tty(&slavefd, slavename) == -1)
-				_exit(EXIT_FAILURE);
+        case 0:
+        {
+            /* Make the slave our controlling tty */
+            if (pty_make_controlling_tty(&slavefd, slavename) == -1)
+                _exit(EXIT_FAILURE);
 
-			/* Redirect stdin, stdout and stderr from the pseudo tty */
+            /* Redirect stdin, stdout and stderr from the pseudo tty */
 
-			if (slavefd != STDIN_FILENO && dup2(slavefd, STDIN_FILENO) == -1)
-				_exit(EXIT_FAILURE);
+            if (slavefd != STDIN_FILENO && dup2(slavefd, STDIN_FILENO) == -1)
+                _exit(EXIT_FAILURE);
 
-			if (slavefd != STDOUT_FILENO && dup2(slavefd, STDOUT_FILENO) == -1)
-				_exit(EXIT_FAILURE);
+            if (slavefd != STDOUT_FILENO && dup2(slavefd, STDOUT_FILENO) == -1)
+                _exit(EXIT_FAILURE);
 
-			if (slavefd != STDERR_FILENO && dup2(slavefd, STDERR_FILENO) == -1)
-				_exit(EXIT_FAILURE);
+            if (slavefd != STDERR_FILENO && dup2(slavefd, STDERR_FILENO) == -1)
+                _exit(EXIT_FAILURE);
 
-			/* Close the extra descriptor for the pseudo tty */
+            /* Close the extra descriptor for the pseudo tty */
 
-			if (slavefd != STDIN_FILENO && slavefd != STDOUT_FILENO && slavefd != STDERR_FILENO)
-				close(slavefd);
+            if (slavefd != STDIN_FILENO && slavefd != STDOUT_FILENO
+                    && slavefd != STDERR_FILENO)
+                close(slavefd);
 
-			/* Close the master side of the pseudo tty in the child */
+            /* Close the master side of the pseudo tty in the child */
 
-			close(*masterfd);
+            close(*masterfd);
 
-			return 0;
-		}
+            return 0;
+        }
 
-		default:
-		{
-			/* Close the slave side of the pseudo tty in the parent */
+        default:
+        {
+            /* Close the slave side of the pseudo tty in the parent */
 
-			close(slavefd);
+            close(slavefd);
 
-			return pid;
-		}
-	}
+            return pid;
+        }
+    }
 }

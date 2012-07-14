@@ -27,7 +27,7 @@
  *  Returns 1 on succes and 0 on failure
  */
 
-int fs_util_is_valid ( const char *dir );
+int fs_util_is_valid(const char *dir);
 
 /* fs_util_create_dir:
  * -------------------
@@ -40,7 +40,7 @@ int fs_util_is_valid ( const char *dir );
  *      1 on succes or if dir already exists.
  *      0 on failure.
  */
-int fs_util_create_dir ( const char *dir );
+int fs_util_create_dir(const char *dir);
 
 /* fs_util_create_dir_in_base:
  * ---------------------------
@@ -56,7 +56,7 @@ int fs_util_create_dir ( const char *dir );
  *      1 on succes or if dir already exists.
  *      0 on failure.
  */
-int fs_util_create_dir_in_base ( const char *base, const char *dirname );
+int fs_util_create_dir_in_base(const char *base, const char *dirname);
 
 /* fs_util_get_path:
  * -----------------
@@ -67,6 +67,6 @@ int fs_util_create_dir_in_base ( const char *base, const char *dirname );
  *  base    - The directory to put the new directory dirname
  *  name    - Then name of the name to create in directory base
  */
-void fs_util_get_path ( const char *base, const char *name, char *path );
+void fs_util_get_path(const char *base, const char *name, char *path);
 
 #endif
