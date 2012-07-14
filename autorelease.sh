@@ -41,8 +41,9 @@ function run {
     echo "" >> "$CGDB_OUTPUT_LOG"
 }
 
-# create an empty release directory, everything is created in here.
-rm -fr $CGDB_RELEASE_DIR
+# Create an empty release directory, everything is created in here.
+chmod -R u+rw $CGDB_RELEASE_DIR
+rm -rf $CGDB_RELEASE_DIR
 mkdir $CGDB_RELEASE_DIR
 
 touch "$CGDB_SOURCE_DIR/doc/cgdb.texinfo"

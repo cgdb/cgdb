@@ -6,7 +6,7 @@ set timeout 3
 global KUI_DRIVER
 
 if ![info exists TGDB_DRIVER] {
-  set KUI_DRIVER "../cgdb/lib/kui/src/kui_driver"
+  set KUI_DRIVER "../lib/kui/kui_driver"
 }
 
 if ![info exists kui_prompt] then {

@@ -8,7 +8,7 @@ dist_pkgdata_DATA = cgdb.txt
 
 # generate the man page using help2man.
 cgdb.1:
-	help2man --output=$(top_srcdir)/doc/cgdb.1 $(top_builddir)/cgdb/src/cgdb$(EXEEXT)
+	help2man --output=$(top_srcdir)/doc/cgdb.1 $(top_builddir)/cgdb/cgdb$(EXEEXT)
 
 cgdb.txt: cgdb.texinfo $(srcdir)/version.texi $(cgdb_TEXINFOS)
 TEXTS = cgdb.txt
