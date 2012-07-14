@@ -1,3 +1,4 @@
+cgdb-0.6.6 (07/14/2012)\n
 cgdb-0.6.6 (09/06/2011)
 
   * Fixed a compile error on Cygwin 1.7 (signature for path conversion
