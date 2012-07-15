@@ -2,13 +2,12 @@
  * -----
  */
 
-#ifndef _WM_H_
-#define _WM_H_
+#ifndef __CGDB_WM_H__
+#define __CGDB_WM_H__
 
-/* Local Includes */
 #include "window.h"
 
-/** 
+/**
  * @file
  * wm.h
  *
@@ -17,100 +16,93 @@
  */
 
 /**
- * @name Window Management Overview
- * Libwm is the window manager library for CGDB.  This abstracts the management
- * of "windows"
- * in the terminal, so that the calling program can create, arrange and delete
- * windows in the terminal space.  This management is transparent to the 
- * confined widget, which can do input and drawing without knowledge of actual
- * screen coordinates or whether it is seen by the user at all.
- *
- * A window is bound to a single widget at the time of creation, and they are
- * inextricably bound until the window is closed.  (The opposite is not true,
- * though, as multiple windows may be bound to the same widget.)  The widget is 
- * expected to implement a draw() function, which will be called
- * when the window needs to be refreshed.
- *
- * Refer to this document for Window Manager function documentation.  The
- * operations on windows can be found in window.h.
+ * Direction values.
  */
-
-//@{
+typedef enum {
+    HORIZONTAL,
+    VERTICAL,
+    BOTH
+} wm_direction;
 
 /**
- * A window manager context, one is required for any window management
+ * @name Window Management Overview
+ * Libwm is the window manager library for CGDB.  This abstracts the
+ * management of "windows" in the terminal, so that the calling program can
+ * create, arrange and delete windows in the terminal space.  This management
+ * is transparent to the confined window, which can do input and drawing
+ * without knowledge of actual screen coordinates or whether it is seen by the
+ * user at all.
+ */
+
+/**
+ * The window manager object, one is required for any window management
  * operations.
  */
-typedef struct wmctx *wmctx;
+struct window_manager_s;
+typedef struct window_manager_s window_manager;
 
 /**
- * Creates a new window management context.  This should be called before
- * attempting any other window management operations.  When done, call
- * wm_destroy() to deallocate the context.
+ * Creates a new window manager.  When done with this object, call wm_destroy
+ * to free it.
  *
- * @param  widget  The initial widget, which will be bound to the first window
- *                 that is automatically created.  This cannot be NULL.
+ * @param main_window
+ * The initial window, which will be the top level window until any kind of
+ * splitting occurs.
  *
- * @return A new context is returned, or NULL on error.
+ * @return
+ * A new window manager is returned, or NULL on error.
  */
-wmctx wm_create(wm_widget widget);
+window_manager *wm_create(wm_window *main_window);
 
 /**
- * Deallocates the context, destroying all associated windows.
+ * Free the window manager, recursively destroying all associated windows.
  *
- * @param  context  The context to destroy.
+ * @param wm
+ * The window manager to destroy.
  *
- * @return Zero on success, non-zero on failure.
+ * @return
+ * Zero on success, non-zero on failure.
  */
-int wm_destroy(wmctx context);
+int wm_destroy(window_manager *wm);
 
 /**
  * Redraw all visible windows (because the display was damaged for some reason,
  * or maybe the user hit C-l).
  *
- * @param  context  The context to redraw.
+ * @param wm
+ * The window manager.
  *
- * @return Zero on success, non-zero on failure.
+ * @return
+ * Zero on success, non-zero on failure.
  */
-int wm_redraw(wmctx context);
+int wm_redraw(window_manager *wm);
 
-/** 
- * Split the current window horizontally, creating a new window which will 
- * evenly share the space occupied by the original window.
+/**
+ * Split the current window, creating a new window which will divide the space
+ * occupied by the original window.
  *
- * @param  widget  The widget which will be bound to the new window.  If NULL
- *                 then the new window will be assigned the same widget as
- *                 the current window.
- * @param  size    Size of the new window (zero means even split).
+ * @param window
+ * The window object to place in the newly created space.
  *
- * @return The window ID (win_id >= 0) of the new window, or -1 on error.
+ * @param orientation
+ * Orientation of the split (HORIZONTAL or VERTICAL).
+ *
+ * @return
+ * Zero on success, non-zero on failure.
  */
-wid_t wm_hsplit(wm_widget widget, int size);
+int wm_split(wm_window *window, wm_direction orientation);
 
-/** 
- * Split the current window vertically, creating a new window which will evenly
- * share the space occupied by the original window.
- *
- * @param  widget  The widget which will be bound to the new window.  If NULL
- *                 then the new window will be assigned the same widget as
- *                 the current window.
- * @param  size    Size of the new window (zero means even split).
- *
- * @return The window ID (win_id >= 0) of the new window, or -1 on error.
- */
-wid_t wm_vsplit(wm_widget widget, int size);
-
-/** 
- * Close the specified window.  Remaining windows will be shuffled to fill in
+/**
+ * Close the current window.  Remaining windows will be shuffled to fill in
  * empty screen real estate.
  *
- * @param  win_id  The window ID of the window to close.
+ * @param window
+ * The window to close.
  *
- * @return Zero on success, non-zero on failure.
+ * @return
+ * Zero on success, non-zero on failure.
  */
-int wm_close(wid_t win_id);
-
-//@}
+void wm_close_current(wm_window *window);
 
 /**
  * @name WM Options
@@ -118,8 +110,6 @@ int wm_close(wid_t win_id);
  * window manager.  The options are used to control the behavior of the
  * windows manager in a way that emulates Vim's window system.
  */
-
-//@{
 
 /**
  * Set of options that affect window manager behavior.
@@ -132,7 +122,7 @@ typedef enum {
     CMDHEIGHT,
 
     /**
-     * Option "eadirection" (shorthand: "ead") is of type: wm_eadir
+     * Option "eadirection" (shorthand: "ead") is of type: wm_direction
      */
     EADIRECTION,
 
@@ -177,16 +167,7 @@ typedef enum {
     WINWIDTH
 } wm_option;
 
-/** 
- * Equal always direction 
- */
-typedef enum {
-    HORIZONTAL,
-    VERTICAL,
-    BOTH
-} wm_eadir;
-
-/** 
+/**
  * Option value types
  */
 typedef enum {
@@ -201,8 +182,8 @@ typedef enum {
  */
 typedef struct {
 
-    /** 
-     * Type of option this structure describes 
+    /**
+     * Type of option this structure describes
      */
     wm_opttype type;
 
@@ -217,7 +198,7 @@ typedef struct {
         char bool_val;
 
         /** if (type == WM_EADIR) */
-        wm_eadir ead_val;
+        wm_direction ead_val;
     } variant;
 
 } wm_optval;
@@ -233,7 +214,7 @@ typedef struct {
  */
 wm_optval wm_option_get(wm_option option);
 
-/** 
+/**
  * Set the value of the specified option.
  *
  * @param   option  The option to set.
@@ -243,6 +224,4 @@ wm_optval wm_option_get(wm_option option);
  */
 int wm_option_set(wm_option option, wm_optval value);
 
-//@}
-
-#endif
+#endif /* __CGDB_WM_H__ */

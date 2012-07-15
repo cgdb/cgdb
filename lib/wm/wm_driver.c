@@ -1,8 +1,7 @@
 /* wm_driver.c:
  * ------------
  *
- * Test program for window manager.  Allows user to create windows to play
- * with the features of the wm library.
+ * Test program for window manager.
  */
 
 #ifndef DOXYGEN
@@ -18,6 +17,7 @@
 #endif /* HAVE_CURSES_H */
 
 #include <stdlib.h>
+#include <unistd.h>
 
 /* Local Includes */
 #include "wm.h"
@@ -25,7 +25,7 @@
 
 /* An example widget */
 struct test_widget {
-    wm_widget widget;
+    wm_window window;
     int lines;
 };
 typedef struct test_widget test_widget;
@@ -35,51 +35,57 @@ typedef struct test_widget test_widget;
 /* ---------------- */
 
 /* test_widget: C++ style cast */
-test_widget *get_test_widget(wm_widget widget)
+test_widget *get_test_widget(wm_window *window)
 {
-    return (test_widget *) widget;
+    return (test_widget *) window;
 }
 
-/* test_create: Constructor function. */
-int test_create(wm_widget widget)
+/* test_init: Constructor function. */
+int test_init(wm_window *window)
 {
-    wprintw(widget->win, "%d: Constructor function called\r\n",
-            get_test_widget(widget)->lines = 1);
-    get_test_widget(widget)->lines++;
+    test_widget *widget = get_test_widget(window);
+    widget->lines = 0;
+    mvwprintw(window->cwindow, widget->lines, 0,
+              "%d: Constructor function called",
+              widget->lines);
+    get_test_widget(window)->lines++;
+    wrefresh(window->cwindow);
     return 0;
 }
 
 /* test_destroy: Destructor function. */
-int test_destroy(wm_widget widget)
+int test_destroy(wm_window *window)
 {
     /* Nothing needs to be deallocated */
     return 0;
 }
 
 /* test_input: Input function. */
-int test_input(wm_widget widget, int *data, int len)
+int test_input(wm_window *window, int *data, int len)
 {
     int i;
 
     /* Display data we received */
-    wprintw(widget->win, "%d: ", get_test_widget(widget)->lines++);
+    wprintw(window->cwindow, "%d: ", get_test_widget(window)->lines++);
     for (i = 0; i < len; i++) {
-        wprintw(widget->win, "%c", (char) data[i]);
+        wprintw(window->cwindow, "%c", (char) data[i]);
     }
-    wprintw(widget->win, "\r\n");
+    wprintw(window->cwindow, "\r\n");
+    wrefresh(window->cwindow);
 
     return 0;
 }
 
 /* test_input: Resize function. */
-int test_resize(wm_widget widget)
+int test_resize(wm_window *window)
 {
     int height, width;
 
     /* Output our new size */
-    getmaxyx(widget->win, height, width);
-    wprintw(widget->win, "%d: ", get_test_widget(widget)->lines++);
-    wprintw(widget->win, "New Size: H: %d, W: %d\r\n", height, width);
+    getmaxyx(window->cwindow, height, width);
+    wprintw(window->cwindow, "%d: ", get_test_widget(window)->lines++);
+    wprintw(window->cwindow, "New Size: H: %d, W: %d\r\n", height, width);
+    wrefresh(window->cwindow);
 
     return 0;
 }
@@ -90,21 +96,31 @@ int test_resize(wm_widget widget)
 
 int main(int argc, char *argv[])
 {
-#if 0
+    WINDOW *mainwin = NULL;
     test_widget mywidget;
+    
+    if ((mainwin = initscr()) == NULL ) {
+	    fprintf(stderr, "Error initialising ncurses.\n");
+	    exit(1);
+    }
 
-    mywidget.widget = (wm_widget) malloc(sizeof (struct wm_widget));
-    mywidget.widget->create = test_create;
-    mywidget.widget->destroy = test_destroy;
-    mywidget.widget->input = test_input;
-    mywidget.widget->resize = test_resize;
+    mywidget.window.init = test_init;
+    mywidget.window.destroy = test_destroy;
+    mywidget.window.input = test_input;
+    mywidget.window.resize = test_resize;
 
     /* Create a Window Manager context */
-    wmctx wm_ctx = wm_create((wm_widget) & mywidget);
+    window_manager *wm = wm_create((wm_window *) &mywidget);
+    sleep(3);
+
+    /* TODO: Send some input, split, etc. */
 
     /* Destroy the Window Manager context */
-    wm_destroy(wm_ctx);
-#endif
+    wm_destroy(wm);
+
+    delwin(mainwin);
+    endwin();
+    refresh();
 
     return 0;
 }

@@ -5,13 +5,8 @@
 #ifndef _WINDOW_H_
 #define _WINDOW_H_
 
-/* Standard Includes */
-/* ----------------- */
-
-/* Autoconf header */
 #include <config.h>
 
-/* Curses library */
 #if HAVE_CURSES_H
 #include <curses.h>
 #elif HAVE_NCURSES_CURSES_H
@@ -21,158 +16,127 @@
 /**
  * @file     window.h
  * @author   Mike Mueller <mmueller@cs.uri.edu>
- * @brief    Please Read This: wm_widget
  */
 
-/**
- * @name Windows
- * Window behavior is contained in this file.  This is very straightforward,
- * if you are reading this you most likely need to read the wm_widget
- * documentation.  The key to using the window manager properly is creating
- * valid widgets.
- */
-
-//@{
+/* Forward declarations. */
+struct wm_window_s;
+typedef struct wm_window_s wm_window;
 
 /**
- * Unique window identifier type (comparable to a file descriptor)
- */
-typedef int wid_t;
-
-/* Forward declarations */
-struct wm_widget;
-typedef struct wm_widget *wm_widget;
-
-/**
- * Widget: This is the object that client code will have to implement.  This is
- * the key to properly using the window manager.  The UI developer needs to
- * create a widget which implements the following interface, using C-style
- * "inheritance".  By this, I mean the widget type will be a struct whose first
- * element is a wm_widget, and therefore "is a" wm_widget (with some minor
- * casting here and there).
+ * Window structure.  This structure and associated functions provide the
+ * generic window functionality that every window will need.  Specific
+ * instances of window objects (e.g. a file viewer) will extend this structure
+ * with their own data fields, as well as set the function pointers to
+ * implement the API declared here.  Event functions that aren't needed can be
+ * left NULL.
  *
  * Example:
  * <pre> struct file_dialog {
- *     wm_widget widget;
+ *     wm_window window;
  *     char *file_list[];
  *     int index;
  * };</pre>
- * 
- * Widget data can now be accessed in the following ways:
- * <pre> struct file_dialog *dlg = malloc(sizeof(struct file_dialog));
- * dlg->widget = malloc(sizeof(struct wm_widget));
- * dlg->widget->create     = dialog_constructor;
- * (wm_widget) dlg->create = dialog_constructor;</pre>
+ *
+ * Implemented this way, a file_dialog can be passed anywhere a wm_window is
+ * required.  (Poor man's inheritance.)
  *
  * See field documentation to identify which fields need to be set when
- * creating a new widget.
+ * creating a new window.
  */
-struct wm_widget {
+struct wm_window_s {
+
+    /** The window that contains this window, or NULL for the top level. */
+    wm_window *parent;
 
     /**
-     * Constructor function, called when the window is initially created.
-     * Although the widget is already created by the time the window is created,
-     * odds are there is some initial setup that needs to occur based on the
-     * window being created.  For example, the size of the widget is not known,
-     * and it cannot do any drawing until a window exists.  This is basically
-     * a notification event.  Set this field to NULL if no constructor is
-     * needed.
-     *
-     * @param  widget  The widget being created
-     * @return Zero on success, non-zero on failure.
+     * The curses window assigned to the window.  Child implementations should
+     * do all their drawing to this curses window.
      */
-    int (*create) (wm_widget widget);
+    WINDOW *cwindow;
+
+    /** Flag to indicate that a status bar should be drawn. (Default true). */
+    int show_status_bar;
 
     /**
-     * Destructor function, called when window is destroyed.  This function
-     * should deallocate anything that the widget references, and finally
-     * the widget itself.  None of the "Internal Use Only" members should be
-     * touched, however!  The windowing code will clean that up automatically,
-     * along with the curses 'win' member. Set this field to NULL if no 
-     * destructor is needed.
+     * Initialization hook for child implementations.  This will be called
+     * after the wm_window has been initialized, so a curses window has been
+     * created.  The child object will probably want to use this time to draw
+     * the contents on the screen.
      *
-     * @param  widget  The widget to destroy
-     * @return Zero on success, non-zero on failure.
+     * @param window
+     * The window being initialized.
+     *
+     * @return
+     * Zero on success, non-zero on failure.
      */
-    int (*destroy) (wm_widget widget);
+    int (*init)(wm_window *window);
 
     /**
-     * Input function, called when keyboard input is received for this widget.
+     * Destructor function, called when window is destroyed.  Implement if
+     * your object needs to do any destruction work.  (The window_destroy
+     * function will clean up wm_window data, child objects do not need to.)
+     *
+     * @param window
+     * The window to destroy.
+     *
+     * @return
+     * Zero on success, non-zero on failure.
+     */
+    int (*destroy)(wm_window *window);
+
+    /**
+     * Input function, called when keyboard input is received for this window.
      * Passed in the form of an integer array (of chars or CGDB_KEY_xxx types),
      * and an integer specifying the size of the input array.  Set this field
      * to NULL if no input handling is needed.
      *
-     * @param  widget  The widget to receive the input
-     * @param  data    The keyboard data read from the user
-     * @param  len     The size of the data array
-     * @return Zero on success, non-zero on failure.
-     */
-    int (*input) (wm_widget widget, int *data, int len);
-
-    /**
-     * Resize function, called when the window containing this widget is
-     * resized.  The dimensions are not passed here because the widget can
-     * simply use the data of the 'win' member.  Set this field to NULL if no
-     * resize event handling is needed.
+     * @param window
+     * The window to receive the input.
      *
-     * @param  widget  The widget receiving the resize event
-     * @return Zero on success, non-zero on failure.
+     * @param data
+     * The keyboard data read from the user.
+     *
+     * @param len
+     * The size of the data array.
+     *
+     * @return
+     * Zero on success, non-zero on failure.
      */
-    int (*resize) (wm_widget widget);
+    int (*input)(wm_window *window, int *data, int len);
 
     /**
-     * The curses window assigned to the widget.  The widget should do all
-     * drawing to this window.  If information about the size of the window
-     * is needed, the widget can retrieve the data via this member.  Remember,
-     * this will be destroyed by the windowing code, so do not attempt to 
-     * destroy it in the widget destructor.
+     * Resize event handler.  Implement this to handle resize events
+     * (redrawing contents if needed).
+     *
+     * @param window
+     * The window receiving the resize event.
+     *
+     * @return
+     * Zero on success, non-zero on failure.
      */
-    WINDOW *win;
+    int (*resize)(wm_window *window);
 
 };
 
 /**
- * Window: This is a structure that contains all window-specific data.  No
- * one outside of window.c ever sees the contents of this structure, it is
- * for internal use only.
+ * Initialize the given window.  This is not a _create function because window
+ * implementations will embed a wm_window in their structs.
+ *
+ * @param window
+ * The window to initialize.
+ *
+ * @param cwindow
+ * The curses window that the window should use.
  */
-typedef struct wm_window {
-
-    /**
-     * A unique identifier for this window.  Not used internally, this is 
-     * provided for the Window Manager.  (Yes it breaks encapsulation, to
-     * a small extent, but it means one less data structure was needed.)
-     */
-    wid_t id;
-
-    /**
-     * The widget encapsulated by this window; this pointer will never be NULL.
-     */
-    wm_widget widget;
-
-} *wm_window;
+void window_init(wm_window *window, WINDOW *cwindow);
 
 /**
- * Creates a new window with the specified widget.  The user-defined constructor
- * of the given widget is called after allocation.
- *
- * @param  widget  Widget to which the window is permanently bound.  Widget
- *                 should never be NULL.
- *
- * @return A newly allocated wm_window is returned, or NULL on error.
- */
-wm_window window_create(wm_widget widget);
-
-/**
- * Destroys the specified window.  Calls the destroy function of the associated
+ * Destroys the specified window. Calls the destroy function of the associated
  * widget before deallocating.
  *
- * @param  window  The window to destroy.  If window is NULL, nothing is done.
- *
- * @return Zero on success, non-zero on failure.  This method never fails.
+ * @param window
+ * The window to destroy.
  */
-int window_destroy(wm_window window);
-
-//@}
+void window_destroy(wm_window *window);
 
 #endif

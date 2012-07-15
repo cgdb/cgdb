@@ -1,4 +1,3 @@
-#if 0
 /* window.c:
  * ---------
  *
@@ -12,32 +11,21 @@
 /* Local Includes */
 #include "window.h"
 
-/* --------- */
-/* Functions */
-/* --------- */
-
-wm_window window_create(wm_widget widget)
+void window_init(wm_window *window, WINDOW *cwindow)
 {
-    /* Parameter bounds check */
-    assert(widget != NULL);
-
-    /* Allocate a new window */
-    wm_window window = (wm_window) malloc(sizeof (struct wm_window));
-
-    /* In such low level code, be extra paranoid */
-    if (window != NULL) {
-        window->widget = widget;
+    window->cwindow = cwindow;
+    window->show_status_bar = 1;
+    if (window->init) {
+        window->init(window);
     }
-
-    return window;
 }
 
-int window_destroy(wm_window window)
+void window_destroy(wm_window *window)
 {
     if (window != NULL) {
-        free(window);
+        delwin(window->cwindow);
+        if (window->destroy) {
+            window->destroy(window);
+        }
     }
-
-    return 0;
 }
-#endif

@@ -200,6 +200,7 @@ AC_OUTPUT(
     lib/tgdb/tgdb-base/Makefile \
     lib/tokenizer/Makefile \
     lib/util/Makefile \
+    lib/wm/Makefile \
     doc/Makefile \
     cgdb/Makefile \
     test/Makefile
