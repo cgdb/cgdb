@@ -6,7 +6,9 @@ libwm_a_SOURCES = \
     window.c \
     window.h \
     wm.c \
-    wm.h
+    wm.h \
+    wm_splitter.c \
+    wm_splitter.h
 
 # Installs the driver programs into progs directory
 noinst_PROGRAMS = wm_driver

@@ -13,6 +13,7 @@
 
 /* Local Includes */
 #include "wm.h"
+#include "wm_splitter.h"
 
 /**
  * The window manager structure.  This is passed to every method in the
@@ -44,11 +45,11 @@ window_manager *wm_create(wm_window *main_window)
     wm->main_window = main_window;
     wm->focused_window = main_window;
 
-    /* TODO: Factor command height into the new window's height. */
     getmaxyx(stdscr, y, x);
-    cwindow = subwin(stdscr, y-2, x, 0, 0);
+    cwindow = subwin(stdscr, y-1, x, 0, 0);
 
-    window_init(main_window, cwindow);
+    wm_window_init(main_window, cwindow, NULL);
+    wm_redraw(wm);
 
     return wm;
 }
@@ -56,7 +57,7 @@ window_manager *wm_create(wm_window *main_window)
 int wm_destroy(window_manager *wm)
 {
     if (wm) {
-        window_destroy(wm->main_window);
+        wm_window_destroy(wm->main_window);
         free(wm);
     }
 
@@ -65,17 +66,40 @@ int wm_destroy(window_manager *wm)
 
 int wm_redraw(window_manager *wm)
 {
-    /* Not implemented */
-    return -1;
+    wm_window_redraw(wm->main_window);
+    refresh();
 }
 
-int wm_split(wm_window *window, wm_direction orientation)
+int wm_split(window_manager *wm, wm_window *window, wm_direction orientation)
 {
-    /* Not implemented */
-    return -1;
+    wm_splitter *splitter = NULL;
+    wm_window *orig = wm->focused_window;
+
+    if (orig->parent && orig->parent->is_splitter) {
+        splitter = (wm_splitter *) orig->parent;
+        if (splitter->orientation != orientation) {
+            /* Need to create a new splitter */
+            splitter = NULL;
+        }
+    }
+
+    if (!splitter) {
+        splitter = wm_splitter_create(orientation);
+        wm_window_init((wm_window *) splitter, orig->cwindow, orig->parent);
+        wm_splitter_add(splitter, orig);
+        if (wm->main_window == orig) {
+            wm->main_window = (wm_window *) splitter;
+        }
+    }
+
+    wm_splitter_add(splitter, window);
+    wm->focused_window = window;
+    wm_window_redraw((wm_window *) splitter);
+
+    return 0;
 }
 
-int wm_close(wm_window *window)
+int wm_close()
 {
     /* Not implemented */
     return -1;

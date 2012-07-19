@@ -6,6 +6,7 @@
 #define __CGDB_WM_H__
 
 #include "window.h"
+#include "types.h"
 
 /**
  * @file
@@ -14,15 +15,6 @@
  * @brief
  * This is the interface to the window management library.
  */
-
-/**
- * Direction values.
- */
-typedef enum {
-    HORIZONTAL,
-    VERTICAL,
-    BOTH
-} wm_direction;
 
 /**
  * @name Window Management Overview
@@ -47,7 +39,7 @@ typedef struct window_manager_s window_manager;
  *
  * @param main_window
  * The initial window, which will be the top level window until any kind of
- * splitting occurs.
+ * splitting occurs.  The window manager now owns this pointer.
  *
  * @return
  * A new window manager is returned, or NULL on error.
@@ -81,8 +73,12 @@ int wm_redraw(window_manager *wm);
  * Split the current window, creating a new window which will divide the space
  * occupied by the original window.
  *
+ * @param wm
+ * The window manager.
+ *
  * @param window
- * The window object to place in the newly created space.
+ * The window object to place in the newly created space. The window manager
+ * now owns this pointer.
  *
  * @param orientation
  * Orientation of the split (HORIZONTAL or VERTICAL).
@@ -90,19 +86,19 @@ int wm_redraw(window_manager *wm);
  * @return
  * Zero on success, non-zero on failure.
  */
-int wm_split(wm_window *window, wm_direction orientation);
+int wm_split(window_manager *wm, wm_window *window, wm_direction orientation);
 
 /**
  * Close the current window.  Remaining windows will be shuffled to fill in
  * empty screen real estate.
  *
- * @param window
- * The window to close.
+ * @param wm
+ * The window manager.
  *
  * @return
  * Zero on success, non-zero on failure.
  */
-void wm_close_current(wm_window *window);
+void wm_close_current(window_manager *wm);
 
 /**
  * @name WM Options

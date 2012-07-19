@@ -26,13 +26,13 @@
 /* An example widget */
 struct test_widget {
     wm_window window;
-    int lines;
+    int color;
 };
 typedef struct test_widget test_widget;
 
-/* ---------------- */
-/* Widget Functions */
-/* ---------------- */
+/* Internal widget functions */
+static test_widget *test_create();
+int test_redraw(wm_window *window);
 
 /* test_widget: C++ style cast */
 test_widget *get_test_widget(wm_window *window)
@@ -43,13 +43,7 @@ test_widget *get_test_widget(wm_window *window)
 /* test_init: Constructor function. */
 int test_init(wm_window *window)
 {
-    test_widget *widget = get_test_widget(window);
-    widget->lines = 0;
-    mvwprintw(window->cwindow, widget->lines, 0,
-              "%d: Constructor function called",
-              widget->lines);
-    get_test_widget(window)->lines++;
-    wrefresh(window->cwindow);
+    test_redraw(window);
     return 0;
 }
 
@@ -63,31 +57,44 @@ int test_destroy(wm_window *window)
 /* test_input: Input function. */
 int test_input(wm_window *window, int *data, int len)
 {
-    int i;
-
-    /* Display data we received */
-    wprintw(window->cwindow, "%d: ", get_test_widget(window)->lines++);
-    for (i = 0; i < len; i++) {
-        wprintw(window->cwindow, "%c", (char) data[i]);
-    }
-    wprintw(window->cwindow, "\r\n");
-    wrefresh(window->cwindow);
-
     return 0;
 }
 
 /* test_input: Resize function. */
 int test_resize(wm_window *window)
 {
-    int height, width;
-
-    /* Output our new size */
-    getmaxyx(window->cwindow, height, width);
-    wprintw(window->cwindow, "%d: ", get_test_widget(window)->lines++);
-    wprintw(window->cwindow, "New Size: H: %d, W: %d\r\n", height, width);
-    wrefresh(window->cwindow);
-
+    test_redraw(window);
     return 0;
+}
+
+int test_redraw(wm_window *window)
+{
+    test_widget *widget = (test_widget *) window;
+    int i, j;
+
+    wattron(window->cwindow, COLOR_PAIR(widget->color));
+    for (i = 0; i < window->height; ++i) {
+        for (j = 0; j < window->width; ++j) {
+            mvwprintw(window->cwindow, i, j, "%d", (i+j) % 10);
+        }
+    }
+    wattroff(window->cwindow, COLOR_PAIR(widget->color));
+    wrefresh(window->cwindow);
+}
+
+/* Create a new test widget */
+static test_widget *test_create(int color)
+{
+    test_widget *widget = (test_widget *) malloc(sizeof(test_widget));
+
+    widget->window.init = test_init;
+    widget->window.destroy = test_destroy;
+    widget->window.input = test_input;
+    widget->window.redraw = test_redraw;
+    widget->window.resize = test_resize;
+    widget->color = color;
+
+    return widget;
 }
 
 /* ------------- */
@@ -97,30 +104,44 @@ int test_resize(wm_window *window)
 int main(int argc, char *argv[])
 {
     WINDOW *mainwin = NULL;
-    test_widget mywidget;
-    
+    test_widget *widget1, *widget2, *widget3;
+    window_manager *wm = NULL;
+    int i;
+
     if ((mainwin = initscr()) == NULL ) {
 	    fprintf(stderr, "Error initialising ncurses.\n");
 	    exit(1);
     }
 
-    mywidget.window.init = test_init;
-    mywidget.window.destroy = test_destroy;
-    mywidget.window.input = test_input;
-    mywidget.window.resize = test_resize;
+    if (has_colors()) {
+        start_color();
+#ifdef NCURSES_VERSION
+        use_default_colors();
+#else
+        bkgdset(0);
+        bkgd(COLOR_WHITE);
+#endif
+        init_pair(1, COLOR_RED, COLOR_BLACK);
+        init_pair(2, COLOR_BLUE, COLOR_BLACK);
+        init_pair(3, COLOR_GREEN, COLOR_BLACK);
+        init_pair(4, COLOR_CYAN, COLOR_BLACK);
+        init_pair(5, COLOR_YELLOW, COLOR_BLACK);
+    }
 
-    /* Create a Window Manager context */
-    window_manager *wm = wm_create((wm_window *) &mywidget);
-    sleep(3);
-
-    /* TODO: Send some input, split, etc. */
+    for (i = 1; i <= 4; i++) {
+        test_widget *widget = test_create(i);
+        if (!wm) {
+            wm = wm_create((wm_window *) widget);
+        } else {
+            wm_split(wm, (wm_window *) widget, WM_HORIZONTAL);
+        }
+        sleep(2);
+    }
 
     /* Destroy the Window Manager context */
     wm_destroy(wm);
 
-    delwin(mainwin);
     endwin();
-    refresh();
 
     return 0;
 }
