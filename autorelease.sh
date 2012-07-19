@@ -42,8 +42,10 @@ function run {
 }
 
 # Create an empty release directory, everything is created in here.
-chmod -R u+rw $CGDB_RELEASE_DIR
-rm -rf $CGDB_RELEASE_DIR
+if [ -e $CGDB_RELEASE_DIR ]; then
+    chmod -R u+rw $CGDB_RELEASE_DIR
+    rm -rf $CGDB_RELEASE_DIR
+fi
 mkdir $CGDB_RELEASE_DIR
 
 touch "$CGDB_SOURCE_DIR/doc/cgdb.texinfo"
