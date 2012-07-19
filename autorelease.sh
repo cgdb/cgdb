@@ -1,25 +1,45 @@
 #!/bin/bash
 
-if [ "$2" = "" ]; then
-  echo "Usage: $0 [version] [web repository]"
-  echo "  Examples:"
-  echo "    $0 0.6.6 ../cgdb.github.com"
-  echo "    $0 0.7.0-svn ../cgdb.github.com"
-  exit 1
-fi
-
-CGDB_WEB=`readlink -f $PWD/$2`
-if [ ! -e $CGDB_WEB ]; then
-    echo "Repository path '$2' does not exist."
-    exit 1
-elif [ ! -d $CGDB_WEB ]; then
-    echo "Repository path '$2' is not a directory."
-    exit 1
-fi
-
 set -e
+
+CGDB_VERSION=`date +"%Y%m%d"`
+echo "-- Preparing to create a new cgdb release."
+echo ""
+echo -n "Version for this release: [$CGDB_VERSION] "
+read tmp
+if [ "$tmp" != "" ]; then
+    CGDB_VERSION=$tmp
+fi
+
+echo ""
+echo "-- This script can generate an update_docs.sh script that will copy this"
+echo "-- release's documentation to your local cgdb web repository, so you can"
+echo "-- push to the web site."
+echo ""
+echo -n "Generate update_docs.sh? [n] "
+read tmp
+if [ "$tmp" = "y" ]; then
+    echo -n "Path to local cgdb web repository (e.g. ../cgdb.github.com): "
+    read CGDB_WEB
+    if [ "$CGDB_WEB" != "" ]; then
+        CGDB_WEB=`readlink -f $PWD/$CGDB_WEB`
+        if [ ! -e $CGDB_WEB ]; then
+            echo "Repository path '$CGDB_WEB' does not exist."
+            exit 1
+        elif [ ! -d $CGDB_WEB ]; then
+            echo "Repository path '$CGDB_WEB' is not a directory."
+            exit 1
+        fi
+    fi
+fi
+
+echo ""
+echo -n "Update NEWS file with version $CGDB_VERSION: [n] "
+read CGDB_UPDATE_NEWS
+
+echo ""
+echo "-- Release build starting."
  
-CGDB_VERSION=$1
 CGDB_RELEASE=cgdb-$CGDB_VERSION
 CGDB_RELEASE_STR=`echo "$CGDB_RELEASE" | perl -pi -e 's/\./_/g'`
 CGDB_SOURCE_DIR="$PWD"
@@ -95,13 +115,17 @@ rm $CGDB_SOURCE_DIR/doc/cgdb.1
 run make cgdb.1
 
 # Update NEWS
-cd "$CGDB_SOURCE_DIR"
-echo "-- Update the NEWS file"
-echo "$CGDB_RELEASE (`date +%m/%d/%Y`)\n" > datetmp.txt
-cp NEWS NEWS.bak
-cat datetmp.txt NEWS.bak > NEWS
-rm NEWS.bak
-rm datetmp.txt
+if [ "$CGDB_UPDATE_NEWS" = "y" ]; then
+    cd "$CGDB_SOURCE_DIR"
+    echo "-- Update the NEWS file"
+    echo -e "$CGDB_RELEASE (`date +%m/%d/%Y`)\n" > datetmp.txt
+    cp NEWS NEWS.bak
+    cat datetmp.txt NEWS.bak > NEWS
+    rm NEWS.bak
+    rm datetmp.txt
+else
+    echo "-- Skipping update of NEWS file"
+fi
 
 # Test the distribution
 echo "-- Unpacking and testing in $CGDB_BUILD_TEST_DIR"
@@ -146,20 +170,24 @@ echo "echo \"-- Push this tag with: git push $TAG_NAME\"" >> $CGDB_RELEASE_TAG_S
 #echo '' >>  $CGDB_RELEASE_UPLOAD_SH
 
 # Create release/scripts/update_docs.sh
-echo '#!/bin/sh' >> $CGDB_RELEASE_DOCS_SH
-echo "" >> $CGDB_RELEASE_DOCS_SH
-echo 'echo "-- Updating cgdb.pdf"' >> $CGDB_RELEASE_DOCS_SH
-echo "cp docs/cgdb.pdf $CGDB_WEB/docs" >> $CGDB_RELEASE_DOCS_SH
-echo '' >> $CGDB_RELEASE_DOCS_SH
-echo 'echo "-- Updating single page HTML"' >> $CGDB_RELEASE_DOCS_SH
-echo "cp docs/cgdb-no-split.html $CGDB_WEB/docs/cgdb.html" \
-     >> $CGDB_RELEASE_DOCS_SH
-echo '' >> $CGDB_RELEASE_DOCS_SH
-echo 'echo "-- Uploading multiple page HTML"' >> $CGDB_RELEASE_DOCS_SH
-echo "cp -r docs/cgdb.html/* $CGDB_WEB/docs/" >> $CGDB_RELEASE_DOCS_SH
-echo '' >> $CGDB_RELEASE_DOCS_SH
-echo "echo \"Verify and commit the changes in $CGDB_WEB to update the site.\"" \
-     >> $CGDB_RELEASE_DOCS_SH
+if [ "$CGDB_WEB" != "" ]; then
+    echo '#!/bin/sh' >> $CGDB_RELEASE_DOCS_SH
+    echo "" >> $CGDB_RELEASE_DOCS_SH
+    echo 'echo "-- Updating cgdb.pdf"' >> $CGDB_RELEASE_DOCS_SH
+    echo "cp docs/cgdb.pdf $CGDB_WEB/docs" >> $CGDB_RELEASE_DOCS_SH
+    echo '' >> $CGDB_RELEASE_DOCS_SH
+    echo 'echo "-- Updating single page HTML"' >> $CGDB_RELEASE_DOCS_SH
+    echo "cp docs/cgdb-no-split.html $CGDB_WEB/docs/cgdb.html" \
+         >> $CGDB_RELEASE_DOCS_SH
+    echo '' >> $CGDB_RELEASE_DOCS_SH
+    echo 'echo "-- Uploading multiple page HTML"' >> $CGDB_RELEASE_DOCS_SH
+    echo "cp -r docs/cgdb.html/* $CGDB_WEB/docs/" >> $CGDB_RELEASE_DOCS_SH
+    echo '' >> $CGDB_RELEASE_DOCS_SH
+    echo "echo \"Verify and commit the changes in $CGDB_WEB to update the" \
+         "site.\"" >> $CGDB_RELEASE_DOCS_SH
+else
+    echo "-- Skipping generation of update_docs.sh"
+fi
 
 # Notification email
 echo "-- Creating Email $CGDB_RELEASE_DIR/cgdb.email"
