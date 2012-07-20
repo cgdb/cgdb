@@ -64,6 +64,12 @@ struct wm_window_s {
     /** The number of columns available in this window. */
     int width;
 
+    /** The top row of the window (absolute). (You shouldn't need this.) */
+    int top;
+
+    /** The left column of the window (absolute). (You shouldn't need this.) */
+    int left;
+
     /** True if this window is an instance of a splitter. */
     int is_splitter;
 

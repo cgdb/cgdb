@@ -46,7 +46,7 @@ window_manager *wm_create(wm_window *main_window)
     wm->focused_window = main_window;
 
     getmaxyx(stdscr, y, x);
-    cwindow = subwin(stdscr, y-1, x, 0, 0);
+    cwindow = derwin(stdscr, y-1, x, 0, 0);
 
     wm_window_init(main_window, cwindow, NULL);
     wm_redraw(wm);
@@ -68,6 +68,7 @@ int wm_redraw(window_manager *wm)
 {
     wm_window_redraw(wm->main_window);
     refresh();
+    return 0;
 }
 
 int wm_split(window_manager *wm, wm_window *window, wm_direction orientation)
@@ -75,28 +76,23 @@ int wm_split(window_manager *wm, wm_window *window, wm_direction orientation)
     wm_splitter *splitter = NULL;
     wm_window *orig = wm->focused_window;
 
+    wm->focused_window = window;
+
+    /* If already inside a splitter, hand off to wm_splitter_split(). */
     if (orig->parent && orig->parent->is_splitter) {
         splitter = (wm_splitter *) orig->parent;
-        if (splitter->orientation != orientation) {
-            /* Need to create a new splitter */
-            splitter = NULL;
-        }
+        wm_splitter_split(splitter, orig, window, orientation);
+        return wm_window_redraw((wm_window *) splitter);
     }
 
-    if (!splitter) {
-        splitter = wm_splitter_create(orientation);
-        wm_window_init((wm_window *) splitter, orig->cwindow, orig->parent);
-        wm_splitter_add(splitter, orig);
-        if (wm->main_window == orig) {
-            wm->main_window = (wm_window *) splitter;
-        }
-    }
+    /* This is the top-level window and it's not a splitter yet. */
+    splitter = wm_splitter_create(orientation);
+    wm_window_init((wm_window *) splitter, orig->cwindow, NULL);
+    wm_splitter_split(splitter, NULL, orig, orientation);
+    wm_splitter_split(splitter, orig, window, orientation);
+    wm->main_window = (wm_window *) splitter;
 
-    wm_splitter_add(splitter, window);
-    wm->focused_window = window;
-    wm_window_redraw((wm_window *) splitter);
-
-    return 0;
+    return wm_window_redraw((wm_window *) splitter);
 }
 
 int wm_close()

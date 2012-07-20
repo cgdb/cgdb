@@ -57,6 +57,7 @@ wm_window_redraw(wm_window *window)
 int
 wm_window_resize(wm_window *window)
 {
+    getbegyx(window->cwindow, window->top, window->left);
     getmaxyx(window->cwindow, window->height, window->width);
     if (window->show_status_bar) {
         window->height--;
@@ -72,6 +73,7 @@ void
 wm_window_show_status_bar(wm_window *window, int value)
 {
     window->show_status_bar = value;
+    getbegyx(window->cwindow, window->top, window->left);
     getmaxyx(window->cwindow, window->height, window->width);
     if (value) {
         window->height--;

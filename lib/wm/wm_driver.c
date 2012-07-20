@@ -128,12 +128,20 @@ int main(int argc, char *argv[])
         init_pair(5, COLOR_YELLOW, COLOR_BLACK);
     }
 
-    for (i = 1; i <= 4; i++) {
+    for (i = 1; i <= 5; i++) {
         test_widget *widget = test_create(i);
-        if (!wm) {
-            wm = wm_create((wm_window *) widget);
-        } else {
-            wm_split(wm, (wm_window *) widget, WM_HORIZONTAL);
+        switch (i) {
+            case 1:
+                wm = wm_create((wm_window *) widget);
+                break;
+            case 2:
+            case 3:
+            case 5:
+                wm_split(wm, (wm_window *) widget, WM_HORIZONTAL);
+                break;
+            case 4:
+                wm_split(wm, (wm_window *) widget, WM_VERTICAL);
+                break;
         }
         sleep(2);
     }
