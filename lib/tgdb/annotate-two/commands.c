@@ -966,12 +966,14 @@ static char *commands_create_command(struct commands *c,
             if (data == NULL)
                 ncom = (char *) cgdb_malloc(sizeof (char) * (16));
             else
-                ncom = (char *) cgdb_malloc(sizeof (char) * (16 +
+                ncom = (char *) cgdb_malloc(sizeof (char) * (18 +
                                 strlen(data)));
             strcpy(ncom, "server list ");
 
             if (temp_file_name != NULL) {
+                strcat(ncom, "\"");
                 strcat(ncom, ibuf_get(temp_file_name));
+                strcat(ncom, "\"");
                 strcat(ncom, ":1");
             }
 

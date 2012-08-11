@@ -409,13 +409,13 @@ char *a2_client_modify_breakpoint(void *ctx,
     char *val = (char *) cgdb_malloc(sizeof (char) * (strlen(file) + 128));
 
     if (b == TGDB_BREAKPOINT_ADD) {
-        sprintf(val, "break %s:%d", file, line);
+        sprintf(val, "break \"%s\":%d", file, line);
         return val;
     } else if (b == TGDB_BREAKPOINT_DELETE) {
-        sprintf(val, "clear %s:%d", file, line);
+        sprintf(val, "clear \"%s\":%d", file, line);
         return val;
     } else if (b == TGDB_TBREAKPOINT_ADD) {
-        sprintf(val, "tbreak %s:%d", file, line);
+        sprintf(val, "tbreak \"%s\":%d", file, line);
         return val;
     } else
         return NULL;
