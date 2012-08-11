@@ -1,3 +1,6 @@
+  * Fixed a bug opening files (and toggling breakpoints in files) with
+    special characters (e.g. space) in their names.
+
 cgdb-0.6.6 (09/06/2011)
 
   * Fixed a compile error on Cygwin 1.7 (signature for path conversion
