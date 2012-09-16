@@ -11,12 +11,14 @@ IDENTIFIER {L}+{T}*
 
 #include <stdio.h>
 #include "tokenizer.h"
+
+int nesting_level;
 %}
 
 %x comment
-%x comment_alt
+%x nesting_comment
 %x string_literal
-%x string_literal_alt
+%x wysiwyg_literal
 
 %%
 "__gshared"             { return(TOKENIZER_TYPE); }
@@ -42,6 +44,8 @@ IDENTIFIER {L}+{T}*
 "dchar"                 { return(TOKENIZER_TYPE); }
 "dstring"               { return(TOKENIZER_TYPE); }
 "double"                { return(TOKENIZER_TYPE); }
+"equals_t"              { return(TOKENIZER_TYPE); }
+"hash_t"                { return(TOKENIZER_TYPE); }
 "idouble"               { return(TOKENIZER_TYPE); }
 "final"                 { return(TOKENIZER_TYPE); }
 "float"                 { return(TOKENIZER_TYPE); }
@@ -54,6 +58,7 @@ IDENTIFIER {L}+{T}*
 "long"                  { return(TOKENIZER_TYPE); }
 "nothrow"               { return(TOKENIZER_TYPE); }
 "override"              { return(TOKENIZER_TYPE); }
+"ptrdiff_t"             { return(TOKENIZER_TYPE); }
 "pure"                  { return(TOKENIZER_TYPE); }
 "real"                  { return(TOKENIZER_TYPE); }
 "ref"                   { return(TOKENIZER_TYPE); }
@@ -61,6 +66,7 @@ IDENTIFIER {L}+{T}*
 "shared"                { return(TOKENIZER_TYPE); }
 "short"                 { return(TOKENIZER_TYPE); }
 "size_t"                { return(TOKENIZER_TYPE); }
+"sizediff_t"            { return(TOKENIZER_TYPE); }
 "static"                { return(TOKENIZER_TYPE); }
 "string"                { return(TOKENIZER_TYPE); }
 "struct"                { return(TOKENIZER_TYPE); }
@@ -71,7 +77,6 @@ IDENTIFIER {L}+{T}*
 "ulong"                 { return(TOKENIZER_TYPE); }
 "union"                 { return(TOKENIZER_TYPE); }
 "ushort"                { return(TOKENIZER_TYPE); }
-"virtual"               { return(TOKENIZER_TYPE); }
 "void"                  { return(TOKENIZER_TYPE); }
 "volatile"              { return(TOKENIZER_TYPE); }
 "wchar"                 { return(TOKENIZER_TYPE); }
@@ -103,6 +108,7 @@ IDENTIFIER {L}+{T}*
 "goto"                  { return(TOKENIZER_KEYWORD); }
 "if"                    { return(TOKENIZER_KEYWORD); }
 "in"                    { return(TOKENIZER_KEYWORD); }
+"invariant"             { return(TOKENIZER_KEYWORD); }
 "is"                    { return(TOKENIZER_KEYWORD); }
 "mixin"                 { return(TOKENIZER_KEYWORD); }
 "new"                   { return(TOKENIZER_KEYWORD); }
@@ -134,15 +140,17 @@ IDENTIFIER {L}+{T}*
 <comment>\r\n               { return(TOKENIZER_NEWLINE); }
 <comment>"*"+"/"            { BEGIN(INITIAL);     return(TOKENIZER_COMMENT); }
 
-"/+"                        { BEGIN(comment_alt); return(TOKENIZER_COMMENT); }
-<comment_alt>[^+\r\n]*      { return(TOKENIZER_COMMENT); }
-<comment_alt>"+"+[^+/\r\n]* { return(TOKENIZER_COMMENT); }
-<comment_alt>\n             { return(TOKENIZER_NEWLINE); }
-<comment_alt>\r             { return(TOKENIZER_NEWLINE); }
-<comment_alt>\r\n           { return(TOKENIZER_NEWLINE); }
-<comment_alt>"+"+"/"        { BEGIN(INITIAL);     return(TOKENIZER_COMMENT); }
+"/+"                            { BEGIN(nesting_comment); nesting_level = (0); return(TOKENIZER_COMMENT); }
+<nesting_comment>[^+/\r\n]*     { return(TOKENIZER_COMMENT); }
+<nesting_comment>"+"+[^+/\r\n]* { return(TOKENIZER_COMMENT); }
+<nesting_comment>"/"+[^+/\r\n]* { return(TOKENIZER_COMMENT); }
+<nesting_comment>"/+"           { nesting_level++; return(TOKENIZER_COMMENT); }
+<nesting_comment>\n             { return(TOKENIZER_NEWLINE); }
+<nesting_comment>\r             { return(TOKENIZER_NEWLINE); }
+<nesting_comment>\r\n           { return(TOKENIZER_NEWLINE); }
+<nesting_comment>"+"+"/"        { if (nesting_level-- == 0) BEGIN(INITIAL);  return(TOKENIZER_COMMENT); }
 
-\/\/[^\r\n]*              { return(TOKENIZER_COMMENT); }
+\/\/[^\r\n]*            { return(TOKENIZER_COMMENT); }
 
 #{L}+                   { return(TOKENIZER_DIRECTIVE); }
 "import"                { return(TOKENIZER_DIRECTIVE); }
@@ -170,12 +178,13 @@ IDENTIFIER {L}+{T}*
 <string_literal>\r\n                        { return(TOKENIZER_NEWLINE); }
 <string_literal>\"                          { BEGIN(INITIAL);            return(TOKENIZER_LITERAL); }
 
-"`"                                         { BEGIN(string_literal_alt); return(TOKENIZER_LITERAL); }
-<string_literal_alt>(\\[^\r\n]|[^\\`\r\n])* { return(TOKENIZER_LITERAL); }
-<string_literal_alt>\n                      { return(TOKENIZER_NEWLINE); }
-<string_literal_alt>\r                      { return(TOKENIZER_NEWLINE); }
-<string_literal_alt>\r\n                    { return(TOKENIZER_NEWLINE); }
-<string_literal_alt>"`"                     { BEGIN(INITIAL);            return(TOKENIZER_LITERAL); }
+"`"                                         { BEGIN(wysiwyg_literal);    return(TOKENIZER_LITERAL); }
+<wysiwyg_literal>([^`\r\n])*                { return(TOKENIZER_LITERAL); }
+<wysiwyg_literal>\n                         { return(TOKENIZER_NEWLINE); }
+<wysiwyg_literal>\r                         { return(TOKENIZER_NEWLINE); }
+<wysiwyg_literal>\r\n                       { return(TOKENIZER_NEWLINE); }
+<wysiwyg_literal>"`"                        { BEGIN(INITIAL);            return(TOKENIZER_LITERAL); }
+
 
 {D}+                    { return(TOKENIZER_LITERAL); }
 {D}+f                   { return(TOKENIZER_LITERAL); }
