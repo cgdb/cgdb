@@ -5,7 +5,7 @@
 
 /* Some default file extensions */
 char *c_extensions[] = {
-    ".c", ".C", ".cc", ".cpp", ".cxx", ".h", ".hpp", ".hxx"
+    ".c", ".C", ".cc", ".cpp", ".cxx", ".c++", ".h", ".hpp", ".hxx", ".hh", ".ipp", ".inl", ".moc"
 };
 char *d_extensions[] = { ".d", ".di" };
 char *ada_extensions[] = { ".adb", ".ads", ".ada", ".ADB", ".ADS", ".ADA" };
