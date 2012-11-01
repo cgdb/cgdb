@@ -27,5 +27,6 @@ Contributors
 
   Iain Buclaw provided a syntax highlighter for the D language,
   so cgdb plays nicely in a gdc development environment.
+  He can be reached at "ibuclaw *at* gdcproject *dot* org".
 
 For more information please see http://cgdb.sourceforge.net/
