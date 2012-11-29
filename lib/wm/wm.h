@@ -70,6 +70,33 @@ int wm_destroy(window_manager *wm);
 int wm_redraw(window_manager *wm);
 
 /**
+ * Resize the given window in the given direction.  Other windows will be
+ * pushed as necessary to accomodate the new space.
+ *
+ * The screen will be redrawn after the window is resized.
+ *
+ * @param wm
+ * The window manager.
+ *
+ * @param window
+ * The window to resize.
+ *
+ * @param dir
+ * The direction being resized (vertical -> wider/narrower, horizontal ->
+ * taller/shorter). Counterintuitive perhaps, but this is consistent with the
+ * split orientation.  Think of it as moving a splitter.
+ *
+ * @param size
+ * The new size of the window.  If the size is too large, the window will be
+ * sized to fit.
+ *
+ * @return
+ * Zero on success, non-zero on failure.
+ */
+int wm_resize(window_manager *wm, wm_window *window, wm_direction dir,
+              unsigned size);
+
+/**
  * Split the current window, creating a new window which will divide the space
  * occupied by the original window.
  *
@@ -219,5 +246,7 @@ wm_optval wm_option_get(wm_option option);
  * @return  Zero on success, non-zero on failure.
  */
 int wm_option_set(wm_option option, wm_optval value);
+
+void wm_dump(window_manager *wm, const char *path);
 
 #endif /* __CGDB_WM_H__ */

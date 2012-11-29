@@ -40,6 +40,33 @@ wm_splitter *wm_splitter_create(wm_direction orientation);
 int wm_splitter_remove(wm_splitter *splitter, wm_window *window);
 
 /**
+ * Resize the given window in the given direction.  Other windows will be
+ * pushed as necessary to accomodate the new space.
+ *
+ * The screen will be redrawn after the window is resized.
+ *
+ * @param splitter
+ * The splitter.
+ *
+ * @param window
+ * The window to resize.
+ *
+ * @param dir
+ * The direction being resized (vertical -> wider/narrower, horizontal ->
+ * taller/shorter). Counterintuitive perhaps, but this is consistent with the
+ * split orientation.  Think of it as moving a splitter.
+ *
+ * @param size
+ * The new size of the window.  If the size is too large, the window will be
+ * sized to fit.
+ *
+ * @return
+ * Zero on success, non-zero on failure.
+ */
+int wm_splitter_resize_window(wm_splitter *splitter, wm_window *window,
+                              wm_direction dir, int size);
+
+/**
  * Split a child of this splitter in the opposite orientation (creates a new
  * splitter).
  *

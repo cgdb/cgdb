@@ -26,8 +26,7 @@ struct window_manager_s {
 
     wm_window *focused_window;
 
-    /* TODO: Command line widget, options, ... */
-
+    /* TODO: CLI */
 };
 
 window_manager *wm_create(wm_window *main_window)
@@ -69,6 +68,34 @@ int wm_redraw(window_manager *wm)
     wm_window_redraw(wm->main_window);
     refresh();
     return 0;
+}
+
+int wm_resize(window_manager *wm, wm_window *window, wm_direction dir,
+              unsigned size)
+{
+    wm_splitter *splitter;
+
+    /* Can't resize the top-level window */
+    if (window->parent == NULL) {
+        return -1;
+    }
+
+    if (window->is_splitter) {
+        splitter = (wm_splitter *) window;
+    } else {
+        splitter = (wm_splitter *) window->parent;
+    }
+
+    /* If resize is along same direction as split, we need to size the parent */
+    if (dir == splitter->orientation) {
+        wm_splitter_resize_window((wm_splitter *) window->parent,
+                                  window, dir, size);
+    } else {
+        wm_splitter_resize_window((wm_splitter *) splitter->window.parent,
+                                  (wm_window *) splitter, dir, size);
+    }
+
+    return wm_redraw(wm);
 }
 
 int wm_split(window_manager *wm, wm_window *window, wm_direction orientation)
@@ -115,4 +142,12 @@ int wm_option_set(wm_option option, wm_optval value)
 {
     /* Not implemented */
     return -1;
+}
+
+void wm_dump(window_manager *wm, const char *path)
+{
+    FILE *out = fopen(path, "a");
+    fprintf(out, "Window Manager Dump:\n");
+    wm_window_dump(wm->main_window, out, 2);
+    fclose(out);
 }

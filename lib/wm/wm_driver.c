@@ -128,23 +128,48 @@ int main(int argc, char *argv[])
         init_pair(5, COLOR_YELLOW, COLOR_BLACK);
     }
 
-    for (i = 1; i <= 5; i++) {
-        test_widget *widget = test_create(i);
+    test_widget *widgets[6];
+    unsigned delay = 400000;
+    for (i = 0; i < 5; i++) {
+        widgets[i] = test_create(i+1);
         switch (i) {
+            case 0:
+                wm = wm_create((wm_window *) widgets[i]);
+                break;
             case 1:
-                wm = wm_create((wm_window *) widget);
-                break;
             case 2:
-            case 3:
-            case 5:
-                wm_split(wm, (wm_window *) widget, WM_HORIZONTAL);
-                break;
             case 4:
-                wm_split(wm, (wm_window *) widget, WM_VERTICAL);
+                wm_split(wm, (wm_window *) widgets[i], WM_HORIZONTAL);
+                break;
+            case 3:
+                wm_split(wm, (wm_window *) widgets[i], WM_VERTICAL);
                 break;
         }
-        sleep(2);
+        usleep(delay);
     }
+
+    for (i = 1; i <= 4; ++i) {
+        wm_resize(wm, (wm_window *) widgets[3], WM_HORIZONTAL,
+                widgets[3]->window.height - i);
+        usleep(delay);
+    }
+
+    for (i = 1; i <= 4; ++i) {
+        wm_resize(wm, (wm_window *) widgets[3], WM_HORIZONTAL,
+                widgets[3]->window.height + i);
+        usleep(delay);
+    }
+    for (i = 1; i <= 3; ++i) {
+        wm_resize(wm, (wm_window *) widgets[2], WM_VERTICAL,
+                widgets[2]->window.width - i);
+        usleep(delay);
+    }
+    for (i = 1; i <= 3; ++i) {
+        wm_resize(wm, (wm_window *) widgets[2], WM_HORIZONTAL,
+                widgets[2]->window.height - i);
+        usleep(delay);
+    }
+    wm_dump(wm, "wm.out");
 
     /* Destroy the Window Manager context */
     wm_destroy(wm);

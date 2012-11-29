@@ -55,9 +55,6 @@ struct wm_window_s {
      */
     WINDOW *cwindow;
 
-    /** Flag to indicate that a status bar should be drawn. (Default true). */
-    int show_status_bar;
-
     /** The number of rows available in this window. */
     int height;
 
@@ -70,8 +67,19 @@ struct wm_window_s {
     /** The left column of the window (absolute). (You shouldn't need this.) */
     int left;
 
+    /** The actual height of the window including any decorations. */
+    int real_height;
+
+    /** The actual width of the window including any decorations. */
+    int real_width;
+
+    /* Flags */
+
     /** True if this window is an instance of a splitter. */
     int is_splitter;
+
+    /** Flag to indicate that a status bar should be drawn. (Default true). */
+    int show_status_bar;
 
     /**
      * Initialization hook for child implementations.  When the window is
@@ -192,6 +200,35 @@ int wm_window_destroy(wm_window *window);
 int wm_window_redraw(wm_window *window);
 
 /**
+ * Move and/or resize the given window.  This will tell the curses window to
+ * take up the new space and update any internal data accordingly.  Sizes are
+ * total and include any status bars (handled internally by the window).
+ *
+ * This is meant for the window manager to use.  No bounds checking is
+ * performed.  Do not call this outside of this library.
+ *
+ * @param window
+ * The window to resize
+ *
+ * @param top
+ * The absolute vertical position of the window.
+ *
+ * @param left
+ * The absolute horizontal position of the window.
+ *
+ * @param height
+ * The new height of the window.
+ *
+ * @param width
+ * The new width of the window.
+ *
+ * @return
+ * Zero on success, non-zero on failure.
+ */
+int wm_window_place(wm_window *window, int top, int left,
+                    int height, int width);
+
+/**
  * Notify the specified window that it has been resized.
  *
  * @param window
@@ -200,7 +237,7 @@ int wm_window_redraw(wm_window *window);
  * @return
  * Zero on success, non-zero on failure.
  */
-int wm_window_resize(wm_window *window);
+int wm_window_resize_event(wm_window *window);
 
 /**
  * Tell this window whether it should display a status bar or not.  This
@@ -215,5 +252,8 @@ int wm_window_resize(wm_window *window);
  * True to display, false to hide.
  */
 void wm_window_show_status_bar(wm_window *window, int value);
+
+void
+wm_window_dump(wm_window *window, FILE *out, int indent);
 
 #endif
