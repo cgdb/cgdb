@@ -16,6 +16,7 @@
 #include <ncurses/curses.h>
 #endif /* HAVE_CURSES_H */
 
+#include <assert.h>
 #include <stdlib.h>
 #include <unistd.h>
 
@@ -139,34 +140,34 @@ int main(int argc, char *argv[])
             case 1:
             case 2:
             case 4:
-                wm_split(wm, (wm_window *) widgets[i], WM_HORIZONTAL);
+                assert(!wm_split(wm, (wm_window *) widgets[i], WM_HORIZONTAL));
                 break;
             case 3:
-                wm_split(wm, (wm_window *) widgets[i], WM_VERTICAL);
+                assert(!wm_split(wm, (wm_window *) widgets[i], WM_VERTICAL));
                 break;
         }
         usleep(delay);
     }
 
     for (i = 1; i <= 4; ++i) {
-        wm_resize(wm, (wm_window *) widgets[3], WM_HORIZONTAL,
-                widgets[3]->window.height - i);
+        assert(!wm_resize(wm, (wm_window *) widgets[3], WM_HORIZONTAL,
+                widgets[3]->window.height - i));
         usleep(delay);
     }
 
     for (i = 1; i <= 4; ++i) {
-        wm_resize(wm, (wm_window *) widgets[3], WM_HORIZONTAL,
-                widgets[3]->window.height + i);
+        assert(!wm_resize(wm, (wm_window *) widgets[3], WM_HORIZONTAL,
+                widgets[3]->window.height + i));
         usleep(delay);
     }
     for (i = 1; i <= 3; ++i) {
-        wm_resize(wm, (wm_window *) widgets[2], WM_VERTICAL,
-                widgets[2]->window.width - i);
+        assert(!wm_resize(wm, (wm_window *) widgets[2], WM_VERTICAL,
+                widgets[2]->window.width - i));
         usleep(delay);
     }
     for (i = 1; i <= 3; ++i) {
-        wm_resize(wm, (wm_window *) widgets[2], WM_HORIZONTAL,
-                widgets[2]->window.height - i);
+        assert(!wm_resize(wm, (wm_window *) widgets[2], WM_HORIZONTAL,
+                widgets[2]->window.height - i));
         usleep(delay);
     }
     wm_dump(wm, "wm.out");

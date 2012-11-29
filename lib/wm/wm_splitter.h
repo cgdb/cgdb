@@ -10,7 +10,9 @@
 typedef struct {
     wm_window window;
     wm_direction orientation;
-    std_list children; /* List of (wm_window *) */
+    wm_window **children;
+    size_t num_children; /* Number of children */
+    size_t array_length; /* Length of children array */
 } wm_splitter;
 
 /**

@@ -128,12 +128,9 @@ wm_window_dump(wm_window *window, FILE *out, int indent)
             ctop, cleft, cheight, cwidth);
     if (window->is_splitter) {
         wm_splitter *splitter = (wm_splitter *) window;
-        std_list_iterator iter = std_list_begin(splitter->children);
-        for (; iter != std_list_end(splitter->children);
-               iter = std_list_next(iter)) {
-            wm_window *child;
-            std_list_get_data(iter, &child);
-            wm_window_dump(child, out, indent + 2);
+        int i;
+        for (i = 0; i < splitter->num_children; ++i) {
+            wm_window_dump(splitter->children[i], out, indent + 2);
         }
     }
 }

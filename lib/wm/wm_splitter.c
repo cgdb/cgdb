@@ -1,4 +1,5 @@
-#include "std_list.h"
+#include <stdlib.h>
+
 #include "wm_splitter.h"
 
 /* Forward declarations */
@@ -7,7 +8,10 @@ static int wm_splitter_destroy(wm_window *window);
 static int wm_splitter_input(wm_window *window, int *data, int len);
 static int wm_splitter_redraw(wm_window *window);
 static int wm_splitter_resize(wm_window *window);
-static int wm_splitter_compare(const void *window1, const void *window2);
+static int wm_splitter_find_child(wm_splitter *splitter, wm_window *window);
+static int wm_splitter_array_remove(wm_splitter *splitter, wm_window *window);
+
+const int DEFAULT_ARRAY_LENGTH = 4;
 
 wm_splitter *
 wm_splitter_create(wm_direction orientation)
@@ -20,7 +24,9 @@ wm_splitter_create(wm_direction orientation)
     splitter->window.redraw = wm_splitter_redraw;
     splitter->window.resize = wm_splitter_resize;
     splitter->orientation = orientation;
-    splitter->children = std_list_create(NULL);
+    splitter->children = malloc(sizeof(wm_window *) * DEFAULT_ARRAY_LENGTH);
+    splitter->num_children = 0;
+    splitter->array_length = DEFAULT_ARRAY_LENGTH;
 
     return splitter;
 }
@@ -29,16 +35,9 @@ int
 wm_splitter_remove(wm_splitter *splitter, wm_window *window)
 {
     /* TODO: Remove this splitter if number of children == 1 */
-    wm_window *child = NULL;
-    std_list_iterator i = std_list_find(splitter->children, window,
-                                        wm_splitter_compare);
-
-    std_list_get_data(i, &child);
-    if (!window) {
+    if (wm_splitter_array_remove(splitter, window)) {
         return -1;
     }
-
-    std_list_remove(splitter->children, i);
     wm_window_destroy(window);
     return wm_splitter_resize((wm_window *) splitter);
 }
@@ -46,11 +45,11 @@ wm_splitter_remove(wm_splitter *splitter, wm_window *window)
 int wm_splitter_resize_window(wm_splitter *splitter, wm_window *window,
                               wm_direction dir, int size)
 {
-    std_list_iterator iter;
+    int i;
     int desired_change;
 
     /* See TODO in wm_splitter_remove(). */
-    if (std_list_length(splitter->children) == 1) {
+    if (splitter->num_children == 1) {
         return -1;
     }
     if (dir != splitter->orientation) {
@@ -69,36 +68,20 @@ int wm_splitter_resize_window(wm_splitter *splitter, wm_window *window,
     }
 
     /* Find successors of window to trade space with */
-    iter = std_list_find(splitter->children, window, wm_splitter_compare);
-    if (!iter || iter == std_list_end(splitter->children)) {
+    i = wm_splitter_find_child(splitter, window);
+    if (i < 0) {
         return -1;
     }
 
     if (desired_change < 0) {
         wm_window *next = NULL;
         int wrapped = 0;
-        iter = std_list_next(iter);
-        if (iter == std_list_end(splitter->children)) {
-            std_list_iterator iter2 = std_list_begin(splitter->children);
-            iter2 = std_list_next(iter2);
-            iter = std_list_begin(splitter->children);
-            while (!next && iter2 != std_list_end(splitter->children)) {
-                wm_window *tmp;
-                std_list_get_data(iter2, &tmp);
-                if (tmp == window) {
-                    std_list_get_data(iter, &next);
-                } else {
-                    iter = iter2;
-                    iter2 = std_list_next(iter2);
-                }
-            }
-            /* Something went really wrong */
-            if (!next) {
-                return -1;
-            }
+        if (i+1 == splitter->num_children) {
+            next = splitter->children[i-1];
             wrapped = 1;
+        } else {
+            next = splitter->children[i+1];
         }
-        std_list_get_data(iter, &next);
         if (dir == WM_HORIZONTAL) {
             if (window->real_height + desired_change < 2) {
                 desired_change = -(window->real_height - 2);
@@ -137,17 +120,20 @@ int
 wm_splitter_split(wm_splitter *splitter, wm_window *window,
                   wm_window *new_window, wm_direction orientation)
 {
-    std_list_iterator iter;
+    wm_window *obj = new_window;
+    int pos = splitter->num_children;
+    int i;
 
     /* Find first window for splitting/insertion */
     if (window) {
-        iter = std_list_find(splitter->children, window, wm_splitter_compare);
-        if (!iter || iter == std_list_end(splitter->children)) {
-            return 1;
+        i = wm_splitter_find_child(splitter, window);
+        if (i < 0) {
+            return -1;
         }
+        pos = i + 1;
     } else if (orientation != splitter->orientation) {
         /* Tried to append a window and got the orientation wrong. */
-        return 1;
+        return -1;
     }
 
     /* TODO: Handle splitright, splitbelow options. */
@@ -160,21 +146,27 @@ wm_splitter_split(wm_splitter *splitter, wm_window *window,
         /* TODO: This may be the 2nd (or 3rd, ...) time that init was called
          * on this widget.  Probably should tighten this up if possible. */
         wm_window_init(new_window, cwindow, (wm_window *) splitter);
-        if (window) {
-            iter = std_list_next(iter);
-            std_list_insert(splitter->children, iter, new_window);
-        } else {
-            std_list_append(splitter->children, new_window);
-        }
     } else {
         wm_splitter *new_splitter = wm_splitter_create(orientation);
         wm_window_init((wm_window *) new_splitter, window->cwindow,
                        (wm_window *) splitter);
-        iter = std_list_remove(splitter->children, iter);
+        wm_splitter_array_remove(splitter, window);
+        pos--;
         wm_splitter_split(new_splitter, NULL, window, orientation);
         wm_splitter_split(new_splitter, window, new_window, orientation);
-        std_list_insert(splitter->children, iter, new_splitter);
+        obj = (wm_window *) new_splitter;
     }
+
+    if (splitter->num_children == splitter->array_length) {
+        splitter->array_length *= 2;
+        splitter->children = realloc(splitter->children,
+            sizeof(wm_window *) * splitter->array_length);
+    }
+    for (i = pos; i < splitter->num_children; ++i) {
+        splitter->children[i+1] = splitter->children[i];
+    }
+    splitter->children[pos] = obj;
+    splitter->num_children++;
 
     return wm_window_resize_event((wm_window *) splitter);
 }
@@ -193,13 +185,12 @@ static int
 wm_splitter_destroy(wm_window *window)
 {
     wm_splitter *splitter = (wm_splitter *) window;
-    std_list_iterator i = std_list_begin(splitter->children);
+    int i;
 
-    for (; i != std_list_end(splitter->children); i = std_list_next(i)) {
-        wm_window *window;
-        std_list_get_data(i, &window);
-        wm_window_destroy(window);
+    for (i = 0; i < splitter->num_children; ++i) {
+        wm_window_destroy(splitter->children[i]);
     }
+    free(splitter->children);
 
     return 0;
 }
@@ -214,12 +205,10 @@ static int
 wm_splitter_redraw(wm_window *window)
 {
     wm_splitter *splitter = (wm_splitter *) window;
-    std_list_iterator i = std_list_begin(splitter->children);
+    int i;
 
-    for (; i != std_list_end(splitter->children); i = std_list_next(i)) {
-        wm_window *child = NULL;
-        std_list_get_data(i, &child);
-        wm_window_redraw(child);
+    for (i = 0; i < splitter->num_children; ++i) {
+        wm_window_redraw(splitter->children[i]);
         wrefresh(window->cwindow);
     }
 
@@ -231,28 +220,22 @@ wm_splitter_resize(wm_window *window)
 {
     /* TODO: Handle window size options (splitting evenly right now) */
     wm_splitter *splitter = (wm_splitter *) window;
-    std_list_iterator i;
-    int num_children = std_list_length(splitter->children);
     int sum = 0, remainder = 0;
     int position;
-    float *proportions = malloc(sizeof(float) * num_children);
+    float *proportions = malloc(sizeof(float) * splitter->num_children);
     int prev_dimension = 0;
-    int *new_sizes = malloc(sizeof(int) * num_children);
-    int j;
+    int *new_sizes = malloc(sizeof(int) * splitter->num_children);
     int redistribute = 0;
+    int i;
 
-    i = std_list_begin(splitter->children);
-    for (j = 0; i != std_list_end(splitter->children);
-         i = std_list_next(i), ++j)
-    {
-        wm_window *child;
-        std_list_get_data(i, &child);
+    for (i = 0; i < splitter->num_children; ++i) {
+        wm_window *child = splitter->children[i];
         if (splitter->orientation == WM_HORIZONTAL) {
             prev_dimension += child->real_height;
-            proportions[j] = child->real_height;
+            proportions[i] = child->real_height;
         } else {
             prev_dimension += child->real_width;
-            proportions[j] = child->real_width;
+            proportions[i] = child->real_width;
         }
         /* Note: Special case: initially created windows are 1 x 1. */
         if (child->real_height == 1 && child->real_width == 1) {
@@ -262,27 +245,27 @@ wm_splitter_resize(wm_window *window)
     if (redistribute) {
         /* Distribute windows equally */
         if (splitter->orientation == WM_HORIZONTAL) {
-            for (j = 0; j < num_children; j++) {
-                new_sizes[j] = window->real_height / num_children;
+            for (i = 0; i < splitter->num_children; i++) {
+                new_sizes[i] = window->real_height / splitter->num_children;
             }
             sum = window->real_height;
         } else {
-            for (j = 0; j < num_children; j++) {
-                new_sizes[j] = window->real_width / num_children;
+            for (i = 0; i < splitter->num_children; i++) {
+                new_sizes[i] = window->real_width / splitter->num_children;
             }
             sum = window->real_width;
         }
     } else {
         /* Distribute windows according to previous proportions. */
         sum = 0;
-        for (j = 0; j < num_children; ++j) {
-            proportions[j] /= prev_dimension;
+        for (i = 0; i < splitter->num_children; ++i) {
+            proportions[i] /= prev_dimension;
             if (splitter->orientation == WM_HORIZONTAL) {
-                new_sizes[j] = proportions[j] * window->real_height;
+                new_sizes[i] = proportions[i] * window->real_height;
             } else {
-                new_sizes[j] = proportions[j] * window->real_width;
+                new_sizes[i] = proportions[i] * window->real_width;
             }
-            sum += new_sizes[j];
+            sum += new_sizes[i];
         }
     }
 
@@ -294,13 +277,9 @@ wm_splitter_resize(wm_window *window)
         position = window->left;
     }
 
-    i = std_list_begin(splitter->children);
-    for (j = 0; i != std_list_end(splitter->children);
-         i = std_list_next(i), ++j)
-    {
-        int my_dimension = new_sizes[j];
-        wm_window *child = NULL;
-        std_list_get_data(i, &child);
+    for (i = 0; i < splitter->num_children; ++i) {
+        int my_dimension = new_sizes[i];
+        wm_window *child = splitter->children[i];
         if (remainder) {
             my_dimension++;
             remainder--;
@@ -324,14 +303,30 @@ wm_splitter_resize(wm_window *window)
 }
 
 static int
-wm_splitter_compare(const void *window1, const void *window2)
+wm_splitter_find_child(wm_splitter *splitter, wm_window *window)
 {
-    /* Naive pointer identity. */
-    if (window1 < window2) {
-        return -1;
-    } else if (window1 == window2) {
-        return 0;
-    } else {
-        return 1;
+    int i = 0;
+    for (i = 0; i < splitter->num_children; ++i) {
+        if (splitter->children[i] == window) {
+            return i;
+        }
     }
+    return -1;
+}
+
+static int
+wm_splitter_array_remove(wm_splitter *splitter, wm_window *window)
+{
+    int i = wm_splitter_find_child(splitter, window);
+    int j;
+    if (i < 0) {
+        return -1;
+    }
+
+    splitter->num_children--;
+    for (j = i; j < splitter->num_children; ++j) {
+        splitter->children[j] = splitter->children[j+1];
+    }
+
+    return 0;
 }
