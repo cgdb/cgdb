@@ -122,10 +122,23 @@ int wm_split(window_manager *wm, wm_window *window, wm_direction orientation)
     return wm_window_redraw((wm_window *) splitter);
 }
 
-int wm_close()
+int wm_close(window_manager *wm, wm_window *window)
 {
-    /* Not implemented */
-    return -1;
+    wm_splitter *splitter;
+
+    /* Only support closing real windows */
+    if (window->is_splitter) {
+        return -1;
+    }
+    if (window->parent == NULL) {
+        return -1;
+    }
+    splitter = (wm_splitter *) window->parent;
+    if (wm_splitter_remove(splitter, window)) {
+        return -1;
+    }
+
+    return wm_redraw(wm);
 }
 
 wm_optval wm_option_get(wm_option option)

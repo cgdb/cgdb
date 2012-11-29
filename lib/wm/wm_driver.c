@@ -151,23 +151,48 @@ int main(int argc, char *argv[])
 
     for (i = 1; i <= 4; ++i) {
         assert(!wm_resize(wm, (wm_window *) widgets[3], WM_HORIZONTAL,
-                widgets[3]->window.height - i));
+                widgets[3]->window.real_height - i));
         usleep(delay);
     }
 
     for (i = 1; i <= 4; ++i) {
         assert(!wm_resize(wm, (wm_window *) widgets[3], WM_HORIZONTAL,
-                widgets[3]->window.height + i));
+                widgets[3]->window.real_height + i));
         usleep(delay);
     }
     for (i = 1; i <= 3; ++i) {
         assert(!wm_resize(wm, (wm_window *) widgets[2], WM_VERTICAL,
-                widgets[2]->window.width - i));
+                widgets[2]->window.real_width - 1));
+        usleep(delay);
+    }
+    for (i = 1; i <= 3; ++i) {
+        assert(!wm_resize(wm, (wm_window *) widgets[2], WM_VERTICAL,
+                widgets[2]->window.real_width + 2));
         usleep(delay);
     }
     for (i = 1; i <= 3; ++i) {
         assert(!wm_resize(wm, (wm_window *) widgets[2], WM_HORIZONTAL,
-                widgets[2]->window.height - i));
+                widgets[2]->window.real_height - i));
+        usleep(delay);
+    }
+    for (i = 1; i <= 60; ++i) {
+        assert(!wm_resize(wm, (wm_window *) widgets[0], WM_HORIZONTAL,
+                widgets[0]->window.real_height + 1));
+        usleep(delay/10);
+    }
+    for (i = 1; i <= 20; ++i) {
+        assert(!wm_resize(wm, (wm_window *) widgets[1], WM_HORIZONTAL,
+                widgets[1]->window.real_height + 1));
+        usleep(delay/10);
+    }
+    for (i = 1; i <= 60; ++i) {
+        assert(!wm_resize(wm, (wm_window *) widgets[2], WM_HORIZONTAL,
+                widgets[2]->window.real_height + 1));
+        usleep(delay/10);
+    }
+    wm_dump(wm, "wm.out");
+    for (i = 4; i >= 1; --i) {
+        assert(!wm_close(wm, (wm_window *) widgets[i]));
         usleep(delay);
     }
     wm_dump(wm, "wm.out");

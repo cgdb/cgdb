@@ -116,16 +116,19 @@ int wm_resize(window_manager *wm, wm_window *window, wm_direction dir,
 int wm_split(window_manager *wm, wm_window *window, wm_direction orientation);
 
 /**
- * Close the current window.  Remaining windows will be shuffled to fill in
+ * Close the given window.  Remaining windows will be shuffled to fill in
  * empty screen real estate.
  *
  * @param wm
  * The window manager.
  *
+ * @param window
+ * The window to close.
+ *
  * @return
  * Zero on success, non-zero on failure.
  */
-void wm_close_current(window_manager *wm);
+int wm_close(window_manager *wm, wm_window *window);
 
 /**
  * @name WM Options
