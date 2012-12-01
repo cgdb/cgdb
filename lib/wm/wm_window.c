@@ -10,8 +10,8 @@
 
 /* Local Includes */
 #include "std_list.h"
-#include "window.h"
 #include "wm_splitter.h"
+#include "wm_window.h"
 
 int
 wm_window_init(wm_window *window, WINDOW *cwindow, wm_window *parent)

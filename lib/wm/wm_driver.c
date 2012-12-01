@@ -22,7 +22,7 @@
 
 /* Local Includes */
 #include "wm.h"
-#include "window.h"
+#include "wm_window.h"
 
 /* An example widget */
 struct test_widget {

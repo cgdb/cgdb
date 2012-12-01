@@ -5,7 +5,7 @@
 #ifndef __CGDB_WM_H__
 #define __CGDB_WM_H__
 
-#include "window.h"
+#include "wm_window.h"
 #include "types.h"
 
 /**

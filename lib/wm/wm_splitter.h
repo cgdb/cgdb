@@ -1,7 +1,7 @@
 #ifndef __CGDB_WM_SPLITTER_H__
 #define __CGDB_WM_SPLITTER_H__
 
-#include "window.h"
+#include "wm_window.h"
 #include "types.h"
 
 /**

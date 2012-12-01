@@ -2,8 +2,8 @@
  * ---------
  */
 
-#ifndef _WINDOW_H_
-#define _WINDOW_H_
+#ifndef _WM_WINDOW_H_
+#define _WM_WINDOW_H_
 
 #include <config.h>
 
@@ -256,4 +256,4 @@ void wm_window_show_status_bar(wm_window *window, int value);
 void
 wm_window_dump(wm_window *window, FILE *out, int indent);
 
-#endif
+#endif /* _WM_WINDOW_H_ */
