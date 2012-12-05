@@ -89,7 +89,8 @@ int wm_splitter_resize_window(wm_splitter *splitter, wm_window *window,
     if (dir == WM_HORIZONTAL) {
         max = splitter->window.real_height;
     } else {
-        max = splitter->window.real_width;
+        /* Leave space for vertical separators between children */
+        max = splitter->window.real_width - (splitter->num_children-1);
     }
     for (i = 0; i < splitter->num_children; ++i) {
         wm_window *child = splitter->children[i];
@@ -213,11 +214,12 @@ wm_splitter_split(wm_splitter *splitter, wm_window *window,
         }
         /* TODO: This may be the 2nd (or 3rd, ...) time that init was called
          * on this widget.  Probably should tighten this up if possible. */
-        wm_window_init(new_window, cwindow, (wm_window *) splitter);
+        wm_window_init(new_window, splitter->window.wm, (wm_window *) splitter,
+                       cwindow);
     } else {
         wm_splitter *new_splitter = wm_splitter_create(orientation);
-        wm_window_init((wm_window *) new_splitter, window->cwindow,
-                       (wm_window *) splitter);
+        wm_window_init((wm_window *) new_splitter, splitter->window.wm,
+                       (wm_window *) splitter, window->cwindow);
         wm_splitter_array_remove(splitter, window);
         wm_splitter_split(new_splitter, NULL, window, orientation);
         wm_splitter_split(new_splitter, window, new_window, orientation);
@@ -273,12 +275,41 @@ static int
 wm_splitter_redraw(wm_window *window)
 {
     wm_splitter *splitter = (wm_splitter *) window;
-    int i;
+    int i, j;
+    int num_children = splitter->num_children;
 
-    for (i = 0; i < splitter->num_children; ++i) {
-        wm_window_redraw(splitter->children[i]);
-        wrefresh(window->cwindow);
+    /* Clear the window - mainly useful for testing purposes, to make
+     * rendering issues obvious. */
+    werase(window->cwindow);
+    /* Lay down an empty "status bar" beneath vertical splits, because the
+     * children cannot draw beneath the vsplit itself (it's outside of the
+     * child window.) The child will overwrite the rest of this. */
+    if (splitter->orientation == WM_VERTICAL) {
+        wattron(window->cwindow, WA_REVERSE);
+        for (i = 0; i < window->real_width; ++i) {
+            mvwprintw(window->cwindow, window->real_height-1, i, " ");
+        }
+        wattroff(window->cwindow, WA_REVERSE);
     }
+    wrefresh(window->cwindow);
+    /* Render the child windows */
+    for (i = 0; i < num_children; ++i) {
+        wm_window_redraw(splitter->children[i]);
+        /* Draw a vertical separator for vsplits */
+        if (splitter->orientation == WM_VERTICAL && i < num_children-1) {
+            int left = splitter->children[i]->left +
+                       splitter->children[i]->real_width;
+            /* TODO: Configurable color of separator */
+            wattron(window->cwindow, WA_REVERSE);
+            for (j = 0; j < window->height-1; ++j) {
+                mvwprintw(window->cwindow, j, left, "|");
+            }
+            wattroff(window->cwindow, WA_REVERSE);
+            /* Not sure why this is needed, curses sucks */
+            wrefresh(window->cwindow);
+        }
+    }
+    wrefresh(window->cwindow);
 
     return 0;
 }
@@ -295,6 +326,7 @@ wm_splitter_resize(wm_window *window)
     int *new_sizes = malloc(sizeof(int) * splitter->num_children);
     int redistribute = 0; /* Set true as fallback if things look bad */
     int i;
+    int real_width = window->real_width - (splitter->num_children - 1);
 
     for (i = 0; i < splitter->num_children; ++i) {
         wm_window *child = splitter->children[i];
@@ -308,7 +340,7 @@ wm_splitter_resize(wm_window *window)
                 break;
             }
         } else {
-            if (window->real_width * proportions[i] < min) {
+            if (real_width * proportions[i] < min) {
                 redistribute = 1;
                 break;
             }
@@ -328,9 +360,9 @@ wm_splitter_resize(wm_window *window)
             sum = window->real_height;
         } else {
             for (i = 0; i < splitter->num_children; i++) {
-                new_sizes[i] = window->real_width / splitter->num_children;
+                new_sizes[i] = real_width / splitter->num_children;
             }
-            sum = window->real_width;
+            sum = real_width;
         }
     } else {
         /* Distribute windows according to previous proportions. */
@@ -340,7 +372,7 @@ wm_splitter_resize(wm_window *window)
             if (splitter->orientation == WM_HORIZONTAL) {
                 new_sizes[i] = proportions[i] * window->real_height;
             } else {
-                new_sizes[i] = proportions[i] * window->real_width;
+                new_sizes[i] = proportions[i] * real_width;
             }
             sum += new_sizes[i];
         }
@@ -350,7 +382,7 @@ wm_splitter_resize(wm_window *window)
         remainder = window->real_height - sum;
         position = window->top;
     } else {
-        remainder = window->real_width - sum;
+        remainder = real_width - sum;
         position = window->left;
     }
 
@@ -369,11 +401,12 @@ wm_splitter_resize(wm_window *window)
         if (splitter->orientation == WM_HORIZONTAL) {
             wm_window_place(child, position, window->left,
                             my_dimension, window->real_width);
+            position += my_dimension;
         } else {
             wm_window_place(child, window->top, position,
                             window->real_height, my_dimension);
+            position += my_dimension + 1;
         }
-        position += my_dimension;
         /* Notify */
         wm_window_resize_event(child);
     }
@@ -448,6 +481,7 @@ wm_splitter_min_width(wm_window *window)
             for (i = 0; i < splitter->num_children; ++i) {
                 result += wm_splitter_min_width(splitter->children[i]);
             }
+            result += (splitter->num_children - 1);
         } else {
             for (i = 0; i < splitter->num_children; ++i) {
                 int h = wm_splitter_min_width(splitter->children[i]);

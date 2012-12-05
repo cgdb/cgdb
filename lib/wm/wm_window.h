@@ -21,6 +21,8 @@
 /* Forward declarations. */
 struct wm_window_s;
 typedef struct wm_window_s wm_window;
+struct window_manager_s;
+typedef struct window_manager_s window_manager;
 
 /**
  * Window structure.  This structure and associated functions provide the
@@ -44,6 +46,9 @@ typedef struct wm_window_s wm_window;
  * creating a new window.
  */
 struct wm_window_s {
+
+    /** Back-pointer to the window manager that owns this window. */
+    window_manager *wm;
 
     /** The window that contains this window, or NULL for the top level. */
     wm_window *parent;
@@ -165,16 +170,20 @@ struct wm_window_s {
  * @param window
  * The window to initialize.
  *
- * @param cwindow
- * The curses window that the window should use.
+ * @param wm
+ * The window manager that owns this window.
  *
  * @param parent
  * The window that contains and owns this window.
  *
+ * @param cwindow
+ * The curses window that the window should use.
+ *
  * @return
  * Zero on success, non-zero on failure.
  */
-int wm_window_init(wm_window *window, WINDOW *cwindow, wm_window *parent);
+int wm_window_init(wm_window *window, window_manager *wm, wm_window *parent,
+                   WINDOW *cwindow);
 
 /**
  * Destroys the specified window. Calls the destroy function of the associated

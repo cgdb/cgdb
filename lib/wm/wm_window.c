@@ -12,10 +12,13 @@
 #include "std_list.h"
 #include "wm_splitter.h"
 #include "wm_window.h"
+#include "wm.h"
 
 int
-wm_window_init(wm_window *window, WINDOW *cwindow, wm_window *parent)
+wm_window_init(wm_window *window, window_manager *wm, wm_window *parent,
+               WINDOW *cwindow)
 {
+    window->wm = wm;
     window->cwindow = cwindow;
     window->parent = parent;
     window->is_splitter = 0;
@@ -46,9 +49,17 @@ wm_window_destroy(wm_window *window)
 int
 wm_window_redraw(wm_window *window)
 {
+    int i;
     if (window->show_status_bar) {
-        mvwprintw(window->cwindow, window->height, 0, "-- Status bar --");
-        wclrtoeol(window->cwindow);
+        char fill[2] = " ";
+        if (wm_is_focused(window->wm, window)) {
+            fill[0] = '^';
+        }
+        wattron(window->cwindow, WA_REVERSE);
+        for (i = 0; i < window->width; ++i) {
+            mvwprintw(window->cwindow, window->height, i, fill);
+        }
+        wattroff(window->cwindow, WA_REVERSE);
     }
     if (window->redraw) {
         window->redraw(window);

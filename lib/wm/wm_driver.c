@@ -76,7 +76,7 @@ int test_redraw(wm_window *window)
     wattron(window->cwindow, COLOR_PAIR(widget->color));
     for (i = 0; i < window->height; ++i) {
         for (j = 0; j < window->width; ++j) {
-            mvwprintw(window->cwindow, i, j, "%d", (i+j) % 10);
+            mvwprintw(window->cwindow, i, j, "%d", (i+j) % 9);
         }
     }
     wattroff(window->cwindow, COLOR_PAIR(widget->color));

@@ -47,7 +47,7 @@ window_manager *wm_create(wm_window *main_window)
     getmaxyx(stdscr, y, x);
     cwindow = derwin(stdscr, y-1, x, 0, 0);
 
-    wm_window_init(main_window, cwindow, NULL);
+    wm_window_init(main_window, wm, NULL, cwindow);
     wm_redraw(wm);
 
     return wm;
@@ -114,7 +114,7 @@ int wm_split(window_manager *wm, wm_window *window, wm_direction orientation)
 
     /* This is the top-level window and it's not a splitter yet. */
     splitter = wm_splitter_create(orientation);
-    wm_window_init((wm_window *) splitter, orig->cwindow, NULL);
+    wm_window_init((wm_window *) splitter, wm, NULL, orig->cwindow);
     wm_splitter_split(splitter, NULL, orig, orientation);
     wm_splitter_split(splitter, orig, window, orientation);
     wm->main_window = (wm_window *) splitter;
@@ -139,6 +139,16 @@ int wm_close(window_manager *wm, wm_window *window)
     }
 
     return wm_redraw(wm);
+}
+
+void wm_focus(window_manager *wm, wm_window *window)
+{
+    wm->focused_window = window;
+}
+
+int wm_is_focused(window_manager *wm, wm_window *window)
+{
+    return wm->focused_window == window;
 }
 
 wm_optval wm_option_get(wm_option option)
