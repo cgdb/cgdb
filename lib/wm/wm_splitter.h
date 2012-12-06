@@ -16,8 +16,7 @@ typedef struct {
 } wm_splitter;
 
 /**
- * Create a new splitter window (derived from wm_window).  Be sure to call its
- * init function before using.
+ * Create a new splitter window (derived from wm_window).
  *
  * @param orientation
  * The orientation of the split.
@@ -71,6 +70,9 @@ int wm_splitter_resize_window(wm_splitter *splitter, wm_window *window,
 /**
  * Split a child of this splitter in the opposite orientation (creates a new
  * splitter).
+ *
+ * This triggers a splitter layout event, you do not need to manually call
+ * layout or redraw after this.
  *
  * @param splitter
  * The splitter that owns the child.

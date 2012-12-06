@@ -7,6 +7,7 @@
 /* Standard Includes */
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 
 /* Local Includes */
 #include "std_list.h"
@@ -15,19 +16,10 @@
 #include "wm.h"
 
 int
-wm_window_init(wm_window *window, window_manager *wm, wm_window *parent,
-               WINDOW *cwindow)
+wm_window_init(wm_window *window)
 {
-    window->wm = wm;
-    window->cwindow = cwindow;
-    window->parent = parent;
-    window->is_splitter = 0;
-    getmaxyx(window->cwindow, window->real_height, window->real_width);
+    memset(window, 0, sizeof(wm_window));
     wm_window_show_status_bar(window, 1);
-
-    if (window->init) {
-        window->init(window);
-    }
 
     return 0;
 }
@@ -47,19 +39,63 @@ wm_window_destroy(wm_window *window)
 }
 
 int
+wm_window_set_context(wm_window *window, window_manager *wm,
+                      wm_window *parent, WINDOW *cwindow)
+{
+    if (wm) {
+        window->wm = wm;
+    }
+    if (parent) {
+        window->parent = parent;
+    }
+    assert(cwindow != NULL);
+    window->cwindow = cwindow;
+}
+
+int
+wm_window_layout_event(wm_window *window)
+{
+    getbegyx(window->cwindow, window->top, window->left);
+    getmaxyx(window->cwindow, window->height, window->width);
+    window->real_height = window->height;
+    window->real_width = window->width;
+    if (window->show_status_bar) {
+        window->height--;
+    }
+    if (window->layout) {
+        window->layout(window);
+    }
+
+    return 0;
+}
+
+int
 wm_window_redraw(wm_window *window)
 {
     int i;
     if (window->show_status_bar) {
-        char fill[2] = " ";
-        if (wm_is_focused(window->wm, window)) {
-            fill[0] = '^';
+        char *status = NULL;
+        size_t status_len = 0;
+        if (window->status_text) {
+            status = window->status_text(window, window->width);
+            if (status) {
+                status_len = strlen(status);
+            }
         }
+        char fill = wm_is_focused(window->wm, window) ? '^' : ' ';
+        char text[2] = { 0 };
         wattron(window->cwindow, WA_REVERSE);
         for (i = 0; i < window->width; ++i) {
-            mvwprintw(window->cwindow, window->height, i, fill);
+            /* TODO: Allow spaces in status that don't get filled */
+            if (i < status_len && status[i] != ' ') {
+                text[0] = status[i];
+            } else {
+                text[0] = fill;
+            }
+            mvwprintw(window->cwindow, window->height, i, text);
         }
         wattroff(window->cwindow, WA_REVERSE);
+        free(status);
     }
     if (window->redraw) {
         window->redraw(window);
@@ -68,48 +104,14 @@ wm_window_redraw(wm_window *window)
     return 0;
 }
 
-int
-wm_window_resize_event(wm_window *window)
-{
-    getbegyx(window->cwindow, window->top, window->left);
-    getmaxyx(window->cwindow, window->height, window->width);
-    window->real_height = window->height;
-    window->real_width = window->width;
-    if (window->show_status_bar) {
-        window->height--;
-    }
-    if (window->resize) {
-        window->resize(window);
-    }
-
-    return 0;
-}
-
-int
-wm_window_place(wm_window *window, int top, int left, int height, int width)
-{
-    /* Note: Assumes resizes are always smaller or bigger, not (smaller height
-     * larger width). Curses window operations will fail if the window tries
-     * to grow or move into a space that is out of bounds, so order is
-     * important. */
-    wresize(window->cwindow, height, width);
-    mvwin(window->cwindow, top, left);
-    wresize(window->cwindow, height, width);
-    mvwin(window->cwindow, top, left);
-
-    wm_window_resize_event(window);
-}
-
 void
 wm_window_show_status_bar(wm_window *window, int value)
 {
-    window->show_status_bar = value;
-    getbegyx(window->cwindow, window->top, window->left);
-    getmaxyx(window->cwindow, window->height, window->width);
-    window->real_height = window->height;
-    window->real_width = window->width;
-    if (value) {
-        window->height--;
+    if (value != window->show_status_bar) {
+        window->show_status_bar = value;
+        if (window->cwindow) {
+            wm_window_layout_event(window);
+        }
     }
 }
 

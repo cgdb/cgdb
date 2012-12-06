@@ -5,14 +5,16 @@
 /* Forward declarations */
 static int wm_splitter_init(wm_window *window);
 static int wm_splitter_destroy(wm_window *window);
-static int wm_splitter_input(wm_window *window, int *data, int len);
 static int wm_splitter_redraw(wm_window *window);
-static int wm_splitter_resize(wm_window *window);
+static int wm_splitter_layout(wm_window *window);
 static int wm_splitter_find_child(wm_splitter *splitter, wm_window *window);
 static int wm_splitter_array_remove(wm_splitter *splitter, wm_window *window);
 static int wm_splitter_min_height(wm_window *window);
 static int wm_splitter_min_width(wm_window *window);
+static int wm_splitter_place_window(wm_window *window, int top, int left,
+                                    int height, int width);
 
+/* Initial size of the splitter's "children" array. */
 const int DEFAULT_ARRAY_LENGTH = 4;
 
 /* Quick macro to fetch a window position or dimension along the split */
@@ -31,12 +33,16 @@ wm_splitter *
 wm_splitter_create(wm_direction orientation)
 {
     wm_splitter *splitter = (wm_splitter *) malloc(sizeof(wm_splitter));
+    wm_window_init((wm_window *) splitter);
 
-    splitter->window.init = wm_splitter_init;
+    /* Window setup */
     splitter->window.destroy = wm_splitter_destroy;
-    splitter->window.input = wm_splitter_input;
+    splitter->window.layout = wm_splitter_layout;
     splitter->window.redraw = wm_splitter_redraw;
-    splitter->window.resize = wm_splitter_resize;
+    splitter->window.is_splitter = 1;
+    wm_window_show_status_bar((wm_window *) splitter, 0);
+
+    /* Splitter data */
     splitter->orientation = orientation;
     splitter->children = malloc(sizeof(wm_window *) * DEFAULT_ARRAY_LENGTH);
     splitter->num_children = 0;
@@ -48,12 +54,13 @@ wm_splitter_create(wm_direction orientation)
 int
 wm_splitter_remove(wm_splitter *splitter, wm_window *window)
 {
+    /* TODO: If children == 2, destroy this splitter */
     if (splitter->num_children > 1) {
         if (wm_splitter_array_remove(splitter, window)) {
             return -1;
         }
         wm_window_destroy(window);
-        return wm_splitter_resize((wm_window *) splitter);
+        return wm_splitter_layout((wm_window *) splitter);
     } else {
         wm_window *self = (wm_window *) splitter;
         wm_splitter *parent = (wm_splitter *) self->parent;
@@ -177,8 +184,8 @@ int wm_splitter_resize_window(wm_splitter *splitter, wm_window *window,
         if (child->top != ctop || child->left != cleft ||
             child->real_height != cheight || child->real_width != cwidth)
         {
-            wm_window_place(child, child->top, child->left,
-                    child->real_height, child->real_width);
+            wm_splitter_place_window(child, child->top, child->left,
+                                     child->real_height, child->real_width);
         }
     }
 
@@ -206,20 +213,17 @@ wm_splitter_split(wm_splitter *splitter, wm_window *window,
     }
 
     /* TODO: Handle splitright, splitbelow options. */
-
     if (orientation == splitter->orientation) {
         WINDOW *cwindow = derwin(splitter->window.cwindow, 1, 1, 0, 0);
         if (cwindow == NULL) {
             abort();
         }
-        /* TODO: This may be the 2nd (or 3rd, ...) time that init was called
-         * on this widget.  Probably should tighten this up if possible. */
-        wm_window_init(new_window, splitter->window.wm, (wm_window *) splitter,
-                       cwindow);
+        wm_window_set_context(new_window, splitter->window.wm,
+                              (wm_window *) splitter, cwindow);
     } else {
         wm_splitter *new_splitter = wm_splitter_create(orientation);
-        wm_window_init((wm_window *) new_splitter, splitter->window.wm,
-                       (wm_window *) splitter, window->cwindow);
+        wm_window_set_context((wm_window *) new_splitter, splitter->window.wm,
+                              (wm_window *) splitter, window->cwindow);
         wm_splitter_array_remove(splitter, window);
         wm_splitter_split(new_splitter, NULL, window, orientation);
         wm_splitter_split(new_splitter, window, new_window, orientation);
@@ -238,18 +242,10 @@ wm_splitter_split(wm_splitter *splitter, wm_window *window,
     splitter->children[pos] = obj;
     splitter->num_children++;
 
-    return wm_window_resize_event((wm_window *) splitter);
+    return wm_window_layout_event((wm_window *) splitter);
 }
 
 /* Window method implementations */
-
-static int
-wm_splitter_init(wm_window *window)
-{
-    window->is_splitter = 1;
-    wm_window_show_status_bar(window, 0);
-    return 0;
-}
 
 static int
 wm_splitter_destroy(wm_window *window)
@@ -266,56 +262,7 @@ wm_splitter_destroy(wm_window *window)
 }
 
 static int
-wm_splitter_input(wm_window *window, int *data, int len)
-{
-    return 0;
-}
-
-static int
-wm_splitter_redraw(wm_window *window)
-{
-    wm_splitter *splitter = (wm_splitter *) window;
-    int i, j;
-    int num_children = splitter->num_children;
-
-    /* Clear the window - mainly useful for testing purposes, to make
-     * rendering issues obvious. */
-    werase(window->cwindow);
-    /* Lay down an empty "status bar" beneath vertical splits, because the
-     * children cannot draw beneath the vsplit itself (it's outside of the
-     * child window.) The child will overwrite the rest of this. */
-    if (splitter->orientation == WM_VERTICAL) {
-        wattron(window->cwindow, WA_REVERSE);
-        for (i = 0; i < window->real_width; ++i) {
-            mvwprintw(window->cwindow, window->real_height-1, i, " ");
-        }
-        wattroff(window->cwindow, WA_REVERSE);
-    }
-    wrefresh(window->cwindow);
-    /* Render the child windows */
-    for (i = 0; i < num_children; ++i) {
-        wm_window_redraw(splitter->children[i]);
-        /* Draw a vertical separator for vsplits */
-        if (splitter->orientation == WM_VERTICAL && i < num_children-1) {
-            int left = splitter->children[i]->left +
-                       splitter->children[i]->real_width;
-            /* TODO: Configurable color of separator */
-            wattron(window->cwindow, WA_REVERSE);
-            for (j = 0; j < window->height-1; ++j) {
-                mvwprintw(window->cwindow, j, left, "|");
-            }
-            wattroff(window->cwindow, WA_REVERSE);
-            /* Not sure why this is needed, curses sucks */
-            wrefresh(window->cwindow);
-        }
-    }
-    wrefresh(window->cwindow);
-
-    return 0;
-}
-
-static int
-wm_splitter_resize(wm_window *window)
+wm_splitter_layout(wm_window *window)
 {
     /* TODO: Handle window size options (min height, etc?) */
     wm_splitter *splitter = (wm_splitter *) window;
@@ -399,21 +346,64 @@ wm_splitter_resize(wm_window *window)
         }
         /* Resize and relocate the window */
         if (splitter->orientation == WM_HORIZONTAL) {
-            wm_window_place(child, position, window->left,
-                            my_dimension, window->real_width);
+            wm_splitter_place_window(child, position, window->left,
+                                     my_dimension, window->real_width);
             position += my_dimension;
         } else {
-            wm_window_place(child, window->top, position,
-                            window->real_height, my_dimension);
+            wm_splitter_place_window(child, window->top, position,
+                                     window->real_height, my_dimension);
             position += my_dimension + 1;
         }
         /* Notify */
-        wm_window_resize_event(child);
+        wm_window_layout_event(child);
     }
 
     free(new_sizes);
     free(proportions);
     return wm_splitter_redraw(window);
+}
+
+static int
+wm_splitter_redraw(wm_window *window)
+{
+    wm_splitter *splitter = (wm_splitter *) window;
+    int i, j;
+    int num_children = splitter->num_children;
+
+    /* Clear the window - mainly useful for testing purposes, to make
+     * rendering issues obvious. */
+    werase(window->cwindow);
+    /* Lay down an empty "status bar" beneath vertical splits, because the
+     * children cannot draw beneath the vsplit itself (it's outside of the
+     * child window.) The child will overwrite the rest of this. */
+    if (splitter->orientation == WM_VERTICAL) {
+        wattron(window->cwindow, WA_REVERSE);
+        for (i = 0; i < window->real_width; ++i) {
+            mvwprintw(window->cwindow, window->real_height-1, i, " ");
+        }
+        wattroff(window->cwindow, WA_REVERSE);
+    }
+    wrefresh(window->cwindow);
+    /* Render the child windows */
+    for (i = 0; i < num_children; ++i) {
+        wm_window_redraw(splitter->children[i]);
+        /* Draw a vertical separator for vsplits */
+        if (splitter->orientation == WM_VERTICAL && i < num_children-1) {
+            int left = splitter->children[i]->left +
+                       splitter->children[i]->real_width;
+            /* TODO: Configurable color of separator */
+            wattron(window->cwindow, WA_REVERSE);
+            for (j = 0; j < window->height-1; ++j) {
+                mvwprintw(window->cwindow, j, left, "|");
+            }
+            wattroff(window->cwindow, WA_REVERSE);
+            /* Not sure why this is needed, curses sucks */
+            wrefresh(window->cwindow);
+        }
+    }
+    wrefresh(window->cwindow);
+
+    return 0;
 }
 
 static int
@@ -492,4 +482,20 @@ wm_splitter_min_width(wm_window *window)
         }
     }
     return result;
+}
+
+static int
+wm_splitter_place_window(wm_window *window, int top, int left,
+                         int height, int width)
+{
+    /* Note: Assumes resizes are always smaller or bigger, not (smaller height
+     * larger width). Curses window operations will fail if the window tries
+     * to grow or move into a space that is out of bounds, so order is
+     * important. */
+    wresize(window->cwindow, height, width);
+    mvwin(window->cwindow, top, left);
+    wresize(window->cwindow, height, width);
+    mvwin(window->cwindow, top, left);
+
+    wm_window_layout_event(window);
 }

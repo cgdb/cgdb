@@ -47,7 +47,8 @@ window_manager *wm_create(wm_window *main_window)
     getmaxyx(stdscr, y, x);
     cwindow = derwin(stdscr, y-1, x, 0, 0);
 
-    wm_window_init(main_window, wm, NULL, cwindow);
+    wm_window_set_context(main_window, wm, NULL, cwindow);
+    wm_window_layout_event(main_window);
     wm_redraw(wm);
 
     return wm;
@@ -114,7 +115,7 @@ int wm_split(window_manager *wm, wm_window *window, wm_direction orientation)
 
     /* This is the top-level window and it's not a splitter yet. */
     splitter = wm_splitter_create(orientation);
-    wm_window_init((wm_window *) splitter, wm, NULL, orig->cwindow);
+    wm_window_set_context((wm_window *) splitter, wm, NULL, orig->cwindow);
     wm_splitter_split(splitter, NULL, orig, orientation);
     wm_splitter_split(splitter, orig, window, orientation);
     wm->main_window = (wm_window *) splitter;

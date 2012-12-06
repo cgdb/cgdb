@@ -42,21 +42,48 @@ typedef struct window_manager_s window_manager;
  * Implemented this way, a file_dialog can be passed anywhere a wm_window is
  * required.  (Poor man's inheritance.)
  *
- * See field documentation to identify which fields need to be set when
- * creating a new window.
+ * Your widget_create(...) method should always call wm_window_init(self) as
+ * the first step.  This initializes the window structure fields (in most
+ * cases, to zero - hook function pointers included).  Then your create method
+ * can override whichever values and function pointers are needed.
+ *
+ * Your constructor cannot do any drawing or manipulation of the curses
+ * window.  A curses window is not available until the first layout() call
+ * occurs.
+ *
+ * To summarize, window creation steps:
+ *
+ * 1. Your widget constructor call.
+ *    a. Calls wm_window_init()
+ *    b. Populates hooks and other internal variables for first time setup.
+ * 2. Window manager calls wm_window_set_context when a curses context is
+ *    ready for your widget.
+ *    a. wm, parent, and cwindow variables are set.
+ * 3. Window manager calls wm_window_layout_event occurs, calling your
+ *    'layout' hook.
+ *    a. Window dimension variables are set (top, left, height, width).
+ *    b. Your widget should update its state as necessary.
+ *    c. Your widget should redraw() itself.
  */
 struct wm_window_s {
 
-    /** Back-pointer to the window manager that owns this window. */
+    /**
+     * Back-pointer to the window manager that owns this window. This pointer
+     * is NULL until the first layout() call occurs.
+     */
     window_manager *wm;
 
-    /** The window that contains this window, or NULL for the top level. */
+    /**
+     * The window that contains this window, or NULL for the top level. This
+     * pointer is always NULL until the first layout() call occurs. */
     wm_window *parent;
 
     /**
      * The curses window assigned to the window.  Child implementations should
      * do all their drawing to this curses window.  Do not hang onto this,
      * because the window can be given a new cwindow at any time.
+     *
+     * This pointer is NULL until the first layout() call occurs.
      */
     WINDOW *cwindow;
 
@@ -87,23 +114,6 @@ struct wm_window_s {
     int show_status_bar;
 
     /**
-     * Initialization hook for child implementations.  When the window is
-     * passed to the window manager, a curses window will be allocated for it
-     * and then passed to this init method.  Before this point, the curses
-     * window is unavailable.
-     *
-     * The child object will probably want to use this time to draw the
-     * contents on the screen.
-     *
-     * @param window
-     * The window being initialized.
-     *
-     * @return
-     * Zero on success, non-zero on failure.
-     */
-    int (*init)(wm_window *window);
-
-    /**
      * Destructor function, called when window is destroyed.  Use this to
      * clean up any member data, but do not delete the derived window object
      * itself.
@@ -115,6 +125,20 @@ struct wm_window_s {
      * Zero on success, non-zero on failure.
      */
     int (*destroy)(wm_window *window);
+
+    /**
+     * Layout event handler, called when the widget needs to handle changes to
+     * its layout.  This will occur when a widget is placed in a new curses
+     * window (including the first widget init), when the widget needs to be
+     * resized, etc.
+     *
+     * @param window
+     * The window receiving the layout event.
+     *
+     * @return
+     * Zero on success, non-zero on failure.
+     */
+    int (*layout)(wm_window *window);
 
     /**
      * Input function, called when keyboard input is received for this window.
@@ -150,40 +174,34 @@ struct wm_window_s {
     int (*redraw)(wm_window *window);
 
     /**
-     * Resize event handler.  Implement this to handle resize events
-     * (redrawing contents if needed).
+     * Get status bar text for the widget.  This will be drawn in the status
+     * bar of the window, if one is visible, and truncated to fit in the
+     * available space.
      *
-     * @param window
-     * The window receiving the resize event.
+     * @param max_length
+     * The available space for status text, if you care to try to compress or
+     * expand it yourself.
      *
      * @return
-     * Zero on success, non-zero on failure.
+     * A newly-allocated string containing status text for the window, or NULL
+     * if no status text is applicable.  The caller owns the returned pointer.
      */
-    int (*resize)(wm_window *window);
-
+    char *(*status_text)(wm_window *window, size_t max_length);
 };
 
 /**
- * Initialize the given window.  This is not a _create function because window
- * implementations will embed a wm_window in their structs.
+ * Initialize the given window object.  This is not a _create function because
+ * window implementations will embed a wm_window in their structs.
+ *
+ * Sets all window data to a well-defined state (typically zero or NULL).
  *
  * @param window
  * The window to initialize.
  *
- * @param wm
- * The window manager that owns this window.
- *
- * @param parent
- * The window that contains and owns this window.
- *
- * @param cwindow
- * The curses window that the window should use.
- *
  * @return
  * Zero on success, non-zero on failure.
  */
-int wm_window_init(wm_window *window, window_manager *wm, wm_window *parent,
-                   WINDOW *cwindow);
+int wm_window_init(wm_window *window);
 
 /**
  * Destroys the specified window. Calls the destroy function of the associated
@@ -198,6 +216,47 @@ int wm_window_init(wm_window *window, window_manager *wm, wm_window *parent,
 int wm_window_destroy(wm_window *window);
 
 /**
+ * Give the window a new UI context.  This should be called the first time a
+ * window is placed into the user interface, and any time a new curses window
+ * is allocated for the window (e.g. a new split occurs).
+ *
+ * This function assumes you may need to perform some manipulation of the
+ * curses window after passing in a context.  After you are done, you should
+ * call wm_window_layout_event() to allow the window to render itself.
+ *
+ * @param window
+ * The window to update.
+ *
+ * @param wm
+ * The window manager that owns this window (or NULL to leave unchanged).
+ *
+ * @param parent
+ * The new parent window of this window (or NULL to leave unchanged).
+ *
+ * @param cwindow
+ * The curses window that this window should use (never NULL).
+ *
+ * @return
+ * Zero on success, non-zero on failure.
+ */
+int wm_window_set_context(wm_window *window, window_manager *wm,
+                          wm_window *parent, WINDOW *cwindow);
+
+/**
+ * Notify the specified window that a layout change has occurred.  This can be
+ * a resize, a new split (and association with a new cwindow), etc.  This
+ * gives the widget a chance to update itself to handle the new environment it
+ * finds itself in.
+ *
+ * @param window
+ * The window that was touched.
+ *
+ * @return
+ * Zero on success, non-zero on failure.
+ */
+int wm_window_layout_event(wm_window *window);
+
+/**
  * Notify the specified window that it should be re-rendered.
  *
  * @param window
@@ -207,46 +266,6 @@ int wm_window_destroy(wm_window *window);
  * Zero on success, non-zero on failure.
  */
 int wm_window_redraw(wm_window *window);
-
-/**
- * Move and/or resize the given window.  This will tell the curses window to
- * take up the new space and update any internal data accordingly.  Sizes are
- * total and include any status bars (handled internally by the window).
- *
- * This is meant for the window manager to use.  No bounds checking is
- * performed.  Do not call this outside of this library.
- *
- * @param window
- * The window to resize
- *
- * @param top
- * The absolute vertical position of the window.
- *
- * @param left
- * The absolute horizontal position of the window.
- *
- * @param height
- * The new height of the window.
- *
- * @param width
- * The new width of the window.
- *
- * @return
- * Zero on success, non-zero on failure.
- */
-int wm_window_place(wm_window *window, int top, int left,
-                    int height, int width);
-
-/**
- * Notify the specified window that it has been resized.
- *
- * @param window
- * The window that was resized.
- *
- * @return
- * Zero on success, non-zero on failure.
- */
-int wm_window_resize_event(wm_window *window);
 
 /**
  * Tell this window whether it should display a status bar or not.  This

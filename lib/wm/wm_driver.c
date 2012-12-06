@@ -18,6 +18,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 /* Local Includes */
@@ -41,28 +42,8 @@ test_widget *get_test_widget(wm_window *window)
     return (test_widget *) window;
 }
 
-/* test_init: Constructor function. */
-int test_init(wm_window *window)
-{
-    test_redraw(window);
-    return 0;
-}
-
-/* test_destroy: Destructor function. */
-int test_destroy(wm_window *window)
-{
-    /* Nothing needs to be deallocated */
-    return 0;
-}
-
-/* test_input: Input function. */
-int test_input(wm_window *window, int *data, int len)
-{
-    return 0;
-}
-
-/* test_input: Resize function. */
-int test_resize(wm_window *window)
+/* test_layout: Resize event. */
+int test_layout(wm_window *window)
 {
     test_redraw(window);
     return 0;
@@ -83,16 +64,23 @@ int test_redraw(wm_window *window)
     wrefresh(window->cwindow);
 }
 
+char *test_status_text(wm_window *window, size_t max_length)
+{
+    return strdup("This is my status");
+}
+
 /* Create a new test widget */
 static test_widget *test_create(int color)
 {
     test_widget *widget = (test_widget *) malloc(sizeof(test_widget));
+    wm_window_init((wm_window *) widget);
 
-    widget->window.init = test_init;
-    widget->window.destroy = test_destroy;
-    widget->window.input = test_input;
+    /* Window data */
+    widget->window.layout = test_layout;
     widget->window.redraw = test_redraw;
-    widget->window.resize = test_resize;
+    widget->window.status_text = test_status_text;
+
+    /* My widget data */
     widget->color = color;
 
     return widget;
