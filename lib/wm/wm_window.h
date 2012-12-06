@@ -187,6 +187,22 @@ struct wm_window_s {
      * if no status text is applicable.  The caller owns the returned pointer.
      */
     char *(*status_text)(wm_window *window, size_t max_length);
+
+    /**
+     * Get the minimum dimensions for this widget.  The window manager will
+     * do its best to prevent the widget from being sized smaller than this.
+     * This should include any status bars or other decorations.
+     *
+     * The default implementation of this function will return 1 x 1 (or 2 x 1
+     * for windows with status bars).
+     *
+     * @param height
+     * Output parameter, set to the minimum height for this widget.
+     *
+     * @param width
+     * Output parameter, set to the minimum width for this widget.
+     */
+    void (*minimum_size)(wm_window *window, int *height, int *width);
 };
 
 /**

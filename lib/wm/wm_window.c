@@ -15,10 +15,25 @@
 #include "wm_window.h"
 #include "wm.h"
 
+/* Default hook implementations - these may be replaced inside the window
+ * structure by child widget hook functions. */
+static int hook_destroy(wm_window *window);
+static int hook_layout(wm_window *window);
+static int hook_input(wm_window *window, int *data, int len);
+static int hook_redraw(wm_window *window);
+static char *hook_status_text(wm_window *window, size_t max_length);
+static void hook_minimum_size(wm_window *window, int *height, int *width);
+
 int
 wm_window_init(wm_window *window)
 {
     memset(window, 0, sizeof(wm_window));
+    window->destroy = hook_destroy;
+    window->layout = hook_layout;
+    window->input = hook_input;
+    window->redraw = hook_redraw;
+    window->status_text = hook_status_text;
+    window->minimum_size = hook_minimum_size;
     wm_window_show_status_bar(window, 1);
 
     return 0;
@@ -29,9 +44,7 @@ wm_window_destroy(wm_window *window)
 {
     if (window != NULL) {
         delwin(window->cwindow);
-        if (window->destroy) {
-            window->destroy(window);
-        }
+        window->destroy(window);
         free(window);
     }
 
@@ -62,9 +75,7 @@ wm_window_layout_event(wm_window *window)
     if (window->show_status_bar) {
         window->height--;
     }
-    if (window->layout) {
-        window->layout(window);
-    }
+    window->layout(window);
 
     return 0;
 }
@@ -74,14 +85,8 @@ wm_window_redraw(wm_window *window)
 {
     int i;
     if (window->show_status_bar) {
-        char *status = NULL;
-        size_t status_len = 0;
-        if (window->status_text) {
-            status = window->status_text(window, window->width);
-            if (status) {
-                status_len = strlen(status);
-            }
-        }
+        char *status = window->status_text(window, window->width);
+        size_t status_len = status ? strlen(status) : 0;
         char fill = wm_is_focused(window->wm, window) ? '^' : ' ';
         char text[2] = { 0 };
         wattron(window->cwindow, WA_REVERSE);
@@ -97,9 +102,7 @@ wm_window_redraw(wm_window *window)
         wattroff(window->cwindow, WA_REVERSE);
         free(status);
     }
-    if (window->redraw) {
-        window->redraw(window);
-    }
+    window->redraw(window);
 
     return 0;
 }
@@ -145,5 +148,49 @@ wm_window_dump(wm_window *window, FILE *out, int indent)
         for (i = 0; i < splitter->num_children; ++i) {
             wm_window_dump(splitter->children[i], out, indent + 2);
         }
+    }
+}
+
+/* Default hook implementations */
+
+static int
+hook_destroy(wm_window *window)
+{
+    return 0;
+}
+
+static int
+hook_layout(wm_window *window)
+{
+    return 0;
+}
+
+static int
+hook_input(wm_window *window, int *data, int len)
+{
+    return 0;
+}
+
+static int
+hook_redraw(wm_window *window)
+{
+    return 0;
+}
+
+static char *
+hook_status_text(wm_window *window, size_t max_length)
+{
+    return NULL;
+}
+
+static void
+hook_minimum_size(wm_window *window, int *height, int *width)
+{
+    assert(height != NULL);
+    assert(width != NULL);
+    *height = 1;
+    *width = 1;
+    if (window->show_status_bar) {
+        *height += 1;
     }
 }

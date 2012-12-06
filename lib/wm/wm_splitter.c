@@ -7,12 +7,13 @@ static int wm_splitter_init(wm_window *window);
 static int wm_splitter_destroy(wm_window *window);
 static int wm_splitter_redraw(wm_window *window);
 static int wm_splitter_layout(wm_window *window);
+static void wm_splitter_minimum_size(wm_window *window,
+                                     int *height, int *width);
 static int wm_splitter_find_child(wm_splitter *splitter, wm_window *window);
 static int wm_splitter_array_remove(wm_splitter *splitter, wm_window *window);
-static int wm_splitter_min_height(wm_window *window);
-static int wm_splitter_min_width(wm_window *window);
 static int wm_splitter_place_window(wm_window *window, int top, int left,
                                     int height, int width);
+static int wm_splitter_min_dimension(wm_splitter *splitter, wm_window *window);
 
 /* Initial size of the splitter's "children" array. */
 const int DEFAULT_ARRAY_LENGTH = 4;
@@ -24,10 +25,6 @@ const int DEFAULT_ARRAY_LENGTH = 4;
 #define get_dimension(splitter, window) \
     (*((splitter)->orientation == WM_HORIZONTAL ? &((window)->real_height) \
                                               : &((window)->real_width)))
-#define min_dimension(splitter, window) \
-    ((splitter)->orientation == WM_HORIZONTAL ? \
-        wm_splitter_min_height(window) : \
-        wm_splitter_min_width(window))
 
 wm_splitter *
 wm_splitter_create(wm_direction orientation)
@@ -39,6 +36,7 @@ wm_splitter_create(wm_direction orientation)
     splitter->window.destroy = wm_splitter_destroy;
     splitter->window.layout = wm_splitter_layout;
     splitter->window.redraw = wm_splitter_redraw;
+    splitter->window.minimum_size = wm_splitter_minimum_size;
     splitter->window.is_splitter = 1;
     wm_window_show_status_bar((wm_window *) splitter, 0);
 
@@ -77,7 +75,7 @@ int wm_splitter_resize_window(wm_splitter *splitter, wm_window *window,
     int i;
     int desired_change;
     int actual_change = 0;
-    int min = min_dimension(splitter, window);
+    int min = wm_splitter_min_dimension(splitter, window);
     int max;
 
     /* See TODO in wm_splitter_remove(). */
@@ -102,7 +100,7 @@ int wm_splitter_resize_window(wm_splitter *splitter, wm_window *window,
     for (i = 0; i < splitter->num_children; ++i) {
         wm_window *child = splitter->children[i];
         if (child != window) {
-            max -= min_dimension(splitter, child);
+            max -= wm_splitter_min_dimension(splitter, child);
         }
     }
     if (size > max) {
@@ -140,7 +138,7 @@ int wm_splitter_resize_window(wm_splitter *splitter, wm_window *window,
         int j = i + 1, k;
         while (actual_change != desired_change && j < splitter->num_children) {
             int avail = get_dimension(splitter, splitter->children[j]) -
-                        min_dimension(splitter, splitter->children[j]);
+                wm_splitter_min_dimension(splitter, splitter->children[j]);
             int this_change = desired_change - actual_change;
             if (this_change > avail) {
                 this_change = avail;
@@ -158,7 +156,7 @@ int wm_splitter_resize_window(wm_splitter *splitter, wm_window *window,
         j = i - 1;
         while (actual_change != desired_change && j >= 0) {
             int avail = get_dimension(splitter, splitter->children[j]) -
-                        min_dimension(splitter, splitter->children[j]);
+                wm_splitter_min_dimension(splitter, splitter->children[j]);
             int this_change = desired_change - actual_change;
             if (this_change > avail) {
                 this_change = avail;
@@ -277,7 +275,7 @@ wm_splitter_layout(wm_window *window)
 
     for (i = 0; i < splitter->num_children; ++i) {
         wm_window *child = splitter->children[i];
-        int min = min_dimension(splitter, child);
+        int min = wm_splitter_min_dimension(splitter, child);
         int cur = get_dimension(splitter, child);
         prev_dimension += cur;
         proportions[i] = cur;
@@ -336,7 +334,8 @@ wm_splitter_layout(wm_window *window)
     for (i = 0; i < splitter->num_children; ++i) {
         int my_dimension = new_sizes[i];
         wm_window *child = splitter->children[i];
-        while (my_dimension < min_dimension(splitter, child) && remainder) {
+        while (my_dimension < wm_splitter_min_dimension(splitter, child)
+               && remainder) {
             my_dimension++;
             remainder--;
         }
@@ -406,6 +405,31 @@ wm_splitter_redraw(wm_window *window)
     return 0;
 }
 
+static void
+wm_splitter_minimum_size(wm_window *window, int *height, int *width)
+{
+    wm_splitter *splitter = (wm_splitter *) window;
+    *height = *width = 0;
+    int i;
+
+    for (i = 0; i < splitter->num_children; ++i) {
+        wm_window *child = splitter->children[i];
+        int child_height, child_width;
+        child->minimum_size(child, &child_height, &child_width);
+        if (splitter->orientation == WM_HORIZONTAL) {
+            *height += child_height;
+            if (child_width > *width) {
+                *width = child_width;
+            }
+        } else {
+            *width += child_width;
+            if (child_height > *height) {
+                *height = child_height;
+            }
+        }
+    }
+}
+
 static int
 wm_splitter_find_child(wm_splitter *splitter, wm_window *window)
 {
@@ -435,53 +459,14 @@ wm_splitter_array_remove(wm_splitter *splitter, wm_window *window)
     return 0;
 }
 
+/* Helper function: Get minimum dimension of window along split. */
 static int
-wm_splitter_min_height(wm_window *window)
+wm_splitter_min_dimension(wm_splitter *splitter, wm_window *window)
 {
-    int result = 2;
-    if (window->is_splitter) {
-        wm_splitter *splitter = (wm_splitter *) window;
-        int i;
-        result = 0;
-        if (splitter->orientation == WM_HORIZONTAL) {
-            for (i = 0; i < splitter->num_children; ++i) {
-                result += wm_splitter_min_height(splitter->children[i]);
-            }
-        } else {
-            for (i = 0; i < splitter->num_children; ++i) {
-                int h = wm_splitter_min_height(splitter->children[i]);
-                if (h > result) {
-                    result = h;
-                }
-            }
-        }
-    }
-    return result;
-}
+    int min_height, min_width;
 
-static int
-wm_splitter_min_width(wm_window *window)
-{
-    int result = 2;
-    if (window->is_splitter) {
-        wm_splitter *splitter = (wm_splitter *) window;
-        int i;
-        result = 0;
-        if (splitter->orientation == WM_VERTICAL) {
-            for (i = 0; i < splitter->num_children; ++i) {
-                result += wm_splitter_min_width(splitter->children[i]);
-            }
-            result += (splitter->num_children - 1);
-        } else {
-            for (i = 0; i < splitter->num_children; ++i) {
-                int h = wm_splitter_min_width(splitter->children[i]);
-                if (h > result) {
-                    result = h;
-                }
-            }
-        }
-    }
-    return result;
+    window->minimum_size(window, &min_height, &min_width);
+    return splitter->orientation == WM_HORIZONTAL ? min_height : min_width;
 }
 
 static int
