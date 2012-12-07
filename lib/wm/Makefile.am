@@ -15,7 +15,7 @@ libwm_a_SOURCES = \
 noinst_PROGRAMS = wm_driver
 
 # This is the wm driver
-wm_driver_LDFLAGS = -L$(top_builddir)/lib/adt
-wm_driver_LDADD = libwm.a -ladt
+wm_driver_LDFLAGS =
+wm_driver_LDADD = libwm.a
 wm_driver_SOURCES = wm_driver.c
 wm_driver_CFLAGS = $(AM_CFLAGS)
