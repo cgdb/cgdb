@@ -131,6 +131,21 @@ int wm_split(window_manager *wm, wm_window *window, wm_direction orientation);
 int wm_close(window_manager *wm, wm_window *window);
 
 /**
+ * Replace the main window.  The main window will be destroyed and replaced
+ * with the given window.  It will also receive focus.
+ *
+ * @param wm
+ * The window manager.
+ *
+ * @param window
+ * The new window to be main.
+ *
+ * @return
+ * Zero on success, non-zero on failure.
+ */
+int wm_new_main(window_manager *wm, wm_window *window);
+
+/**
  * @name WM Options
  * The data types and operations used to set and retrieve options for the
  * window manager.  The options are used to control the behavior of the

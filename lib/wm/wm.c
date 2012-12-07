@@ -142,6 +142,16 @@ int wm_close(window_manager *wm, wm_window *window)
     return wm_redraw(wm);
 }
 
+int wm_new_main(window_manager *wm, wm_window *window)
+{
+    wm_window_destroy(wm->main_window);
+    wm->main_window = window;
+    wm->focused_window = window;
+    wm_window_set_context(window, wm, NULL, derwin(stdscr, 0, 0, 0, 0));
+    wm_window_layout_event(window);
+    wm_redraw(wm);
+}
+
 void wm_focus(window_manager *wm, wm_window *window)
 {
     wm->focused_window = window;

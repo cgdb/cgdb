@@ -1,5 +1,7 @@
+#include <assert.h>
 #include <stdlib.h>
 
+#include "wm.h"
 #include "wm_splitter.h"
 
 /* Forward declarations */
@@ -52,21 +54,37 @@ wm_splitter_create(wm_direction orientation)
 int
 wm_splitter_remove(wm_splitter *splitter, wm_window *window)
 {
-    /* TODO: If children == 2, destroy this splitter */
-    if (splitter->num_children > 1) {
-        if (wm_splitter_array_remove(splitter, window)) {
-            return -1;
-        }
-        wm_window_destroy(window);
-        return wm_splitter_layout((wm_window *) splitter);
-    } else {
+    /* This should be essentially invariant */
+    assert(splitter->num_children >= 2);
+
+    if (wm_splitter_array_remove(splitter, window)) {
+        return -1;
+    }
+    wm_window_destroy(window);
+
+    if (splitter->num_children == 1) {
         wm_window *self = (wm_window *) splitter;
         wm_splitter *parent = (wm_splitter *) self->parent;
-        if (!parent) {
-            return -1;
+        wm_window *child = splitter->children[0];
+        wm_splitter_array_remove(splitter, child);
+        if (parent) {
+            int i = 0;
+            for (i = 0; i < parent->num_children; ++i) {
+                if (parent->children[i] == self) {
+                    parent->children[i] = child;
+                    break;
+                }
+            }
+            wm_window_set_context(child, self->wm, self->parent, self->cwindow);
+            wm_window_layout_event(self->parent);
+        } else {
+            wm_new_main(self->wm, child);
         }
-        return wm_splitter_remove(parent, self);
+    } else {
+        wm_window_layout_event((wm_window *) splitter);
     }
+
+    return 0;
 }
 
 int wm_splitter_resize_window(wm_splitter *splitter, wm_window *window,
