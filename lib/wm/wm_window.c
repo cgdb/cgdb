@@ -43,8 +43,10 @@ int
 wm_window_destroy(wm_window *window)
 {
     if (window != NULL) {
-        delwin(window->cwindow);
         window->destroy(window);
+        if (window->cwindow) {
+            delwin(window->cwindow);
+        }
         free(window);
     }
 

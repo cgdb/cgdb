@@ -54,6 +54,8 @@ wm_splitter_create(wm_direction orientation)
 int
 wm_splitter_remove(wm_splitter *splitter, wm_window *window)
 {
+    int need_focus = wm_is_focused(window->wm, window);
+
     /* This should be essentially invariant */
     assert(splitter->num_children >= 2);
 
@@ -75,12 +77,21 @@ wm_splitter_remove(wm_splitter *splitter, wm_window *window)
                     break;
                 }
             }
-            wm_window_set_context(child, self->wm, self->parent, self->cwindow);
-            wm_window_layout_event(self->parent);
+            wm_window_set_context(child, parent->window.wm, self->parent,
+                                  self->cwindow);
+            if (need_focus) {
+                wm_focus(child->wm, child);
+            }
+            self->cwindow = NULL; /* We gave our cwindow to child */
+            wm_window_destroy(self);
+            wm_window_layout_event((wm_window *) parent);
         } else {
             wm_new_main(self->wm, child);
         }
     } else {
+        if (need_focus) {
+            wm_focus(splitter->window.wm, splitter->children[0]);
+        }
         wm_window_layout_event((wm_window *) splitter);
     }
 

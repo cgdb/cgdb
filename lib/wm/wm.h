@@ -131,6 +131,31 @@ int wm_split(window_manager *wm, wm_window *window, wm_direction orientation);
 int wm_close(window_manager *wm, wm_window *window);
 
 /**
+ * Focus the given window.
+ *
+ * @param wm
+ * The window manager.
+ *
+ * @param window
+ * The window to focus.
+ */
+void wm_focus(window_manager *wm, wm_window *window);
+
+/**
+ * Check if the given window has input focus.
+ *
+ * @param wm
+ * The window manager.
+ *
+ * @param window
+ * The window to check
+ *
+ * @return
+ * 1 if the window is focused, 0 otherwise.
+ */
+int wm_is_focused(window_manager *wm, wm_window *window);
+
+/**
  * Replace the main window.  The main window will be destroyed and replaced
  * with the given window.  It will also receive focus.
  *
