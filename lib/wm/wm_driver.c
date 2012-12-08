@@ -25,31 +25,17 @@
 #include "wm.h"
 #include "wm_window.h"
 
-/* An example widget */
+/* ----------- */
+/* Test Widget */
+/* ----------- */
+
 struct test_widget {
     wm_window window;
     int color;
 };
 typedef struct test_widget test_widget;
 
-/* Internal widget functions */
-static test_widget *test_create();
-int test_redraw(wm_window *window);
-
-/* test_widget: C++ style cast */
-test_widget *get_test_widget(wm_window *window)
-{
-    return (test_widget *) window;
-}
-
-/* test_layout: Resize event. */
-int test_layout(wm_window *window)
-{
-    test_redraw(window);
-    return 0;
-}
-
-int test_redraw(wm_window *window)
+static int test_redraw(wm_window *window)
 {
     test_widget *widget = (test_widget *) window;
     int i, j;
@@ -64,12 +50,16 @@ int test_redraw(wm_window *window)
     wrefresh(window->cwindow);
 }
 
-char *test_status_text(wm_window *window, size_t max_length)
+static int test_layout(wm_window *window)
+{
+    return test_redraw(window);
+}
+
+static char *test_status_text(wm_window *window, size_t max_length)
 {
     return strdup("This is my status");
 }
 
-/* Create a new test widget */
 static test_widget *test_create(int color)
 {
     test_widget *widget = (test_widget *) malloc(sizeof(test_widget));
@@ -84,6 +74,42 @@ static test_widget *test_create(int color)
     widget->color = color;
 
     return widget;
+}
+
+/* --- */
+/* CLI */
+/* --- */
+
+typedef struct {
+    wm_window window;
+} test_cli;
+
+static int test_cli_redraw(wm_window *window)
+{
+    int i;
+    for (i = 0; i < window->width; ++i) {
+        if (i == window->width/2 - 1) {
+            mvwprintw(window->cwindow, 0, i, "CLI");
+            i += 2;
+        } else {
+            mvwprintw(window->cwindow, 0, i, ".");
+        }
+    }
+    return 0;
+}
+
+static int test_cli_layout(wm_window *window)
+{
+    return test_cli_redraw(window);
+}
+
+static test_cli *test_cli_create()
+{
+    test_cli *cli = (test_cli *) malloc(sizeof(test_cli));
+    wm_window_init((wm_window *) cli);
+    cli->window.redraw = test_cli_redraw;
+    cli->window.layout = test_cli_layout;
+    return cli;
 }
 
 /* ------------- */
@@ -118,13 +144,14 @@ int main(int argc, char *argv[])
         init_pair(5, COLOR_YELLOW, COLOR_BLACK);
     }
 
+    test_cli *cli = test_cli_create();
     test_widget *widgets[6];
     unsigned delay = 400000;
     for (i = 0; i < 5; i++) {
         widgets[i] = test_create(i+1);
         switch (i) {
             case 0:
-                wm = wm_create((wm_window *) widgets[i]);
+                wm = wm_create((wm_window *) widgets[i], (wm_window *) cli);
                 break;
             case 1:
             case 2:

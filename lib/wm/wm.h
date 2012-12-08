@@ -41,10 +41,15 @@ typedef struct window_manager_s window_manager;
  * The initial window, which will be the top level window until any kind of
  * splitting occurs.  The window manager now owns this pointer.
  *
+ * @param cli
+ * The command line widget that will live at the bottom of the screen.  The
+ * window manager is currently hard-coded to expect this to exist, so you must
+ * always provide one.  The window manager now owns this pointer.
+ *
  * @return
  * A new window manager is returned, or NULL on error.
  */
-window_manager *wm_create(wm_window *main_window);
+window_manager *wm_create(wm_window *main_window, wm_window *cli);
 
 /**
  * Free the window manager, recursively destroying all associated windows.
@@ -56,6 +61,21 @@ window_manager *wm_create(wm_window *main_window);
  * Zero on success, non-zero on failure.
  */
 int wm_destroy(window_manager *wm);
+
+/**
+ * Send keyboard input into the window manager.  It will be passed to
+ * whichever window is currently focused.
+ *
+ * @param wm
+ * The window manager.
+ *
+ * @param data
+ * The sequence of keyboard data received from the user (as integers).
+ *
+ * @param len
+ * The number of keystrokes contained in data.
+ */
+int wm_input(window_manager *wm, int *data, size_t len);
 
 /**
  * Redraw all visible windows (because the display was damaged for some reason,
@@ -188,6 +208,18 @@ int wm_move_focus(window_manager *wm, wm_direction dir, wm_position cursor_pos);
  * Zero on success, non-zero on failure.
  */
 int wm_new_main(window_manager *wm, wm_window *window);
+
+/**
+ * Put the window manager into (or take out of) command-line mode.  All input
+ * will be passed to the cli until this mode is exited.
+ *
+ * @param wm
+ * The window manager.
+ *
+ * @param value
+ * True (non-zero) to enable, false to disable.
+ */
+void wm_cli_mode(window_manager *wm, int value);
 
 /**
  * @name WM Options

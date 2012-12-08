@@ -30,7 +30,7 @@ typedef struct window_manager_s window_manager;
  * instances of window objects (e.g. a file viewer) will extend this structure
  * with their own data fields, as well as set the function pointers to
  * implement the API declared here.  Event functions that aren't needed can be
- * left NULL.
+ * left at their default values (wm_window implements default behaviors).
  *
  * Example:
  * <pre> struct file_dialog {
@@ -143,8 +143,7 @@ struct wm_window_s {
     /**
      * Input function, called when keyboard input is received for this window.
      * Passed in the form of an integer array (of chars or CGDB_KEY_xxx types),
-     * and an integer specifying the size of the input array.  Set this field
-     * to NULL if no input handling is needed.
+     * and an integer specifying the size of the input array.
      *
      * @param window
      * The window to receive the input.
@@ -158,7 +157,7 @@ struct wm_window_s {
      * @return
      * Zero on success, non-zero on failure.
      */
-    int (*input)(wm_window *window, int *data, int len);
+    int (*input)(wm_window *window, int *data, size_t len);
 
     /**
      * Redraw the widget.  This method will be called whenever the window

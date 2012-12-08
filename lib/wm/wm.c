@@ -21,15 +21,13 @@
  * management.
  */
 struct window_manager_s {
-
     wm_window *main_window;
-
     wm_window *focused_window;
-
-    /* TODO: CLI */
+    wm_window *cli;
+    int cli_mode;
 };
 
-window_manager *wm_create(wm_window *main_window)
+window_manager *wm_create(wm_window *main_window, wm_window *cli)
 {
     WINDOW *cwindow = NULL;
     window_manager *wm = NULL;
@@ -43,12 +41,17 @@ window_manager *wm_create(wm_window *main_window)
 
     wm->main_window = main_window;
     wm->focused_window = main_window;
-
     getmaxyx(stdscr, y, x);
-    cwindow = derwin(stdscr, y-1, x, 0, 0);
-
+    cwindow = derwin(stdscr, y - 1, x, 0, 0);
     wm_window_set_context(main_window, wm, NULL, cwindow);
     wm_window_layout_event(main_window);
+
+    wm->cli = (wm_window *) cli;
+    cwindow = derwin(stdscr, 1, x, y-1, 0);
+    wm_window_set_context(wm->cli, wm, NULL, cwindow);
+    wm_window_layout_event(wm->cli);
+    wm->cli_mode = 0;
+
     wm_redraw(wm);
 
     return wm;
@@ -58,15 +61,23 @@ int wm_destroy(window_manager *wm)
 {
     if (wm) {
         wm_window_destroy(wm->main_window);
+        wm_window_destroy(wm->cli);
         free(wm);
     }
 
     return 0;
 }
 
+int wm_input(window_manager *wm, int *data, size_t len)
+{
+    wm_window *target = wm->cli_mode ? wm->cli : wm->focused_window;
+    return target->input(target, data, len);
+}
+
 int wm_redraw(window_manager *wm)
 {
     wm_window_redraw(wm->main_window);
+    wm_window_redraw(wm->cli);
     refresh();
     return 0;
 }
@@ -144,15 +155,23 @@ int wm_close(window_manager *wm, wm_window *window)
 
 int wm_new_main(window_manager *wm, wm_window *window)
 {
+    int maxx, maxy;
     wm_window_destroy(wm->main_window);
     wm->main_window = window;
     if (window->cwindow) {
         delwin(window->cwindow);
     }
-    wm_window_set_context(window, wm, NULL, derwin(stdscr, 0, 0, 0, 0));
+    getmaxyx(stdscr, maxy, maxx);
+    wm_window_set_context(window, wm, NULL,
+                          derwin(stdscr, maxy - 1, maxx, 0, 0));
     wm_focus(wm, window);
     wm_window_layout_event(window);
     wm_redraw(wm);
+}
+
+void wm_cli_mode(window_manager *wm, int value)
+{
+    wm->cli_mode = value;
 }
 
 void wm_focus(window_manager *wm, wm_window *window)

@@ -19,7 +19,7 @@
  * structure by child widget hook functions. */
 static int hook_destroy(wm_window *window);
 static int hook_layout(wm_window *window);
-static int hook_input(wm_window *window, int *data, int len);
+static int hook_input(wm_window *window, int *data, size_t len);
 static int hook_redraw(wm_window *window);
 static char *hook_status_text(wm_window *window, size_t max_length);
 static void hook_minimum_size(wm_window *window, int *height, int *width);
@@ -168,7 +168,7 @@ hook_layout(wm_window *window)
 }
 
 static int
-hook_input(wm_window *window, int *data, int len)
+hook_input(wm_window *window, int *data, size_t len)
 {
     return 0;
 }
