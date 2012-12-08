@@ -71,7 +71,7 @@ int wm_redraw(window_manager *wm)
     return 0;
 }
 
-int wm_resize(window_manager *wm, wm_window *window, wm_direction dir,
+int wm_resize(window_manager *wm, wm_window *window, wm_orientation dir,
               unsigned size)
 {
     wm_splitter *splitter;
@@ -99,7 +99,7 @@ int wm_resize(window_manager *wm, wm_window *window, wm_direction dir,
     return wm_redraw(wm);
 }
 
-int wm_split(window_manager *wm, wm_window *window, wm_direction orientation)
+int wm_split(window_manager *wm, wm_window *window, wm_orientation orientation)
 {
     wm_splitter *splitter = NULL;
     wm_window *orig = wm->focused_window;
@@ -164,6 +164,30 @@ void wm_focus(window_manager *wm, wm_window *window)
 int wm_is_focused(window_manager *wm, wm_window *window)
 {
     return wm->focused_window == window;
+}
+
+int wm_move_focus(window_manager *wm, wm_direction dir, wm_position cursor_pos)
+{
+    wm_window *parent = wm->focused_window->parent;
+    wm_position abs_cursor_pos;
+    wm_window *to_focus = NULL;
+
+    if (!parent) {
+        return -1;
+    }
+    assert(parent->is_splitter);
+
+    /* Get the absolute cursor position. */
+    abs_cursor_pos.top = cursor_pos.top + wm->focused_window->top;
+    abs_cursor_pos.left = cursor_pos.left + wm->focused_window->left;
+
+    to_focus = wm_splitter_get_neighbor((wm_splitter *) parent,
+                                       wm->focused_window, dir, abs_cursor_pos);
+    if (to_focus == NULL) {
+        return -1;
+    }
+    wm->focused_window = to_focus;
+    return wm_redraw(wm);
 }
 
 wm_optval wm_option_get(wm_option option)

@@ -95,6 +95,7 @@ int main(int argc, char *argv[])
     WINDOW *mainwin = NULL;
     test_widget *widget1, *widget2, *widget3;
     window_manager *wm = NULL;
+    wm_position pos = { 0 };
     int i;
 
     if ((mainwin = initscr()) == NULL ) {
@@ -136,6 +137,20 @@ int main(int argc, char *argv[])
         }
         usleep(delay);
     }
+
+    wm_move_focus(wm, WM_LEFT, pos);
+    usleep(delay);
+    wm_move_focus(wm, WM_UP, pos);
+    usleep(delay);
+    wm_move_focus(wm, WM_UP, pos);
+    usleep(delay);
+    pos.left = ((wm_window *) widgets[3])->left;
+    wm_move_focus(wm, WM_DOWN, pos);
+    usleep(delay);
+    wm_move_focus(wm, WM_DOWN, pos);
+    usleep(delay);
+    wm_move_focus(wm, WM_DOWN, pos);
+    usleep(delay);
 
     for (i = 1; i <= 4; ++i) {
         assert(!wm_resize(wm, (wm_window *) widgets[3], WM_HORIZONTAL,

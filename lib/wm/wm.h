@@ -93,7 +93,7 @@ int wm_redraw(window_manager *wm);
  * @return
  * Zero on success, non-zero on failure.
  */
-int wm_resize(window_manager *wm, wm_window *window, wm_direction dir,
+int wm_resize(window_manager *wm, wm_window *window, wm_orientation dir,
               unsigned size);
 
 /**
@@ -113,7 +113,7 @@ int wm_resize(window_manager *wm, wm_window *window, wm_direction dir,
  * @return
  * Zero on success, non-zero on failure.
  */
-int wm_split(window_manager *wm, wm_window *window, wm_direction orientation);
+int wm_split(window_manager *wm, wm_window *window, wm_orientation orientation);
 
 /**
  * Close the given window.  Remaining windows will be shuffled to fill in
@@ -156,6 +156,25 @@ void wm_focus(window_manager *wm, wm_window *window);
 int wm_is_focused(window_manager *wm, wm_window *window);
 
 /**
+ * Move the focus in the given direction.  Includes the current cursor
+ * position (if available) to help focus the correct window.  You can simply
+ * provide (0, 0) if you don't wish to specify a cursor.
+ *
+ * @param wm
+ * The window manager.
+ *
+ * @param dir
+ * The direction to move focus.
+ *
+ * @param cursor_pos
+ * The current position of the cursor relative to the focused window..
+ *
+ * @return
+ * Zero on success, non-zero on failure.
+ */
+int wm_move_focus(window_manager *wm, wm_direction dir, wm_position cursor_pos);
+
+/**
  * Replace the main window.  The main window will be destroyed and replaced
  * with the given window.  It will also receive focus.
  *
@@ -188,7 +207,7 @@ typedef enum {
     CMDHEIGHT,
 
     /**
-     * Option "eadirection" (shorthand: "ead") is of type: wm_direction
+     * Option "eadirection" (shorthand: "ead") is of type: wm_orientation
      */
     EADIRECTION,
 
@@ -264,7 +283,7 @@ typedef struct {
         char bool_val;
 
         /** if (type == WM_EADIR) */
-        wm_direction ead_val;
+        wm_orientation ead_val;
     } variant;
 
 } wm_optval;

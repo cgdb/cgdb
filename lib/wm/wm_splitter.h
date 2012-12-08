@@ -9,7 +9,7 @@
  */
 typedef struct {
     wm_window window;
-    wm_direction orientation;
+    wm_orientation orientation;
     wm_window **children;
     size_t num_children; /* Number of children */
     size_t array_length; /* Length of children array */
@@ -24,7 +24,7 @@ typedef struct {
  * @return
  * Returns a newly allocated wm_splitter.
  */
-wm_splitter *wm_splitter_create(wm_direction orientation);
+wm_splitter *wm_splitter_create(wm_orientation orientation);
 
 /**
  * Remove a window from a splitter.
@@ -65,7 +65,7 @@ int wm_splitter_remove(wm_splitter *splitter, wm_window *window);
  * Zero on success, non-zero on failure.
  */
 int wm_splitter_resize_window(wm_splitter *splitter, wm_window *window,
-                              wm_direction dir, int size);
+                              wm_orientation dir, int size);
 
 /**
  * Split a child of this splitter in the opposite orientation (creates a new
@@ -90,6 +90,34 @@ int wm_splitter_resize_window(wm_splitter *splitter, wm_window *window,
  * Zero on success, non-zero on failure.
  */
 int wm_splitter_split(wm_splitter *splitter, wm_window *window,
-                      wm_window *new_window, wm_direction orientation);
+                      wm_window *new_window, wm_orientation orientation);
+
+/**
+ * Find the window neighboring the given window, in the given direction.  The
+ * cursor position is used to make this more precise, but can also be set to
+ * (0, 0) if you aren't that picky.
+ *
+ * If the position falls outside of the bounds of this splitter, it will find
+ * the nearest match within this splitter.  For example, if the splitter
+ * starts at column 20 and the position is 10, the result will be the first
+ * child (at column 20).
+ *
+ * @param splitter
+ * The splitter object.
+ *
+ * @param window
+ * The window whose neighbor we'd like to find.
+ *
+ * @param dir
+ * The direction to look.
+ *
+ * @param cursor_pos
+ * The current absolute (relative to screen) cursor position.
+ *
+ * @return
+ * The neighboring window if found, otherwise NULL.
+ */
+wm_window *wm_splitter_get_neighbor(wm_splitter *splitter, wm_window *window,
+                                    wm_direction dir, wm_position cursor_pos);
 
 #endif /* __CGDB_WM_SPLITTER_H__ */

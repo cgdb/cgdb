@@ -16,6 +16,8 @@ static int wm_splitter_array_remove(wm_splitter *splitter, wm_window *window);
 static int wm_splitter_place_window(wm_window *window, int top, int left,
                                     int height, int width);
 static int wm_splitter_min_dimension(wm_splitter *splitter, wm_window *window);
+static wm_window *wm_splitter_find_window_at(wm_splitter *splitter,
+                                             wm_position cursor_pos);
 
 /* Initial size of the splitter's "children" array. */
 const int DEFAULT_ARRAY_LENGTH = 4;
@@ -29,7 +31,7 @@ const int DEFAULT_ARRAY_LENGTH = 4;
                                               : &((window)->real_width)))
 
 wm_splitter *
-wm_splitter_create(wm_direction orientation)
+wm_splitter_create(wm_orientation orientation)
 {
     wm_splitter *splitter = (wm_splitter *) malloc(sizeof(wm_splitter));
     wm_window_init((wm_window *) splitter);
@@ -99,7 +101,7 @@ wm_splitter_remove(wm_splitter *splitter, wm_window *window)
 }
 
 int wm_splitter_resize_window(wm_splitter *splitter, wm_window *window,
-                              wm_direction dir, int size)
+                              wm_orientation dir, int size)
 {
     int i;
     int desired_change;
@@ -221,7 +223,7 @@ int wm_splitter_resize_window(wm_splitter *splitter, wm_window *window,
 
 int
 wm_splitter_split(wm_splitter *splitter, wm_window *window,
-                  wm_window *new_window, wm_direction orientation)
+                  wm_window *new_window, wm_orientation orientation)
 {
     wm_window *obj = new_window;
     int pos = splitter->num_children;
@@ -270,6 +272,58 @@ wm_splitter_split(wm_splitter *splitter, wm_window *window,
     splitter->num_children++;
 
     return wm_window_layout_event((wm_window *) splitter);
+}
+
+wm_window *wm_splitter_get_neighbor(wm_splitter *splitter, wm_window *window,
+                                    wm_direction dir, wm_position cursor_pos)
+{
+    wm_splitter *parent = NULL;
+    wm_window *result = NULL;
+    int i;
+
+    if (splitter->window.parent) {
+        assert(splitter->window.parent->is_splitter);
+        parent = (wm_splitter *) splitter->window.parent;
+    }
+    if (splitter->orientation == WM_HORIZONTAL &&
+            (dir == WM_LEFT || dir == WM_RIGHT) ||
+        splitter->orientation == WM_VERTICAL &&
+            (dir == WM_UP || dir == WM_DOWN))
+    {
+        if (parent == NULL) {
+            return NULL;
+        }
+        return wm_splitter_get_neighbor(parent, (wm_window *) splitter,
+                                        dir, cursor_pos);
+    }
+
+    switch (dir) {
+        case WM_UP:
+        case WM_LEFT:
+            for (i = 1; i < splitter->num_children; ++i) {
+                if (splitter->children[i] == window) {
+                    result = splitter->children[i-1];
+                    break;
+                }
+            }
+            break;
+
+        case WM_DOWN:
+        case WM_RIGHT:
+            for (i = 0; i < splitter->num_children - 1; ++i) {
+                if (splitter->children[i] == window) {
+                    result = splitter->children[i+1];
+                    break;
+                }
+            }
+            break;
+    }
+
+    if (result && result->is_splitter) {
+        result = wm_splitter_find_window_at((wm_splitter *) result, cursor_pos);
+    }
+
+    return result;
 }
 
 /* Window method implementations */
@@ -512,4 +566,37 @@ wm_splitter_place_window(wm_window *window, int top, int left,
     mvwin(window->cwindow, top, left);
 
     wm_window_layout_event(window);
+}
+
+static wm_window *
+wm_splitter_find_window_at(wm_splitter *splitter, wm_position cursor_pos)
+{
+    wm_window *result = NULL;
+    int i;
+
+    for (i = 0; i < splitter->num_children; ++i) {
+        wm_window *child = splitter->children[i];
+        int value, lower_bound, upper_bound;
+        if (splitter->orientation == WM_HORIZONTAL) {
+            value = cursor_pos.top;
+            lower_bound = child->top;
+            upper_bound = child->top + child->real_height;
+        } else {
+            value = cursor_pos.left;
+            lower_bound = child->left;
+            upper_bound = child->left + child->real_width;
+        }
+        if (value >= lower_bound && value < upper_bound ||
+            i == 0 && value < lower_bound ||
+            i == splitter->num_children - 1 && value >= upper_bound)
+        {
+            result = child;
+            break;
+        }
+    }
+    if (result && result->is_splitter) {
+        result = wm_splitter_find_window_at((wm_splitter *) result, cursor_pos);
+    }
+
+    return result;
 }
