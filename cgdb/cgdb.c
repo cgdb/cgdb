@@ -1325,6 +1325,15 @@ static int main_loop(void)
             FD_SET(masterfd, &rset);
         }
 
+        /* Before waits for any input, check if gdb process is terminated.
+         * If it is, handle it here because the gdb_fd can have nothing
+         * to read. This happens on mac OSX */
+        if (tgdb_has_sigchld_recv(tgdb)) {
+            if (gdb_input() == -1) {
+                return -1;
+            }
+        }
+
         /* Wait for input */
         if (select(max + 1, &rset, NULL, NULL, NULL) == -1) {
             if (errno == EINTR)
