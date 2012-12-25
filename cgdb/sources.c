@@ -853,7 +853,9 @@ int source_search_regex(struct sviewer *sview,
 
     if (sview == NULL || sview->cur == NULL || regex == NULL ||
             strlen(regex) == 0) {
-        sview->cur->buf.cur_line = NULL;
+
+        if (sview->curr)
+            sview->cur->buf.cur_line = NULL;
         return -1;
     }
 
