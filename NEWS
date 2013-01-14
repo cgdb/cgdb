@@ -1,3 +1,5 @@
+cgdb-0.6.7 (01/14/2013)
+
   * Changed documentation license from GFDL to GPL (github #6).
 
   * Fixed a hang on MacOS when quitting cgdb while inferior is running
