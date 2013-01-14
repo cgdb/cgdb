@@ -1,3 +1,10 @@
+  * Changed documentation license from GFDL to GPL (github #6).
+
+  * Fixed a hang on MacOS when quitting cgdb while inferior is running
+    (github #1 and #5).
+
+  * Fixed a crash when pressing 'n' in source window (github #5).
+
   * Fixed a bug opening files (and toggling breakpoints in files) with
     special characters (e.g. space) in their names.
 
