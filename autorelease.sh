@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Usage: ./autorelease.sh [optional ./configure arguments]
+
 set -e
 
 CGDB_VERSION=`date +"%Y%m%d"`
@@ -19,18 +21,23 @@ echo ""
 echo -n "Generate update_docs.sh? [n] "
 read tmp
 if [ "$tmp" = "y" ]; then
-    echo -n "Path to local cgdb web repository (e.g. ../cgdb.github.com): "
-    read CGDB_WEB
-    if [ "$CGDB_WEB" != "" ]; then
-        CGDB_WEB=`readlink -f $PWD/$CGDB_WEB`
+    while true; do
+        echo -n "Path to local cgdb web repository (e.g. ../cgdb.github.com): "
+        read CGDB_WEB
+        if [ "$CGDB_WEB" = "" ]; then
+            continue
+        fi
+        CGDB_WEB=$( cd $(dirname $CGDB_WEB); pwd)/$(basename $CGDB_WEB)
         if [ ! -e $CGDB_WEB ]; then
             echo "Repository path '$CGDB_WEB' does not exist."
-            exit 1
         elif [ ! -d $CGDB_WEB ]; then
             echo "Repository path '$CGDB_WEB' is not a directory."
-            exit 1
+        elif [ ! -d $CGDB_WEB/.git ]; then
+            echo "Repository path '$CGDB_WEB' is not a git repository."
+        else
+            break
         fi
-    fi
+    done
 fi
 
 echo ""
@@ -86,16 +93,29 @@ run ./autogen.sh $CGDB_VERSION
 echo "-- Verify CGDB works with --std=c89"
 mkdir $CGDB_C89_BUILD_DIR
 cd $CGDB_C89_BUILD_DIR
-run $CGDB_SOURCE_DIR/configure CFLAGS="-g --std=c89 -D_XOPEN_SOURCE=600"
+run $CGDB_SOURCE_DIR/configure CFLAGS="-g --std=c89 -D_XOPEN_SOURCE=600 -DSIGWINCH=28" "$@"
 run make -s
+
+# Update NEWS
+if [ "$CGDB_UPDATE_NEWS" = "y" ]; then
+    cd "$CGDB_SOURCE_DIR"
+    echo "-- Update the NEWS file"
+    echo -e "$CGDB_RELEASE (`date +%m/%d/%Y`)\n" > datetmp.txt
+    cp NEWS NEWS.bak
+    cat datetmp.txt NEWS.bak > NEWS
+    rm NEWS.bak
+    rm datetmp.txt
+else
+    echo "-- Skipping update of NEWS file"
+fi
 
 # Build the distribution
 echo "-- Creating the distribution in $CGDB_BUILD_DIR"
 mkdir $CGDB_BUILD_DIR
 cd "$CGDB_BUILD_DIR"
-run $CGDB_SOURCE_DIR/configure
+run $CGDB_SOURCE_DIR/configure "$@"
 run make -s
-run make distcheck
+DISTCHECK_CONFIGURE_FLAGS="$@" run make distcheck
 
 # Generate documentation
 cd "$CGDB_BUILD_DIR/doc/"
@@ -114,19 +134,6 @@ echo "-- Generate MAN page"
 rm $CGDB_SOURCE_DIR/doc/cgdb.1
 run make cgdb.1
 
-# Update NEWS
-if [ "$CGDB_UPDATE_NEWS" = "y" ]; then
-    cd "$CGDB_SOURCE_DIR"
-    echo "-- Update the NEWS file"
-    echo -e "$CGDB_RELEASE (`date +%m/%d/%Y`)\n" > datetmp.txt
-    cp NEWS NEWS.bak
-    cat datetmp.txt NEWS.bak > NEWS
-    rm NEWS.bak
-    rm datetmp.txt
-else
-    echo "-- Skipping update of NEWS file"
-fi
-
 # Test the distribution
 echo "-- Unpacking and testing in $CGDB_BUILD_TEST_DIR"
 mkdir "$CGDB_BUILD_TEST_DIR"
@@ -134,7 +141,7 @@ cd "$CGDB_BUILD_TEST_DIR"
 run tar -zxvf "$CGDB_BUILD_DIR/$CGDB_RELEASE.tar.gz"
 mkdir build
 cd build
-run ../$CGDB_RELEASE/configure --prefix=$PWD/../install
+run ../$CGDB_RELEASE/configure --prefix=$PWD/../install "$@"
 run make -s
 run make install
 ../install/bin/cgdb --version
