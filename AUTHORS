@@ -29,4 +29,8 @@ Contributors
   so cgdb plays nicely in a gdc development environment.
   He can be reached at "ibuclaw *at* gdcproject *dot* org".
 
+  Li Jia submitted fixes for two serious bugs, including a
+  long-standing hang issue on MacOS.
+  He can be reached at "tiwb *at* msn *dot* com".
+
 For more information please see http://cgdb.sourceforge.net/
