@@ -2,6 +2,7 @@
 %option outfile="lex.yy.c"
 
 D       [0-9]
+H       [0-9a-fA-F_]
 L       [a-zA-Z_]
 T       [0-9a-zA-Z_]
 IDENTIFIER {L}+{T}*
@@ -113,6 +114,24 @@ IDENTIFIER {L}+{T}*
 
 
 {D}+                    { return(TOKENIZER_LITERAL); }
+{D}+f                   { return(TOKENIZER_LITERAL); }
+{D}+[lL]                { return(TOKENIZER_LITERAL); }
+{D}+[uU]                { return(TOKENIZER_LITERAL); }
+{D}+ll                  { return(TOKENIZER_LITERAL); }
+{D}+LL                  { return(TOKENIZER_LITERAL); }
+{D}+UL                  { return(TOKENIZER_LITERAL); }
+{D}+ul                  { return(TOKENIZER_LITERAL); }
+{D}+ull                 { return(TOKENIZER_LITERAL); }
+{D}+ULL                 { return(TOKENIZER_LITERAL); }
+0x{H}+                  { return(TOKENIZER_LITERAL); }
+0x{H}+[lL]              { return(TOKENIZER_LITERAL); }
+0x{H}+[uU]              { return(TOKENIZER_LITERAL); }
+0x{H}+ll                { return(TOKENIZER_LITERAL); }
+0x{H}+LL                { return(TOKENIZER_LITERAL); }
+0x{H}+UL                { return(TOKENIZER_LITERAL); }
+0x{H}+ul                { return(TOKENIZER_LITERAL); }
+0x{H}+ull               { return(TOKENIZER_LITERAL); }
+0x{H}+ULL               { return(TOKENIZER_LITERAL); }
 '.'                     { return(TOKENIZER_LITERAL); }
 '\\.'                   { return(TOKENIZER_LITERAL); }
 
