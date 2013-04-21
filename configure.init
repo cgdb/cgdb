@@ -87,6 +87,9 @@ AC_CHECK_FUNC([strdup],,AC_MSG_ERROR([CGDB requires strdup to build.]))
 AC_CHECK_FUNC([strerror],,AC_MSG_ERROR([CGDB requires strerror to build.]))
 AC_CHECK_FUNC([openpty],[AC_DEFINE(HAVE_OPENPTY, 1, [Define to 1 if you have the openpty function])],)
 
+dnl program checks
+AC_CHECK_PROG([HAS_MAKEINFO], [makeinfo], [yes], [no], [path =$PATH])
+AC_CHECK_PROG([HAS_HELP2MAN], [help2man], [yes], [no], [path =$PATH])
 dnl Default variables
 dnl If ncurses is yes after arguments, than use ncurses. Otherwise, use curses
 opt_with_readline_prefix=no
@@ -98,6 +101,7 @@ dnl argument to configure
 AC_ARG_WITH(readline, AC_HELP_STRING([--with-readline=PREFIX], [Use system installed readline library]), opt_with_readline_prefix=$withval)
 AC_ARG_WITH(ncurses, AC_HELP_STRING([--with-ncurses=PREFIX], [Use system installed ncurses library]), opt_with_ncurses_prefix=$withval)
 AC_ARG_WITH(curses, AC_HELP_STRING([--with-curses=PREFIX], [Use system installed curses library]), opt_with_curses_prefix=$withval use_ncurses_library=no)
+
 
 if test "$opt_with_readline_prefix" != "no"; then
   # If set to "yes", it is on the compilers include path.
@@ -119,6 +123,19 @@ if test "$opt_with_curses_prefix" != "no"; then
   if test "$opt_with_curses_prefix" != "yes"; then
     LDFLAGS="-L$opt_with_curses_prefix/lib $LDFLAGS" CFLAGS="-I$opt_with_curses_prefix/include $CFLAGS" CPPFLAGS="-I$opt_with_curses_prefix/include $CPPFLAGS"
   fi
+fi
+
+dnl make sure that (f)lex is available
+if test "$LEX" != "flex" -a "$LEX" != "lex"; then
+	AC_MSG_ERROR([Please install flex before installing])
+fi
+
+dnl check that the required tools are available to generate documentation
+if test "$HAS_MAKEINFO" != "yes" ; then
+	AC_MSG_ERROR([Please install makeinfo before installing])
+fi
+if test "$HAS_HELP2MAN" != "yes" ; then
+	AC_MSG_ERROR([Please install help2man])
 fi
 
 dnl Checking for log10 function in math - I would like to remove this
