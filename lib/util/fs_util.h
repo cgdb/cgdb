@@ -69,4 +69,11 @@ int fs_util_create_dir_in_base(const char *base, const char *dirname);
  */
 void fs_util_get_path(const char *base, const char *name, char *path);
 
+/* fs_util_file_exists_in path:
+ * ----------------------------
+ *
+ * Checks if the file exists in any known location (absolute path
+ * and paths stored in $PATH.
+ */
+int fs_util_file_exists_in_path(char * filePath);
 #endif

@@ -224,6 +224,12 @@ int invoke_debugger(const char *path,
 
     local_argv[j] = NULL;
 
+    if (fs_util_file_exists_in_path(local_argv[0]) == -1) {
+        logger_write_pos(logger, __FILE__, __LINE__,
+                         "Debugger \"%s\" not found", local_argv[0]);
+        pty_free_memory(slavename, masterfd, argc, local_argv);
+        return -1;
+    }
     /* Fork into two processes with a shared pty pipe */
     pid = pty_fork(&masterfd, slavename, SLAVE_SIZE, NULL, NULL);
 

@@ -154,3 +154,33 @@ void fs_util_get_path(const char *base, const char *name, char *path)
     strncpy(path, dir, strlen(dir) + 1);
 #endif
 }
+
+int fs_util_file_exists_in_path(char * filePath)
+{
+    struct stat buff;
+    char * tok, *local_pathStr;
+    char testPath[1024];
+    int result = -1;
+    char *pathStr = getenv("PATH");
+    local_pathStr = malloc(strlen(pathStr) + 1);
+    strcpy(local_pathStr, pathStr);
+    
+    if (stat(filePath, &buff) >= 0)
+    {
+        free(local_pathStr);
+        return 0;
+    }
+    /* Check all directories in path*/
+    tok = strtok(local_pathStr, ":");
+    while (tok != NULL)
+    {
+        sprintf(testPath, "%s/%s", tok, filePath);
+        if (stat(testPath, &buff) >= 0) {
+            result = 0;
+            break;
+        }
+        tok = strtok(NULL, ":");
+    }
+    free(local_pathStr);
+    return result;
+}
