@@ -1650,13 +1650,15 @@ int main(int argc, char *argv[])
     cgdbrc_init();
 
     if (create_and_init_pair() == -1) {
-        fprintf(stderr, "%s:%d Unable to create PTY pair", __FILE__, __LINE__);
+        fprintf(stderr, "%s:%d Unable to create PTY pair\n",
+                __FILE__, __LINE__);
         exit(-1);
     }
 
     /* First create tgdb, because it has the error log */
     if (start_gdb(argc, argv) == -1) {
-        fprintf(stderr, "%s:%d Unable to invoke GDB", __FILE__, __LINE__);
+        fprintf(stderr, "%s:%d Unable to invoke debugger: %s\n",
+                __FILE__, __LINE__, debugger_path ? debugger_path : "gdb");
         exit(-1);
     }
 
