@@ -253,9 +253,9 @@ struct tgdb_client_context *tgdb_client_create_context(const char
                 config_dir, logger);
 
         if (tcc->tgdb_debugger_context == NULL) {
-            free(tcc);
             logger_write_pos(tcc->logger, __FILE__, __LINE__,
                     "a2_create_instance failed");
+            free(tcc);
             return NULL;
         }
     } else {
