@@ -2,6 +2,7 @@
 %option outfile="lex.yy.c"
 
 D       [0-9]
+H       [0-9a-fA-F_]
 L       [a-zA-Z_]
 T       [0-9a-zA-Z_]
 IDENTIFIER {L}+{T}*
@@ -113,6 +114,26 @@ IDENTIFIER {L}+{T}*
 
 
 {D}+                    { return(TOKENIZER_LITERAL); }
+{D}+[lL]                { return(TOKENIZER_LITERAL); }
+{D}+[uU]                { return(TOKENIZER_LITERAL); }
+{D}+[lL][lL]            { return(TOKENIZER_LITERAL); }
+{D}+[uU][lL]            { return(TOKENIZER_LITERAL); }
+{D}+[uU][lL][lL]        { return(TOKENIZER_LITERAL); }
+{D}+[lL][uU]            { return(TOKENIZER_LITERAL); }
+{D}+[lL][lL][uU]        { return(TOKENIZER_LITERAL); }
+0x{H}+                  { return(TOKENIZER_LITERAL); }
+0x{H}+[lL]              { return(TOKENIZER_LITERAL); }
+0x{H}+[uU]              { return(TOKENIZER_LITERAL); }
+0x{H}+[lL][lL]          { return(TOKENIZER_LITERAL); }
+0x{H}+[uU][lL]          { return(TOKENIZER_LITERAL); }
+0x{H}+[uU][lL][lL]      { return(TOKENIZER_LITERAL); }
+0x{H}+[lL][uU]          { return(TOKENIZER_LITERAL); }
+0x{H}+[lL][lL][uU]      { return(TOKENIZER_LITERAL); }
+
+{D}*\.?{D}+([eE][-+]?{D}+)?    { return(TOKENIZER_LITERAL); }
+{D}+\.?({D})?+[fF]      { return(TOKENIZER_LITERAL); }
+\.{D}+[fF]              { return(TOKENIZER_LITERAL); }
+
 '.'                     { return(TOKENIZER_LITERAL); }
 '\\.'                   { return(TOKENIZER_LITERAL); }
 
