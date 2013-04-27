@@ -18,7 +18,7 @@ extern int gdbmi_lineno;
 
 struct gdbmi_parser {
     char *last_error;
-    gdbmi_pstate *mips;
+    gdbmi_pstate *pmips;
     gdbmi_pdata_ptr pdata_ptr;
 };
 
@@ -35,7 +35,7 @@ gdbmi_parser_ptr gdbmi_parser_create(void)
     }
 
     /* Create a new parser instance */
-    parser->mips = gdbmi_pstate_new();
+    parser->pmips = gdbmi_pstate_new();
     if (!parser) {
         fprintf(stderr, "%s:%d", __FILE__, __LINE__);
         return NULL;
@@ -62,10 +62,10 @@ int gdbmi_parser_destroy(gdbmi_parser_ptr parser)
         parser->last_error = NULL;
     }
 
-    if (parser->mips) {
+    if (parser->pmips) {
         /* Free the parser instance */
-        gdbmi_pstate_delete(parser->mips);
-        parser->mips = NULL;
+        gdbmi_pstate_delete(parser->pmips);
+        parser->pmips = NULL;
     }
 
     if (parser->pdata_ptr) {
@@ -111,7 +111,7 @@ gdbmi_parser_parse_string(gdbmi_parser_ptr parser,
         if (pattern == 0)
             break;
         mi_status =
-                gdbmi_push_parse(parser->mips, pattern, NULL,
+                gdbmi_push_parse(parser->pmips, pattern, NULL,
                 parser->pdata_ptr);
     } while (mi_status == YYPUSH_MORE);
 
@@ -163,7 +163,7 @@ gdbmi_parser_parse_file(gdbmi_parser_ptr parser,
         if (pattern == 0)
             break;
         mi_status =
-                gdbmi_push_parse(parser->mips, pattern, NULL,
+                gdbmi_push_parse(parser->pmips, pattern, NULL,
                 parser->pdata_ptr);
     } while (mi_status == YYPUSH_MORE);
 
