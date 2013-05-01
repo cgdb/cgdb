@@ -338,10 +338,17 @@ class show(gdb.Command):
         gdb.Command.__init__(self, "colored-display show", gdb.COMMAND_DATA)
 
     def invoke(self, arg, from_tty):
-        if not enabled:
+        if enabled:
+            print 'colored-display is on'
+        else:
             print 'colored-display is off'
-            return
-        print 'colored-display is on'
-        print 'printing to file ' + out_fname if print_to_file else 'printing to stdout'
+        if os.system('which source-highlight') == 0:
+            print 'source-highlight is installed'
+        else:
+            print 'source-highlight is not installed'
+        if print_to_file:
+            print 'printing to file ' + out_fname
+        else:
+            print 'printing to stdout'
 
 show()
