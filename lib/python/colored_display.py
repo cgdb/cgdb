@@ -20,6 +20,7 @@ out_fname = os.environ['HOME'] + '/gdbout.txt'
 out_file = None
 enabled = False
 print_to_file = False
+has_colorizer = False
 
 def dump_registers():
     s = '\033[1;31m=== registers =======================================\033[0;0m\n'
@@ -183,13 +184,30 @@ def get_colorized_source(fname, linenum):
         s += 'cannot execute source-highlight\n'
     return s
     
+def get_plain_source(fname, linenum):
+    rex = '^(0*)(%d):' % linenum
+    re_curr_line = re.compile(rex, re.MULTILINE)
+    f = open(fname, 'rt')
+    s = f.read()
+    f.close()
+    lines = s.split('\n')
+    lines = lines[linenum - 20 : linenum + 20]
+    text = ''
+    cnt = linenum if linenum > 20 else 0
+    for line in lines:
+        text += '%4d %s'
+    return text
+    
 def display_data(file):
     try:
         s = '\033[2J\033[;H' # clear screen
         (rows, cols) = get_term_size()
         fname, line = get_source_line()
         if line > 0:
-            s += get_colorized_source(fname, line)
+            if has_colorizer:
+                s += get_colorized_source(fname, line)
+            else:
+                s += get_plain_source(name, line)
         s += dump_registers()
         s += dump_stack()
         s += dump_locals()
@@ -226,9 +244,10 @@ def enable():
         out_file = open(out_fname, 'wt')
     else:
         out_file = sys.stdout
+        gdb.execute('set pagination off')
     gdb.events.stop.connect(stop_event_handler)
     enabled = True
-    gdb.execute('set pagination off')
+    has_colorizer = (os.system('which source-highlight') == 0)
     print '\033[31m=== colored-display is on ===\033[0m'
     print 'printing to file ' + out_fname + '. Use "tail -f ' + out_fname + \
         '" to display file ' if print_to_file else 'printing to stdout'
