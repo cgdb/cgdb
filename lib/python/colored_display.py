@@ -49,9 +49,9 @@ def dump_stack():
                 fname = 'bbind'
 
             # compact long names
-            if len(fname) > 40:
-                fname = fname[:19] + '...' + fname[-18:]
-            fname = fname.ljust(40)
+            if len(fname) > 60:
+                fname = fname[:29] + '...' + fname[-28:]
+            fname = fname.ljust(60)
 
             # hilight frame unless system lib
             if not fn.symtab.filename.startswith('libs/'):
@@ -123,7 +123,8 @@ def _format_value(x, frame):
     elif ctype.startswith('const boost::shared_ptr<'):
         ctype = ctype.replace('const boost::shared_ptr<', 'c_bsptr<')
         value = value['px'].dereference()
-
+    elif ctype.find('tbb::internal::') >= 0:
+        ctype = ctype.replace('tbb::internal::', '+tbi::')
 
     if value is None:
         value = ''
@@ -148,7 +149,7 @@ def dump_locals():
             type, \
             name.ljust(10)[:10], \
             tag.ljust(2), \
-            ctype.ljust(12)[:12], \
+            ctype.ljust(30)[:30], \
             value.ljust(40)[:40])
     return s
 
@@ -229,7 +230,8 @@ def enable():
     enabled = True
     gdb.execute('set pagination off')
     print '\033[31m=== colored-display is on ===\033[0m'
-    print 'printing to file ' + out_fname + '. Use "tail -f ' + out_fname + '" to display file ' if print_to_file else 'printing to stdout'
+    print 'printing to file ' + out_fname + '. Use "tail -f ' + out_fname + \
+        '" to display file ' if print_to_file else 'printing to stdout'
 
 class main_command(gdb.Command):
     """
@@ -300,7 +302,11 @@ class display(gdb.Command):
         if not enabled:
             print 'colored-display is not enabled'
             return
-        display_data(out_file)
+        if arg != '':
+            print >> out_file, gdb.execute('p ' + arg, from_tty = True, to_string = True)
+            out_file.flush()
+        else:
+            display_data(out_file)
 
 display()
 
