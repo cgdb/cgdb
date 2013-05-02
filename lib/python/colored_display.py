@@ -34,12 +34,15 @@ def dump_stack():
     cnt = 0
     while frame is not None:
         fn = frame.function()
+        green = True
         if fn is None:
             if frame.name() is None:
                 break
             s += str(cnt).ljust(3) + str(frame.name()).ljust(20)
         else:
             fname = fn.name
+            if fname.find('boost::') >= 0:
+                green = False
 
             # shorten long boost names
             fname = fname.replace('boost::asio::', 'bas::')
@@ -55,7 +58,7 @@ def dump_stack():
             fname = fname.ljust(60)
 
             # hilight frame unless system lib
-            if not fn.symtab.filename.startswith('libs/'):
+            if green:
                 fname = '\033[32m' + fname + '\033[0m'
             s += str(cnt).ljust(3) + fname + ' ' \
                 + os.path.basename(fn.symtab.filename)
@@ -122,11 +125,14 @@ def _format_value(x, frame):
         ctype = 'astr'
         value = value['_M_dataplus']['_M_p']
     elif ctype.startswith('const boost::shared_ptr<'):
-        ctype = ctype.replace('const boost::shared_ptr<', 'c_bsptr<')
+        ctype = ctype.replace('const boost::shared_ptr<', 'CBSP<')
+        value = value['px'].dereference()
+    elif ctype.startswith('boost::intrusive_ptr<'):
+        ctype = ctype.replace('boost::intrusive_ptr<', 'BIP<')
         value = value['px'].dereference()
     elif ctype.find('tbb::internal::') >= 0:
         ctype = ctype.replace('tbb::internal::', '+tbi::')
-
+        
     if value is None:
         value = ''
     else:
@@ -136,14 +142,14 @@ def _format_value(x, frame):
     value = re_space.sub(' ', value)
     
     return type, ctype, tag, x.print_name, value
-    
+
 def dump_locals():
     s = '\033[1;31m=== locals ==========================================\033[0;0m\n'
     frame = gdb.selected_frame()
     try:
         block = frame.block()
     except:
-        return s + 'no blocks in this frame'
+        return s + 'no blocks in this frame\n'
     for x in block:
         type, ctype, tag, name, value = _format_value(x, frame)
         s += '%s %s %s %s %s\n' % (\
@@ -152,7 +158,36 @@ def dump_locals():
             tag.ljust(2), \
             ctype.ljust(30)[:30], \
             value.ljust(40)[:40])
-    return s
+    return s + '\n'
+
+def dump_threads():
+    s = '\033[1;31m=== threads ==========================================\033[0;0m\n'
+    inferior = gdb.selected_inferior()
+    sel_thread = gdb.selected_thread();
+    for x in inferior.threads():
+        x.switch()
+        frame = gdb.selected_frame()
+        func = frame.function()
+        name = ''
+        if func is not None:
+            name = func.name
+        else:
+            name = frame.name()
+
+        row = '%2d %4d %4d %s' % (\
+            x.num, \
+            x.ptid[0], \
+            x.ptid[1], \
+            name
+            )
+
+        row = row[:40]    
+
+        if x.ptid == sel_thread.ptid:
+            row = '\033[1;33m' + row + '\033[0m'
+        s += row + '\n'
+    sel_thread.switch()
+    return s + '\n'
 
 def get_term_size():
     st = fcntl.ioctl(2, termios.TIOCGWINSZ, '1234')
@@ -211,6 +246,7 @@ def display_data(file):
         s += dump_registers()
         s += dump_stack()
         s += dump_locals()
+        s += dump_threads()
         lines = s.split('\n')
         print >> file, s
     except Exception as e:

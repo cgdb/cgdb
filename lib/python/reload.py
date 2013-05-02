@@ -10,6 +10,7 @@ class reload(gdb.Command):
 
     def invoke(self, arg, from_tty):
         gdb.execute('source ~/local/share/gdb/python/gdb/command/colored_display.py')
+        gdb.execute('colored-display output file')
         print '~/local/share/gdb/python/gdb/command/colored_display.py reloaded'
 
 reload()
