@@ -1,10 +1,12 @@
 %option prefix="d_"
 %option outfile="lex.yy.c"
 
+B       [01_]
 D       [0-9_]
 H       [0-9a-fA-F_]
 L       [a-zA-Z_]
 T       [0-9a-zA-Z_]
+SP      [cwd]
 IDENTIFIER {L}+{T}*
 
 %{
@@ -19,6 +21,7 @@ int nesting_level;
 %x nesting_comment
 %x string_literal
 %x wysiwyg_literal
+%x alt_wysiwyg_literal
 
 %%
 "__gshared"             { return(TOKENIZER_TYPE); }
@@ -172,38 +175,79 @@ int nesting_level;
 
 
 \"                                          { BEGIN(string_literal);     return(TOKENIZER_LITERAL); }
+x\"                                         { BEGIN(string_literal);     return(TOKENIZER_LITERAL); }
 <string_literal>(\\[^\r\n]|[^\\"\r\n])*     { return(TOKENIZER_LITERAL); }
 <string_literal>\n                          { return(TOKENIZER_NEWLINE); }
 <string_literal>\r                          { return(TOKENIZER_NEWLINE); }
 <string_literal>\r\n                        { return(TOKENIZER_NEWLINE); }
 <string_literal>\"                          { BEGIN(INITIAL);            return(TOKENIZER_LITERAL); }
+<string_literal>\"{SP}                      { BEGIN(INITIAL);            return(TOKENIZER_LITERAL); }
 
-"`"                                         { BEGIN(wysiwyg_literal);    return(TOKENIZER_LITERAL); }
-<wysiwyg_literal>([^`\r\n])*                { return(TOKENIZER_LITERAL); }
+r\"                                         { BEGIN(wysiwyg_literal);    return(TOKENIZER_LITERAL); }
+<wysiwyg_literal>(\\[^\r\n]|[^\\"\r\n])*    { return(TOKENIZER_LITERAL); }
 <wysiwyg_literal>\n                         { return(TOKENIZER_NEWLINE); }
 <wysiwyg_literal>\r                         { return(TOKENIZER_NEWLINE); }
 <wysiwyg_literal>\r\n                       { return(TOKENIZER_NEWLINE); }
-<wysiwyg_literal>"`"                        { BEGIN(INITIAL);            return(TOKENIZER_LITERAL); }
+<wysiwyg_literal>\"                         { BEGIN(INITIAL);            return(TOKENIZER_LITERAL); }
+<wysiwyg_literal>\"{SP}                     { BEGIN(INITIAL);            return(TOKENIZER_LITERAL); }
+
+"`"                                         { BEGIN(alt_wysiwyg_literal);    return(TOKENIZER_LITERAL); }
+<alt_wysiwyg_literal>([^`\r\n])*            { return(TOKENIZER_LITERAL); }
+<alt_wysiwyg_literal>\n                     { return(TOKENIZER_NEWLINE); }
+<alt_wysiwyg_literal>\r                     { return(TOKENIZER_NEWLINE); }
+<alt_wysiwyg_literal>\r\n                   { return(TOKENIZER_NEWLINE); }
+<alt_wysiwyg_literal>"`"                    { BEGIN(INITIAL);            return(TOKENIZER_LITERAL); }
+<alt_wysiwyg_literal>"`"{SP}                { BEGIN(INITIAL);            return(TOKENIZER_LITERAL); }
 
 
-{D}+                    { return(TOKENIZER_LITERAL); }
-{D}+f                   { return(TOKENIZER_LITERAL); }
-{D}+L                   { return(TOKENIZER_LITERAL); }
-{D}+U                   { return(TOKENIZER_LITERAL); }
-{D}+UL                  { return(TOKENIZER_LITERAL); }
-0x{H}+                  { return(TOKENIZER_LITERAL); }
-'.'                     { return(TOKENIZER_LITERAL); }
-'\\.'                   { return(TOKENIZER_LITERAL); }
-"false"                 { return(TOKENIZER_LITERAL); }
-"null"                  { return(TOKENIZER_LITERAL); }
-"true"                  { return(TOKENIZER_LITERAL); }
+{D}+                          { return(TOKENIZER_LITERAL); }
+{D}+[fF]                      { return(TOKENIZER_LITERAL); }
+{D}+i                         { return(TOKENIZER_LITERAL); }
+{D}+L                         { return(TOKENIZER_LITERAL); }
+{D}+L[uU]                     { return(TOKENIZER_LITERAL); }
+{D}+[uU]                      { return(TOKENIZER_LITERAL); }
+{D}+[uU]L                     { return(TOKENIZER_LITERAL); }
+{D}+[eE]{D}+                  { return(TOKENIZER_LITERAL); }
+{D}+[eE]{D}+[fF]              { return(TOKENIZER_LITERAL); }
+{D}+[eE][-+]{D}+              { return(TOKENIZER_LITERAL); }
+{D}+[eE][-+]{D}+[fF]          { return(TOKENIZER_LITERAL); }
 
-\n                      { return(TOKENIZER_NEWLINE); }
-\r\n                    { return(TOKENIZER_NEWLINE); }
-\r                      { return(TOKENIZER_NEWLINE); }
-[ \t\v\f]               { return(TOKENIZER_TEXT);    }
-{IDENTIFIER}            { return(TOKENIZER_TEXT);    }
-.                       { return(TOKENIZER_TEXT);    }
+0b{B}+                        { return(TOKENIZER_LITERAL); }
+0b{B}+L                       { return(TOKENIZER_LITERAL); }
+0b{B}+L[uU]                   { return(TOKENIZER_LITERAL); }
+0b{B}+[uU]                    { return(TOKENIZER_LITERAL); }
+0b{B}+[uU]L                   { return(TOKENIZER_LITERAL); }
+
+0x{H}+                        { return(TOKENIZER_LITERAL); }
+0x{H}+L                       { return(TOKENIZER_LITERAL); }
+0x{H}+L[uU]                   { return(TOKENIZER_LITERAL); }
+0x{H}+[uU]                    { return(TOKENIZER_LITERAL); }
+0x{H}+[uU]L                   { return(TOKENIZER_LITERAL); }
+0x{H}+[pP][-+]{D}+            { return(TOKENIZER_LITERAL); }
+0x{H}+[pP][-+]{D}+i           { return(TOKENIZER_LITERAL); }
+0x{H}+[pP][-+]{D}+L           { return(TOKENIZER_LITERAL); }
+0x{H}+[pP][-+]{D}+L[uU]       { return(TOKENIZER_LITERAL); }
+0x{H}+[pP][-+]{D}+[uU]        { return(TOKENIZER_LITERAL); }
+0x{H}+[pP][-+]{D}+[uU]L       { return(TOKENIZER_LITERAL); }
+0x{H}+.{H}+[pP][-+]{D}+       { return(TOKENIZER_LITERAL); }
+0x{H}+.{H}+[pP][-+]{D}+i      { return(TOKENIZER_LITERAL); }
+0x{H}+.{H}+[pP][-+]{D}+L      { return(TOKENIZER_LITERAL); }
+0x{H}+.{H}+[pP][-+]{D}+L[uU]  { return(TOKENIZER_LITERAL); }
+0x{H}+.{H}+[pP][-+]{D}+[uU]   { return(TOKENIZER_LITERAL); }
+0x{H}+.{H}+[pP][-+]{D}+[uU]L  { return(TOKENIZER_LITERAL); }
+
+'.'                           { return(TOKENIZER_LITERAL); }
+'\\.'                         { return(TOKENIZER_LITERAL); }
+"false"                       { return(TOKENIZER_LITERAL); }
+"null"                        { return(TOKENIZER_LITERAL); }
+"true"                        { return(TOKENIZER_LITERAL); }
+
+\n                            { return(TOKENIZER_NEWLINE); }
+\r\n                          { return(TOKENIZER_NEWLINE); }
+\r                            { return(TOKENIZER_NEWLINE); }
+[ \t\v\f]                     { return(TOKENIZER_TEXT);    }
+{IDENTIFIER}                  { return(TOKENIZER_TEXT);    }
+.                             { return(TOKENIZER_TEXT);    }
 
 %%
 
