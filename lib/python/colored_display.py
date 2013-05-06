@@ -13,7 +13,7 @@ colored-display print                -- print data for current frame
 colored-display output {file|stdout} -- set output stream
 """
 
-import gdb, os, re, time, sys, termios, struct, fcntl, subprocess
+import gdb, os, re, time, sys, termios, struct, fcntl, subprocess, datetime
 import traceback
 
 out_fname = os.environ['HOME'] + '/gdbout.txt'
@@ -84,16 +84,19 @@ def dump_stack():
             s += str(cnt).ljust(3) + str(frame.name()).ljust(20)
         else:
             fname = fn.name
-            if fname.find('boost::') >= 0:
-                green = False
 
             # shorten long boost names
-            fname = fname.replace('boost::asio::', 'bas::')
+
             n = fname.rfind('(')
             if n > 0:
                 fname = fname[:n]
+
             if fname.startswith('boost::_bi::bind_t'):
                 fname = 'bbind'
+            elif fname.find('boost::') >= 0:
+                green = False
+
+            fname = fname.replace('boost::asio::', 'bas::')
 
             # compact long names
             if len(fname) > 60:
@@ -167,19 +170,27 @@ def format_value(x, frame):
     elif ctype == 'astring':
         ctype = 'astr'
         value = value['_M_dataplus']['_M_p']
+    elif ctype == 'std::locale::string':
+        ctype = 'str'
+        value = value['_M_dataplus']['_M_p']
     elif ctype.startswith('const boost::shared_ptr<'):
         ctype = ctype.replace('const boost::shared_ptr<', 'CBSP<')
         value = value['px'].dereference()
     elif ctype.startswith('boost::intrusive_ptr<'):
         ctype = ctype.replace('boost::intrusive_ptr<', 'BIP<')
         value = value['px'].dereference()
+    elif ctype.startswith('std::_Rb_tree_iterator<'):
+        ctype = ctype.replace('std::_Rb_tree_iterator<', 'iter<')
     elif ctype.find('tbb::internal::') >= 0:
         ctype = ctype.replace('tbb::internal::', '+tbi::')
         
     if value is None:
         value = ''
     else:
-        value = str(value)
+        try:
+            value = str(value)
+        except Exception as e:
+            value = 'ERROR: ' + e.message
 
     value = value.replace('\n', ' ')
     value = re_space.sub(' ', value)
@@ -255,6 +266,7 @@ def get_source_line():
 
 def display_data(file):
     try:
+        start = datetime.datetime.now()
         s = '\033[2J\033[;H' # clear screen
         (rows, cols) = get_term_size()
         fname, line = get_source_line()
@@ -269,6 +281,8 @@ def display_data(file):
         s += dump_threads()
         lines = s.split('\n')
         print >> file, s
+        end = datetime.datetime.now()
+        print >> file, 'time: ' + str(end - start)
     except Exception as e:
         traceback.print_tb(sys.exc_info()[2])
         print >> file, 'ERROR: ' + e.message
