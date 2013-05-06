@@ -1,7 +1,7 @@
 """GDB stop event handler.
 Produces colored output on the stop event.
-Output contains current frame data like registers, stack, local variables
-and source code.
+Output contains current registers, stack, local variables,
+threads and source code.
 Output can be redirected to the file instead of stdout and can be
 viewed by in second terminal by "tail -f ~/gdbout.txt"
 
@@ -22,15 +22,58 @@ enabled = False
 print_to_file = False
 has_colorizer = False
 
+#====================== utils ==========================================
+
+def format_header(s):
+    s = '\033[1;31m=== ' + (s + ' ').ljust(80, '=') + '\033[0;0m\n'
+    return s
+
+def get_term_size():
+    st = fcntl.ioctl(2, termios.TIOCGWINSZ, '1234')
+    cr = struct.unpack('hh', st)
+    return cr
+    
+def get_colorized_source(fname, linenum):
+    rex = '^(0*)(%d):' % linenum
+    re_curr_line = re.compile(rex, re.MULTILINE)
+    cmd = ['source-highlight',
+            '--line-number', '--line-number-ref=aaaa',
+            '--line-range=%d-%d' % (linenum - 20, linenum + 20),
+            '-o', '/dev/stdout',
+            '-i', fname,
+            '-f', 'esc']
+    p = subprocess.Popen(cmd, stdout = subprocess.PIPE) 
+    s = p.stdout.read()
+    s = re_curr_line.sub('\033[1;33m\g<1>\g<2>=\033[0m', s)
+    if p.wait() != 0:
+        s += 'cannot execute source-highlight\n'
+    return s
+    
+def get_plain_source(fname, linenum):
+    rex = '^(0*)(%d):' % linenum
+    re_curr_line = re.compile(rex, re.MULTILINE)
+    f = open(fname, 'rt')
+    s = f.read()
+    f.close()
+    lines = s.split('\n')
+    lines = lines[linenum - 20 : linenum + 20]
+    text = ''
+    cnt = linenum if linenum > 20 else 0
+    for line in lines:
+        text += '%4d %s'
+    return text
+
+#=======================================================================
+
 def dump_registers():
-    s = '\033[1;31m=== registers =======================================\033[0;0m\n'
+    s = format_header('registers')
     v = gdb.parse_and_eval('$rax')
     s += '$rax: 0x%x (%d)\n' % (v, v)
     return s
 
 def dump_stack():
     frame = gdb.selected_frame()
-    s = '\033[1;31m=== stack ===========================================\033[0;0m\n'
+    s = format_header('stack')
     cnt = 0
     while frame is not None:
         fn = frame.function()
@@ -61,13 +104,13 @@ def dump_stack():
             if green:
                 fname = '\033[32m' + fname + '\033[0m'
             s += str(cnt).ljust(3) + fname + ' ' \
-                + os.path.basename(fn.symtab.filename)
+                + os.path.basename(fn.symtab.filename) + ':' + str(fn.line)
         s += '\n'
         cnt += 1
         frame = frame.older()
     return s
 
-def _get_value_types(v):
+def get_value_types(v):
 
     type = ''
     ctype = ''
@@ -106,10 +149,10 @@ def _get_value_types(v):
 
 re_space = re.compile('\s+')
 
-def _format_value(x, frame):
+def format_value(x, frame):
     value = None
 
-    type, ctype, tag = _get_value_types(x)
+    type, ctype, tag = get_value_types(x)
 
     if x.is_argument or x.is_variable or x.is_constant:
         value = x.value(frame)
@@ -144,14 +187,14 @@ def _format_value(x, frame):
     return type, ctype, tag, x.print_name, value
 
 def dump_locals():
-    s = '\033[1;31m=== locals ==========================================\033[0;0m\n'
+    s = format_header('locals')
     frame = gdb.selected_frame()
     try:
         block = frame.block()
     except:
         return s + 'no blocks in this frame\n'
     for x in block:
-        type, ctype, tag, name, value = _format_value(x, frame)
+        type, ctype, tag, name, value = format_value(x, frame)
         s += '%s %s %s %s %s\n' % (\
             type, \
             name.ljust(10)[:10], \
@@ -161,38 +204,45 @@ def dump_locals():
     return s + '\n'
 
 def dump_threads():
-    s = '\033[1;31m=== threads ==========================================\033[0;0m\n'
+    
+    s = format_header('threads')
+    
     inferior = gdb.selected_inferior()
-    sel_thread = gdb.selected_thread();
+    sel_thread = gdb.selected_thread() # save current thread
+    sel_frame = gdb.selected_frame() # save current thread
+    
+    # switch to threads and get frames
     for x in inferior.threads():
         x.switch()
         frame = gdb.selected_frame()
         func = frame.function()
         name = ''
+        fname = ''
         if func is not None:
             name = func.name
+            if func.symtab is not None:
+                fname = os.path.basename(func.symtab.filename)
+                fname += ':' + str(func.line)
         else:
             name = frame.name()
 
-        row = '%2d %4d %4d %s' % (\
+        row = '%2d %4d %4d %s %s' % (\
             x.num, \
             x.ptid[0], \
             x.ptid[1], \
-            name
+            name, \
+            fname
             )
-
-        row = row[:40]    
 
         if x.ptid == sel_thread.ptid:
             row = '\033[1;33m' + row + '\033[0m'
         s += row + '\n'
-    sel_thread.switch()
+    
+    sel_thread.switch() # restore thread
+    sel_frame.select()  # restore frame
+    
     return s + '\n'
 
-def get_term_size():
-    st = fcntl.ioctl(2, termios.TIOCGWINSZ, '1234')
-    cr = struct.unpack('hh', st)
-    return cr
 
 re_where = re.compile(' at ([^:]*):(\d+)$')
 
@@ -203,36 +253,6 @@ def get_source_line():
         return '', 0
     return m.group(1), int(m.group(2))
 
-def get_colorized_source(fname, linenum):
-    rex = '^(0*)(%d):' % linenum
-    re_curr_line = re.compile(rex, re.MULTILINE)
-    cmd = ['source-highlight',
-            '--line-number', '--line-number-ref=aaaa',
-            '--line-range=%d-%d' % (linenum - 20, linenum + 20),
-            '-o', '/dev/stdout',
-            '-i', fname,
-            '-f', 'esc']
-    p = subprocess.Popen(cmd, stdout = subprocess.PIPE) 
-    s = p.stdout.read()
-    s = re_curr_line.sub('\033[1;33m\g<1>\g<2>=\033[0m', s)
-    if p.wait() != 0:
-        s += 'cannot execute source-highlight\n'
-    return s
-    
-def get_plain_source(fname, linenum):
-    rex = '^(0*)(%d):' % linenum
-    re_curr_line = re.compile(rex, re.MULTILINE)
-    f = open(fname, 'rt')
-    s = f.read()
-    f.close()
-    lines = s.split('\n')
-    lines = lines[linenum - 20 : linenum + 20]
-    text = ''
-    cnt = linenum if linenum > 20 else 0
-    for line in lines:
-        text += '%4d %s'
-    return text
-    
 def display_data(file):
     try:
         s = '\033[2J\033[;H' # clear screen
