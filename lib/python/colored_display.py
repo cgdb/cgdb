@@ -274,7 +274,7 @@ def display_data(file):
             if has_colorizer:
                 s += get_colorized_source(fname, line)
             else:
-                s += get_plain_source(name, line)
+                s += get_plain_source(fname, line)
         s += dump_registers()
         s += dump_stack()
         s += dump_locals()
@@ -306,6 +306,7 @@ def disable():
 def enable():
     global enabled
     global out_file
+    global has_colorizer
     if enabled:
         gdb.execute('echo \033[31m=== colored-display is enabled already. Disabling first ===\033[0m\n')
         disable()
