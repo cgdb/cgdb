@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 """GDB stop event handler.
 Produces colored output on the stop event.
 Output contains current registers, stack, local variables,
@@ -13,7 +15,7 @@ colored-display print                -- print data for current frame
 colored-display output {file|stdout} -- set output stream
 """
 
-import gdb, os, re, time, sys, termios, struct, fcntl, subprocess, datetime
+import os, re, time, sys, termios, struct, fcntl, subprocess, datetime
 import traceback
 
 out_fname = os.environ['HOME'] + '/gdbout.txt'
@@ -21,6 +23,7 @@ out_file = None
 enabled = False
 print_to_file = False
 has_colorizer = False
+debug = 0
 
 #====================== utils ==========================================
 
@@ -58,7 +61,9 @@ def get_plain_source(fname, linenum):
     lines = s.split('\n')
     lines = lines[linenum - 20 : linenum + 20]
     text = ''
-    cnt = linenum if linenum > 20 else 0
+    cnt = 0
+    if linenum > 20:
+        linenum = 20
     for line in lines:
         text += '%4d %s'
     return text
@@ -189,8 +194,8 @@ def format_value(x, frame):
     else:
         try:
             value = str(value)
-        except Exception as e:
-            value = 'ERROR: ' + e.message
+        except Exception:
+            value = 'ERROR: ' + str(sys.exc_info())
 
     value = value.replace('\n', ' ')
     value = re_space.sub(' ', value)
@@ -283,13 +288,90 @@ def display_data(file):
         print >> file, s
         end = datetime.datetime.now()
         print >> file, 'time: ' + str(end - start)
-    except Exception as e:
+    except Exception:
         traceback.print_tb(sys.exc_info()[2])
-        print >> file, 'ERROR: ' + e.message
+        print >> file, 'ERROR: ' + str(sys.exc_info())
     file.flush()
+
+def parse_annot(text, file):
+
+    lines = text.split('\n')
+    state = ''
+    depth = 0
+    arr_value = ''
+    value = ''
+    name = ''
+
+    for line in lines:
+        s = line.lstrip('\x1a\x1a')
+     
+        if s.startswith('field-begin'):
+            state = s
+            depth += 1
+            continue
+       
+        if s.startswith('field-value'):
+            state = s
+            continue
+
+        if s.startswith('field-name-end'):
+            state = s
+            continue
+     
+        if s.startswith('value-history-begin'):
+            continue
+       
+        if s.startswith('value-history-value'):
+            state = s
+            continue
+       
+        if s.startswith('value-history-end'):
+            state = s
+            continue
+            
+        if s.startswith('array-section-begin'):
+            arr_value = ''
+            continue
+
+        if s.startswith('array-section-end'):
+            value = arr_value
+            state = s
+            continue
+
+        if s.startswith('elt'):
+            arr_value += value + ' '
+#            print 'arr_value:', arr_value
+            continue
+
+        if s.startswith('field-end'):
+            state = s
+            depth -= 1
+            continue
+
+        # print 'state:', state, ',', s
+
+        if state == 'field-begin -':
+            name = s
+        elif state == 'field-value':
+            value = s
+        elif state == 'value-history-value':
+            if s != '':
+                value = s
+        elif state == 'field-end' and name != '':
+            print >> file, ' ' * (depth * 2) + name, '=', value
+            name = ''
+            value = ''
+            arr_value = ''
+        elif state == 'value-history-end':
+            print >> file, value
+            name = ''
+            value = ''
+            arr_value = ''
+
 
 def stop_event_handler(event):
     display_data(out_file)
+
 
 def disable():
     global enabled
@@ -303,6 +385,7 @@ def disable():
     out_file = None
     gdb.execute('echo \033[31m=== colored-display is off ===\033[0m\n')
 
+    
 def enable():
     global enabled
     global out_file
@@ -320,8 +403,23 @@ def enable():
     enabled = True
     has_colorizer = (os.system('which source-highlight') == 0)
     print '\033[31m=== colored-display is on ===\033[0m'
-    print 'printing to file ' + out_fname + '. Use "tail -f ' + out_fname + \
-        '" to display file ' if print_to_file else 'printing to stdout'
+    if print_to_file:
+        print 'printing to file ' + out_fname
+    else:
+        print 'printing to stdout'
+
+def debug():
+    global debug
+    debug = 1
+    f  = open('/home/sergv/tmp/1.txt')
+    text = f.read()
+    parse_annot(text, sys.stdout)
+
+if __name__ == '__main__':
+    debug()
+    sys.exit(1)
+    
+import gdb
 
 class main_command(gdb.Command):
     """
@@ -329,7 +427,6 @@ class main_command(gdb.Command):
     """
 
     def __init__(self):
-        import gdb
         gdb.Command.__init__(self, "colored-display", gdb.COMMAND_DATA, prefix=True)
 
     def invoke(self, arg, from_tty):
@@ -343,7 +440,6 @@ class enable_command(gdb.Command):
     """
 
     def __init__(self):
-        import gdb
         gdb.Command.__init__(self, "colored-display enable", gdb.COMMAND_DATA)
 
     def invoke(self, arg, from_tty):
@@ -357,7 +453,6 @@ class set_output(gdb.Command):
     """
 
     def __init__(self):
-        import gdb
         gdb.Command.__init__(self, "colored-display output", gdb.COMMAND_DATA)
 
     def invoke(self, arg, from_tty):
@@ -393,7 +488,12 @@ class display(gdb.Command):
             print 'colored-display is not enabled'
             return
         if arg != '':
-            print >> out_file, gdb.execute('p ' + arg, from_tty = True, to_string = True)
+            s = gdb.execute('p ' + arg, from_tty = True, to_string = True)
+#            f = open('/home/sergv/tmp/1.txt', 'wb')
+#            f.write(s)
+#            f.close()
+            print >> out_file, '\033[1;31m=== ' + (arg + ' ').ljust(80, '=') + '\033[0;0m'
+            parse_annot(s, out_file)
             out_file.flush()
         else:
             display_data(out_file)
@@ -423,3 +523,4 @@ class show(gdb.Command):
             print 'printing to stdout'
 
 show()
+
