@@ -173,7 +173,7 @@ void scr_up(struct scroller *scr, int nlines)
         else {
             if (scr->current.r > 0) {
                 scr->current.r--;
-                if ((length = strlen(scr->buffer[scr->current.r])) > width)
+                if ((length = strlen((const char *)scr->buffer[scr->current.r])) > width)
                     scr->current.c = ((length - 1) / width) * width;
             } else {
                 /* At top */
@@ -198,7 +198,7 @@ void scr_down(struct scroller *scr, int nlines)
 
     for (i = 0; i < nlines; i++) {
         /* If the current line wraps to the next, then advance column number */
-        length = strlen(scr->buffer[scr->current.r]);
+        length = strlen((const char *)scr->buffer[scr->current.r]);
         if (scr->current.c < length - width)
             scr->current.c += width;
 
@@ -228,7 +228,7 @@ void scr_end(struct scroller *scr)
     getmaxyx(scr->win, height, width);
 
     scr->current.r = scr->length - 1;
-    scr->current.c = (strlen(scr->buffer[scr->current.r]) / width) * width;
+    scr->current.c = (strlen((const char *)scr->buffer[scr->current.r]) / width) * width;
 }
 
 void scr_add(struct scroller *scr, const char *buf)
@@ -239,12 +239,12 @@ void scr_add(struct scroller *scr, const char *buf)
 
     /* Find next newline in the string */
     x = strchr(buf, '\n');
-    length = strlen(scr->buffer[scr->length - 1]);
+    length = strlen((const char *)scr->buffer[scr->length - 1]);
     distance = x ? x - buf : strlen(buf);
 
     /* Append to the last line in the buffer */
     if (distance > 0) {
-        char *temp = scr->buffer[scr->length - 1];
+        char *temp = (char *)scr->buffer[scr->length - 1];
         char *buf2 = malloc(distance + 1);
 
         strncpy(buf2, buf, distance);
@@ -310,11 +310,10 @@ void scr_refresh(struct scroller *scr, int focus)
 
     /* Start drawing at the bottom of the viewable space, and work our way up */
     for (nlines = 1; nlines <= height; nlines++) {
-
         /* Print the current line [segment] */
         memset(buffer, ' ', width);
         if (r >= 0) {
-            length = strlen(scr->buffer[r] + c);
+            length = strlen((const char *)scr->buffer[r] + c);
             memcpy(buffer, scr->buffer[r] + c, length < width ? length : width);
         }
         mvwprintw(scr->win, height - nlines, 0, "%s", buffer);
@@ -325,14 +324,14 @@ void scr_refresh(struct scroller *scr, int focus)
         else {
             r--;
             if (r >= 0) {
-                length = strlen(scr->buffer[r]);
+                length = strlen((const char *)scr->buffer[r]);
                 if (length > width)
                     c = ((length - 1) / width) * width;
             }
         }
     }
 
-    length = strlen(scr->buffer[scr->current.r] + scr->current.c);
+    length = strlen((const char *)(scr->buffer[scr->current.r] + scr->current.c));
     if (focus && scr->current.r == scr->length - 1 && length <= width) {
         /* We're on the last line, draw the cursor */
         curs_set(1);
