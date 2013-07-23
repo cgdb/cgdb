@@ -353,6 +353,9 @@ Opens a window to give input to the debugged program.
 @item Ctrl-T
 Opens a new tty for the debugged program.
 
+@item Ctrl-W
+Toggle the window orientation (horizontal <-> vertical).
+
 @item k
 @itemx up arrow
 Move up a line.
@@ -411,10 +414,10 @@ Sets a breakpoint at the current line number.
 Sets a temporary breakpoint at the current line number.
 
 @item -
-Shrink source window 1 line.
+Shrink source window 1 line or column (depending on split orientation).
 
 @item =
-Grow source window 1 line.
+Grow source window 1 line or column (depending on split orientation).
 
 @item _
 Shrink source window 25% (or, shrink tty window 1 line, if visible).
@@ -720,6 +723,13 @@ Set the split point between source and GDB window.  This is especially useful
 as an init setting in your @file{cgdbrc} file.  @xref{Configuring CGDB}.  The 
 possible values for @var{style} are @samp{top_full}, @samp{top_big}, 
 @samp{even}, @samp{bottom_big}, and @samp{bottom_full}.
+
+@item :set so=@var{style}
+@itemx :set splitorientation=@var{style}
+Sets the window split orientation to either @samp{horizontal} (which places the 
+source window above and the GDB window below), or @samp{vertical} (which places the 
+source window on the left and the GDB window on the right). 
+@xref{Configuring CGDB}.
 
 @item :set ws
 @itemx :set wrapscan

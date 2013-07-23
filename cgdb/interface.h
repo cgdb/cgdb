@@ -163,6 +163,11 @@ void if_tty_toggle(void);
  */
 void if_draw(void);
 
+ /* if_set_winorientation:
+  * ________________
+  */
+void if_set_splitorientation(SPLIT_ORIENTATION_TYPE newOrientation);
+
  /* if_set_winsplit:
   * ________________
   */

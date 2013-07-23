@@ -84,7 +84,7 @@ extern struct tgdb *tgdb;
 static int interface_winminheight = 0;
 
 /* The offset that determines allows gdb/sources window to grow or shrink */
-static int window_height_shift;
+static int window_shift;
 
 /* This is for the tty I/O window */
 #define TTY_WIN_DEFAULT_HEIGHT ((interface_winminheight>4)?interface_winminheight:4)
@@ -98,6 +98,7 @@ static int tty_win_height_shift = 0;
 
 /* Current window split state */
 WIN_SPLIT_TYPE cur_win_split = WIN_SPLIT_EVEN;
+SPLIT_ORIENTATION_TYPE cur_split_orientation = SPLIT_HORIZONTAL;
 
 /* --------------- */
 /* Local Variables */
@@ -193,13 +194,19 @@ static int get_src_col(void)
     return 0;
 }
 
+static int get_src_status_height(void);
+
 static int get_src_height(void)
 {
-    return ((int) (((screen_size.ws_row + 0.5) / 2) + window_height_shift));
+    if (cur_split_orientation == SPLIT_HORIZONTAL)
+        return ((int) (((screen_size.ws_row + 0.5) / 2) + window_shift));
+    return (screen_size.ws_row) - get_src_status_height();
 }
 
 static int get_src_width(void)
 {
+    if (cur_split_orientation == SPLIT_VERTICAL)
+        return ((int) (((screen_size.ws_col + 0.5) / 2) + window_shift));
     return (screen_size.ws_col);
 }
 
@@ -213,7 +220,7 @@ static int get_src_status_row(void)
 
 static int get_src_status_col(void)
 {
-    return 0;
+    return get_src_col();;
 }
 
 static int get_src_status_height(void)
@@ -223,17 +230,42 @@ static int get_src_status_height(void)
 
 static int get_src_status_width(void)
 {
-    return (screen_size.ws_col);
+    return get_src_width();
+}
+
+/* These are for the separator line in horizontal split mode */
+static int get_sep_row(void)
+{
+    return 0;
+}
+
+static int get_sep_col(void)
+{
+    return get_src_col() + get_src_width();
+}
+
+static int get_sep_height(void)
+{
+    return (screen_size.ws_row);
+}
+
+static int get_sep_width(void)
+{
+    return 1;
 }
 
 /* This is for the tty I/O window */
 static int get_tty_row(void)
 {
-    return get_src_status_row() + get_src_status_height();
+    if (cur_split_orientation == SPLIT_HORIZONTAL)
+        return get_src_status_row() + get_src_status_height();
+    return 0;
 }
 
 static int get_tty_col(void)
 {
+    if (cur_split_orientation == SPLIT_VERTICAL)
+        return get_sep_col() + get_sep_width();
     return 0;
 }
 
@@ -242,8 +274,12 @@ static int get_tty_height(void)
     return TTY_WIN_OFFSET;
 }
 
+static int get_gdb_width(void);
+
 static int get_tty_width(void)
 {
+    if (cur_split_orientation == SPLIT_VERTICAL)
+        return get_gdb_width();
     return (screen_size.ws_col);
 }
 
@@ -255,7 +291,7 @@ static int get_tty_status_row(void)
 
 static int get_tty_status_col(void)
 {
-    return 0;
+    return get_tty_col();
 }
 
 static int get_tty_status_height(void)
@@ -265,7 +301,7 @@ static int get_tty_status_height(void)
 
 static int get_tty_status_width(void)
 {
-    return (screen_size.ws_col);
+    return get_tty_width();
 }
 
 /* This is for the debugger window */
@@ -274,28 +310,57 @@ static int get_gdb_row(void)
     if (tty_win_on)
         return get_tty_status_row() + get_tty_status_height();
 
-    return get_src_status_row() + get_src_status_height();
+    if (cur_split_orientation == SPLIT_HORIZONTAL)
+        return get_src_status_row() + get_src_status_height();
+
+    return 0;
 }
 
 static int get_gdb_col(void)
 {
+    if (cur_split_orientation == SPLIT_VERTICAL)
+        return get_sep_col() + get_sep_width();
     return 0;
 }
 
 int get_gdb_height(void)
 {
-    int window_size = ((screen_size.ws_row / 2) - window_height_shift - 1);
-    int odd_screen_size = (screen_size.ws_row % 2);
+    if (cur_split_orientation == SPLIT_HORIZONTAL) {
+        int window_size = ((screen_size.ws_row / 2) - window_shift - 1);
+        int odd_screen_size = (screen_size.ws_row % 2);
 
-    if (tty_win_on)
-        return window_size - TTY_WIN_OFFSET + odd_screen_size - 1;
+        if (tty_win_on)
+            return window_size - TTY_WIN_OFFSET + odd_screen_size - 1;
 
-    return window_size + odd_screen_size;
+        return window_size + odd_screen_size;
+    }
+
+    return (screen_size.ws_row) - (tty_win_on ? TTY_WIN_OFFSET + 1 : 0);
 }
 
 static int get_gdb_width(void)
 {
+    if (cur_split_orientation == SPLIT_VERTICAL) {
+        int window_size = ((screen_size.ws_col / 2) - window_shift - 1);
+        int odd_screen_size = (screen_size.ws_col % 2);
+
+        return window_size + odd_screen_size;
+    }
+
     return (screen_size.ws_col);
+}
+
+static void separator_display()
+{
+    int col = get_sep_col();
+    int row = get_sep_row();
+    int last_row = row + get_sep_height();
+
+    for (; row < last_row; ++row) {
+        wmove(stdscr, row, col);
+        waddch(stdscr, VERT_LINE);
+        wrefresh(stdscr);
+    }
 }
 
 /* ---------------------------------------
@@ -437,6 +502,9 @@ void if_draw(void)
     if (get_src_height() > 0)
         source_display(src_win, focus == CGDB);
 
+    if (cur_split_orientation == SPLIT_VERTICAL)
+        separator_display();
+
     if (tty_win_on && get_tty_height() > 0)
         scr_refresh(tty_win, focus == TTY);
 
@@ -460,22 +528,25 @@ void if_draw(void)
  */
 static void validate_window_sizes(void)
 {
-    int tty_window_offset = (tty_win_on) ? TTY_WIN_OFFSET + 1 : 0;
-    int odd_height = (HEIGHT + 1) % 2;
-    int max_window_height_shift = (HEIGHT / 2) - tty_window_offset - odd_height;
-    int min_window_height_shift = -(HEIGHT / 2);
+    int h_or_w = cur_split_orientation == SPLIT_HORIZONTAL ? HEIGHT : WIDTH;
+    int tty_window_offset = (tty_win_on
+            && cur_split_orientation == SPLIT_HORIZONTAL)
+            ? TTY_WIN_OFFSET + 1 : 0;
+    int odd_size = (h_or_w + 1) % 2;
+    int max_window_size_shift = (h_or_w / 2) - tty_window_offset - odd_size;
+    int min_window_size_shift = -(h_or_w / 2);
 
     /* update max and min based off of users winminheight request */
-    min_window_height_shift += interface_winminheight;
-    max_window_height_shift -= interface_winminheight;
+    min_window_size_shift += interface_winminheight;
+    max_window_size_shift -= interface_winminheight;
 
     /* Make sure that the windows offset is within its bounds: 
      * This checks the window offset.
      * */
-    if (window_height_shift > max_window_height_shift)
-        window_height_shift = max_window_height_shift;
-    else if (window_height_shift < min_window_height_shift)
-        window_height_shift = min_window_height_shift;
+    if (window_shift > max_window_size_shift)
+        window_shift = max_window_size_shift;
+    else if (window_shift < min_window_size_shift)
+        window_shift = min_window_size_shift;
 }
 
 /* if_layout: Update the layout of the screen based on current terminal size.
@@ -594,7 +665,7 @@ int if_resize_term(void)
 static void increase_win_height(int jump_or_tty)
 {
     int height = (HEIGHT / 2) - ((tty_win_on) ? TTY_WIN_OFFSET + 1 : 0);
-    int old_window_height_shift = window_height_shift;
+    int old_window_height_shift = window_shift;
     int old_tty_win_height_shift = tty_win_height_shift;
 
     if (jump_or_tty) {
@@ -612,11 +683,11 @@ static void increase_win_height(int jump_or_tty)
             /* no tty window */
             if (cur_win_split == WIN_SPLIT_FREE) {
                 /* cur position is not on mark, find nearest mark */
-                cur_win_split = (WIN_SPLIT_TYPE) ((2 * window_height_shift) / height);
+                cur_win_split = (WIN_SPLIT_TYPE) (2 * window_shift) / height;
 
                 /* handle rounding on either side of mid-way mark */
-                if (window_height_shift > 0) {
-                    cur_win_split = (WIN_SPLIT_TYPE)(cur_win_split + 1);
+                if (window_shift > 0) {
+                    cur_win_split++;
                 }
             } else {
                 /* increase to next mark */
@@ -629,17 +700,17 @@ static void increase_win_height(int jump_or_tty)
             }
 
             /* set window height to specified quarter mark */
-            window_height_shift = (int) (height * (cur_win_split / 2.0));
+            window_shift = (int) (height * (cur_win_split / 2.0));
         }
     } else {
         /* user input: '=' */
         cur_win_split = WIN_SPLIT_FREE; /* cur split is not on a mark */
-        window_height_shift++;  /* increase src window size by 1 */
+        window_shift++;         /* increase src window size by 1 */
 
     }
 
     /* reduce flicker by avoiding unnecessary redraws */
-    if (window_height_shift != old_window_height_shift ||
+    if (window_shift != old_window_height_shift ||
             tty_win_height_shift != old_tty_win_height_shift) {
         if_layout();
     }
@@ -657,7 +728,7 @@ static void increase_win_height(int jump_or_tty)
 static void decrease_win_height(int jump_or_tty)
 {
     int height = HEIGHT / 2;
-    int old_window_height_shift = window_height_shift;
+    int old_window_height_shift = window_shift;
     int old_tty_win_height_shift = tty_win_height_shift;
 
     if (jump_or_tty) {
@@ -673,11 +744,11 @@ static void decrease_win_height(int jump_or_tty)
             /* no tty window */
             if (cur_win_split == WIN_SPLIT_FREE) {
                 /* cur position is not on mark, find nearest mark */
-                cur_win_split = (WIN_SPLIT_TYPE) ((2 * window_height_shift) / height);
+                cur_win_split = (WIN_SPLIT_TYPE) (2 * window_shift) / height;
 
                 /* handle rounding on either side of mid-way mark */
-                if (window_height_shift < 0) {
-                    cur_win_split = (WIN_SPLIT_TYPE)(cur_win_split - 1);
+                if (window_shift < 0) {
+                    cur_win_split--;
                 }
             } else {
                 /* decrease to next mark */
@@ -690,17 +761,17 @@ static void decrease_win_height(int jump_or_tty)
             }
 
             /* set window height to specified quarter mark */
-            window_height_shift = (int) (height * (cur_win_split / 2.0));
+            window_shift = (int) (height * (cur_win_split / 2.0));
         }
     } else {
         /* user input: '-' */
         cur_win_split = WIN_SPLIT_FREE; /* cur split is not on a mark */
-        window_height_shift--;  /* decrease src window size by 1 */
+        window_shift--;         /* decrease src window size by 1 */
 
     }
 
     /* reduce flicker by avoiding unnecessary redraws */
-    if (window_height_shift != old_window_height_shift ||
+    if (window_shift != old_window_height_shift ||
             tty_win_height_shift != old_tty_win_height_shift) {
         if_layout();
     }
@@ -1205,7 +1276,7 @@ int if_init(void)
         return 5;
 
     /* Set up window layout */
-    window_height_shift = (int) ((HEIGHT / 2) * (cur_win_split / 2.0));
+    window_shift = (int) ((HEIGHT / 2) * (cur_win_split / 2.0));
     switch (if_layout()) {
         case 2:
             return 4;
@@ -1282,6 +1353,15 @@ static int cgdb_input(int key)
                 tty_win = NULL;
                 if_layout();
             }
+
+            break;
+        case CGDB_KEY_CTRL_W:
+            if (cur_split_orientation == SPLIT_HORIZONTAL)
+                cur_split_orientation = SPLIT_VERTICAL;
+            else
+                cur_split_orientation = SPLIT_HORIZONTAL;
+
+            if_layout();
 
             break;
         case CGDB_KEY_F1:
@@ -1571,11 +1651,24 @@ Focus if_get_focus(void)
     return focus;
 }
 
+void reset_window_shift(void)
+{
+    int h_or_w = cur_split_orientation == SPLIT_HORIZONTAL ? HEIGHT : WIDTH;
+
+    window_shift = (int) ((h_or_w / 2) * (cur_win_split / 2.0));
+    if_layout();
+}
+
+void if_set_splitorientation(SPLIT_ORIENTATION_TYPE new_orientation)
+{
+    cur_split_orientation = new_orientation;
+    reset_window_shift();
+}
+
 void if_set_winsplit(WIN_SPLIT_TYPE new_split)
 {
     cur_win_split = new_split;
-    window_height_shift = (int) ((HEIGHT / 2) * (cur_win_split / 2.0));
-    if_layout();
+    reset_window_shift();
 }
 
 void if_highlight_sviewer(enum tokenizer_language_support l)

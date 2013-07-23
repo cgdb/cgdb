@@ -48,6 +48,7 @@ static int command_set_arrowstyle(const char *value);
 static int command_set_cgdb_mode_key(const char *value);
 static int command_set_executing_line_display(const char *value);
 static int command_set_selected_line_display(const char *value);
+static int command_set_splitorientation(const char *value);
 static int command_set_timeout(int value);
 static int command_set_timeoutlen(int value);
 static int command_set_ttimeout(int value);
@@ -72,6 +73,7 @@ static struct cgdbrc_config_option cgdbrc_config_options[CGDBRC_WRAPSCAN + 1] = 
     {CGDBRC_SELECTED_LINE_DISPLAY,
         {.line_display_style = LINE_DISPLAY_BLOCK}},
     {CGDBRC_SHOWTGDBCOMMANDS, {.int_val = 0}},
+    {CGDBRC_SPLITORIENTATION, {.win_orientation_val = SPLIT_HORIZONTAL}},
     {CGDBRC_SYNTAX, {.language_support_val = TOKENIZER_LANGUAGE_UNKNOWN}},
     {CGDBRC_TABSTOP, {.int_val = 8}},
     {CGDBRC_TIMEOUT, {.int_val = 1}},
@@ -151,6 +153,10 @@ static struct ConfigVariable {
             /* winsplit */
     {
     "winsplit", "winsplit", CONFIG_TYPE_FUNC_STRING, (void *)command_set_winsplit},
+            /* splitorientation */
+    {
+    "splitorientation", "so", CONFIG_TYPE_FUNC_STRING,
+                command_set_splitorientation},
             /* wrapscan */
     {
     "wrapscan", "ws", CONFIG_TYPE_BOOL,
@@ -367,6 +373,26 @@ int command_set_winsplit(const char *value)
     if (cgdbrc_set_val(option))
         return 1;
     if_set_winsplit(split_type);
+
+    return 0;
+}
+
+int command_set_splitorientation(const char *value)
+{
+    struct cgdbrc_config_option option;
+    SPLIT_ORIENTATION_TYPE orientation = SPLIT_HORIZONTAL;
+
+    option.option_kind = CGDBRC_SPLITORIENTATION;
+
+    if (strcasecmp(value, "horizontal") == 0)
+        orientation = SPLIT_HORIZONTAL;
+    else if (strcasecmp(value, "vertical") == 0)
+        orientation = SPLIT_VERTICAL;
+
+    option.variant.win_orientation_val = orientation;
+    if (cgdbrc_set_val(option))
+        return 1;
+    if_set_splitorientation(orientation);
 
     return 0;
 }
