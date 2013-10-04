@@ -10,6 +10,7 @@ libtokenizer_a_SOURCES = \
 	adalexer.l \
 	clexer.l \
 	dlexer.l \
+	golexer.l \
     tokenizer.c \
     tokenizer.h
 
