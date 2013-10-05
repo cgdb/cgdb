@@ -6,7 +6,7 @@
 static void usage(void)
 {
 
-    printf("tokenizer_driver <file> <c|d|ada>\n");
+    printf("tokenizer_driver <file> <c|d|go|ada>\n");
     exit(-1);
 }
 
@@ -23,6 +23,8 @@ int main(int argc, char **argv)
         l = TOKENIZER_LANGUAGE_C;
     else if (strcmp(argv[2], "d") == 0)
         l = TOKENIZER_LANGUAGE_D;
+    else if (strcmp(argv[2], "go") == 0)
+        l = TOKENIZER_LANGUAGE_GO;
     else if (strcmp(argv[2], "ada") == 0)
         l = TOKENIZER_LANGUAGE_ADA;
     else
