@@ -1,11 +1,20 @@
 %option prefix="go_"
 %option outfile="lex.yy.c"
 
+O       [0-7]
 D       [0-9]
 H       [0-9a-fA-F_]
 L       [a-zA-Z_]
 T       [0-9a-zA-Z_]
 IDENTIFIER {L}+{T}*
+esc_char        \\[abfnrtv\\'"]
+big_u_val       \\U{H}{H}{H}{H}
+little_u_val    \\u{H}{H}{H}{H}
+hex_byte_val    \\x{H}{H}
+oct_byte_val    \\{O}{O}{O}
+byte_val        ({oct_byte_val}|{hex_byte_val})
+unicode_char    [^']
+unicode_val     ({unicode_char}|{little_u_val}|{big_u_val}|{esc_char})
 
 %{
 
@@ -15,6 +24,8 @@ IDENTIFIER {L}+{T}*
 
 %x comment
 %x string_literal
+%x alt_wysiwyg_literal
+%x unicode_literal
 
 %%
 "bool"                  { return(TOKENIZER_TYPE); }
@@ -54,8 +65,6 @@ IDENTIFIER {L}+{T}*
 "go"                    { return(TOKENIZER_KEYWORD); }
 "goto"                  { return(TOKENIZER_KEYWORD); }
 "if"                    { return(TOKENIZER_KEYWORD); }
-"import"                { return(TOKENIZER_KEYWORD); }
-"package"               { return(TOKENIZER_KEYWORD); }
 "range"                 { return(TOKENIZER_KEYWORD); }
 "return"                { return(TOKENIZER_KEYWORD); }
 "select"                { return(TOKENIZER_KEYWORD); }
@@ -74,6 +83,9 @@ IDENTIFIER {L}+{T}*
 
 \/\/[^\r\n]*              { return(TOKENIZER_COMMENT); }
 
+"import"                { return(TOKENIZER_DIRECTIVE); }
+"package"                { return(TOKENIZER_DIRECTIVE); }
+
 \"                                          { BEGIN(string_literal);    return(TOKENIZER_LITERAL); }
 <string_literal>(\\[^\r\n]|[^\\"\r\n])*     { return(TOKENIZER_LITERAL); }
 <string_literal>\n                          { return(TOKENIZER_NEWLINE); }
@@ -81,27 +93,45 @@ IDENTIFIER {L}+{T}*
 <string_literal>\r\n                        { return(TOKENIZER_NEWLINE); }
 <string_literal>\"                          { BEGIN(INITIAL);           return(TOKENIZER_LITERAL); }
 
+"`"                                         { BEGIN(alt_wysiwyg_literal);    return(TOKENIZER_LITERAL); }
+<alt_wysiwyg_literal>([^`\r\n])*            { return(TOKENIZER_LITERAL); }
+<alt_wysiwyg_literal>\n                     { return(TOKENIZER_NEWLINE); }
+<alt_wysiwyg_literal>\r                     { return(TOKENIZER_NEWLINE); }
+<alt_wysiwyg_literal>\r\n                   { return(TOKENIZER_NEWLINE); }
+<alt_wysiwyg_literal>"`"                    { BEGIN(INITIAL);            return(TOKENIZER_LITERAL); }
 
-{D}+                    { return(TOKENIZER_LITERAL); }
-{D}+[lL]                { return(TOKENIZER_LITERAL); }
-{D}+[uU]                { return(TOKENIZER_LITERAL); }
-{D}+[lL][lL]            { return(TOKENIZER_LITERAL); }
-{D}+[uU][lL]            { return(TOKENIZER_LITERAL); }
-{D}+[uU][lL][lL]        { return(TOKENIZER_LITERAL); }
-{D}+[lL][uU]            { return(TOKENIZER_LITERAL); }
-{D}+[lL][lL][uU]        { return(TOKENIZER_LITERAL); }
+    /* decimals */
+[1-9]{D}+               { return(TOKENIZER_LITERAL); }
+
+    /* octal */
+0{O}+                   { return(TOKENIZER_LITERAL); }
+
+    /* hex */
 0x{H}+                  { return(TOKENIZER_LITERAL); }
-0x{H}+[lL]              { return(TOKENIZER_LITERAL); }
-0x{H}+[uU]              { return(TOKENIZER_LITERAL); }
-0x{H}+[lL][lL]          { return(TOKENIZER_LITERAL); }
-0x{H}+[uU][lL]          { return(TOKENIZER_LITERAL); }
-0x{H}+[uU][lL][lL]      { return(TOKENIZER_LITERAL); }
-0x{H}+[lL][uU]          { return(TOKENIZER_LITERAL); }
-0x{H}+[lL][lL][uU]      { return(TOKENIZER_LITERAL); }
+0X{H}+                  { return(TOKENIZER_LITERAL); }
 
+    /* floating point */
 {D}*\.?{D}+([eE][-+]?{D}+)?    { return(TOKENIZER_LITERAL); }
-{D}+\.?({D})?+[fF]      { return(TOKENIZER_LITERAL); }
-\.{D}+[fF]              { return(TOKENIZER_LITERAL); }
+{D}+\.?{D}*([eE][-+]?{D}+)?    { return(TOKENIZER_LITERAL); }
+
+    /* imaginary */
+{D}+i                   { return(TOKENIZER_LITERAL); }
+{D}*\.?{D}+([eE][-+]?{D}+)?i    { return(TOKENIZER_LITERAL); }
+{D}+\.?{D}*([eE][-+]?{D}+)?i    { return(TOKENIZER_LITERAL); }
+
+    /* rune */
+    /* It's a dirty little trick, since cgdb will never see ilegal program that can't pass compiler
+     * check we just assume anything between single quote would be unicode literal
+    */
+"'"                                     { BEGIN(unicode_literal);    return(TOKENIZER_LITERAL); }
+    /*
+    <unicode_literal>{unicode_val}|{byte_val}       { return(TOKENIZER_LITERAL); }
+    */
+<unicode_literal>(\\[^\r\n]|[^\'\r\n])* { return(TOKENIZER_LITERAL); }
+<unicode_literal>\n                     { return(TOKENIZER_NEWLINE); }
+<unicode_literal>\r                     { return(TOKENIZER_NEWLINE); }
+<unicode_literal>\r\n                   { return(TOKENIZER_NEWLINE); }
+<unicode_literal>"'"                            { BEGIN(INITIAL);    return(TOKENIZER_LITERAL); }
 
 '.'                     { return(TOKENIZER_LITERAL); }
 '\\.'                   { return(TOKENIZER_LITERAL); }
