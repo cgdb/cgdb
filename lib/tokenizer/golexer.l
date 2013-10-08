@@ -81,10 +81,10 @@ unicode_val     ({unicode_char}|{little_u_val}|{big_u_val}|{esc_char})
 <comment>\r\n           { return(TOKENIZER_NEWLINE); }
 <comment>"*"+"/"        { BEGIN(INITIAL); return(TOKENIZER_COMMENT); }
 
-\/\/[^\r\n]*              { return(TOKENIZER_COMMENT); }
+\/\/[^\r\n]*            { return(TOKENIZER_COMMENT); }
 
 "import"                { return(TOKENIZER_DIRECTIVE); }
-"package"                { return(TOKENIZER_DIRECTIVE); }
+"package"               { return(TOKENIZER_DIRECTIVE); }
 
 \"                                          { BEGIN(string_literal);    return(TOKENIZER_LITERAL); }
 <string_literal>(\\[^\r\n]|[^\\"\r\n])*     { return(TOKENIZER_LITERAL); }
@@ -100,24 +100,14 @@ unicode_val     ({unicode_char}|{little_u_val}|{big_u_val}|{esc_char})
 <alt_wysiwyg_literal>\r\n                   { return(TOKENIZER_NEWLINE); }
 <alt_wysiwyg_literal>"`"                    { BEGIN(INITIAL);            return(TOKENIZER_LITERAL); }
 
-    /* decimals */
-[1-9]{D}+               { return(TOKENIZER_LITERAL); }
-
-    /* octal */
-0{O}+                   { return(TOKENIZER_LITERAL); }
-
-    /* hex */
-0x{H}+                  { return(TOKENIZER_LITERAL); }
-0X{H}+                  { return(TOKENIZER_LITERAL); }
-
-    /* floating point */
-{D}*\.?{D}+([eE][-+]?{D}+)?    { return(TOKENIZER_LITERAL); }
-{D}+\.?{D}*([eE][-+]?{D}+)?    { return(TOKENIZER_LITERAL); }
+0x{H}+                          { return(TOKENIZER_LITERAL); }
+0X{H}+                          { return(TOKENIZER_LITERAL); }
+{D}+\.?{D}*([eE][-+]?{D}+)?     { return(TOKENIZER_LITERAL); }
+{D}*\.?{D}+([eE][-+]?{D}+)?     { return(TOKENIZER_LITERAL); }
 
     /* imaginary */
-{D}+i                   { return(TOKENIZER_LITERAL); }
-{D}*\.?{D}+([eE][-+]?{D}+)?i    { return(TOKENIZER_LITERAL); }
-{D}+\.?{D}*([eE][-+]?{D}+)?i    { return(TOKENIZER_LITERAL); }
+{D}+i                           { return(TOKENIZER_LITERAL); }
+{D}*\.?{D}*([eE][-+]?{D}+)?i    { return(TOKENIZER_LITERAL); }
 
     /* rune */
     /* It's a dirty little trick, since cgdb will never see ilegal program that can't pass compiler
@@ -131,7 +121,7 @@ unicode_val     ({unicode_char}|{little_u_val}|{big_u_val}|{esc_char})
 <unicode_literal>\n                     { return(TOKENIZER_NEWLINE); }
 <unicode_literal>\r                     { return(TOKENIZER_NEWLINE); }
 <unicode_literal>\r\n                   { return(TOKENIZER_NEWLINE); }
-<unicode_literal>"'"                            { BEGIN(INITIAL);    return(TOKENIZER_LITERAL); }
+<unicode_literal>"'"                    { BEGIN(INITIAL);    return(TOKENIZER_LITERAL); }
 
 '.'                     { return(TOKENIZER_LITERAL); }
 '\\.'                   { return(TOKENIZER_LITERAL); }
