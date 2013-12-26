@@ -132,12 +132,6 @@ int fs_util_create_dir_in_base(const char *base, const char *dirname)
 {
     char dir[FSUTIL_PATH_MAX];
 
-    /* Make surr the directory is valid */
-    if (!fs_util_is_valid(base)) {
-        logger_write_pos(logger, __FILE__, __LINE__, "fs_util_is_valid error");
-        return -1;
-    }
-
     sprintf(dir, "%s/%s", base, dirname);
     return fs_util_create_dir(dir);
 }
