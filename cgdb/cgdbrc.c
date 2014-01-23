@@ -65,6 +65,7 @@ static struct cgdbrc_config_option cgdbrc_config_options[CGDBRC_WRAPSCAN + 1] = 
     {CGDBRC_AUTOSOURCERELOAD, {1}},
     {CGDBRC_CGDB_MODE_KEY, {CGDB_KEY_ESC}},
     {CGDBRC_IGNORECASE, {0}},
+    {CGDBRC_SHOWHIDDEN, {1}},
     {CGDBRC_SHOWTGDBCOMMANDS, {0}},
     {CGDBRC_SYNTAX, {TOKENIZER_LANGUAGE_UNKNOWN}},
     {CGDBRC_TABSTOP, {8}},
@@ -108,6 +109,10 @@ static struct ConfigVariable {
     {
     "ignorecase", "ic", CONFIG_TYPE_BOOL,
                 &cgdbrc_config_options[CGDBRC_IGNORECASE].variant.int_val},
+            /* showhidden */
+    {
+    "showhidden", "sh", CONFIG_TYPE_BOOL,
+                &cgdbrc_config_options[CGDBRC_SHOWHIDDEN].variant.int_val},
             /* showtgdbcommands */
     {
     "showtgdbcommands", "stc", CONFIG_TYPE_FUNC_BOOL, &command_set_stc},
@@ -639,6 +644,8 @@ int command_parse_set(void)
     /* commands could look like the following:
      * set ignorecase
      * set noignorecase
+     * set showhidden
+     * set noshowhidden
      * set focus=gdb
      * set tabstop=8
      */

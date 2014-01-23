@@ -22,6 +22,7 @@
 
 #include "filedlg.h"
 #include "cgdb.h"
+#include "cgdbrc.h"
 #include "highlight.h"
 #include "kui_term.h"
 #include "highlight_groups.h"
@@ -120,9 +121,14 @@ int filedlg_add_file_choice(struct filedlg *fd, const char *file_choice)
     int length;
     int index, i;
     int equal = 1;              /* Not set to 0, because 0 *is* equal */
+    int show_hidden = cgdbrc_get(CGDBRC_SHOWHIDDEN)->variant.int_val;
 
     if (file_choice == NULL || *file_choice == '\0')
         return -1;
+    /* ignore hidden files if noshowhidden is set */
+    if (!show_hidden &&
+        (file_choice[0] == '.' || strstr(file_choice, "/.") != NULL))
+        return -4;
 
     /* find index to insert by comparing:
      * Absolute paths go to the end

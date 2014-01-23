@@ -604,6 +604,10 @@ key will flow through to readline.
 @itemx :set ignorecase
 Sets searching case insensitive.  The default is off.
 
+@item :set sh
+@itemx :set showhidden
+Sets showing hidden files and folders.  The default is on.
+
 @item :set stc
 @itemx :set showtgdbcommands
 If this is on, CGDB will show all of the commands that it sends to GDB. 
