@@ -530,11 +530,6 @@ extern "C" {
    */
     int tgdb_signal_notification(struct tgdb *tgdb, int signum);
 
-  /**
-   * Checks if SIGCHLD is received.
-   */
-    int tgdb_has_sigchld_recv(struct tgdb *tgdb);
-
 /*@}*/
 /* }}}*/
 

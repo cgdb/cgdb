@@ -1407,10 +1407,6 @@ int tgdb_signal_notification(struct tgdb *tgdb, int signum)
     return 0;
 }
 
-int tgdb_has_sigchld_recv(struct tgdb *tgdb) {
-    return tgdb->has_sigchld_recv;
-}
-
 /* }}}*/
 
 /* Config Options {{{*/
