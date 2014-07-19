@@ -1,3 +1,9 @@
+cgdb-0.6.7 (07/18/2014)
+
+  * Fixed a hang when quitting cgdb while inferior is running
+    (github #1 and #5 and #46). This was believed to be fixed in the last
+    release but I've finally reproduced the issue and fixed it for good.
+
 cgdb-0.6.7 (01/14/2013)
 
   * Changed documentation license from GFDL to GPL (github #6).

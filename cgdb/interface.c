@@ -49,6 +49,7 @@
 #endif
 
 /* Local Includes */
+#include "assert.h"
 #include "cgdb.h"
 #include "config.h"
 #include "logger.h"
@@ -700,26 +701,28 @@ static void decrease_win_height(int jump_or_tty)
     }
 }
 
-/* signal_handler: Handles the WINCH signal (xterm resize).
- * ---------------
+/**
+ * The signal handler for CGDB.
+ *
+ * Pass any signals along from the signal handler to the main loop by
+ * writing the signal value to a pipe, which is later read and interpreted.
+ *
+ * Since it's non trivial to do error handling from the signal handler if an
+ * error occurs the program will terminate. Hopefully this doesn't occur.
  */
-
-void rl_sigint_recved(void);
 static void signal_handler(int signo)
 {
     extern int resize_pipe[2];
+    extern int signal_pipe[2];
+    int fd;
 
     if (signo == SIGWINCH) {
-        int c = CGDB_KEY_RESIZE;
-
-        if (write(resize_pipe[1], &c, sizeof (int)) < sizeof (int)) {
-            logger_write_pos(logger, __FILE__, __LINE__, "write resize pipe");
-        }
-    } else if (signo == SIGINT || signo == SIGTERM ||
-            signo == SIGQUIT || signo == SIGCHLD) {
-        rl_sigint_recved();
-        tgdb_signal_notification(tgdb, signo);
+        fd = resize_pipe[1];
+    } else {
+        fd = signal_pipe[1];
     }
+
+    assert(write(fd, &signo, sizeof(signo)) == sizeof(signo));
 }
 
 static void if_run_command(struct sviewer *sview, struct ibuf *ibuf_command)

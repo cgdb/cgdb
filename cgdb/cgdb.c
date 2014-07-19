@@ -14,6 +14,10 @@
 #include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 
+#if HAVE_SIGNAL_H
+#include <signal.h>
+#endif
+
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif /* HAVE_STDLIB_H */
@@ -135,7 +139,36 @@ struct kui_map_set *kui_imap = NULL;
  */
 int kui_input_acceptable = 1;
 
+/**
+ * This pipe is used for passing SIGWINCH from the handler to the main loop.
+ *
+ * A separate pipe is used for SIGWINCH because when the user resizes the
+ * terminal many signals may be sent to the application. Each time a signal
+ * is received it is written to this pipe to be processed in the main loop.
+ * The main loop is more efficient if it only has to process the last
+ * resize, since all the intermediate signals will be of no use. By creating
+ * a separate pipe, the main loop can easily detect if more SIGWINCH signals
+ * have been received and ignore them.
+ *
+ * I'm not sure if this optimization is still necessary as it was needed
+ * around the year 2005. It may or may not still matter, but the logic
+ * overhead isn't that complex anyways.
+ */
 int resize_pipe[2] = { -1, -1 };
+
+/**
+ * This pipe is used for passing signals from the handler to the main loop.
+ *
+ * When a signal is sent to CGDB (ie. SIGINT or SIGQUIT), the signal is
+ * passed to the signal handler. Only certain functions can be called from
+ * a signal handler so some functionality must be handled in the main loop.
+ *
+ * This pipe is the mechanism that is used to pass to the main loop the fact
+ * that a signal was received in a signal handler. This way, when the main
+ * loop detects the signal pipe has information it can read the signal and
+ * process it safely (by calling any necessary functions).
+ */
+int signal_pipe[2] = { -1, -1 };
 
 /* Readline interface */
 static struct rline *rline;
@@ -1253,7 +1286,7 @@ static int cgdb_resize_term(int fd)
 {
     int c, result;
 
-    if (read(resize_pipe[0], &c, sizeof (int)) < sizeof (int)) {
+    if (read(fd, &c, sizeof (int)) < sizeof (int)) {
         logger_write_pos(logger, __FILE__, __LINE__, "read from resize pipe");
         return -1;
     }
@@ -1262,7 +1295,7 @@ static int cgdb_resize_term(int fd)
      * been recieved, and we still have not handled this one. So, skip this
      * one and only handle the next one.
      */
-    result = io_data_ready(resize_pipe[0], 0);
+    result = io_data_ready(fd, 0);
     if (result == -1) {
         logger_write_pos(logger, __FILE__, __LINE__, "io_data_ready");
         return -1;
@@ -1275,6 +1308,37 @@ static int cgdb_resize_term(int fd)
         logger_write_pos(logger, __FILE__, __LINE__, "if_resize_term error");
         return -1;
     }
+
+    return 0;
+}
+
+/**
+ * Handles the signals that were received from the main loop.
+ *
+ * Initially the signals are sent to the signal handler. The signal handler
+ * writes those values to a pipe which are detected in the main loop and
+ * sent here.
+ *
+ * @param fd
+ * The file descriptor to read the signal number from.
+ *
+ * @return
+ * 0 on success or -1 on error
+ */
+static int cgdb_handle_signal_in_main_loop(int fd)
+{
+    int signo;
+
+    if (read(fd, &signo, sizeof(int)) < sizeof(int)) {
+        logger_write_pos(logger, __FILE__, __LINE__, "read from signal pipe");
+        return -1;
+    }
+
+    if (signo == SIGINT) {
+        rl_sigint_recved();
+    }
+
+    tgdb_signal_notification(tgdb, signo);
 
     return 0;
 }
@@ -1302,6 +1366,7 @@ static int main_loop(void)
     max = (gdb_fd > STDIN_FILENO) ? gdb_fd : STDIN_FILENO;
     max = (max > tty_fd) ? max : tty_fd;
     max = (max > resize_pipe[0]) ? max : resize_pipe[0];
+    max = (max > signal_pipe[0]) ? max : signal_pipe[0];
     max = (max > slavefd) ? max : slavefd;
     max = (max > masterfd) ? max : masterfd;
 
@@ -1318,6 +1383,7 @@ static int main_loop(void)
         FD_SET(gdb_fd, &rset);
         FD_SET(tty_fd, &rset);
         FD_SET(resize_pipe[0], &rset);
+        FD_SET(signal_pipe[0], &rset);
 
         /* No readline activity allowed while displaying tab completion */
         if (!is_tab_completing) {
@@ -1344,6 +1410,16 @@ static int main_loop(void)
                 return -1;
             }
         }
+
+        /* A signal occured (besides SIGWINCH) */
+        if (FD_ISSET(signal_pipe[0], &rset))
+            if (cgdb_handle_signal_in_main_loop(signal_pipe[0]) == -1)
+                return -1;
+
+        /* A resize signal occured */
+        if (FD_ISSET(resize_pipe[0], &rset))
+            if (cgdb_resize_term(resize_pipe[0]) == -1)
+                return -1;
 
         /* Input received through the pty:  Handle it 
          * Wrote to masterfd, now slavefd is ready, tell readline */
@@ -1399,11 +1475,6 @@ static int main_loop(void)
                 user_input_loop();
             }
         }
-
-        /* A resize signal occured */
-        if (FD_ISSET(resize_pipe[0], &rset))
-            if (cgdb_resize_term(resize_pipe[0]) == -1)
-                return -1;
     }
     return 0;
 }
@@ -1471,6 +1542,17 @@ int init_resize_pipe(void)
     }
 
     return 0;
+}
+
+int init_signal_pipe(void)
+{
+    int result = pipe(signal_pipe);
+
+    if (result == -1) {
+        logger_write_pos(logger, __FILE__, __LINE__, "pipe error");
+    }
+
+    return result;
 }
 
 int init_readline(void)
@@ -1717,6 +1799,13 @@ int main(int argc, char *argv[])
     /* Initialize the pipe that is used for resize */
     if (init_resize_pipe() == -1) {
         logger_write_pos(logger, __FILE__, __LINE__, "init_resize_pipe error");
+        cleanup();
+        exit(-1);
+    }
+
+    /* Initialize the pipe that is used for signals */
+    if (init_signal_pipe() == -1) {
+        logger_write_pos(logger, __FILE__, __LINE__, "init_signal_pipe error");
         cleanup();
         exit(-1);
     }
