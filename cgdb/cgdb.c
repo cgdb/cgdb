@@ -104,7 +104,6 @@ char *readline_history_path;    /* After readline init is called, this will
                                  * file. */
 
 static int gdb_fd = -1;         /* File descriptor for GDB communication */
-static int tty_fd = -1;         /* File descriptor for process being debugged */
 
 /** Master/Slave PTY used to keep readline off of stdin/stdout. */
 static pty_pair_ptr pty_pair;
@@ -805,7 +804,7 @@ static int start_gdb(int argc, char *argv[])
 {
     tgdb_request_ptr request_ptr;
 
-    tgdb = tgdb_initialize(debugger_path, argc, argv, &gdb_fd, &tty_fd);
+    tgdb = tgdb_initialize(debugger_path, argc, argv, &gdb_fd);
     if (tgdb == NULL)
         return -1;
 
@@ -1257,12 +1256,12 @@ static int readline_input()
 
 /* child_input: Recieves data from the child application:
  *
- *  Returns:  -1 on error, 0 on success
+ *  Returns: -1 on error, 0 on EOF or number of bytes handled from child.
  */
-static int child_input()
+static ssize_t child_input()
 {
     char *buf = malloc(GDB_MAXBUF + 1);
-    int size;
+    ssize_t size;
 
     /* Read from GDB */
     size = tgdb_recv_inferior_data(tgdb, buf, GDB_MAXBUF);
@@ -1279,7 +1278,7 @@ static int child_input()
     if_tty_print(buf);
     free(buf);
     buf = NULL;
-    return 0;
+    return size;
 }
 
 static int cgdb_resize_term(int fd)
@@ -1363,12 +1362,6 @@ static int main_loop(void)
         return -1;
     }
 
-    max = (gdb_fd > STDIN_FILENO) ? gdb_fd : STDIN_FILENO;
-    max = (max > tty_fd) ? max : tty_fd;
-    max = (max > resize_pipe[0]) ? max : resize_pipe[0];
-    max = (max > signal_pipe[0]) ? max : signal_pipe[0];
-    max = (max > slavefd) ? max : slavefd;
-    max = (max > masterfd) ? max : masterfd;
 
     /* Main (infinite) loop:
      *   Sits and waits for input on either stdin (user input) or the
@@ -1377,6 +1370,25 @@ static int main_loop(void)
      *   This will result in calls to the curses interface, typically. */
 
     for (;;) {
+        /**
+         * tty_fd can vary during the program. Some GDB variants, or perhaps
+         * OS's allow the inferior to close the terminal descriptor.
+         *
+         * CGDB reallocates a new one in this situation, for the next run of
+         * the inferior to have a place to send it's output.
+         *
+         * This varies the value of tty_fd, and forces us to compute the max
+         * each time in the loop.
+         */
+        int tty_fd = tgdb_get_inferior_fd(tgdb);
+
+        max = (gdb_fd > STDIN_FILENO) ? gdb_fd : STDIN_FILENO;
+        max = (max > tty_fd) ? max : tty_fd;
+        max = (max > resize_pipe[0]) ? max : resize_pipe[0];
+        max = (max > signal_pipe[0]) ? max : signal_pipe[0];
+        max = (max > slavefd) ? max : slavefd;
+        max = (max > masterfd) ? max : masterfd;
+
         /* Reset the fd_set, and watch for input from GDB or stdin */
         FD_ZERO(&rset);
         FD_SET(STDIN_FILENO, &rset);
@@ -1439,15 +1451,31 @@ static int main_loop(void)
                 return -1;
         }
 
-        /* child's ouptut -> stdout
-         * The continue is important I think. It allows all of the child
+        /**
+         * Handle the debugged programs standard output.
+         * (Otherwise known as the inferior)
+         * child's ouptut -> stdout
+         * 
+         * The continue is important. It allows all of the child
          * output to get written to stdout before tgdb's next command.
          * This is because sometimes they are both ready.
+         *
+         * In the case that the tty_fd has been closed, do not continue
+         * or an infinite loop will occur (as the select loop is always
+         * activated on EOF). Instead fall through and let the remaining
+         * file descriptors get handled.
          */
         if (FD_ISSET(tty_fd, &rset)) {
-            if (child_input() == -1)
+            ssize_t result = child_input();
+            if (result == -1) {
                 return -1;
-            continue;
+            } else if (result == 0) {
+                if (tgdb_tty_new(tgdb) == -1) {
+                    return -1;
+                }
+            } else {
+                continue;
+            }
         }
 
         /* gdb's output -> stdout */

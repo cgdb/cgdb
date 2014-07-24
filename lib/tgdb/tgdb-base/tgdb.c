@@ -318,7 +318,7 @@ static int tgdb_initialize_logger_interface(struct tgdb *tgdb, char *config_dir)
 /* Createing and Destroying a libtgdb context. {{{*/
 
 struct tgdb *tgdb_initialize(const char *debugger,
-        int argc, char **argv, int *debugger_fd, int *inferior_fd)
+        int argc, char **argv, int *debugger_fd)
 {
     /* Initialize the libtgdb context */
     struct tgdb *tgdb = initialize_tgdb_context();
@@ -362,7 +362,6 @@ struct tgdb *tgdb_initialize(const char *debugger,
     tgdb_process_client_commands(tgdb);
 
     *debugger_fd = tgdb->debugger_stdout;
-    *inferior_fd = tgdb->inferior_stdout;
 
     return tgdb;
 }
@@ -729,7 +728,22 @@ int tgdb_send_inferior_char(struct tgdb *tgdb, char c)
 }
 
 /* returns to the caller data from the child */
-size_t tgdb_recv_inferior_data(struct tgdb * tgdb, char *buf, size_t n)
+/**
+ * Returns output that the debugged program printed (the inferior).
+ *
+ * @param tgdb
+ * The tgdb instance to act on.
+ *
+ * @param buf
+ * The buffer to write the inferior data to.
+ *
+ * @param n
+ * The number of bytes that buf can contain.
+ *
+ * @return
+ * 0 on EOR, -1 on error, or the number of bytes written to buf.
+ */
+ssize_t tgdb_recv_inferior_data(struct tgdb * tgdb, char *buf, size_t n)
 {
     char local_buf[n + 1];
     ssize_t size;
@@ -1013,6 +1027,11 @@ int tgdb_tty_new(struct tgdb *tgdb)
     tgdb_process_client_commands(tgdb);
 
     return ret;
+}
+
+int tgdb_get_inferior_fd(struct tgdb *tgdb)
+{
+    return tgdb->inferior_stdout;
 }
 
 const char *tgdb_tty_name(struct tgdb *tgdb)

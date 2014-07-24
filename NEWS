@@ -1,4 +1,6 @@
-cgdb-0.6.7 (07/18/2014)
+cgdb-0.6.8 (in development)
+
+  * Fixed a hang consuming 100% CPU usage on OS X Mavericks (github #48).
 
   * Fixed a hang when quitting cgdb while inferior is running
     (github #1 and #5 and #46). This was believed to be fixed in the last

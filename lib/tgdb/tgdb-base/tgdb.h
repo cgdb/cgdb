@@ -61,14 +61,11 @@ extern "C" {
    * \param debugger_fd
    * The descriptor to the debugger's I/O
    *
-   * \param inferior_fd
-   * The descriptor to the I/O of the program being debugged.
-   *
    * @return
    * NULL on error, a valid context on success.
    */
     struct tgdb *tgdb_initialize(const char *debugger,
-            int argc, char **argv, int *debugger_fd, int *inferior_fd);
+            int argc, char **argv, int *debugger_fd);
 
   /**
    * This will terminate a libtgdb session. No functions should be called on
@@ -208,7 +205,7 @@ extern "C" {
    * @return
    * The number of valid bytes in BUF on success, or 0 on error.
    */
-    size_t tgdb_recv_inferior_data(struct tgdb *tgdb, char *buf, size_t n);
+    ssize_t tgdb_recv_inferior_data(struct tgdb *tgdb, char *buf, size_t n);
 
 /*@}*/
 /* }}}*/
@@ -287,6 +284,22 @@ extern "C" {
    * 0 on success or -1 on error
    */
     int tgdb_tty_new(struct tgdb *tgdb);
+
+  /**
+   * Get the file descriptor the debugger is using for the inferior.
+   *
+   * You can see the associated terminal name for the file descriptor
+   * with the following gdb command,
+   *   (gdb) show inferior-tty
+   *   Terminal for future runs of program being debugged is "/dev/pts/34".
+   *
+   * @tgdb
+   * An instance of the tgdb library to operate on.
+   *
+   * @return
+   * The descriptor to the I/O of the program being debugged (-1 on error).
+   */
+   int tgdb_get_inferior_fd(struct tgdb *tgdb);
 
   /**
    * Gets the name of file that debugger is using for I/O with the program

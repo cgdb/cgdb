@@ -483,13 +483,17 @@ int pty_release(const char *slavename)
     if (!slavename)
         return set_errno(EINVAL);
 
-    if (chown(slavename, (uid_t) 0, (gid_t) 0) == -1)
-        return -1;
+    /**
+     * Intentionally not checking errors below, as the note above indicates
+     * that non root users typically fail here. I'm unaware if this code is
+     * even necessary to execute on certain systems. Since this came with
+     * the pseudo library, I'm assuming it is useful in some configurations.
+     * The solution was to ignore errors on systems that don't allow the
+     * following calls.
+     */
+    chown(slavename, (uid_t) 0, (gid_t) 0);
 
-    if (chmod(slavename,
-                    S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH)
-            == -1)
-        return -1;
+    chmod(slavename, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
 
     return 0;
 }

@@ -363,13 +363,13 @@ static int stdin_input()
     return 0;
 }
 
-int main_loop(int gdbfd, int childfd)
+int main_loop(int gdbfd)
 {
     int max;
     fd_set rfds;
     int result;
 
-    int masterfd, slavefd;
+    int masterfd, slavefd, childfd;
 
     masterfd = pty_pair_get_masterfd(pty_pair);
     if (masterfd == -1) {
@@ -386,13 +386,17 @@ int main_loop(int gdbfd, int childfd)
     }
 
     /* When TGDB is ready, we read from STDIN, otherwise, leave the data buffered. */
-    /* get max fd  for select loop */
-    max = (gdbfd > STDIN_FILENO) ? gdbfd : STDIN_FILENO;
-    max = (max > childfd) ? max : childfd;
-    max = (max > slavefd) ? max : slavefd;
-    max = (max > masterfd) ? max : masterfd;
 
     while (1) {
+
+        /* get max fd  for select loop */
+        childfd = tgdb_get_inferior_fd(tgdb);
+
+        max = (gdbfd > STDIN_FILENO) ? gdbfd : STDIN_FILENO;
+        max = (max > childfd) ? max : childfd;
+        max = (max > slavefd) ? max : slavefd;
+        max = (max > masterfd) ? max : masterfd;
+
         /* Clear the set and 
          *
          * READ FROM:
@@ -488,8 +492,7 @@ int main(int argc, char **argv)
     rline = rline_initialize(slavefd, rlctx_send_user_command, tab_completion,
             getenv("TERM"));
 
-    if ((tgdb = tgdb_initialize(NULL, argc - 1, argv + 1, &gdb_fd,
-                            &child_fd)) == NULL) {
+    if ((tgdb = tgdb_initialize(NULL, argc - 1, argv + 1, &gdb_fd)) == NULL) {
         logger_write_pos(logger, __FILE__, __LINE__, "tgdb_start error");
         goto driver_end;
     }
@@ -507,7 +510,7 @@ int main(int argc, char **argv)
 
     set_up_signal();
 
-    main_loop(gdb_fd, child_fd);
+    main_loop(gdb_fd);
 
     if (tgdb_shutdown(tgdb) == -1)
         logger_write_pos(logger, __FILE__, __LINE__, "could not shutdown");
