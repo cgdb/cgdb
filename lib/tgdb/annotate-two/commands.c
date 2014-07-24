@@ -771,7 +771,7 @@ void commands_process(struct commands *c, char a, struct tgdb_list *list)
             || commands_get_state(c) == INFO_SOURCE_RELATIVE) {
         commands_process_info_source(c, list, a);
     } else if (c->breakpoint_table && c->cur_command_state == FIELD && c->cur_field_num == 5) { /* the file name and line num */
-        if (a != '\n' || a != '\r')
+        if (a != '\n' && a != '\r')
             ibuf_addchar(c->breakpoint_string, a);
     } else if (c->breakpoint_table && c->cur_command_state == FIELD
             && c->cur_field_num == 3 && a == 'y') {
