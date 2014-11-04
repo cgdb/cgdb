@@ -203,6 +203,8 @@ COMMANDS commands[] = {
     /* step         */ {"step", command_do_tgdbcommand, TGDB_STEP},
     /* step         */ {"s", command_do_tgdbcommand, TGDB_STEP},
     /* start        */ {"start", command_do_tgdbcommand, TGDB_START},
+    /* until        */ {"until", command_do_tgdbcommand, TGDB_UNTIL},
+    /* until        */ {"u", command_do_tgdbcommand, TGDB_UNTIL},
     /* up               */ {"up", command_do_tgdbcommand, TGDB_UP},
 };
 

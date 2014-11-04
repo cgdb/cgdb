@@ -1,5 +1,10 @@
 cgdb-0.6.8 (in development)
 
+  * Added feature from issue #29, added 'until' command to CGDB.
+  
+  * Updated autotools configuration files to satisfy warnings and
+    recommendations produced by autotools when run.
+
   * Fix issue #49, a gcc compiler warning.
 
   * Fixed a hang consuming 100% CPU usage on OS X Mavericks (github #48).

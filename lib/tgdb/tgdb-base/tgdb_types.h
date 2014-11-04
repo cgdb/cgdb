@@ -105,6 +105,13 @@ extern "C" {
     /** This will instruct TGDB to tell the debugger to step.  */
         TGDB_STEP,
 
+    /** 
+     * This will instruct TGDB to tell the debugger to continue running
+     * until a source line past the current line.  This is used to avoid
+     * single stepping through loops.
+     */
+        TGDB_UNTIL,
+
     /** This will instruct TGDB to tell the debugger to go up a frame.  */
         TGDB_UP,
 
