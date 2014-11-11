@@ -13,7 +13,7 @@ config/missing
 config/texinfo.tex
 config/ylwrap
 configure
-configure.in
+configure.ac
 doc/cgdb.1
 doc/cgdb.info
 doc/cgdb.txt
