@@ -392,6 +392,9 @@ char *a2_return_client_command(void *ctx, enum tgdb_command_type c)
         case TGDB_STEP:
             ret = "step";
             break;
+        case TGDB_UNTIL:
+            ret = "until";
+            break;
         case TGDB_UP:
             ret = "up";
             break;
