@@ -1,5 +1,9 @@
 cgdb-0.6.8 (in development)
 
+  * Fix issue #40, the map commands were adding additional new lines
+    to the mappings. For instance, 'imap a b' in the ~/.cgdb/cgdbrc
+    file would cause a to map to 'b<cr>' instead of just 'b'.
+
   * Added feature from issue #29, added 'until' command to CGDB.
   
   * Updated autotools configuration files to satisfy warnings and

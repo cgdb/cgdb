@@ -54,9 +54,9 @@ const char * get_token( void )
 
 <MAP_ID>
 {
-" "     { /* ignore white space */ }
-[^ ]+   { return IDENTIFIER; }
-.       { /* ignore bad-characters */ }
+(\r\n|\n|\r)        { return EOL; }
+[\t\v\f]            { /* ignore white space */ }
+[^ \t\v\f\r\n]+     { return IDENTIFIER; }
 }
 
 %%
