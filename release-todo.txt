@@ -24,11 +24,9 @@ These steps are manual.
 
 - Commit all currently modified files.
 
- ** AUTOMATE THIS NEXT RELEASE IN UPLOAD.SH **
-- Update website cgdb.sourceforge.net:
-    * ssh -t USER,cgdb@shell.sourceforge.net create
-    * cd /home/groups/c/cg/cgdb/htdocs
-	* run 'git pull --rebase'
+- Update documentation in website
+  - cd release
+  - ./scripts/update_docs.sh
 
  ** At this point, you should be ready to release, there is no going back.
 
