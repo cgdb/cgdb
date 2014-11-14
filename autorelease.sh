@@ -75,15 +75,15 @@ if [ -e $CGDB_RELEASE_DIR ]; then
 fi
 mkdir $CGDB_RELEASE_DIR
 
-touch "$CGDB_SOURCE_DIR/doc/cgdb.texinfo"
+touch "$CGDB_SOURCE_DIR/doc/cgdb.texi"
 
 echo "-- All release files will be written to $CGDB_RELEASE_DIR"
 echo "-- Output will be logged to $CGDB_OUTPUT_LOG"
 
-# Update configure.in
-echo "-- Update configure.in to reflect the new version number"
-cp configure.init configure.in
-perl -pi -e "s/AC_INIT\(cgdb, (.*)\)/AC_INIT\(cgdb, $CGDB_VERSION\)/g" configure.in
+# Update configure.ac
+echo "-- Update configure.ac to reflect the new version number"
+cp configure.init configure.ac
+perl -pi -e "s/AC_INIT\(cgdb, (.*)\)/AC_INIT\(cgdb, $CGDB_VERSION\)/g" configure.ac
 
 # Autogen
 echo "-- Regenerate the autoconf files"
@@ -123,11 +123,11 @@ echo "-- Generate HTML manual"
 run make html
 echo "-- Generate HTML NO SPLIT manual"
 run makeinfo --html -I "$CGDB_SOURCE_DIR/doc" --no-split \
-             -o cgdb-no-split.html "$CGDB_SOURCE_DIR/doc/cgdb.texinfo"
+             -o cgdb-no-split.html "$CGDB_SOURCE_DIR/doc/cgdb.texi"
 echo "-- Generate TEXT manual"
 run makeinfo --plaintext -I "$CGDB_SOURCE_DIR/doc" \
              -o "$CGDB_SOURCE_DIR/doc/cgdb.txt" \
-             "$CGDB_SOURCE_DIR/doc/cgdb.texinfo"
+             "$CGDB_SOURCE_DIR/doc/cgdb.texi"
 echo "-- Generate PDF manual"
 run make pdf
 echo "-- Generate MAN page"

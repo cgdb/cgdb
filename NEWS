@@ -1,4 +1,4 @@
-cgdb-0.6.8 (in development)
+cgdb-0.6.8 (11/13/2014)
 
   * Fix issue #40, the map commands were adding additional new lines
     to the mappings. For instance, 'imap a b' in the ~/.cgdb/cgdbrc

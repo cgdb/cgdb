@@ -4,8 +4,9 @@ Steps for releasing a new CGDB version, follow these in order.
 All of the steps below are automated by autorelease.sh, just check to make
 sure that it worked properly.
 
-- Run autorelease.sh version, where version could be '0.6.2'
-  ./autorelease.sh 0.6.2
+- Run autorelease.sh
+  ./autorelease.sh
+  - It prompts for version, put in the version, for example: 0.6.8
 
 - Look at tar file in releasedir to make sure it has the correct version.
   untar it and run to make sure it shows the correct version and that it runs.
@@ -20,8 +21,6 @@ sure that it worked properly.
 
 --------------------------------------------------------------------------------
 These steps are manual.
-
-- Modify doc/htdocs/index.php to add a release note.
 
 - Commit all currently modified files.
 

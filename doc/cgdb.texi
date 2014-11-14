@@ -752,6 +752,10 @@ Send a step command to GDB.
 @item :syntax
 Turn the syntax on or off.
 
+@item :u
+@itemx :until
+Send an until command to GDB.
+
 @item :up
 Send an up command to GDB.
 
