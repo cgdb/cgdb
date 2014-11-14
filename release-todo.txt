@@ -24,29 +24,22 @@ These steps are manual.
 
 - Commit all currently modified files.
 
- ** AUTOMATE THIS NEXT RELEASE IN UPLOAD.SH **
-- Update website cgdb.sourceforge.net:
-    * ssh -t USER,cgdb@shell.sourceforge.net create
-    * cd /home/groups/c/cg/cgdb/htdocs
-	* run 'git pull --rebase'
+- Update documentation in website
+  - cd release
+  - ./scripts/update_docs.sh
+  - update release date from 0.6.7 to 0.6.8
+  - update md5 sum
 
- ** At this point, you should be ready to release, there is no going back.
+-  Tag the release in git
+  - cd release
+  - ./scripts/tag.sh
 
-- Put a release on sourceforge.net/projects/cgdb
-  mkdir /home/frs/project/c/cg/cgdb/cgdb-0.6.5
-  scp cgdb-0.6.5.tar.gz bobbybrasko,cgdb@frs.sourceforge.net:/home/frs/project/c/cg/cgdb/cgdb/cgdb-0.6.5
-
-- Go into releasedir and run upload.sh to upload all the files.
-
-- Ensure tag is written. If the version is cgdb-0.3.3, name the tag
-  cgdb-0_3_3.
+- Email the release tar ball ./release/cgdb-version.tar.gz to knave
 
 - Test website by looking at it and attempting to download file.
 
-- Download and test the new version from sourceforge.
+- Download and test the new version
 
-- Announce the release on freshmeat
-
-- Announce the release on cgdb-announce@lists.sourceforge.net
-  with email from releasedir/cgdb.email.
+- Announce the release on cgdb-users@googlegroups.com
+  with email from release/cgdb.email.
   Subject: CGDB 0.Major.Minor released

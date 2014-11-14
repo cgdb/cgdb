@@ -203,8 +203,7 @@ echo "-------------------" >> $CGDB_RELEASE_EMAIL
 echo "" >> $CGDB_RELEASE_EMAIL
 echo "Downloading:" >> $CGDB_RELEASE_EMAIL
 echo "" >> $CGDB_RELEASE_EMAIL
-echo "    Go to http://cgdb.sourceforge.net/download.php for download" >> $CGDB_RELEASE_EMAIL
-echo "    link and instructions." >> $CGDB_RELEASE_EMAIL
+echo "    Go to http://cgdb.github.io/ for download link and instructions." >> $CGDB_RELEASE_EMAIL
 echo "" >> $CGDB_RELEASE_EMAIL
 echo "This new version contains the following changes:" >> $CGDB_RELEASE_EMAIL
 echo "" >> $CGDB_RELEASE_EMAIL
