@@ -1,8 +1,9 @@
+*.[ao]
 *.swp
+.deps/
 aclocal.m4
 autom4te.cache
-config.h.in
-config.h.in~
+config.*
 config/compile
 config/config.guess
 config/config.sub
@@ -25,7 +26,9 @@ lib/gdbmi/depcomp
 lib/gdbmi/install-sh
 lib/gdbmi/missing
 lib/gdbmi/ylwrap
+Makefile
 Makefile.in
 build/
 install/
 release/
+stamp-h1
