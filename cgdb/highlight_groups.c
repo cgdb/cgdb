@@ -99,6 +99,7 @@ static const struct default_hl_group_info default_groups_for_curses[] = {
     {HLG_ENABLED_BREAKPOINT, A_BOLD, A_BOLD, COLOR_RED, COLOR_BLACK},
     {HLG_DISABLED_BREAKPOINT, A_BOLD, A_BOLD, COLOR_YELLOW, COLOR_BLACK},
     {HLG_SELECTED_LINE_NUMBER, A_BOLD, A_BOLD, COLOR_WHITE, COLOR_BLACK},
+    {HLG_ARROW_SEL, A_BOLD, A_BOLD, COLOR_WHITE, COLOR_BLACK},
     {HLG_LOGO, A_BOLD, A_BOLD, COLOR_BLUE, COLOR_BLACK},
     {HLG_LAST, A_NORMAL, A_NORMAL, -1, -1}
 };
@@ -122,6 +123,7 @@ static const struct default_hl_group_info default_groups_for_background_dark[]
     {HLG_ENABLED_BREAKPOINT, A_BOLD, A_BOLD, COLOR_RED, -1},
     {HLG_DISABLED_BREAKPOINT, A_BOLD, A_BOLD, COLOR_YELLOW, -1},
     {HLG_SELECTED_LINE_NUMBER, A_BOLD, A_BOLD, -1, -1},
+    {HLG_ARROW_SEL, A_BOLD, A_BOLD, -1, -1},
     {HLG_LOGO, A_BOLD, A_BOLD, COLOR_BLUE, -1},
     {HLG_LAST, A_NORMAL, A_NORMAL, -1, -1}
 };
@@ -147,6 +149,7 @@ static struct hl_group_name hl_group_names[] = {
     {HLG_ENABLED_BREAKPOINT, "Breakpoint"},
     {HLG_DISABLED_BREAKPOINT, "DisabledBreakpoint"},
     {HLG_SELECTED_LINE_NUMBER, "SelectedLineNr"},
+    {HLG_ARROW_SEL, "SelectedLineArrow"},
     {HLG_LOGO, "Logo"},
     {HLG_LAST, NULL}
 };
