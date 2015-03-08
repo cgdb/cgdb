@@ -312,9 +312,6 @@ static void draw_current_line(struct sviewer *sview, int line, int lwidth, int a
             cgdbrc_get(CGDBRC_ARROWSTYLE)->variant.arrow_style;
     int highlight_tabstop = cgdbrc_get(CGDBRC_TABSTOP)->variant.int_val;
 
-    //if (hl_groups_get_attr(hl_groups_instance, HLG_ARROW, &arrow_attr) == -1)
-    //    return;
-
     if (hl_groups_get_attr(hl_groups_instance, HLG_LINE_HIGHLIGHT,
                     &highlight_attr) == -1)
         return;
