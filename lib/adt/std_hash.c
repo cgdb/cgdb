@@ -148,7 +148,7 @@ struct std_hashtable *std_hash_table_new(STDHashFunc hash_func,
  *   value used when removing the entry from the #struct std_hashtable or %NULL if 
  *   you don't want to supply such a function.
  * 
- * Creates a new #struct std_hashtable like std_hash_table_new() and allows to specify
+ * Creates a new #struct std_hashtable like std_hash_table_new() and allows specifying
  * functions to free the memory allocated for the key and value that get 
  * called when removing the entry from the #struct std_hashtable.
  * 
