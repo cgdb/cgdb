@@ -61,7 +61,7 @@ struct std_bbtree *std_bbtree_new_with_data(STDCompareDataFunc key_compare_func,
         void *key_compare_data);
 
 /**
- * Creates a new std_bbtree like std_bbtree_new() and allows to specify functions 
+ * Creates a new std_bbtree like std_bbtree_new() and allows specifying functions 
  * to free the memory allocated for the key and value that get called when 
  * removing the entry from the std_bbtree.
  *
