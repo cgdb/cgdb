@@ -15,7 +15,7 @@
  * \brief
  * This interface is the algorithm behind libkui's fast macro finding abilities.
  * It is a statefull data structure, which can be told to start matching, to
- * recieve input, and then to stop matching. When it is told to stop, it knows
+ * receive input, and then to stop matching. When it is told to stop, it knows
  * exactly which macro's have been completed, and how much data is extra.
  */
 /* }}} */
@@ -136,7 +136,7 @@ int kui_tree_reset_state(struct kui_tree *ktree);
  * To finish searching for a macro, finalize the state of the tree.
  * This allows the tree to do any book keeping it must do, and allows it
  * to find out exaclty which macro should was called, and how many extra
- * key strokes have been recieved.
+ * key strokes have been received.
  *
  * \param ktree
  * The tree to finalize the state of.

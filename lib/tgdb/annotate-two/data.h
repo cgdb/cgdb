@@ -1,7 +1,7 @@
 /* data:
  * -----
  *
- * This unit recieves all of the data that was not an annotation from gdb.
+ * This unit receives all of the data that was not an annotation from gdb.
  * It gets the data 1 character at a time and passes it along to the
  * commands unit when necessary.
  *

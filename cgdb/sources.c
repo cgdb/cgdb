@@ -7,7 +7,7 @@
  * memory for the duration of execution.  If memory consumption becomes a
  * problem, this can be optimized to unload files which have not been
  * displayed recently, or only load portions of large files at once. (May
- * affect syntax hilighting.)
+ * affect syntax highlighting.)
  *
  */
 
@@ -223,7 +223,7 @@ static int load_file(struct list_node *node)
 
     /* Open file and save in original buffer.
      * I am not sure if this should be done this way in the future.
-     * Maybe this data should be recieved from flex.
+     * Maybe this data should be received from flex.
      */
     node->orig_buf.length = 0;
     node->orig_buf.tlines = NULL;
@@ -661,7 +661,7 @@ int source_display(struct sviewer *sview, int focus)
                     wattroff(sview->win, A_BOLD);
                 waddch(sview->win, ' ');
 
-                /* I know this is rediculous, it needs to be reimplemented */
+                /* I know this is ridiculous, it needs to be reimplemented */
                 if (sources_syntax_on) {
                     if (line == sview->cur->sel_line &&
                             sview->cur->buf.cur_line != NULL) {
@@ -702,7 +702,7 @@ int source_display(struct sviewer *sview, int focus)
                     wattroff(sview->win, A_BOLD);
                 waddch(sview->win, ' ');
 
-                /* I know this is rediculous, it needs to be reimplemented */
+                /* I know this is ridiculous, it needs to be reimplemented */
                 if (sources_syntax_on) {
                     /* No special line information */
                     if (line == sview->cur->sel_line &&

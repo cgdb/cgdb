@@ -87,7 +87,7 @@ struct tgdb {
    * TGDB buffers all of the commands that the FE wants to run. That is,
    * if the FE is sending commands faster than TGDB can pass the command to
    * GDB and get a response, then the commands are buffered until it is there
-   * turn to run. These commands are run in the order that they are recieved.
+   * turn to run. These commands are run in the order that they are received.
    *
    * This is here as a convience to the FE. TGDB currently does not access 
    * these commands. It provides the push/pop functionality and it erases the
@@ -104,7 +104,7 @@ struct tgdb {
    * single GUI function request could take N client context commands to generate
    * a response. Also, to make things worse, sometimes the client context doesn't 
    * know if it will take 1 or N commands to satisfy the request until after it has 
-   * sent and recieved the information from the first command. Thus, while the 
+   * sent and received the information from the first command. Thus, while the 
    * client context is processing the first command, it may add more commands to 
    * this queue to specify that these commands need to be run before any other 
    * commands are sent to GDB.
@@ -117,8 +117,8 @@ struct tgdb {
 
   /**
    * If set to 1, libtgdb thinks the lower level subsystem is capable of 
-   * recieving another command. It needs this so that it doesn't send 2
-   * commands to the lower level before it can say it can't recieve a command.
+   * receiving another command. It needs this so that it doesn't send 2
+   * commands to the lower level before it can say it can't receive a command.
    * At some point, maybe this can be removed?
    * When its set to 0, libtgdb thinks it can not send the lower level another
    * command.  */
@@ -610,7 +610,7 @@ tgdb_run_or_queue_command(struct tgdb *tgdb, struct tgdb_command *command)
 }
 
 /** 
- * Will send a command to the debugger immediatly. No queueing will be done
+ * Will send a command to the debugger immediately. No queueing will be done
  * at this point.
  *
  * \param tgdb
@@ -865,7 +865,7 @@ size_t tgdb_process(struct tgdb * tgdb, char *buf, size_t n, int *is_finished)
      * return a malloc'd string, not a static buffer.
      *
      * Currently, I see it as a bigger hack to try to just append this to the
-     * beggining of buf.
+     * beginning of buf.
      */
     if (tgdb->last_gui_command != NULL) {
         int ret;
@@ -929,7 +929,7 @@ size_t tgdb_process(struct tgdb * tgdb, char *buf, size_t n, int *is_finished)
     local_buf[size] = '\0';
 
     /* 2. At this point local_buf has everything new from this read.
-     * Basically this function is responsible for seperating the annotations
+     * Basically this function is responsible for separating the annotations
      * that gdb writes from the data. 
      *
      * buf and buf_size are the data to be returned from the user.
@@ -958,7 +958,7 @@ size_t tgdb_process(struct tgdb * tgdb, char *buf, size_t n, int *is_finished)
     }
 
     /* 3. if ^c has been sent, clear the buffers.
-     *        If a signal has been recieved, clear the queue and return
+     *        If a signal has been received, clear the queue and return
      */
     if (tgdb_handle_signals(tgdb) == -1) {
         logger_write_pos(logger, __FILE__, __LINE__,
@@ -972,7 +972,7 @@ size_t tgdb_process(struct tgdb * tgdb, char *buf, size_t n, int *is_finished)
 
   tgdb_finish:
 
-    /* Set the iterator to the beggining. So when the user
+    /* Set the iterator to the beginning. So when the user
      * calls tgdb_get_command it, it will be in the right spot.
      */
     tgdb->command_list_iterator = tgdb_list_get_first(tgdb->command_list);

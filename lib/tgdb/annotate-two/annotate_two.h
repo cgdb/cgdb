@@ -85,7 +85,7 @@ struct annotate_two {
     struct tgdb_list *client_command_list;
 
     /** 
-	 * This is used to show if the source annotation has been recieved yet.
+	 * This is used to show if the source annotation has been received yet.
 	 * It is set to 0 if it hasn't, otherwise 1.
 	 */
     int source_already_received;

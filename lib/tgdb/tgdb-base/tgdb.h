@@ -191,7 +191,7 @@ extern "C" {
     int tgdb_send_inferior_char(struct tgdb *tgdb, char c);
 
   /**
-   * Gets the ouput from the program being debugged.
+   * Gets the output from the program being debugged.
    * 
    * \param tgdb
    * An instance of the tgdb library to operate on.
@@ -517,7 +517,7 @@ extern "C" {
 /******************************************************************************/
 /**
  * @name Signal Handling Support
- * These functinos are used to notify TGDB of signal recieved.
+ * These functinos are used to notify TGDB of signal received.
  */
 /******************************************************************************/
 
@@ -536,7 +536,7 @@ extern "C" {
    * An instance of the tgdb library to operate on.
    *
    * \param signum
-   * The signal number SIGNUM that has occured.
+   * The signal number SIGNUM that has occurred.
    *
    * @return
    * 0 on success or -1 on error

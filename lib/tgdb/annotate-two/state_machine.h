@@ -6,7 +6,7 @@
  * is not an annotation. It sends all output that is not an annotation to 
  * the data package and all output that is an annotation to the annotation 
  * package. It does not interpret the data in any way.
- * All ouput from gdb must be filtered through this function.
+ * All output from gdb must be filtered through this function.
  */
 
 #ifndef __STATE_MACHINE_H__

@@ -225,7 +225,7 @@ void main_loop(struct kui_manager *i)
 
         result = select(max + 1, &rfds, NULL, NULL, NULL);
 
-        /* if the signal interuppted system call keep going */
+        /* if the signal interrupted system call keep going */
         if (result == -1 && errno == EINTR)
             continue;
         else if (result == -1)  /* on error ... must die -> stupid OS */
@@ -269,7 +269,7 @@ void main_loop(struct kui_manager *i)
 
                         fprintf(stderr, "%s", val);
 
-                        /* Print out the sequence recieved */
+                        /* Print out the sequence received */
                         sequence = (char *)
                                 kui_term_get_ascii_char_sequence_from_key(c);
                         while (sequence && sequence[0]) {
@@ -365,7 +365,7 @@ static int create_mappings(struct kui_manager *kuim)
 
 int main(int argc, char **argv)
 {
-    /* Initalize curses */
+    /* Initialize curses */
     initscr();
     noecho();
     raw();

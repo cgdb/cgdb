@@ -42,7 +42,7 @@ ssize_t io_read(int fd, void *buf, size_t count);
 
 /* io_writen: This will write n bytes of vptr to fd. 
  *
- *     It recieves:
+ *     It receives:
  *         fd     - The file descriptor to write to.
  *         n      - The number of bytes to write.
  *         vptr   - A pointer to the data to be written.
@@ -54,11 +54,11 @@ ssize_t io_writen(int fd, const void *vptr, size_t n);
 
 /* io_debug_init: Puts tgdb in a mode where it writes a debug log of everything
  *    that is read from gdb. That is basically the entire session. This info
- *    is usefull in determining what is going on under tgdb since the gui 
+ *    is useful in determining what is going on under tgdb since the gui 
  *    is good at hiding that info from the user.
  *    
  *    filename is the file that the debug info will go to. If it is null, the 
- *    debug data will be writting to $HOME/.tgdb/tgdb_debug.txt
+ *    debug data will be writing to $HOME/.tgdb/tgdb_debug.txt
  *
  *    Returns: 0 on success, or -1 if can not open file.
  */
@@ -69,7 +69,7 @@ void io_debug_write(const char *write);
 void io_debug_write_fmt(const char *fmt, ...);
 
 /* io_display_char: Displays the char c in fd. 
- *    This is usefull when c is a '\r' or '\n' because it will be displayed
+ *    This is useful when c is a '\r' or '\n' because it will be displayed
  *    that way in the file.
  */
 void io_display_char(FILE * fd, char c);
@@ -90,7 +90,7 @@ void io_display_char(FILE * fd, char c);
 int io_data_ready(int fd, int ms);
 
 /**
- * Read in 1 charachter.
+ * Read in 1 character.
  *
  * If no I/O is ready, then the function will wait ms milliseconds waiting 
  * for input. After that amount of time, this function will return, with
@@ -104,7 +104,7 @@ int io_data_ready(int fd, int ms);
  * \param ms
  * The The amount of time in milliseconds to wait for input.
  * Pass 0, if you do not want to wait.
- * Pass -1, if you want to block indefinately.
+ * Pass -1, if you want to block indefinitely.
  *
  * \param key
  * The character read if the return value is successful

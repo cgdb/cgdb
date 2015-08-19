@@ -7,7 +7,7 @@
  * be directed through this unit.
  *
  * All char pointers passed to functions in this unit should be FSUTIL_PATH_MAX
- * in length at a minumum. Unfortunatly, the POSIX PATH_MAX can't be used here
+ * in length at a minimum. Unfortunately, the POSIX PATH_MAX can't be used here
  * since it isn't defined with the HURD OS.
  *
  * Anyways, I think in the long run the static buffer will not be the best

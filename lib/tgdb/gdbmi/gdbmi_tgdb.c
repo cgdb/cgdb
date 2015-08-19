@@ -429,7 +429,7 @@ static int gdbmi_get_newline_style(struct ibuf *ibuf, enum newlinestyle *style)
 /* 
  * 1. Align the 'input' data into null-terminated strings that
  *    end in a newline.
- * 2. Check to see if a command has been fully recieved.
+ * 2. Check to see if a command has been fully received.
  *    2a. If it has, go to step 3
  *    2b. If it hasn't, return from the function
  * 3. parse the command.

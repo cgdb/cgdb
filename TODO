@@ -8,7 +8,7 @@ Bug fixes/improvement for cgdb-0.6.3
 bluffer_
  [ ] Look at passing ^z to GDB
  [ ] Look at how CGDB could allow itself to debug curses applications by
-     putting itself in the backgroud when the inferior runs.
+     putting itself in the background when the inferior runs.
  [ ] If you single step into a system library call (or any library call for
      that matter where the source isn't available), CGDB should show
      [NO SOURCE], instead of displaying the last source position available.
@@ -81,7 +81,7 @@ Bug fixes/improvement for cgdb-0.6.0
 Closed:
 [x] Use valgrind to get rid of most memory leaks.
 
-[x] Add documentation to CGDB. I think texinfo is the prefered way to do this,
+[x] Add documentation to CGDB. I think texinfo is the preferred way to do this,
   it generates info and html pages. For man pages, looking at help2man might
   be a good idea.
 
