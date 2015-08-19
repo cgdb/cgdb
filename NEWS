@@ -167,7 +167,7 @@ cgdb-0.6.3 (06/03/2006)
    * CGDB will no longer crash if you attempt to do a regular expression
      search with / when there is no file in the source viewer.
    
-   * CGDB now uses a psuedo terminal (PTY) to start GDB on, instead of
+   * CGDB now uses a pseudo terminal (PTY) to start GDB on, instead of
      using a pipe. Jens Frederich reported that on a Mac, typing Ctrl-C
      while the inferior was running would cause GDB to shut down, thus
      causing CGDB to shut down. This patch fixes that problem. At the

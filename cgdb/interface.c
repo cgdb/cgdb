@@ -863,7 +863,7 @@ static int status_bar_regex_input(struct sviewer *sview, int key)
     /* Flag to indicate we're done with regex mode, need to switch back */
     int done = 0;
 
-    /* Recieve a regex from the user. */
+    /* Receive a regex from the user. */
     switch (key) {
         case '\r':
         case '\n':
@@ -922,7 +922,7 @@ static int status_bar_normal_input(int key)
     /* Flag to indicate we're done with status mode, need to switch back */
     int done = 0;
 
-    /* The goal of this state is to recieve a command from the user. */
+    /* The goal of this state is to receive a command from the user. */
     switch (key) {
         case '\r':
         case '\n':
@@ -1057,7 +1057,7 @@ static void source_input(struct sviewer *sview, int key)
         case CGDB_KEY_CTRL_F:  /* VI-style page down */
             source_vscroll(sview, get_src_height() - 1);
             break;
-        case 'g':              /* beggining of file */
+        case 'g':              /* beginning of file */
             if (last_key_pressed == 'g')
                 source_set_sel_line(sview, 1);
             break;

@@ -669,7 +669,7 @@ pid_t pty_fork(int *masterfd, char *slavename, size_t slavenamesize,
     /*
      ** Note: we don't use forkpty() because it closes the master in the
      ** child process before making the slave the controlling terminal of the
-     ** child proces and this can prevent the slave from becoming the
+     ** child process and this can prevent the slave from becoming the
      ** controlling terminal (but I have no idea why).
      */
 

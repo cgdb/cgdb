@@ -133,7 +133,7 @@ struct kui_map_set *kui_imap = NULL;
  * typed 'o /main' they would want to open the file dialog and start 
  * searching for a file that had the substring 'main' in it. So, CGDB must
  * first ensure all the files are retrieved, displayed in the file
- * dialog, and ensure the file dialog is ready to recieve keys from the 
+ * dialog, and ensure the file dialog is ready to receive keys from the 
  * user before the input is allowed to hit the file dialog.
  */
 int kui_input_acceptable = 1;
@@ -533,7 +533,7 @@ static int cgdb_get_y_or_n(int key, int for_pager)
  *
  * It will output to the screen as much as can be until user input is needed. 
  * If user input is needed, then this function must stop, and wait until 
- * that data has been recieved.
+ * that data has been received.
  *
  * If this function is called a second time with the same completion_ptr
  * parameter, it will continue outputting the tab completion data from
@@ -776,7 +776,7 @@ static void parse_long_options(int *argc, char ***argv)
 /* init_home_dir: Attempts to create a config directory in the user's home
  * -------------  directory.
  *
- * Return:  0 on sucess or -1 on error
+ * Return:  0 on success or -1 on error
  */
 
 static int init_home_dir(void)
@@ -1123,7 +1123,7 @@ does_request_require_console_update(struct tgdb_request *request, int *update)
     return 0;
 }
 
-/* gdb_input: Recieves data from tgdb:
+/* gdb_input: Receives data from tgdb:
  *
  *  Returns:  -1 on error, 0 on success
  */
@@ -1158,7 +1158,7 @@ static int gdb_input()
     free(buf);
     buf = NULL;
 
-    /* Check to see if GDB is ready to recieve another command. If it is, then
+    /* Check to see if GDB is ready to receive another command. If it is, then
      * readline should redisplay what it currently contains. There are 2 special
      * case's here.
      *
@@ -1254,7 +1254,7 @@ static int readline_input()
     return 0;
 }
 
-/* child_input: Recieves data from the child application:
+/* child_input: Receives data from the child application:
  *
  *  Returns: -1 on error, 0 on EOF or number of bytes handled from child.
  */
@@ -1291,7 +1291,7 @@ static int cgdb_resize_term(int fd)
     }
 
     /* If there is more input in the pipe, that means another resize has
-     * been recieved, and we still have not handled this one. So, skip this
+     * been received, and we still have not handled this one. So, skip this
      * one and only handle the next one.
      */
     result = io_data_ready(fd, 0);
@@ -1414,12 +1414,12 @@ static int main_loop(void)
             }
         }
 
-        /* A signal occured (besides SIGWINCH) */
+        /* A signal occurred (besides SIGWINCH) */
         if (FD_ISSET(signal_pipe[0], &rset))
             if (cgdb_handle_signal_in_main_loop(signal_pipe[0]) == -1)
                 return -1;
 
-        /* A resize signal occured */
+        /* A resize signal occurred */
         if (FD_ISSET(resize_pipe[0], &rset))
             if (cgdb_resize_term(resize_pipe[0]) == -1)
                 return -1;
@@ -1532,7 +1532,7 @@ void cleanup()
 #endif
 
     /* Finally, should display the errors. 
-     * TGDB guarentees the logger to be open at this point.
+     * TGDB guarantees the logger to be open at this point.
      * So, we can get the filename directly from the logger 
      */
     logger_get_file(logger, &tmp_log_file);
@@ -1716,7 +1716,7 @@ int init_kui(void)
      * Home and End keys. A few distros I've run into (redhat e3
      * and ubuntu) provide incorrect terminfo entries for xterm.
      * So, Home and End do not work. The distro's fixed readline
-     * by modifing /etc/inputrc to hard code the terminal sequences.
+     * by modifying /etc/inputrc to hard code the terminal sequences.
      * I have no idea why they wouldn't just fix the terminfo 
      * database, but they didn't! Therefor, readline, bash, gdb all
      * work but cgdb doesn't. So, I'm going to simply ask readline

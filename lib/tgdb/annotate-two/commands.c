@@ -343,7 +343,7 @@ commands_parse_source(struct commands *c,
 /** 
  * Parse a breakpoint that GDB passes back when annotate=2 is set.
  * 
- * Unfortunatly, the line that this function has to parse is completly 
+ * Unfortunately, the line that this function has to parse is completely 
  * ambiguous. GDB does not output a line that can be read in a 
  * non-ambiguous way. Therefore, TGDB tries its best to read the line 
  * properly. The line is in this format.

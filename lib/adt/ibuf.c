@@ -57,7 +57,7 @@ void ibuf_addchar(struct ibuf *s, char c)
     /* the '+1' is for the null-terminated char */
     if (s->cur_buf_pos + 1 == ((s->cur_block_size) * s->BLOCK_SIZE)) {
         /* NOTE: s->cur_block_size *= 2 would double the buffer size 
-         *  however, I didn't think it was necesary since it should rarly go
+         *  however, I didn't think it was necessary since it should rarly go
          *  above 1 block.
          */
         s->cur_block_size += 1;

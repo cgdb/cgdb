@@ -51,7 +51,7 @@ void hl_wprintw(WINDOW * win, const char *line, int width, int offset);
  *  cur_line:       This line is returned with highlighting embedded into it.
  *  sel_line:       The current line the user is on.
  *  sel_rline:      The current line the regular expression is on.
- *  sel_col_rbeg:   The beggining index of the last match.
+ *  sel_col_rbeg:   The beginning index of the last match.
  *  sel_col_rend:   The ending index of the last match.
  *  opt:            1 -> incremental match, 2 -> perminant match
  *  direction:      1 if forward, 0 if reverse

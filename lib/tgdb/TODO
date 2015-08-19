@@ -42,7 +42,7 @@ tgdb 0.5.0 issues raised by developers
   I have to remove all occurrences of PATH_MAX. I can apply the patch
   for know, or come up with a better all around approach.
 
-  I removed all occurences of PATH_MAX and replaced them with FSUTIL_PATH_MAX.
+  I removed all occurrences of PATH_MAX and replaced them with FSUTIL_PATH_MAX.
   Ideally, CGDB/TGDB could dynamically create the strings like Santiago 
   pointed out. This should be done eventually.
 	

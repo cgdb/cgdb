@@ -301,7 +301,7 @@ extern "C" {
 
     /**
      * This is a response to the tgdb_get_sources function call.
-     * If the sources can not be recieved you will get this response.
+     * If the sources can not be received you will get this response.
      */
         TGDB_SOURCES_DENIED,
 

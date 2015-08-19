@@ -83,7 +83,7 @@ int logger_destroy(struct logger *log);
 int logger_set_file(struct logger *log, const char *file);
 
 /**
- * Get's the file that the logger is writting to.
+ * Get's the file that the logger is writing to.
  * This could be used to tell the user what file the error's
  * are being sent to.
  *
@@ -189,7 +189,7 @@ int logger_has_recv_data(struct logger *log, int *has_recv_data);
  *
  * \param record
  * 1 if you wish to have the logger record the data ( default )
- * 0 if you wish the logger to ignore the data it recieves.
+ * 0 if you wish the logger to ignore the data it receives.
  *
  * \return
  * 0 on succes, -1 on error

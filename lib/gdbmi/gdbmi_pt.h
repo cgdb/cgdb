@@ -56,8 +56,8 @@ struct gdbmi_result_record {
 /* There are several kinds of output that GDB can send  */
 enum gdbmi_oob_record_choice {
     /* GDBMI_ASYNC
-       I believe that the asyncronous records contain data that was not asked
-       for by the front end. An asyncronous event occured within the inferior
+       I believe that the asynchronous records contain data that was not asked
+       for by the front end. An asynchronous event occurred within the inferior
        or GDB and GDB needs to update the front end.
 
        For instance, I believe this is useful for when breakpoints are modified, 
@@ -84,7 +84,7 @@ struct gdbmi_oob_record {
     gdbmi_oob_record_ptr next;
 };
 
-/* This represents each choice of asyncronous record GDB is capable of 
+/* This represents each choice of asynchronous record GDB is capable of 
    sending.  */
 enum gdbmi_async_record_choice {
     /* Contains on-going status information about the progress of a slow 
@@ -115,13 +115,13 @@ enum gdbmi_async_class {
     GDBMI_STOPPED
 };
 
-/* An asyncronous record  */
+/* An asynchronous record  */
 struct gdbmi_async_record {
     /* This is the unique identifier that was passed to GDB when asking for a 
        command to be done on behalf of the front end.  */
     gdbmi_token_t token;
 
-    /* The choice of asyncronous record this represents  */
+    /* The choice of asynchronous record this represents  */
     enum gdbmi_async_record_choice async_record;
 
     enum gdbmi_async_class async_class;

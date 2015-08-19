@@ -308,8 +308,8 @@ char *rline_rl_completion_entry_function(const char *text, int matches)
 }
 
 /* This is necessary because we want to make what the user has typed
- * against a list of possibilites. For example, if the user has typed
- * 'b ma', the completion possibities should at least have 'b main'.
+ * against a list of possibilities. For example, if the user has typed
+ * 'b ma', the completion possibilities should at least have 'b main'.
  * The default readline word break includes a ' ', which would not
  * result in 'b main' as the completion result.
  */

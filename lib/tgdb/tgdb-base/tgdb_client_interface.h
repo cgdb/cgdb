@@ -234,7 +234,7 @@ int tgdb_client_is_client_ready(struct tgdb_client_context *tcc);
 /** 
  * This is currently called after TGDB has sent a command to the debugger.
  * Currently, the client can run commands that has to be run ( for TGDB ) 
- * everytime the user/GUI runs a commnad. For example, this is necessary 
+ * every time the user/GUI runs a command. For example, this is necessary 
  * for keeping the breakpoints current.
  *
  * In the future, it seems like this function should go away, and TGDB 
@@ -293,7 +293,7 @@ int tgdb_client_can_tgdb_run_commands(struct tgdb_client_context *tcc);
 /*@{*/
 
  /** 
-  * This recieves all of the output from the debugger. It is all routed 
+  * This receives all of the output from the debugger. It is all routed 
   * through this function. 
   *
   * \param tcc
@@ -326,7 +326,7 @@ int tgdb_client_can_tgdb_run_commands(struct tgdb_client_context *tcc);
   *
   * @return
   * 1 when it has finished a command, 
-  * 0 on success but hasn't recieved enough I/O to finish the command, 
+  * 0 on success but hasn't received enough I/O to finish the command, 
   * otherwise -1 on error.
   *
   * \post

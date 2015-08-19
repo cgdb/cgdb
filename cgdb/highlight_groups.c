@@ -285,7 +285,7 @@ static const struct color_info *color_spec_for_name(const char *name)
  * The foreground color
  *
  * \param back_color
- * The backgroud color
+ * The background color
  *
  * \return
  * 0 on success, -1 on error.

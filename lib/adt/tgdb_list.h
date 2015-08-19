@@ -16,7 +16,7 @@ typedef int (*tgdb_list_func) (void *item);
 struct tgdb_list *tgdb_list_init(void);
 
 /*
- * Destory a list
+ * Destroy a list
  *
  * \param list
  * The list to destroy
@@ -41,7 +41,7 @@ int tgdb_list_destroy(struct tgdb_list *list);
 int tgdb_list_append(struct tgdb_list *tlist, void *item);
 
 /* 
- * Prepends item to the beggining of the list.
+ * Prepends item to the beginning of the list.
  * 
  * tlist
  *    The list to prepend an item to.
@@ -154,7 +154,7 @@ int tgdb_list_size(struct tgdb_list *tlist);
  * Gets a hold of the first iterator in the list
  *
  * tlist
- *    The list to get the beggining of
+ *    The list to get the beginning of
  *
  * i
  *    The iterator to assign at the first position of the list

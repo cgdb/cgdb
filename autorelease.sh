@@ -217,7 +217,7 @@ echo "The CGDB Team" >> $CGDB_RELEASE_EMAIL
 
 # TODO: Use jekyll in the web site and then set a variable for the version
 ################################################################################
-#echo "-- Modifing doc/htdocs/download.php"
+#echo "-- Modifying doc/htdocs/download.php"
 ################################################################################
 #perl -pi -e "s/define\('LATEST', \".*?\"\)/define\('LATEST', \"$CGDB_VERSION\"\)/g" doc/htdocs/download.php
 

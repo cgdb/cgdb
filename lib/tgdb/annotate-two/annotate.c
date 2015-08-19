@@ -201,8 +201,8 @@ static int handle_error_begin(struct annotate_two *a2, const char *buf,
 
     /* After a signal is sent (^c), the debugger will then output 
      * something like "Quit\n", so that should be displayed to the user.
-     * Unfortunatly, the debugger ( gdb ) isn't nice enough to return a 
-     * post-prompt when a signal is recieved.
+     * Unfortunately, the debugger ( gdb ) isn't nice enough to return a 
+     * post-prompt when a signal is received.
      */
     data_set_state(a2, VOID);
 

@@ -29,7 +29,7 @@ enum TOKENS {
     EOL
 };
 
-/* yylex: retreive the next token from the current scan buffer
+/* yylex: retrieve the next token from the current scan buffer
  * --------------
  *  return: an integer value representing the token type (enum TOKEN).  0 when
  *          no more input.

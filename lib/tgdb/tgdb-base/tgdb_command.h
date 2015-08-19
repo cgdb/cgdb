@@ -15,7 +15,7 @@
  * The current command type. TGDB is capable of having any commands of this
  * type in it's queue.
  *
- * I don't know what this should look like completly.
+ * I don't know what this should look like completely.
  */
 enum tgdb_command_choice {
 
@@ -86,7 +86,7 @@ struct tgdb_command {
  * Data that the client can use when prepare_client_for_command is called
  *
  * @return
- * Always is successfull, will call exit on failed malloc
+ * Always is successful, will call exit on failed malloc
  */
 struct tgdb_command *tgdb_command_create(const char *tgdb_command_data,
         enum tgdb_command_choice command_choice, void *client_data);

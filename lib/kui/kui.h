@@ -555,7 +555,7 @@ int kui_manager_getkey_blocking(struct kui_manager *kuim);
  * Set's the terminal escape sequence time out value.
  * This is used to tell CGDB how long to block when looking to match terminal
  * escape sequences. For instance, in order to get F11, Maybe it's necessary
- * for the charachters 27(ESC) 80(P) 81(Q) to get sent. So, if the user types 
+ * for the characters 27(ESC) 80(P) 81(Q) to get sent. So, if the user types 
  * these within msec each, then CGDB_KEY_F11 get's returned, otherwise the 
  * key's are returned as typed.
  *
