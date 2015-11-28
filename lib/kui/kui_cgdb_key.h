@@ -105,6 +105,11 @@ enum cgdb_key {
     CGDB_KEY_CTRL_Y,
     CGDB_KEY_CTRL_Z,
 
+    /* CGDB passes some special keys directly to readline.
+     * These keys are not vim compatible. */
+    CGDB_KEY_BACKWARD_WORD,
+    CGDB_KEY_FORWARD_WORD,
+
     CGDB_KEY_ERROR
 };
 

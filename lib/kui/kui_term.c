@@ -97,9 +97,21 @@ struct keydata {
 } hard_coded_bindings[] = {
     {
     CGDB_KEY_ESC, "\033"},
-            /* Arrow bindings */
-            /* These should be first, because readline hard codes them and when I
-             * walk this list to get the key bindings, I want these for the arrows */
+
+    /* Arrow bindings */
+
+    /* A cgdb key can be represented by several different terminal
+     * mappings. Different terminals produce different key sequences, for
+     * say F11, and we hard code common cases for the popular terminals.
+     *
+     * cgdb returns the enumeration cgdb_key back up to cgdb
+     * instead of the key sequence. The first key mapping is the one that
+     * will be used when asking what character mapping makes up a cgdb key.
+     *
+     * For this reason, we put the ones that are hard coded in readline
+     * on top. That way, we know when we pass readline the key mapping,
+     * it will understand it.
+     */
     {
     CGDB_KEY_UP, "\033[A"}, {
     CGDB_KEY_DOWN, "\033[B"}, {
@@ -119,6 +131,10 @@ struct keydata {
     CGDB_KEY_LEFT, "\033OD"}, {
     CGDB_KEY_HOME, "\033OH"}, {
     CGDB_KEY_END, "\033OF"},
+            /* Passed through to readline */
+    {
+    CGDB_KEY_BACKWARD_WORD, "\033b"}, {
+    CGDB_KEY_FORWARD_WORD, "\033f"},
             /* Ctrl bindings */
     {
     CGDB_KEY_CTRL_A, "\001"}, {
@@ -218,6 +234,8 @@ struct cgdb_keycode_data {
     CGDB_KEY_F10, "<F10>", "CGDB_KEY_F10"}, {
     CGDB_KEY_F11, "<F11>", "CGDB_KEY_F11"}, {
     CGDB_KEY_F12, "<F12>", "CGDB_KEY_F12"}, {
+    CGDB_KEY_BACKWARD_WORD, "<BACKWARD-WORD>", "CGDB_KEY_BACKWARD_WORD"}, {
+    CGDB_KEY_FORWARD_WORD, "<FORWARD-WORD>", "CGDB_KEY_FORWARD_WORD"}, {
     CGDB_KEY_CTRL_A, "<C-a>", "CGDB_KEY_CTRL_A"}, {
     CGDB_KEY_CTRL_B, "<C-b>", "CGDB_KEY_CTRL_B"}, {
     CGDB_KEY_CTRL_C, "<C-c>", "CGDB_KEY_CTRL_C"}, {

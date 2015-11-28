@@ -638,6 +638,24 @@ expect {
   }
 }
 
+set test "backward-word key"
+send "\033b"
+expect {
+  -re "CGDB_KEY_BACKWARD_WORD\\\[27\\\]\\\[98\\\]$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "forward-word key"
+send "\033f"
+expect {
+  -re "CGDB_KEY_FORWARD_WORD\\\[27\\\]\\\[102\\\]$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
 # Test previously broken functionality
 set test "key not detected until next key hit"
 send "\033o"

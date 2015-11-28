@@ -1729,6 +1729,10 @@ int init_kui(void)
     add_readline_key_sequence("beginning-of-line", CGDB_KEY_HOME);
     /* End key */
     add_readline_key_sequence("end-of-line", CGDB_KEY_END);
+    /* Backword-Word */
+    add_readline_key_sequence("backward-word", CGDB_KEY_BACKWARD_WORD);
+    /* Forward-word */
+    add_readline_key_sequence("forward-word", CGDB_KEY_FORWARD_WORD);
 
     return 0;
 }

@@ -88,7 +88,6 @@ struct filedlg *filedlg_new(int pos_r, int pos_c, int height, int width)
 
     /* Initialize the structure */
     fd->win = newwin(height, width, pos_r, pos_c);
-    keypad(fd->win, TRUE);
 
     /* Initialize the buffer */
     if ((fd->buf = (struct file_buffer *)malloc(sizeof (struct file_buffer))) == NULL)
