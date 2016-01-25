@@ -10,6 +10,13 @@ char *c_extensions[] = {
 char *d_extensions[] = { ".d", ".di" };
 char *go_extensions[] = { ".go" };
 char *ada_extensions[] = { ".adb", ".ads", ".ada", ".ADB", ".ADS", ".ADA" };
+/*
+ * File extensions for Fortran are defined according to
+ * http://fortranwiki.org/fortran/show/File+extensions
+ * (accessed on 25-Jan-16)
+ */
+char *fxx_extensions[] = { ".f", ".for", ".f90", ".f95", ".f03",
+                           ".F", ".FOR", ".F90", ".F95", ".F03" };
 
 extern int c_lex(void);
 extern FILE *c_in;
@@ -26,6 +33,10 @@ extern char *go_text;
 extern int ada_lex(void);
 extern FILE *ada_in;
 extern char *ada_text;
+
+extern int fxx_lex(void);
+extern FILE *fxx_in;
+extern char *fxx_text;
 
 struct tokenizer {
     enum tokenizer_language_support lang;
@@ -70,10 +81,14 @@ int tokenizer_set_file(struct tokenizer *t, const char *file,
         t->tokenizer_lex = go_lex;
         t->tokenizer_in = &go_in;
         t->tokenizer_text = &go_text;
-    } else {
+    } else if (l == TOKENIZER_LANGUAGE_ADA) {
         t->tokenizer_lex = ada_lex;
         t->tokenizer_in = &ada_in;
         t->tokenizer_text = &ada_text;
+    } else if (l == TOKENIZER_LANGUAGE_FXX) {
+        t->tokenizer_lex = fxx_lex;
+        t->tokenizer_in = &fxx_in;
+        t->tokenizer_text = &fxx_text;
     }
 
     *(t->tokenizer_in) = fopen(file, "r");
@@ -117,6 +132,7 @@ const char *tokenizer_get_printable_enum(enum tokenizer_type e)
         "TOKENIZER_NUMBER",
         "TOKENIZER_COMMENT",
         "TOKENIZER_DIRECTIVE",
+        "TOKENIZER_FXXFUNC",
         "TOKENIZER_TEXT",
         "TOKENIZER_NEWLINE"
     };
@@ -160,6 +176,10 @@ enum tokenizer_language_support tokenizer_get_default_file_type(const char
     for (i = 0; i < sizeof (ada_extensions) / sizeof (char *); i++)
         if (strcmp(file_extension, ada_extensions[i]) == 0)
             l = TOKENIZER_LANGUAGE_ADA;
+
+    for (i = 0; i < sizeof (fxx_extensions) / sizeof (char *); i++)
+        if (strcmp(file_extension, fxx_extensions[i]) == 0)
+            l = TOKENIZER_LANGUAGE_FXX;
 
     return l;
 }

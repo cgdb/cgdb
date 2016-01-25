@@ -32,6 +32,7 @@ enum hl_group_kind {
     HLG_LITERAL,
     HLG_COMMENT,
     HLG_DIRECTIVE,
+    HLG_FXXFUNC,
     HLG_TEXT,
     HLG_SEARCH,
     HLG_STATUS_BAR,

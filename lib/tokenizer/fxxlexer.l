@@ -155,10 +155,6 @@ IDENTIFIER {L}+{T}*
    * Fortran intrinsic functions are defined according to
    * http://fortranwiki.org/fortran/show/Intrinsic+procedures
    * (accessed on 25-Jan-16)
-   *
-   * A Fortran intrinsic function is matched as:
-   * function name + none or more blank characters + (
-   * But the function name is then terminated by a null character.
    */
 "abs"                            { return(TOKENIZER_KEYWORD); }
 "achar"                          { return(TOKENIZER_KEYWORD); }
