@@ -323,6 +323,7 @@ int pty_open(int *masterfd, int *slavefd, char *slavename, size_t slavenamesize,
 
     /* Turn the slave into a terminal */
 
+#ifdef I_PUSH
 #ifndef HAVE_CYGWIN
 #ifndef HAVE_LINUX              /* linux does not use the streams module */
     /*
@@ -346,6 +347,7 @@ int pty_open(int *masterfd, int *slavefd, char *slavename, size_t slavenamesize,
         close(*slavefd);
         return -1;
     }
+#endif
 #endif
 #endif
 #endif
