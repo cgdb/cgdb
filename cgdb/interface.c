@@ -1,6 +1,6 @@
 /* interface.c:
 * ------------
- * 
+ *
  * Provides the routines for displaying the interface, and interacting with
  * the user via keystrokes.
  */
@@ -51,7 +51,11 @@
 /* Local Includes */
 #include "assert.h"
 #include "cgdb.h"
+
+#if HAVE_CONFIG_H
 #include "config.h"
+#endif
+
 #include "logger.h"
 #include "interface.h"
 #include "kui_term.h"
@@ -78,7 +82,7 @@ extern struct tgdb *tgdb;
 /* Definitions */
 /* ----------- */
 
-/* This determines the minimum number of rows wants to close a window too 
+/* This determines the minimum number of rows wants to close a window too
  * A window should never become smaller than this size */
 static int interface_winminheight = 0;
 
@@ -438,8 +442,8 @@ void if_draw(void)
     if (get_gdb_height() > 0)
         scr_refresh(gdb_win, focus == GDB);
 
-    /* This check is here so that the cursor goes to the 
-     * cgdb window. The cursor would stay in the gdb window 
+    /* This check is here so that the cursor goes to the
+     * cgdb window. The cursor would stay in the gdb window
      * on cygwin */
     if (get_src_height() > 0 && focus == CGDB)
         wrefresh(src_win->win);
@@ -464,7 +468,7 @@ static void validate_window_sizes(void)
     min_window_height_shift += interface_winminheight;
     max_window_height_shift -= interface_winminheight;
 
-    /* Make sure that the windows offset is within its bounds: 
+    /* Make sure that the windows offset is within its bounds:
      * This checks the window offset.
      * */
     if (window_height_shift > max_window_height_shift)
@@ -583,7 +587,7 @@ int if_resize_term(void)
  *
  * Param jump_or_tty - if 0, increase source window by 1
  *                     if 1, if tty window is visible, increase it by 1
- *                           else jump source window to next biggest quarter 
+ *                           else jump source window to next biggest quarter
  *
  */
 static void increase_win_height(int jump_or_tty)
@@ -646,7 +650,7 @@ static void increase_win_height(int jump_or_tty)
  *
  * Param jump_or_tty - if 0, decrease source window by 1
  *                     if 1, if tty window is visible, decrease it by 1
- *                           else jump source window to next smallest quarter 
+ *                           else jump source window to next smallest quarter
  *
  */
 static void decrease_win_height(int jump_or_tty)
@@ -749,7 +753,7 @@ static void if_run_command(struct sviewer *sview, struct ibuf *ibuf_command)
  *
  *   key:  Keystroke received.
  *
- * Return Value:    0 if internal key was used, 
+ * Return Value:    0 if internal key was used,
  *                  2 if input to tty,
  *                  -1        : Error resizing terminal -- terminal too small
  */
@@ -783,7 +787,7 @@ static int tty_input(int key)
  *
  *   key:  Keystroke received.
  *
- * Return Value:    0 if internal key was used, 
+ * Return Value:    0 if internal key was used,
  *                  1 if input to gdb or ...
  *                  -1        : Error resizing terminal -- terminal too small
  */
@@ -806,13 +810,13 @@ static int gdb_input(int key)
 #if 0
             /* I would like to add better support for control-l in the GDB
              * window, but this patch didn't make me happy enough to release it.
-             * The problem is, when it clears the screen, it adds a lot of 
+             * The problem is, when it clears the screen, it adds a lot of
              * whitespace in the buffer. If you hit page-up to look back in
              * the buffer, it's visible. This is really unacceptable.
              *
              * The approach I believe I would like to take with this, is to
              * have the GDB window behave more like the terminal. That is,
-             * have GDB start at the top line, and move down as input 
+             * have GDB start at the top line, and move down as input
              * becomes available. Then, when you hit ctrl-l, you just move
              * the prompt to the top line. */
         case CGDB_KEY_CTRL_L:
@@ -831,7 +835,7 @@ static int gdb_input(int key)
 
             /* Sneaky return 1 here. Basically, this allows tricks readline to think
              * that gdb did not handle the Ctrl-l. That way readline will also handle
-             * it. Because readline uses TERM=dumb, that means that it will clear a 
+             * it. Because readline uses TERM=dumb, that means that it will clear a
              * single line and put out the prompt. */
             return 1;
             break;
@@ -978,7 +982,7 @@ static int status_bar_input(struct sviewer *sview, int key)
 
 /**
  * toggle a breakpoint
- * 
+ *
  * \param sview
  * The source view
  *
@@ -1235,7 +1239,7 @@ int internal_if_input(int key)
                     /* Set the type of the command the user is typing in the status bar */
                     sbc_kind = SBC_NORMAL;
                     if_set_focus(CGDB_STATUS_BAR);
-                    /* Since the user is about to type in a command, allocate a buffer 
+                    /* Since the user is about to type in a command, allocate a buffer
                      * in which this command can be stored. */
                     cur_sbc = ibuf_init();
                     return 0;

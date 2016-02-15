@@ -34,7 +34,10 @@
  * called by a name other than "ssh" or "Secure Shell".
  */
 
+#if HAVE_CONFIG_H
 #include "config.h"
+#endif /* HAVE_CONFIG_H */
+
 #define _GNU_SOURCE             /* ptsname_r() under Linux */
 #include <fcntl.h>
 #include <grp.h>
@@ -97,11 +100,11 @@
  * src: source
  * size: amount to copy from source to dest.
  *
- * NOTE: dst will be no longer than size - 1 bytes and will be nul 
- * terminated (unless size is zero). This is similar to strncpy() 
- * except that it always terminates the string with a nul byte 
- * (so it's safer) and it doesn't fill the remainder of the buffer 
- * with nul bytes (so it's faster).  Returns the length of src 
+ * NOTE: dst will be no longer than size - 1 bytes and will be nul
+ * terminated (unless size is zero). This is similar to strncpy()
+ * except that it always terminates the string with a nul byte
+ * (so it's safer) and it doesn't fill the remainder of the buffer
+ * with nul bytes (so it's faster).  Returns the length of src
  * (If this is >= size, truncation occurred).
  */
 
@@ -165,19 +168,19 @@ static int uid2gid(uid_t uid)
     return ret;
 }
 
-/* pty_open: A safe version of openpty. 
- * Allocates and opens a pseudo terminal. The new descriptor for the 
- * master side of the pseudo terminal is stored in masterfd. The new 
- * descriptor for the slave side of the pseudo terminal is stored in slavefd. 
- * The device name of the slave side of the pseudo terminal is stored in the 
- * buffer pointed to by slavename which must be able to hold at least 64 
- * characters. slavenamesize is the size of the buffer pointed to by 
- * slavename. No more than slavenamesize bytes will be written into the 
- * buffer pointed to by slavename, including the terminating nul byte. 
- * If slave_termios is not null, it is passed to tcsetattr with the 
- * command TCSANOW to set the terminal attributes of the slave device. 
- * If slave_winsize is not null, it is passed to ioctl with the command 
- * TIOCSWINSZ to set the window size of the slave device. On success, 
+/* pty_open: A safe version of openpty.
+ * Allocates and opens a pseudo terminal. The new descriptor for the
+ * master side of the pseudo terminal is stored in masterfd. The new
+ * descriptor for the slave side of the pseudo terminal is stored in slavefd.
+ * The device name of the slave side of the pseudo terminal is stored in the
+ * buffer pointed to by slavename which must be able to hold at least 64
+ * characters. slavenamesize is the size of the buffer pointed to by
+ * slavename. No more than slavenamesize bytes will be written into the
+ * buffer pointed to by slavename, including the terminating nul byte.
+ * If slave_termios is not null, it is passed to tcsetattr with the
+ * command TCSANOW to set the terminal attributes of the slave device.
+ * If slave_winsize is not null, it is passed to ioctl with the command
+ * TIOCSWINSZ to set the window size of the slave device. On success,
  * returns 0. On error, returns -1 with errno set appropriately.
  */
 int pty_open(int *masterfd, int *slavefd, char *slavename, size_t slavenamesize,
@@ -474,9 +477,9 @@ int pty_open(int *masterfd, int *slavefd, char *slavename, size_t slavenamesize,
  * slavename: the device name of the slave side of the pseudo terminal
  * Returns  : 0 on success or -1 on error.
  *
- * Note: Its ownership is returned to root, and its permissions set to 
- * rw-rw-rw-. Note that only root can execute this function successfully 
- * on most systems. 
+ * Note: Its ownership is returned to root, and its permissions set to
+ * rw-rw-rw-. Note that only root can execute this function successfully
+ * on most systems.
  */
 int pty_release(const char *slavename)
 {
@@ -513,7 +516,7 @@ int pty_release(const char *slavename)
  * set to the real uid of the process by pty_open() and pty_fork(). The
  * permissions are also set automatically by these functions. So
  * pty_set_owner() is only needed when the device needs to be owned by some
- * user other than the real user. 
+ * user other than the real user.
  */
 int pty_set_owner(const char *slavename, uid_t uid)
 {
@@ -542,14 +545,14 @@ int pty_set_owner(const char *slavename, uid_t uid)
     return 0;
 }
 
-/* pty_make_controlling_tty: Makes the slave pty the controlling terminal. 
+/* pty_make_controlling_tty: Makes the slave pty the controlling terminal.
  *
- * slavefd contains the descriptor for the slave side of a pseudo terminal. 
+ * slavefd contains the descriptor for the slave side of a pseudo terminal.
  * slavename: the device name of the slave side of the pseudo terminal
  * Returns  : 0 on success or -1 on error.
  *
- * NOTE: The descriptor of the resulting controlling terminal will be stored 
- * in slavefd. 
+ * NOTE: The descriptor of the resulting controlling terminal will be stored
+ * in slavefd.
  */
 int pty_make_controlling_tty(int *slavefd, const char *slavename)
 {
@@ -641,22 +644,22 @@ int pty_change_window_size(int masterfd, int row, int col, int xpixel,
     return ioctl(masterfd, TIOCSWINSZ, &win);
 }
 
-/* pty_fork:  Creates a pseudo terminal and then calls fork. In the parent 
- * process, the slave side of the pseudo terminal is closed. In the child 
- * process, the master side of the pseudo terminal is closed and the slave 
- * side is made the controlling terminal. It is duplicated onto standard 
- * input, output and error and then closed. The master side of the pseudo 
- * terminal is stored in masterfd for the parent process. The device name 
- * of the slave side of the pseudo terminal is stored in the buffer pointed 
- * to by slavename which must be able to hold at least 64 bytes.  
+/* pty_fork:  Creates a pseudo terminal and then calls fork. In the parent
+ * process, the slave side of the pseudo terminal is closed. In the child
+ * process, the master side of the pseudo terminal is closed and the slave
+ * side is made the controlling terminal. It is duplicated onto standard
+ * input, output and error and then closed. The master side of the pseudo
+ * terminal is stored in masterfd for the parent process. The device name
+ * of the slave side of the pseudo terminal is stored in the buffer pointed
+ * to by slavename which must be able to hold at least 64 bytes.
  * slavenamesize is the size of the buffer pointed to by slavename. No
- * more than slavenamesize bytes will be written to slavename, including 
- * the terminating nul byte. If slave_termios is not null, it is passed to 
- * tcsetattr with the command TCSANOW to set the terminal attributes of the 
- * slave device. If slave_winsize is not null, it is passed to ioctl with 
- * the command TIOCSWINSZ to set the window size of the slave device. 
- * On success, returns 0 to the child process and returns the process 
- * id of the child process to the parent process. On error, returns -1 with 
+ * more than slavenamesize bytes will be written to slavename, including
+ * the terminating nul byte. If slave_termios is not null, it is passed to
+ * tcsetattr with the command TCSANOW to set the terminal attributes of the
+ * slave device. If slave_winsize is not null, it is passed to ioctl with
+ * the command TIOCSWINSZ to set the window size of the slave device.
+ * On success, returns 0 to the child process and returns the process
+ * id of the child process to the parent process. On error, returns -1 with
  * errno set appropriately.
  */
 pid_t pty_fork(int *masterfd, char *slavename, size_t slavenamesize,
