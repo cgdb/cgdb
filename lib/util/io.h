@@ -15,6 +15,12 @@
 
 #define MAX_LINE 4096
 
+#if HAVE_ATTRIBUTE_PRINTF
+#define ATTRIBUTE_PRINTF( _x, _y ) __attribute__( ( __format__( __printf__, _x, _y ) ) )
+#else
+#define ATTRIBUTE_PRINTF( _x, _y )
+#endif
+
 /* The Next three function handle reading and writing of bytes */
 
 /* io_read_byte: reads the byte c from source.
@@ -66,7 +72,7 @@ int io_debug_init(const char *filename);
 
 /* io_debug_write: Writes null terminated data cstring to debug file.  */
 void io_debug_write(const char *write);
-void io_debug_write_fmt(const char *fmt, ...);
+void io_debug_write_fmt(const char *fmt, ...) ATTRIBUTE_PRINTF( 1, 2 );
 
 /* io_display_char: Displays the char c in fd. 
  *    This is useful when c is a '\r' or '\n' because it will be displayed

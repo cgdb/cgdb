@@ -269,8 +269,6 @@ static int load_file(struct list_node *node)
     } else {
         /* Just copy the lines from the original buffer if no highlighting 
          * is possible */
-        int i;
-
         node->buf.length = node->orig_buf.length;
         node->buf.max_width = node->orig_buf.max_width;
         node->buf.tlines = (char **)cgdb_malloc(sizeof (char *) * node->orig_buf.length);

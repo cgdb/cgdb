@@ -60,7 +60,7 @@ void if_print(const char *buf);
  *
  * fmt:     The message to display
  */
-void if_print_message(const char *fmt, ...);
+void if_print_message(const char *fmt, ...) ATTRIBUTE_PRINTF( 1, 2 );
 
 /* if_tty_print: Prints data to the tty input/output window.
  * -------------
@@ -95,7 +95,7 @@ struct sviewer *if_get_sview();
  *
  * fmt:     The message to display
  */
-void if_display_message(const char *msg, int width, const char *fmt, ...);
+void if_display_message(const char *msg, int width, const char *fmt, ...) ATTRIBUTE_PRINTF( 3, 4 );
 
 /* if_clear_filedlg: Clears all the files the file dialog has to show the user.
  * -----------------

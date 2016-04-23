@@ -9,6 +9,12 @@
 #include <stdio.h>
 #endif /* HAVE_STDIO_H */
 
+#if HAVE_ATTRIBUTE_PRINTF
+#define ATTRIBUTE_PRINTF( _x, _y ) __attribute__( ( __format__( __printf__, _x, _y ) ) )
+#else
+#define ATTRIBUTE_PRINTF( _x, _y )
+#endif
+
 /* Doxygen headers {{{ */
 /*!
  * \file
@@ -153,7 +159,7 @@ int logger_set_fd(struct logger *log, FILE * fd);
  * 0 on succes, -1 on error
  */
 int logger_write_pos(struct logger *log,
-        const char *file, int line, const char *fmt, ...);
+        const char *file, int line, const char *fmt, ...) ATTRIBUTE_PRINTF( 4, 5 );
 
 /*@}*/
 
