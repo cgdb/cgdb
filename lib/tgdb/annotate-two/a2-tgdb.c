@@ -176,14 +176,14 @@ static int tgdb_setup_config_file(struct annotate_two *a2, const char *dir)
 }
 
 void *a2_create_context(const char *debugger,
-        int argc, char **argv, const char *config_dir, struct logger *logger)
+        int argc, char **argv, const char *config_dir, struct logger *logger_in)
 {
 
     struct annotate_two *a2 = initialize_annotate_two();
     char a2_debug_file[FSUTIL_PATH_MAX];
 
     if (!tgdb_setup_config_file(a2, config_dir)) {
-        logger_write_pos(logger, __FILE__, __LINE__,
+        logger_write_pos(logger_in, __FILE__, __LINE__,
                 "tgdb_init_config_file error");
         return NULL;
     }
@@ -400,6 +400,8 @@ char *a2_return_client_command(void *ctx, enum tgdb_command_type c)
             break;
         case TGDB_DOWN:
             ret = "down";
+            break;
+        case TGDB_ERROR:
             break;
     }
 

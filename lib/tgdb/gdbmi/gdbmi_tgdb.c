@@ -246,14 +246,14 @@ static int tgdb_setup_config_file(struct tgdb_gdbmi *gdbmi, const char *dir)
 }
 
 void *gdbmi_create_context(const char *debugger,
-        int argc, char **argv, const char *config_dir, struct logger *logger)
+        int argc, char **argv, const char *config_dir, struct logger *logger_in)
 {
 
     struct tgdb_gdbmi *gdbmi = initialize_tgdb_gdbmi();
     char gdbmi_debug_file[PATH_MAX];
 
     if (!tgdb_setup_config_file(gdbmi, config_dir)) {
-        logger_write_pos(logger, __FILE__, __LINE__,
+        logger_write_pos(logger_in, __FILE__, __LINE__,
                 "tgdb_init_config_file error");
         return NULL;
     }

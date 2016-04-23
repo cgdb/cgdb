@@ -225,7 +225,7 @@ struct tgdb_client_context {
 struct tgdb_client_context *tgdb_client_create_context(const char
         *debugger_path, int argc, char **argv, const char *config_dir,
         enum tgdb_client_supported_debuggers debugger,
-        enum tgdb_client_supported_protocols protocol, struct logger *logger)
+        enum tgdb_client_supported_protocols protocol, struct logger *logger_in)
 {
 
     struct tgdb_client_context *tcc = NULL;
@@ -240,7 +240,7 @@ struct tgdb_client_context *tgdb_client_create_context(const char
                 cgdb_malloc(sizeof (struct tgdb_client_context));
         tcc->debugger = debugger;
         tcc->protocol = protocol;
-        tcc->logger = logger;
+        tcc->logger = logger_in;
 
         if (protocol == TGDB_CLIENT_PROTOCOL_GNU_GDB_ANNOTATE_TWO)
             tcc->tgdb_client_interface = &tgdb_client_debugger_interfaces[0];
@@ -250,7 +250,7 @@ struct tgdb_client_context *tgdb_client_create_context(const char
         tcc->tgdb_debugger_context =
                 tcc->tgdb_client_interface->
                 tgdb_client_create_context(debugger_path, argc, argv,
-                config_dir, logger);
+                config_dir, logger_in);
 
         if (tcc->tgdb_debugger_context == NULL) {
             logger_write_pos(tcc->logger, __FILE__, __LINE__,

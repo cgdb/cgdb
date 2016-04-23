@@ -257,7 +257,7 @@ static struct termios term_attributes;
  * If the TGDB instance is not busy, it will run the requested command.
  * Otherwise, the command will get queued to run later.
  *
- * \param tgdb
+ * \param tgdb_in
  * An instance of the tgdb library to operate on.
  *
  * \param request
@@ -266,22 +266,22 @@ static struct termios term_attributes;
  * \return
  * 0 on success or -1 on error
  */
-int handle_request(struct tgdb *tgdb, struct tgdb_request *request)
+int handle_request(struct tgdb *tgdb_in, struct tgdb_request *request)
 {
     int val, is_busy;
 
-    if (!tgdb || !request)
+    if (!tgdb_in || !request)
         return -1;
 
-    val = tgdb_is_busy(tgdb, &is_busy);
+    val = tgdb_is_busy(tgdb_in, &is_busy);
     if (val == -1)
         return -1;
 
     if (is_busy)
-        tgdb_queue_append(tgdb, request);
+        tgdb_queue_append(tgdb_in, request);
     else {
         last_request = request;
-        tgdb_process_command(tgdb, request);
+        tgdb_process_command(tgdb_in, request);
     }
 
     return 0;
@@ -932,11 +932,11 @@ static int user_input_loop()
     return 0;
 }
 
-static void process_commands(struct tgdb *tgdb)
+static void process_commands(struct tgdb *tgdb_in)
 {
     struct tgdb_response *item;
 
-    while ((item = tgdb_get_response(tgdb)) != NULL) {
+    while ((item = tgdb_get_response(tgdb_in)) != NULL) {
         switch (item->header) {
                 /* This updates all the breakpoints */
             case TGDB_UPDATE_BREAKPOINTS:
@@ -1176,7 +1176,6 @@ static int gdb_input()
      * result in a race condition.
      */
     if (is_finished) {
-        int size;
 
         tgdb_queue_size(tgdb, &size);
         /* This is the second case, this command was queued. */

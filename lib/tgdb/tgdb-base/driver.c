@@ -63,21 +63,21 @@ static int is_tab_completing = 0;
 static struct termios term_attributes;
 
 /* Run or queue a TGDB command */
-static int handle_request(struct tgdb *tgdb, struct tgdb_request *request)
+static int handle_request(struct tgdb *tgdb_in, struct tgdb_request *request)
 {
     int val, is_busy;
 
-    if (!tgdb || !request)
+    if (!tgdb_in || !request)
         return -1;
 
-    val = tgdb_is_busy(tgdb, &is_busy);
+    val = tgdb_is_busy(tgdb_in, &is_busy);
     if (val == -1)
         return -1;
 
     if (is_busy)
-        tgdb_queue_append(tgdb, request);
+        tgdb_queue_append(tgdb_in, request);
     else
-        tgdb_process_command(tgdb, request);
+        tgdb_process_command(tgdb_in, request);
 
     return 0;
 }
@@ -246,10 +246,10 @@ static int gdb_input(void)
     }
 
     if (is_finished) {
-        int size;
+        int qsize;
 
-        tgdb_queue_size(tgdb, &size);
-        if (size > 0) {
+        tgdb_queue_size(tgdb, &qsize);
+        if (qsize > 0) {
             struct tgdb_request *request = tgdb_queue_pop(tgdb);
             char *prompt;
 
