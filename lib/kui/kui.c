@@ -758,7 +758,6 @@ static int kui_was_map_found(struct kuictx *kctx,
             return -1;
 
         if (map_state == KUI_TREE_FOUND) {
-            void *data;
 
             if (kui_tree_get_data(map_set->ktree, &data) == -1)
                 return -1;

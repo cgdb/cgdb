@@ -246,17 +246,17 @@ void main_loop(struct kui_manager *i)
                 } else if (kui_term_is_cgdb_key(c) && c == CGDB_KEY_CTRL_Z) {
                     /* Read a complete line, and check to see if it's a 
                      * map or umap command. */
-                    char c;
+                    char ch;
                     char line[4096];
                     int pos = 0;
 
                     fprintf(stderr, "\r\n(kui_map)");
 
                     do {
-                        c = fgetc(stdin);
-                        line[pos++] = c;
-                        fprintf(stderr, "%c", c);
-                    } while (c != '\r' && c != '\n' && pos < 4095);
+                        ch = fgetc(stdin);
+                        line[pos++] = ch;
+                        fprintf(stderr, "%c", ch);
+                    } while (ch != '\r' && ch != '\n' && pos < 4095);
                     line[pos++] = 0;
 
                     load_map(line);

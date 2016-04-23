@@ -714,15 +714,15 @@ static void signal_handler(int signo)
 {
     extern int resize_pipe[2];
     extern int signal_pipe[2];
-    int fd;
+    int fdpipe;
 
     if (signo == SIGWINCH) {
-        fd = resize_pipe[1];
+        fdpipe = resize_pipe[1];
     } else {
-        fd = signal_pipe[1];
+        fdpipe = signal_pipe[1];
     }
 
-    assert(write(fd, &signo, sizeof(signo)) == sizeof(signo));
+    assert(write(fdpipe, &signo, sizeof(signo)) == sizeof(signo));
 }
 
 static void if_run_command(struct sviewer *sview, struct ibuf *ibuf_command)
@@ -1002,7 +1002,7 @@ toggle_breakpoint(struct sviewer *sview, enum tgdb_breakpoint_action t)
 
     /* Get filename (strip path off -- GDB is dumb) */
     path = strrchr(sview->cur->path, '/') + 1;
-    if (path == NULL + 1)
+    if (path == (char *)NULL + 1)
         path = sview->cur->path;
 
     /* delete an existing breakpoint */

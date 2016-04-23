@@ -457,7 +457,7 @@ int main_loop(int gdbfd)
 int main(int argc, char **argv)
 {
 
-    int gdb_fd, child_fd, slavefd, masterfd;
+    int gdb_fd, slavefd, masterfd;
 
 #if 0
     int c;
