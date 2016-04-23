@@ -85,7 +85,7 @@ int fs_util_create_dir(const char *dir)
             return 1;
         else {
             logger_write_pos(logger, __FILE__, __LINE__,
-                    "file %d is not a directory", actual_dir);
+                    "file %s is not a directory", actual_dir);
             return 0;
         }
     } else {
