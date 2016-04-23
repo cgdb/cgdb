@@ -67,6 +67,7 @@ LDFLAGS="$LDFLAGS -L${ac_cv_rl_libdir}"
 AC_CACHE_VAL(ac_cv_rl_version,
 [AC_TRY_RUN([
 #include <stdio.h>
+#include <stdlib.h>
 #include <readline/readline.h>
 
 main()
