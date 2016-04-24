@@ -35,7 +35,7 @@
  */
 
 #include "config.h"
-#define _GNU_SOURCE             /* ptsname_r() under Linux */
+#define _GNU_SOURCE 1             /* ptsname_r() under Linux */
 #include <fcntl.h>
 #include <grp.h>
 #include <pwd.h>

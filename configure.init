@@ -87,6 +87,15 @@ AC_CHECK_FUNC([strdup],,AC_MSG_ERROR([CGDB requires strdup to build.]))
 AC_CHECK_FUNC([strerror],,AC_MSG_ERROR([CGDB requires strerror to build.]))
 AC_CHECK_FUNC([openpty],[AC_DEFINE(HAVE_OPENPTY, 1, [Define to 1 if you have the openpty function])],)
 
+dnl define HAVE_PTSNAME_R if we have reentrant version of ptsname.
+AC_TRY_LINK([#ifndef _GNU_SOURCE
+             #define _GNU_SOURCE
+             #endif
+             #include <stdlib.h>],
+            [char buf[10]; ptsname_r(0, buf, sizeof(buf));],
+            [AC_DEFINE(HAVE_PTSNAME_R, 1,
+                     Define to 1 if you have a re-entrant version of ptsname)])
+
 dnl program checks
 AC_CHECK_PROG([HAS_MAKEINFO], [makeinfo], [yes], [no])
 AC_CHECK_PROG([HAS_HELP2MAN], [help2man], [yes], [no])
