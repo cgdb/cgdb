@@ -1460,7 +1460,7 @@ void if_display_help(void)
     if (ret_val == 0)
         if_draw();
     else if (ret_val == 5)      /* File does not exist */
-        if_display_message("No such file: %s", 0, cgdb_help_file);
+        if_display_message("No such file:", 0, "%s", cgdb_help_file);
 }
 
 struct sviewer *if_get_sview()
