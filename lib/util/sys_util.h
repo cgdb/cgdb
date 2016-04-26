@@ -34,4 +34,9 @@ int cgdb_close(int fd);
  */
 int cgdb_string_to_int(char *str, int *num);
 
+/* Check if debugger is attached to cgdb.
+ * Return 0 for no, 1 for yes, -1 for error.
+ */
+int cgdb_is_debugger_attached();
+
 #endif

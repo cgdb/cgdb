@@ -68,6 +68,10 @@ dnl determine if /dev/ptmx is available for pseudo terminals
 AC_CHECK_FILE([/dev/ptmx],
 	      [AC_DEFINE(HAVE_DEV_PTMX, 1, have /dev/ptmx)])
 
+dnl determine if /proc/self/status is available for checking TracerPid
+AC_CHECK_FILE([/proc/self/status],
+	      [AC_DEFINE(HAVE_PROC_SELF_STATUS_FILE, 1, have /proc/self/status file)])
+
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
 AC_TYPE_UID_T

@@ -110,6 +110,8 @@ static pty_pair_ptr pty_pair;
 
 static char *debugger_path = NULL;  /* Path to debugger to use */
 
+static int wait_for_debugger_to_attach = 0;
+
 struct kui_manager *kui_ctx = NULL; /* The key input package */
 
 struct kui_map_set *kui_map = NULL;
@@ -711,7 +713,7 @@ static char *version_info(void)
 static void parse_long_options(int *argc, char ***argv)
 {
     int c, option_index = 0, n = 1;
-    const char *args = "d:hv";
+    const char *args = "wd:hv";
 
 #ifdef HAVE_GETOPT_H
     static struct option long_options[] = {
@@ -750,6 +752,10 @@ static void parse_long_options(int *argc, char ***argv)
             case 'v':
                 printf("%s", version_info());
                 exit(0);
+            case 'w':
+                wait_for_debugger_to_attach = 1;
+                n++;
+                break;
             case 'd':
                 debugger_path = strdup(optarg);
                 if (optarg == (*argv)[n + 1]) {
@@ -1747,6 +1753,18 @@ int main(int argc, char *argv[])
 #endif
 
     parse_long_options(&argc, &argv);
+
+    /* Debugging helper - wait for debugger to attach to us before continuing */
+    if (wait_for_debugger_to_attach) {
+        int count = 0;
+
+        fprintf( stdout, "Waiting 30 seconds for debugger to attach...\n" );
+        while ( ( count++ < 30 ) && ( cgdb_is_debugger_attached() == 0 ) ) {
+            sleep(1);
+        }
+
+        fprintf( stdout, "Debugger attached: %d\n", cgdb_is_debugger_attached() );
+    }
 
     current_line = ibuf_init();
 
