@@ -378,13 +378,13 @@
 
             /* header == TGDB_FILENAME_PAIR */
             struct {
-        /** 
-	 * If either of these are NULL, the data could not be retrieved from
-	 * the debugger. */
+                /** 
+                 * If either of these are NULL, the data could not be retrieved from
+                 * the debugger. */
 
-    /** The absolute path to the file being looked for */
+                /** The absolute path to the file being looked for */
                 const char *absolute_path;
-    /** The relative path to the file being looked for */
+                /** The relative path to the file being looked for */
                 const char *relative_path;
             } filename_pair;
 
@@ -419,7 +419,4 @@
         } choice;
     };
 
-//#ifdef __cplusplus
-//}
-//#endif
 #endif                          /* __TGDB_TYPES_H__ */

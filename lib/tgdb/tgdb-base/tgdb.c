@@ -89,7 +89,7 @@ struct tgdb {
    * GDB and get a response, then the commands are buffered until it is there
    * turn to run. These commands are run in the order that they are received.
    *
-   * This is here as a convience to the FE. TGDB currently does not access 
+   * This is here as a convenience to the FE. TGDB currently does not access 
    * these commands. It provides the push/pop functionality and it erases the
    * queue when a control_c is received.
    */
@@ -456,9 +456,10 @@ int tgdb_is_busy(struct tgdb *tgdb, int *is_busy)
     return 0;
 }
 
-static void tgdb_request_destroy(void *item)
+void tgdb_request_destroy(tgdb_request_ptr request_ptr)
 {
-    tgdb_request_ptr request_ptr = (tgdb_request_ptr) item;
+    if (!request_ptr)
+        return;
 
     switch (request_ptr->header) {
         case TGDB_REQUEST_CONSOLE_COMMAND:
@@ -489,13 +490,18 @@ static void tgdb_request_destroy(void *item)
     request_ptr = NULL;
 }
 
+static void tgdb_request_destroy_func(void *item)
+{
+    tgdb_request_destroy((tgdb_request_ptr) item);
+}
+
 /* tgdb_handle_signals
  */
 static int tgdb_handle_signals(struct tgdb *tgdb)
 {
     if (tgdb->control_c) {
         queue_free_list(tgdb->gdb_input_queue, tgdb_command_destroy);
-        queue_free_list(tgdb->gdb_client_request_queue, tgdb_request_destroy);
+        queue_free_list(tgdb->gdb_client_request_queue, tgdb_request_destroy_func);
         tgdb->control_c = 0;
     }
 
@@ -584,6 +590,8 @@ tgdb_run_or_queue_command(struct tgdb *tgdb, struct tgdb_command *command)
     if (can_issue) {
         if (tgdb_deliver_command(tgdb, command) == -1)
             return -1;
+
+        tgdb_command_destroy(command);
     } else {
         /* Make sure to put the command into the correct queue. */
         switch (command->command_choice) {

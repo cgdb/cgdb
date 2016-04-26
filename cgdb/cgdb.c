@@ -280,6 +280,7 @@ int handle_request(struct tgdb *tgdb_in, struct tgdb_request *request)
     if (is_busy)
         tgdb_queue_append(tgdb_in, request);
     else {
+        tgdb_request_destroy(last_request);
         last_request = request;
         tgdb_process_command(tgdb_in, request);
     }
@@ -1162,7 +1163,7 @@ static int gdb_input()
      * readline should redisplay what it currently contains. There are 2 special
      * case's here.
      *
-     * If there are no commands in the queue to send to GDB then  readline 
+     * If there are no commands in the queue to send to GDB then readline 
      * should simply redisplay what it has currently in it's buffer.
      * rl_forced_update_display does this.
      *
@@ -1191,8 +1192,10 @@ static int gdb_input()
                 if_print("\n");
             }
 
+            tgdb_request_destroy(last_request);
             last_request = request;
             tgdb_process_command(tgdb, request);
+
             /* This is the first case */
         }
       /** If the user is currently completing, do not update the prompt */
@@ -1205,6 +1208,8 @@ static int gdb_input()
                         &update);
                 if (ret_val == -1)
                     return -1;
+
+                tgdb_request_destroy(last_request);
                 last_request = NULL;
             }
 

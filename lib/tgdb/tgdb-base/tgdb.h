@@ -454,6 +454,14 @@
    */
     tgdb_request_ptr tgdb_request_complete(struct tgdb *tgdb, const char *line);
 
+  /**
+   * Free the tgdb request pointer data.
+   *
+   * \param request_ptr
+   * Request pointer from tgdb_request_* function to destroy.
+   */
+    void tgdb_request_destroy(tgdb_request_ptr request_ptr);
+
 /*@}*/
 /* }}}*/
 

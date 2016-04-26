@@ -237,6 +237,16 @@ int a2_initialize(void *ctx,
     return 0;
 }
 
+/* tgdb_list_free expects a "int (*)(void)" function, and
+ * queue_free_list wants a "void (*)(void). This function is here
+ * to wrap tgdb_command_destroy for tgdb_list_free.
+ */
+static int tgdb_command_destroy_list_item(void *item)
+{
+    tgdb_command_destroy(item);
+    return 0;
+}
+
 /* TODO: Implement shutdown properly */
 int a2_shutdown(void *ctx)
 {
@@ -247,6 +257,13 @@ int a2_shutdown(void *ctx)
     data_shutdown(a2->data);
     state_machine_shutdown(a2->sm);
     commands_shutdown(a2->c);
+
+    tgdb_list_free(a2->client_command_list, tgdb_command_destroy_list_item);
+    tgdb_list_destroy(a2->client_command_list);
+
+    tgdb_list_free(a2->cur_response_list, tgdb_types_free_command);
+    tgdb_list_destroy(a2->cur_response_list);
+
     globals_shutdown(a2->g);
     return 0;
 }
