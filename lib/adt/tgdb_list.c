@@ -287,6 +287,10 @@ int tgdb_list_free(struct tgdb_list *tlist, tgdb_list_func func)
         if (func(i->data) == -1)
             return -1;
         tgdb_list_delete(tlist, i);
+
+        /* Free memory alloc'd by tdbg_list_new_node(). */
+        free(i);
+
         /* Can't call tgdb_list_next () here on the iterator.
          * This is because the iterator was just deleted.
          */
@@ -302,6 +306,10 @@ int tgdb_list_clear(struct tgdb_list *tlist)
 
     while (i) {
         tgdb_list_delete(tlist, i);
+
+        /* Free memory alloc'd by tdbg_list_new_node(). */
+        free(i);
+
         /* Can't call tgdb_list_next () here on the iterator.
          * This is because the iterator was just deleted.
          */
