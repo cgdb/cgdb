@@ -463,6 +463,7 @@ int source_set_relative_path(struct sviewer *sview,
 
     while (node != NULL) {
         if (strcmp(node->path, path) == 0) {
+            free(node->lpath);
             node->lpath = strdup(lpath);
             return 0;
         }
