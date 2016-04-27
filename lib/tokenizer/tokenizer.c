@@ -49,6 +49,14 @@ struct tokenizer *tokenizer_init(void)
     return n;
 }
 
+void tokenizer_destroy(struct tokenizer *t)
+{
+    if (t) {
+        ibuf_free(t->i);
+        free(t);
+    }
+}
+
 int tokenizer_set_file(struct tokenizer *t, const char *file,
         enum tokenizer_language_support l)
 {

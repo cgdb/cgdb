@@ -143,6 +143,7 @@ static int highlight_node(struct list_node *node)
         }
     }
 
+    tokenizer_destroy(t);
     return 0;
 }
 
