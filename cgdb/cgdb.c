@@ -388,6 +388,7 @@ void rlctx_send_user_command(char *line)
             rline_set_prompt(rline, "");
         }
 
+        free(line);
         return;
     }
 
@@ -411,6 +412,8 @@ void rlctx_send_user_command(char *line)
     handle_request(tgdb, request_ptr);
 
     ibuf_clear(current_line);
+
+    free(line);
 }
 
 static int tab_completion(int a, int b)
