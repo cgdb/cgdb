@@ -683,11 +683,11 @@ static void increase_win_height(int jump_or_tty)
             /* no tty window */
             if (cur_win_split == WIN_SPLIT_FREE) {
                 /* cur position is not on mark, find nearest mark */
-                cur_win_split = (WIN_SPLIT_TYPE) (2 * window_shift) / height;
+                cur_win_split = (WIN_SPLIT_TYPE) ((2 * window_shift) / height);
 
                 /* handle rounding on either side of mid-way mark */
                 if (window_shift > 0) {
-                    cur_win_split++;
+                    cur_win_split = (WIN_SPLIT_TYPE)(cur_win_split + 1);
                 }
             } else {
                 /* increase to next mark */
@@ -744,11 +744,11 @@ static void decrease_win_height(int jump_or_tty)
             /* no tty window */
             if (cur_win_split == WIN_SPLIT_FREE) {
                 /* cur position is not on mark, find nearest mark */
-                cur_win_split = (WIN_SPLIT_TYPE) (2 * window_shift) / height;
+                cur_win_split = (WIN_SPLIT_TYPE) ((2 * window_shift) / height);
 
                 /* handle rounding on either side of mid-way mark */
                 if (window_shift < 0) {
-                    cur_win_split--;
+                    cur_win_split = (WIN_SPLIT_TYPE)(cur_win_split - 1);
                 }
             } else {
                 /* decrease to next mark */

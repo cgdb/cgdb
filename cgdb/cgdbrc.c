@@ -156,7 +156,7 @@ static struct ConfigVariable {
             /* splitorientation */
     {
     "splitorientation", "so", CONFIG_TYPE_FUNC_STRING,
-                command_set_splitorientation},
+                (void *)command_set_splitorientation},
             /* wrapscan */
     {
     "wrapscan", "ws", CONFIG_TYPE_BOOL,
