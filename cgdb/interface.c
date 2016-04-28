@@ -808,6 +808,20 @@ static int gdb_input(int key)
         case CGDB_KEY_F12:
             scr_end(gdb_win);
             break;
+
+        case CGDB_KEY_UP:
+        case CGDB_KEY_CTRL_P:
+            if(!gdb_win->in_scroll_mode)
+                return 1;
+            scr_up(gdb_win, 1);
+            break;
+        case CGDB_KEY_DOWN:
+        case CGDB_KEY_CTRL_N:
+            if(!gdb_win->in_scroll_mode)
+                return 1;
+            scr_down(gdb_win, 1);
+            break;
+
 #if 0
             /* I would like to add better support for control-l in the GDB
              * window, but this patch didn't make me happy enough to release it.

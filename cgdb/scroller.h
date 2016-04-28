@@ -27,6 +27,7 @@
 struct scroller {
     char **buffer;              /* The text buffer */
     int length;                 /* Number of lines in buffer */
+    int in_scroll_mode;         /* Currently in scroll mode? */
     struct {
         int r;                  /* Current line (row) number */
         int c;                  /* Current column number */

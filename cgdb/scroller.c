@@ -124,6 +124,7 @@ struct scroller *scr_new(int pos_r, int pos_c, int height, int width)
     rv->current.r = 0;
     rv->current.c = 0;
     rv->current.pos = 0;
+    rv->in_scroll_mode = 0;
     rv->win = newwin(height, width, pos_r, pos_c);
 
     /* Start with a single (blank) line */
@@ -155,6 +156,8 @@ void scr_up(struct scroller *scr, int nlines)
     int height, width;
     int length;
     int i;
+
+    scr->in_scroll_mode = 1;
 
     /* Sanity check */
     getmaxyx(scr->win, height, width);
@@ -188,6 +191,8 @@ void scr_down(struct scroller *scr, int nlines)
     int length;
     int i;
 
+    int at_bottom = 0;
+
     /* Sanity check */
     getmaxyx(scr->win, height, width);
     if (scr->current.c > 0) {
@@ -208,16 +213,22 @@ void scr_down(struct scroller *scr, int nlines)
                 scr->current.c = 0;
             } else {
                 /* At bottom */
+                at_bottom = 1;
                 break;
             }
         }
     }
+
+    if ( at_bottom )
+        scr->in_scroll_mode = 0;
 }
 
 void scr_home(struct scroller *scr)
 {
     scr->current.r = 0;
     scr->current.c = 0;
+
+    scr->in_scroll_mode = 1;
 }
 
 void scr_end(struct scroller *scr)
@@ -228,6 +239,8 @@ void scr_end(struct scroller *scr)
 
     scr->current.r = scr->length - 1;
     scr->current.c = (strlen(scr->buffer[scr->current.r]) / width) * width;
+
+    scr->in_scroll_mode = 0;
 }
 
 void scr_add(struct scroller *scr, const char *buf)
