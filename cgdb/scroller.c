@@ -26,6 +26,7 @@
 
 /* Local Includes */
 #include "cgdb.h"
+#include "highlight_groups.h"
 #include "scroller.h"
 #include "sys_util.h"
 
@@ -307,6 +308,11 @@ void scr_refresh(struct scroller *scr, int focus)
     int c;                      /* Current column in row */
     int width, height;          /* Width and height of window */
     char *buffer;               /* Current line segment to print */
+    int highlight_attr;
+
+    /* Steal line highlight attribute for our scroll mode status */
+    if (hl_groups_get_attr(hl_groups_instance, HLG_LINE_HIGHLIGHT, &highlight_attr) == -1)
+        highlight_attr = A_BOLD;
 
     /* Sanity check */
     getmaxyx(scr->win, height, width);
@@ -329,7 +335,28 @@ void scr_refresh(struct scroller *scr, int focus)
             length = strlen(scr->buffer[r] + c);
             memcpy(buffer, scr->buffer[r] + c, length < width ? length : width);
         }
-        mvwprintw(scr->win, height - nlines, 0, "%s", buffer);
+
+        /* If we're in scroll mode and this is the top line, spew status on right */
+        if (scr->in_scroll_mode && (nlines == height)) {
+            char status[ 64 ];
+            size_t status_len;
+
+            snprintf(status, sizeof(status), "[%d/%d]", scr->current.r + 1, scr->length);
+
+            status_len = strlen(status);
+            if ( status_len >= width )
+                status_len = 0;
+
+            mvwprintw(scr->win, height - nlines, 0, "%.*s", width - status_len, buffer);
+
+            wattron(scr->win, highlight_attr);
+            mvwprintw(scr->win, height - nlines, width - status_len, "%s", status);
+            wattroff(scr->win, highlight_attr);
+        }
+        else
+        {
+            mvwprintw(scr->win, height - nlines, 0, "%s", buffer);
+        }
 
         /* Update our position */
         if (c >= width)
