@@ -13,8 +13,6 @@
 #include <stdio.h>
 #endif /* HAVE_STDIO_H */
 
-#define MAX_LINE 4096
-
 /* The Next three function handle reading and writing of bytes */
 
 /* io_read_byte: reads the byte c from source.

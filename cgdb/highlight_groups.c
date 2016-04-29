@@ -472,6 +472,9 @@ hl_groups_get_attr(hl_groups_ptr hl_groups, enum hl_group_kind kind, int *attr)
 {
     struct hl_group_info *info = lookup_group_info_by_key(hl_groups, kind);
 
+    /* Default to normal */
+    *attr = A_NORMAL;
+
     if (!hl_groups || !info || !attr)
         return -1;
 

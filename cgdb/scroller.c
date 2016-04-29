@@ -272,6 +272,8 @@ void scr_add(struct scroller *scr, const char *buf)
         memset(newbuf, 0, distance + 1);
         strncpy(newbuf, buf, distance);
 
+        //$ TODO: This realloc can be improved...
+
         /* Expand the buffer */
         scr->length++;
         scr->buffer = (char **)cgdb_realloc(scr->buffer, sizeof (char *) * scr->length);

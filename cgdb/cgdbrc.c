@@ -516,23 +516,34 @@ static int command_set_ttimeoutlen(int value)
 
 int command_set_syntax_type(const char *value)
 {
-    enum tokenizer_language_support lang;
+    /* In sources.c */
+    extern int sources_syntax_on;
+
     struct cgdbrc_config_option option;
+    enum tokenizer_language_support lang = TOKENIZER_LANGUAGE_UNKNOWN;
 
     option.option_kind = CGDBRC_SYNTAX;
 
     if (strcasecmp(value, "c") == 0)
         lang = TOKENIZER_LANGUAGE_C;
+    else if (strcasecmp(value, "d") == 0)
+        lang = TOKENIZER_LANGUAGE_D;
+    else if (strcasecmp(value, "go") == 0)
+        lang = TOKENIZER_LANGUAGE_GO;
     else if (strcasecmp(value, "ada") == 0)
         lang = TOKENIZER_LANGUAGE_ADA;
-    else if (strcasecmp(value, "off") == 0)
-        lang = TOKENIZER_LANGUAGE_UNKNOWN;
+
+    /* If caller specified a language or 'on', enable highlighting */
+    if (lang != TOKENIZER_LANGUAGE_UNKNOWN || strcasecmp(value, "on") == 0 || strcasecmp(value, "yes") == 0)
+        sources_syntax_on = 1;
+    else if (strcasecmp(value, "no") == 0 || strcasecmp(value, "off") == 0)
+        sources_syntax_on = 0;
 
     option.variant.language_support_val = lang;
     if (cgdbrc_set_val(option))
         return 1;
-    if_highlight_sviewer(lang);
 
+    if_highlight_sviewer(lang);
     return 0;
 }
 
@@ -637,14 +648,9 @@ int command_parse_syntax(int param)
             break;
         case BOOLEAN:
         case IDENTIFIER:{
-            extern int sources_syntax_on;
             const char *value = get_token();
 
-            if (strcasecmp(value, "on") == 0 || strcasecmp(value, "yes") == 0)
-                sources_syntax_on = 1;
-            else if (strcasecmp(value, "no") == 0
-                    || strcasecmp(value, "off") == 0)
-                sources_syntax_on = 0;
+            command_set_syntax_type(value);
 
             if_draw();
         }

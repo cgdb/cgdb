@@ -9,10 +9,10 @@
 #include <stdlib.h>
 #endif /* HAVE_STDLIB_H */
 
-/* A simple interface to an infinate string */
+/* A simple interface to an infinite string */
 struct ibuf;
 
-/* ibuf_init: Returns a new infinate string.  */
+/* ibuf_init: Returns a new infinite string.  */
 struct ibuf *ibuf_init(void);
 
 /* ibuf_free: free a string */
@@ -21,14 +21,14 @@ void ibuf_free(struct ibuf *s);
 /* clears the string s */
 void ibuf_clear(struct ibuf *s);
 
-/* ibuf_addchar: Adds a char to the infinate buffer
- *  s - the infinate string to modify
+/* ibuf_addchar: Adds a char to the infinite buffer
+ *  s - the infinite string to modify
  *  c - the char to add
  */
 void ibuf_addchar(struct ibuf *s, char c);
 
-/* ibuf_add: Adds a char to the infinate buffer
- *  s - the infinate string to modify
+/* ibuf_add: Adds a char to the infinite buffer
+ *  s - the infinite string to modify
  *  d - the string to add
  */
 void ibuf_add(struct ibuf *s, const char *d);

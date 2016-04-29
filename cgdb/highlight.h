@@ -25,12 +25,12 @@
 /* Functions */
 /* --------- */
 
-/* highlight:  Inserts the highlighting tags into the buffer.  Lines in
+/* highlight_node:  Inserts the highlighting tags into the buffer.  Lines in
  * ----------  this file should be displayed with hl_wprintw from now on...
  *
  *   node:  The node containing the file buffer to highlight.
  */
-void highlight(struct list_node *node);
+int highlight_node(const char *filename, struct buffer *buf);
 
 /* hl_wprintw:  Prints a given line using the embedded highlighting commands
  * -----------  to dictate how to color the given line.
@@ -57,7 +57,8 @@ void hl_wprintw(WINDOW * win, const char *line, int width, int offset);
  *  direction:      1 if forward, 0 if reverse
  *  icase:          1 if case insensitive, 0 otherwise
  */
-int hl_regex(const char *regex, const char **highlighted_lines, const char **tlines, const int length, char **cur_line, /* Returns the correct highlighted line */
+int hl_regex(const char *regex, const char **highlighted_lines, const char **tlines,
+        const int length, char **cur_line, /* Returns the correct highlighted line */
         int *sel_line,          /* Returns new cur line if regex matches */
         int *sel_rline,         /* Used for internal purposes */
         int *sel_col_rbeg,

@@ -1003,7 +1003,7 @@ toggle_breakpoint(struct sviewer *sview, enum tgdb_breakpoint_action t)
         path = sview->cur->path;
 
     /* delete an existing breakpoint */
-    if (sview->cur->buf.breakpts[line])
+    if (sview->cur->breakpts[line])
         t = TGDB_BREAKPOINT_DELETE;
 
     request_ptr = tgdb_request_modify_breakpoint(tgdb, path, line + 1, t);
@@ -1342,8 +1342,8 @@ int internal_if_input(int key)
         } else if (focus == CGDB_STATUS_BAR && sbc_kind == SBC_REGEX) {
             ibuf_free(regex_cur);
             regex_cur = NULL;
-            free(src_win->cur->buf.cur_line);
-            src_win->cur->buf.cur_line = NULL;
+            free(src_win->cur->buf->cur_line);
+            src_win->cur->buf->cur_line = NULL;
             src_win->cur->sel_rline = orig_line_regex;
             src_win->cur->sel_line = orig_line_regex;
         }
@@ -1547,8 +1547,11 @@ void if_highlight_sviewer(enum tokenizer_language_support l)
 {
     /* src_win->cur is NULL when reading cgdbrc */
     if (src_win->cur) {
+        if ( l == TOKENIZER_LANGUAGE_UNKNOWN )
+            l = tokenizer_get_default_file_type(strrchr(src_win->cur->path, '.'));
+
         src_win->cur->language = l;
-        highlight(src_win->cur);
+        source_highlight(src_win->cur);
         if_draw();
     }
 }

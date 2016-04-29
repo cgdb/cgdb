@@ -48,6 +48,10 @@
 #include <ctype.h>
 #endif
 
+#if HAVE_LIMITS_H
+#include <limits.h>             /* CHAR_MAX */
+#endif /* HAVE_LIMITS_H */
+
 /* Local Includes */
 #include "highlight.h"
 #include "sources.h"
@@ -58,6 +62,9 @@
 #include "highlight_groups.h"
 
 int sources_syntax_on = 1;
+
+// This speeds up loading sqlite.c from 2:48 down to ~2 seconds.
+// sqlite3 is 6,596,401 bytes, 188,185 lines.
 
 /* --------------- */
 /* Local Functions */
@@ -89,13 +96,12 @@ static int verify_file_exists(const char *path)
 static struct list_node *get_relative_node(struct sviewer *sview,
         const char *lpath)
 {
-
     struct list_node *cur;
 
-    for (cur = sview->list_head; cur != NULL; cur = cur->next)
-        if (cur->lpath)
-            if (strcmp(lpath, cur->lpath) == 0)
-                return cur;
+    for (cur = sview->list_head; cur != NULL; cur = cur->next) {
+        if (cur->lpath && (strcmp(lpath, cur->lpath) == 0))
+            return cur;
+    }
 
     return NULL;
 }
@@ -111,12 +117,28 @@ static struct list_node *get_node(struct sviewer *sview, const char *path)
 {
     struct list_node *cur;
 
-    for (cur = sview->list_head; cur != NULL; cur = cur->next)
-        if (cur->path)
-            if (strcmp(path, cur->path) == 0)
-                return cur;
+    for (cur = sview->list_head; cur != NULL; cur = cur->next) {
+        if (cur->path && (strcmp(path, cur->path) == 0))
+            return cur;
+    }
 
     return NULL;
+}
+
+/* stb__sbgrowf: internal stretchy buffer grow function.
+ */
+int stb__sbgrowf( void **arr, int increment, int itemsize )
+{
+    int m = *arr ? 2 * stb__sbm( *arr ) + increment : increment + 1; 
+    void *p = cgdb_realloc( *arr ? stb__sbraw( *arr ) : 0,
+                            itemsize * m + sizeof( int ) * 2 );
+
+    if ( !*arr )
+        ( ( int * )p )[ 1 ] = 0; 
+    *arr = ( void * )( ( int * )p + 2 ); 
+    stb__sbm( *arr ) = m; 
+
+    return 0;
 }
 
 /**
@@ -154,29 +176,43 @@ static int get_timestamp(const char *path, time_t * timestamp)
     return 0;
 }
 
-static int release_file_buffer(struct buffer *buf)
+static void init_file_buffer(struct buffer *buf)
 {
-    int i;
-
-    /* Nothing to free */
-    if (!buf)
-        return 0;
-
-    for (i = 0; i < buf->length; ++i) {
-        free(buf->tlines[i]);
-        buf->tlines[i] = NULL;
-    }
-
-    free(buf->tlines);
     buf->tlines = NULL;
-    buf->length = 0;
-    free(buf->cur_line);
     buf->cur_line = NULL;
     buf->max_width = 0;
-    free(buf->breakpts);
-    buf->breakpts = NULL;
+    buf->file_data = NULL;
+    buf->language = TOKENIZER_LANGUAGE_UNKNOWN;
+}
 
-    return 0;
+static void release_file_buffer(struct buffer *buf)
+{
+    if (buf) {
+        /* Free entire file buffer if we have that */
+        if (buf->file_data) {
+            free(buf->file_data);
+            buf->file_data = NULL;
+        }
+        else {
+            /* Otherwise free individual file lines */
+            int i;
+            int count = sbcount(buf->tlines);
+
+            for (i = 0; i < count; ++i) {
+                free(buf->tlines[i]);
+                buf->tlines[i] = NULL;
+            }
+        }
+
+        sbfree(buf->tlines);
+        buf->tlines = NULL;
+
+        free(buf->cur_line);
+        buf->cur_line = NULL;
+
+        buf->max_width = 0;
+        buf->language = TOKENIZER_LANGUAGE_UNKNOWN;
+    }
 }
 
 /** 
@@ -193,13 +229,101 @@ static int release_file_memory(struct list_node *node)
     if (!node)
         return -1;
 
-    /* Free the buffer */
-    if (release_file_buffer(&node->buf) == -1)
-        return -1;
+    /* Release file buffers */
+    release_file_buffer(&node->color_buf);
+    release_file_buffer(&node->orig_buf);
+    node->buf = NULL;
 
-    if (release_file_buffer(&node->orig_buf) == -1)
-        return -1;
+    return 0;
+}
 
+/**
+ * Get file size from file pointer.
+ *
+ * \param file
+ * file pointer
+ *
+ * \return
+ * file size on success, or -1 on error.
+ */
+static long get_file_size(FILE *file)
+{
+    if (fseek(file, 0, SEEK_END) != -1) {
+        long size;
+
+        size = ftell(file);
+        fseek(file, 0, SEEK_SET);
+
+        return size;
+    }
+
+    return -1;
+}
+
+/**
+ * Load file and fill tlines line pointers.
+ *
+ * \param buf
+ * struct buffer pointer
+ *
+ * \param filename
+ * name of file to load
+ *
+ * \return
+ * 0 on sucess, 1 on error
+ */
+static int load_file_buf(struct buffer *buf, const char *filename)
+{
+    FILE *file;
+    long file_size;
+
+    if (!(file = fopen(filename, "r")))
+        return 1;
+
+    file_size = get_file_size(file);
+    if ( file_size > 0 ) {
+        size_t bytes_read;
+
+        buf->file_data = (char *)cgdb_malloc(file_size + 2);
+        bytes_read = fread(buf->file_data, 1, file_size, file);
+        if ( bytes_read != file_size ) {
+            return 1;
+        } else {
+            char *line_start = buf->file_data;
+            char *line_feed = strchr( line_start, '\n' );
+
+            line_start[file_size] = 0;
+
+            while ( line_feed ) {
+                size_t line_len;
+                char *line_end = line_feed;
+
+                /* Trim trailing cr-lfs */
+                while ( line_end >= line_start && ( *line_end == '\n' || *line_end == '\r' ) )
+                    *line_end-- = 0;
+
+                /* Update max length string found */
+                line_len = line_end - line_start;
+                if (line_len > buf->max_width )
+                    buf->max_width = line_len;
+
+                /* Add this line to tlines array */
+                sbpush( buf->tlines, line_start );
+
+                line_start = line_feed + 1;
+                line_feed = strchr( line_start, '\n' );
+            }
+
+            if ( *line_start )
+                sbpush( buf->tlines, line_start );
+        }
+
+        /* Add two nil bytes in case we use lexer string scanner. */
+        buf->file_data[file_size] = 0;
+        buf->file_data[file_size + 1] = 0;
+    }
+
+    fclose(file);
     return 0;
 }
 
@@ -212,76 +336,14 @@ static int release_file_memory(struct list_node *node)
  */
 static int load_file(struct list_node *node)
 {
-    FILE *file;
-    char line[MAX_LINE];
-    int i;
-
-    node->buf.length = 0;
-    node->buf.tlines = NULL;
-    node->buf.breakpts = NULL;
-    node->buf.cur_line = NULL;
-    node->buf.max_width = 0;
-
-    /* Open file and save in original buffer.
-     * I am not sure if this should be done this way in the future.
-     * Maybe this data should be received from flex.
-     */
-    node->orig_buf.length = 0;
-    node->orig_buf.tlines = NULL;
-    node->orig_buf.breakpts = NULL;
-    node->orig_buf.cur_line = NULL;
-    node->orig_buf.max_width = 0;
-
     /* Stat the file to get the timestamp */
     if (get_timestamp(node->path, &(node->last_modification)) == -1)
         return 2;
-    if (!(file = fopen(node->path, "r")))
-        return 1;
-
-    while (!feof(file)) {
-        if (fgets(line, MAX_LINE, file)) {
-            int length = strlen(line);
-
-            if (length > 0) {
-                if (line[length - 1] == '\n')
-                    line[length - 1] = 0;
-                if (line[length - 1] == '\r')
-                    line[length - 1] = 0;
-            }
-            if (strlen(line) > node->orig_buf.max_width)
-                node->orig_buf.max_width = strlen(line);
-
-            /* Inefficient - Reallocates memory at each line */
-            node->orig_buf.length++;
-            node->orig_buf.tlines = (char**)realloc(node->orig_buf.tlines,
-                    sizeof (char *) * node->orig_buf.length);
-            node->orig_buf.tlines[node->orig_buf.length - 1] = strdup(line);
-        }
-    }
-
-    fclose(file);
 
     node->language = tokenizer_get_default_file_type(strrchr(node->path, '.'));
 
     /* Add the highlighted lines */
-    if (has_colors()) {
-        highlight(node);
-    } else {
-        /* Just copy the lines from the original buffer if no highlighting 
-         * is possible */
-        node->buf.length = node->orig_buf.length;
-        node->buf.max_width = node->orig_buf.max_width;
-        node->buf.tlines = (char **)cgdb_malloc(sizeof (char *) * node->orig_buf.length);
-        for (i = 0; i < node->orig_buf.length; i++)
-            node->buf.tlines[i] = cgdb_strdup(node->orig_buf.tlines[i]);
-    }
-
-    /* Allocate the breakpoints array */
-    node->buf.breakpts = (char *)malloc(sizeof (char) * node->buf.length);
-    for (i = 0; i < node->buf.length; i++)
-        node->buf.breakpts[i] = 0;
-
-    return 0;
+    return source_highlight(node);
 }
 
 enum LineKind {
@@ -302,13 +364,12 @@ enum LineKind {
 static void draw_current_line(struct sviewer *sview, int line, int lwidth,
     enum LineKind kind)
 {
-
     int height = 0;             /* Height of curses window */
     int width = 0;              /* Width of curses window */
     int i = 0, j = 0;           /* Iterators */
     struct buffer *buf = NULL;  /* Pointer to the source buffer */
     char *text = NULL;          /* The current line (highlighted) */
-    char *otext = NULL;         /* The current line (unhighlighted) */
+    const char *otext = NULL;   /* The current line (unhighlighted) */
     unsigned int length = 0;    /* Length of the line */
     int column_offset = 0;      /* Text to skip due to arrow */
     int arrow_attr;
@@ -353,12 +414,7 @@ static void draw_current_line(struct sviewer *sview, int line, int lwidth,
     /* Initialize height and width */
     getmaxyx(sview->win, height, width);
 
-    /* If syntax highlighting is on, point to the colored buffer. */
-    if (sources_syntax_on) {
-        buf = &(sview->cur->buf);
-    } else {
-        buf = &(sview->cur->orig_buf);
-    }
+    buf = sview->cur->buf;
 
     /* If the current selected line is the line executing, use cur_line */
     if (line == sview->cur->sel_line && buf->cur_line != NULL) {
@@ -366,7 +422,7 @@ static void draw_current_line(struct sviewer *sview, int line, int lwidth,
     } else {
         text = buf->tlines[line];
     }
-    otext = sview->cur->orig_buf.tlines[line];
+    otext = sview->cur->buf->tlines[line];
     length = strlen(otext);
 
     /* Draw the appropriate arrow, if applicable */
@@ -386,26 +442,34 @@ static void draw_current_line(struct sviewer *sview, int line, int lwidth,
             waddch(sview->win, ACS_LTEE);
 
             /* Compute the length of the arrow, respecting tab stops, etc. */
-            for (i = 0; i < length - 1 && isspace(otext[i]); i++) {
+            if (isspace(otext[0]) || (otext[i] == CHAR_MAX)) {
+                for (i = 0; i < length - 1; i++) {
+                    /* Skip highlight chars (HL_CHAR / CHAR_MAX) */
+                    if ((otext[i] == CHAR_MAX) && otext[i]) {
+                        i++;
+                        continue;
+                    }
 
-                /* Oh so cryptic */
-                int offset = otext[i] != '\t' ? 1 :
-                        highlight_tabstop - (column_offset % highlight_tabstop);
+                    /* Add one for space or number of spaces to next tabstop */
+                    int offset = otext[i] != '\t' ? 1 :
+                            highlight_tabstop - (column_offset % highlight_tabstop);
 
-                if (!isspace(otext[i + 1])) {
-                    offset--;
+                    column_offset += offset;
+
+                    if (!isspace(otext[i + 1])) {
+                        column_offset--;
+                        break;
+                    }
                 }
-
-                column_offset += offset;
             }
+
             column_offset -= sview->cur->sel_col;
-            if (column_offset < 0) {
+            if (column_offset < 0)
                 column_offset = 0;
-            }
-
-            /* Now actually draw the arrow */
-            for (j = 0; j < column_offset; j++) {
-                waddch(sview->win, ACS_HLINE);
+            else {
+                /* Now actually draw the arrow */
+                for (j = 0; j < column_offset; j++)
+                    waddch(sview->win, ACS_HLINE);
             }
 
             waddch(sview->win, '>');
@@ -419,7 +483,11 @@ static void draw_current_line(struct sviewer *sview, int line, int lwidth,
             wattron(sview->win, highlight_attr);
             for (i = 0; i < width - lwidth - 2; i++) {
                 if (i < length) {
-                    waddch(sview->win, otext[i]);
+                    /* Skip highlight chars (HL_CHAR / CHAR_MAX) */
+                    if ( otext[i] == CHAR_MAX )
+                        i++;
+                    else
+                        waddch(sview->win, otext[i]);
                 } else {
                     waddch(sview->win, ' ');
                 }
@@ -433,28 +501,39 @@ static void draw_current_line(struct sviewer *sview, int line, int lwidth,
             waddch(sview->win, VERT_LINE);
 
             /* Compute the length of the arrow, respecting tab stops, etc. */
-            for (i = 0; i < length - 1 && isspace(otext[i]); i++) {
+            if (isspace(otext[0]) || (otext[i] == CHAR_MAX)) {
+                for (i = 0; i < length - 1; i++) {
+                    /* Skip highlight chars (HL_CHAR / CHAR_MAX) */
+                    if ((otext[i] == CHAR_MAX) && otext[i]) {
+                        i++;
+                        continue;
+                    }
 
-                /* Oh so cryptic */
-                int offset = otext[i] != '\t' ? 1 :
-                        highlight_tabstop - (column_offset % highlight_tabstop);
+                    /* Add one for space or number of spaces to next tabstop */
+                    int offset = otext[i] != '\t' ? 1 :
+                            highlight_tabstop - (column_offset % highlight_tabstop);
 
-                if (!isspace(otext[i + 1])) {
-                    offset--;
+                    column_offset += offset;
+
+                    if (!isspace(otext[i + 1])) {
+                        column_offset--;
+                        break;
+                    }
                 }
-
-                column_offset += offset;
             }
+
+
             column_offset -= sview->cur->sel_col;
             if (column_offset < 0) {
                 column_offset = 0;
             }
 
-            /* Now actually draw the arrow */
+            /* Draw the space to the block */
             for (j = 0; j < column_offset; j++) {
                 waddch(sview->win, ' ');
             }
 
+            /* Draw the block */
             wattron(sview->win, block_attr);
             waddch(sview->win, ' ');
             wattroff(sview->win, block_attr);
@@ -471,6 +550,52 @@ static void draw_current_line(struct sviewer *sview, int line, int lwidth,
 /* --------- */
 
 /* Descriptive comments found in header file: sources.h */
+
+int source_highlight(struct list_node *node)
+{
+    int do_color = sources_syntax_on &&
+                   (node->language != TOKENIZER_LANGUAGE_UNKNOWN) &&
+                   has_colors();
+
+    node->buf = NULL;
+
+    /* If we're doing color and we haven't already loaded this file
+     * with this language, then load and highlight it.
+     */
+    if (do_color && (node->color_buf.language != node->language))
+    {
+        /* Release previously loaded data */
+        release_file_buffer(&node->color_buf);
+
+        node->color_buf.language = node->language;
+        if ( highlight_node(node->path, &node->color_buf) )
+        {
+            /* Error - free this and try loading no color buffer */
+            release_file_buffer( &node->color_buf );
+            do_color = 0;
+        }
+    }
+
+    if (!do_color && !sbcount(node->orig_buf.tlines))
+        load_file_buf(&node->orig_buf, node->path);
+
+    /* If we're doing color, use color_buf, otherwise original buf */
+    node->buf = do_color ? &node->color_buf : &node->orig_buf;
+
+    /* Allocate the breakpoints array */
+    if ( !node->breakpts ) {
+        int count = sbcount(node->buf->tlines);
+        sbsetcount( node->breakpts, count );
+
+        memset(node->breakpts, 0, sbcount(node->breakpts));
+    }
+
+    if (node->buf && node->buf->tlines)
+        return 0;
+
+    return -1;
+}
+
 
 struct sviewer *source_new(int pos_r, int pos_c, int height, int width)
 {
@@ -495,8 +620,12 @@ int source_add(struct sviewer *sview, const char *path)
     new_node = (struct list_node *)malloc(sizeof (struct list_node));
     new_node->path = strdup(path);
     new_node->lpath = NULL;
-    new_node->buf.length = 0;
-    new_node->buf.tlines = NULL;    /* This signals an empty buffer */
+
+    init_file_buffer(&new_node->orig_buf);
+    init_file_buffer(&new_node->color_buf);
+
+    new_node->buf = NULL;
+    new_node->breakpts = NULL;
     new_node->sel_line = 0;
     new_node->sel_col = 0;
     new_node->sel_col_rbeg = 0;
@@ -521,7 +650,6 @@ int source_add(struct sviewer *sview, const char *path)
 int source_set_relative_path(struct sviewer *sview,
         const char *path, const char *lpath)
 {
-
     struct list_node *node = sview->list_head;
 
     while (node != NULL) {
@@ -553,12 +681,16 @@ int source_del(struct sviewer *sview, const char *path)
         return 1;               /* Node not found */
 
     /* Release file buffers */
-    release_file_buffer(&cur->buf);
     release_file_buffer(&cur->orig_buf);
+    release_file_buffer(&cur->color_buf);
+    cur->buf = NULL;
 
     /* Release file name */
     free(cur->path);
     cur->path = NULL;
+
+    sbfree(cur->breakpts);
+    cur->breakpts = NULL;
 
     /* Release local file name */
     if (cur->lpath) {
@@ -584,11 +716,11 @@ int source_length(struct sviewer *sview, const char *path)
 
     if (!cur) {
         /* Load the file if it's not already */
-        if (!cur->buf.tlines && load_file(cur))
+        if (!cur->buf && load_file(cur))
             return -1;
     }
 
-    return cur->buf.length;
+    return sbcount(cur->buf->tlines);
 }
 
 char *source_current_file(struct sviewer *sview, char *path)
@@ -607,196 +739,162 @@ int source_display(struct sviewer *sview, int focus)
     int lwidth;
     int line;
     int i;
+    int count;
     int attr = 0, sellineno;
+    int exelinearrow, sellinearrow;
+    int enabled_bp, disabled_bp;
 
-    if (hl_groups_get_attr(hl_groups_instance, HLG_SELECTED_LINE_NUMBER,
-                    &sellineno) == -1)
-        return -1;
+    hl_groups_get_attr(hl_groups_instance, HLG_EXECUTING_LINE_ARROW, &exelinearrow);
+    hl_groups_get_attr(hl_groups_instance, HLG_SELECTED_LINE_ARROW, &sellinearrow);
+    hl_groups_get_attr(hl_groups_instance, HLG_SELECTED_LINE_NUMBER, &sellineno);
+    hl_groups_get_attr(hl_groups_instance, HLG_ENABLED_BREAKPOINT, &enabled_bp);
+    hl_groups_get_attr(hl_groups_instance, HLG_DISABLED_BREAKPOINT, &disabled_bp);
 
     /* Check that a file is loaded */
-    if (sview->cur == NULL || sview->cur->buf.tlines == NULL) {
+    if (sview->cur == NULL || sview->cur->buf->tlines == NULL) {
         logo_display(sview->win);
         wrefresh(sview->win);
         return 0;
     }
 
     /* Make sure cursor is visible */
-    if (focus)
-        curs_set(1);
-    else
-        curs_set(0);
+    curs_set( !!focus );
 
     /* Initialize variables */
     getmaxyx(sview->win, height, width);
 
     /* Set starting line number (center source file if it's small enough) */
-    if (sview->cur->buf.length < height)
-        line = (sview->cur->buf.length - height) / 2;
+    count = sbcount(sview->cur->buf->tlines);
+    if (count < height)
+        line = (count - height) / 2;
     else {
         line = sview->cur->sel_line - height / 2;
-        if (line > sview->cur->buf.length - height)
-            line = sview->cur->buf.length - height;
+        if (line > count - height)
+            line = count - height;
         else if (line < 0)
             line = 0;
     }
 
     /* Print 'height' lines of the file, starting at 'line' */
-    lwidth = (int) log10(sview->cur->buf.length) + 1;
+    lwidth = (int) log10(count) + 1;
     sprintf(fmt, "%%%dd", lwidth);
 
     for (i = 0; i < height; i++, line++) {
         wmove(sview->win, i, 0);
-        if (has_colors()) {
-            /* Outside of file, just finish drawing the vertical line */
-            if (line < 0 || line >= sview->cur->buf.length) {
-                int j;
 
-                for (j = 1; j < lwidth; j++)
-                    waddch(sview->win, ' ');
-                waddch(sview->win, '~');
-                if (focus)
-                    wattron(sview->win, A_BOLD);
-                waddch(sview->win, VERT_LINE);
-                if (focus)
-                    wattroff(sview->win, A_BOLD);
-                for (j = 2 + lwidth; j < width; j++)
-                    waddch(sview->win, ' ');
+        if (!has_colors()) {
+            wprintw(sview->win, "%s\n", sview->cur->buf->tlines[line]);
+            continue;
+        }
 
-                /* Mark the current line with an arrow */
-            } else if (line == sview->cur->exe_line) {
-                switch (sview->cur->buf.breakpts[line]) {
-                    case 0:
-                        if (hl_groups_get_attr(hl_groups_instance,
-                            HLG_EXECUTING_LINE_ARROW,
-                                        &attr) == -1)
-                            return -1;
-                        break;
-                    case 1:
-                        if (hl_groups_get_attr(hl_groups_instance,
-                                        HLG_ENABLED_BREAKPOINT, &attr) == -1)
-                            return -1;
-                        break;
-                    case 2:
-                        if (hl_groups_get_attr(hl_groups_instance,
-                                        HLG_DISABLED_BREAKPOINT, &attr) == -1)
-                            return -1;
-                        break;
-                }
-                wattron(sview->win, attr);
-                wprintw(sview->win, fmt, line + 1);
-                wattroff(sview->win, attr);
+        /* Outside of file, just finish drawing the vertical line */
+        if (line < 0 || line >= count) {
+            int j;
 
-                draw_current_line(sview, line, lwidth, EXECUTING_LINE);
+            for (j = 1; j < lwidth; j++)
+                waddch(sview->win, ' ');
+            waddch(sview->win, '~');
 
-                /* Mark the selected line with an arrow */
-            } else if (line == sview->cur->sel_line) {
-                switch (sview->cur->buf.breakpts[line]) {
-                    case 0:
-                        if (hl_groups_get_attr(hl_groups_instance,
-                            HLG_SELECTED_LINE_ARROW,
-                                        &attr) == -1)
-                            return -1;
-                        break;
-                    case 1:
-                        if (hl_groups_get_attr(hl_groups_instance,
-                                        HLG_ENABLED_BREAKPOINT, &attr) == -1)
-                            return -1;
-                        break;
-                    case 2:
-                        if (hl_groups_get_attr(hl_groups_instance,
-                                        HLG_DISABLED_BREAKPOINT, &attr) == -1)
-                            return -1;
-                        break;
-                }
-                wattron(sview->win, attr);
-                wprintw(sview->win, fmt, line + 1);
-                wattroff(sview->win, attr);
+            if (focus)
+                wattron(sview->win, A_BOLD);
+            waddch(sview->win, VERT_LINE);
+            if (focus)
+                wattroff(sview->win, A_BOLD);
 
-                draw_current_line(sview, line, lwidth, SELECTED_LINE);
-                /* Look for breakpoints */
-            } else if (sview->cur->buf.breakpts[line]) {
-                if (sview->cur->buf.breakpts[line] == 1) {
-                    if (hl_groups_get_attr(hl_groups_instance,
-                                    HLG_ENABLED_BREAKPOINT, &attr) == -1)
-                        return -1;
-                } else {
-                    if (hl_groups_get_attr(hl_groups_instance,
-                                    HLG_DISABLED_BREAKPOINT, &attr) == -1)
-                        return -1;
-                }
-                wattron(sview->win, attr);
-                wprintw(sview->win, fmt, line + 1);
-                wattroff(sview->win, attr);
-                if (focus)
-                    wattron(sview->win, A_BOLD);
-                waddch(sview->win, VERT_LINE);
-                if (focus)
-                    wattroff(sview->win, A_BOLD);
+            for (j = 2 + lwidth; j < width; j++)
                 waddch(sview->win, ' ');
 
-                /* I know this is ridiculous, it needs to be reimplemented */
-                if (sources_syntax_on) {
-                    if (line == sview->cur->sel_line &&
-                            sview->cur->buf.cur_line != NULL) {
-                        hl_wprintw(sview->win, sview->cur->buf.cur_line,
-                                width - lwidth - 2, sview->cur->sel_col);
-
-                    } else {
-                        hl_wprintw(sview->win, sview->cur->buf.tlines[line],
-                                width - lwidth - 2, sview->cur->sel_col);
-                    }
-                } else {
-                    if (line == sview->cur->sel_line &&
-                            sview->cur->buf.cur_line != NULL) {
-                        hl_wprintw(sview->win, sview->cur->orig_buf.cur_line,
-                                width - lwidth - 2, sview->cur->sel_col);
-
-                    } else {
-                        hl_wprintw(sview->win,
-                                sview->cur->orig_buf.tlines[line],
-                                width - lwidth - 2, sview->cur->sel_col);
-                    }
-                }
+            /* Mark the current (executing) line with an arrow */
+        } else if ( line == sview->cur->exe_line ) {
+            switch (sview->cur->breakpts[line]) {
+                case 0:
+                    attr = exelinearrow;
+                    break;
+                case 1:
+                    attr = enabled_bp;
+                    break;
+                case 2:
+                    attr = disabled_bp;
+                    break;
             }
-            /* Ordinary lines */
-            else {
-                wprintw(sview->win, fmt, line + 1);
+            wattron(sview->win, attr);
+            wprintw(sview->win, fmt, line + 1);
+            wattroff(sview->win, attr);
 
-                if (focus)
-                    wattron(sview->win, A_BOLD);
-                waddch(sview->win, VERT_LINE);
-                if (focus)
-                    wattroff(sview->win, A_BOLD);
-                waddch(sview->win, ' ');
+            draw_current_line(sview, line, lwidth, EXECUTING_LINE);
 
-                /* I know this is ridiculous, it needs to be reimplemented */
-                if (sources_syntax_on) {
-                    /* No special line information */
-                    if (line == sview->cur->sel_line &&
-                            sview->cur->buf.cur_line != NULL) {
-                        hl_wprintw(sview->win, sview->cur->buf.cur_line,
-                                width - lwidth - 2, sview->cur->sel_col);
-
-                    } else {
-                        hl_wprintw(sview->win, sview->cur->buf.tlines[line],
-                                width - lwidth - 2, sview->cur->sel_col);
-                    }
-                } else {
-                    /* No special line information */
-                    if (line == sview->cur->sel_line &&
-                            sview->cur->buf.cur_line != NULL) {
-                        hl_wprintw(sview->win, sview->cur->orig_buf.cur_line,
-                                width - lwidth - 2, sview->cur->sel_col);
-
-                    } else {
-                        hl_wprintw(sview->win,
-                                sview->cur->orig_buf.tlines[line],
-                                width - lwidth - 2, sview->cur->sel_col);
-                    }
-                }
+            /* Mark the current line with an arrow */
+        } else if ( line == sview->cur->sel_line ) {
+            switch (sview->cur->breakpts[line]) {
+                case 0:
+                    attr = sellinearrow;
+                    break;
+                case 1:
+                    attr = enabled_bp;
+                    break;
+                case 2:
+                    attr = disabled_bp;
+                    break;
             }
-        } else {
-            wprintw(sview->win, "%s\n", sview->cur->buf.tlines[line]);
+            wattron(sview->win, attr);
+            wprintw(sview->win, fmt, line + 1);
+            wattroff(sview->win, attr);
+
+            draw_current_line(sview, line, lwidth, SELECTED_LINE);
+
+            /* Look for breakpoints */
+        } else if (sview->cur->breakpts[line]) {
+            if (sview->cur->breakpts[line] == 1)
+                attr = enabled_bp;
+            else
+                attr = disabled_bp;
+
+            wattron(sview->win, attr);
+            wprintw(sview->win, fmt, line + 1);
+            wattroff(sview->win, attr);
+
+            if (focus)
+                wattron(sview->win, A_BOLD);
+            waddch(sview->win, VERT_LINE);
+            if (focus)
+                wattroff(sview->win, A_BOLD);
+            waddch(sview->win, ' ');
+
+            if (line == sview->cur->sel_line && sview->cur->buf->cur_line != NULL) {
+                hl_wprintw(sview->win, sview->cur->buf->cur_line,
+                        width - lwidth - 2, sview->cur->sel_col);
+
+            } else {
+                hl_wprintw(sview->win, sview->cur->buf->tlines[line],
+                        width - lwidth - 2, sview->cur->sel_col);
+            }
+        }
+        /* Ordinary lines */
+        else {
+            if (focus && sview->cur->sel_line == line)
+                wattron(sview->win, sellineno);
+
+            wprintw(sview->win, fmt, line + 1);
+
+            if (focus && sview->cur->sel_line == line)
+                wattroff(sview->win, sellineno);
+
+            if (focus)
+                wattron(sview->win, A_BOLD);
+            waddch(sview->win, VERT_LINE);
+            if (focus)
+                wattroff(sview->win, A_BOLD);
+            waddch(sview->win, ' ');
+
+            /* No special line information */
+            if (line == sview->cur->sel_line && sview->cur->buf->cur_line != NULL) {
+                hl_wprintw(sview->win, sview->cur->buf->cur_line,
+                        width - lwidth - 2, sview->cur->sel_col);
+
+            } else {
+                hl_wprintw(sview->win, sview->cur->buf->tlines[line],
+                        width - lwidth - 2, sview->cur->sel_col);
+            }
         }
     }
 
@@ -820,8 +918,8 @@ void source_vscroll(struct sviewer *sview, int offset)
         sview->cur->sel_line += offset;
         if (sview->cur->sel_line < 0)
             sview->cur->sel_line = 0;
-        if (sview->cur->sel_line >= sview->cur->buf.length)
-            sview->cur->sel_line = sview->cur->buf.length - 1;
+        if (sview->cur->sel_line >= sbcount(sview->cur->buf->tlines))
+            sview->cur->sel_line = sbcount(sview->cur->buf->tlines) - 1;
 
         sview->cur->sel_rline = sview->cur->sel_line;
     }
@@ -833,8 +931,8 @@ void source_hscroll(struct sviewer *sview, int offset)
     int max_width;
 
     if (sview->cur) {
-        lwidth = (int) log10(sview->cur->buf.length) + 1;
-        max_width = sview->cur->buf.max_width - COLS + lwidth + 6;
+        lwidth = (int) log10(sbcount(sview->cur->buf->tlines)) + 1;
+        max_width = sview->cur->buf->max_width - COLS + lwidth + 6;
 
         sview->cur->sel_col += offset;
         if (sview->cur->sel_col > max_width)
@@ -848,15 +946,15 @@ void source_set_sel_line(struct sviewer *sview, int line)
 {
     if (sview->cur) {
         if (line == -1) {
-            sview->cur->sel_line = sview->cur->buf.length - 1;
+            sview->cur->sel_line = sbcount(sview->cur->buf->tlines) - 1;
         } else {
             /* Set line (note correction for 0-based line counting) */
             sview->cur->sel_line = line - 1;
             if (sview->cur->sel_line < 0)
                 sview->cur->sel_line = 0;
-            if (sview->cur->sel_line >= sview->cur->buf.length)
-                sview->cur->sel_line = sview->cur->buf.length - 1;
-        }
+            if (sview->cur->sel_line >= sbcount(sview->cur->buf->tlines))
+                sview->cur->sel_line = sbcount(sview->cur->buf->tlines) - 1;
+            }
 
         sview->cur->sel_rline = sview->cur->sel_line;
     }
@@ -878,7 +976,7 @@ int source_set_exec_line(struct sviewer *sview, const char *path, int line)
         return 3;
 
     /* Buffer the file if it's not already */
-    if (!sview->cur->buf.tlines && load_file(sview->cur))
+    if (!sview->cur->buf && load_file(sview->cur))
         return 4;
 
     /* Update line, if set */
@@ -886,8 +984,8 @@ int source_set_exec_line(struct sviewer *sview, const char *path, int line)
         /* Check bounds of line */
         if (line < 0)
             line = 0;
-        if (line >= sview->cur->buf.length)
-            line = sview->cur->buf.length - 1;
+        if (line >= sbcount(sview->cur->buf->tlines))
+            line = sbcount(sview->cur->buf->tlines) - 1;
         sview->cur->sel_line = sview->cur->exe_line = line;
     }
 
@@ -921,20 +1019,24 @@ void source_search_regex_init(struct sviewer *sview)
 int source_search_regex(struct sviewer *sview,
         const char *regex, int opt, int direction, int icase)
 {
+    if (sview == NULL || sview->cur == NULL ||
+        regex == NULL || strlen(regex) == 0) {
 
-    if (sview == NULL || sview->cur == NULL || regex == NULL ||
-            strlen(regex) == 0) {
-
-        if (sview && sview->cur)
-            sview->cur->buf.cur_line = NULL;
+        if (sview && sview->cur) {
+            free( sview->cur->buf->cur_line );
+            sview->cur->buf->cur_line = NULL;
+        }
         return -1;
     }
 
+    if ( !sbcount(sview->cur->orig_buf.tlines ) )
+        load_file_buf(&sview->cur->orig_buf, sview->cur->path);
+
     return hl_regex(regex,
-            (const char **) sview->cur->buf.tlines,
+            (const char **) sview->cur->buf->tlines,
             (const char **) sview->cur->orig_buf.tlines,
-            sview->cur->orig_buf.length,
-            &sview->cur->buf.cur_line, &sview->cur->sel_line,
+            sbcount(sview->cur->buf->tlines),
+            &sview->cur->buf->cur_line, &sview->cur->sel_line,
             &sview->cur->sel_rline, &sview->cur->sel_col_rbeg,
             &sview->cur->sel_col_rend, opt, direction, icase);
 }
@@ -946,12 +1048,11 @@ void source_disable_break(struct sviewer *sview, const char *path, int line)
     if ((node = get_relative_node(sview, path)) == NULL)
         return;
 
-    if (node->buf.tlines == NULL)
-        if (load_file(node))
-            return;
+    if (!node->buf && load_file(node))
+        return;
 
-    if (line > 0 && line <= node->buf.length)
-        node->buf.breakpts[line - 1] = 2;
+    if (line > 0 && line <= sbcount(node->buf->tlines))
+        node->breakpts[line - 1] = 2;
 }
 
 void source_enable_break(struct sviewer *sview, const char *path, int line)
@@ -961,12 +1062,11 @@ void source_enable_break(struct sviewer *sview, const char *path, int line)
     if ((node = get_relative_node(sview, path)) == NULL)
         return;
 
-    if (node->buf.tlines == NULL)
-        if (load_file(node))
-            return;
+    if (!node->buf && load_file(node))
+        return;
 
-    if (line > 0 && line <= node->buf.length) {
-        node->buf.breakpts[line - 1] = 1;
+    if (line > 0 && line <= sbcount(node->buf->tlines)) {
+        node->breakpts[line - 1] = 1;
     }
 }
 
@@ -975,8 +1075,7 @@ void source_clear_breaks(struct sviewer *sview)
     struct list_node *node;
 
     for (node = sview->list_head; node != NULL; node = node->next)
-        memset(node->buf.breakpts, 0, node->buf.length);
-
+        memset(node->breakpts, 0, sbcount(node->breakpts));
 }
 
 int source_reload(struct sviewer *sview, const char *path, int force)

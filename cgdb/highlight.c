@@ -54,21 +54,16 @@
 /* Local Variables */
 /* --------------- */
 
-static int highlight_node(struct list_node *node)
+int highlight_node(const char *filename, struct buffer *buf)
 {
-    struct tokenizer *t = tokenizer_init();
     int ret;
     struct ibuf *ibuf = ibuf_init();
+    struct tokenizer *t = tokenizer_init();
 
     ibuf_addchar(ibuf, HL_CHAR);
     ibuf_addchar(ibuf, HLG_TEXT);
 
-    /* Initialize */
-    node->buf.length = 0;
-    node->buf.tlines = NULL;
-    node->buf.max_width = 0;
-
-    if (tokenizer_set_file(t, node->path, node->language) == -1) {
+    if (tokenizer_set_file(t, filename, buf->language) == -1) {
         if_print_message("%s:%d tokenizer_set_file error", __FILE__, __LINE__);
         return -1;
     }
@@ -121,14 +116,10 @@ static int highlight_node(struct list_node *node)
                 ibuf_add(ibuf, tokenizer_get_data(t));
                 break;
             case TOKENIZER_NEWLINE:
-                node->buf.length++;
-                node->buf.tlines =
-                        (char **)realloc(node->buf.tlines,
-                        sizeof (char *) * node->buf.length);
-                node->buf.tlines[node->buf.length - 1] = strdup(ibuf_get(ibuf));
+                sbpush(buf->tlines, strdup(ibuf_get(ibuf)));
 
-                if (ibuf_length(ibuf) > node->buf.max_width)
-                    node->buf.max_width = ibuf_length(ibuf);
+                if (ibuf_length(ibuf) > buf->max_width)
+                    buf->max_width = ibuf_length(ibuf);
 
                 ibuf_clear(ibuf);
                 ibuf_addchar(ibuf, HL_CHAR);
@@ -152,25 +143,7 @@ static int highlight_node(struct list_node *node)
 /* Functions */
 /* --------- */
 
-/* See comments in highlight.h for function descriptions. */
-
-void highlight(struct list_node *node)
-{
-    if (node->language == TOKENIZER_LANGUAGE_UNKNOWN) {
-        /* Just copy the lines from the original buffer if no highlighting 
-         * is possible */
-        int i;
-
-        node->buf.length = node->orig_buf.length;
-        node->buf.max_width = node->orig_buf.max_width;
-        node->buf.tlines = (char **)cgdb_malloc(sizeof (char *) * node->orig_buf.length);
-        for (i = 0; i < node->orig_buf.length; i++)
-            node->buf.tlines[i] = cgdb_strdup(node->orig_buf.tlines[i]);
-    } else
-        highlight_node(node);
-}
-
-/* highlight_line_segment: Creates a new line that is hightlighted.
+/* highlight_line_segment: Creates a new line that is highlighted.
  * ------------------------
  *
  *  orig:   The line that needs to be highlighted.
@@ -479,7 +452,7 @@ int hl_regex(const char *regex, const char **hl_lines, const char **tlines,
         /* Keep the new line as the selected line */
         *sel_line = i;
 
-        /* If the match is not perminant then give cur_line highlighting */
+        /* If the match is not permanent then give cur_line highlighting */
         if (opt != 2 && pmatch[0].rm_so != -1 && pmatch[0].rm_eo != -1)
             *cur_line =
                     highlight_line_segment(hl_lines[i],
