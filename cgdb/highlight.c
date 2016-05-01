@@ -54,14 +54,39 @@
 /* Local Variables */
 /* --------------- */
 
+static void add_type(struct ibuf *ibuf, int *lasttype, int newtype)
+{
+    /* Add HL_CHAR + HLG_* token only if the HLG_ type has changed */
+    if ( *lasttype != newtype ) {
+        ibuf_addchar(ibuf, HL_CHAR);
+        ibuf_addchar(ibuf, newtype);
+        *lasttype = newtype;
+    }
+}
+
+static int hlg_from_tokenizer_type(enum tokenizer_type type)
+{
+    switch(type) {
+        case TOKENIZER_KEYWORD: return HLG_KEYWORD;
+        case TOKENIZER_TYPE: return HLG_TYPE;
+        case TOKENIZER_LITERAL: return HLG_LITERAL;
+        case TOKENIZER_NUMBER: return HLG_TEXT;
+        case TOKENIZER_COMMENT: return HLG_COMMENT;
+        case TOKENIZER_DIRECTIVE: return HLG_DIRECTIVE;
+        case TOKENIZER_TEXT: return HLG_TEXT;
+        case TOKENIZER_ERROR: return HLG_TEXT;
+        case TOKENIZER_NEWLINE: return -1;
+        default: return -1;
+    }
+}
+
 int highlight_node(const char *filename, struct buffer *buf)
 {
     int ret;
+    int length = 0;
+    int lasttype = -1;
     struct ibuf *ibuf = ibuf_init();
     struct tokenizer *t = tokenizer_init();
-
-    ibuf_addchar(ibuf, HL_CHAR);
-    ibuf_addchar(ibuf, HLG_TEXT);
 
     if (tokenizer_set_file(t, filename, buf->language) == -1) {
         if_print_message("%s:%d tokenizer_set_file error", __FILE__, __LINE__);
@@ -73,64 +98,24 @@ int highlight_node(const char *filename, struct buffer *buf)
 
         /*if_print_message  ( "TOKEN(%d:%s)\n", e, tokenizer_get_printable_enum ( e ) ); */
 
-        switch (e) {
-            case TOKENIZER_KEYWORD:
-                ibuf_addchar(ibuf, HL_CHAR);
-                ibuf_addchar(ibuf, HLG_KEYWORD);
-                ibuf_add(ibuf, tokenizer_get_data(t));
-                ibuf_addchar(ibuf, HL_CHAR);
-                ibuf_addchar(ibuf, HLG_TEXT);
-                break;
-            case TOKENIZER_TYPE:
-                ibuf_addchar(ibuf, HL_CHAR);
-                ibuf_addchar(ibuf, HLG_TYPE);
-                ibuf_add(ibuf, tokenizer_get_data(t));
-                ibuf_addchar(ibuf, HL_CHAR);
-                ibuf_addchar(ibuf, HLG_TEXT);
-                break;
-            case TOKENIZER_LITERAL:
-                ibuf_addchar(ibuf, HL_CHAR);
-                ibuf_addchar(ibuf, HLG_LITERAL);
-                ibuf_add(ibuf, tokenizer_get_data(t));
-                ibuf_addchar(ibuf, HL_CHAR);
-                ibuf_addchar(ibuf, HLG_TEXT);
-                break;
-            case TOKENIZER_NUMBER:
-                ibuf_add(ibuf, tokenizer_get_data(t));
-                break;
-            case TOKENIZER_COMMENT:
-                ibuf_addchar(ibuf, HL_CHAR);
-                ibuf_addchar(ibuf, HLG_COMMENT);
-                ibuf_add(ibuf, tokenizer_get_data(t));
-                ibuf_addchar(ibuf, HL_CHAR);
-                ibuf_addchar(ibuf, HLG_TEXT);
-                break;
-            case TOKENIZER_DIRECTIVE:
-                ibuf_addchar(ibuf, HL_CHAR);
-                ibuf_addchar(ibuf, HLG_DIRECTIVE);
-                ibuf_add(ibuf, tokenizer_get_data(t));
-                ibuf_addchar(ibuf, HL_CHAR);
-                ibuf_addchar(ibuf, HLG_TEXT);
-                break;
-            case TOKENIZER_TEXT:
-                ibuf_add(ibuf, tokenizer_get_data(t));
-                break;
-            case TOKENIZER_NEWLINE:
-                sbpush(buf->tlines, strdup(ibuf_get(ibuf)));
+        if (e == TOKENIZER_NEWLINE) {
+            sbpush(buf->tlines, strdup(ibuf_get(ibuf)));
 
-                if (ibuf_length(ibuf) > buf->max_width)
-                    buf->max_width = ibuf_length(ibuf);
+            if (length > buf->max_width)
+                buf->max_width = length;
 
-                ibuf_clear(ibuf);
-                ibuf_addchar(ibuf, HL_CHAR);
-                ibuf_addchar(ibuf, HLG_TEXT);
-                break;
-            case TOKENIZER_ERROR:
-                ibuf_add(ibuf, tokenizer_get_data(t));
-                break;
-            default:
+            length = 0;
+            lasttype = -1;
+            ibuf_clear(ibuf);
+        } else {
+            int hlg_type = hlg_from_tokenizer_type(e);
+            if (hlg_type < 0)
                 return -1;
-                break;
+
+            /* Set the highlight group type */
+            add_type(ibuf, &lasttype, hlg_type);
+            /* Add the text and bump our length */
+            length += ibuf_add(ibuf, tokenizer_get_data(t));
         }
     }
 

@@ -31,7 +31,7 @@ void ibuf_addchar(struct ibuf *s, char c);
  *  s - the infinite string to modify
  *  d - the string to add
  */
-void ibuf_add(struct ibuf *s, const char *d);
+int ibuf_add(struct ibuf *s, const char *d);
 
 /* ibuf_delchar: Delete the last char put in */
 void ibuf_delchar(struct ibuf *s);

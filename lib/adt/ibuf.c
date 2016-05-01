@@ -59,7 +59,7 @@ void ibuf_addchar(struct ibuf *s, char c)
     }
 }
 
-void ibuf_add(struct ibuf *s, const char *d)
+int ibuf_add(struct ibuf *s, const char *d)
 {
     int length = strlen(d);
 
@@ -67,6 +67,7 @@ void ibuf_add(struct ibuf *s, const char *d)
 
     strcpy(s->buf + s->pos, d);
     s->pos += length;
+    return length;
 }
 
 void ibuf_delchar(struct ibuf *s)
