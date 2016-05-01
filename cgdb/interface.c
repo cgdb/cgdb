@@ -1193,10 +1193,140 @@ int if_init(void)
     return 0;
 }
 
-int internal_if_input(int key)
+static int cgdb_input(int key)
 {
     int regex_icase = cgdbrc_get(CGDBRC_IGNORECASE)->variant.int_val;
 
+    switch (key) {
+        case 'i':
+            if_set_focus(GDB);
+            return 0;
+        case 'I':
+            if_set_focus(TTY);
+            return 0;
+        case ':':
+            /* Set the type of the command the user is typing in the status bar */
+            sbc_kind = SBC_NORMAL;
+            if_set_focus(CGDB_STATUS_BAR);
+            /* Since the user is about to type in a command, allocate a buffer
+                         * in which this command can be stored. */
+            cur_sbc = ibuf_init();
+            return 0;
+        case '/':
+        case '?':
+            if (src_win->cur != NULL) {
+                regex_cur = ibuf_init();
+                regex_direction_cur = ('/' == key);
+                orig_line_regex = src_win->cur->sel_line;
+
+                sbc_kind = SBC_REGEX;
+                if_set_focus(CGDB_STATUS_BAR);
+
+                /* Capturing regular expressions */
+                source_search_regex_init(src_win);
+
+                /* Initialize the function for finding a regex and tell user */
+                if_draw();
+            }
+            return 0;
+        case 'n':
+            source_search_regex(src_win, ibuf_get(regex_last), 2,
+                                regex_direction_last, regex_icase);
+            if_draw();
+            break;
+        case 'N':
+            source_search_regex(src_win, ibuf_get(regex_last), 2,
+                                !regex_direction_last, regex_icase);
+            if_draw();
+            break;
+        case 'T':
+            if (tty_win_on) {
+                tty_win_on = 0;
+                focus = CGDB;
+            } else {
+                tty_win_on = 1;
+                focus = TTY;
+            }
+
+            if_layout();
+
+            break;
+        case CGDB_KEY_CTRL_T:
+            if (tgdb_tty_new(tgdb) == -1) {
+                /* Error */
+            } else {
+                scr_free(tty_win);
+                tty_win = NULL;
+                if_layout();
+            }
+
+            break;
+        case CGDB_KEY_F1:
+            if_display_help();
+            return 0;
+        case CGDB_KEY_F5:
+            /* Issue GDB run command */
+        {
+            tgdb_request_ptr request_ptr;
+
+            request_ptr =
+                    tgdb_request_run_debugger_command(tgdb, TGDB_RUN);
+            handle_request(tgdb, request_ptr);
+        }
+            return 0;
+        case CGDB_KEY_F6:
+            /* Issue GDB continue command */
+        {
+            tgdb_request_ptr request_ptr;
+
+            request_ptr =
+                    tgdb_request_run_debugger_command(tgdb,
+                                                      TGDB_CONTINUE);
+            handle_request(tgdb, request_ptr);
+        }
+            return 0;
+        case CGDB_KEY_F7:
+            /* Issue GDB finish command */
+        {
+            tgdb_request_ptr request_ptr;
+
+            request_ptr =
+                    tgdb_request_run_debugger_command(tgdb,
+                                                      TGDB_FINISH);
+            handle_request(tgdb, request_ptr);
+        }
+            return 0;
+        case CGDB_KEY_F8:
+            /* Issue GDB next command */
+        {
+            tgdb_request_ptr request_ptr;
+
+            request_ptr =
+                    tgdb_request_run_debugger_command(tgdb, TGDB_NEXT);
+            handle_request(tgdb, request_ptr);
+        }
+            return 0;
+        case CGDB_KEY_F10:
+            /* Issue GDB step command */
+        {
+            tgdb_request_ptr request_ptr;
+
+            request_ptr =
+                    tgdb_request_run_debugger_command(tgdb, TGDB_STEP);
+            handle_request(tgdb, request_ptr);
+        }
+            return 0;
+        case CGDB_KEY_CTRL_L:
+            if_layout();
+            return 0;
+    }
+
+    source_input(src_win, key);
+    return 0;
+}
+
+int internal_if_input(int key)
+{
     /* Normally, CGDB_KEY_ESC, but can be configured by the user */
     int cgdb_mode_key = cgdbrc_get(CGDBRC_CGDB_MODE_KEY)->variant.int_val;
 
@@ -1225,132 +1355,7 @@ int internal_if_input(int key)
     /* Check for global keystrokes */
     switch (focus) {
         case CGDB:
-            switch (key) {
-                case 'i':
-                    if_set_focus(GDB);
-                    return 0;
-                case 'I':
-                    if_set_focus(TTY);
-                    return 0;
-                case ':':
-                    /* Set the type of the command the user is typing in the status bar */
-                    sbc_kind = SBC_NORMAL;
-                    if_set_focus(CGDB_STATUS_BAR);
-                    /* Since the user is about to type in a command, allocate a buffer 
-                     * in which this command can be stored. */
-                    cur_sbc = ibuf_init();
-                    return 0;
-                case '/':
-                case '?':
-                    if (src_win->cur != NULL) {
-                        regex_cur = ibuf_init();
-                        regex_direction_cur = ('/' == key);
-                        orig_line_regex = src_win->cur->sel_line;
-
-                        sbc_kind = SBC_REGEX;
-                        if_set_focus(CGDB_STATUS_BAR);
-
-                        /* Capturing regular expressions */
-                        source_search_regex_init(src_win);
-
-                        /* Initialize the function for finding a regex and tell user */
-                        if_draw();
-                    }
-                    return 0;
-                case 'n':
-                    source_search_regex(src_win, ibuf_get(regex_last), 2,
-                            regex_direction_last, regex_icase);
-                    if_draw();
-                    break;
-                case 'N':
-                    source_search_regex(src_win, ibuf_get(regex_last), 2,
-                            !regex_direction_last, regex_icase);
-                    if_draw();
-                    break;
-                case 'T':
-                    if (tty_win_on) {
-                        tty_win_on = 0;
-                        focus = CGDB;
-                    } else {
-                        tty_win_on = 1;
-                        focus = TTY;
-                    }
-
-                    if_layout();
-
-                    break;
-                case CGDB_KEY_CTRL_T:
-                    if (tgdb_tty_new(tgdb) == -1) {
-                        /* Error */
-                    } else {
-                        scr_free(tty_win);
-                        tty_win = NULL;
-                        if_layout();
-                    }
-
-                    break;
-                case CGDB_KEY_F1:
-                    if_display_help();
-                    return 0;
-                case CGDB_KEY_F5:
-                    /* Issue GDB run command */
-                {
-                    tgdb_request_ptr request_ptr;
-
-                    request_ptr =
-                            tgdb_request_run_debugger_command(tgdb, TGDB_RUN);
-                    handle_request(tgdb, request_ptr);
-                }
-                    return 0;
-                case CGDB_KEY_F6:
-                    /* Issue GDB continue command */
-                {
-                    tgdb_request_ptr request_ptr;
-
-                    request_ptr =
-                            tgdb_request_run_debugger_command(tgdb,
-                            TGDB_CONTINUE);
-                    handle_request(tgdb, request_ptr);
-                }
-                    return 0;
-                case CGDB_KEY_F7:
-                    /* Issue GDB finish command */
-                {
-                    tgdb_request_ptr request_ptr;
-
-                    request_ptr =
-                            tgdb_request_run_debugger_command(tgdb,
-                            TGDB_FINISH);
-                    handle_request(tgdb, request_ptr);
-                }
-                    return 0;
-                case CGDB_KEY_F8:
-                    /* Issue GDB next command */
-                {
-                    tgdb_request_ptr request_ptr;
-
-                    request_ptr =
-                            tgdb_request_run_debugger_command(tgdb, TGDB_NEXT);
-                    handle_request(tgdb, request_ptr);
-                }
-                    return 0;
-                case CGDB_KEY_F10:
-                    /* Issue GDB step command */
-                {
-                    tgdb_request_ptr request_ptr;
-
-                    request_ptr =
-                            tgdb_request_run_debugger_command(tgdb, TGDB_STEP);
-                    handle_request(tgdb, request_ptr);
-                }
-                    return 0;
-                case CGDB_KEY_CTRL_L:
-                    if_layout();
-                    return 0;
-            }
-            source_input(src_win, key);
-            return 0;
-            break;
+            return cgdb_input(key);
         case TTY:
             return tty_input(key);
         case GDB:
