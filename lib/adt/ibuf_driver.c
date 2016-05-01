@@ -43,7 +43,6 @@ static int test_add(ibuf_ptr s);
 static int test_addchar(ibuf_ptr s);
 static int test_delchar(ibuf_ptr s);
 static int test_dup(ibuf_ptr s);
-static int test_trim(ibuf_ptr s);
 
 /* main:
  *
@@ -68,7 +67,6 @@ int main(int argc, char *argv[])
     result |= test_addchar(s);
     result |= test_delchar(s);
     result |= test_dup(s);
-    result |= test_trim(s);
 
     debug("Destroying string...\n");
     ibuf_free(s);
@@ -189,44 +187,3 @@ static int test_dup(ibuf_ptr s)
     return 0;
 }
 
-static int test_trim(ibuf_ptr s)
-{
-
-    /* Test #1: Empty string. */
-    ibuf_clear(s);
-    ibuf_trim(s);
-    if (strcmp(ibuf_get(s), "") != 0) {
-        debug("test_trim: 1: expected empty string, got: %s\n", ibuf_get(s));
-        return 1;
-    }
-
-    /* Test #2: Single space. */
-    ibuf_clear(s);
-    ibuf_addchar(s, ' ');
-    ibuf_trim(s);
-    if (strcmp(ibuf_get(s), "") != 0) {
-        debug("test_trim: 2: expected empty string, got: %s\n", ibuf_get(s));
-        return 2;
-    }
-
-    /* Test #3: "hello world" (no leading or trailing spaces) */
-    ibuf_clear(s);
-    ibuf_add(s, "hello world");
-    ibuf_trim(s);
-    if (strcmp(ibuf_get(s), "hello world") != 0) {
-        debug("test_trim: 3: expected \"hello world\", got: %s\n", ibuf_get(s));
-        return 3;
-    }
-
-    /* Test #4: "  hello world  \t" (leading and trailing spaces) */
-    ibuf_clear(s);
-    ibuf_add(s, "  hello world  \t");
-    ibuf_trim(s);
-    if (strcmp(ibuf_get(s), "hello world") != 0) {
-        debug("test_trim: 4: expected \"hello world\", got: %s\n", ibuf_get(s));
-        return 3;
-    }
-
-    debug("test_trim: Succeeded.\n");
-    return 0;
-}
