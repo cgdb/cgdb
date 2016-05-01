@@ -27,6 +27,7 @@
 /* Local Includes */
 #include "cgdb.h"
 #include "scroller.h"
+#include "sys_util.h"
 
 /* --------------- */
 /* Local Functions */
@@ -62,9 +63,10 @@ static int count(const char *s, char c)
  */
 static char *parse(struct scroller *scr, const char *orig, const char *buf)
 {
+    //$ TODO: Use cgdbrc_get(CGDBRC_TABSTOP, ...) here?
     const int tab_size = 8;
     int length = strlen(orig) + strlen(buf) + (tab_size - 1) * count(buf, '\t');
-    char *rv = (char *) malloc(length + 1);
+    char *rv = (char *) cgdb_malloc(length + 1);
     int i, j;
 
     /* Zero out the string */
@@ -83,9 +85,9 @@ static char *parse(struct scroller *scr, const char *orig, const char *buf)
                 break;
                 /* Tab -> Translating to spaces */
             case '\t':
-                do
+                do {
                     rv[i++] = ' ';
-                while (i % tab_size != 0);
+                } while (i % tab_size != 0);
                 break;
                 /* Carriage return -> Move back to the beginning of the line */
             case '\r':
@@ -99,10 +101,11 @@ static char *parse(struct scroller *scr, const char *orig, const char *buf)
 
     scr->current.pos = i;
     /* Remove trailing space from the line */
-    for (j = strlen(rv) - 1; j > i && isspace((int) rv[j]); j--);
+    for (j = strlen(rv) - 1; j > i && isspace((int) rv[j]); j--)
+        ;
     rv[j + 1] = 0;
 
-    return (char *)realloc(rv, strlen(rv) + 1);
+    return (char *)cgdb_realloc(rv, strlen(rv) + 1);
 }
 
 /* ----------------- */
@@ -115,7 +118,7 @@ struct scroller *scr_new(int pos_r, int pos_c, int height, int width)
 {
     struct scroller *rv;
 
-    if ((rv = (struct scroller *)malloc(sizeof (struct scroller))) == NULL)
+    if ((rv = (struct scroller *)cgdb_malloc(sizeof (struct scroller))) == NULL)
         return NULL;
 
     rv->current.r = 0;
@@ -124,7 +127,7 @@ struct scroller *scr_new(int pos_r, int pos_c, int height, int width)
     rv->win = newwin(height, width, pos_r, pos_c);
 
     /* Start with a single (blank) line */
-    rv->buffer = (char **)malloc(sizeof (char *));
+    rv->buffer = (char **)cgdb_malloc(sizeof (char *));
     rv->buffer[0] = strdup("");
     rv->length = 1;
 
@@ -241,7 +244,7 @@ void scr_add(struct scroller *scr, const char *buf)
     /* Append to the last line in the buffer */
     if (distance > 0) {
         char *temp = scr->buffer[scr->length - 1];
-        char *buf2 = (char *)malloc(distance + 1);
+        char *buf2 = (char *)cgdb_malloc(distance + 1);
 
         strncpy(buf2, buf, distance);
         buf2[distance] = 0;
@@ -259,13 +262,13 @@ void scr_add(struct scroller *scr, const char *buf)
         distance = x ? x - buf : strlen(buf);
 
         /* Create a new buffer that stops at the next newline */
-        newbuf = (char *)malloc(distance + 1);
+        newbuf = (char *)cgdb_malloc(distance + 1);
         memset(newbuf, 0, distance + 1);
         strncpy(newbuf, buf, distance);
 
         /* Expand the buffer */
         scr->length++;
-        scr->buffer = (char **)realloc(scr->buffer, sizeof (char *) * scr->length);
+        scr->buffer = (char **)cgdb_realloc(scr->buffer, sizeof (char *) * scr->length);
         scr->current.pos = 0;
 
         /* Add the new line */
@@ -301,7 +304,7 @@ void scr_refresh(struct scroller *scr, int focus)
     }
     r = scr->current.r;
     c = scr->current.c;
-    buffer = (char *)malloc(width + 1);
+    buffer = (char *)cgdb_malloc(width + 1);
     buffer[width] = 0;
 
     /* Start drawing at the bottom of the viewable space, and work our way up */
