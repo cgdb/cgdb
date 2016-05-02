@@ -885,10 +885,10 @@ size_t tgdb_process(struct tgdb * tgdb, char *buf, size_t n, int *is_finished)
         *is_finished = !is_busy;
 
         if (tgdb->show_gui_commands) {
-            strcpy(buf, tgdb->last_gui_command);
+            strncpy(buf, tgdb->last_gui_command, n);
             ret = strlen(tgdb->last_gui_command);
         } else {
-            strcpy(buf, "\n");
+            buf[0] = '\n';
             ret = 1;
         }
 

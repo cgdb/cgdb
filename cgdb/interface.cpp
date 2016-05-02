@@ -1443,7 +1443,7 @@ void if_show_file(char *path, int line)
 
 void if_display_help(void)
 {
-    char cgdb_help_file[MAXLINE];
+    char cgdb_help_file[FSUTIL_PATH_MAX];
     int ret_val = 0;
 
     fs_util_get_path(PKGDATADIR, "cgdb.txt", cgdb_help_file);
