@@ -1,4 +1,4 @@
-AM_CFLAGS = \
+AM_CXXFLAGS = \
     -I$(top_srcdir)/lib/adt \
     -I$(top_srcdir)/lib/rline \
     -I$(top_srcdir)/lib/util \
@@ -9,13 +9,13 @@ AM_CFLAGS = \
 noinst_LIBRARIES = libtgdb.a
 
 libtgdb_a_SOURCES = \
-    tgdb.c \
+    tgdb.cpp \
     tgdb.h \
-    tgdb_client_interface.c \
+    tgdb_client_interface.cpp \
     tgdb_client_interface.h \
-    tgdb_command.c \
+    tgdb_command.cpp \
     tgdb_command.h \
-    tgdb_types.c \
+    tgdb_types.cpp \
     tgdb_types.h
 
 noinst_PROGRAMS = tgdb_driver
@@ -36,4 +36,4 @@ tgdb_driver_LDADD = \
     $(top_builddir)/lib/adt/libadt.a \
     $(top_builddir)/lib/util/libutil.a
 
-tgdb_driver_SOURCES = driver.c
+tgdb_driver_SOURCES = driver.cpp

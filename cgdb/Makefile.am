@@ -1,6 +1,6 @@
 DEFS += -DPKGDATADIR=\"$(pkgdatadir)\"
 
-AM_CFLAGS = \
+AM_CXXFLAGS = \
     -I$(top_srcdir)/lib/adt \
     -I$(top_srcdir)/lib/kui \
     -I$(top_srcdir)/lib/rline \
@@ -36,24 +36,24 @@ noinst_HEADERS = \
     command_lexer.h
 
 cgdb_SOURCES = \
-    cgdb.c \
+    cgdb.cpp \
     cgdb.h \
-    cgdbrc.c \
+    cgdbrc.cpp \
     cgdbrc.h \
-    command_lexer.l \
-    filedlg.c \
+    command_lexer.lpp \
+    filedlg.cpp \
     filedlg.h \
-    highlight.c \
+    highlight.cpp \
     highlight.h \
-    highlight_groups.c \
+    highlight_groups.cpp \
     highlight_groups.h \
-    interface.c \
+    interface.cpp \
     interface.h \
-    logo.c \
+    logo.cpp \
     logo.h \
-    scroller.c \
+    scroller.cpp \
     scroller.h \
-    sources.c \
+    sources.cpp \
     sources.h \
-    usage.c \
+    usage.cpp \
     usage.h

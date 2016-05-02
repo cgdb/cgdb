@@ -1,4 +1,4 @@
-AM_CFLAGS = \
+AM_CXXFLAGS = \
     -I$(top_srcdir)/lib/adt \
     -I$(top_srcdir)/lib/util
 
@@ -7,11 +7,11 @@ AM_CFLAGS = \
 # create the input library
 noinst_LIBRARIES = libtokenizer.a
 libtokenizer_a_SOURCES = \
-	adalexer.l \
-	clexer.l \
-	dlexer.l \
-	golexer.l \
-    tokenizer.c \
+    adalexer.lpp \
+    clexer.lpp \
+    dlexer.lpp \
+    golexer.lpp \
+    tokenizer.cpp \
     tokenizer.h
 
 # Installs the driver programs into progs directory
@@ -24,5 +24,5 @@ tokenizer_driver_LDFLAGS = -L. \
 tokenizer_driver_LDADD = ./libtokenizer.a \
     $(top_builddir)/lib/adt/libadt.a \
     $(top_builddir)/lib/util/libutil.a
-tokenizer_driver_SOURCES = tokenizer_driver.c
-input_driver_CFLAGS = $(AM_CFLAGS)
+tokenizer_driver_SOURCES = tokenizer_driver.cpp
+input_driver_CXXFLAGS = $(AM_CXXFLAGS)

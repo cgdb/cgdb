@@ -33,4 +33,4 @@ doc/cgdb.txt
 doc/stamp-vti
 doc/version.texi
 
-lib/gdbmi/gdbmi_lexer.c
+lib/gdbmi/gdbmi_lexer.cpp

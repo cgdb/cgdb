@@ -1,4 +1,4 @@
-libtgdb_a2_a_CFLAGS = \
+libtgdb_a2_a_CXXFLAGS = \
     -I$(top_srcdir)/lib/adt \
     -I$(top_srcdir)/lib/util \
     -I$(top_srcdir)/lib/tgdb/tgdb-base
@@ -8,16 +8,16 @@ libtgdb_a2_a_CFLAGS = \
 noinst_LIBRARIES = libtgdb_a2.a
 
 libtgdb_a2_a_SOURCES = \
-    a2-tgdb.c \
+    a2-tgdb.cpp \
     a2-tgdb.h \
-    annotate.c \
+    annotate.cpp \
     annotate.h \
     annotate_two.h \
-    commands.c \
+    commands.cpp \
     commands.h \
-    data.c \
+    data.cpp \
     data.h \
-    globals.c \
+    globals.cpp \
     globals.h \
-    state_machine.c \
+    state_machine.cpp \
     state_machine.h
