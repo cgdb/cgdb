@@ -265,12 +265,7 @@ void hl_wprintw(WINDOW * win, const char *line, int width, int offset)
         wprintw(win, " ");
 
     /* Set the color appropriately */
-    if (hl_groups_get_attr(hl_groups_instance, color, &attr) == -1) {
-        logger_write_pos(logger, __FILE__, __LINE__,
-                "hl_groups_get_attr error");
-        return;
-    }
-
+    hl_groups_get_attr(hl_groups_instance, color, &attr);
     wattron(win, attr);
 
     /* Print string 1 char at a time */
@@ -280,12 +275,7 @@ void hl_wprintw(WINDOW * win, const char *line, int width, int offset)
                 wattroff(win, attr);
                 color = (enum hl_group_kind) line[i];
 
-                if (hl_groups_get_attr(hl_groups_instance, color, &attr) == -1) {
-                    logger_write_pos(logger, __FILE__, __LINE__,
-                            "hl_groups_get_attr error");
-                    return;
-                }
-
+                hl_groups_get_attr(hl_groups_instance, color, &attr);
                 wattron(win, attr);
             }
         } else {

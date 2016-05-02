@@ -318,9 +318,9 @@ int filedlg_display(struct filedlg *fd)
                 wattron(fd->win, A_BOLD);
                 wprintw(fd->win, fmt, file + 1);
                 wattroff(fd->win, A_BOLD);
-                if (hl_groups_get_attr(hl_groups_instance,
-                    HLG_EXECUTING_LINE_ARROW, &attr) == -1)
-                    return -1;
+
+                hl_groups_get_attr(hl_groups_instance,
+                    HLG_EXECUTING_LINE_ARROW, &attr);
                 wattron(fd->win, attr);
                 waddch(fd->win, '-');
                 waddch(fd->win, '>');
@@ -360,8 +360,7 @@ int filedlg_display(struct filedlg *fd)
     wmove(fd->win, height, 0);
 
     /* Print white background */
-    if (hl_groups_get_attr(hl_groups_instance, HLG_STATUS_BAR, &attr) == -1)
-        return -1;
+    hl_groups_get_attr(hl_groups_instance, HLG_STATUS_BAR, &attr);
     wattron(fd->win, attr);
 
     for (i = 0; i < width; i++)
@@ -385,8 +384,7 @@ void filedlg_display_message(struct filedlg *fd, char *message)
     int height, width, i;
     int attr;
 
-    if (hl_groups_get_attr(hl_groups_instance, HLG_STATUS_BAR, &attr) == -1)
-        return;
+    hl_groups_get_attr(hl_groups_instance, HLG_STATUS_BAR, &attr);
 
     getmaxyx(fd->win, height, width);
 
