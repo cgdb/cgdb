@@ -438,8 +438,7 @@ void if_display_message(const char *msg, int width, const char *fmt, ...)
     int pos, error_length, length;
     int attr;
 
-    if (hl_groups_get_attr(hl_groups_instance, HLG_STATUS_BAR, &attr) == -1)
-        return;
+    hl_groups_get_attr(hl_groups_instance, HLG_STATUS_BAR, &attr);
 
     curs_set(0);
 
@@ -1448,11 +1447,17 @@ void if_display_help(void)
     int ret_val = 0;
 
     fs_util_get_path(PKGDATADIR, "cgdb.txt", cgdb_help_file);
+
+    /* File doesn't exist. Try to find cgdb.txt in the build dir in case
+     * the user is running a built cgdb binary directly. */
+    if (!fs_verify_file_exists(cgdb_help_file))
+        fs_util_get_path(TOPBUILDDIR, "doc/cgdb.txt", cgdb_help_file);
+
     ret_val = source_set_exec_line(src_win, cgdb_help_file, 1);
     if (ret_val == 0)
         if_draw();
     else if (ret_val == 5)      /* File does not exist */
-        if_display_message("No such file:", 0, "%s", cgdb_help_file);
+        if_display_message("No such file: ", 0, "%s", cgdb_help_file);
 }
 
 struct sviewer *if_get_sview()

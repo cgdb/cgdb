@@ -33,10 +33,6 @@
 #include "fs_util.h"
 #include "logger.h"
 
-#define MAXLINE 4096
-
-/* TODO: The cgywin_conv functions used here are deprecated. */
-
 int fs_util_is_valid(const char *dir)
 {
     char actual_dir[FSUTIL_PATH_MAX];
@@ -110,7 +106,7 @@ int fs_util_create_dir_in_base(const char *base, const char *dirname)
 {
     char dir[FSUTIL_PATH_MAX];
 
-    sprintf(dir, "%s/%s", base, dirname);
+    snprintf(dir, sizeof(dir), "%s/%s", base, dirname);
     return fs_util_create_dir(dir);
 }
 
@@ -118,7 +114,7 @@ void fs_util_get_path(const char *base, const char *name, char *path)
 {
     char dir[FSUTIL_PATH_MAX];
 
-    sprintf(dir, "%s/%s", base, name);
+    snprintf(dir, sizeof(dir), "%s/%s", base, name);
 
     strncpy(path, dir, strlen(dir) + 1);
 }
@@ -142,7 +138,7 @@ int fs_util_file_exists_in_path(char * filePath)
     tok = strtok(local_pathStr, ":");
     while (tok != NULL)
     {
-        sprintf(testPath, "%s/%s", tok, filePath);
+        snprintf(testPath, sizeof(testPath), "%s/%s", tok, filePath);
         if (stat(testPath, &buff) >= 0) {
             result = 0;
             break;
@@ -151,4 +147,15 @@ int fs_util_file_exists_in_path(char * filePath)
     }
     free(local_pathStr);
     return result;
+}
+
+int fs_verify_file_exists(const char *path)
+{
+    struct stat st;
+
+    /* Check for read permission of file, already exists */
+    if (stat(path, &st) == -1)
+        return 0;
+
+    return 1;
 }

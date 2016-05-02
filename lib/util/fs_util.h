@@ -15,7 +15,7 @@
  * for the sake of time, it is done this way.
  ******************************************************************************/
 
-#define FSUTIL_PATH_MAX 1024
+#define FSUTIL_PATH_MAX 4096
 
 /* fs_util_is_valid:
  * -----------------
@@ -26,7 +26,6 @@
  *
  *  Returns 1 on succes and 0 on failure
  */
-
 int fs_util_is_valid(const char *dir);
 
 /* fs_util_create_dir:
@@ -76,4 +75,12 @@ void fs_util_get_path(const char *base, const char *name, char *path);
  * and paths stored in $PATH.
  */
 int fs_util_file_exists_in_path(char * filePath);
+
+/* fs_verify_file_exists path:
+ * ----------------------------
+ *
+ * Checks if the file exists.
+ */
+int fs_verify_file_exists(const char *path);
+
 #endif

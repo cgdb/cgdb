@@ -1,4 +1,4 @@
-DEFS += -DPKGDATADIR=\"$(pkgdatadir)\"
+DEFS += -DPKGDATADIR=\"$(pkgdatadir)\" -DTOPBUILDDIR=\"$(abs_top_builddir)\"
 
 AM_CXXFLAGS = \
     -I$(top_srcdir)/lib/adt \

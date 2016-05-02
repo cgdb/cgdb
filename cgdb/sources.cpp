@@ -54,6 +54,7 @@
 #include "cgdb.h"
 #include "logo.h"
 #include "sys_util.h"
+#include "fs_util.h"
 #include "cgdbrc.h"
 #include "highlight_groups.h"
 
@@ -65,22 +66,6 @@ int sources_syntax_on = 1;
 /* --------------- */
 /* Local Functions */
 /* --------------- */
-
-/* verify_file_exists: Checks to see if a file exists
- * -------------------
- *
- * Return Value: 0 if does not exist, 1 if exists 
- */
-static int verify_file_exists(const char *path)
-{
-    struct stat st;
-
-    /* Check for read permission of file, already exists */
-    if (stat(path, &st) == -1)
-        return 0;
-
-    return 1;
-}
 
 /* get_relative_node:  Returns a pointer to the node that matches the 
  * ------------------  given relative path.
@@ -958,7 +943,7 @@ void source_set_sel_line(struct sviewer *sview, int line)
 
 int source_set_exec_line(struct sviewer *sview, const char *path, int line)
 {
-    if (path && !verify_file_exists(path))
+    if (path && !fs_verify_file_exists(path))
         return 5;
 
     /* Locate node, if path has changed */
