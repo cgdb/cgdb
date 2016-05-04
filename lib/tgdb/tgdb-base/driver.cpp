@@ -106,6 +106,8 @@ static void rlctx_send_user_command(char *line)
                 "rlctx_send_user_command\n");
 
     handle_request(tgdb, request_ptr);
+
+    free(line);
 }
 
 static int tab_completion(int a, int b)
