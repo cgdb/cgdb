@@ -2,16 +2,15 @@
 
 1. What is CGDB?
 	CGDB is a curses-based interface to the GNU Debugger (GDB).
-	The goal of CGDB is to be lightweight and responsive; not encumbered with 
-	unnecessary features. The interface is designed to deliver the familiar 
-	GDB text interface, with a split screen showing the source as it executes. 
-	The UI is modeled on the classic Unix text editor, vi. Those familiar with 
+	The goal of CGDB is to be lightweight and responsive; not encumbered with
+	unnecessary features. The interface is designed to deliver the familiar
+	GDB text interface, with a split screen showing the source as it executes.
+	The UI is modeled on the classic Unix text editor, vi. Those familiar with
 	vi should feel right at home using CGDB.
 
 2. Where can I get CGDB?
-	The CGDB project is hosted on http://sourceforge.net/. You can view the 
-	project by going to http://sourceforge.net/projects/cgdb/. Alternatively, 
-	CGDB's home-page is at http://cgdb.sourceforge.net/.
+	The CGDB project is hosted on GitHub. You can view the project by going to
+    https://cgdb.github.io/.
 
 3. What OS does CGDB work on?
 	CGDB is used daily on
@@ -19,7 +18,7 @@
 		Cygwin 1.3.22 (NT,2000,XP)
 		Solaris 5.7,5.8,5.9
 
-	it has been reported to work on 
+	it has been reported to work on
 	 	AIX
 		FreeBSD
 		NetBSD
@@ -31,11 +30,11 @@
 							Section II Installing CGDB
 
 1. How do I install CGDB?
-	CGDB can be installed by compiling it from sources. Goto CGDB's home 
+	CGDB can be installed by compiling it from sources. Goto CGDB's home
 	page to get them. Also, there is binary release's of CGDB for different
-	distrobutions.
+	distributions.
 
-	Look at http://cgdb.sourceforge.net/download.shtml for more information.
+	Look at https://github.com/cgdb/cgdb/releases for more information.
 
 2. What dependencies does CGDB have?
 	CGDB could not have been written without the use of other libraries.
@@ -47,7 +46,7 @@
 	3. If you decide to modify the tokenizer library or the config
 	   file module, you will need to have flex installed.
 	   I have used flex 2.5.4 to build CGDB.
-	4. CGDB uses autoconf/automake to build its configure scripts and 
+	4. CGDB uses autoconf/automake to build its configure scripts and
 	   makefiles. At the time of this writing, CGDB was using
           * aclocal  (GNU automake)   1.9.5
           * autoconf (GNU Autoconf)   2.59
@@ -63,28 +62,28 @@
 	page up, page down, insert, delete, home, end and all the function
 	keys.
 
-	If you have problems using any of the keys above, you should modify 
-	the value of escdelay. Please look at the README file for more 
+	If you have problems using any of the keys above, you should modify
+	the value of escdelay. Please look at the README file for more
 	information on escdelay.
 
 2. Why does CGDB not work when a tty can not be opened?
-    There are 2 problems with this. 
-	
-	a) The annotate 2 communication protocol used between CGDB and GDB is 
-	lacking. It is difficult ( at best ) to figure out which output is GDB 
-	and which output is the inferior program. It is impossible to send input 
+    There are 2 problems with this.
+
+	a) The annotate 2 communication protocol used between CGDB and GDB is
+	lacking. It is difficult ( at best ) to figure out which output is GDB
+	and which output is the inferior program. It is impossible to send input
 	to the inferior program without error.
-	
-	To solve this CGDB used the tty command to be able to allow the user to send 
-	data to the inferior program. It also can easily determine which data is 
+
+	To solve this CGDB used the tty command to be able to allow the user to send
+	data to the inferior program. It also can easily determine which data is
 	from the inferior and which data is from GDB.
-	
+
 	b) Readline can not be used if there is no tty available.
 
 	All in all, not allowing CGDB to work when there is no tty is a bug. In
 	the future, when CGDB will work when no tty is available, there will be
 	several features that do not work.
-		1) No sending input to the inferior program. The work around is to 
+		1) No sending input to the inferior program. The work around is to
 		start the program from the terminal and attach to it using GDB.
 		2) Readline will not work.
 

@@ -13,8 +13,8 @@ long_description \
   The goal of CGDB is to be lightweight and responsive, not   \
   encumbered with unnecessary features.                       \
 
-homepage        http://cgdb.sourceforge.net
-master_sites    sourceforge
+homepage        https://cgdb.github.io/
+master_sites    github
 checksums       md5  bddcaaee7b20ab2c17f1f4e197db74c0 \
                 sha1 5f1246d151dc419aa08890291175b4b2094e62c9
 
