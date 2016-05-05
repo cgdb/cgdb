@@ -256,6 +256,50 @@ static tab_completion_ptr completion_ptr = NULL;
 /* Original terminal attributes */
 static struct termios term_attributes;
 
+static int is_gdb_tui_command(const char* line)
+{
+    size_t i;
+    static const char *tui_commands[] =
+    {
+        "wh",
+        "wi",
+        "win",
+        "winh",
+        "winhe",
+        "winhei",
+        "winheig",
+        "winheigh",
+        "winheight",
+        "foc",
+        "focu",
+        "focus",
+        "la",
+        "lay",
+        "layo",
+        "layou",
+        "layout",
+    };
+
+    /* Skip leading white space */
+    while (isspace(*line))
+        line++;
+    if (*line) {
+        const char *cmd_end = line + 1;
+
+        /* Find end of command */
+        while (*cmd_end && !isspace(*cmd_end))
+            cmd_end++;
+
+        for (i = 0; i < sizeof(tui_commands) / sizeof(tui_commands[0]); i++)
+        {
+            if (!strncasecmp(line, tui_commands[i], cmd_end - line))
+                return 1;
+        }
+    }
+
+    return 0;
+}
+
 /**
  * If the TGDB instance is not busy, it will run the requested command.
  * Otherwise, the command will get queued to run later.
@@ -350,7 +394,7 @@ int run_shell_command(const char *command)
  */
 void rlctx_send_user_command(char *line)
 {
-    char *cline;
+    const char *cline;
     int length;
     char *rline_prompt;
     tgdb_request_ptr request_ptr;
@@ -405,6 +449,9 @@ void rlctx_send_user_command(char *line)
     /* Don't add the enter command to the history */
     if (length > 0)
         rline_add_history(rline, cline);
+
+    if (is_gdb_tui_command(cline))
+        cline = "echo WARNING: Not executing GDB TUI command.\\n";
 
     request_ptr = tgdb_request_run_console_command(tgdb, cline);
     if (!request_ptr)
