@@ -139,8 +139,6 @@ static struct annotate_two *initialize_annotate_two(void)
     a2->config_dir[0] = '\0';
     a2->a2_gdb_init_file[0] = '\0';
 
-    a2->source_already_received = 0;
-
     a2->cur_response_list = NULL;
 
     return a2;
