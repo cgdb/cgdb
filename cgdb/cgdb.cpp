@@ -863,24 +863,8 @@ static int init_home_dir(void)
  */
 static int start_gdb(int argc, char *argv[])
 {
-    tgdb_request_ptr request_ptr;
-
     tgdb = tgdb_initialize(debugger_path, argc, argv, &gdb_fd);
     if (tgdb == NULL)
-        return -1;
-
-    /* Run some initialize commands */
-
-    /* gdb may already have some breakpoints when it starts. This could happen
-     * if the user puts breakpoints in there .gdbinit.
-     * This makes sure that TGDB asks for the breakpoints on start up.
-     */
-
-  /**
-   * Get the filename GDB defaults to. 
-   */
-    request_ptr = tgdb_request_current_location(tgdb, 1);
-    if (handle_request(tgdb, request_ptr) == -1)
         return -1;
 
     return 0;

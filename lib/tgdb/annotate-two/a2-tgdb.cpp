@@ -218,6 +218,12 @@ int a2_initialize(void *ctx,
 
     a2_open_new_tty(a2, inferior_stdin, inferior_stdout);
 
+    /* Need to get source information before breakpoint information otherwise
+     * the TGDB_UPDATE_BREAKPOINTS event will be ignored in process_commands()
+     * because there are no source files to add the breakpoints to.
+     */
+    a2_get_current_location(a2, 1);
+
     /* gdb may already have some breakpoints when it starts. This could happen
      * if the user puts breakpoints in there .gdbinit.
      * This makes sure that TGDB asks for the breakpoints on start up.
