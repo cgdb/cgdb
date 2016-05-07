@@ -119,7 +119,7 @@ enum annotate_commands {
  * @return
  * NULL on error, A valid descriptor upon success
  */
-void *a2_create_context(const char *debugger_path,
+struct annotate_two *a2_create_context(const char *debugger_path,
         int argc, char **argv, const char *config_dir, struct logger *logger);
 
 /** 
@@ -143,7 +143,7 @@ void *a2_create_context(const char *debugger_path,
  * @return Retruns
  * 0 on success, otherwise -1 on error.
  */
-int a2_initialize(void *a2,
+int a2_initialize(struct annotate_two *a2,
         int *debugger_stdin, int *debugger_stdout,
         int *inferior_stdin, int *inferior_stdout);
 
@@ -158,7 +158,7 @@ int a2_initialize(void *a2,
  * @return
  * 0 on success, otherwise -1 on error.
  */
-int a2_shutdown(void *ctx);
+int a2_shutdown(struct annotate_two *a2);
 
 /*@}*/
 
@@ -182,7 +182,7 @@ int a2_shutdown(void *ctx);
  * @return
  * 0 on success, otherwise -1 on error.
  */
-int a2_err_msg(void *ctx);
+int a2_err_msg(struct annotate_two *a2);
 
 /** 
  * This determines if the annotate two context is ready to receive
@@ -194,7 +194,7 @@ int a2_err_msg(void *ctx);
  * @return
  * 1 if it is ready, 0 if it is not.
  */
-int a2_is_client_ready(void *ctx);
+int a2_is_client_ready(struct annotate_two *a2);
 
 /** 
  * This lets the annotate_two know that the user ran a command.
@@ -206,7 +206,7 @@ int a2_is_client_ready(void *ctx);
  * @return
  * -1 on error, 0 on success
  */
-int a2_user_ran_command(void *ctx);
+int a2_user_ran_command(struct annotate_two *a2);
 
 /** 
  *  Prepare's the client for the command COM to be run.
@@ -220,7 +220,7 @@ int a2_user_ran_command(void *ctx);
  * @return
  * -1 on error, 0 on success
  */
-int a2_prepare_for_command(void *ctx, struct tgdb_command *com);
+int a2_prepare_for_command(struct annotate_two *a2, struct tgdb_command *com);
 
 /** 
  * This is a hack. It should be removed eventually.
@@ -232,7 +232,7 @@ int a2_prepare_for_command(void *ctx, struct tgdb_command *com);
  * @return
  * 1 if it is at a misc prompt, 0 if it is not.
  */
-int a2_is_misc_prompt(void *ctx);
+int a2_is_misc_prompt(struct annotate_two *a2);
 
 /*@}*/
 
@@ -283,7 +283,7 @@ int a2_is_misc_prompt(void *ctx);
   * 0 on success but hasn't received enough I/O to finish the command, 
   * otherwise -1 on error.
   */
-int a2_parse_io(void *ctx,
+int a2_parse_io(struct annotate_two *a2,
         const char *input_data, const size_t input_data_size,
         char *debugger_output, size_t * debugger_output_size,
         char *inferior_output, size_t * inferior_output_size,
@@ -300,7 +300,7 @@ int a2_parse_io(void *ctx,
  * NULL if no commands were generated.
  * Otherwise, a list of tgdb_client_commands.
  */
-struct tgdb_list *a2_get_client_commands(void *ctx);
+struct tgdb_list *a2_get_client_commands(struct annotate_two *a2);
 
 /*@}*/
 
@@ -325,7 +325,7 @@ struct tgdb_list *a2_get_client_commands(void *ctx);
  * @return
  * 0 on success, otherwise -1 on error.
  */
-int a2_get_source_filename_pair(void *ctx, const char *file);
+int a2_get_source_filename_pair(struct annotate_two *a2, const char *file);
 
 /**
  * Get's the fullname, filename and line number GDB is currently at.
@@ -342,7 +342,7 @@ int a2_get_source_filename_pair(void *ctx, const char *file);
  * @return
  * 0 on success, otherwise -1 on error.
  */
-int a2_get_current_location(void *ctx, int on_startup);
+int a2_get_current_location(struct annotate_two *a2, int on_startup);
 
 /** 
  * Gets all the source files that the inferior makes up.
@@ -353,7 +353,7 @@ int a2_get_current_location(void *ctx, int on_startup);
  * @return
  * 0 on success, otherwise -1 on error.
  */
-int a2_get_inferior_sources(void *ctx);
+int a2_get_inferior_sources(struct annotate_two *a2);
 
 /** 
  * This is called when readline determines a command needs to be completed.
@@ -367,7 +367,7 @@ int a2_get_inferior_sources(void *ctx);
  * @return
  * 0 on success, otherwise -1 on error.
  */
-int a2_completion_callback(void *ctx, const char *command);
+int a2_completion_callback(struct annotate_two *a2, const char *command);
 
 /** 
  * This returns the command to send to gdb for the enum C.
@@ -382,7 +382,7 @@ int a2_completion_callback(void *ctx, const char *command);
  * @return
  * Command on success, otherwise NULL on error.
  */
-const char *a2_return_client_command(void *ctx, enum tgdb_command_type c);
+const char *a2_return_client_command(struct annotate_two *a2, enum tgdb_command_type c);
 
 /** 
  * \param ctx
@@ -400,7 +400,7 @@ const char *a2_return_client_command(void *ctx, enum tgdb_command_type c);
  * @return
  * NULL on error or message to print to terminal
  */
-char *a2_client_modify_breakpoint(void *ctx,
+char *a2_client_modify_breakpoint(struct annotate_two *a2,
         const char *file, int line, enum tgdb_breakpoint_action b);
 
 /** 
@@ -410,7 +410,7 @@ char *a2_client_modify_breakpoint(void *ctx,
  * @return 
  * -1 on error. Or pid on Success.
  */
-pid_t a2_get_debugger_pid(void *ctx);
+pid_t a2_get_debugger_pid(struct annotate_two *a2);
 
 /*@}*/
 
@@ -436,7 +436,7 @@ pid_t a2_get_debugger_pid(void *ctx);
  * @return
  * 0 on success, otherwise -1 on error.
  */
-int a2_open_new_tty(void *ctx, int *inferior_stdin, int *inferior_stdout);
+int a2_open_new_tty(struct annotate_two *a2, int *inferior_stdin, int *inferior_stdout);
 
 /** 
  * \param ctx
@@ -445,7 +445,7 @@ int a2_open_new_tty(void *ctx, int *inferior_stdin, int *inferior_stdout);
  * @return
  * tty name on success, otherwise NULL on error.
  */
-const char *a2_get_tty_name(void *ctx);
+const char *a2_get_tty_name(struct annotate_two *a2);
 
 /*@}*/
 

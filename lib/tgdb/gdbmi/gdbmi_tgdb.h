@@ -111,7 +111,7 @@ enum gdbmi_commands {
  * @return
  * NULL on error, A valid descriptor upon success
  */
-void *gdbmi_create_context(const char *debugger_path,
+struct tgdb_gdbmi *gdbmi_create_context(const char *debugger_path,
         int argc, char **argv, const char *config_dir, struct logger *logger);
 
 /** 
@@ -135,7 +135,7 @@ void *gdbmi_create_context(const char *debugger_path,
  * @return Retruns
  * 0 on success, otherwise -1 on error.
  */
-int gdbmi_initialize(void *ctx,
+int gdbmi_initialize(struct tgdb_gdbmi *gdbmi,
         int *debugger_stdin, int *debugger_stdout,
         int *inferior_stdin, int *inferior_stdout);
 
@@ -150,7 +150,7 @@ int gdbmi_initialize(void *ctx,
  * @return
  * 0 on success, otherwise -1 on error.
  */
-int gdbmi_shutdown(void *ctx);
+int gdbmi_shutdown(struct tgdb_gdbmi *gdbmi);
 
 /*@}*/
 
@@ -174,7 +174,7 @@ int gdbmi_shutdown(void *ctx);
  * @return
  * 0 on success, otherwise -1 on error.
  */
-int gdbmi_err_msg(void *ctx);
+int gdbmi_err_msg(struct tgdb_gdbmi *gdbmi);
 
 /** 
  * This determines if the gdbmi context is ready to receive
@@ -186,7 +186,7 @@ int gdbmi_err_msg(void *ctx);
  * @return
  * 1 if it is ready, 0 if it is not.
  */
-int gdbmi_is_client_ready(void *ctx);
+int gdbmi_is_client_ready(struct tgdb_gdbmi *gdbmi);
 
 /** 
  * This lets the gdbmi know that the user ran a command.
@@ -198,7 +198,7 @@ int gdbmi_is_client_ready(void *ctx);
  * @return
  * -1 on error, 0 on success
  */
-int gdbmi_user_ran_command(void *ctx);
+int gdbmi_user_ran_command(struct tgdb_gdbmi *gdbmi);
 
 /** 
  *  Prepare's the client for the command COM to be run.
@@ -212,7 +212,7 @@ int gdbmi_user_ran_command(void *ctx);
  * @return
  * -1 on error, 0 on success
  */
-int gdbmi_prepare_for_command(void *ctx, struct tgdb_command *com);
+int gdbmi_prepare_for_command(struct tgdb_gdbmi *gdbmi, struct tgdb_command *com);
 
 /** 
  * This is a hack. It should be removed eventually.
@@ -224,7 +224,7 @@ int gdbmi_prepare_for_command(void *ctx, struct tgdb_command *com);
  * @return
  * 1 if it is at a misc prompt, 0 if it is not.
  */
-int gdbmi_is_misc_prompt(void *ctx);
+int gdbmi_is_misc_prompt(struct tgdb_gdbmi *gdbmi);
 
 /*@}*/
 
@@ -275,7 +275,7 @@ int gdbmi_is_misc_prompt(void *ctx);
   * 0 on success but hasn't received enough I/O to finish the command, 
   * otherwise -1 on error.
   */
-int gdbmi_parse_io(void *ctx,
+int gdbmi_parse_io(struct tgdb_gdbmi *gdbmi,
         const char *input_data, const size_t input_data_size,
         char *debugger_output, size_t * debugger_output_size,
         char *inferior_output, size_t * inferior_output_size,
@@ -292,7 +292,7 @@ int gdbmi_parse_io(void *ctx,
  * NULL if no commands were generated.
  * Otherwise, a list of tgdb_client_commands.
  */
-struct tgdb_list *gdbmi_get_client_commands(void *ctx);
+struct tgdb_list *gdbmi_get_client_commands(struct tgdb_gdbmi *gdbmi);
 
 /*@}*/
 
@@ -317,7 +317,7 @@ struct tgdb_list *gdbmi_get_client_commands(void *ctx);
  * @return
  * 0 on success, otherwise -1 on error.
  */
-int gdbmi_get_source_absolute_filename(void *ctx, const char *file);
+int gdbmi_get_source_absolute_filename(struct tgdb_gdbmi *gdbmi, const char *file);
 
 /** 
  * Gets all the source files that the inferior makes up.
@@ -328,7 +328,7 @@ int gdbmi_get_source_absolute_filename(void *ctx, const char *file);
  * @return
  * 0 on success, otherwise -1 on error.
  */
-int gdbmi_get_inferior_sources(void *ctx);
+int gdbmi_get_inferior_sources(struct tgdb_gdbmi *gdbmi);
 
 /** 
  * This will change the prompt the user sees to PROMPT.
@@ -342,7 +342,7 @@ int gdbmi_get_inferior_sources(void *ctx);
  * @return
  * 0 on success, otherwise -1 on error.
  */
-int gdbmi_change_prompt(void *ctx, const char *prompt);
+int gdbmi_change_prompt(struct tgdb_gdbmi *gdbmi, const char *prompt);
 
 /** 
  * This is called when readline determines a command has been typed. 
@@ -356,7 +356,7 @@ int gdbmi_change_prompt(void *ctx, const char *prompt);
  * @return
  * 0 on success, otherwise -1 on error.
  */
-int gdbmi_command_callback(void *ctx, const char *command);
+int gdbmi_command_callback(struct tgdb_gdbmi *gdbmi, const char *command);
 
 /** 
  * This is called when readline determines a command needs to be completed.
@@ -370,7 +370,7 @@ int gdbmi_command_callback(void *ctx, const char *command);
  * @return
  * 0 on success, otherwise -1 on error.
  */
-int gdbmi_completion_callback(void *ctx, const char *command);
+int gdbmi_completion_callback(struct tgdb_gdbmi *gdbmi, const char *command);
 
 /** 
  * This returns the command to send to gdb for the enum C.
@@ -385,7 +385,7 @@ int gdbmi_completion_callback(void *ctx, const char *command);
  * @return
  * Command on success, otherwise NULL on error.
  */
-char *gdbmi_return_client_command(void *ctx, enum tgdb_command_type c);
+char *gdbmi_return_client_command(struct tgdb_gdbmi *gdbmi, enum tgdb_command_type c);
 
 /** 
  * \param ctx
@@ -403,7 +403,7 @@ char *gdbmi_return_client_command(void *ctx, enum tgdb_command_type c);
  * @return
  * NULL on error or message to print to terminal
  */
-char *gdbmi_client_modify_breakpoint(void *ctx,
+char *gdbmi_client_modify_breakpoint(struct tgdb_gdbmi *gdbmi,
         const char *file, int line, enum tgdb_breakpoint_action b);
 
 /** 
@@ -413,7 +413,7 @@ char *gdbmi_client_modify_breakpoint(void *ctx,
  * @return 
  * -1 on error. Or pid on Success.
  */
-pid_t gdbmi_get_debugger_pid(void *ctx);
+pid_t gdbmi_get_debugger_pid(struct tgdb_gdbmi *gdbmi);
 
 /*@}*/
 
@@ -439,7 +439,7 @@ pid_t gdbmi_get_debugger_pid(void *ctx);
  * @return
  * 0 on success, otherwise -1 on error.
  */
-int gdbmi_open_new_tty(void *ctx, int *inferior_stdin, int *inferior_stdout);
+int gdbmi_open_new_tty(struct tgdb_gdbmi *gdbmi, int *inferior_stdin, int *inferior_stdout);
 
 /** 
  * \param ctx
@@ -448,7 +448,7 @@ int gdbmi_open_new_tty(void *ctx, int *inferior_stdin, int *inferior_stdout);
  * @return
  * tty name on success, otherwise NULL on error.
  */
-char *gdbmi_get_tty_name(void *ctx);
+char *gdbmi_get_tty_name(struct tgdb_gdbmi *gdbmi);
 
 /*@}*/
 

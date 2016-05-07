@@ -340,8 +340,7 @@ struct tgdb *tgdb_initialize(const char *debugger,
     tgdb->oob_input_queue = queue_init();
 
     tgdb->tcc = tgdb_client_create_context(debugger, argc, argv, config_dir,
-            TGDB_CLIENT_DEBUGGER_GNU_GDB,
-            TGDB_CLIENT_PROTOCOL_GNU_GDB_ANNOTATE_TWO, logger);
+            logger);
 
     /* create an instance and initialize a tgdb_client_context */
     if (tgdb->tcc == NULL) {

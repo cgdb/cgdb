@@ -110,9 +110,7 @@ struct tgdb_gdbmi {
 };
 
 #if 0
-//static int gdbmi_set_inferior_tty ( void *ctx ) {
-//  struct annotate_two *a2 = (struct annotate_two *)ctx;
-//
+//static int gdbmi_set_inferior_tty ( struct tgdb_gdbmi *gdbmi ) {
 //    if ( commands_issue_command ( 
 //              a2->c, 
 //              a2->client_command_list,
@@ -138,9 +136,7 @@ struct tgdb_gdbmi {
 //};
 //
 //
-//static int close_inferior_connection ( void *ctx ) {
-//  struct annotate_two *a2 = (struct annotate_two *)ctx;
-//
+//static int close_inferior_connection ( struct tgdb_gdbmi *gdbmi ) {
 //  if ( a2->inferior_stdin != -1 )
 //      cgdb_close ( a2->inferior_stdin );
 //
@@ -164,11 +160,9 @@ struct tgdb_gdbmi {
 // */
 //
 //int gdbmi_open_new_tty ( 
-//      void *ctx,
+//      struct tgdb_gdbmi *gdbmi,
 //      int *inferior_stdin, 
 //      int *inferior_stdout ) {
-//  struct annotate_two *a2 = (struct annotate_two *)ctx;
-//
 //    close_inferior_connection(a2);
 //
 //  /* Open up the tty communication */
@@ -185,8 +179,7 @@ struct tgdb_gdbmi {
 //    return 0;
 //}
 //
-//char *a2_get_tty_name ( void *ctx ) {
-//  struct annotate_two *a2 = (struct annotate_two *)ctx;
+//char *a2_get_tty_name ( struct tgdb_gdbmi *gdbmi ) {
 //  return a2->inferior_tty_name;
 //}
 #endif
@@ -245,7 +238,7 @@ static int tgdb_setup_config_file(struct tgdb_gdbmi *gdbmi, const char *dir)
     return 1;
 }
 
-void *gdbmi_create_context(const char *debugger,
+struct tgdb_gdbmi *gdbmi_create_context(const char *debugger,
         int argc, char **argv, const char *config_dir, struct logger *logger_in)
 {
 
@@ -277,12 +270,10 @@ void *gdbmi_create_context(const char *debugger,
     return gdbmi;
 }
 
-int gdbmi_initialize(void *ctx,
+int gdbmi_initialize(struct tgdb_gdbmi *gdbmi,
         int *debugger_stdin, int *debugger_stdout,
         int *inferior_stdin, int *inferior_stdout)
 {
-    struct tgdb_gdbmi *gdbmi = (struct tgdb_gdbmi *) ctx;
-
     gdbmi->client_command_list = tgdb_list_init();
 
     *debugger_stdin = gdbmi->debugger_stdin;
@@ -305,10 +296,8 @@ int gdbmi_initialize(void *ctx,
     return 0;
 }
 
-int gdbmi_shutdown(void *ctx)
+int gdbmi_shutdown(struct tgdb_gdbmi *gdbmi)
 {
-    struct tgdb_gdbmi *gdbmi = (struct tgdb_gdbmi *) ctx;
-
     cgdb_close(gdbmi->debugger_stdin);
 
     ibuf_free(gdbmi->tgdb_cur_output_command);
@@ -319,12 +308,12 @@ int gdbmi_shutdown(void *ctx)
 
 #if 0
 /* TODO: Implement error messages. */
-//int a2_err_msg ( void *ctx ) {
+//int a2_err_msg ( struct tgdb_gdbmi *gdbmi ) {
 //  return -1;
 //}
 #endif
 
-int gdbmi_is_client_ready(void *ctx)
+int gdbmi_is_client_ready(struct tgdb_gdbmi *gdbmi)
 {
     return 1;
 }
@@ -436,13 +425,12 @@ static int gdbmi_get_newline_style(struct ibuf *ibuf, enum newlinestyle *style)
  * 4. traverse the parse tree to populate the tgdb_list with
  *    commands the user/front end is looking for.
  */
-int gdbmi_parse_io(void *ctx,
+int gdbmi_parse_io(struct tgdb_gdbmi *gdbmi,
         const char *input_data, const size_t input_data_size,
         char *debugger_output, size_t * debugger_output_size,
         char *inferior_output, size_t * inferior_output_size,
         struct tgdb_list *list)
 {
-    struct tgdb_gdbmi *gdbmi = (struct tgdb_gdbmi *) ctx;
     int found_command = 0;
     enum newlinestyle style = GDBMI_NL;
 
@@ -480,10 +468,8 @@ int gdbmi_parse_io(void *ctx,
     return 0;
 }
 
-struct tgdb_list *gdbmi_get_client_commands(void *ctx)
+struct tgdb_list *gdbmi_get_client_commands(struct tgdb_gdbmi *gdbmi)
 {
-    struct tgdb_gdbmi *gdbmi = (struct tgdb_gdbmi *) ctx;
-
     return gdbmi->client_command_list;
 }
 
@@ -583,10 +569,8 @@ struct tgdb_list *gdbmi_get_client_commands(void *ctx)
 //}
 #endif
 
-pid_t gdbmi_get_debugger_pid(void *ctx)
+pid_t gdbmi_get_debugger_pid(struct tgdb_gdbmi *gdbmi)
 {
-    struct tgdb_gdbmi *gdbmi = (struct tgdb_gdbmi *) ctx;
-
     return gdbmi->debugger_pid;
 }
 
@@ -607,12 +591,12 @@ pid_t gdbmi_get_debugger_pid(void *ctx)
 //}
 #endif
 
-int gdbmi_user_ran_command(void *ctx)
+int gdbmi_user_ran_command(struct tgdb_gdbmi *gdbmi)
 {
     return 0;
 }
 
-int gdbmi_prepare_for_command(void *ctx, struct tgdb_command *com)
+int gdbmi_prepare_for_command(struct tgdb_gdbmi *gdbmi, struct tgdb_command *com)
 {
     return 0;
 }

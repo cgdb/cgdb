@@ -88,10 +88,8 @@ static int close_inferior_connection(void *ctx)
  * of the annotate_two subsystem.
  */
 
-int a2_open_new_tty(void *ctx, int *inferior_stdin, int *inferior_stdout)
+int a2_open_new_tty(struct annotate_two *a2, int *inferior_stdin, int *inferior_stdout)
 {
-    struct annotate_two *a2 = (struct annotate_two *) ctx;
-
     close_inferior_connection(a2);
 
     a2->pty_pair = pty_pair_create();
@@ -108,10 +106,8 @@ int a2_open_new_tty(void *ctx, int *inferior_stdin, int *inferior_stdout)
     return 0;
 }
 
-const char *a2_get_tty_name(void *ctx)
+const char *a2_get_tty_name(struct annotate_two *a2)
 {
-    struct annotate_two *a2 = (struct annotate_two *) ctx;
-
     if (!a2) {
         logger_write_pos(logger, __FILE__, __LINE__, "a2_get_tty_name failed");
         return NULL;
@@ -173,7 +169,7 @@ static int tgdb_setup_config_file(struct annotate_two *a2, const char *dir)
     return 1;
 }
 
-void *a2_create_context(const char *debugger,
+struct annotate_two *a2_create_context(const char *debugger,
         int argc, char **argv, const char *config_dir, struct logger *logger_in)
 {
 
@@ -201,12 +197,10 @@ void *a2_create_context(const char *debugger,
     return a2;
 }
 
-int a2_initialize(void *ctx,
+int a2_initialize(struct annotate_two *a2,
         int *debugger_stdin, int *debugger_stdout,
         int *inferior_stdin, int *inferior_stdout)
 {
-    struct annotate_two *a2 = (struct annotate_two *) ctx;
-
     *debugger_stdin = a2->debugger_stdin;
     *debugger_stdout = a2->debugger_out;
 
@@ -252,10 +246,8 @@ static int tgdb_command_destroy_list_item(void *item)
 }
 
 /* TODO: Implement shutdown properly */
-int a2_shutdown(void *ctx)
+int a2_shutdown(struct annotate_two *a2)
 {
-    struct annotate_two *a2 = (struct annotate_two *) ctx;
-
     cgdb_close(a2->debugger_stdin);
 
     data_shutdown(a2->data);
@@ -273,15 +265,13 @@ int a2_shutdown(void *ctx)
 }
 
 /* TODO: Implement error messages. */
-int a2_err_msg(void *ctx)
+int a2_err_msg(struct annotate_two *a2)
 {
     return -1;
 }
 
-int a2_is_client_ready(void *ctx)
+int a2_is_client_ready(struct annotate_two *a2)
 {
-    struct annotate_two *a2 = (struct annotate_two *) ctx;
-
     if (!a2->tgdb_initialized)
         return 0;
 
@@ -292,14 +282,13 @@ int a2_is_client_ready(void *ctx)
     return 0;
 }
 
-int a2_parse_io(void *ctx,
+int a2_parse_io(struct annotate_two *a2,
         const char *input_data, const size_t input_data_size,
         char *debugger_output, size_t * debugger_output_size,
         char *inferior_output, size_t * inferior_output_size,
         struct tgdb_list *list)
 {
     int val;
-    struct annotate_two *a2 = (struct annotate_two *) ctx;
 
     a2->command_finished = 0;
     a2->cur_response_list = list;
@@ -315,16 +304,13 @@ int a2_parse_io(void *ctx,
         return 0;
 }
 
-struct tgdb_list *a2_get_client_commands(void *ctx)
+struct tgdb_list *a2_get_client_commands(struct annotate_two *a2)
 {
-    struct annotate_two *a2 = (struct annotate_two *) ctx;
-
     return a2->client_command_list;
 }
 
-int a2_get_source_filename_pair(void *ctx, const char *file)
+int a2_get_source_filename_pair(struct annotate_two *a2, const char *file)
 {
-    struct annotate_two *a2 = (struct annotate_two *) ctx;
     int ret;
 
     ret = commands_issue_command(a2->c, a2->client_command_list, ANNOTATE_LIST,
@@ -346,9 +332,8 @@ int a2_get_source_filename_pair(void *ctx, const char *file)
     return 0;
 }
 
-int a2_get_current_location(void *ctx, int on_startup)
+int a2_get_current_location(struct annotate_two *a2, int on_startup)
 {
-    struct annotate_two *a2 = (struct annotate_two *) ctx;
     int ret;
 
     if (on_startup) {
@@ -372,10 +357,8 @@ int a2_get_current_location(void *ctx, int on_startup)
     return 0;
 }
 
-int a2_get_inferior_sources(void *ctx)
+int a2_get_inferior_sources(struct annotate_two *a2)
 {
-    struct annotate_two *a2 = (struct annotate_two *) ctx;
-
     if (commands_issue_command(a2->c,
                     a2->client_command_list,
                     ANNOTATE_INFO_SOURCES, NULL, 0) == -1) {
@@ -387,7 +370,7 @@ int a2_get_inferior_sources(void *ctx)
     return 0;
 }
 
-const char *a2_return_client_command(void *ctx, enum tgdb_command_type c)
+const char *a2_return_client_command(struct annotate_two *a2, enum tgdb_command_type c)
 {
     const char *ret = NULL;
 
@@ -429,7 +412,7 @@ const char *a2_return_client_command(void *ctx, enum tgdb_command_type c)
     return ret;
 }
 
-char *a2_client_modify_breakpoint(void *ctx,
+char *a2_client_modify_breakpoint(struct annotate_two *a2,
         const char *file, int line, enum tgdb_breakpoint_action b)
 {
     char *val = (char *) cgdb_malloc(sizeof (char) * (strlen(file) + 128));
@@ -447,17 +430,13 @@ char *a2_client_modify_breakpoint(void *ctx,
         return NULL;
 }
 
-pid_t a2_get_debugger_pid(void *ctx)
+pid_t a2_get_debugger_pid(struct annotate_two *a2)
 {
-    struct annotate_two *a2 = (struct annotate_two *) ctx;
-
     return a2->debugger_pid;
 }
 
-int a2_completion_callback(void *ctx, const char *command)
+int a2_completion_callback(struct annotate_two *a2, const char *command)
 {
-    struct annotate_two *a2 = (struct annotate_two *) ctx;
-
     if (commands_issue_command(a2->c,
                     a2->client_command_list,
                     ANNOTATE_COMPLETE, command, 4) == -1) {
@@ -469,23 +448,17 @@ int a2_completion_callback(void *ctx, const char *command)
     return 0;
 }
 
-int a2_user_ran_command(void *ctx)
+int a2_user_ran_command(struct annotate_two *a2)
 {
-    struct annotate_two *a2 = (struct annotate_two *) ctx;
-
     return commands_user_ran_command(a2->c, a2->client_command_list);
 }
 
-int a2_prepare_for_command(void *ctx, struct tgdb_command *com)
+int a2_prepare_for_command(struct annotate_two *a2, struct tgdb_command *com)
 {
-    struct annotate_two *a2 = (struct annotate_two *) ctx;
-
     return commands_prepare_for_command(a2, a2->c, com);
 }
 
-int a2_is_misc_prompt(void *ctx)
+int a2_is_misc_prompt(struct annotate_two *a2)
 {
-    struct annotate_two *a2 = (struct annotate_two *) ctx;
-
     return globals_is_misc_prompt(a2->g);
 }

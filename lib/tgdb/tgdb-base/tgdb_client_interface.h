@@ -58,55 +58,6 @@ enum tgdb_client_commands {
     TGDB_CLIENT_SET_DEBUGGER_PROMPT
 };
 
-/**
- * All of the debuggers that TGDB supports.
- */
-enum tgdb_client_supported_debuggers {
-
-    /**
-	 * An unsupported debugger.
-	 */
-    TGDB_CLIENT_DEBUGGER_UNSUPPORTED = 0,
-
-    /**
-     * This is of course the gnu debugger (GDB).
-	 */
-    TGDB_CLIENT_DEBUGGER_GNU_GDB
-};
-
-/**
- * All of the protocols that are supported.
- * One debugger can work with many protocols. Basically, GDB supports 
- * the 'annotate two' interface, the 'gdbmi' interface, and several others.
- */
-enum tgdb_client_supported_protocols {
-
-    /**
-	 * An unsupported protocol.
-	 */
-    TGDB_CLIENT_PROTOCOL_UNSUPPORTED = 0,
-
-    /**
-     * TGDB will try to negotiate with the debugger in order to choose the
-     * most appropriate protocol to communicate with GDB.
- 	 */
-    TGDB_CLIENT_PROTOCOL_AUTO,
-
-    /**
-     * This is a functional protocol to communicate with GDB. This protocol is
- 	 * depricated. The annotate two protocol does not allow a lot of GDB's 
-     * functionality to be used. However, it works with really old GDB's.
-	 */
-    TGDB_CLIENT_PROTOCOL_GNU_GDB_ANNOTATE_TWO,
-
-    /**
-	 * This is currently the best protocol to use when communicating with GDB.
-     * It allows for the most functionality to be retrieved from GDB and 
- 	 * sent back to the front end.
-	 */
-    TGDB_CLIENT_PROTOCOL_GNU_GDB_GDBMI
-};
-
 /******************************************************************************/
 /**
  * @name Createing and Destroying a libtgdb context.
@@ -150,8 +101,7 @@ enum tgdb_client_supported_protocols {
  */
 struct tgdb_client_context *tgdb_client_create_context(const char
         *debugger_path, int argc, char **argv, const char *config_dir,
-        enum tgdb_client_supported_debuggers debugger,
-        enum tgdb_client_supported_protocols protocol, struct logger *logger);
+        struct logger *logger);
 
 /** 
  * This will initialize a client context.
