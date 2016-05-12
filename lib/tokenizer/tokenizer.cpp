@@ -9,6 +9,7 @@ const char *c_extensions[] = {
 };
 const char *d_extensions[] = { ".d", ".di" };
 const char *go_extensions[] = { ".go" };
+const char *rust_extensions[] = { ".rs" };
 const char *ada_extensions[] = { ".adb", ".ads", ".ada" };
 
 extern int c_lex(void);
@@ -22,6 +23,10 @@ extern char *d_text;
 extern int go_lex(void);
 extern FILE *go_in;
 extern char *go_text;
+
+extern int rust_lex(void);
+extern FILE *rust_in;
+extern char *rust_text;
 
 extern int ada_lex(void);
 extern FILE *ada_in;
@@ -85,6 +90,10 @@ int tokenizer_set_file(struct tokenizer *t, const char *file,
         t->tokenizer_lex = cgdbhelp_lex;
         t->tokenizer_in = &cgdbhelp_in;
         t->tokenizer_text = &cgdbhelp_text;
+    } else if (l == TOKENIZER_LANGUAGE_RUST) {
+        t->tokenizer_lex = rust_lex;
+        t->tokenizer_in = &rust_in;
+        t->tokenizer_text = &rust_text;
     } else {
         t->tokenizer_lex = ada_lex;
         t->tokenizer_in = &ada_in;
@@ -171,6 +180,10 @@ enum tokenizer_language_support tokenizer_get_default_file_type(const char
     for (i = 0; i < sizeof (go_extensions) / sizeof (char *); i++)
         if (strcasecmp(file_extension, go_extensions[i]) == 0)
             return TOKENIZER_LANGUAGE_GO;
+
+    for (i = 0; i < sizeof (rust_extensions) / sizeof (char *); i++)
+        if (strcmp(file_extension, rust_extensions[i]) == 0)
+            l = TOKENIZER_LANGUAGE_RUST;
 
     for (i = 0; i < sizeof (ada_extensions) / sizeof (char *); i++)
         if (strcasecmp(file_extension, ada_extensions[i]) == 0)
