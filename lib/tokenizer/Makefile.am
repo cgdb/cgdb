@@ -11,6 +11,7 @@ libtokenizer_a_SOURCES = \
 	clexer.l \
 	dlexer.l \
 	golexer.l \
+	rustlexer.l \
     tokenizer.c \
     tokenizer.h
 
