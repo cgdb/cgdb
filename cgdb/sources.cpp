@@ -16,10 +16,6 @@
 #endif /* HAVE_CONFIG_H */
 
 /* System Includes */
-#if HAVE_MATH_H
-#include <math.h>
-#endif
-
 #if HAVE_STDIO_H
 #include <stdio.h>
 #endif /* HAVE_STDIO_H */
@@ -747,7 +743,7 @@ int source_display(struct sviewer *sview, int focus)
     }
 
     /* Print 'height' lines of the file, starting at 'line' */
-    lwidth = (int) log10(count) + 1;
+    lwidth = log10_uint(count) + 1;
     sprintf(fmt, "%%%dd", lwidth);
 
     for (i = 0; i < height; i++, line++) {
@@ -902,7 +898,7 @@ void source_hscroll(struct sviewer *sview, int offset)
     int max_width;
 
     if (sview->cur) {
-        lwidth = (int) log10(sbcount(sview->cur->buf->tlines)) + 1;
+        lwidth = log10_uint(sbcount(sview->cur->buf->tlines)) + 1;
         max_width = sview->cur->buf->max_width - COLS + lwidth + 6;
 
         sview->cur->sel_col += offset;

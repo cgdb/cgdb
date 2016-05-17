@@ -137,3 +137,17 @@ int cgdb_is_debugger_attached()
 
     return result;
 }
+
+int log10_uint(unsigned int val)
+{
+    if (val >= 1000000000u) return 9;
+    if (val >= 100000000u) return 8;
+    if (val >= 10000000u) return 7;
+    if (val >= 1000000u) return 6;
+    if (val >= 100000u) return 5;
+    if (val >= 10000u) return 4;
+    if (val >= 1000u) return 3;
+    if (val >= 100u) return 2;
+    if (val >= 10u) return 1;
+    return 0;
+}

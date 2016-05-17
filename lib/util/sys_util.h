@@ -47,4 +47,8 @@ int cgdb_supports_debugger_attach_detection();
  */
 int cgdb_is_debugger_attached();
 
+/* Unsigned integer version of log10
+*/
+int log10_uint(unsigned int val);
+
 #endif

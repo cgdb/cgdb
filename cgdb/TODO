@@ -22,14 +22,12 @@ Current To Do List (in no particular order)
    o Support terminals that don't handle the ACS lines
 
    o Investigate nocbreak problem on Solaris
-   
+
    o Optimize display of GDB output -- it's currently quite slow
 
    o Add a feature to open an editor using the CGDB_EDITOR env var
      when the user hits ^E. It opens the current file in the source
      windows, or does nothing.
-
-   o Investigate removing log10 function calls from sources.c.
 
    o Allow the user to open a new window for child input/output. Although
      this is only useful in a windowing environment, it is much nicer. Most

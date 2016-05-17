@@ -16,12 +16,9 @@
 #include <string.h>
 #endif /* HAVE_STRING_H */
 
-#if HAVE_MATH_H
-#include <math.h>
-#endif /* HAVE_MATH_H */
-
 #include "filedlg.h"
 #include "cgdb.h"
+#include "sys_util.h"
 #include "highlight.h"
 #include "kui_term.h"
 #include "highlight_groups.h"
@@ -213,7 +210,7 @@ static void filedlg_hscroll(struct filedlg *fd, int offset)
     int max_width;
 
     if (fd->buf) {
-        lwidth = (int) log10(fd->buf->length) + 1;
+        lwidth = log10_uint(fd->buf->length) + 1;
         max_width = fd->buf->max_width - COLS + lwidth + 6;
 
         fd->buf->sel_col += offset;
@@ -295,7 +292,7 @@ int filedlg_display(struct filedlg *fd)
     }
 
     /* Print 'height' lines of the file, starting at 'file' */
-    lwidth = (int) log10(fd->buf->length) + 1;
+    lwidth = log10_uint(fd->buf->length) + 1;
     sprintf(fmt, "%%%dd", lwidth);
 
     print_in_middle(fd->win, 0, width, label);

@@ -151,9 +151,6 @@ if test "$HAS_HELP2MAN" != "yes" ; then
 	AC_MSG_ERROR([Please install help2man])
 fi
 
-dnl Checking for log10 function in math - I would like to remove this
-AC_CHECK_LIB(m, log10)
-
 dnl readline and ncurses/curses configure magic is difficult.
 dnl A prerequisite is that CGDB needs either ncurses or curses to link.
 dnl A prerequisite is that readline needs tgetent to link.
