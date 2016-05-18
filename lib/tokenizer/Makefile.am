@@ -23,6 +23,6 @@ tokenizer_driver_LDFLAGS = -L. \
     -L$(top_builddir)/lib/util
 tokenizer_driver_LDADD = ./libtokenizer.a \
     $(top_builddir)/lib/adt/libadt.a \
-    $(top_builddir)/lib/util/libutil.a
+    $(top_builddir)/lib/util/libcgdbutil.a
 tokenizer_driver_SOURCES = tokenizer_driver.cpp
 input_driver_CXXFLAGS = $(AM_CXXFLAGS)

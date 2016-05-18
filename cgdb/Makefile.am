@@ -30,7 +30,7 @@ cgdb_LDADD = \
     $(top_builddir)/lib/kui/libkui.a \
     $(top_builddir)/lib/rline/librline.a \
     $(top_builddir)/lib/adt/libadt.a \
-    $(top_builddir)/lib/util/libutil.a
+    $(top_builddir)/lib/util/libcgdbutil.a
 
 noinst_HEADERS = \
     command_lexer.h

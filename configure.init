@@ -73,6 +73,13 @@ dnl determine if /proc/self/status is available for checking TracerPid
 AC_CHECK_FILE([/proc/self/status],
 	      [AC_DEFINE(HAVE_PROC_SELF_STATUS_FILE, 1, have /proc/self/status file)])
 
+dnl Check for pty.h
+AC_CHECK_HEADERS([pty.h],
+		 [AC_DEFINE(HAVE_PTY_H, 1, have pty.h)])
+
+AC_CHECK_LIB(util,openpty,
+         [AC_DEFINE(HAVE_OPENPTY, 1, Define to 1 if you have the openpty function) LIBS="$LIBS -lutil"])
+
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
 AC_TYPE_UID_T
@@ -89,9 +96,7 @@ AC_CHECK_FUNC([putenv],,AC_MSG_ERROR([CGDB requires putenv to build.]))
 AC_CHECK_FUNC([select],,AC_MSG_ERROR([CGDB requires select to build.]))
 AC_CHECK_FUNC([strdup],,AC_MSG_ERROR([CGDB requires strdup to build.]))
 AC_CHECK_FUNC([strerror],,AC_MSG_ERROR([CGDB requires strerror to build.]))
-AC_CHECK_FUNC([openpty],[AC_DEFINE(HAVE_OPENPTY, 1, [Define to 1 if you have the openpty function])],)
 AC_CHECK_FUNC([ttyname_r],[AC_DEFINE(HAVE_TTYNAME_R, 1, [Define to 1 if you have the ttyname_r function])],)
-AC_CHECK_FUNC([ptsname_r],[AC_DEFINE(HAVE_PTSNAME_R, 1, [Define to 1 if you have the ptsname_r function])],)
 
 dnl define HAVE_PTSNAME_R if we have reentrant version of ptsname.
 AC_TRY_LINK([#ifndef _GNU_SOURCE

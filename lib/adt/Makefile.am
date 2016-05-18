@@ -27,7 +27,7 @@ noinst_PROGRAMS = ibuf_driver std_hash_driver std_list_driver \
 ibuf_driver_LDFLAGS = -L. -L$(top_builddir)/lib/util
 ibuf_driver_LDADD = \
 libadt.a \
-$(top_builddir)/lib/util/libutil.a
+$(top_builddir)/lib/util/libcgdbutil.a
 ibuf_driver_SOURCES = ibuf_driver.cpp
 ibuf_driver_CXXFLAGS = $(AM_CXXFLAGS)
 
@@ -35,7 +35,7 @@ ibuf_driver_CXXFLAGS = $(AM_CXXFLAGS)
 std_hash_driver_LDFLAGS = -L. -L$(top_builddir)/lib/util
 std_hash_driver_LDADD = \
 libadt.a \
-$(top_builddir)/lib/util/libutil.a
+$(top_builddir)/lib/util/libcgdbutil.a
 std_hash_driver_SOURCES = std_hash_driver.cpp
 std_hash_driver_CXXFLAGS = $(AM_CXXFLAGS)
 
@@ -43,7 +43,7 @@ std_hash_driver_CXXFLAGS = $(AM_CXXFLAGS)
 std_list_driver_LDFLAGS = -L. -L$(top_builddir)/lib/util
 std_list_driver_LDADD = \
 libadt.a \
-$(top_builddir)/lib/util/libutil.a
+$(top_builddir)/lib/util/libcgdbutil.a
 std_list_driver_SOURCES = std_list_driver.cpp
 std_list_driver_CXXFLAGS = $(AM_CXXFLAGS)
 
@@ -51,7 +51,7 @@ std_list_driver_CXXFLAGS = $(AM_CXXFLAGS)
 std_btree_driver_LDFLAGS = -L. -L$(top_builddir)/lib/util
 std_btree_driver_LDADD = \
 libadt.a \
-$(top_builddir)/lib/util/libutil.a
+$(top_builddir)/lib/util/libcgdbutil.a
 std_btree_driver_SOURCES = std_btree_driver.cpp
 std_btree_driver_CXXFLAGS = $(AM_CXXFLAGS)
 
@@ -59,6 +59,6 @@ std_btree_driver_CXXFLAGS = $(AM_CXXFLAGS)
 std_bbtree_driver_LDFLAGS = -L. -L$(top_builddir)/lib/util
 std_bbtree_driver_LDADD = \
 libadt.a \
-$(top_builddir)/lib/util/libutil.a
+$(top_builddir)/lib/util/libcgdbutil.a
 std_bbtree_driver_SOURCES = std_bbtree_driver.cpp
 std_bbtree_driver_CXXFLAGS = $(AM_CXXFLAGS)

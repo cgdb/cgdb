@@ -1,6 +1,6 @@
-noinst_LIBRARIES = libutil.a
+noinst_LIBRARIES = libcgdbutil.a
 
-libutil_a_SOURCES = \
+libcgdbutil_a_SOURCES = \
     fork_util.cpp \
     fork_util.h \
     fs_util.cpp \

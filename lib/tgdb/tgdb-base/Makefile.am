@@ -34,6 +34,6 @@ tgdb_driver_LDADD = \
     $(top_builddir)/lib/tgdb/gdbmi/libtgdb_mi.a \
     $(top_builddir)/lib/rline/librline.a \
     $(top_builddir)/lib/adt/libadt.a \
-    $(top_builddir)/lib/util/libutil.a
+    $(top_builddir)/lib/util/libcgdbutil.a
 
 tgdb_driver_SOURCES = driver.cpp
