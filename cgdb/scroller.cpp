@@ -26,6 +26,7 @@
 
 /* Local Includes */
 #include "cgdb.h"
+#include "cgdbrc.h"
 #include "highlight_groups.h"
 #include "scroller.h"
 #include "sys_util.h"
@@ -64,8 +65,9 @@ static int count(const char *s, char c)
  */
 static char *parse(struct scroller *scr, const char *orig, const char *buf)
 {
-    //$ TODO: Use cgdbrc_get(CGDBRC_TABSTOP, ...) here?
-    const int tab_size = 8;
+    // Read in tabstop settings, but don't change them on the fly as we'd have to
+    //  store each previous line and recalculate every one of them.
+    static const int tab_size = cgdbrc_get(CGDBRC_TABSTOP)->variant.int_val;
     int length = strlen(orig) + strlen(buf) + (tab_size - 1) * count(buf, '\t');
     char *rv = (char *) cgdb_malloc(length + 1);
     int i, j;
@@ -350,8 +352,7 @@ void scr_refresh(struct scroller *scr, int focus)
             mvwprintw(scr->win, height - nlines, width - status_len, "%s", status);
             wattroff(scr->win, highlight_attr);
         }
-        else
-        {
+        else {
             mvwprintw(scr->win, height - nlines, 0, "%s", buffer);
         }
 
