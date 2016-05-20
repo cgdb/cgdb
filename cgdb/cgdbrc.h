@@ -63,7 +63,7 @@ void cgdbrc_init(void);
 int command_parse_string(const char *buffer);
 
 /**
- * Parse a configuration file, and execute teh commands that it contains.
+ * Parse a configuration file, and execute the commands that it contains.
  * The commands will be executed in order.
  *
  * \param fp

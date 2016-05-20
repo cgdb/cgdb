@@ -58,7 +58,7 @@ struct std_hashtable *std_hash_table_new(STDHashFunc hash_func,
         STDEqualFunc key_equal_func);
 
 /**
- * Creates a new hash table like std_hash_table_new() and allows to specify 
+ * Creates a new hash table like std_hash_table_new() and allow specifying
  * functions to free the memory allocated for the key and value that get 
  * called when removing the entry from the hash table.
  *

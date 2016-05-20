@@ -16,7 +16,7 @@
  * \brief
  * This interface is intended to provide a key interface to an application. It 
  * represents unprintable char's and terminal escape sequences via an enumeration.
- * This enumeration has convertion functions capable of changing an enum into
+ * This enumeration has conversion functions capable of changing an enum into
  * an ascii representation and back.
  */
 /* }}} */
@@ -52,7 +52,7 @@ int kui_term_is_cgdb_key(int key);
  * The cgdb_key to get the ascii character sequence of.
  *
  * \return
- * The ascii charachter sequence on success. If key is not a cgdb_key
+ * The ascii character sequence on success. If key is not a cgdb_key
  * or if this function fails, NULL will return.
  */
 char *kui_term_get_ascii_char_sequence_from_key(int key);

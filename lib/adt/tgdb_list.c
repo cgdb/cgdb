@@ -77,7 +77,7 @@ static void tgdb_list_insert(struct tgdb_list *list,
         new_node->next = NULL;
         new_node->prev = NULL;
 
-        /* Insert at beggining of list */
+        /* Insert at beginning of list */
     } else if (before == NULL) {
         new_node->next = list->head;
         new_node->prev = NULL;
@@ -145,7 +145,7 @@ static void tgdb_list_delete(struct tgdb_list *list,
         list->head = NULL;
         list->tail = NULL;
 
-        /* Deleting from beggining of list */
+        /* Deleting from beginning of list */
     } else if (node->prev == NULL) {
         node->next->prev = NULL;
         list->head = node->next;

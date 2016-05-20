@@ -185,7 +185,7 @@ int a2_shutdown(void *ctx);
 int a2_err_msg(void *ctx);
 
 /** 
- * This determines if the annotate two context is ready to recieve
+ * This determines if the annotate two context is ready to receive
  * another command.
  *
  * \param ctx
@@ -246,7 +246,7 @@ int a2_is_misc_prompt(void *ctx);
 /*@{*/
 
  /** 
-  * This recieves all of the output from the debugger. It is all routed 
+  * This receives all of the output from the debugger. It is all routed 
   * through this function. 
   *
   * \param ctx
@@ -280,7 +280,7 @@ int a2_is_misc_prompt(void *ctx);
   *
   * @return
   * 1 when it has finished a command, 
-  * 0 on success but hasn't recieved enough I/O to finish the command, 
+  * 0 on success but hasn't received enough I/O to finish the command, 
   * otherwise -1 on error.
   */
 int a2_parse_io(void *ctx,

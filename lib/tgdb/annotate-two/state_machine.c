@@ -24,8 +24,8 @@
 #include "ibuf.h"
 
 /* This package looks for annotations coming from gdb's output.
- * The program that is being debugged does not have its ouput pass
- * through here. So only gdb's ouput is filtered here.
+ * The program that is being debugged does not have its output pass
+ * through here. So only gdb's output is filtered here.
  *
  * This is a simple state machine that is looking for annotations
  * in gdb's output. Annotations are of the form

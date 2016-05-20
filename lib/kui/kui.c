@@ -504,7 +504,7 @@ int kui_add_map_set(struct kuictx *kctx, struct kui_map_set *kui_ms)
 
 /**
  * This basically get's a char from the internal buffer within the kui context
- * or it get's a charachter from the standard input file descriptor.
+ * or it get's a character from the standard input file descriptor.
  *
  * It only blocks for a limited amount of time, waiting for user input.
  *

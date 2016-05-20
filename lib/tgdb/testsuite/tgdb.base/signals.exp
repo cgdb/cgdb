@@ -91,9 +91,9 @@ expect {
 
 # The next few test are to make sure that if you 
 # 1. run a command
-# 2. type another command, but interupt it with ^c
+# 2. type another command, but interrupt it with ^c
 # 3. Run "\n" to make sure the original command is the command run,
-#    The command that was interuppted should go away forever.
+#    The command that was interrupted should go away forever.
 
 # Run "info address" 
 send "info address\n";
@@ -121,11 +121,11 @@ expect {
   }
 }
 
-# This makes sure that the previous command that was interupted by a signal did
+# This makes sure that the previous command that was interrupted by a signal did
 # not make it into readline's history
 send "\n"
 expect {
-    -re "\[\r\n\]+Argument required\.\[\r\n\]+$tgdb_prompt$" { pass "interuppted command did not enter history" }
+    -re "\[\r\n\]+Argument required\.\[\r\n\]+$tgdb_prompt$" { pass "interrupted command did not enter history" }
     timeout {
 	fail "timeout $test"
     }

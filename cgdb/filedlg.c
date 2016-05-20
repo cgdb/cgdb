@@ -230,13 +230,13 @@ static void filedlg_search_regex_init(struct filedlg *fd)
     if (fd == NULL || fd->buf == NULL)
         return;
 
-    /* Start from beggining of line if not at same line */
+    /* Start from beginning of line if not at same line */
     if (fd->buf->sel_rline != fd->buf->sel_line) {
         fd->buf->sel_col_rend = 0;
         fd->buf->sel_col_rbeg = 0;
     }
 
-    /* Start searching at the beggining of the selected line */
+    /* Start searching at the beginning of the selected line */
     fd->buf->sel_rline = fd->buf->sel_line;
 }
 
@@ -439,7 +439,7 @@ static int capture_regex(struct filedlg *fd)
             return 1;
         }
 
-        /* If the user hit enter, then a successful regex has been recieved */
+        /* If the user hit enter, then a successful regex has been received */
         if (c == '\r' || c == '\n' || c == CGDB_KEY_CTRL_M) {
             regex_line[regex_line_pos] = '\0';
             break;

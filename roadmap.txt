@@ -36,7 +36,7 @@ at this point are,
     as vim's window manager. This includes, splitting horizontally and 
     vertically, and resizing.
   - Finish writing the map functionality. This is actually 90% done. With
-    a little more testing of the boundry cases, and some documentation, 
+    a little more testing of the boundary cases, and some documentation, 
     this will be done.
   - Write an interface on top of the kui that will determine exactly how
     multiple keys are bound together to form a command. That way, we can

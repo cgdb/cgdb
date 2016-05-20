@@ -35,7 +35,7 @@ void commands_shutdown(struct commands *c);
 
 /* commands_parse_field: This is called when tgdb gets a field annotation
  *                       from gdb. 
- * buf -> The 'field' annotation recieved from gdb.
+ * buf -> The 'field' annotation received from gdb.
  * n   -> The size of the annotation.
  * field -> the field number outputted.
  */
@@ -46,7 +46,7 @@ int commands_parse_field(struct commands *c, const char *buf, size_t n,
  *                         from gdb. It parses the annotation and puts the 
  *                         correct information into com for the gui.
  * 
- * buf -> The 'source' annotation recieved from gdb.
+ * buf -> The 'source' annotation received from gdb.
  * n   -> The size of the annotation.
  */
 int commands_parse_source(struct commands *c,
@@ -84,10 +84,10 @@ int commands_issue_command(struct commands *c,
         struct tgdb_list *client_command_list,
         enum annotate_commands com, const char *data, int oob);
 
-/* commands_process: This function recieves the output from gdb when gdb
+/* commands_process: This function receives the output from gdb when gdb
  *                   is running a command on behalf of this package.
  *
- *    a     -> the character recieved from gdb.
+ *    a     -> the character received from gdb.
  *    com   -> commands to give back to gdb.
  */
 void commands_process(struct commands *c, char a, struct tgdb_list *list);
