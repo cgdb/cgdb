@@ -6,7 +6,7 @@
 
 If you are interested in contributing to CGDB, discuss your ideas
 with CGDB's active maintainers. Once a feature or bug has been agreed
-to be worked on by both parties, fork CGDB and developer your
+to be worked on by both parties, fork CGDB and develop your
 feature in a new branch. Commit and push your changes and send
 a pull request when ready.
 
