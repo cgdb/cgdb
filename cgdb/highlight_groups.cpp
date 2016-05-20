@@ -44,8 +44,6 @@ struct hl_group_info {
 struct hl_groups {
   /** If 0 then the terminal doesn't support colors, otherwise it does. */
     int in_color;
-  /** maximum numbers of colors on screen */
-    int more_colors;
   /** This is the data for each highlighting group. */
     struct hl_group_info groups[HLG_LAST];
 };
@@ -246,8 +244,6 @@ const struct attr_pair *lookup_attr_pair_by_name(const char *name)
 struct color_info {
     /* The name of the color */
     const char *name;
-    /* The number this color represents if the terminal supports 16 colors. */
-    int nr16Color;
     /* The number this color represents if the terminal supports 8 colors. */
     int nr8Color;
     /* If the terminal has 8 colors, they could be bold. */
@@ -256,34 +252,35 @@ struct color_info {
 
 /** A list of all the default colors and their values */
 static const struct color_info hl_color_names[] = {
-    {"Black", 0, 0, 0},
-    {"DarkBlue", 1, 4, 0},
-    {"DarkGreen", 2, 2, 0},
-    {"DarkCyan", 3, 6, 0},
-    {"DarkRed", 4, 1, 0},
-    {"DarkMagenta", 5, 5, 0},
-    {"Brown", 6, 3, 0},
-    {"DarkYellow", 6, 3, 0},
-    {"LightGray", 7, 7, 0},
-    {"LightGrey", 7, 7, 0},
-    {"Gray", 7, 7, 0},
-    {"Grey", 7, 7, 0},
-    {"DarkGray", 8, 0, 1},
-    {"DarkGrey", 8, 0, 1},
-    {"Blue", 9, 4, 1},
-    {"LightBlue", 9, 4, 1},
-    {"Green", 10, 2, 1},
-    {"LightGreen", 10, 2, 1},
-    {"Cyan", 11, 6, 1},
-    {"LightCyan", 11, 6, 1},
-    {"Red", 12, 1, 1},
-    {"LightRed", 12, 1, 1},
-    {"Magenta", 13, 5, 1},
-    {"LightMagenta", 13, 5, 1},
-    {"Yellow", 14, 3, 1},
-    {"LightYellow", 14, 3, 1},
-    {"White", 15, 7, 1},
-    {NULL, 0, 0, 0}
+    {"Black", COLOR_BLACK, 0},
+    {"DarkBlue", COLOR_BLUE, 0},
+    {"DarkGreen", COLOR_GREEN, 0},
+    {"DarkCyan", COLOR_CYAN, 0},
+    {"DarkRed", COLOR_RED, 0},
+    {"DarkMagenta", COLOR_MAGENTA, 0},
+    {"Brown", COLOR_YELLOW, 0},
+    {"DarkYellow", COLOR_YELLOW, 0},
+    {"LightGray", COLOR_WHITE, 0},
+    {"LightGrey", COLOR_WHITE, 0},
+    {"Gray", COLOR_WHITE, 0},
+    {"Grey", COLOR_WHITE, 0},
+    // Bold/high-intensity colors
+    {"DarkGray", COLOR_BLACK, 1},
+    {"DarkGrey", COLOR_BLACK, 1},
+    {"Blue", COLOR_BLUE, 1},
+    {"LightBlue", COLOR_BLUE, 1},
+    {"Green", COLOR_GREEN, 1},
+    {"LightGreen", COLOR_GREEN, 1},
+    {"Cyan", COLOR_CYAN, 1},
+    {"LightCyan", COLOR_CYAN, 1},
+    {"Red", COLOR_RED, 1},
+    {"LightRed", COLOR_RED, 1},
+    {"Magenta", COLOR_MAGENTA, 1},
+    {"LightMagenta", COLOR_MAGENTA, 1},
+    {"Yellow", COLOR_YELLOW, 1},
+    {"LightYellow", COLOR_YELLOW, 1},
+    {"White", COLOR_WHITE, 1},
+    {NULL, 0, 0}
 };
 
 static const struct color_info *color_spec_for_name(const char *name)
@@ -360,11 +357,13 @@ setup_group(hl_groups_ptr hl_groups, enum hl_group_kind group,
     if (fore_color == UNSPECIFIED_COLOR) {
         short old_fore_color, old_back_color;
 
+        //$ TODO: How does this work if the pair hasn't been init'd yet? Ie, color_pair is 0;
         pair_content(info->color_pair, &old_fore_color, &old_back_color);
         fore_color = old_fore_color;
     } else if (back_color == UNSPECIFIED_COLOR) {
         short old_fore_color, old_back_color;
 
+        //$ TODO: How does this work if the pair hasn't been init'd yet? Ie, color_pair is 0;
         pair_content(info->color_pair, &old_fore_color, &old_back_color);
         back_color = old_back_color;
     }
@@ -405,7 +404,6 @@ hl_groups_ptr hl_groups_initialize(void)
         return NULL;
 
     hl_groups->in_color = 0;
-    hl_groups->more_colors = 0;
 
     for (i = 0; i < HLG_LAST; ++i) {
         struct hl_group_info *info;
@@ -452,8 +450,6 @@ int hl_groups_setup(hl_groups_ptr hl_groups)
 #endif
 
     hl_groups->in_color = has_colors();
-    if (hl_groups->in_color)
-        hl_groups->more_colors = (tgetnum("Co") >= 16);
 
     /* Set up the default groups. */
     for (i = 0; ginfo[i].kind != HLG_LAST; ++i) {
@@ -646,16 +642,12 @@ int hl_groups_parse_config(hl_groups_ptr hl_groups)
 #endif
                             return 1;
                         }
-                        if (hl_groups->more_colors)
-                            color = color_spec->nr16Color;
-                        else {
-                            color = color_spec->nr8Color;
-                            if (color_spec->nr8ForegroundBold) {
-                                if (color_attrs == UNSPECIFIED_COLOR)
-                                    color_attrs = A_BOLD;
-                                else
-                                    color_attrs |= A_BOLD;
-                            }
+                        color = color_spec->nr8Color;
+                        if (color_spec->nr8ForegroundBold) {
+                            if (color_attrs == UNSPECIFIED_COLOR)
+                                color_attrs = A_BOLD;
+                            else
+                                color_attrs |= A_BOLD;
                         }
                         break;
 

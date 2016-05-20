@@ -931,81 +931,62 @@ This will cause the text to be 1/2 bright.  Uses A_DIM curses attribute.
 @section The different colors
 @cindex colors
 
-CGDB supports several colors, depending on how many colors your terminal 
-supports.  Below is a chart of the colors that CGDB provides.  The heading 
-NR-16 is used to represent terminals that support at least 16 colors.  The
-heading NR-8 is used to represent terminals that support at least 8 colors.  
-The integer values for each color represent the values passed to the curses
-function init_pair() to ask curses to create a new color.
+CGDB supports several colors, depending on how many colors your terminal
+supports.  Below is a chart of the colors that CGDB provides.
+The values for each color represent the defines from the curses header
+file passed to init_pair() to ask curses to create a new color.
 
 @multitable @columnfractions .4 .2 .2 .2
 @item @code{COLOR NAME}
-@tab @code{NR-16}
-@tab @code{NR-8}
-@tab @code{NR-8 bold attribute}
+@tab @code{Color}
+@tab @code{Bold attribute}
 @item Black
-@tab 0
-@tab 0
+@tab COLOR_BLACK
 @tab No
 @item DarkBlue
-@tab 1
-@tab 4
+@tab COLOR_BLUE
 @tab No
 @item DarkGreen
-@tab 2
-@tab 2
+@tab COLOR_GREEN
 @tab No
 @item DarkCyan
-@tab 3
-@tab 6
+@tab COLOR_CYAN
 @tab No
 @item DarkRed
-@tab 4
-@tab 1
+@tab COLOR_RED
 @tab No
 @item DarkMagenta
-@tab 5
-@tab 5
+@tab COLOR_MAGENTA
 @tab No
 @item Brown, DarkYellow
-@tab 6
-@tab 3
+@tab COLOR_YELLOW
 @tab No
 @item LightGray, LightGrey, Gray, Grey
-@tab 7
-@tab 7
+@tab COLOR_WHITE
 @tab No
 @item DarkGray, DarkGrey
-@tab 8
-@tab 0
+@tab COLOR_BLACK
 @tab Yes
 @item Blue, LightBlue
-@tab 9
-@tab 4
+@tab COLOR_BLUE
 @tab Yes
 @item Green, LightGreen
-@tab 10
-@tab 2
+@tab COLOR_GREEN
 @tab Yes
 @item Cyan, LightCyan
-@tab 11
-@tab 6
+@tab COLOR_CYAN
 @tab Yes
 @item Red, LightRed
-@tab 12
-@tab 1
+@tab COLOR_RED
 @tab Yes
 @item Magenta, LightMagenta
-@tab 13
-@tab 5
+@tab COLOR_MAGENTA
 @tab Yes
 @item Yellow, LightYellow
-@tab 14
-@tab 3
+@tab COLOR_YELLOW
 @tab Yes
 @item White
-@tab 15
-@tab 7
+@tab COLOR_WHITE
 @tab Yes
 @end multitable
 

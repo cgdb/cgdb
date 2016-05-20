@@ -15,3 +15,13 @@ libcgdbutil_a_SOURCES = \
     sys_util.h \
     terminal.cpp \
     terminal.h
+
+noinst_PROGRAMS = cgdbutil_driver
+
+cgdbutil_driver_LDFLAGS = \
+    -L$(top_builddir)/lib/util
+
+cgdbutil_driver_LDADD = \
+    libcgdbutil.a
+
+cgdbutil_driver_SOURCES = driver.cpp

@@ -27,6 +27,10 @@ extern int ada_lex(void);
 extern FILE *ada_in;
 extern char *ada_text;
 
+extern int cgdbhelp_lex(void);
+extern FILE *cgdbhelp_in;
+extern char *cgdbhelp_text;
+
 struct tokenizer {
     enum tokenizer_language_support lang;
     int (*tokenizer_lex) (void);
@@ -60,7 +64,6 @@ void tokenizer_destroy(struct tokenizer *t)
 int tokenizer_set_file(struct tokenizer *t, const char *file,
         enum tokenizer_language_support l)
 {
-
     if (l < TOKENIZER_ENUM_START_POS || l >= TOKENIZER_LANGUAGE_UNKNOWN)
         return 0;
 
@@ -78,6 +81,10 @@ int tokenizer_set_file(struct tokenizer *t, const char *file,
         t->tokenizer_lex = go_lex;
         t->tokenizer_in = &go_in;
         t->tokenizer_text = &go_text;
+    } else if (l == TOKENIZER_LANGUAGE_CGDBHELP) {
+        t->tokenizer_lex = cgdbhelp_lex;
+        t->tokenizer_in = &cgdbhelp_in;
+        t->tokenizer_text = &cgdbhelp_text;
     } else {
         t->tokenizer_lex = ada_lex;
         t->tokenizer_in = &ada_in;
@@ -155,19 +162,19 @@ enum tokenizer_language_support tokenizer_get_default_file_type(const char
 
     for (i = 0; i < sizeof (c_extensions) / sizeof (char *); i++)
         if (strcasecmp(file_extension, c_extensions[i]) == 0)
-            l = TOKENIZER_LANGUAGE_C;
+            return TOKENIZER_LANGUAGE_C;
 
     for (i = 0; i < sizeof (d_extensions) / sizeof (char *); i++)
         if (strcasecmp(file_extension, d_extensions[i]) == 0)
-            l = TOKENIZER_LANGUAGE_D;
+            return TOKENIZER_LANGUAGE_D;
 
     for (i = 0; i < sizeof (go_extensions) / sizeof (char *); i++)
         if (strcasecmp(file_extension, go_extensions[i]) == 0)
-            l = TOKENIZER_LANGUAGE_GO;
+            return TOKENIZER_LANGUAGE_GO;
 
     for (i = 0; i < sizeof (ada_extensions) / sizeof (char *); i++)
         if (strcasecmp(file_extension, ada_extensions[i]) == 0)
-            l = TOKENIZER_LANGUAGE_ADA;
+            return TOKENIZER_LANGUAGE_ADA;
 
     return l;
 }

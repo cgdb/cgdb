@@ -76,6 +76,16 @@ static int hlg_from_tokenizer_type(enum tokenizer_type type)
         case TOKENIZER_TEXT: return HLG_TEXT;
         case TOKENIZER_ERROR: return HLG_TEXT;
         case TOKENIZER_NEWLINE: return -1;
+        case TOKENIZER_SEARCH: return HLG_SEARCH;
+        case TOKENIZER_STATUS_BAR: return HLG_STATUS_BAR;
+        case TOKENIZER_ARROW: return HLG_EXECUTING_LINE_ARROW;
+        case TOKENIZER_LINE_HIGHLIGHT: return HLG_EXECUTING_LINE_HIGHLIGHT;
+        case TOKENIZER_ENABLED_BREAKPOINT: return HLG_ENABLED_BREAKPOINT;
+        case TOKENIZER_DISABLED_BREAKPOINT: return HLG_DISABLED_BREAKPOINT;
+        case TOKENIZER_SELECTED_LINE_NUMBER: return HLG_SELECTED_LINE_NUMBER;
+        case TOKENIZER_ARROW_SEL: return HLG_SELECTED_LINE_ARROW;
+        case TOKENIZER_LOGO: return HLG_LOGO;
+
         default: return -1;
     }
 }

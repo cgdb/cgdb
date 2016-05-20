@@ -1453,8 +1453,13 @@ void if_display_help(void)
         fs_util_get_path(TOPBUILDDIR, "doc/cgdb.txt", cgdb_help_file);
 
     ret_val = source_set_exec_line(src_win, cgdb_help_file, 1);
+
     if (ret_val == 0)
+    {
+        src_win->cur->language = TOKENIZER_LANGUAGE_CGDBHELP;
+        source_highlight(src_win->cur);
         if_draw();
+    }
     else if (ret_val == 5)      /* File does not exist */
         if_display_message("No such file: ", 0, "%s", cgdb_help_file);
 }

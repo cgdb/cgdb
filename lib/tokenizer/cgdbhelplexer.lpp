@@ -1,0 +1,57 @@
+%option prefix="cgdbhelp_"
+%option outfile="lex.yy.c"
+%option case-insensitive
+
+D                       [0-9]
+L                       [a-zA-Z_]
+
+%{
+
+/* System Includes */
+#include <stdio.h>
+#include "tokenizer.h"
+
+%}
+
+%%
+"CGDB"                  { return(TOKENIZER_KEYWORD); }
+               
+[`']Statement'          { return TOKENIZER_KEYWORD; }
+[`']Type'               { return TOKENIZER_TYPE; }
+[`']Constant'           { return TOKENIZER_LITERAL; }
+[`']Comment'            { return TOKENIZER_COMMENT; }
+[`']PreProc'            { return TOKENIZER_DIRECTIVE; }
+[`']Normal'             { return TOKENIZER_TEXT; }
+[`']IncSearch'          { return TOKENIZER_SEARCH; }
+[`']StatusLine'         { return TOKENIZER_STATUS_BAR; }
+[`']Arrow'              { return TOKENIZER_ARROW; }
+[`']ArrowSel'           { return TOKENIZER_ARROW_SEL; }
+[`']LineHighlight'      { return TOKENIZER_LINE_HIGHLIGHT; }
+[`']Breakpoint'         { return TOKENIZER_ENABLED_BREAKPOINT; }
+[`']DisabledBreakpoint' { return TOKENIZER_DISABLED_BREAKPOINT; }
+[`']SelectedLineNr'     { return TOKENIZER_SELECTED_LINE_NUMBER; }
+[`']SelectedLineArrow'  { return TOKENIZER_ARROW_SEL; }
+[`']Logo'               { return TOKENIZER_LOGO; }
+
+^[=]+                    { return(TOKENIZER_COMMENT); }
+^[\*]+                    { return(TOKENIZER_COMMENT); }
+               
+\n					    { return(TOKENIZER_NEWLINE); }
+\r\n 			        { return(TOKENIZER_NEWLINE); }
+\r 						{ return(TOKENIZER_NEWLINE); }
+[ \t\v\f]               { return(TOKENIZER_TEXT);    }
+{L}+                    { return(TOKENIZER_TEXT); 	 }
+.                       { return(TOKENIZER_TEXT);    }
+%%
+
+int cgdbhelp_wrap ( void ) {
+	{
+		/* Silly impossible function call to stop warning of unused functions */
+		if ( 0 ) {
+            char buf[] = "";
+            yyunput(0, buf);
+		}
+	}
+
+	return 1;
+}

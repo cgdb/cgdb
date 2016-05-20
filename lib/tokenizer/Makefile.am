@@ -11,6 +11,7 @@ libtokenizer_a_SOURCES = \
     clexer.lpp \
     dlexer.lpp \
     golexer.lpp \
+    cgdbhelplexer.lpp \
     tokenizer.cpp \
     tokenizer.h
 
