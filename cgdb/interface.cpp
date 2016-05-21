@@ -1400,13 +1400,13 @@ int if_input(int key)
 void if_tty_print(const char *buf)
 {
     /* Send output to the gdb buffer */
-    if_print(buf);
+    if_print(buf, 1);
 }
 
-void if_print(const char *buf)
+void if_print(const char *buf, int source )
 {
     /* Print it to the scroller */
-    scr_add(gdb_win, buf);
+    scr_add(gdb_win, buf, source);
 
     if (get_gdb_height() > 0) {
         scr_refresh(gdb_win, focus == GDB);
@@ -1431,7 +1431,7 @@ void if_print_message(const char *fmt, ...)
 #endif
     va_end(ap);
 
-    if_print(va_buf);
+    if_print(va_buf, GDB);
 }
 
 void if_show_file(char *path, int line)
@@ -1605,7 +1605,7 @@ int if_clear_line()
     line[i] = '\r';
     line[i + 1] = '\0';
 
-    if_print(line);
+    if_print(line, GDB);
 
     return 0;
 }

@@ -11,8 +11,6 @@
 /* Definitions */
 /* ----------- */
 
-#define GDB_MAXBUF 4096         /* GDB input buffer size */
-
 /* Special char to use for vertical line 
  * CYGWIN does not support this character 
  */

@@ -2,8 +2,14 @@
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
+/* System Includes */
+#if HAVE_CTYPE_H
+#include <ctype.h>
+#endif
+
 #include "highlight_groups.h"
 #include "command_lexer.h"
+#include "sys_util.h"
 #include "logger.h"
 
 #if HAVE_CURSES_H
@@ -14,15 +20,6 @@
 
 #include <strings.h>
 #include <stdlib.h>
-
-/* term.h prototypes */
-#ifdef __cplusplus
-#define EXTERN_C extern "C"
-#else
-#define EXTERN_C extern
-#endif
-
-EXTERN_C int tgetnum(const char *);
 
 /* internal {{{*/
 
@@ -44,6 +41,8 @@ struct hl_group_info {
 struct hl_groups {
   /** If 0 then the terminal doesn't support colors, otherwise it does. */
     int in_color;
+  /** If 1 then the terminal supports ansi colors (8 colors, 64 color pairs). */
+    int ansi_color;
   /** This is the data for each highlighting group. */
     struct hl_group_info groups[HLG_LAST];
 };
@@ -295,6 +294,42 @@ static const struct color_info *color_spec_for_name(const char *name)
     return NULL;
 }
 
+int hl_get_color_pair(int bgcolor, int fgcolor)
+{
+    static int color_pairs_inited = 0;
+    static int color_pair_table[9][9];
+
+    if (!color_pairs_inited) {
+        int fg, bg;
+        int color_pair = 1;
+
+        /* Initialize [1..8][1..8] */
+        for (fg = COLOR_BLACK; fg <= COLOR_WHITE; fg++) {
+            for (bg = COLOR_BLACK; bg <= COLOR_WHITE; bg++) {
+                init_pair(color_pair, fg, bg);
+                color_pair_table[bg + 1][fg + 1] = color_pair++;
+            }
+        }
+
+        /* Initialize colors w/ default bg: [0][1..8] */
+        for (fg = COLOR_BLACK; fg <= COLOR_WHITE; fg++) {
+            init_pair(color_pair, fg, -1);
+            color_pair_table[0][fg + 1] = color_pair++;
+        }
+        /* Initialize colors w/ default fg: [1..8][0] */
+        for (bg = COLOR_BLACK; bg <= COLOR_WHITE; bg++) {
+            init_pair(color_pair, -1, bg);
+            color_pair_table[bg + 1][0] = color_pair++;
+        }
+
+        color_pairs_inited = 1;
+    }
+
+    fgcolor = MAX(0, fgcolor + 1);
+    bgcolor = MAX(0, bgcolor + 1);
+    return color_pair_table[bgcolor][fgcolor];
+}
+
 /**
  * Set up a highlighting group to be displayed as the user wishes.
  *
@@ -346,6 +381,13 @@ setup_group(hl_groups_ptr hl_groups, enum hl_group_kind group,
     if (fore_color == UNSPECIFIED_COLOR && back_color == UNSPECIFIED_COLOR)
         return 0;
 
+#ifdef NCURSES_VERSION
+    if (hl_groups->ansi_color) {
+        info->color_pair = hl_get_color_pair(back_color, fore_color);
+        return 0;
+    }
+#endif
+
     /* Don't allow -1 to be used in curses mode */
 #ifndef NCURSES_VERSION
     if (fore_color < 0 || back_color < 0)
@@ -357,13 +399,11 @@ setup_group(hl_groups_ptr hl_groups, enum hl_group_kind group,
     if (fore_color == UNSPECIFIED_COLOR) {
         short old_fore_color, old_back_color;
 
-        //$ TODO: How does this work if the pair hasn't been init'd yet? Ie, color_pair is 0;
         pair_content(info->color_pair, &old_fore_color, &old_back_color);
         fore_color = old_fore_color;
     } else if (back_color == UNSPECIFIED_COLOR) {
         short old_fore_color, old_back_color;
 
-        //$ TODO: How does this work if the pair hasn't been init'd yet? Ie, color_pair is 0;
         pair_content(info->color_pair, &old_fore_color, &old_back_color);
         back_color = old_back_color;
     }
@@ -404,6 +444,7 @@ hl_groups_ptr hl_groups_initialize(void)
         return NULL;
 
     hl_groups->in_color = 0;
+    hl_groups->ansi_color = 0;
 
     for (i = 0; i < HLG_LAST; ++i) {
         struct hl_group_info *info;
@@ -450,6 +491,7 @@ int hl_groups_setup(hl_groups_ptr hl_groups)
 #endif
 
     hl_groups->in_color = has_colors();
+    hl_groups->ansi_color = has_colors() && (COLORS >= 8) && (COLOR_PAIRS >= 64);
 
     /* Set up the default groups. */
     for (i = 0; ginfo[i].kind != HLG_LAST; ++i) {
@@ -683,6 +725,111 @@ int hl_groups_parse_config(hl_groups_ptr hl_groups)
             bg_color);
     if (val == -1) {
         return 1;
+    }
+
+    return 0;
+}
+
+int hl_ansi_get_color_attrs(const char *buf, int *attr)
+{
+    int i = 0;
+    int fg = -1;
+    int bg = -1;
+    int a = A_NORMAL;
+
+    *attr = 0;
+
+    if ((buf[i++] == '\033') && (buf[i++] == '[')) {
+
+        /* Check for reset attributes */
+        if (buf[i] == 'm')
+            return 3;
+        else if (buf[i] == '0' && buf[i+1] == 'm')
+            return 4;
+
+        for (;;)
+        {
+            int num = 0;
+
+            /* Should have a number here */
+            if (!isdigit(buf[i]))
+                return 0;
+
+            while (isdigit(buf[i]))
+            {
+                num = num * 10 + buf[i] - '0';
+                i++;
+            }
+
+            /* https://conemu.github.io/en/AnsiEscapeCodes.html#SGR_Select_Graphic_Rendition_parameters */
+            switch(num)
+            {
+            case 0: /* Reset current attributes */
+                a = A_NORMAL;
+                fg = -1;
+                bg = -1;
+                break;
+            case 1: /* Set BrightOrBold */
+                a |= A_BOLD;
+                break;
+            case 2: /* Unset BrightOrBold */
+            case 22: /* Unset BrightOrBold */
+                a &= ~A_BOLD;
+                break;
+            case 4: /* SetBackOrUnderline */
+            case 5: /* SetBackOrUnderline */
+                a |= A_UNDERLINE;
+                break;
+            case 3: /* SetItalicOrInverse */
+            case 7: /* Use inverse colors */
+                a |= A_REVERSE;
+                break;
+            case 23: /*Unset ItalicOrInverse */
+                a &= ~A_REVERSE;
+                break;
+            case 24: /* UnsetBackOrUnderline */
+                a &= ~A_UNDERLINE;
+                break;
+            case 27: /* Use normal colors */
+            case 39: /* Rest text color to defaults */
+                fg = -1;
+                bg = -1;
+                break;
+            case 49: /* Reset background color to defaults */
+                bg = -1;
+                break;
+                /* Set ANSI text color */
+            case 30: case 31: case 32: case 33: case 34: case 35: case 36: case 37:
+                fg = num - 30;
+                break;
+                /* Set ANSI background color */
+            case 40: case 41: case 42: case 43: case 44: case 45: case 46: case 47:
+                bg = num - 40;
+                break;
+                /* Set bright ANSI text color */
+            case 90: case 91: case 92: case 93: case 94: case 95: case 96: case 97:
+                fg = num - 90;
+                a |= A_STANDOUT;
+                break;
+                /* Set bright ANSI background color */
+            case 100: case 101: case 102: case 103: case 104: case 105: case 106: case 107:
+                bg = num - 100;
+                a |= A_STANDOUT;
+                break;
+            }
+
+            if (buf[i] == 'm')
+            {
+                int color_pair = hl_get_color_pair(bg, fg);
+
+                *attr = a | COLOR_PAIR(color_pair);
+                return i + 1;
+            }
+
+            if (buf[i] != ';')
+                return 0;
+            i++;
+        }
     }
 
     return 0;

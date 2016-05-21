@@ -24,9 +24,24 @@
 /* Data Structures */
 /* --------------- */
 
+struct scroller_line_attr {
+    int col;
+    int attr;
+};
+
+struct scroller_line {
+    char *line;
+    int line_len;
+    int tty;
+    struct scroller_line_attr *attrs;
+};
+
 struct scroller {
-    char **buffer;              /* The text buffer */
-    int length;                 /* Number of lines in buffer */
+    struct scroller_line *lines;
+
+    char *last_tty_line;
+    int last_tty_attr;
+
     int in_scroll_mode;         /* Currently in scroll mode? */
     struct {
         int r;                  /* Current line (row) number */
@@ -95,7 +110,7 @@ void scr_end(struct scroller *scr);
  *   scr:  Pointer to the scroller object
  *   buf:  Buffer to append -- \b characters will be treated as backspace!
  */
-void scr_add(struct scroller *scr, const char *buf);
+void scr_add(struct scroller *scr, const char *buf, int tty);
 
 /* scr_move: Reposition the buffer on the screen
  * ---------

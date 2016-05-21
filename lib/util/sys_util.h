@@ -51,4 +51,34 @@ int cgdb_is_debugger_attached();
 */
 int log10_uint(unsigned int val);
 
+#define MAX(a, b)  (((a) > (b)) ? (a) : (b))
+#define MIN(a, b)  (((a) < (b)) ? (a) : (b))
+
+#if HAVE_ATTRIBUTE_PRINTF
+#define ATTRIBUTE_PRINTF( _x, _y ) __attribute__( ( __format__( __printf__, _x, _y ) ) )
+#else
+#define ATTRIBUTE_PRINTF( _x, _y )
+#endif
+
+// ---- stretchy buffers (From Sean's stb.h)
+// https://github.com/nothings/stb/blob/master/stretchy_buffer.h
+
+#define sbfree( a ) ( ( a ) ? free( stb__sbraw( a ) ), NULL : NULL )
+#define sbpush( a, v ) ( stb__sbmaybegrow( a, 1 ), ( a )[ stb__sbn( a )++ ] = ( v ) )
+#define sbpop( a ) ( ( a )[ --stb__sbn( a ) ] )
+#define sbcount( a ) ( ( a ) ? stb__sbn( a ) : 0 )
+#define sbadd( a, n ) ( stb__sbmaybegrow( a, n ), stb__sbn( a ) += ( n ), &( a )[ stb__sbn( a ) - ( n ) ] )
+#define sblast( a ) ( ( a )[ stb__sbn( a ) - 1 ] )
+#define sbforeach( v, arr ) for ( ( v ) = ( arr ); ( v ) < ( arr ) + sbcount( arr ); ++( v ) )
+#define sbsetcount( a, n ) ( stb__sbgrow( a, n ), stb__sbn( a ) = n )
+
+#define stb__sbraw( a ) ( ( int * )( a )-2 )
+#define stb__sbm( a ) stb__sbraw( a )[ 0 ]
+#define stb__sbn( a ) stb__sbraw( a )[ 1 ]
+
+int stb__sbgrowf( void **arr, int increment, int itemsize );
+#define stb__sbneedgrow( a, n ) ( ( a ) == 0 || stb__sbn( a ) + n >= stb__sbm( a ) )
+#define stb__sbmaybegrow( a, n ) ( stb__sbneedgrow( a, ( n ) ) ? stb__sbgrow( a, n ) : 0 )
+#define stb__sbgrow( a, n ) stb__sbgrowf( ( void ** )&( a ), ( n ), sizeof( *( a ) ) )
+
 #endif

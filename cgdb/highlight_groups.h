@@ -52,7 +52,7 @@ enum hl_group_kind {
 
 /* }}}*/
 
-/* Createing and Destroying a hl_groups context. {{{*/
+/* Creating and Destroying a hl_groups context. {{{*/
 /******************************************************************************/
 /**
  * @name Createing and Destroying a hl_groups context.
@@ -153,6 +153,10 @@ int hl_groups_get_attr(hl_groups_ptr hl_groups, enum hl_group_kind kind);
  * 0 on success or -1 on error
  */
 int hl_groups_parse_config(hl_groups_ptr hl_groups);
+
+int hl_get_color_pair(int bgcolor, int fgcolor);
+
+int hl_ansi_get_color_attrs(const char *buf, int *attr);
 
 /*@}*/
 /* }}}*/

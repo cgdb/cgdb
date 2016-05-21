@@ -53,7 +53,7 @@ int if_input(int key);
  *
  *   buf:  NULL-terminated buffer to display.
  */
-void if_print(const char *buf);
+void if_print(const char *buf, int source);
 
 /* if_print_message: Prints data to the GDB input/output window.
  * -----------------

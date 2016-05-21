@@ -40,8 +40,8 @@
 #include "sources.h"
 #include "cgdb.h"
 #include "tokenizer.h"
-#include "interface.h"
 #include "sys_util.h"
+#include "interface.h"
 #include "logger.h"
 
 /* ----------- */
@@ -177,11 +177,11 @@ static char *highlight_line_segment(const char *orig, int start, int end)
 #ifdef HIGHLIGHT_DEBUG
     /*
        for ( j = 0; j < strlen(orig); j++ ) {
-       char temp[100];
-       sprintf(temp, "(%d:%c)", orig[j], orig[j]);
-       scr_add(gdb_win, temp);
+           char temp[100];
+           sprintf(temp, "(%d:%c)", orig[j], orig[j]);
+           scr_add(gdb_win, temp, 0);
        }
-       scr_add(gdb_win, "\r\n");
+       scr_add(gdb_win, "\r\n", 0);
        scr_refresh(gdb_win, 1);
      */
 #endif
@@ -310,6 +310,7 @@ void hl_wprintw(WINDOW * win, const char *line, int width, int offset)
     /* Shut off color attribute */
     wattroff(win, attr);
 
+    //$ TODO: Use wclrtoeol(win)?
     for (; p < width; p++)
         wprintw(win, " ");
 }

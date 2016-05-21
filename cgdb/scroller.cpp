@@ -43,14 +43,13 @@
  *
  * Return Value:  Number of occurrences of c in s.
  */
-static int count(const char *s, char c)
+static int count(const char *s, int slen, char c)
 {
+    int i;
     int rv = 0;
-    char *x = strchr((char *)s, c);
 
-    while (x) {
-        rv++;
-        x = strchr(x + 1, c);
+    for (i = 0; i < slen; i++) {
+        rv += (s[i] == c);
     }
 
     return rv;
@@ -63,22 +62,41 @@ static int count(const char *s, char c)
  *
  * Return Value:  A newly allocated copy of buf, with modifications made.
  */
-static char *parse(struct scroller *scr, const char *orig, const char *buf)
+static char *parse(struct scroller *scr, struct scroller_line_attr **attrs,
+    const char *orig, const char *buf, int buflen)
 {
     // Read in tabstop settings, but don't change them on the fly as we'd have to
     //  store each previous line and recalculate every one of them.
     static const int tab_size = cgdbrc_get(CGDBRC_TABSTOP)->variant.int_val;
-    int length = strlen(orig) + strlen(buf) + (tab_size - 1) * count(buf, '\t');
-    char *rv = (char *) cgdb_malloc(length + 1);
+    int tabcount = count(buf, buflen, '\t');
+    int orig_len = strlen(orig);
+    int length = MAX(orig_len, scr->current.pos) + buflen + (tab_size - 1) * tabcount;
+    char *rv = (char *) cgdb_calloc(length + 1, 1);
     int i, j;
 
-    /* Zero out the string */
-    memset(rv, 0, length + 1);
+    /* Copy over original buffer */
     strcpy(rv, orig);
+
     i = scr->current.pos;
 
     /* Expand special characters */
-    for (j = 0; j < strlen(buf); j++) {
+    for (j = 0; j < buflen; j++) {
+        int attr;
+
+        /* Handle ansi escape characters */
+        if (buf[j] == '\033') {
+            int ansi_count = hl_ansi_get_color_attrs(buf + j, &attr);
+            if (ansi_count) {
+                struct scroller_line_attr line_attr;
+                j += ansi_count - 1;
+
+                line_attr.col = i;
+                line_attr.attr = attr;
+                sbpush(*attrs, line_attr);
+                continue;
+            }
+        }
+
         switch (buf[j]) {
                 /* Backspace/Delete -> Erase last character */
             case 8:
@@ -95,6 +113,10 @@ static char *parse(struct scroller *scr, const char *orig, const char *buf)
                 /* Carriage return -> Move back to the beginning of the line */
             case '\r':
                 i = 0;
+                if (buf[j + 1] != '\n') {
+                    sbfree(*attrs);
+                    *attrs = NULL;
+                }
                 break;
             default:
                 rv[i++] = buf[j];
@@ -103,12 +125,63 @@ static char *parse(struct scroller *scr, const char *orig, const char *buf)
     }
 
     scr->current.pos = i;
-    /* Remove trailing space from the line */
-    for (j = strlen(rv) - 1; j > i && isspace((int) rv[j]); j--)
-        ;
-    rv[j + 1] = 0;
 
-    return (char *)cgdb_realloc(rv, strlen(rv) + 1);
+    /* Remove trailing space from the line if we don't have color */
+    if (*attrs) {
+        j = strlen(rv);
+    } else {
+        for (j = strlen(rv) - 1; j > i && isspace(rv[j]); j--)
+            ;
+    }
+
+    /* Only realloc if it's going to save us more than ~128 bytes */
+    return (length - j > 128) ? (char *)cgdb_realloc(rv, j + 2) : rv;
+}
+
+static void scroller_set_last_tty_attr(struct scroller *scr)
+{
+    int index = sbcount(scr->lines) - 1;
+    struct scroller_line *sl = index >= 0 ? &scr->lines[index] : 0;
+
+    /* If this is a tty line and we've got color attributes */
+    if (sl && sl->tty && sbcount(sl->attrs)) {
+        /* Grab last attribute */
+        int attr = sl->attrs[sbcount(sl->attrs) - 1].attr;
+
+        /* Store last attribute for following tty lines */
+        scr->last_tty_attr = attr ? attr : -1;
+    }
+}
+
+static void scroller_addline(struct scroller *scr, char *line,
+    struct scroller_line_attr *attrs, int tty)
+{
+    struct scroller_line sl;
+
+    /* Add attribute from last tty line to start of this one */
+    if (tty && (scr->last_tty_attr != -1)) {
+        /* If there isn't already a color attribute for the first column */
+        if (!attrs || (attrs[0].col != 0)) {
+            int count = sbcount(attrs);
+
+            /* Bump the count up and scoot the attributes over one */
+            sbsetcount(attrs, count + 1);
+            memmove(attrs+1, attrs, count * sizeof(struct scroller_line_attr));
+
+            attrs[0].col = 0;
+            attrs[0].attr = scr->last_tty_attr;
+        }
+
+        scr->last_tty_attr = -1;
+    }
+
+    sl.line = line;
+    sl.line_len = strlen(line);
+    sl.tty = tty;
+    sl.attrs = attrs;
+    sbpush(scr->lines, sl);
+
+    scroller_set_last_tty_attr(scr);
 }
 
 /* ----------------- */
@@ -128,13 +201,13 @@ struct scroller *scr_new(int pos_r, int pos_c, int height, int width)
     rv->current.c = 0;
     rv->current.pos = 0;
     rv->in_scroll_mode = 0;
+    rv->last_tty_line = NULL;
+    rv->last_tty_attr = -1;
     rv->win = newwin(height, width, pos_r, pos_c);
 
     /* Start with a single (blank) line */
-    rv->buffer = (char **)cgdb_malloc(sizeof (char *));
-    rv->buffer[0] = strdup("");
-    rv->length = 1;
-
+    rv->lines = NULL;
+    scroller_addline(rv, strdup(""), NULL, 0);
     return rv;
 }
 
@@ -143,12 +216,18 @@ void scr_free(struct scroller *scr)
     int i;
 
     /* Release the buffer */
-    if (scr->length) {
-        for (i = 0; i < scr->length; i++)
-            free(scr->buffer[i]);
-        free(scr->buffer);
+    for (i = 0; i < sbcount(scr->lines); i++) {
+        free(scr->lines[i].line);
+        sbfree(scr->lines[i].attrs);
     }
+    sbfree(scr->lines);
+    scr->lines = NULL;
+
+    free(scr->last_tty_line);
+    scr->last_tty_line = NULL;
+
     delwin(scr->win);
+    scr->win = NULL;
 
     /* Release the scroller object */
     free(scr);
@@ -178,7 +257,7 @@ void scr_up(struct scroller *scr, int nlines)
         else {
             if (scr->current.r > 0) {
                 scr->current.r--;
-                if ((length = strlen(scr->buffer[scr->current.r])) > width)
+                if ((length = strlen(scr->lines[scr->current.r].line)) > width)
                     scr->current.c = ((length - 1) / width) * width;
             } else {
                 /* At top */
@@ -203,13 +282,13 @@ void scr_down(struct scroller *scr, int nlines)
 
     for (i = 0; i < nlines; i++) {
         /* If the current line wraps to the next, then advance column number */
-        length = strlen(scr->buffer[scr->current.r]);
+        length = strlen(scr->lines[scr->current.r].line);
         if (scr->current.c < length - width)
             scr->current.c += width;
 
         /* Otherwise, advance row number, and set column number to 0. */
         else {
-            if (scr->current.r < scr->length - 1) {
+            if (scr->current.r < sbcount(scr->lines) - 1) {
                 scr->current.r++;
                 scr->current.c = 0;
             } else {
@@ -234,62 +313,110 @@ void scr_end(struct scroller *scr)
 
     getmaxyx(scr->win, height, width);
 
-    scr->current.r = scr->length - 1;
-    scr->current.c = (strlen(scr->buffer[scr->current.r]) / width) * width;
+    scr->current.r = sbcount(scr->lines) - 1;
+    scr->current.c = (strlen(scr->lines[scr->current.r].line) / width) * width;
 }
 
-void scr_add(struct scroller *scr, const char *buf)
+static void scr_add_buf(struct scroller *scr, const char *buf, int tty)
 {
-    int distance;               /* Distance to next new line character */
-    int length;                 /* Length of the current line */
-    char *x;                    /* Pointer to next new line character */
+    char *x;
+    int distance;
 
     /* Find next newline in the string */
     x = strchr((char *)buf, '\n');
-    length = strlen(scr->buffer[scr->length - 1]);
     distance = x ? x - buf : strlen(buf);
 
     /* Append to the last line in the buffer */
     if (distance > 0) {
-        char *temp = scr->buffer[scr->length - 1];
-        char *buf2 = (char *)cgdb_malloc(distance + 1);
+        int is_crlf = (distance == 1) && (buf[0] == '\r');
+        if (!is_crlf) {
+            int index = sbcount(scr->lines) - 1;
+            char *orig = scr->lines[index].line;
 
-        strncpy(buf2, buf, distance);
-        buf2[distance] = 0;
-        scr->buffer[scr->length - 1] = parse(scr, temp, buf2);
-        free(temp);
-        free(buf2);
+            if ((scr->last_tty_attr != -1) && (tty != scr->lines[index].tty)) {
+                struct scroller_line_attr attr;
+
+                attr.col = strlen(orig);
+                if (tty) {
+                    attr.attr = scr->last_tty_attr;
+                    scr->last_tty_attr = -1;
+                }
+                else {
+                    /* Add that color attribute in */
+                    attr.attr = 0;
+                }
+
+                sbpush(scr->lines[index].attrs, attr);
+            }
+
+            scr->lines[index].tty = tty;
+            scr->lines[index].line = parse(scr, &scr->lines[index].attrs, orig, buf, distance);
+            scr->lines[index].line_len = strlen(scr->lines[index].line);
+
+            scroller_set_last_tty_attr(scr);
+
+            free(orig);
+        }
     }
 
     /* Create additional lines if buf contains newlines */
     while (x != NULL) {
-        char *newbuf;
+        char *line;
+        struct scroller_line_attr *attrs = NULL;
 
         buf = x + 1;
         x = strchr((char *)buf, '\n');
         distance = x ? x - buf : strlen(buf);
 
-        /* Create a new buffer that stops at the next newline */
-        newbuf = (char *)cgdb_malloc(distance + 1);
-        memset(newbuf, 0, distance + 1);
-        strncpy(newbuf, buf, distance);
-
-        //$ TODO: This realloc can be improved...
+        /* tty input with no lf. */
+        if (!x && tty && distance && (distance < 4096)) {
+            /* Store away and parse when the rest of the line shows up */
+            scr->last_tty_line = strdup(buf);
+            /* Add line since we did have a lf */
+            scr->current.pos = 0;
+            scroller_addline(scr, strdup(""), NULL, tty);
+            break;
+        }
 
         /* Expand the buffer */
-        scr->length++;
-        scr->buffer = (char **)cgdb_realloc(scr->buffer, sizeof (char *) * scr->length);
         scr->current.pos = 0;
 
         /* Add the new line */
-        scr->buffer[scr->length - 1] = parse(scr, "", newbuf);
-        free(newbuf);
+        line = parse(scr, &attrs, "", buf, distance);
+        scroller_addline(scr, line, attrs, tty);
     }
 
     /* Don't want to exit scroll mode simply because new data received */
     if (!scr->in_scroll_mode) {
         scr_end(scr);
     }
+}
+
+void scr_add(struct scroller *scr, const char *buf, int tty)
+{
+    char *tempbuf = NULL;
+
+    if (scr->last_tty_line) {
+        if (!tty) {
+            /* New line coming in isn't tty so spew out last tty line and carry on */
+            scr_add_buf(scr, scr->last_tty_line, 1);
+            free(scr->last_tty_line);
+        }
+        else {
+            /* Combine this tty line with previous tty line */
+            tempbuf = (char *)cgdb_realloc(scr->last_tty_line, strlen(scr->last_tty_line) + strlen(buf) + 1);
+            strcat(tempbuf, buf);
+            buf = tempbuf;
+        }
+
+        scr->last_tty_line = NULL;
+    }
+
+    scr_add_buf(scr, buf, tty);
+
+    scr_end(scr);
+
+    free(tempbuf);
 }
 
 void scr_move(struct scroller *scr, int pos_r, int pos_c, int height, int width)
@@ -299,6 +426,58 @@ void scr_move(struct scroller *scr, int pos_r, int pos_c, int height, int width)
     wclear(scr->win);
 }
 
+static void scr_printline(WINDOW *win, int x, int y, int col,
+    struct scroller_line *sline, int width)
+{
+    int attr = 0;
+    int line_len = sline->line_len;
+    const char *line = sline->line;
+    int count = MIN(line_len - col, width);
+
+    wmove(win, y, x);
+
+    if (sline->attrs) {
+        int i;
+
+        for (i = 0; i < sbcount(sline->attrs); i++) {
+            if (sline->attrs[i].col <= col) {
+                attr = sline->attrs[i].attr;
+            }
+            else if (sline->attrs[i].col < col + count) {
+                int len = sline->attrs[i].col -col;
+
+                wattron(win, attr);
+                wprintw(win, "%.*s", len, line + col);
+                wattroff(win, attr);
+
+                col += len;
+                count -= len;
+                width -= len;
+
+                attr = sline->attrs[i].attr;
+            } else {
+                wattron(win, attr);
+                wprintw(win, "%.*s", count, line + col);
+                wattroff(win, attr);
+
+                width -= count;
+                count = 0;
+            }
+        }
+    }
+
+    if (count) {
+        wattron(win, attr);
+        wprintw(win, "%.*s", count, line + col);
+        wattroff(win, attr);
+
+        width -= count;
+    }
+
+    if (width)
+        wclrtoeol(win);
+}
+
 void scr_refresh(struct scroller *scr, int focus)
 {
     int length;                 /* Length of current line */
@@ -306,7 +485,6 @@ void scr_refresh(struct scroller *scr, int focus)
     int r;                      /* Current row in scroller */
     int c;                      /* Current column in row */
     int width, height;          /* Width and height of window */
-    char *buffer;               /* Current line segment to print */
     int highlight_attr;
 
     /* Steal line highlight attribute for our scroll mode status */
@@ -322,17 +500,29 @@ void scr_refresh(struct scroller *scr, int focus)
     }
     r = scr->current.r;
     c = scr->current.c;
-    buffer = (char *)cgdb_malloc(width + 1);
-    buffer[width] = 0;
 
     /* Start drawing at the bottom of the viewable space, and work our way up */
     for (nlines = 1; nlines <= height; nlines++) {
-
         /* Print the current line [segment] */
-        memset(buffer, ' ', width);
         if (r >= 0) {
-            length = strlen(scr->buffer[r] + c);
-            memcpy(buffer, scr->buffer[r] + c, length < width ? length : width);
+            struct scroller_line *sline = &scr->lines[r];
+
+            scr_printline(scr->win, 0, height - nlines, c, sline, width);
+
+            /* Update our position */
+            if (c >= width)
+                c -= width;
+            else {
+                r--;
+                if (r >= 0) {
+                    length = scr->lines[r].line_len;
+                    if (length > width)
+                        c = ((length - 1) / width) * width;
+                }
+            }
+        } else {
+            wmove(scr->win, height - nlines, 0);
+            wclrtoeol(scr->win);
         }
 
         /* If we're in scroll mode and this is the top line, spew status on right */
@@ -340,37 +530,19 @@ void scr_refresh(struct scroller *scr, int focus)
             char status[ 64 ];
             size_t status_len;
 
-            snprintf(status, sizeof(status), "[%d/%d]", scr->current.r + 1, scr->length);
+            snprintf(status, sizeof(status), "[%d/%d]", scr->current.r + 1, sbcount(scr->lines));
 
             status_len = strlen(status);
-            if ( status_len >= width )
-                status_len = 0;
-
-            mvwprintw(scr->win, height - nlines, 0, "%.*s", width - status_len, buffer);
-
-            wattron(scr->win, highlight_attr);
-            mvwprintw(scr->win, height - nlines, width - status_len, "%s", status);
-            wattroff(scr->win, highlight_attr);
-        }
-        else {
-            mvwprintw(scr->win, height - nlines, 0, "%s", buffer);
-        }
-
-        /* Update our position */
-        if (c >= width)
-            c -= width;
-        else {
-            r--;
-            if (r >= 0) {
-                length = strlen(scr->buffer[r]);
-                if (length > width)
-                    c = ((length - 1) / width) * width;
+            if ( status_len < width ) {
+                wattron(scr->win, highlight_attr);
+                mvwprintw(scr->win, height - nlines, width - status_len, "%s", status);
+                wattroff(scr->win, highlight_attr);
             }
         }
     }
 
-    length = strlen(scr->buffer[scr->current.r] + scr->current.c);
-    if (focus && scr->current.r == scr->length - 1 && length <= width) {
+    length = scr->lines[scr->current.r].line_len - scr->current.c;
+    if (focus && scr->current.r == sbcount(scr->lines) - 1 && length <= width) {
         /* We're on the last line, draw the cursor */
         curs_set(1);
         wmove(scr->win, height - 1, scr->current.pos % width);
@@ -379,6 +551,5 @@ void scr_refresh(struct scroller *scr, int focus)
         curs_set(0);
     }
 
-    free(buffer);
     wrefresh(scr->win);
 }
