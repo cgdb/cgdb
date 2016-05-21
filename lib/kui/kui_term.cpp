@@ -340,7 +340,7 @@ static int import_keyseq(struct tlist *list, struct kui_map_set *map)
     }
 
     /* Set up the terminfo seq */
-    list->tiname_seq = tigetstr(list->tiname);
+    list->tiname_seq = tigetstr((char *)list->tiname);
     if (list->tiname_seq == 0) {
         /* fprintf ( stderr, "CAPNAME (%s) is not present in this TERM's terminfo description\n", i->tiname); */
     } else if (list->tiname_seq == (char *) -1) {
