@@ -452,7 +452,7 @@ hl_groups_ptr hl_groups_initialize(void)
         info = &hl_groups->groups[i];
         info->kind = (enum hl_group_kind) (i + 1);
         info->mono_attrs = 0;
-        info->mono_attrs = 0;
+        info->color_attrs = 0;
         info->color_pair = 0;
     }
 
