@@ -67,7 +67,7 @@ static char *parse(struct scroller *scr, struct scroller_line_attr **attrs,
 {
     // Read in tabstop settings, but don't change them on the fly as we'd have to
     //  store each previous line and recalculate every one of them.
-    static const int tab_size = cgdbrc_get(CGDBRC_TABSTOP)->variant.int_val;
+    static const int tab_size = cgdbrc_get_int(CGDBRC_TABSTOP);
     int tabcount = count(buf, buflen, '\t');
     int orig_len = strlen(orig);
     int length = MAX(orig_len, scr->current.pos) + buflen + (tab_size - 1) * tabcount;

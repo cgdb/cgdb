@@ -230,6 +230,8 @@ int cgdbrc_detach(int handle);
  * to the option asked for is returned.
  */
 cgdbrc_config_option_ptr cgdbrc_get(enum cgdbrc_option_kind option);
+int cgdbrc_get_int(enum cgdbrc_option_kind option);
+enum LineDisplayStyle cgdbrc_get_displaystyle(enum cgdbrc_option_kind option);
 
 /**
  * A convience function for determining the timeout that should be used to

@@ -353,12 +353,12 @@ static void draw_current_line(struct sviewer *sview, int line, int lwidth,
     int block_attr;
     int highlight_attr;
     enum LineDisplayStyle display_style;
-    int highlight_tabstop = cgdbrc_get(CGDBRC_TABSTOP)->variant.int_val;
+    int highlight_tabstop = cgdbrc_get_int(CGDBRC_TABSTOP);
 
     switch (kind) {
         case EXECUTING_LINE:
-            display_style = cgdbrc_get(CGDBRC_EXECUTING_LINE_DISPLAY)->
-                    variant.line_display_style;
+            display_style =
+                cgdbrc_get_displaystyle(CGDBRC_EXECUTING_LINE_DISPLAY);
             arrow_attr = hl_groups_get_attr(hl_groups_instance,
                     HLG_EXECUTING_LINE_ARROW);
             highlight_attr = hl_groups_get_attr(hl_groups_instance,
@@ -367,8 +367,8 @@ static void draw_current_line(struct sviewer *sview, int line, int lwidth,
                     HLG_EXECUTING_LINE_BLOCK);
             break;
         case SELECTED_LINE:
-            display_style = cgdbrc_get(CGDBRC_SELECTED_LINE_DISPLAY)->
-                    variant.line_display_style;
+            display_style =
+                cgdbrc_get_displaystyle(CGDBRC_SELECTED_LINE_DISPLAY);
             arrow_attr = hl_groups_get_attr(hl_groups_instance,
                     HLG_SELECTED_LINE_ARROW);
             highlight_attr = hl_groups_get_attr(hl_groups_instance,
@@ -1050,8 +1050,7 @@ int source_reload(struct sviewer *sview, const char *path, int force)
     time_t timestamp;
     struct list_node *cur;
     struct list_node *prev = NULL;
-    int auto_source_reload =
-            cgdbrc_get(CGDBRC_AUTOSOURCERELOAD)->variant.int_val;
+    int auto_source_reload = cgdbrc_get_int(CGDBRC_AUTOSOURCERELOAD);
 
     if (!path)
         return -1;

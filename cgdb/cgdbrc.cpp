@@ -1078,31 +1078,38 @@ cgdbrc_config_option_ptr cgdbrc_get(enum cgdbrc_option_kind option)
     return &cgdbrc_config_options[option];
 }
 
+int cgdbrc_get_int(enum cgdbrc_option_kind option)
+{
+    return cgdbrc_get(option)->variant.int_val;
+}
+
+enum LineDisplayStyle cgdbrc_get_displaystyle(enum cgdbrc_option_kind option)
+{
+    return cgdbrc_get(option)->variant.line_display_style;
+}
+
 int cgdbrc_get_key_code_timeoutlen(void)
 {
-    cgdbrc_config_option_ptr timeout_option_ptr = cgdbrc_get(CGDBRC_TIMEOUT);
-    cgdbrc_config_option_ptr ttimeout_option_ptr = cgdbrc_get(CGDBRC_TTIMEOUT);
+    int timeout_val = cgdbrc_get_int(CGDBRC_TIMEOUT);
+    int ttimeout_val = cgdbrc_get_int(CGDBRC_TTIMEOUT);
 
     /* Do not time out. */
-    if (timeout_option_ptr->variant.int_val == 0 &&
-            ttimeout_option_ptr->variant.int_val == 0)
+    if (timeout_val == 0 && ttimeout_val == 0)
         return 0;
 
-    if (cgdbrc_get(CGDBRC_TTIMEOUT_LEN)->variant.int_val < 0)
-        return cgdbrc_get(CGDBRC_TIMEOUT_LEN)->variant.int_val;
+    if (cgdbrc_get_int(CGDBRC_TTIMEOUT_LEN) < 0)
+        return cgdbrc_get_int(CGDBRC_TIMEOUT_LEN);
     else
-        return cgdbrc_get(CGDBRC_TTIMEOUT_LEN)->variant.int_val;
+        return cgdbrc_get_int(CGDBRC_TTIMEOUT_LEN);
 }
 
 int cgdbrc_get_mapped_key_timeoutlen(void)
 {
-    cgdbrc_config_option_ptr timeout_option_ptr = cgdbrc_get(CGDBRC_TIMEOUT);
-
     /* Do not time out. */
-    if (timeout_option_ptr->variant.int_val == 0)
+    if (cgdbrc_get_int(CGDBRC_TIMEOUT) == 0)
         return 0;
 
-    return cgdbrc_get(CGDBRC_TIMEOUT_LEN)->variant.int_val;
+    return cgdbrc_get_int(CGDBRC_TIMEOUT_LEN);
 }
 
 /* }}} */

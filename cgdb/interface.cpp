@@ -853,7 +853,7 @@ static int gdb_input(int key)
  */
 static int status_bar_regex_input(struct sviewer *sview, int key)
 {
-    int regex_icase = cgdbrc_get(CGDBRC_IGNORECASE)->variant.int_val;
+    int regex_icase = cgdbrc_get_int(CGDBRC_IGNORECASE);
 
     /* Flag to indicate we're done with regex mode, need to switch back */
     int done = 0;
@@ -1199,7 +1199,7 @@ int if_init(void)
 
 static int cgdb_input(int key)
 {
-    int regex_icase = cgdbrc_get(CGDBRC_IGNORECASE)->variant.int_val;
+    int regex_icase = cgdbrc_get_int(CGDBRC_IGNORECASE);
 
     switch (key) {
         case 'i':
@@ -1328,7 +1328,7 @@ static int cgdb_input(int key)
 int internal_if_input(int key)
 {
     /* Normally, CGDB_KEY_ESC, but can be configured by the user */
-    int cgdb_mode_key = cgdbrc_get(CGDBRC_CGDB_MODE_KEY)->variant.int_val;
+    int cgdb_mode_key = cgdbrc_get_int(CGDBRC_CGDB_MODE_KEY);
 
     /* The cgdb mode key, puts the debugger into command mode */
     if (focus != CGDB && key == cgdb_mode_key) {

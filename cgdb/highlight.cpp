@@ -251,7 +251,7 @@ void hl_wprintw(WINDOW * win, const char *line, int width, int offset)
     int p;                      /* Count of chars printed to screen */
     int pad;                    /* Used to pad partial tabs */
     int attr;                   /* A temp variable used for attributes */
-    int highlight_tabstop = cgdbrc_get(CGDBRC_TABSTOP)->variant.int_val;
+    int highlight_tabstop = cgdbrc_get_int(CGDBRC_TABSTOP);
 
     /* Jump ahead to the character at offset (process color commands too) */
     length = strlen(line);
@@ -326,7 +326,7 @@ int hl_regex(const char *regex, const char **hl_lines, const char **tlines,
     char *local_cur_line;
     int success = 0;
     int offset = 0;
-    int config_wrapscan = cgdbrc_get(CGDBRC_WRAPSCAN)->variant.int_val;
+    int config_wrapscan = cgdbrc_get_int(CGDBRC_WRAPSCAN);
 
     if (tlines == NULL || tlines[0] == NULL ||
             cur_line == NULL || sel_line == NULL ||
