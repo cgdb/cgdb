@@ -47,8 +47,25 @@ enum hl_group_kind {
     HLG_EXECUTING_LINE_NUMBER,
     HLG_SCROLL_MODE_STATUS,
     HLG_LOGO,
+    HLG_LAST,
 
-    HLG_LAST
+    /* Straight colors - not configurable */
+    HLG_BLACK,
+    HLG_RED,
+    HLG_GREEN,
+    HLG_YELLOW,
+    HLG_BLUE,
+    HLG_MAGENTA,
+    HLG_CYAN,
+    HLG_WHITE,
+    HLG_BOLD_BLACK,
+    HLG_BOLD_RED,
+    HLG_BOLD_GREEN,
+    HLG_BOLD_YELLOW,
+    HLG_BOLD_BLUE,
+    HLG_BOLD_MAGENTA,
+    HLG_BOLD_CYAN,
+    HLG_BOLD_WHITE,
 };
 
 /* }}}*/
@@ -172,6 +189,8 @@ int hl_groups_parse_config(hl_groups_ptr hl_groups);
  * Number of characters in escape sequence
  */
 int hl_ansi_get_color_attrs(hl_groups_ptr hl_groups, const char *buf, int *attr);
+
+enum hl_group_kind hl_get_color_group(const char *color);
 
 /*@}*/
 /* }}}*/

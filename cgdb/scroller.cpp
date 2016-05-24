@@ -73,6 +73,7 @@ static char *parse(struct scroller *scr, struct scroller_line_attr **attrs,
     int length = MAX(orig_len, scr->current.pos) + buflen + (tab_size - 1) * tabcount;
     char *rv = (char *) cgdb_calloc(length + 1, 1);
     int i, j;
+    int debugwincolor = cgdbrc_get_int(CGDBRC_DEBUGWINCOLOR);
 
     /* Copy over original buffer */
     strcpy(rv, orig);
@@ -84,7 +85,7 @@ static char *parse(struct scroller *scr, struct scroller_line_attr **attrs,
         int attr;
 
         /* Handle ansi escape characters */
-        if (buf[j] == '\033') {
+        if (debugwincolor && buf[j] == '\033') {
             int ansi_count = hl_ansi_get_color_attrs(hl_groups_instance, buf + j, &attr);
             if (ansi_count) {
                 struct scroller_line_attr line_attr;

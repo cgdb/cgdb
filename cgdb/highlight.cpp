@@ -64,9 +64,11 @@ static void add_type(struct ibuf *ibuf, int *lasttype, int newtype)
     }
 }
 
-static int hlg_from_tokenizer_type(enum tokenizer_type type)
+/* Returns HLG_LAST on error */
+static enum hl_group_kind hlg_from_tokenizer_type(enum tokenizer_type type, const char *tok_data)
 {
     switch(type) {
+        case TOKENIZER_COLOR: return hl_get_color_group(tok_data);
         case TOKENIZER_KEYWORD: return HLG_KEYWORD;
         case TOKENIZER_TYPE: return HLG_TYPE;
         case TOKENIZER_LITERAL: return HLG_LITERAL;
@@ -75,7 +77,6 @@ static int hlg_from_tokenizer_type(enum tokenizer_type type)
         case TOKENIZER_DIRECTIVE: return HLG_DIRECTIVE;
         case TOKENIZER_TEXT: return HLG_TEXT;
         case TOKENIZER_ERROR: return HLG_TEXT;
-        case TOKENIZER_NEWLINE: return -1;
         case TOKENIZER_SEARCH: return HLG_SEARCH;
         case TOKENIZER_STATUS_BAR: return HLG_STATUS_BAR;
         case TOKENIZER_EXECUTING_LINE_ARROW: return HLG_EXECUTING_LINE_ARROW;
@@ -90,7 +91,8 @@ static int hlg_from_tokenizer_type(enum tokenizer_type type)
         case TOKENIZER_SCROLL_MODE_STATUS: return HLG_SCROLL_MODE_STATUS;
         case TOKENIZER_LOGO: return HLG_LOGO;
 
-        default: return -1;
+        case TOKENIZER_NEWLINE: return HLG_LAST;
+        default: return HLG_LAST;
     }
 }
 
@@ -126,14 +128,18 @@ int highlight_node(const char *filename, struct buffer *buf)
             lasttype = -1;
             ibuf_clear(ibuf);
         } else {
-            int hlg_type = hlg_from_tokenizer_type(e);
-            if (hlg_type < 0)
-                return -1;
+            const char *tok_data = tokenizer_get_data(t);
+            enum hl_group_kind hlg = hlg_from_tokenizer_type(e, tok_data);
+
+            if (hlg == HLG_LAST) {
+                logger_write_pos(logger, __FILE__, __LINE__, "Bad hlg_type for '%s', e==%d\n", tok_data, e);
+                hlg = HLG_TEXT;
+            }
 
             /* Set the highlight group type */
-            add_type(ibuf, &lasttype, hlg_type);
+            add_type(ibuf, &lasttype, hlg);
             /* Add the text and bump our length */
-            length += ibuf_add(ibuf, tokenizer_get_data(t));
+            length += ibuf_add(ibuf, tok_data);
         }
     }
 

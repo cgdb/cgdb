@@ -33,6 +33,7 @@ enum tokenizer_type {
     TOKENIZER_SELECTED_LINE_NUMBER,
     TOKENIZER_SCROLL_MODE_STATUS,
     TOKENIZER_LOGO,
+    TOKENIZER_COLOR,
 };
 
 enum tokenizer_language_support {

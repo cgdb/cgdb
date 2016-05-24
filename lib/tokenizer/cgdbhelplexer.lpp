@@ -39,9 +39,36 @@ L                       [a-zA-Z_]
 [`']ScrollModeStatus'   { return TOKENIZER_SCROLL_MODE_STATUS; }
 [`']Logo'               { return TOKENIZER_LOGO; }
 
-^[=]+                    { return(TOKENIZER_COMMENT); }
-^[\*]+                    { return(TOKENIZER_COMMENT); }
-               
+"DarkBlue"              { return TOKENIZER_COLOR; }
+"DarkGreen"             { return TOKENIZER_COLOR; }
+"DarkCyan"              { return TOKENIZER_COLOR; }
+"DarkRed"               { return TOKENIZER_COLOR; }
+"DarkMagenta"           { return TOKENIZER_COLOR; }
+"Brown"                 { return TOKENIZER_COLOR; }
+"DarkYellow"            { return TOKENIZER_COLOR; }
+"LightGray"             { return TOKENIZER_COLOR; }
+"LightGrey"             { return TOKENIZER_COLOR; }
+"Gray"                  { return TOKENIZER_COLOR; }
+"Grey"                  { return TOKENIZER_COLOR; }
+"DarkGray"              { return TOKENIZER_COLOR; }
+"DarkGrey"              { return TOKENIZER_COLOR; }
+"Blue"                  { return TOKENIZER_COLOR; }
+"LightBlue"             { return TOKENIZER_COLOR; }
+"Green"                 { return TOKENIZER_COLOR; }
+"LightGreen"            { return TOKENIZER_COLOR; }
+"Cyan"                  { return TOKENIZER_COLOR; }
+"LightCyan"             { return TOKENIZER_COLOR; }
+"Red"                   { return TOKENIZER_COLOR; }
+"LightRed"              { return TOKENIZER_COLOR; }
+"Magenta"               { return TOKENIZER_COLOR; }
+"LightMagenta"          { return TOKENIZER_COLOR; }
+"Yellow"                { return TOKENIZER_COLOR; }
+"LightYellow"           { return TOKENIZER_COLOR; }
+"White"                 { return TOKENIZER_COLOR; }
+
+^[=]+                   { return(TOKENIZER_COMMENT); }
+^[\*]+                  { return(TOKENIZER_COMMENT); }
+
 \n					    { return(TOKENIZER_NEWLINE); }
 \r\n 			        { return(TOKENIZER_NEWLINE); }
 \r 						{ return(TOKENIZER_NEWLINE); }
