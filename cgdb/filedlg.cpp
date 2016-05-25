@@ -208,10 +208,13 @@ static void filedlg_hscroll(struct filedlg *fd, int offset)
 {
     int lwidth;
     int max_width;
+    int width, height;
 
     if (fd->buf) {
+        getmaxyx(fd->win, height, width);
+
         lwidth = log10_uint(fd->buf->length) + 1;
-        max_width = fd->buf->max_width - COLS + lwidth + 6;
+        max_width = fd->buf->max_width - width + lwidth + 6;
 
         fd->buf->sel_col += offset;
         if (fd->buf->sel_col > max_width)

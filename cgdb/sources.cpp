@@ -904,10 +904,13 @@ void source_hscroll(struct sviewer *sview, int offset)
 {
     int lwidth;
     int max_width;
+    int width, height;
 
     if (sview->cur) {
+        getmaxyx(sview->win, height, width);
+
         lwidth = log10_uint(sbcount(sview->cur->buf->tlines)) + 1;
-        max_width = sview->cur->buf->max_width - COLS + lwidth + 6;
+        max_width = sview->cur->buf->max_width - width + lwidth + 6;
 
         sview->cur->sel_col += offset;
         if (sview->cur->sel_col > max_width)
