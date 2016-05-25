@@ -296,7 +296,7 @@ int filedlg_display(struct filedlg *fd)
 
     /* Print 'height' lines of the file, starting at 'file' */
     lwidth = log10_uint(fd->buf->length) + 1;
-    sprintf(fmt, "%%%dd", lwidth);
+    snprintf(fmt, sizeof(fmt), "%%%dd", lwidth);
 
     print_in_middle(fd->win, 0, width, label);
     wmove(fd->win, 0, 0);

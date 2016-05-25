@@ -744,7 +744,7 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
 
     /* Print 'height' lines of the file, starting at 'line' */
     lwidth = log10_uint(count) + 1;
-    sprintf(fmt, "%%%dd", lwidth);
+    snprintf(fmt, sizeof(fmt), "%%%dd", lwidth);
 
     for (i = 0; i < height; i++, line++) {
         wmove(sview->win, i, 0);

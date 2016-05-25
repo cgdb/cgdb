@@ -178,7 +178,7 @@ static char *highlight_line_segment(const char *orig, int start, int end)
     /*
        for ( j = 0; j < strlen(orig); j++ ) {
            char temp[100];
-           sprintf(temp, "(%d:%c)", orig[j], orig[j]);
+           snprintf(temp, sizeof(temp), "(%d:%c)", orig[j], orig[j]);
            scr_add(gdb_win, temp, 0);
        }
        scr_add(gdb_win, "\r\n", 0);

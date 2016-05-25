@@ -462,10 +462,10 @@ void if_display_message(const char *msg, enum win_refresh dorefresh, int width, 
     if (error_length > width)
         strcat(strncpy(buf_display, msg, width - 1), ">");
     else if (error_length + length > width)
-        sprintf(buf_display, "%s>%s", msg,
+        snprintf(buf_display, sizeof(buf_display), "%s>%s", msg,
                 va_buf + (length - (width - error_length) + 1));
     else
-        sprintf(buf_display, "%s%s", msg, va_buf);
+        snprintf(buf_display, sizeof(buf_display), "%s%s", msg, va_buf);
 
     /* Print white background */
     wattron(status_win, attr);
