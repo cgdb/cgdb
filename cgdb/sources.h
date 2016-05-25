@@ -162,7 +162,7 @@ char *source_current_file(struct sviewer *sview, char *path);
  *
  * Return Value:  Zero on success, non-zero on error.
  */
-int source_display(struct sviewer *sview, int focus);
+int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh);
 
 /* source_move:  Relocate the source window.
  * ------------

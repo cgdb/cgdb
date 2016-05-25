@@ -371,7 +371,7 @@ static void separator_display()
     for (; row < last_row; ++row) {
         wmove(stdscr, row, col);
         waddch(stdscr, VERT_LINE);
-        wrefresh(stdscr);
+        wnoutrefresh(stdscr);
     }
 }
 
@@ -380,7 +380,7 @@ static void separator_display()
  * --------------------------------------- */
 
 /* Updates the status bar */
-static void update_status_win(void)
+static void update_status_win(enum win_refresh dorefresh)
 {
     int pos;
     char filename[FSUTIL_PATH_MAX];
@@ -402,12 +402,12 @@ static void update_status_win(void)
     /* Print the regex that the user is looking for Forward */
     if (focus == CGDB_STATUS_BAR && sbc_kind == SBC_REGEX
             && regex_direction_cur) {
-        if_display_message("/", WIDTH - 1, "%s", ibuf_get(regex_cur));
+        if_display_message("/", dorefresh, WIDTH - 1, "%s", ibuf_get(regex_cur));
         curs_set(1);
     }
     /* Regex backwards */
     else if (focus == CGDB_STATUS_BAR && sbc_kind == SBC_REGEX) {
-        if_display_message("?", WIDTH - 1, "%s", ibuf_get(regex_cur));
+        if_display_message("?", dorefresh, WIDTH - 1, "%s", ibuf_get(regex_cur));
         curs_set(1);
     }
     /* A colon command typed at the status bar */
@@ -416,20 +416,23 @@ static void update_status_win(void)
 
         if (!command)
             command = "";
-        if_display_message(":", WIDTH - 1, "%s", command);
+        if_display_message(":", dorefresh, WIDTH - 1, "%s", command);
         curs_set(1);
     }
     /* Default: Current Filename */
     else {
         /* Print filename */
         if (src_win != NULL && source_current_file(src_win, filename) != NULL)
-            if_display_message("", WIDTH - 1, "%s", filename);
+            if_display_message("", dorefresh, WIDTH - 1, "%s", filename);
     }
 
-    wrefresh(status_win);
+    if (dorefresh == WIN_REFRESH)
+        wrefresh(status_win);
+    else
+        wnoutrefresh(status_win);
 }
 
-void if_display_message(const char *msg, int width, const char *fmt, ...)
+void if_display_message(const char *msg, enum win_refresh dorefresh, int width, const char *fmt, ...)
 {
     va_list ap;
     char va_buf[MAXLINE];
@@ -471,7 +474,11 @@ void if_display_message(const char *msg, int width, const char *fmt, ...)
 
     mvwprintw(status_win, 0, 0, "%s", buf_display);
     wattroff(status_win, attr);
-    wrefresh(status_win);
+    
+    if (dorefresh == WIN_REFRESH)
+        wrefresh(status_win);
+    else
+        wnoutrefresh(status_win);
 }
 
 /* if_draw: Draws the interface on the screen.
@@ -485,25 +492,27 @@ void if_draw(void)
         return;
     }
 
-    update_status_win();
+    update_status_win(WIN_NO_REFRESH);
 
     if (get_src_height() != 0 && get_gdb_height() != 0)
-        wrefresh(status_win);
+        wnoutrefresh(status_win);
 
     if (get_src_height() > 0)
-        source_display(src_win, focus == CGDB);
+        source_display(src_win, focus == CGDB, WIN_NO_REFRESH);
 
     if (cur_split_orientation == WSO_VERTICAL)
         separator_display();
 
     if (get_gdb_height() > 0)
-        scr_refresh(gdb_win, focus == GDB);
+        scr_refresh(gdb_win, focus == GDB, WIN_NO_REFRESH);
 
     /* This check is here so that the cursor goes to the 
      * cgdb window. The cursor would stay in the gdb window 
      * on cygwin */
     if (get_src_height() > 0 && focus == CGDB)
-        wrefresh(src_win->win);
+        wnoutrefresh(src_win->win);
+
+    doupdate();
 }
 
 /* validate_window_sizes:
@@ -758,9 +767,9 @@ static void if_run_command(struct sviewer *sview, struct ibuf *ibuf_command)
     }
 
     if (command_parse_string(command)) {
-        if_display_message("Unknown command: ", 0, "%s", command);
+        if_display_message("Unknown command: ", WIN_NO_REFRESH, 0, "%s", command);
     } else {
-        update_status_win();
+        update_status_win(WIN_NO_REFRESH);
     }
 
     if_draw();
@@ -884,7 +893,7 @@ static int status_bar_regex_input(struct sviewer *sview, int key)
                 source_search_regex(sview, ibuf_get(regex_cur), 1,
                         regex_direction_cur, regex_icase);
                 if_draw();
-                update_status_win();
+                update_status_win(WIN_REFRESH);
             }
             break;
         default:
@@ -900,7 +909,7 @@ static int status_bar_regex_input(struct sviewer *sview, int key)
             source_search_regex(sview, ibuf_get(regex_cur), 1,
                     regex_direction_cur, regex_icase);
             if_draw();
-            update_status_win();
+            update_status_win(WIN_REFRESH);
     };
 
     if (done) {
@@ -933,7 +942,7 @@ static int status_bar_normal_input(int key)
                 done = 1;
             } else {
                 ibuf_delchar(cur_sbc);
-                update_status_win();
+                update_status_win(WIN_REFRESH);
             }
             break;
         default:
@@ -946,7 +955,7 @@ static int status_bar_normal_input(int key)
             } else {
                 ibuf_addchar(cur_sbc, key);
             }
-            update_status_win();
+            update_status_win(WIN_REFRESH);
             break;
     };
 
@@ -1409,11 +1418,13 @@ void if_print(const char *buf, int source )
     scr_add(gdb_win, buf, source);
 
     if (get_gdb_height() > 0) {
-        scr_refresh(gdb_win, focus == GDB);
+        scr_refresh(gdb_win, focus == GDB, WIN_NO_REFRESH);
 
         /* Make sure cursor reappears in source window if focus is there */
         if (focus == CGDB)
-            wrefresh(src_win->win);
+            wnoutrefresh(src_win->win);
+
+        doupdate();
     }
 }
 
@@ -1461,7 +1472,7 @@ void if_display_help(void)
         if_draw();
     }
     else if (ret_val == 5)      /* File does not exist */
-        if_display_message("No such file: ", 0, "%s", cgdb_help_file);
+        if_display_message("No such file: ", WIN_REFRESH, 0, "%s", cgdb_help_file);
 }
 
 struct sviewer *if_get_sview()

@@ -1051,7 +1051,7 @@ static void process_commands(struct tgdb *tgdb_in)
                  * the debugged program but libtgdb is claiming that gdb knows
                  * none. */
             case TGDB_SOURCES_DENIED:
-                if_display_message("Error:", 0,
+                if_display_message("Error:", WIN_REFRESH, 0,
                         " No sources available! Was the program compiled with debug?");
                 kui_input_acceptable = 1;
                 break;
@@ -1075,7 +1075,7 @@ static void process_commands(struct tgdb *tgdb_in)
                 if_show_file(NULL, 0);
                 /* com can be NULL when tgdb orig requests main file */
                 if (file->absolute_path != NULL)
-                    if_display_message("No such file:", 0, " %s",
+                    if_display_message("No such file:", WIN_REFRESH, 0, " %s",
                             file->absolute_path);
                 break;
             }
@@ -1086,7 +1086,7 @@ static void process_commands(struct tgdb *tgdb_in)
                  * This could eventually go here, but for now, the update breakpoint 
                  * display function makes the status bar go back to the name of the file.
                  *
-                 * if_display_message ( "Program exited with value", 0, " %d", *status );
+                 * if_display_message ( "Program exited with value", WIN_REFRESH, 0, " %d", *status );
                  */
 
                 /* Clear the cache */

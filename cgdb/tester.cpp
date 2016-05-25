@@ -154,9 +154,9 @@ int main(int argc, char *argv[])
         if (*line < 7)
             *line = 7;
         move(5, 0);
-        source_display(argv[1], stdscr, line1, num);
+        source_display(argv[1], stdscr, line1, num, 1);
         move(20, 0);
-        source_display(argv[2], stdscr, line2, num);
+        source_display(argv[2], stdscr, line2, num, 1);
     } while ((c = getch()) != 27);
     source_del(argv[1]);
     source_del(argv[2]);

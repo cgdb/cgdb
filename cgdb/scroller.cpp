@@ -478,7 +478,7 @@ static void scr_printline(WINDOW *win, int x, int y, int col,
         wclrtoeol(win);
 }
 
-void scr_refresh(struct scroller *scr, int focus)
+void scr_refresh(struct scroller *scr, int focus, enum win_refresh dorefresh)
 {
     int length;                 /* Length of current line */
     int nlines;                 /* Number of lines written so far */
@@ -551,5 +551,8 @@ void scr_refresh(struct scroller *scr, int focus)
         curs_set(0);
     }
 
-    wrefresh(scr->win);
+    if (dorefresh == WIN_REFRESH)
+        wrefresh(scr->win);
+    else
+        wnoutrefresh(scr->win);
 }

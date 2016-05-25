@@ -18,10 +18,10 @@
 #include "command_lexer.h"
 #include "tgdb.h"
 #include "sys_util.h"
+#include "cgdb.h"
 #include "interface.h"
 #include "tokenizer.h"
 #include "highlight_groups.h"
-#include "cgdb.h"
 #include "std_list.h"
 #include "kui_term.h"
 

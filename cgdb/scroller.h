@@ -131,6 +131,6 @@ void scr_move(struct scroller *scr,
  *   scr:    Pointer to the scroller object
  *   focus:  If the window has focus
  */
-void scr_refresh(struct scroller *scr, int focus);
+void scr_refresh(struct scroller *scr, int focus, enum win_refresh dorefresh);
 
 #endif

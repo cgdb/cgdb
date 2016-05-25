@@ -95,7 +95,8 @@ struct sviewer *if_get_sview();
  *
  * fmt:     The message to display
  */
-void if_display_message(const char *msg, int width, const char *fmt, ...) ATTRIBUTE_PRINTF( 3, 4 );
+void if_display_message(const char *msg, enum win_refresh dorefresh,
+                        int width, const char *fmt, ...) ATTRIBUTE_PRINTF( 4, 5 );
 
 /* if_clear_filedlg: Clears all the files the file dialog has to show the user.
  * -----------------

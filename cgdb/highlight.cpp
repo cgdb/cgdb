@@ -35,10 +35,10 @@
 #endif /* HAVE_REGEX_H */
 
 /* Local Includes */
+#include "cgdb.h"
 #include "highlight.h"
 #include "highlight_groups.h"
 #include "sources.h"
-#include "cgdb.h"
 #include "tokenizer.h"
 #include "sys_util.h"
 #include "interface.h"
@@ -182,7 +182,7 @@ static char *highlight_line_segment(const char *orig, int start, int end)
            scr_add(gdb_win, temp, 0);
        }
        scr_add(gdb_win, "\r\n", 0);
-       scr_refresh(gdb_win, 1);
+       scr_refresh(gdb_win, 1, WIN_REFRESH);
      */
 #endif
 

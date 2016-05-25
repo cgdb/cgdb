@@ -27,6 +27,22 @@
 
 #define MAXLINE 4096
 
+/* From the ncurses doupdate() man page:
+ *
+ * The routine wrefresh works by first calling wnoutrefresh, which copies the
+ * named window to the virtual screen, and then calling doupdate, which compares
+ * the virtual screen to the physical screen and does the actual update. If the
+ * programmer wishes to output several windows at once, a series of calls to
+ * wrefresh results in alternating calls to wnoutrefresh and doupdate, causing
+ * several bursts of output to the screen. By first calling wnoutrefresh for each
+ * window, it is then possible to call doupdate once, resulting in only one burst
+ * of output, with fewer total characters transmitted and less CPU time used.
+ *
+ * So we use the win_refresh option to tell the routine whether to use
+ * wrefresh() or wnoutrefresh(). This eliminates quite a bit of flashing as well.
+ */
+enum win_refresh { WIN_NO_REFRESH, WIN_REFRESH };
+
 /* TODO: Remove the below 3 lines. This is a reorganization effort to allow 
  * TGDB to understand the new request/response mechanism that TGDB supports.
  */
