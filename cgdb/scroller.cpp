@@ -85,7 +85,7 @@ static char *parse(struct scroller *scr, struct scroller_line_attr **attrs,
 
         /* Handle ansi escape characters */
         if (buf[j] == '\033') {
-            int ansi_count = hl_ansi_get_color_attrs(buf + j, &attr);
+            int ansi_count = hl_ansi_get_color_attrs(hl_groups_instance, buf + j, &attr);
             if (ansi_count) {
                 struct scroller_line_attr line_attr;
                 j += ansi_count - 1;
