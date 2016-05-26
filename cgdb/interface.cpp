@@ -1019,7 +1019,7 @@ toggle_breakpoint(struct sviewer *sview, enum tgdb_breakpoint_action t)
         path = sview->cur->path;
 
     /* delete an existing breakpoint */
-    if (sview->cur->breakpts[line])
+    if (sview->cur->lflags[line].breakpt)
         t = TGDB_BREAKPOINT_DELETE;
 
     request_ptr = tgdb_request_modify_breakpoint(tgdb, path, line + 1, t);
@@ -1215,9 +1215,25 @@ int if_init(void)
     return 0;
 }
 
-static int cgdb_input(int key)
+static int cgdb_input(int key, int *last_key)
 {
     int regex_icase = cgdbrc_get_int(CGDBRC_IGNORECASE);
+
+    if (src_win && src_win->cur) {
+        int ret = 0;
+
+        /* Handle setting (mX) and going ('X) to source buffer marks */
+        if (last_key_pressed == 'm')
+            ret = source_set_mark(src_win, key);
+        else if (last_key_pressed == '\'')
+            ret = source_goto_mark(src_win, key);
+
+        if (ret) {
+            *last_key = 0;
+            if_draw();
+            return 0;
+        }
+    }
 
     switch (key) {
         case 'i':
@@ -1343,7 +1359,7 @@ static int cgdb_input(int key)
     return 0;
 }
 
-int internal_if_input(int key)
+int internal_if_input(int key, int *last_key)
 {
     /* Normally, CGDB_KEY_ESC, but can be configured by the user */
     int cgdb_mode_key = cgdbrc_get_int(CGDBRC_CGDB_MODE_KEY);
@@ -1373,11 +1389,12 @@ int internal_if_input(int key)
     /* Check for global keystrokes */
     switch (focus) {
         case CGDB:
-            return cgdb_input(key);
+            return cgdb_input(key, last_key);
         case GDB:
             return gdb_input(key);
         case FILE_DLG:
         {
+            //$ TODO: Does this need to be static?
             static char filedlg_file[MAX_LINE];
             int ret = filedlg_recv_char(fd, key, filedlg_file);
 
@@ -1409,9 +1426,10 @@ int internal_if_input(int key)
 
 int if_input(int key)
 {
-    int result = internal_if_input(key);
+    int last_key = key;
+    int result = internal_if_input(key, &last_key);
 
-    last_key_pressed = key;
+    last_key_pressed = last_key;
     return result;
 }
 

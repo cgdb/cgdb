@@ -75,6 +75,7 @@ static struct cgdbrc_config_option cgdbrc_config_options[CGDBRC_WRAPSCAN + 1] = 
     {CGDBRC_IGNORECASE, {.int_val = 0}},
     {CGDBRC_SELECTED_LINE_DISPLAY,
         {.line_display_style = LINE_DISPLAY_BLOCK}},
+    {CGDBRC_SHOWMARKS, {.int_val = 1}},
     {CGDBRC_SHOWTGDBCOMMANDS, {.int_val = 0}},
     {CGDBRC_SYNTAX, {.language_support_val = TOKENIZER_LANGUAGE_UNKNOWN}},
     {CGDBRC_TABSTOP, {.int_val = 8}},
@@ -137,6 +138,10 @@ static struct ConfigVariable {
     {
     "selectedlinedisplay", "sld", CONFIG_TYPE_FUNC_STRING,
                 (void *)command_set_selected_line_display},
+            /* showmarks */
+    {
+    "showmarks", "marks", CONFIG_TYPE_INT,
+                (void *)&cgdbrc_config_options[CGDBRC_SHOWMARKS].variant.int_val},
             /* showtgdbcommands */
     {
     "showtgdbcommands", "stc", CONFIG_TYPE_FUNC_BOOL, (void *)&command_set_stc},

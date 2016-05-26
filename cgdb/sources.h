@@ -39,15 +39,26 @@
 /* Max length of a line */
 #define MAX_LINE        4096
 
+/* Count of marks */
+#define MARK_COUNT      26
+
 /* --------------- */
 /* Data Structures */
 /* --------------- */
 
+/* Global mark: source file and line number */
+struct sviewer_mark {
+    struct list_node *node;
+    int line;
+};
+
 /* Source viewer object */
 struct sviewer {
-    struct list_node *list_head;    /* File list */
-    struct list_node *cur;      /* Current node we're displaying */
-    WINDOW *win;                /* Curses window */
+    struct list_node *list_head;           /* File list */
+    struct list_node *cur;                 /* Current node we're displaying */
+    sviewer_mark global_marks[MARK_COUNT]; /* Global A-Z marks */
+    sviewer_mark jump_back_mark;           /* Location where last jump occurred from */
+    WINDOW *win;                           /* Curses window */
 };
 
 struct buffer {
@@ -58,6 +69,11 @@ struct buffer {
     enum tokenizer_language_support language;   /* The language type of this file */
 };
 
+struct line_flags {
+    unsigned char breakpt : 2;
+    unsigned char has_mark : 1;
+};
+
 struct list_node;
 struct list_node {
     char *path;                 /* Full path to source file */
@@ -65,7 +81,7 @@ struct list_node {
     struct buffer *buf;         /* Current buffer - points to color_buf or orig_buf */
     struct buffer color_buf;    /* Color file buffer */
     struct buffer orig_buf;     /* Original File buffer ( no color ) */
-    char *breakpts;             /* Breakpoints */
+    line_flags *lflags;         /* Breakpoints */
     int sel_line;               /* Current line selected in viewer */
     int sel_col;                /* Current column selected in viewer */
     int exe_line;               /* Current line executing */
@@ -77,6 +93,8 @@ struct list_node {
     enum tokenizer_language_support language;   /* The language type of this file */
 
     time_t last_modification;   /* timestamp of last modification */
+
+    int local_marks[MARK_COUNT];/* Line numbers for local (a..z) marks */
 
     struct list_node *next;     /* Pointer to next link in list */
 };
@@ -298,5 +316,33 @@ void source_clear_breaks(struct sviewer *sview);
  * 0 on success or -1 on error
  */
 int source_reload(struct sviewer *sview, const char *path, int force);
+
+/* ----- */
+/* Marks */
+/* ----- */
+
+/* source_set_mark:  Set mark at current selected line.
+ * --------------------
+ *
+ *   sview:  The source viewer object
+ *   key: local mark char: a..z or global mark: A..Z
+ */
+int source_set_mark(struct sviewer *sview, int key);
+
+/* source_goto_mark:  Goto mark specified at key.
+ * --------------------
+ *
+ *   sview:  The source viewer object
+ *   key: local mark char: a..z or global mark: A..Z
+ */
+int source_goto_mark(struct sviewer *sview, int key);
+
+/* source_get_mark_char:  Return mark char for line.
+ * --------------------
+ *
+ *   sview:  The source viewer object
+ *   line: line to check for mark
+ */
+int source_get_mark_char(struct sviewer *sview, int line);
 
 #endif
