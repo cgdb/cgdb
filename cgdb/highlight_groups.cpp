@@ -11,6 +11,7 @@
 #include "command_lexer.h"
 #include "sys_util.h"
 #include "logger.h"
+#include "cgdbrc.h"
 
 #if HAVE_CURSES_H
 #include <curses.h>
@@ -24,6 +25,15 @@
 /* internal {{{*/
 
 #define UNSPECIFIED_COLOR (-2)
+
+struct hl_setup_group_info {
+    enum hl_group_kind group_kind;
+    int mono_attrs;
+    int color_attrs;
+    int fg_color;
+    int bg_color;
+};
+static struct hl_setup_group_info *setup_group_infos = NULL;
 
 /** This represents all the data for a particular highlighting group. */
 struct hl_group_info {
@@ -486,6 +496,7 @@ int hl_groups_shutdown(hl_groups_ptr hl_groups)
 int hl_groups_setup(hl_groups_ptr hl_groups)
 {
     int i;
+    int val;
     const struct default_hl_group_info *ginfo;
 
     if (!hl_groups)
@@ -497,14 +508,15 @@ int hl_groups_setup(hl_groups_ptr hl_groups)
     ginfo = default_groups_for_curses;
 #endif
 
-    hl_groups->in_color = has_colors();
+    hl_groups->in_color = cgdbrc_get_int(CGDBRC_COLOR) &&
+                          has_colors();
 
-    //$ TODO: Add ability to disable ansi_color mode in cgdbrc file
-    hl_groups->ansi_color = has_colors() && (COLORS >= 8) && (COLOR_PAIRS >= 64);
+    hl_groups->ansi_color = cgdbrc_get_int(CGDBRC_ANSIESCAPEPARSING) &&
+                            hl_groups->in_color &&
+                            (COLORS >= 8) && (COLOR_PAIRS >= 64);
 
     /* Set up the default groups. */
     for (i = 0; ginfo[i].kind != HLG_LAST; ++i) {
-        int val;
         const struct default_hl_group_info *spec = &ginfo[i];
 
         val = setup_group(hl_groups, spec->kind, spec->mono_attrs,
@@ -513,6 +525,23 @@ int hl_groups_setup(hl_groups_ptr hl_groups)
             logger_write_pos(logger, __FILE__, __LINE__, "setup group.");
             return -1;
         }
+    }
+
+    if (setup_group_infos) {
+        for (i = 0; i < sbcount(setup_group_infos); i++) {
+            struct hl_setup_group_info *group_info = &setup_group_infos[i];
+
+            val = setup_group(hl_groups, group_info->group_kind,
+                              group_info->mono_attrs, group_info->color_attrs,
+                              group_info->fg_color, group_info->bg_color);
+            if (val == -1) {
+                logger_write_pos(logger, __FILE__, __LINE__, "setup group.");
+                return -1;
+            }
+        }
+
+        sbfree(setup_group_infos);
+        setup_group_infos = NULL;
     }
 
     return 0;
@@ -554,9 +583,6 @@ int hl_groups_parse_config(hl_groups_ptr hl_groups)
         BG,
         IGNORE
     };
-
-    if (!hl_groups)
-        return 1;
 
     /* First, get the "group", that is, the group. */
     token = yylex();
@@ -730,10 +756,25 @@ int hl_groups_parse_config(hl_groups_ptr hl_groups)
         }
     }
 
-    val = setup_group(hl_groups, group_kind, mono_attrs, color_attrs, fg_color,
-            bg_color);
-    if (val == -1) {
-        return 1;
+    if (!hl_groups) {
+        /* We haven't had our group initialized yet, so this is coming in when reading
+           the cgdb rc file. Store this information and set it in hl_gruops_setup().
+         */
+        struct hl_setup_group_info group_info;
+
+        group_info.group_kind = group_kind;
+        group_info.mono_attrs = mono_attrs;
+        group_info.color_attrs = color_attrs;
+        group_info.fg_color = fg_color;
+        group_info.bg_color = bg_color;
+
+        sbpush(setup_group_infos, group_info);
+    } else {
+        val = setup_group(hl_groups, group_kind, mono_attrs, color_attrs, fg_color,
+                bg_color);
+        if (val == -1) {
+            return 1;
+        }
     }
 
     return 0;

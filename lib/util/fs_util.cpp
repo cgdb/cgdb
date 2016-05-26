@@ -112,11 +112,7 @@ int fs_util_create_dir_in_base(const char *base, const char *dirname)
 
 void fs_util_get_path(const char *base, const char *name, char *path)
 {
-    char dir[FSUTIL_PATH_MAX];
-
-    snprintf(dir, sizeof(dir), "%s/%s", base, name);
-
-    strncpy(path, dir, strlen(dir) + 1);
+    snprintf(path, FSUTIL_PATH_MAX, "%s/%s", base, name);
 }
 
 int fs_util_file_exists_in_path(char * filePath)

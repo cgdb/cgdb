@@ -65,9 +65,11 @@ static int cgdbrc_set_val(struct cgdbrc_config_option config_option);
  * It is initialized with the default values.
  */
 static struct cgdbrc_config_option cgdbrc_config_options[CGDBRC_WRAPSCAN + 1] = {
+    {CGDBRC_ANSIESCAPEPARSING, {.int_val = 1}},
     {CGDBRC_ARROWSTYLE, {.line_display_style = LINE_DISPLAY_SHORT_ARROW}},
     {CGDBRC_AUTOSOURCERELOAD, {.int_val = 1}},
     {CGDBRC_CGDB_MODE_KEY, {.int_val = CGDB_KEY_ESC}},
+    {CGDBRC_COLOR, {.int_val = 1}},
     {CGDBRC_EXECUTING_LINE_DISPLAY,
         {.line_display_style = LINE_DISPLAY_LONG_ARROW}},
     {CGDBRC_IGNORECASE, {.int_val = 0}},
@@ -100,8 +102,13 @@ static struct ConfigVariable {
     void *data;
 } VARIABLES[] = {
 
+
     /* keep this stuff sorted! !sort */
 
+            /* ansiescapeparsing */
+    {
+    "ansiescapeparsing", "ansi", CONFIG_TYPE_INT,
+                (void *)&cgdbrc_config_options[CGDBRC_ANSIESCAPEPARSING].variant.int_val},
     /* arrowstyle */
     {
         "arrowstyle", "as", CONFIG_TYPE_FUNC_STRING, (void *)command_set_arrowstyle},
@@ -114,6 +121,10 @@ static struct ConfigVariable {
     {
     "cgdbmodekey", "cgdbmodekey", CONFIG_TYPE_FUNC_STRING,
                 (void *)command_set_cgdb_mode_key},
+            /* color */
+    {
+    "color", "col", CONFIG_TYPE_INT,
+                (void *)&cgdbrc_config_options[CGDBRC_COLOR].variant.int_val},
             /* executinglinedisplay */
     {
     "executinglinedisplay", "eld", CONFIG_TYPE_FUNC_STRING,
@@ -954,29 +965,36 @@ int command_parse_string(const char *buffer)
     return rv;
 }
 
-int command_parse_file(FILE * fp)
+int command_parse_file(const char *config_file)
 {
-    char buffer[4096];
-    char *p = buffer;
-    int linenumber = 0;
+    FILE *fp;
 
-    while (linenumber++, fgets(p, sizeof (buffer) - (p - buffer), fp)) {
-        int bufferlen = strlen(buffer);
+    fp = fopen(config_file, "r");
+    if (fp) {
+        char buffer[4096];
+        char *p = buffer;
+        int linenumber = 0;
 
-        if ((bufferlen - 2 >= 0) && buffer[bufferlen - 2] == '\\') {
-            /* line continuation character, read another line into the buffer */
-            linenumber--;
-            p = buffer + bufferlen - 2;
-            continue;
+        while (linenumber++, fgets(p, sizeof (buffer) - (p - buffer), fp)) {
+            int bufferlen = strlen(buffer);
+
+            if ((bufferlen - 2 >= 0) && buffer[bufferlen - 2] == '\\') {
+                /* line continuation character, read another line into the buffer */
+                linenumber--;
+                p = buffer + bufferlen - 2;
+                continue;
+            }
+
+            if (command_parse_string(buffer)) {
+                /* buffer already has an \n */
+                if_print_message("Error parsing line %d: %s", linenumber, buffer);
+                /* return -1; don't return, lets keep parsing the file. */
+            }
+
+            p = buffer;
         }
 
-        if (command_parse_string(buffer)) {
-            /* buffer already has an \n */
-            if_print_message("Error parsing line %d: %s", linenumber, buffer);
-            /* return -1; don't return, lets keep parsing the file. */
-        }
-
-        p = buffer;
+        fclose(fp);
     }
 
     return 0;

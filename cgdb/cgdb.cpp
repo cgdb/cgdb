@@ -389,6 +389,14 @@ int run_shell_command(const char *command)
     return rv;
 }
 
+static void parse_cgdbrc_file()
+{
+    char config_file[FSUTIL_PATH_MAX];
+
+    fs_util_get_path(cgdb_home_dir, "cgdbrc", config_file);
+    command_parse_file(config_file);
+}
+
 /* readline code {{{*/
 
 /* Please forgive me for adding all the comment below. This function
@@ -1829,6 +1837,13 @@ int main(int argc, char *argv[])
         exit(-1);
     }
 
+    /* Parse the cgdbrc file. Note that we are doing this before
+       if_init() is called so windows and highlight groups haven't
+       been created yet. We need to do this here because some options
+       can disable color, ansi escape parsing, or set Logo color.
+    */
+    parse_cgdbrc_file();
+
     /* Initialize the display */
     switch (if_init()) {
         case 1:
@@ -1865,18 +1880,6 @@ int main(int argc, char *argv[])
         logger_write_pos(logger, __FILE__, __LINE__, "init_signal_pipe error");
         cleanup();
         exit(-1);
-    }
-
-    {
-        char config_file[FSUTIL_PATH_MAX];
-        FILE *config;
-
-        fs_util_get_path(cgdb_home_dir, "cgdbrc", config_file);
-        config = fopen(config_file, "r");
-        if (config) {
-            command_parse_file(config);
-            fclose(config);
-        }
     }
 
     /* Enter main loop */

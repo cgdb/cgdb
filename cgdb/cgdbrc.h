@@ -72,7 +72,7 @@ int command_parse_string(const char *buffer);
  * \return
  * Currently only returns 0.
  */
-int command_parse_file(FILE * fp);
+int command_parse_file(const char *config_file);
 
 /* }}} */
 
@@ -111,9 +111,11 @@ typedef enum {
 /** All of the different configuration options */
 enum cgdbrc_option_kind {
     /* Arrow style is deprecated, use CGDBRC_EXECUTING_LINE_DISPLAY insetad */
+    CGDBRC_ANSIESCAPEPARSING,
     CGDBRC_ARROWSTYLE,
     CGDBRC_AUTOSOURCERELOAD,
     CGDBRC_CGDB_MODE_KEY,
+    CGDBRC_COLOR,
     CGDBRC_EXECUTING_LINE_DISPLAY,
     CGDBRC_IGNORECASE,
     CGDBRC_SELECTED_LINE_DISPLAY,
@@ -139,8 +141,10 @@ struct cgdbrc_config_option {
         /* option_kind == CGDBRC_EXECUTING_LINE_DISPLAY */
         /* option_kind == CGDBRC_SELECTED_LINE_DISPLAY */
         enum LineDisplayStyle line_display_style;
+        /* option_kind == CGDBRC_ANSIESCAPEPARSING */
         /* option_kind == CGDBRC_AUTOSOURCERELOAD */
         /* option_kind == CGDBRC_CGDB_MODE_KEY */
+        /* option_kind == CGDBRC_COLOR */
         /* option_kind == CGDBRC_IGNORECASE */
         /* option_kind == CGDBRC_SHOWTGDBCOMMANDS */
         /* option_kind == CGDBRC_TABSTOP */
