@@ -16,6 +16,10 @@
 #include <string.h>
 #endif /* HAVE_STRING_H */
 
+#if HAVE_LIMITS_H
+#include <limits.h> /* INT_MAX */
+#endif
+
 #include "filedlg.h"
 #include "cgdb.h"
 #include "sys_util.h"
@@ -46,6 +50,8 @@ static char regex_line[MAX_LINE];   /* The regex the user enters */
 static int regex_line_pos;      /* The index into the current regex */
 static int regex_search;        /* Currently searching text ? */
 static int regex_direction;     /* Direction to search */
+
+static int G_line_number = -1;      /* Line number user wants to 'G' to */
 
 /* print_in_middle: Prints the message 'string' centered at line in win 
  * ----------------
@@ -221,6 +227,17 @@ static void filedlg_hscroll(struct filedlg *fd, int offset)
             fd->buf->sel_col = max_width;
         if (fd->buf->sel_col < 0)
             fd->buf->sel_col = 0;
+    }
+}
+
+static void filedlg_set_sel_line(struct filedlg *fd, int line)
+{
+    if (fd->buf) {
+        if (line < 0)
+            line = 0;
+        if (line >= fd->buf->length)
+            line = fd->buf->length - 1;
+        fd->buf->sel_line = line;
     }
 }
 
@@ -468,7 +485,7 @@ static int capture_regex(struct filedlg *fd)
     return 0;
 }
 
-int filedlg_recv_char(struct filedlg *fd, int key, char *file)
+int filedlg_recv_char(struct filedlg *fd, int key, char *file, int last_key_pressed)
 {
     int height, width;
 
@@ -488,6 +505,12 @@ int filedlg_recv_char(struct filedlg *fd, int key, char *file)
         case CGDB_KEY_NPAGE:
         case CGDB_KEY_CTRL_F:  /* VI-style page down */
             filedlg_vscroll(fd, height - 1);
+            break;
+        case CGDB_KEY_CTRL_D:  /* VI-style 1/2 page down */
+            filedlg_vscroll(fd, height / 2);
+            break;
+        case CGDB_KEY_CTRL_U:  /* VI-style 1/2 page up */
+            filedlg_vscroll(fd, -height / 2);
             break;
         case CGDB_KEY_UP:
         case 'k':
@@ -526,9 +549,23 @@ int filedlg_recv_char(struct filedlg *fd, int key, char *file)
         case CGDB_KEY_CTRL_M:
             strcpy(file, fd->buf->files[fd->buf->sel_line]);
             return 1;
+
+        case 'g':              /* beginning of file */
+            if (last_key_pressed == 'g')
+                filedlg_set_sel_line(fd, 0);
+            break;
+        case 'G':              /* end of file, or a line number*/
+            filedlg_set_sel_line(fd, G_line_number >= 0 ? G_line_number - 1 : INT_MAX);
+            break;
         default:
             break;
     }
+
+    /* Store digits into G_line_number for 'G' command. */
+    if ((key >= '0' && key <= '9') && (G_line_number < INT_MAX / 10 - 9))
+        G_line_number = MAX(0, G_line_number) * 10 + key - '0';
+    else
+        G_line_number = -1;
 
     filedlg_display(fd);
 

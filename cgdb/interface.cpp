@@ -1419,7 +1419,7 @@ int internal_if_input(int key, int *last_key)
         {
             //$ TODO: Does this need to be static?
             static char filedlg_file[MAX_LINE];
-            int ret = filedlg_recv_char(fd, key, filedlg_file);
+            int ret = filedlg_recv_char(fd, key, filedlg_file, last_key_pressed);
 
             /* The user cancelled */
             if (ret == -1) {
