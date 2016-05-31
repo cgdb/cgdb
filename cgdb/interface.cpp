@@ -1499,9 +1499,9 @@ void if_print_message(const char *fmt, ...)
     if_print(va_buf, GDB);
 }
 
-void if_show_file(char *path, int line)
+void if_show_file(char *path, int sel_line, int exe_line)
 {
-    if (source_set_exec_line(src_win, path, line) == 0)
+    if (source_set_exec_line(src_win, path, sel_line, exe_line) == 0)
         if_draw();
 }
 
@@ -1517,7 +1517,7 @@ void if_display_help(void)
     if (!fs_verify_file_exists(cgdb_help_file))
         fs_util_get_path(TOPBUILDDIR, "doc/cgdb.txt", cgdb_help_file);
 
-    ret_val = source_set_exec_line(src_win, cgdb_help_file, 1);
+    ret_val = source_set_exec_line(src_win, cgdb_help_file, 1, 0);
 
     if (ret_val == 0)
     {

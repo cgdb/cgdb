@@ -414,7 +414,7 @@ int source_add(struct sviewer *sview, const char *path)
     new_node->sel_col_rbeg = 0;
     new_node->sel_col_rend = 0;
     new_node->sel_rline = 0;
-    new_node->exe_line = 0;
+    new_node->exe_line = -1;
     new_node->last_modification = 0;    /* No timestamp yet */
 
     /* Initialize all local marks to -1 */
@@ -636,8 +636,9 @@ int source_goto_mark(struct sviewer *sview, int key)
         line = sview->jump_back_mark.line;
         node = sview->jump_back_mark.node;
     } else if (key == '.') {
+        /* Jump to currently executing line if it's set */
         line = sview->cur->exe_line;
-        node = sview->cur;
+        node = (line >= 0) ? sview->cur : NULL;
     }
 
     if (node) {
@@ -945,15 +946,20 @@ void source_move(struct sviewer *sview,
     wclear(sview->win);
 }
 
+static int clamp_line(struct sviewer *sview, int line)
+{
+    if (line < 0)
+        line = 0;
+    if (line >= sbcount(sview->cur->buf->tlines))
+        line = sbcount(sview->cur->buf->tlines) - 1;
+
+    return line;
+}
+
 void source_vscroll(struct sviewer *sview, int offset)
 {
     if (sview->cur) {
-        sview->cur->sel_line += offset;
-        if (sview->cur->sel_line < 0)
-            sview->cur->sel_line = 0;
-        if (sview->cur->sel_line >= sbcount(sview->cur->buf->tlines))
-            sview->cur->sel_line = sbcount(sview->cur->buf->tlines) - 1;
-
+        sview->cur->sel_line = clamp_line(sview, sview->cur->sel_line + offset);
         sview->cur->sel_rline = sview->cur->sel_line;
     }
 }
@@ -985,18 +991,14 @@ void source_set_sel_line(struct sviewer *sview, int line)
             sview->cur->sel_line = sbcount(sview->cur->buf->tlines) - 1;
         } else {
             /* Set line (note correction for 0-based line counting) */
-            sview->cur->sel_line = line - 1;
-            if (sview->cur->sel_line < 0)
-                sview->cur->sel_line = 0;
-            if (sview->cur->sel_line >= sbcount(sview->cur->buf->tlines))
-                sview->cur->sel_line = sbcount(sview->cur->buf->tlines) - 1;
-            }
+            sview->cur->sel_line = clamp_line(sview, line - 1);
+        }
 
         sview->cur->sel_rline = sview->cur->sel_line;
     }
 }
 
-int source_set_exec_line(struct sviewer *sview, const char *path, int line)
+int source_set_exec_line(struct sviewer *sview, const char *path, int sel_line, int exe_line)
 {
     if (path && !fs_verify_file_exists(path))
         return 5;
@@ -1016,13 +1018,12 @@ int source_set_exec_line(struct sviewer *sview, const char *path, int line)
         return 4;
 
     /* Update line, if set */
-    if (line--) {
-        /* Check bounds of line */
-        if (line < 0)
-            line = 0;
-        if (line >= sbcount(sview->cur->buf->tlines))
-            line = sbcount(sview->cur->buf->tlines) - 1;
-        sview->cur->sel_line = sview->cur->exe_line = line;
+    if (sel_line--) {
+        sview->cur->sel_line = clamp_line(sview, sel_line);
+
+        /* Set executing line if passed a valid value */
+        if (exe_line > 0)
+            sview->cur->exe_line = clamp_line(sview, exe_line - 1);
     }
 
     return 0;

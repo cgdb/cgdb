@@ -84,7 +84,7 @@ struct list_node {
     line_flags *lflags;         /* Breakpoints */
     int sel_line;               /* Current line selected in viewer */
     int sel_col;                /* Current column selected in viewer */
-    int exe_line;               /* Current line executing */
+    int exe_line;               /* Current line executing, or -1 if not set */
 
     int sel_col_rbeg;           /* Current beg column matched in regex */
     int sel_col_rend;           /* Current end column matched in regex */
@@ -219,17 +219,18 @@ void source_hscroll(struct sviewer *sview, int offset);
  */
 void source_set_sel_line(struct sviewer *sview, int line);
 
-/* source_set_exec_line:  Set currently executing line
+/* source_set_exec_line:  Set currently selected line and executing line
  * ---------------
  *
- *   sview:  Source viewer object
- *   path:   Full path to the source file (may be NULL to leave unchanged)
- *   line:   Current line number (0 to leave unchanged)
+ *   sview:     Source viewer object
+ *   path:      Full path to the source file (may be NULL to leave unchanged)
+ *   sel_line:  Current selected line number (0 to leave unchanged)
+ *   exe_line:  Current executing line number (0 to leave unchanged)
  *
  * Return Value: Zero on success, non-zero on failure.
  *               5 -> file does not exist
  */
-int source_set_exec_line(struct sviewer *sview, const char *path, int line);
+int source_set_exec_line(struct sviewer *sview, const char *path, int sel_line, int exe_line);
 
 /* source_search_regex_init: Should be called before source_search_regex
  * -------------------------

@@ -1012,7 +1012,7 @@ static void process_commands(struct tgdb *tgdb_in)
                     iterator = tgdb_list_next(iterator);
                 }
 
-                if_show_file(NULL, 0);
+                if_show_file(NULL, 0, 0);
                 break;
             }
 
@@ -1026,7 +1026,7 @@ static void process_commands(struct tgdb *tgdb_in)
                 /* Update the file */
                 source_reload(if_get_sview(), tfp->absolute_path, 0);
 
-                if_show_file(tfp->absolute_path, tfp->line_number);
+                if_show_file(tfp->absolute_path, tfp->line_number, tfp->line_number);
 
                 source_set_relative_path(if_get_sview(),
                         tfp->absolute_path, tfp->relative_path);
@@ -1070,7 +1070,7 @@ static void process_commands(struct tgdb *tgdb_in)
                 const char *apath = item->choice.filename_pair.absolute_path;
                 const char *rpath = item->choice.filename_pair.relative_path;
 
-                if_show_file((char *) apath, 1);
+                if_show_file((char *) apath, 0, 0);
                 source_set_relative_path(if_get_sview(), apath, rpath);
                 break;
             }
@@ -1080,7 +1080,9 @@ static void process_commands(struct tgdb *tgdb_in)
             {
                 struct tgdb_source_file *file =
                         item->choice.absolute_source_denied.source_file;
-                if_show_file(NULL, 0);
+
+                if_show_file(NULL, 0, 0);
+
                 /* com can be NULL when tgdb orig requests main file */
                 if (file->absolute_path != NULL)
                     if_display_message("No such file:", WIN_REFRESH, 0, " %s",
