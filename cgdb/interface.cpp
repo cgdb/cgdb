@@ -1417,8 +1417,7 @@ int internal_if_input(int key, int *last_key)
             return gdb_input(key);
         case FILE_DLG:
         {
-            //$ TODO: Does this need to be static?
-            static char filedlg_file[MAX_LINE];
+            char filedlg_file[MAX_LINE];
             int ret = filedlg_recv_char(fd, key, filedlg_file, last_key_pressed);
 
             /* The user cancelled */
