@@ -241,6 +241,9 @@ void commands_shutdown(struct commands *c)
     ibuf_free(c->info_source_absolute_path);
     c->info_source_absolute_path = NULL;
 
+    ibuf_free(c->last_info_source_requested);
+    c->last_info_source_requested = NULL;
+
     ibuf_free(c->info_sources_string);
     c->info_sources_string = NULL;
 
