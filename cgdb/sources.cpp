@@ -323,6 +323,32 @@ static int load_file(struct list_node *node)
     return source_highlight(node);
 }
 
+static int get_line_leading_ws_count(const char *otext, int length, int tabstop)
+{
+    int i;
+    int column_offset = 0;      /* Text to skip due to arrow */
+
+    for (i = 0; i < length - 1; i++) {
+        int offset;
+
+        /* Skip highlight chars (HL_CHAR / CHAR_MAX) */
+        if (otext[i] == hl_get_marker()) {
+            i++;
+            continue;
+        }
+
+        /* Bail if we hit a non whitespace character */
+        if (!isspace(otext[i]))
+            break;
+
+        /* Add one for space or number of spaces to next tabstop */
+        offset = (otext[i] == '\t') ? (tabstop - (column_offset % tabstop)) : 1;
+        column_offset += offset;
+    }
+
+    return column_offset;
+}
+
 /* --------- */
 /* Functions */
 /* --------- */
@@ -523,35 +549,6 @@ char *source_current_file(struct sviewer *sview, char *path)
 
     strcpy(path, sview->cur->path);
     return path;
-}
-
-static int get_line_leading_ws_count(const char *otext, int length, int tabstop)
-{
-    int i = 0;
-    int column_offset = 0;      /* Text to skip due to arrow */
-
-    if (isspace(otext[0]) || (otext[i] == hl_get_marker())) {
-        for (i = 0; i < length - 1; i++) {
-            /* Skip highlight chars */
-            if (otext[i] == hl_get_marker()) {
-                i++;
-                continue;
-            }
-
-            /* Add one for space or number of spaces to next tabstop */
-            int offset = otext[i] != '\t' ? 1 :
-                tabstop - (column_offset % tabstop);
-
-            column_offset += offset;
-
-            if (!isspace(otext[i + 1])) {
-                column_offset--;
-                break;
-            }
-        }
-    }
-
-    return column_offset;
 }
 
 /* source_get_mark_char:  Return mark char for line.
@@ -873,14 +870,13 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
                         sview->cur->buf->tlines[line],
                         strlen(sview->cur->buf->tlines[line]),
                         highlight_tabstop);
-                    column_offset -= sview->cur->sel_col;
+                    column_offset -= (sview->cur->sel_col + 1);
                     if (column_offset < 0)
                         column_offset = 0;
-                    else {
-                        /* Now actually draw the arrow */
-                        for (int j = 0; j < column_offset; j++)
-                            waddch(sview->win, ACS_HLINE);
-                    }
+
+                    /* Now actually draw the arrow */
+                    for (int j = 0; j < column_offset; j++)
+                        waddch(sview->win, ACS_HLINE);
 
                     waddch(sview->win, '>');
                     wattroff(sview->win, arrow_attr);
@@ -895,14 +891,13 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
                         sview->cur->buf->tlines[line],
                         strlen(sview->cur->buf->tlines[line]),
                         highlight_tabstop);
-                    column_offset -= sview->cur->sel_col;
+                    column_offset -= (sview->cur->sel_col + 1);
                     if (column_offset < 0)
                         column_offset = 0;
-                    else {
-                        /* Now actually draw the space to the block */
-                        for (int j = 0; j < column_offset; j++)
-                            waddch(sview->win, ' ');
-                    }
+
+                    /* Now actually draw the space to the block */
+                    for (int j = 0; j < column_offset; j++)
+                        waddch(sview->win, ' ');
 
                     /* Draw the block */
                     wattron(sview->win, block_attr);
