@@ -1,6 +1,6 @@
-#line 2 "rustlexer.c"
+#line 2 "rustlexer.cpp"
 
-#line 4 "rustlexer.c"
+#line 4 "rustlexer.cpp"
 
 #define  YY_INT_ALIGNED short int
 
@@ -230,7 +230,7 @@ struct yy_buffer_state
 	/* Number of characters read into yy_ch_buf, not including EOB
 	 * characters.
 	 */
-	yy_size_t yy_n_chars;
+	int yy_n_chars;
 
 	/* Whether we "own" the buffer - i.e., we know we created it,
 	 * and can realloc() it to grow it, and should free() it to
@@ -300,7 +300,7 @@ static YY_BUFFER_STATE * yy_buffer_stack = 0; /**< Stack as an array. */
 
 /* yy_hold_char holds the character lost when rust_text is formed. */
 static char yy_hold_char;
-static yy_size_t yy_n_chars;		/* number of characters read into yy_ch_buf */
+static int yy_n_chars;		/* number of characters read into yy_ch_buf */
 yy_size_t rust_leng;
 
 /* Points to current character in buffer. */
@@ -1094,14 +1094,14 @@ int rust__flex_debug = 0;
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char *rust_text;
-#line 1 "rustlexer.l"
-#line 13 "rustlexer.l"
+#line 1 "rustlexer.lpp"
+#line 13 "rustlexer.lpp"
 
 #include <stdio.h>
 #include "tokenizer.h"
 
 
-#line 1105 "rustlexer.c"
+#line 1105 "rustlexer.cpp"
 
 #define INITIAL 0
 #define comment 1
@@ -1321,9 +1321,9 @@ YY_DECL
 		}
 
 	{
-#line 21 "rustlexer.l"
+#line 21 "rustlexer.lpp"
 
-#line 1327 "rustlexer.c"
+#line 1327 "rustlexer.cpp"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -1382,661 +1382,661 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 22 "rustlexer.l"
+#line 22 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 23 "rustlexer.l"
+#line 23 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 24 "rustlexer.l"
+#line 24 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 25 "rustlexer.l"
+#line 25 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 26 "rustlexer.l"
+#line 26 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 27 "rustlexer.l"
+#line 27 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 28 "rustlexer.l"
+#line 28 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 29 "rustlexer.l"
+#line 29 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 30 "rustlexer.l"
+#line 30 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 31 "rustlexer.l"
+#line 31 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 32 "rustlexer.l"
+#line 32 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 33 "rustlexer.l"
+#line 33 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 34 "rustlexer.l"
+#line 34 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 35 "rustlexer.l"
+#line 35 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 36 "rustlexer.l"
+#line 36 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 37 "rustlexer.l"
+#line 37 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 38 "rustlexer.l"
+#line 38 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 39 "rustlexer.l"
+#line 39 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 40 "rustlexer.l"
+#line 40 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 41 "rustlexer.l"
+#line 41 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 42 "rustlexer.l"
+#line 42 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 43 "rustlexer.l"
+#line 43 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 44 "rustlexer.l"
+#line 44 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 45 "rustlexer.l"
+#line 45 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 46 "rustlexer.l"
+#line 46 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 47 "rustlexer.l"
+#line 47 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 48 "rustlexer.l"
+#line 48 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 49 "rustlexer.l"
+#line 49 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 50 "rustlexer.l"
+#line 50 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 51 "rustlexer.l"
+#line 51 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 52 "rustlexer.l"
+#line 52 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 53 "rustlexer.l"
+#line 53 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 54 "rustlexer.l"
+#line 54 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 55 "rustlexer.l"
+#line 55 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 56 "rustlexer.l"
+#line 56 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 57 "rustlexer.l"
+#line 57 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 58 "rustlexer.l"
+#line 58 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 59 "rustlexer.l"
+#line 59 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 60 "rustlexer.l"
+#line 60 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 61 "rustlexer.l"
+#line 61 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 62 "rustlexer.l"
+#line 62 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 63 "rustlexer.l"
+#line 63 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 64 "rustlexer.l"
+#line 64 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 65 "rustlexer.l"
+#line 65 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 66 "rustlexer.l"
+#line 66 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 67 "rustlexer.l"
+#line 67 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 68 "rustlexer.l"
+#line 68 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 69 "rustlexer.l"
+#line 69 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 70 "rustlexer.l"
+#line 70 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 71 "rustlexer.l"
+#line 71 "rustlexer.lpp"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 73 "rustlexer.l"
+#line 73 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 74 "rustlexer.l"
+#line 74 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 75 "rustlexer.l"
+#line 75 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 76 "rustlexer.l"
+#line 76 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 77 "rustlexer.l"
+#line 77 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 78 "rustlexer.l"
+#line 78 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 79 "rustlexer.l"
+#line 79 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 80 "rustlexer.l"
+#line 80 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 81 "rustlexer.l"
+#line 81 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
-#line 82 "rustlexer.l"
+#line 82 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
-#line 83 "rustlexer.l"
+#line 83 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 84 "rustlexer.l"
+#line 84 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
-#line 85 "rustlexer.l"
+#line 85 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
-#line 86 "rustlexer.l"
+#line 86 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
-#line 87 "rustlexer.l"
+#line 87 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
-#line 88 "rustlexer.l"
+#line 88 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 67:
 YY_RULE_SETUP
-#line 89 "rustlexer.l"
+#line 89 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 68:
 YY_RULE_SETUP
-#line 90 "rustlexer.l"
+#line 90 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 69:
 YY_RULE_SETUP
-#line 91 "rustlexer.l"
+#line 91 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 70:
 YY_RULE_SETUP
-#line 92 "rustlexer.l"
+#line 92 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 71:
 YY_RULE_SETUP
-#line 93 "rustlexer.l"
+#line 93 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 72:
 YY_RULE_SETUP
-#line 94 "rustlexer.l"
+#line 94 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 73:
 YY_RULE_SETUP
-#line 95 "rustlexer.l"
+#line 95 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 74:
 YY_RULE_SETUP
-#line 96 "rustlexer.l"
+#line 96 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 75:
 YY_RULE_SETUP
-#line 97 "rustlexer.l"
+#line 97 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 76:
 YY_RULE_SETUP
-#line 98 "rustlexer.l"
+#line 98 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 77:
 YY_RULE_SETUP
-#line 99 "rustlexer.l"
+#line 99 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 78:
 YY_RULE_SETUP
-#line 100 "rustlexer.l"
+#line 100 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 79:
 YY_RULE_SETUP
-#line 101 "rustlexer.l"
+#line 101 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 80:
 YY_RULE_SETUP
-#line 102 "rustlexer.l"
+#line 102 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 81:
 YY_RULE_SETUP
-#line 103 "rustlexer.l"
+#line 103 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 82:
 YY_RULE_SETUP
-#line 104 "rustlexer.l"
+#line 104 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 83:
 YY_RULE_SETUP
-#line 105 "rustlexer.l"
+#line 105 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 84:
 YY_RULE_SETUP
-#line 106 "rustlexer.l"
+#line 106 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 85:
 YY_RULE_SETUP
-#line 107 "rustlexer.l"
+#line 107 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 86:
 YY_RULE_SETUP
-#line 108 "rustlexer.l"
+#line 108 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 87:
 YY_RULE_SETUP
-#line 109 "rustlexer.l"
+#line 109 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 88:
 YY_RULE_SETUP
-#line 110 "rustlexer.l"
+#line 110 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 89:
 YY_RULE_SETUP
-#line 111 "rustlexer.l"
+#line 111 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 90:
 YY_RULE_SETUP
-#line 112 "rustlexer.l"
+#line 112 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 91:
 YY_RULE_SETUP
-#line 113 "rustlexer.l"
+#line 113 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 92:
 YY_RULE_SETUP
-#line 114 "rustlexer.l"
+#line 114 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 93:
 YY_RULE_SETUP
-#line 115 "rustlexer.l"
+#line 115 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 94:
 YY_RULE_SETUP
-#line 116 "rustlexer.l"
+#line 116 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 95:
 YY_RULE_SETUP
-#line 117 "rustlexer.l"
+#line 117 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 96:
 YY_RULE_SETUP
-#line 118 "rustlexer.l"
+#line 118 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 97:
 YY_RULE_SETUP
-#line 119 "rustlexer.l"
+#line 119 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 98:
 YY_RULE_SETUP
-#line 120 "rustlexer.l"
+#line 120 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 99:
 YY_RULE_SETUP
-#line 121 "rustlexer.l"
+#line 121 "rustlexer.lpp"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 100:
 YY_RULE_SETUP
-#line 123 "rustlexer.l"
+#line 123 "rustlexer.lpp"
 { BEGIN(comment); return(TOKENIZER_COMMENT); }
 	YY_BREAK
 case 101:
 YY_RULE_SETUP
-#line 124 "rustlexer.l"
+#line 124 "rustlexer.lpp"
 { return(TOKENIZER_COMMENT); }
 	YY_BREAK
 case 102:
 YY_RULE_SETUP
-#line 125 "rustlexer.l"
+#line 125 "rustlexer.lpp"
 { return(TOKENIZER_COMMENT); }
 	YY_BREAK
 case 103:
 /* rule 103 can match eol */
 YY_RULE_SETUP
-#line 126 "rustlexer.l"
+#line 126 "rustlexer.lpp"
 { return(TOKENIZER_NEWLINE); }
 	YY_BREAK
 case 104:
 YY_RULE_SETUP
-#line 127 "rustlexer.l"
+#line 127 "rustlexer.lpp"
 { return(TOKENIZER_NEWLINE); }
 	YY_BREAK
 case 105:
 /* rule 105 can match eol */
 YY_RULE_SETUP
-#line 128 "rustlexer.l"
+#line 128 "rustlexer.lpp"
 { return(TOKENIZER_NEWLINE); }
 	YY_BREAK
 case 106:
 YY_RULE_SETUP
-#line 129 "rustlexer.l"
+#line 129 "rustlexer.lpp"
 { BEGIN(INITIAL); return(TOKENIZER_COMMENT); }
 	YY_BREAK
 case 107:
 YY_RULE_SETUP
-#line 131 "rustlexer.l"
+#line 131 "rustlexer.lpp"
 { return(TOKENIZER_COMMENT); }
 	YY_BREAK
 case 108:
 YY_RULE_SETUP
-#line 133 "rustlexer.l"
+#line 133 "rustlexer.lpp"
 { return(TOKENIZER_DIRECTIVE); }
 	YY_BREAK
 case 109:
 YY_RULE_SETUP
-#line 134 "rustlexer.l"
+#line 134 "rustlexer.lpp"
 { return(TOKENIZER_DIRECTIVE); }
 	YY_BREAK
 case 110:
 YY_RULE_SETUP
-#line 135 "rustlexer.l"
+#line 135 "rustlexer.lpp"
 { return(TOKENIZER_DIRECTIVE); }
 	YY_BREAK
 case 111:
 YY_RULE_SETUP
-#line 136 "rustlexer.l"
+#line 136 "rustlexer.lpp"
 { return(TOKENIZER_DIRECTIVE); }
 	YY_BREAK
 case 112:
 YY_RULE_SETUP
-#line 138 "rustlexer.l"
+#line 138 "rustlexer.lpp"
 { BEGIN(string_literal);    return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 113:
 YY_RULE_SETUP
-#line 139 "rustlexer.l"
+#line 139 "rustlexer.lpp"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 114:
 /* rule 114 can match eol */
 YY_RULE_SETUP
-#line 140 "rustlexer.l"
+#line 140 "rustlexer.lpp"
 { return(TOKENIZER_NEWLINE); }
 	YY_BREAK
 case 115:
 YY_RULE_SETUP
-#line 141 "rustlexer.l"
+#line 141 "rustlexer.lpp"
 { return(TOKENIZER_NEWLINE); }
 	YY_BREAK
 case 116:
 /* rule 116 can match eol */
 YY_RULE_SETUP
-#line 142 "rustlexer.l"
+#line 142 "rustlexer.lpp"
 { return(TOKENIZER_NEWLINE); }
 	YY_BREAK
 case 117:
 YY_RULE_SETUP
-#line 143 "rustlexer.l"
+#line 143 "rustlexer.lpp"
 { BEGIN(INITIAL);           return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 118:
 YY_RULE_SETUP
-#line 145 "rustlexer.l"
+#line 145 "rustlexer.lpp"
 { return(TOKENIZER_LITERAL); } 
 	YY_BREAK
 case 119:
 YY_RULE_SETUP
-#line 146 "rustlexer.l"
+#line 146 "rustlexer.lpp"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 120:
 YY_RULE_SETUP
-#line 147 "rustlexer.l"
+#line 147 "rustlexer.lpp"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 121:
 YY_RULE_SETUP
-#line 148 "rustlexer.l"
+#line 148 "rustlexer.lpp"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 122:
 YY_RULE_SETUP
-#line 150 "rustlexer.l"
+#line 150 "rustlexer.lpp"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 123:
 YY_RULE_SETUP
-#line 151 "rustlexer.l"
+#line 151 "rustlexer.lpp"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 124:
 /* rule 124 can match eol */
 YY_RULE_SETUP
-#line 153 "rustlexer.l"
+#line 153 "rustlexer.lpp"
 { return(TOKENIZER_NEWLINE); }
 	YY_BREAK
 case 125:
 /* rule 125 can match eol */
 YY_RULE_SETUP
-#line 154 "rustlexer.l"
+#line 154 "rustlexer.lpp"
 { return(TOKENIZER_NEWLINE); }
 	YY_BREAK
 case 126:
 YY_RULE_SETUP
-#line 155 "rustlexer.l"
+#line 155 "rustlexer.lpp"
 { return(TOKENIZER_NEWLINE); }
 	YY_BREAK
 case 127:
 YY_RULE_SETUP
-#line 156 "rustlexer.l"
+#line 156 "rustlexer.lpp"
 { return(TOKENIZER_TEXT);    }
 	YY_BREAK
 case 128:
 YY_RULE_SETUP
-#line 157 "rustlexer.l"
+#line 157 "rustlexer.lpp"
 { return(TOKENIZER_TEXT);    }
 	YY_BREAK
 case 129:
 YY_RULE_SETUP
-#line 158 "rustlexer.l"
+#line 158 "rustlexer.lpp"
 { return(TOKENIZER_TEXT);    }
 	YY_BREAK
 case 130:
 YY_RULE_SETUP
-#line 160 "rustlexer.l"
+#line 160 "rustlexer.lpp"
 ECHO;
 	YY_BREAK
-#line 2040 "rustlexer.c"
+#line 2040 "rustlexer.cpp"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(comment):
 case YY_STATE_EOF(string_literal):
@@ -2294,9 +2294,9 @@ static int yy_get_next_buffer (void)
 	else
 		ret_val = EOB_ACT_CONTINUE_SCAN;
 
-	if ((yy_size_t) ((yy_n_chars) + number_to_move) > YY_CURRENT_BUFFER_LVALUE->yy_buf_size) {
+	if ((int) ((yy_n_chars) + number_to_move) > YY_CURRENT_BUFFER_LVALUE->yy_buf_size) {
 		/* Extend the array by 50%, plus the number we really need. */
-		yy_size_t new_size = (yy_n_chars) + number_to_move + ((yy_n_chars) >> 1);
+		int new_size = (yy_n_chars) + number_to_move + ((yy_n_chars) >> 1);
 		YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char *) rust_realloc((void *) YY_CURRENT_BUFFER_LVALUE->yy_ch_buf,new_size  );
 		if ( ! YY_CURRENT_BUFFER_LVALUE->yy_ch_buf )
 			YY_FATAL_ERROR( "out of dynamic memory in yy_get_next_buffer()" );
@@ -2713,7 +2713,7 @@ static void rust_ensure_buffer_stack (void)
 		 * scanner will even need a stack. We use 2 instead of 1 to avoid an
 		 * immediate realloc on the next call.
          */
-      num_to_alloc = 1; /* After all that talk, this was set to 1 anyways... */
+		num_to_alloc = 1; /* After all that talk, this was set to 1 anyways... */
 		(yy_buffer_stack) = (struct yy_buffer_state**)rust_alloc
 								(num_to_alloc * sizeof(struct yy_buffer_state*)
 								);
@@ -3039,7 +3039,7 @@ void rust_free (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 160 "rustlexer.l"
+#line 160 "rustlexer.lpp"
 
 
 
@@ -3047,7 +3047,8 @@ int rust_wrap ( void ) {
 	{
 		/* Silly impossible function call to stop warning of unused functions */
 		if ( 0 ) {
-			yyunput(0, "");
+            char buf[] = "";
+			yyunput(0, buf);
 		}
 	}
     return 1;

@@ -1,5 +1,5 @@
 %option prefix="rust_"
-%option outfile="rustlexer.c"
+%option outfile="rustlexer.cpp"
 
 B       [01_]
 O       [0-7_]
@@ -163,7 +163,8 @@ int rust_wrap ( void ) {
 	{
 		/* Silly impossible function call to stop warning of unused functions */
 		if ( 0 ) {
-			yyunput(0, "");
+            char buf[] = "";
+			yyunput(0, buf);
 		}
 	}
     return 1;

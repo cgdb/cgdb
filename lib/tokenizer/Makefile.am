@@ -12,7 +12,7 @@ libtokenizer_a_SOURCES = \
     dlexer.lpp \
     golexer.lpp \
     cgdbhelplexer.lpp \
-    rustlexer.l \
+    rustlexer.lpp \
     tokenizer.cpp \
     tokenizer.h
 

@@ -182,7 +182,7 @@ enum tokenizer_language_support tokenizer_get_default_file_type(const char
             return TOKENIZER_LANGUAGE_GO;
 
     for (i = 0; i < sizeof (rust_extensions) / sizeof (char *); i++)
-        if (strcmp(file_extension, rust_extensions[i]) == 0)
+        if (strcasecmp(file_extension, rust_extensions[i]) == 0)
             l = TOKENIZER_LANGUAGE_RUST;
 
     for (i = 0; i < sizeof (ada_extensions) / sizeof (char *); i++)
