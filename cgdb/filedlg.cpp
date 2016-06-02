@@ -16,6 +16,10 @@
 #include <string.h>
 #endif /* HAVE_STRING_H */
 
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif /* HAVE_UNISTD_H */
+
 #include "filedlg.h"
 #include "cgdb.h"
 #include "sys_util.h"
@@ -123,6 +127,13 @@ int filedlg_add_file_choice(struct filedlg *fd, const char *file_choice)
 
     if (file_choice == NULL || *file_choice == '\0')
         return -1;
+
+    /* Make sure file exists. ASAN uses a ton of temp files they
+     * delete and it pollutes the file open dialog with files you
+     * can't actually open.
+     */
+    if (access(file_choice, F_OK) == -1)
+        return -4;
 
     /* find index to insert by comparing:
      * Absolute paths go to the end
