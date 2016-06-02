@@ -25,7 +25,6 @@
 #include "highlight_groups.h"
 
 struct file_buffer {
-    int length;                 /* Number of files in program */
     char **files;               /* Array containing file */
     char *cur_line;             /* cur line may have unique color */
     int max_width;              /* Width of longest line in file */
@@ -94,7 +93,6 @@ struct filedlg *filedlg_new(int pos_r, int pos_c, int height, int width)
 
     fd->G_line_number = ibuf_init();
 
-    fd->buf->length = 0;
     fd->buf->files = NULL;
     fd->buf->cur_line = NULL;
     fd->buf->max_width = 0;
@@ -139,7 +137,7 @@ int filedlg_add_file_choice(struct filedlg *fd, const char *file_choice)
      * Absolute paths go to the end
      * Relative paths go before the absolute paths 
      */
-    for (i = 0; i < fd->buf->length; i++) {
+    for (i = 0; i < sbcount(fd->buf->files); i++) {
         /* Don't add duplicate entry's ... gdb outputs duplicates */
         if ((equal = strcmp(fd->buf->files[i], file_choice)) == 0)
             return -3;
@@ -169,15 +167,13 @@ int filedlg_add_file_choice(struct filedlg *fd, const char *file_choice)
 
     index = i;
 
-    fd->buf->length = fd->buf->length + 1;
-    fd->buf->files = (char **)realloc(fd->buf->files, sizeof (char *) * fd->buf->length);
+    sbpush(fd->buf->files, NULL);
 
     /* shift everything down and then insert into index */
-    for (i = fd->buf->length - 1; i > index; i--)
+    for (i = sbcount(fd->buf->files) - 1; i > index; i--)
         fd->buf->files[i] = fd->buf->files[i - 1];
 
-    if ((fd->buf->files[index] = strdup(file_choice)) == NULL)
-        return -2;
+    fd->buf->files[index] = cgdb_strdup(file_choice);
 
     if ((length = strlen(file_choice)) > fd->buf->max_width)
         fd->buf->max_width = length;
@@ -191,17 +187,16 @@ void filedlg_clear(struct filedlg *fd)
 
     ibuf_clear(fd->G_line_number);
 
-    for (i = 0; i < fd->buf->length; i++)
+    for (i = 0; i < sbcount(fd->buf->files); i++)
         free(fd->buf->files[i]);
 
-    free(fd->buf->files);
+    sbfree(fd->buf->files);
     fd->buf->files = NULL;
 
     free(fd->buf->cur_line);
     fd->buf->cur_line = NULL;
 
     fd->buf->max_width = 0;
-    fd->buf->length = 0;
     fd->buf->sel_line = 0;
     fd->buf->sel_col = 0;
     fd->buf->sel_col_rbeg = 0;
@@ -209,16 +204,20 @@ void filedlg_clear(struct filedlg *fd)
     fd->buf->sel_rline = 0;
 }
 
+static int clamp_line(struct filedlg *fd, int line)
+{
+    if (line < 0)
+        line = 0;
+    if (line >= sbcount(fd->buf->files))
+        line = sbcount(fd->buf->files) - 1;
+
+    return line;
+}
+
 static void filedlg_vscroll(struct filedlg *fd, int offset)
 {
-    if (fd->buf) {
-        fd->buf->sel_line += offset;
-        if (fd->buf->sel_line < 0)
-            fd->buf->sel_line = 0;
-        /* The display message and status bar takes a line */
-        if (fd->buf->sel_line >= fd->buf->length)
-            fd->buf->sel_line = fd->buf->length - 1;
-    }
+    if (fd->buf)
+        fd->buf->sel_line = clamp_line(fd, fd->buf->sel_line + offset);
 }
 
 static void filedlg_hscroll(struct filedlg *fd, int offset)
@@ -230,7 +229,7 @@ static void filedlg_hscroll(struct filedlg *fd, int offset)
     if (fd->buf) {
         getmaxyx(fd->win, height, width);
 
-        lwidth = log10_uint(fd->buf->length) + 1;
+        lwidth = log10_uint(sbcount(fd->buf->files)) + 1;
         max_width = fd->buf->max_width - width + lwidth + 6;
 
         fd->buf->sel_col += offset;
@@ -243,13 +242,8 @@ static void filedlg_hscroll(struct filedlg *fd, int offset)
 
 static void filedlg_set_sel_line(struct filedlg *fd, int line)
 {
-    if (fd->buf) {
-        if (line < 0)
-            line = 0;
-        if (line >= fd->buf->length)
-            line = fd->buf->length - 1;
-        fd->buf->sel_line = line;
-    }
+    if (fd->buf)
+        fd->buf->sel_line = clamp_line(fd, line);
 }
 
 static void filedlg_search_regex_init(struct filedlg *fd)
@@ -276,7 +270,7 @@ static int filedlg_search_regex(struct filedlg *fd, const char *regex,
     return hl_regex(regex,
             (const char **) fd->buf->files,
             (const char **) fd->buf->files,
-            fd->buf->length,
+            sbcount(fd->buf->files),
             &fd->buf->cur_line, &fd->buf->sel_line,
             &fd->buf->sel_rline, &fd->buf->sel_col_rbeg,
             &fd->buf->sel_col_rend, opt, direction, icase);
@@ -290,6 +284,7 @@ int filedlg_display(struct filedlg *fd)
     int file;
     int i;
     int statusbar;
+    int count = sbcount(fd->buf->files);
     static const char label[] = "Select a file or press q to cancel.";
     int exelinearrow;
 
@@ -312,18 +307,18 @@ int filedlg_display(struct filedlg *fd)
     height -= 2;
 
     /* Set starting line number (center source file if it's small enough) */
-    if (fd->buf->length < height)
-        file = (fd->buf->length - height) / 2;
+    if (count < height)
+        file = (count - height) / 2;
     else {
         file = fd->buf->sel_line - height / 2;
-        if (file > fd->buf->length - height)
-            file = fd->buf->length - height;
+        if (file > count - height)
+            file = count - height;
         else if (file < 0)
             file = 0;
     }
 
     /* Print 'height' lines of the file, starting at 'file' */
-    lwidth = log10_uint(fd->buf->length) + 1;
+    lwidth = log10_uint(count) + 1;
     snprintf(fmt, sizeof(fmt), "%%%dd", lwidth);
 
     print_in_middle(fd->win, 0, width, label);
@@ -333,7 +328,7 @@ int filedlg_display(struct filedlg *fd)
         wmove(fd->win, i, 0);
         if (has_colors()) {
             /* Outside of filename, just finish drawing the vertical file */
-            if (file < 0 || file >= fd->buf->length) {
+            if (file < 0 || file >= count) {
                 int j;
 
                 for (j = 1; j < lwidth; j++)
