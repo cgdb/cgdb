@@ -1041,13 +1041,19 @@ static void source_input(struct sviewer *sview, int key)
 {
     switch (key) {
         case CGDB_KEY_UP:
-        case 'k':              /* VI-style up-arrow */
-            source_vscroll(sview, -1);
+        case 'k': {             /* VI-style up-arrow */
+            int lineno = 1;
+            cgdb_string_to_int(ibuf_get(G_line_number), &lineno);
+            source_vscroll(sview, -lineno);
             break;
+        }
         case CGDB_KEY_DOWN:
-        case 'j':              /* VI-style down-arrow */
-            source_vscroll(sview, 1);
+        case 'j': {             /* VI-style down-arrow */
+            int lineno = 1;
+            cgdb_string_to_int(ibuf_get(G_line_number), &lineno);
+            source_vscroll(sview, lineno);
             break;
+        }
         case CGDB_KEY_LEFT:
         case 'h':
             source_hscroll(sview, -1);
