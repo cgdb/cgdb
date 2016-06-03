@@ -193,6 +193,16 @@ int hl_ansi_get_color_attrs(hl_groups_ptr hl_groups, const char *buf, int *attr)
 
 enum hl_group_kind hl_get_color_group(const char *color);
 
+/**
+ * Given a set of attributes and the column they start at, print the line.
+ */
+struct hl_line_attr {
+    int col;
+    int attr;
+};
+void hl_printline(WINDOW *win, const char *line, int line_len,
+        const hl_line_attr *attrs, int x, int y, int col, int width);
+
 /*@}*/
 /* }}}*/
 

@@ -24,6 +24,12 @@
 #include <string.h>
 #endif /* HAVE_STRING_H */
 
+#if HAVE_CURSES_H
+#include <curses.h>
+#elif HAVE_NCURSES_CURSES_H
+#include <ncurses/curses.h>
+#endif /* HAVE_CURSES_H */
+
 /* Local Includes */
 #include "cgdb.h"
 #include "cgdbrc.h"
@@ -62,7 +68,7 @@ static int count(const char *s, int slen, char c)
  *
  * Return Value:  A newly allocated copy of buf, with modifications made.
  */
-static char *parse(struct scroller *scr, struct scroller_line_attr **attrs,
+static char *parse(struct scroller *scr, struct hl_line_attr **attrs,
     const char *orig, const char *buf, int buflen)
 {
     // Read in tabstop settings, but don't change them on the fly as we'd have to
@@ -88,7 +94,7 @@ static char *parse(struct scroller *scr, struct scroller_line_attr **attrs,
         if (debugwincolor && buf[j] == '\033') {
             int ansi_count = hl_ansi_get_color_attrs(hl_groups_instance, buf + j, &attr);
             if (ansi_count) {
-                struct scroller_line_attr line_attr;
+                struct hl_line_attr line_attr;
                 j += ansi_count - 1;
 
                 line_attr.col = i;
@@ -155,7 +161,7 @@ static void scroller_set_last_tty_attr(struct scroller *scr)
 }
 
 static void scroller_addline(struct scroller *scr, char *line,
-    struct scroller_line_attr *attrs, int tty)
+    struct hl_line_attr *attrs, int tty)
 {
     struct scroller_line sl;
 
@@ -167,7 +173,7 @@ static void scroller_addline(struct scroller *scr, char *line,
 
             /* Bump the count up and scoot the attributes over one */
             sbsetcount(attrs, count + 1);
-            memmove(attrs+1, attrs, count * sizeof(struct scroller_line_attr));
+            memmove(attrs+1, attrs, count * sizeof(struct hl_line_attr));
 
             attrs[0].col = 0;
             attrs[0].attr = scr->last_tty_attr;
@@ -339,7 +345,7 @@ static void scr_add_buf(struct scroller *scr, const char *buf, int tty)
             char *orig = scr->lines[index].line;
 
             if ((scr->last_tty_attr != -1) && (tty != scr->lines[index].tty)) {
-                struct scroller_line_attr attr;
+                struct hl_line_attr attr;
 
                 attr.col = strlen(orig);
                 if (tty) {
@@ -367,7 +373,7 @@ static void scr_add_buf(struct scroller *scr, const char *buf, int tty)
     /* Create additional lines if buf contains newlines */
     while (x != NULL) {
         char *line;
-        struct scroller_line_attr *attrs = NULL;
+        struct hl_line_attr *attrs = NULL;
 
         buf = x + 1;
         x = strchr((char *)buf, '\n');
@@ -429,58 +435,6 @@ void scr_move(struct scroller *scr, int pos_r, int pos_c, int height, int width)
     delwin(scr->win);
     scr->win = newwin(height, width, pos_r, pos_c);
     wclear(scr->win);
-}
-
-static void scr_printline(WINDOW *win, int x, int y, int col,
-    struct scroller_line *sline, int width)
-{
-    int attr = 0;
-    int line_len = sline->line_len;
-    const char *line = sline->line;
-    int count = MIN(line_len - col, width);
-
-    wmove(win, y, x);
-
-    if (sline->attrs) {
-        int i;
-
-        for (i = 0; i < sbcount(sline->attrs); i++) {
-            if (sline->attrs[i].col <= col) {
-                attr = sline->attrs[i].attr;
-            }
-            else if (sline->attrs[i].col < col + count) {
-                int len = sline->attrs[i].col -col;
-
-                wattron(win, attr);
-                wprintw(win, "%.*s", len, line + col);
-                wattroff(win, attr);
-
-                col += len;
-                count -= len;
-                width -= len;
-
-                attr = sline->attrs[i].attr;
-            } else {
-                wattron(win, attr);
-                wprintw(win, "%.*s", count, line + col);
-                wattroff(win, attr);
-
-                width -= count;
-                count = 0;
-            }
-        }
-    }
-
-    if (count) {
-        wattron(win, attr);
-        wprintw(win, "%.*s", count, line + col);
-        wattroff(win, attr);
-
-        width -= count;
-    }
-
-    if (width)
-        wclrtoeol(win);
 }
 
 void scr_clear(struct scroller *scr) {
@@ -563,7 +517,7 @@ void scr_refresh(struct scroller *scr, int focus, enum win_refresh dorefresh)
         else if (r >= 0) {
             struct scroller_line *sline = &scr->lines[r];
 
-            scr_printline(scr->win, 0, height - nlines, c, sline, width);
+            hl_printline(scr->win, sline->line, sline->line_len, sline->attrs, 0, height - nlines, c, width);
 
             /* Update our position */
             if (c >= width)

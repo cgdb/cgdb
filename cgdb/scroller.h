@@ -24,16 +24,11 @@
 /* Data Structures */
 /* --------------- */
 
-struct scroller_line_attr {
-    int col;
-    int attr;
-};
-
 struct scroller_line {
     char *line;
     int line_len;
     int tty;
-    struct scroller_line_attr *attrs;
+    struct hl_line_attr *attrs;
 };
 
 struct scroller {

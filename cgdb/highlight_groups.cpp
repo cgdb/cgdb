@@ -7,11 +7,13 @@
 #include <ctype.h>
 #endif
 
-#include "highlight_groups.h"
-#include "command_lexer.h"
-#include "sys_util.h"
-#include "logger.h"
-#include "cgdbrc.h"
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif /* HAVE_STDLIB_H */
+
+#if HAVE_STRING_H
+#include <string.h>
+#endif /* HAVE_STRING_H */
 
 #if HAVE_CURSES_H
 #include <curses.h>
@@ -19,8 +21,11 @@
 #include <ncurses/curses.h>
 #endif /* HAVE_CURSES_H */
 
-#include <strings.h>
-#include <stdlib.h>
+#include "highlight_groups.h"
+#include "command_lexer.h"
+#include "sys_util.h"
+#include "logger.h"
+#include "cgdbrc.h"
 
 /* internal {{{*/
 
@@ -1043,6 +1048,56 @@ int hl_ansi_get_color_attrs(hl_groups_ptr hl_groups, const char *buf, int *attr)
     }
 
     return 0;
+}
+
+void hl_printline(WINDOW *win, const char *line, int line_len,
+        const hl_line_attr *attrs, int x, int y, int col, int width)
+{
+    int attr = 0;
+    int count = MIN(line_len - col, width);
+
+    wmove(win, y, x);
+
+    if (attrs) {
+        int i;
+
+        for (i = 0; i < sbcount(attrs); i++) {
+            if (attrs[i].col <= col) {
+                attr = attrs[i].attr;
+            }
+            else if (attrs[i].col < col + count) {
+                int len = attrs[i].col -col;
+
+                wattron(win, attr);
+                wprintw(win, "%.*s", len, line + col);
+                wattroff(win, attr);
+
+                col += len;
+                count -= len;
+                width -= len;
+
+                attr = attrs[i].attr;
+            } else {
+                wattron(win, attr);
+                wprintw(win, "%.*s", count, line + col);
+                wattroff(win, attr);
+
+                width -= count;
+                count = 0;
+            }
+        }
+    }
+
+    if (count) {
+        wattron(win, attr);
+        wprintw(win, "%.*s", count, line + col);
+        wattroff(win, attr);
+
+        width -= count;
+    }
+
+    if (width)
+        wclrtoeol(win);
 }
 
 /*@}*/
