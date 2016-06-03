@@ -713,6 +713,17 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
     int showmarks = cgdbrc_get_int(CGDBRC_SHOWMARKS);
     int mark_attr;
 
+    /* Check that a file is loaded */
+    if (sview->cur == NULL || sview->cur->buf->tlines == NULL) {
+        logo_display(sview->win);
+
+        if (dorefresh == WIN_REFRESH)
+            wrefresh(sview->win);
+        else
+            wnoutrefresh(sview->win);
+        return 0;
+    }
+
     sellineno = hl_groups_get_attr(
         hl_groups_instance, HLG_SELECTED_LINE_NUMBER);
     exelineno = hl_groups_get_attr(
@@ -746,13 +757,6 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
         sel_display_style == LINE_DISPLAY_LONG_ARROW;
 
     mark_attr = hl_groups_get_attr(hl_groups_instance, HLG_MARK);
-
-    /* Check that a file is loaded */
-    if (sview->cur == NULL || sview->cur->buf->tlines == NULL) {
-        logo_display(sview->win);
-        wrefresh(sview->win);
-        return 0;
-    }
 
     /* Make sure cursor is visible */
     curs_set( !!focus );

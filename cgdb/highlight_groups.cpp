@@ -56,7 +56,9 @@ struct hl_group_info {
 struct hl_groups {
   /** If 0 then the terminal doesn't support colors, otherwise it does. */
     int in_color;
-  /** If 1 then the terminal supports ansi colors (8 colors, 64 color pairs). */
+  /** If 1 then we parse ansi escape codes */
+    int ansi_esc_parsing;
+  /** 1 if the terminal supports ansi colors (8 colors, 64 color pairs). */
     int ansi_color;
   /** This is the data for each highlighting group. */
     struct hl_group_info groups[HLG_LAST];
@@ -323,7 +325,7 @@ enum hl_group_kind hl_get_color_group(const char *color)
 /* Given an ncurses COLOR_XX background and foreground color, return an ncurses
  *  color pair index for that color.
  */
-static int hl_get_color_pair(hl_groups_ptr hl_groups, int bgcolor, int fgcolor)
+static int hl_get_ansicolor_pair(hl_groups_ptr hl_groups, int bgcolor, int fgcolor)
 {
     static int color_pairs_inited = 0;
     static int color_pair_table[9][9];
@@ -421,7 +423,7 @@ setup_group(hl_groups_ptr hl_groups, enum hl_group_kind group,
     if (hl_groups->ansi_color) {
         /* Ansi mode is enabled so we've got 16 colors and 64 color pairs.
            Set the color_pair index for this bg / fg color combination. */
-        info->color_pair = hl_get_color_pair(hl_groups, back_color, fore_color);
+        info->color_pair = hl_get_ansicolor_pair(hl_groups, back_color, fore_color);
         return 0;
     }
 #endif
@@ -478,6 +480,7 @@ hl_groups_ptr hl_groups_initialize(void)
     hl_groups_ptr hl_groups = (hl_groups_ptr) cgdb_malloc(sizeof (struct hl_groups));
 
     hl_groups->in_color = 0;
+    hl_groups->ansi_esc_parsing = 0;
     hl_groups->ansi_color = 0;
 
     for (i = 0; i < HLG_LAST; ++i) {
@@ -525,8 +528,9 @@ int hl_groups_setup(hl_groups_ptr hl_groups)
     ginfo = default_groups_for_curses;
 #endif
 
-    hl_groups->in_color = cgdbrc_get_int(CGDBRC_COLOR) &&
-                          has_colors();
+    hl_groups->in_color = cgdbrc_get_int(CGDBRC_COLOR) && has_colors();
+
+    hl_groups->ansi_esc_parsing = cgdbrc_get_int(CGDBRC_DEBUGWINCOLOR);
 
     hl_groups->ansi_color = hl_groups->in_color &&
                             (COLORS >= 8) && (COLOR_PAIRS >= 64);
@@ -566,7 +570,6 @@ int hl_groups_setup(hl_groups_ptr hl_groups)
 int
 hl_groups_get_attr(hl_groups_ptr hl_groups, enum hl_group_kind kind)
 {
-
     struct hl_group_info *info = lookup_group_info_by_key(hl_groups, kind);
     int attr = (kind == HLG_EXECUTING_LINE_HIGHLIGHT) ? A_BOLD : A_NORMAL;
 
@@ -580,7 +583,7 @@ hl_groups_get_attr(hl_groups_ptr hl_groups, enum hl_group_kind kind)
         case HLG_MAGENTA:
         case HLG_CYAN:
         case HLG_WHITE:
-            attr = COLOR_PAIR(hl_get_color_pair(
+            attr = COLOR_PAIR(hl_get_ansicolor_pair(
                 hl_groups, -1, kind - HLG_BLACK));
             return attr;
         case HLG_BOLD_BLACK:
@@ -592,7 +595,7 @@ hl_groups_get_attr(hl_groups_ptr hl_groups, enum hl_group_kind kind)
         case HLG_BOLD_CYAN:
         case HLG_BOLD_WHITE:
             attr = A_BOLD | COLOR_PAIR(
-                hl_get_color_pair(hl_groups, -1, kind - HLG_BOLD_BLACK));
+                hl_get_ansicolor_pair(hl_groups, -1, kind - HLG_BOLD_BLACK));
             return attr;
     }
 
@@ -918,7 +921,7 @@ static int ansi_get_color_code_index(const char *buf, int *index)
 }
 
 /* Parse ansi color escape sequence in buf, return ncurses attribute and esc length */
-int hl_ansi_get_color_attrs(hl_groups_ptr hl_groups, const char *buf, int *attr)
+int hl_ansi_get_color_attrs(hl_groups_ptr hl_groups, const char *buf, int *attr, int force_esc_parsing)
 {
     int i = 0;
     int fg = -1;
@@ -929,7 +932,7 @@ int hl_ansi_get_color_attrs(hl_groups_ptr hl_groups, const char *buf, int *attr)
 
     /* If we're not in ansi mode, just return default color pair 0 and don't parse
        the string. */
-    if (!hl_groups->ansi_color)
+    if (!hl_groups->ansi_esc_parsing && !force_esc_parsing)
         return 0;
 
     if ((buf[i++] == '\033') && (buf[i++] == '[')) {
@@ -1035,7 +1038,7 @@ int hl_ansi_get_color_attrs(hl_groups_ptr hl_groups, const char *buf, int *attr)
 
             if (buf[i] == 'm')
             {
-                int color_pair = hl_get_color_pair(hl_groups, bg, fg);
+                int color_pair = hl_get_ansicolor_pair(hl_groups, bg, fg);
 
                 *attr = a | COLOR_PAIR(color_pair);
                 return i + 1;
@@ -1054,9 +1057,22 @@ void hl_printline(WINDOW *win, const char *line, int line_len,
         const hl_line_attr *attrs, int x, int y, int col, int width)
 {
     int attr = 0;
-    int count = MIN(line_len - col, width);
+    int count;
+
+    if (y < 0)
+        return;
+    else if (x < 0) {
+        col -= x;
+        x = 0;
+    }
 
     wmove(win, y, x);
+
+    count = MIN(line_len - col, width);
+    if (count <= 0) {
+        wclrtoeol(win);
+        return;
+    }
 
     if (attrs) {
         int i;
