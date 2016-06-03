@@ -486,6 +486,9 @@ void if_display_message(const char *msg, enum win_refresh dorefresh, int width, 
  */
 void if_draw(void)
 {
+    if (!curses_initialized)
+        return;
+
     /* Only redisplay the filedlg if it is up */
     if (focus == FILE_DLG) {
         filedlg_display(fd);
@@ -558,6 +561,9 @@ static void validate_window_sizes(void)
  */
 static int if_layout()
 {
+    if (!curses_initialized)
+        return 2;
+
     /* Verify the window size is reasonable */
     validate_window_sizes();
 
@@ -1625,7 +1631,7 @@ void if_set_winsplit(WIN_SPLIT_TYPE new_split)
 void if_highlight_sviewer(enum tokenizer_language_support l)
 {
     /* src_win->cur is NULL when reading cgdbrc */
-    if (src_win->cur) {
+    if (src_win && src_win->cur) {
         if ( l == TOKENIZER_LANGUAGE_UNKNOWN )
             l = tokenizer_get_default_file_type(strrchr(src_win->cur->path, '.'));
 
