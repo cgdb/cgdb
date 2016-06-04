@@ -247,6 +247,8 @@ COMMANDS commands[] = {
     /* start        */ {"start", (action_t)command_do_tgdbcommand, TGDB_START},
     /* until        */ {"until", (action_t)command_do_tgdbcommand, TGDB_UNTIL},
     /* until        */ {"u", (action_t)command_do_tgdbcommand, TGDB_UNTIL},
+    /* disassemble  */ {"disassemble", (action_t)command_do_tgdbcommand, TGDB_DISASSEMBLE},
+    /* disassemble  */ {"dis", (action_t)command_do_tgdbcommand, TGDB_DISASSEMBLE},
     /* up           */ {"up", (action_t)command_do_tgdbcommand, TGDB_UP},
 };
 

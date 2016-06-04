@@ -399,6 +399,9 @@ const char *a2_return_client_command(struct annotate_two *a2, enum tgdb_command_
         case TGDB_UNTIL:
             ret = "until";
             break;
+        case TGDB_DISASSEMBLE:
+            ret = "disassemble";
+            break;
         case TGDB_UP:
             ret = "up";
             break;
