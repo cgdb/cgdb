@@ -102,22 +102,6 @@ static struct list_node *get_node(struct sviewer *sview, const char *path)
     return NULL;
 }
 
-/* stb__sbgrowf: internal stretchy buffer grow function.
- */
-int stb__sbgrowf( void **arr, int increment, int itemsize )
-{
-    int m = *arr ? 2 * stb__sbm( *arr ) + increment : increment + 1; 
-    void *p = cgdb_realloc( *arr ? stb__sbraw( *arr ) : 0,
-                            itemsize * m + sizeof( int ) * 2 );
-
-    if ( !*arr )
-        ( ( int * )p )[ 1 ] = 0; 
-    *arr = ( void * )( ( int * )p + 2 ); 
-    stb__sbm( *arr ) = m; 
-
-    return 0;
-}
-
 /**
  * Get's the timestamp of a particular file.
  *
@@ -759,7 +743,7 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
     mark_attr = hl_groups_get_attr(hl_groups_instance, HLG_MARK);
 
     /* Make sure cursor is visible */
-    curs_set( !!focus );
+    curs_set(!!focus);
 
     /* Initialize variables */
     getmaxyx(sview->win, height, width);
@@ -1035,6 +1019,7 @@ void source_free(struct sviewer *sview)
         source_del(sview, sview->list_head->path);
 
     delwin(sview->win);
+    sview->win = NULL;
 }
 
 void source_search_regex_init(struct sviewer *sview)
@@ -1059,13 +1044,13 @@ int source_search_regex(struct sviewer *sview,
         regex == NULL || strlen(regex) == 0) {
 
         if (sview && sview->cur) {
-            free( sview->cur->buf->cur_line );
+            free(sview->cur->buf->cur_line);
             sview->cur->buf->cur_line = NULL;
         }
         return -1;
     }
 
-    if ( !sbcount(sview->cur->orig_buf.tlines ) )
+    if (!sbcount(sview->cur->orig_buf.tlines))
         load_file_buf(&sview->cur->orig_buf, sview->cur->path);
 
     return hl_regex(regex,
@@ -1087,7 +1072,7 @@ void source_disable_break(struct sviewer *sview, const char *path, int line)
     if (!node->buf && load_file(node))
         return;
 
-    if (line > 0 && line <= sbcount(node->buf->tlines))
+    if (line > 0 && line <= sbcount(node->lflags))
         node->lflags[line - 1].breakpt = 2;
 }
 
@@ -1101,7 +1086,7 @@ void source_enable_break(struct sviewer *sview, const char *path, int line)
     if (!node->buf && load_file(node))
         return;
 
-    if (line > 0 && line <= sbcount(node->buf->tlines)) {
+    if (line > 0 && line < sbcount(node->lflags)) {
         node->lflags[line - 1].breakpt = 1;
     }
 }

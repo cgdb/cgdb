@@ -151,3 +151,19 @@ int log10_uint(unsigned int val)
     if (val >= 10u) return 1;
     return 0;
 }
+
+/* stb__sbgrowf: internal stretchy buffer grow function.
+ */
+int stb__sbgrowf( void **arr, int increment, int itemsize )
+{
+    int m = *arr ? 2 * stb__sbm( *arr ) + increment : increment + 1;
+    void *p = cgdb_realloc( *arr ? stb__sbraw( *arr ) : 0,
+                            itemsize * m + sizeof( int ) * 2 );
+
+    if ( !*arr )
+        ( ( int * )p )[ 1 ] = 0;
+    *arr = ( void * )( ( int * )p + 2 );
+    stb__sbm( *arr ) = m;
+
+    return 0;
+}
