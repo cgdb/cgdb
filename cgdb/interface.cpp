@@ -89,6 +89,7 @@
 #include "highlight_groups.h"
 #include "fs_util.h"
 #include "sys_util.h"
+#include "logo.h"
 
 /* ----------- */
 /* Prototypes  */
@@ -1550,6 +1551,12 @@ void if_display_help(void)
     }
     else if (ret_val == 5)      /* File does not exist */
         if_display_message("No such file: ", WIN_REFRESH, 0, "%s", cgdb_help_file);
+}
+
+void if_display_logo(void)
+{
+    src_win->cur = NULL;
+    logo_reset();
 }
 
 struct sviewer *if_get_sview()

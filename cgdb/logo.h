@@ -23,4 +23,6 @@
  */
 void logo_display(WINDOW * win);
 
+void logo_reset();
+
 #endif

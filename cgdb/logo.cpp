@@ -33,6 +33,9 @@
 #include "sys_util.h"
 #include "highlight_groups.h"
 
+/* Logo index */
+static int logoindex = -1;
+
 /* --------------- */
 /* Data Structures */
 /* --------------- */
@@ -173,19 +176,23 @@ static void center_line(WINDOW *win, int row, int width, const char *data, int d
     sbfree(line);
 }
 
+void logo_reset()
+{
+    logoindex = (logoindex + 1) % CGDB_NUM_LOGOS;
+}
+
 void logo_display(WINDOW *win)
 {
-    static int logo = -1;              /* Logo index */
     int height, width;                 /* Dimensions of the window */
     int line;                          /* Starting line */
     int i;                             /* Iterators */
     int attr;                          /* Default logo attributes */
     int usage_height = CGDB_NUM_USAGE; /* Height of the usage message */
 
-    /* Pick a random logo */
-    if (logo == -1) {
+    /* Pick a random logoindex */
+    if (logoindex == -1) {
         srand(time(NULL));
-        logo = rand() % CGDB_NUM_LOGOS;
+        logoindex = rand() % CGDB_NUM_LOGOS;
     }
 
     attr = hl_groups_get_attr(hl_groups_instance, HLG_LOGO);
@@ -197,11 +204,13 @@ void logo_display(WINDOW *win)
     werase(win);
 
     /* If the logo fits on the screen, draw it */
-    if ((CGDB_LOGO[logo].h <= height - usage_height - 2)) {
-        line = (height - CGDB_LOGO[logo].h - usage_height - 2) / 2;
+    if ((CGDB_LOGO[logoindex].h <= height - usage_height - 2)) {
+        line = (height - CGDB_LOGO[logoindex].h - usage_height - 2) / 2;
 
-        for(i = 0; i < CGDB_LOGO[logo].h; i++)
-            center_line(win, line++, width, CGDB_LOGO[logo].data[i], CGDB_LOGO[logo].w, attr);
+        for(i = 0; i < CGDB_LOGO[logoindex].h; i++) {
+            center_line(win, line++, width,
+                CGDB_LOGO[logoindex].data[i], CGDB_LOGO[logoindex].w, attr);
+        }
         line++;
     } else {
         line = (height - usage_height) / 2;
