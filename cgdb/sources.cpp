@@ -390,8 +390,7 @@ struct sviewer *source_new(int pos_r, int pos_c, int height, int width)
     struct sviewer *rv;
 
     /* Allocate a new structure */
-    if ((rv = (struct sviewer *)malloc(sizeof (struct sviewer))) == NULL)
-        return NULL;
+    rv = (struct sviewer *)cgdb_malloc(sizeof (struct sviewer));
 
     /* Initialize the structure */
     rv->win = newwin(height, width, pos_r, pos_c);
@@ -410,7 +409,7 @@ int source_add(struct sviewer *sview, const char *path)
 {
     struct list_node *new_node;
 
-    new_node = (struct list_node *)malloc(sizeof (struct list_node));
+    new_node = (struct list_node *)cgdb_malloc(sizeof (struct list_node));
     new_node->path = strdup(path);
     new_node->lpath = NULL;
 
@@ -1020,6 +1019,8 @@ void source_free(struct sviewer *sview)
 
     delwin(sview->win);
     sview->win = NULL;
+
+    free(sview);
 }
 
 void source_search_regex_init(struct sviewer *sview)
