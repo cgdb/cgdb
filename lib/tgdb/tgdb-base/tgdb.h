@@ -597,7 +597,8 @@
    * @return
    * 1 if option is set, otherwise 0
    */
-    int tgdb_set_verbose_error_handling(struct tgdb *tgdb, int value);
+    int tgdb_set_verbose_error_handling(struct tgdb *tgdb, int value,
+            void (*print_message)(const char *fmt, ...));
 
 /*@}*/
 /* }}}*/

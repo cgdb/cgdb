@@ -144,6 +144,8 @@ struct tgdb {
    * running. Otherwise, if it is 1, it does.  */
     int show_gui_commands;
 
+    void (*print_message)(const char *fmt, ...);
+
   /**
    * This is the queue of commands TGDB has currently made to give to the 
    * front end.  */
@@ -230,6 +232,7 @@ static struct tgdb *initialize_tgdb_context(void)
 
     tgdb->last_gui_command = NULL;
     tgdb->show_gui_commands = 0;
+    tgdb->print_message = NULL;
 
     tgdb->command_list = tgdb_list_init();
     tgdb->has_sigchld_recv = 0;
@@ -654,16 +657,15 @@ static int tgdb_deliver_command(struct tgdb *tgdb, struct tgdb_command *command)
 
     /* Uncomment this if you wish to see all of the commands, that are 
      * passed to GDB. */
-#if 0
+#if 1
     {
-        char *s = strdup(client_command->tgdb_client_command_data);
-        int length = strlen(s);
+        if (tgdb->print_message)
+        {
+            char *s = command->tgdb_command_data;
+            int length = strlen(command->tgdb_command_data);
 
-        s[length - 1] = '\0';
-        fprintf(stderr, "[%s]\n", s);
-        s[length - 1] = ' ';
-        free(s);
-        s = NULL;
+            tgdb->print_message("tgdb:[%.*s]\n", length - 1, s);
+        }
     }
 #endif
 
@@ -1447,8 +1449,11 @@ int tgdb_set_verbose_gui_command_output(struct tgdb *tgdb, int value)
     return 0;
 }
 
-int tgdb_set_verbose_error_handling(struct tgdb *tgdb, int value)
+int tgdb_set_verbose_error_handling(struct tgdb *tgdb, int value,
+    void (*print_message)(const char *fmt, ...))
 {
+    tgdb->print_message = print_message;
+
     if (value == -1)
         return logger_is_recording(logger);
 
