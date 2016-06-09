@@ -66,14 +66,8 @@ struct commands {
     /* info sources information {{{ */
     /*@{ */
 
-  /** ??? Finished parsing the data being looked for.  */
-    int sources_ready;
-
   /** All of the sources.  */
     struct ibuf *info_sources_string;
-
-  /** All of the source, parsed in put in a list, 1 at a time.  */
-    struct tgdb_list *inferior_source_files;
 
     /*@} */
     /* }}} */
@@ -106,9 +100,7 @@ struct commands *commands_initialize(void)
 
     c->info_source_string = ibuf_init();
 
-    c->sources_ready = 0;
     c->info_sources_string = ibuf_init();
-    c->inferior_source_files = tgdb_list_init();
 
     c->tab_completion_ready = 0;
     c->tab_completion_string = ibuf_init();
@@ -168,9 +160,6 @@ void commands_shutdown(struct commands *c)
     c->tab_completion_string = NULL;
 
     tgdb_list_destroy(c->tab_completions);
-
-    tgdb_list_free(c->inferior_source_files, free_char_star);
-    tgdb_list_destroy(c->inferior_source_files);
 
     /* TODO: free source_files queue */
 
@@ -244,11 +233,23 @@ static void commands_process_info_source(struct commands *c, char a,
     }
 }
 
+static void commands_send_source_files(struct commands *c,
+        struct tgdb_list *list, struct tgdb_list *source_files)
+{
+    struct tgdb_response *response = (struct tgdb_response *)
+            cgdb_malloc(sizeof (struct tgdb_response));
+
+    response->header = TGDB_UPDATE_SOURCE_FILES;
+    response->choice.update_source_files.source_files = source_files;
+    tgdb_types_append_command(list, response);
+}
+
 /* This function is capable of parsing the output of 'info source'.
  * It can get both the absolute and relative path to the source file.
  */
 static void
-commands_process_info_sources(struct commands *c, char a)
+commands_process_info_sources(struct commands *c, char a,
+        struct tgdb_list *list)
 {
     ibuf_addchar(c->info_sources_string, a);
 
@@ -258,18 +259,20 @@ commands_process_info_sources(struct commands *c, char a)
         result = gdbwire_interpreter_exec(ibuf_get(c->info_sources_string),
             GDBWIRE_MI_FILE_LIST_EXEC_SOURCE_FILES, &mi_command);
         if (result == GDBWIRE_OK) {
+            struct tgdb_list *source_files = tgdb_list_init();
             struct gdbwire_mi_source_file *files =
                 mi_command->variant.file_list_exec_source_files.files;
             while (files) {
                 char *file = (files->fullname)?files->fullname:files->file;
-                tgdb_list_append(c->inferior_source_files, strdup(file));
+                tgdb_list_append(source_files, strdup(file));
                 files = files->next;
             }
+
+            commands_send_source_files(c, list, source_files);
 
             gdbwire_mi_command_free(mi_command);
         }
 
-        c->sources_ready = 1;
         ibuf_clear(c->info_sources_string);
     }
 }
@@ -379,17 +382,6 @@ void commands_free(struct commands *c, void *item)
     free((char *) item);
 }
 
-void commands_send_gui_sources(struct commands *c, struct tgdb_list *list)
-{
-    struct tgdb_response *response = (struct tgdb_response *)
-            cgdb_malloc(sizeof (struct tgdb_response));
-
-    response->header = TGDB_UPDATE_SOURCE_FILES;
-    response->choice.update_source_files.source_files =
-            c->inferior_source_files;
-    tgdb_types_append_command(list, response);
-}
-
 void commands_send_gui_completions(struct commands *c, struct tgdb_list *list)
 {
     /* If the inferior program was not compiled with debug, then no sources
@@ -407,7 +399,7 @@ void commands_send_gui_completions(struct commands *c, struct tgdb_list *list)
 void commands_process(struct commands *c, char a, struct tgdb_list *list)
 {
     if (commands_get_state(c) == INFO_SOURCES) {
-        commands_process_info_sources(c, a);
+        commands_process_info_sources(c, a, list);
     } else if (commands_get_state(c) == INFO_BREAKPOINTS) {
         commands_process_breakpoints(c, a, list);
     } else if (commands_get_state(c) == COMPLETE) {
@@ -454,10 +446,8 @@ commands_prepare_tab_completion(struct annotate_two *a2, struct commands *c)
 static void
 commands_prepare_info_sources(struct annotate_two *a2, struct commands *c)
 {
-    c->sources_ready = 0;
     ibuf_clear(c->info_sources_string);
     commands_set_state(c, INFO_SOURCES, NULL);
-    global_set_start_info_sources(a2->g);
 }
 
 int

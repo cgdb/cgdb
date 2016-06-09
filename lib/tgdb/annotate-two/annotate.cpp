@@ -22,9 +22,8 @@ static int
 handle_source(struct annotate_two *a2, const char *buf, size_t n,
         struct tgdb_list *list)
 {
-    /* set up the info_source command to get info */
-    if (commands_issue_command(a2->c,
-                    a2->client_command_list,
+    /* set up the info_source command to get file info */
+    if (commands_issue_command(a2->c, a2->client_command_list,
                     ANNOTATE_INFO_SOURCE, NULL, 1) == -1) {
         logger_write_pos(logger, __FILE__, __LINE__,
                 "commands_issue_command error");
@@ -80,13 +79,6 @@ static int handle_prompt(struct annotate_two *a2, const char *buf, size_t n,
 {
     /* All done. */
     data_set_state(a2, USER_AT_PROMPT);
-
-    /* 'info sources' is done, return the sources to the gui */
-    if (global_has_info_sources_started(a2->g) == 1) {
-        global_reset_info_sources_started(a2->g);
-        commands_send_gui_sources(a2->c, list);
-        return 0;
-    }
 
     /* 'complete' is done, return the completions to the gui */
     if (global_has_completion_started(a2->g) == 1) {

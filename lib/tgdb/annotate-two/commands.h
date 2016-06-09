@@ -65,13 +65,6 @@ int commands_issue_command(struct commands *c,
  */
 void commands_process(struct commands *c, char a, struct tgdb_list *list);
 
-/* commands_send_gui_sources: This gives the gui all of the sources that were
- *                            just read from gdb through an 'info sources' prompt.
- *
- *    com   -> commands to give back to gdb.
- */
-void commands_send_gui_sources(struct commands *c, struct tgdb_list *list);
-
 /* This gives the gui all of the completions that were just read from gdb 
  * through a 'complete' command.
  *
