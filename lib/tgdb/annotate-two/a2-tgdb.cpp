@@ -56,16 +56,10 @@ static int a2_set_inferior_tty(void *ctx)
         return -1;
     }
 
-    if (commands_issue_command(a2->c,
+    return commands_issue_command(a2->c,
                     a2->client_command_list,
                     ANNOTATE_TTY,
-                    pty_pair_get_slavename(a2->pty_pair), 0) == -1) {
-        logger_write_pos(logger, __FILE__, __LINE__,
-                "commands_issue_command error");
-        return -1;
-    }
-
-    return 0;
+                    pty_pair_get_slavename(a2->pty_pair), 0);
 }
 
 static int close_inferior_connection(void *ctx)
@@ -226,8 +220,6 @@ int a2_initialize(struct annotate_two *a2,
     if (commands_issue_command(a2->c,
                     a2->client_command_list,
                     ANNOTATE_INFO_BREAKPOINTS, NULL, 0) == -1) {
-        logger_write_pos(logger, __FILE__, __LINE__,
-                "commands_issue_command error");
         return -1;
     }
 
@@ -312,31 +304,15 @@ struct tgdb_list *a2_get_client_commands(struct annotate_two *a2)
 
 int a2_get_current_location(struct annotate_two *a2)
 {
-    int ret;
-
-    /* set up the info_source command to get info */
-    ret = commands_issue_command(a2->c, a2->client_command_list,
-                    ANNOTATE_INFO_SOURCE, NULL, 1);
-    if (ret == -1) {
-        logger_write_pos(logger, __FILE__, __LINE__,
-                "commands_issue_command error");
-        return -1;
-    }
-
-    return 0;
+    return commands_issue_command(a2->c, a2->client_command_list,
+                           ANNOTATE_INFO_SOURCE, NULL, 1);
 }
 
 int a2_get_inferior_sources(struct annotate_two *a2)
 {
-    if (commands_issue_command(a2->c,
+    return commands_issue_command(a2->c,
                     a2->client_command_list,
-                    ANNOTATE_INFO_SOURCES, NULL, 0) == -1) {
-        logger_write_pos(logger, __FILE__, __LINE__,
-                "commands_issue_command error");
-        return -1;
-    }
-
-    return 0;
+                    ANNOTATE_INFO_SOURCES, NULL, 0);
 }
 
 const char *a2_return_client_command(struct annotate_two *a2, enum tgdb_command_type c)
@@ -409,15 +385,9 @@ pid_t a2_get_debugger_pid(struct annotate_two *a2)
 
 int a2_completion_callback(struct annotate_two *a2, const char *command)
 {
-    if (commands_issue_command(a2->c,
+    return commands_issue_command(a2->c,
                     a2->client_command_list,
-                    ANNOTATE_COMPLETE, command, 4) == -1) {
-        logger_write_pos(logger, __FILE__, __LINE__,
-                "commands_issue_command error");
-        return -1;
-    }
-
-    return 0;
+                    ANNOTATE_COMPLETE, command, 4);
 }
 
 int a2_user_ran_command(struct annotate_two *a2)

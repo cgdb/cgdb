@@ -480,13 +480,10 @@ int
 commands_user_ran_command(struct commands *c,
         struct tgdb_list *client_command_list)
 {
-    if (commands_issue_command(c,
+    return commands_issue_command(c,
                     client_command_list,
-                    ANNOTATE_INFO_BREAKPOINTS, NULL, 0) == -1) {
-        logger_write_pos(logger, __FILE__, __LINE__,
-                "commands_issue_command error");
-        return -1;
-    }
+                    ANNOTATE_INFO_BREAKPOINTS, NULL, 0);
+
 #if 0
     /* This was added to allow support for TGDB to tell the FE when the user
      * switched locations due to a 'list foo:1' command. The info line would
@@ -498,15 +495,9 @@ commands_user_ran_command(struct commands *c,
      * position it was just at and the FE would show that spot again, but this
      * isn't necessarily what the FE wants.
      */
-    if (commands_issue_command(c,
-                    client_command_list, ANNOTATE_INFO_LINE, NULL, 0) == -1) {
-        logger_write_pos(logger, __FILE__, __LINE__,
-                "commands_issue_command error");
-        return -1;
-    }
+    return commands_issue_command(c,
+                    client_command_list, ANNOTATE_INFO_LINE, NULL, 0);
 #endif
-
-    return 0;
 }
 
 int
