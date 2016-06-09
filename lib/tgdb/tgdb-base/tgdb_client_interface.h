@@ -26,42 +26,10 @@
  */
 struct tgdb_client_context;
 
-/**  
- * Commands that the client should be able to act upon or ignore.
- * TGDB will issue these commands to the client.
- */
-enum tgdb_client_commands {
-
-    /**
-	 * The client can currently ignore this command.
-	 */
-    TGDB_CLIENT_VOID = 0,
-
-    /**
- 	 * Get a list of breakpoints
-	 */
-    TGDB_CLIENT_GET_BREAKPOINTS,
-
-    /**
-     * Complete the current console line
-	 */
-    TGDB_CLIENT_COMPLETE_COMMAND_LINE,
-
-    /**
-     * Get a list of all the source files the inferior is made up of
-	 */
-    TGDB_CLIENT_GET_INFERIOR_SOURCE_FILES,
-
-    /**
-     * Set the debugger's prompt
-	 */
-    TGDB_CLIENT_SET_DEBUGGER_PROMPT
-};
-
 /******************************************************************************/
 /**
- * @name Createing and Destroying a libtgdb context.
- * These functions are for createing and destroying client contexts.
+ * @name Creating and Destroying a libtgdb context.
+ * These functions are for creating and destroying client contexts.
  */
 /******************************************************************************/
 

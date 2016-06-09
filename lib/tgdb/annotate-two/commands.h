@@ -82,12 +82,6 @@ void commands_send_gui_completions(struct commands *c, struct tgdb_list *list);
  * THEY ARE STRICTLY FOR KEEPING TGDB UP TO DATE WITH GDB
  */
 
-/* commands_has_commnands_to_run: Determines if there is a command that 
- *                                tgdb needs run.
- *    RETURNS: 1 if there is commands to run, otherwise 0 
- */
-int commands_has_commnands_to_run(struct commands *c);
-
 /* commands_prepare_for_command:
  * -----------------------------
  *

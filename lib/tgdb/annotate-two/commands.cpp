@@ -482,7 +482,6 @@ commands_prepare_for_command(struct annotate_two *a2,
             commands_prepare_tab_completion(a2, c);
             io_debug_write_fmt("<%s\n>", com->tgdb_command_data);
             break;              /* Nothing to do */
-        case ANNOTATE_SET_PROMPT:
         case ANNOTATE_VOID:
             break;
         default:
@@ -546,9 +545,6 @@ static char *commands_create_command(struct commands *c,
             strcpy(ncom, "server complete ");
             strcat(ncom, data);
             strcat(ncom, "\n");
-            break;
-        case ANNOTATE_SET_PROMPT:
-            ncom = strdup(data);
             break;
         case ANNOTATE_VOID:
         default:

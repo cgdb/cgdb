@@ -58,11 +58,6 @@ enum annotate_commands {
  	 * Shows information on the current source file
 	 */
     ANNOTATE_INFO_SOURCE,
-
-    /**
-	 * Sets the prompt.
-	 */
-    ANNOTATE_SET_PROMPT
 };
 
 /******************************************************************************/
