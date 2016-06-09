@@ -340,15 +340,6 @@
   /**
    * Gets a list of source files that make up the program being debugged.
    *
-   * This function does not actually do anything but put a command in the 
-   * queue to be run when libtgdb is ready. When the libtgdb runs the
-   * command to get the inferior's source files, it will return 1 of 2
-   * things next time tgdb_recv is called.
-   *
-   * If the function succeeds the gui will get back TGDB_UPDATE_SOURCE_FILES
-   * containing a list of all the source files. Otherwise the gui will get
-   * back TGDB_SOURCES_DENIED.
-   *
    * \param tgdb
    * An instance of the tgdb library to operate on.
    *

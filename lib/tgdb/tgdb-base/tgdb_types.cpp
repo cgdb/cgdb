@@ -93,9 +93,6 @@ static int tgdb_types_print_item(void *command)
             fprintf(fd, "Inferior source files end\n");
             break;
         }
-        case TGDB_SOURCES_DENIED:
-            fprintf(fd, "TGDB_SOURCES_DENIED\n");
-            break;
         case TGDB_INFERIOR_EXITED:
         {
             int *status = com->choice.inferior_exited.exit_status;
@@ -207,9 +204,6 @@ static int tgdb_types_delete_item(void *command)
             tgdb_list_free(list, tgdb_types_source_files_free);
             break;
         }
-        case TGDB_SOURCES_DENIED:
-            /* Nothing to do */
-            break;
         case TGDB_INFERIOR_EXITED:
         {
             int *status = com->choice.inferior_exited.exit_status;

@@ -105,18 +105,6 @@ static int handle_error(struct annotate_two *a2, const char *buf, size_t n,
 static int handle_error_begin(struct annotate_two *a2, const char *buf,
         size_t n, struct tgdb_list *list)
 {
-    /* If the user listed the files ( info sources ) and there is an 
-     * annotate error ( usually meaning that gdb can not find the symbols
-     * for the debugged program ) then send a denied response. */
-    if (commands_get_state(a2->c) == INFO_SOURCES) {
-        struct tgdb_response *response = (struct tgdb_response *)
-                cgdb_malloc(sizeof (struct tgdb_response));
-
-        response->header = TGDB_SOURCES_DENIED;
-        tgdb_types_append_command(list, response);
-        return 0;
-    }
-
     /* After a signal is sent (^c), the debugger will then output 
      * something like "Quit\n", so that should be displayed to the user.
      * Unfortunately, the debugger ( gdb ) isn't nice enough to return a 

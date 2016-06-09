@@ -1055,15 +1055,6 @@ static void process_commands(struct tgdb *tgdb_in)
                 break;
             }
 
-                /* The user is trying to get a list of source files that make up
-                 * the debugged program but libtgdb is claiming that gdb knows
-                 * none. */
-            case TGDB_SOURCES_DENIED:
-                if_display_message("Error:", WIN_REFRESH, 0,
-                        " No sources available! Was the program compiled with debug?");
-                kui_input_acceptable = 1;
-                break;
-
             case TGDB_INFERIOR_EXITED:
             {
                 /*

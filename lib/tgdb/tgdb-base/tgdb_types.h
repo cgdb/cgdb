@@ -278,12 +278,6 @@
         TGDB_UPDATE_SOURCE_FILES,
 
     /**
-     * This is a response to the tgdb_get_sources function call.
-     * If the sources can not be received you will get this response.
-     */
-        TGDB_SOURCES_DENIED,
-
-    /**
      * This happens when the program being debugged by GDB exits. 
      * It can be used be the front end to clear any cache that it might have
      * obtained by debugging the last program. The data represents the exit
@@ -340,8 +334,6 @@
                  * filename. The filename may be relative or absolute. */
                 struct tgdb_list *source_files;
             } update_source_files;
-
-            /* header == TGDB_SOURCES_DENIED */
 
             /* header == TGDB_INFERIOR_EXITED */
             struct {
