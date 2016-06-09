@@ -358,32 +358,6 @@
     tgdb_request_ptr tgdb_request_inferiors_source_files(struct tgdb *tgdb);
 
   /**
-   * This gets the absolute path and the relative path from the given file, 
-   * FILE. The file parameter should have been returned by 
-   * tgdb_request_inferiors_source_files. It can return both relative and 
-   * absolute filenames.
-   *
-   * Basically, if the parameter file is a relative path OR an absolute path, 
-   * both the relative path and the absolute path will be returned in the 
-   * response.
-   *
-   * If this functions succeeds TGDB_ABSOLUTE_SOURCE_ACCEPTED will be returned.
-   * Otherwise, TGDB_ABSOLUTE_SOURCE_DENIED gets returned.
-   *
-   * \param tgdb
-   * An instance of the tgdb library to operate on.
-   *
-   * \param file
-   * The relative filename to get the absolute path of. If this is passed in as
-   * NULL, then this function will return NULL.
-   *
-   * \return
-   * Will return as a tgdb request command on success, otherwise NULL.
-   */
-    tgdb_request_ptr tgdb_request_filename_pair(struct tgdb *tgdb,
-            const char *file);
-
-  /**
    * This will ask the debugger for it's current file and line number.
    * It will return to the caller a tgdb_response with the 
    * response->update_source_files set. This is the same response you 
@@ -392,17 +366,10 @@
    * \param tgdb
    * An instance of the tgdb library to operate on.
    * 
-   * \param on_starup
-   * This variable can be set to 1 if the front end wants to probe GDB
-   * for the initial file and location of the program being debugged.
-   * However, each initial time after that, this variable should be 
-   * set to 0.
-   *
    * \return
    * Will return as a tgdb request command on success, otherwise NULL.
    */
-    tgdb_request_ptr tgdb_request_current_location(struct tgdb *tgdb,
-            int on_startup);
+    tgdb_request_ptr tgdb_request_current_location(struct tgdb *tgdb);
 
   /**
    * This tells libtgdb to run a command through the debugger.

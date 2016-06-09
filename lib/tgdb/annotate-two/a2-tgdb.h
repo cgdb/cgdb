@@ -55,32 +55,9 @@ enum annotate_commands {
     ANNOTATE_INFO_SOURCES,
 
     /**
-	 * relative source path.
-	 */
-    ANNOTATE_INFO_SOURCE_RELATIVE,
-
-    /**
-	 * absolute source path.
-	 */
-    ANNOTATE_INFO_SOURCE_FILENAME_PAIR,
-
-    /**
  	 * Shows information on the current source file
 	 */
     ANNOTATE_INFO_SOURCE,
-
-    /**
- 	 * displays the contents of current source file
-	 */
-    ANNOTATE_LIST,
-
-    /**
- 	 * Get's the current fullname, filename and line number.
-	 * This is because the 'info line' command to GDB generates the source
-	 * annotation, which in turn causes the a2 subsystem to get the 
-	 * relative path.
-	 */
-    ANNOTATE_INFO_LINE,
 
     /**
 	 * Sets the prompt.
@@ -313,36 +290,16 @@ struct tgdb_list *a2_get_client_commands(struct annotate_two *a2);
 
 /*@{*/
 
-/** 
- * Gets the Absolute path of FILE.
- *  
- * \param ctx
- * The annotate two context.
- *
- * \param file
- * The relative path that gdb outputted.
- *
- * @return
- * 0 on success, otherwise -1 on error.
- */
-int a2_get_source_filename_pair(struct annotate_two *a2, const char *file);
-
 /**
  * Get's the fullname, filename and line number GDB is currently at.
  *
  * \param ctx
  * The annotate two context.
  *
- * \param on_startup
- * This variable can be set to 1 if the front end wants to probe GDB
- * for the initial file and location of the program being debugged.
- * However, each initial time after that, this variable should be 
- * set to 0.
- *
  * @return
  * 0 on success, otherwise -1 on error.
  */
-int a2_get_current_location(struct annotate_two *a2, int on_startup);
+int a2_get_current_location(struct annotate_two *a2);
 
 /** 
  * Gets all the source files that the inferior makes up.

@@ -216,7 +216,8 @@ int a2_initialize(struct annotate_two *a2,
      * the TGDB_UPDATE_BREAKPOINTS event will be ignored in process_commands()
      * because there are no source files to add the breakpoints to.
      */
-    a2_get_current_location(a2, 1);
+
+    a2_get_current_location(a2);
 
     /* gdb may already have some breakpoints when it starts. This could happen
      * if the user puts breakpoints in there .gdbinit.
@@ -309,45 +310,13 @@ struct tgdb_list *a2_get_client_commands(struct annotate_two *a2)
     return a2->client_command_list;
 }
 
-int a2_get_source_filename_pair(struct annotate_two *a2, const char *file)
+int a2_get_current_location(struct annotate_two *a2)
 {
     int ret;
 
-    ret = commands_issue_command(a2->c, a2->client_command_list, ANNOTATE_LIST,
-            file, 0);
-    if (ret == -1) {
-        logger_write_pos(logger, __FILE__, __LINE__,
-                "commands_issue_command error");
-        return -1;
-    }
-
+    /* set up the info_source command to get info */
     ret = commands_issue_command(a2->c, a2->client_command_list,
-            ANNOTATE_INFO_SOURCE_FILENAME_PAIR, file, 0);
-    if (ret == -1) {
-        logger_write_pos(logger, __FILE__, __LINE__,
-                "commands_issue_command error");
-        return -1;
-    }
-
-    return 0;
-}
-
-int a2_get_current_location(struct annotate_two *a2, int on_startup)
-{
-    int ret;
-
-    if (on_startup) {
-        ret = commands_issue_command(a2->c, a2->client_command_list,
-                ANNOTATE_LIST, NULL, 0);
-        if (ret == -1) {
-            logger_write_pos(logger, __FILE__, __LINE__,
-                    "commands_issue_command error");
-            return -1;
-        }
-    }
-
-    ret = commands_issue_command(a2->c, a2->client_command_list,
-            ANNOTATE_INFO_LINE, NULL, 0);
+                    ANNOTATE_INFO_SOURCE, NULL, 1);
     if (ret == -1) {
         logger_write_pos(logger, __FILE__, __LINE__,
                 "commands_issue_command error");

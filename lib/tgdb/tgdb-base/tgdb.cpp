@@ -447,10 +447,6 @@ void tgdb_request_destroy(tgdb_request_ptr request_ptr)
             break;
         case TGDB_REQUEST_INFO_SOURCES:
             break;
-        case TGDB_REQUEST_FILENAME_PAIR:
-            free((char *) request_ptr->choice.filename_pair.file);
-            request_ptr->choice.filename_pair.file = NULL;
-            break;
         case TGDB_REQUEST_DEBUGGER_COMMAND:
             break;
         case TGDB_REQUEST_MODIFY_BREAKPOINT:
@@ -1032,34 +1028,7 @@ tgdb_request_ptr tgdb_request_inferiors_source_files(struct tgdb * tgdb)
 }
 
 tgdb_request_ptr
-tgdb_request_filename_pair(struct tgdb * tgdb, const char *file)
-{
-    tgdb_request_ptr request_ptr;
-
-    if (!tgdb)
-        return NULL;
-
-    if (!file)
-        return NULL;
-
-    request_ptr = (tgdb_request_ptr)
-            cgdb_malloc(sizeof (struct tgdb_request));
-    if (!request_ptr)
-        return NULL;
-
-    request_ptr->header = TGDB_REQUEST_FILENAME_PAIR;
-
-    if (file) {
-        request_ptr->choice.filename_pair.file = (const char *)
-                cgdb_strdup(file);
-    } else
-        request_ptr->choice.filename_pair.file = NULL;
-
-    return request_ptr;
-}
-
-tgdb_request_ptr
-tgdb_request_current_location(struct tgdb * tgdb, int on_startup)
+tgdb_request_current_location(struct tgdb * tgdb)
 {
     tgdb_request_ptr request_ptr;
 
@@ -1072,7 +1041,6 @@ tgdb_request_current_location(struct tgdb * tgdb, int on_startup)
         return NULL;
 
     request_ptr->header = TGDB_REQUEST_CURRENT_LOCATION;
-    request_ptr->choice.current_location.on_startup = on_startup;
 
     return request_ptr;
 }
@@ -1189,24 +1157,6 @@ tgdb_process_info_sources(struct tgdb *tgdb, tgdb_request_ptr request)
 }
 
 static int
-tgdb_process_filename_pair(struct tgdb *tgdb, tgdb_request_ptr request)
-{
-    int ret;
-
-    if (!tgdb || !request)
-        return -1;
-
-    if (request->header != TGDB_REQUEST_FILENAME_PAIR)
-        return -1;
-
-    ret = tgdb_client_get_filename_pair(tgdb->tcc,
-            request->choice.filename_pair.file);
-    tgdb_process_client_commands(tgdb);
-
-    return ret;
-}
-
-static int
 tgdb_process_current_location(struct tgdb *tgdb, tgdb_request_ptr request)
 {
     int ret = 0;
@@ -1217,8 +1167,7 @@ tgdb_process_current_location(struct tgdb *tgdb, tgdb_request_ptr request)
     if (request->header != TGDB_REQUEST_CURRENT_LOCATION)
         return -1;
 
-    ret = tgdb_client_get_current_location(tgdb->tcc,
-            request->choice.current_location.on_startup);
+    ret = tgdb_client_get_current_location(tgdb->tcc);
     tgdb_process_client_commands(tgdb);
 
     return ret;
@@ -1296,8 +1245,6 @@ int tgdb_process_command(struct tgdb *tgdb, tgdb_request_ptr request)
         return tgdb_process_console_command(tgdb, request);
     else if (request->header == TGDB_REQUEST_INFO_SOURCES)
         return tgdb_process_info_sources(tgdb, request);
-    else if (request->header == TGDB_REQUEST_FILENAME_PAIR)
-        return tgdb_process_filename_pair(tgdb, request);
     else if (request->header == TGDB_REQUEST_CURRENT_LOCATION)
         return tgdb_process_current_location(tgdb, request);
     else if (request->header == TGDB_REQUEST_DEBUGGER_COMMAND)

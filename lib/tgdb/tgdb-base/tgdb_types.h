@@ -210,12 +210,6 @@
      * currently knows about the inferior. */
         TGDB_REQUEST_INFO_SOURCES,
     /**
-     * Request the absolute and relative path from the debugger given a path.
-     * This path being used to get the pair should have been returned by the 
-     * tgdb_request_inferiors_source_files command.
-     */
-        TGDB_REQUEST_FILENAME_PAIR,
-    /**
      * This asks TGDB to determine the current fullname, filename and line 
      * number that the debugger is currently at, in the inferior. */
         TGDB_REQUEST_CURRENT_LOCATION,
@@ -236,16 +230,6 @@
     /** The null terminated console command to pass to GDB */
                 const char *command;
             } console_command;
-
-            /* info_sources; */
-
-            struct {
-                const char *file;
-            } filename_pair;
-
-            struct {
-                int on_startup;
-            } current_location;
 
             struct {
     /** This is the command that libtgdb should run through the debugger */
@@ -293,22 +277,11 @@
      */
         TGDB_UPDATE_SOURCE_FILES,
 
-    /** 
-     * This is a response to the function call tgdb_get_filename_pair.
-     * It returns the absolute and relative path to the source file requested.
+    /**
+     * This is a response to the tgdb_get_sources function call.
+     * If the sources can not be received you will get this response.
      */
-        TGDB_FILENAME_PAIR,
-
-    /** 
-     * This is a response to the function call tgdb_get_source_absolute_filename.
-     * It happens when gdb failed to know what the absolute path to the relative
-     * path asked for was.
-     *
-     * NOTE: If this command is generated and the file is NULL, the command can
-     * be ignored. Currently, the annotate 2 subsytem uses this when trying to
-     * figure out the initial file.
-     */
-        TGDB_ABSOLUTE_SOURCE_DENIED,
+        TGDB_SOURCES_DENIED,
 
     /**
      * This happens when the program being debugged by GDB exits. 
@@ -368,22 +341,7 @@
                 struct tgdb_list *source_files;
             } update_source_files;
 
-            /* header == TGDB_FILENAME_PAIR */
-            struct {
-                /** 
-                 * If either of these are NULL, the data could not be retrieved from
-                 * the debugger. */
-
-                /** The absolute path to the file being looked for */
-                const char *absolute_path;
-                /** The relative path to the file being looked for */
-                const char *relative_path;
-            } filename_pair;
-
-            /* header == TGDB_ABSOLUTE_SOURCE_DENIED */
-            struct {
-                struct tgdb_source_file *source_file;
-            } absolute_source_denied;
+            /* header == TGDB_SOURCES_DENIED */
 
             /* header == TGDB_INFERIOR_EXITED */
             struct {

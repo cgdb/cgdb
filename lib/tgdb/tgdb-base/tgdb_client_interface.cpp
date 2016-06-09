@@ -152,21 +152,10 @@ struct tgdb_list *tgdb_client_get_client_commands(struct tgdb_client_context
 #endif
 }
 
-int tgdb_client_get_filename_pair(struct tgdb_client_context *tcc,
-        const char *path)
+int tgdb_client_get_current_location(struct tgdb_client_context *tcc)
 {
 #ifdef ANNOTATE_TWO
-    return a2_get_source_filename_pair(tcc->tgdb_debugger_context, path);
-#else
-    return -1;
-#endif
-}
-
-int tgdb_client_get_current_location(struct tgdb_client_context *tcc,
-        int on_startup)
-{
-#ifdef ANNOTATE_TWO
-    return a2_get_current_location(tcc->tgdb_debugger_context, on_startup);
+    return a2_get_current_location(tcc->tgdb_debugger_context);
 #else
     return -1;
 #endif

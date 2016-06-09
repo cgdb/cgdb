@@ -313,21 +313,6 @@ struct tgdb_list *tgdb_client_get_client_commands(struct tgdb_client_context
 
 /*@{*/
 
-/** 
- * Get's the absolute and relative path that relates to the path PATH.
- *  
- * \param tcc
- * The client context.
- *
- * \param path
- * The path that the debugger outputted. (relative or absolute)
- *
- * @return
- * 0 on success, otherwise -1 on error.
- */
-int tgdb_client_get_filename_pair(struct tgdb_client_context *tcc,
-        const char *path);
-
 /**
  * Get's the current fullname, filename and line number that the debugger is 
  * at.
@@ -335,17 +320,10 @@ int tgdb_client_get_filename_pair(struct tgdb_client_context *tcc,
  * \param tcc
  * The client context.
  *
- * \param on_startup
- * This variable can be set to 1 if the front end wants to probe GDB
- * for the initial file and location of the program being debugged.
- * However, each initial time after that, this variable should be 
- * set to 0.
- *
  * @return
  * 0 on success, otherwise -1 on error.
  */
-int tgdb_client_get_current_location(struct tgdb_client_context *tcc,
-        int on_startup);
+int tgdb_client_get_current_location(struct tgdb_client_context *tcc);
 
 /** 
  * Gets all of the source files that the inferior is made of.

@@ -19,34 +19,12 @@ enum COMMAND_STATE {
     COMPLETE,
 
     /* Related to the 'info source' command */
-    INFO_LIST,
-    INFO_SOURCE_FILENAME_PAIR,
-    INFO_SOURCE_RELATIVE
+    INFO_SOURCE,
 };
 
 /* commands_initialize: Initialize the commands unit */
 struct commands *commands_initialize(void);
 void commands_shutdown(struct commands *c);
-
-/* commands_parse_field: This is called when tgdb gets a field annotation
- *                       from gdb. 
- * buf -> The 'field' annotation received from gdb.
- * n   -> The size of the annotation.
- * field -> the field number outputted.
- */
-int commands_parse_field(struct commands *c, const char *buf, size_t n,
-        int *field);
-
-/* commands_parse_source: This is called when tgdb gets a source annotation
- *                         from gdb. It parses the annotation and puts the 
- *                         correct information into com for the gui.
- * 
- * buf -> The 'source' annotation received from gdb.
- * n   -> The size of the annotation.
- */
-int commands_parse_source(struct commands *c,
-        struct tgdb_list *client_command_list,
-        const char *buf, size_t n, struct tgdb_list *list);
 
 /* command_set_state: Sets the state of the command package. This should usually be called
  *                      after an annotation has been read.
@@ -85,15 +63,7 @@ int commands_issue_command(struct commands *c,
  *    a     -> the character received from gdb.
  *    com   -> commands to give back to gdb.
  */
-void commands_process(struct commands *c, char a);
-
-/* commands_list_command_finished: Returns to the gui the absolute path of
- *                                  the filename requested.
- *
- *  if success is 0 then the list failed, otherwise it worked.
- */
-void commands_list_command_finished(struct commands *c,
-        struct tgdb_list *list, int success);
+void commands_process(struct commands *c, char a, struct tgdb_list *list);
 
 /* commands_send_gui_sources: This gives the gui all of the sources that were
  *                            just read from gdb through an 'info sources' prompt.
@@ -136,13 +106,6 @@ int commands_has_commnands_to_run(struct commands *c);
  */
 int commands_prepare_for_command(struct annotate_two *a2, struct commands *c,
         struct tgdb_command *com);
-
-/* commands_finalize_command:
- * --------------------------
- *
- *  This can be called to finalize work when the end of a command is reached.
- */
-void commands_finalize_command(struct commands *c, struct tgdb_list *list);
 
 /* commands_user_ran_command:
  * --------------------------

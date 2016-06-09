@@ -24,16 +24,6 @@ struct globals {
 
     unsigned short completion_started;
 
-    /** 
-	 * Has the 'list' command been started.
-	 */
-    unsigned short list_started;
-
-    /**
-	 * Did the list have an error?
-	 */
-    unsigned short list_had_error;
-
     /**
 	 * Is a misc prompt command be run.
 	 */
@@ -46,8 +36,6 @@ struct globals *globals_initialize(void)
 
     g->info_sources_started = 0;
     g->completion_started = 0;
-    g->list_started = 0;
-    g->list_had_error = 0;
     g->misc_prompt_command = 0;
 
     return g;
@@ -101,32 +89,4 @@ int global_has_completion_started(struct globals *g)
 void global_reset_completion_started(struct globals *g)
 {
     g->completion_started = 0;
-}
-
-/* For list_started */
-void global_set_start_list(struct globals *g)
-{
-    g->list_started = 1;
-    g->list_had_error = 0;
-}
-
-int global_has_list_started(struct globals *g)
-{
-    return g->list_started;
-}
-
-void global_list_finished(struct globals *g)
-{
-    g->list_started = 0;
-}
-
-/* For list_had_error */
-unsigned short global_list_had_error(struct globals *g)
-{
-    return g->list_had_error;
-}
-
-void global_set_list_error(struct globals *g, unsigned short error)
-{
-    g->list_had_error = error;
 }

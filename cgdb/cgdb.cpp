@@ -1055,31 +1055,15 @@ static void process_commands(struct tgdb *tgdb_in)
                 break;
             }
 
-                /* This is the absolute path to the last file the user requested */
-            case TGDB_FILENAME_PAIR:
-            {
-                const char *apath = item->choice.filename_pair.absolute_path;
-                const char *rpath = item->choice.filename_pair.relative_path;
-
-                if_show_file((char *) apath, 0, 0);
-                source_set_relative_path(if_get_sview(), apath, rpath);
+                /* The user is trying to get a list of source files that make up
+                 * the debugged program but libtgdb is claiming that gdb knows
+                 * none. */
+            case TGDB_SOURCES_DENIED:
+                if_display_message("Error:", WIN_REFRESH, 0,
+                        " No sources available! Was the program compiled with debug?");
+                kui_input_acceptable = 1;
                 break;
-            }
 
-                /* The source file requested does not exist */
-            case TGDB_ABSOLUTE_SOURCE_DENIED:
-            {
-                struct tgdb_source_file *file =
-                        item->choice.absolute_source_denied.source_file;
-
-                if_show_file(NULL, 0, 0);
-
-                /* com can be NULL when tgdb orig requests main file */
-                if (file->absolute_path != NULL)
-                    if_display_message("No such file:", WIN_REFRESH, 0, " %s",
-                            file->absolute_path);
-                break;
-            }
             case TGDB_INFERIOR_EXITED:
             {
                 /*
@@ -1163,7 +1147,6 @@ does_request_require_console_update(struct tgdb_request *request, int *update)
             *update = 1;
             break;
         case TGDB_REQUEST_INFO_SOURCES:
-        case TGDB_REQUEST_FILENAME_PAIR:
         case TGDB_REQUEST_CURRENT_LOCATION:
             *update = 0;
             break;
