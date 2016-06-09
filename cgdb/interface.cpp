@@ -1454,10 +1454,14 @@ int internal_if_input(int key, int *last_key)
                 return 0;
                 /* The user picked a file */
             } else if (ret == 1) {
+                if_show_file(filedlg_file, 0, 0);
+#if 0
+                //$ TODO: Kill all this code - we get full absolute paths now...
                 tgdb_request_ptr request_ptr;
 
                 request_ptr = tgdb_request_filename_pair(tgdb, filedlg_file);
                 handle_request(tgdb, request_ptr);
+#endif
                 if_set_focus(CGDB);
                 return 0;
             }
