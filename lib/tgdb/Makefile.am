@@ -1,2 +1,2 @@
-SUBDIRS = annotate-two gdbmi tgdb-base
+SUBDIRS = annotate-two tgdb-base
 EXTRA_DIST = testsuite

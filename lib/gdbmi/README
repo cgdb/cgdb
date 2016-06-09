@@ -1,2 +1,0 @@
-This library implements the gdbmi protocol. Currently, it simply parses an MI
-output command into a parse tree.

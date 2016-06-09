@@ -1,9 +1,0 @@
-Here is the current roadmap for libgdbmi. Plain and simple.
-  [x] Implement the bison push parser that can parse gdb/mi
-  [ ] Write automated unit tests to test this works.
-  [ ] Implement a layer which turns the parse tree into a nice
-      gdb/mi output command. This allows a client to easily access
-      the fields they care about.
-  [ ] Write automated unit tests to test this works.
-  [ ] Document this API
-  [ ] Integrate this API into CGDB.

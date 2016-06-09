@@ -1,1 +1,1 @@
-SUBDIRS = util rline adt gdbmi tgdb kui tokenizer
+SUBDIRS = util rline adt tgdb kui tokenizer

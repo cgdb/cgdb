@@ -250,12 +250,10 @@ AC_OUTPUT(
     Makefile \
     lib/Makefile \
     lib/adt/Makefile \
-    lib/gdbmi/Makefile \
     lib/kui/Makefile \
     lib/rline/Makefile \
     lib/tgdb/Makefile \
     lib/tgdb/annotate-two/Makefile \
-    lib/tgdb/gdbmi/Makefile \
     lib/tgdb/tgdb-base/Makefile \
     lib/tokenizer/Makefile \
     lib/util/Makefile \
