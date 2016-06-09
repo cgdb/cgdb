@@ -6,6 +6,10 @@
 #include <stdio.h>
 #endif /* HAVE_STDIO_H */
 
+#if HAVE_STDARG_H
+#include <stdarg.h>
+#endif /* HAVE_STDARG_H */
+
 #if HAVE_STRING_H
 #include <string.h>
 #endif /* HAVE_STRING_H */
@@ -166,4 +170,26 @@ int stb__sbgrowf( void **arr, int increment, int itemsize )
     stb__sbm( *arr ) = m;
 
     return 0;
+}
+
+char *sys_aprintf(const char *fmt, ...)
+{
+    int n;
+    va_list ap;
+
+    va_start(ap, fmt);
+    n = vsnprintf(NULL, 0, fmt, ap) + 1;
+    va_end(ap);
+
+    if (n > 0 ) {
+        char *str = (char *)cgdb_malloc(n);
+
+        va_start(ap, fmt);
+        vsnprintf(str, n, fmt, ap);
+        va_end(ap);
+
+        return str;
+    }
+
+    return NULL;
 }

@@ -51,6 +51,8 @@ int cgdb_is_debugger_attached();
 */
 int log10_uint(unsigned int val);
 
+char *sys_aprintf(const char *fmt, ...);
+
 #define MAX(a, b)  (((a) > (b)) ? (a) : (b))
 #define MIN(a, b)  (((a) < (b)) ? (a) : (b))
 
