@@ -526,20 +526,9 @@ static char *commands_create_command(struct commands *c,
             ncom = strdup("server interpreter-exec mi \"-break-info\"\n");
             break;
         case ANNOTATE_TTY:
-        {
-            //$ TODO mikesart: -inferior-tty-set
-            struct ibuf *temp_tty_name = ibuf_init();
-
-            ibuf_add(temp_tty_name, data);
-            ncom = (char *) cgdb_malloc(sizeof (char) * (13 + strlen(data)));
-            strcpy(ncom, "server tty ");
-            strcat(ncom, ibuf_get(temp_tty_name));
-            strcat(ncom, "\n");
-
-            ibuf_free(temp_tty_name);
-            temp_tty_name = NULL;
+            /* server tty %s */
+            ncom = sys_aprintf("server interpreter-exec mi \"-inferior-tty-set %s\"\n", data);
             break;
-        }
         case ANNOTATE_COMPLETE:
             ncom = (char *) cgdb_malloc(sizeof (char) * (18 + strlen(data)));
             strcpy(ncom, "server complete ");
