@@ -63,26 +63,6 @@ int sources_syntax_on = 1;
 /* Local Functions */
 /* --------------- */
 
-/* get_relative_node:  Returns a pointer to the node that matches the 
- * ------------------  given relative path.
- 
- *   lpath:  Full path to source file
- *
- * Return Value:  Pointer to the matching node, or NULL if not found.
- */
-static struct list_node *get_relative_node(struct sviewer *sview,
-        const char *lpath)
-{
-    struct list_node *cur;
-
-    for (cur = sview->list_head; cur != NULL; cur = cur->next) {
-        if (cur->lpath && (strcmp(lpath, cur->lpath) == 0))
-            return cur;
-    }
-
-    return NULL;
-}
-
 /* get_node:  Returns a pointer to the node that matches the given path.
  * ---------
  
@@ -411,7 +391,6 @@ int source_add(struct sviewer *sview, const char *path)
 
     new_node = (struct list_node *)cgdb_malloc(sizeof (struct list_node));
     new_node->path = strdup(path);
-    new_node->lpath = NULL;
 
     init_file_buffer(&new_node->orig_buf);
     init_file_buffer(&new_node->color_buf);
@@ -442,24 +421,6 @@ int source_add(struct sviewer *sview, const char *path)
     return 0;
 }
 
-int source_set_relative_path(struct sviewer *sview,
-        const char *path, const char *lpath)
-{
-    struct list_node *node = sview->list_head;
-
-    while (node != NULL) {
-        if (strcmp(node->path, path) == 0) {
-            free(node->lpath);
-            node->lpath = strdup(lpath);
-            return 0;
-        }
-
-        node = node->next;
-    }
-
-    return -1;
-}
-
 int source_del(struct sviewer *sview, const char *path)
 {
     int i;
@@ -487,12 +448,6 @@ int source_del(struct sviewer *sview, const char *path)
 
     sbfree(cur->lflags);
     cur->lflags = NULL;
-
-    /* Release local file name */
-    if (cur->lpath) {
-        free(cur->lpath);
-        cur->lpath = NULL;
-    }
 
     /* Remove link from list */
     if (cur == sview->list_head)
@@ -1073,7 +1028,7 @@ void source_enable_break(struct sviewer *sview, const char *path,
     }
 
     if (!node && path) {
-        node = get_relative_node(sview, path);
+        node = get_node(sview, path);
     }
 
     if (!node || (!node->buf && load_file(node)))

@@ -1022,10 +1022,6 @@ static void process_commands(struct tgdb *tgdb_in)
                 source_reload(if_get_sview(), tfp->absolute_path, 0);
 
                 if_show_file(tfp->absolute_path, tfp->line_number, tfp->line_number);
-
-                source_set_relative_path(if_get_sview(),
-                        tfp->absolute_path, tfp->relative_path);
-
                 break;
             }
 

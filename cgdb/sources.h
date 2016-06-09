@@ -77,7 +77,6 @@ struct line_flags {
 struct list_node;
 struct list_node {
     char *path;                 /* Full path to source file */
-    char *lpath;                /* Relative path to source file */
     struct buffer *buf;         /* Current buffer - points to color_buf or orig_buf */
     struct buffer color_buf;    /* Color file buffer */
     struct buffer orig_buf;     /* Original File buffer ( no color ) */
@@ -127,19 +126,6 @@ struct sviewer *source_new(int pos_r, int pos_c, int height, int width);
 int source_add(struct sviewer *sview, const char *path);
 
 int source_highlight(struct list_node *node);
-
-/* source_set_relative_path: Sets the path that gdb uses for breakpoints
- * -------------------------
- * 
- *   sview:  Source viewer object
- *   path:   Full path to the source file (this is considered to be a
- *           unique identifier -- no duplicate paths in the list!)
- *   lpath:  
- *
- * Return Value:  Zero on success, non-zero on error.
- */
-int source_set_relative_path(struct sviewer *sview,
-        const char *path, const char *lpath);
 
 /* source_del:  Remove a file from the list of source files.
  * -----------
