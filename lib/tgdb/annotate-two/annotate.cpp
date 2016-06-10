@@ -191,12 +191,11 @@ int tgdb_parse_annotation(struct annotate_two *a2, char *data, size_t size,
 
     for (i = 0; annotations[i].data != NULL; ++i) {
         if (strncmp(data, annotations[i].data, annotations[i].size) == 0) {
-            if (annotations[i].f) {
-                if (annotations[i].f(a2, data, size, list) == -1) {
-                    logger_write_pos(logger, __FILE__, __LINE__,
-                            "parsing annotation failed");
-                } else
-                    break;      /* only match one annotation */
+            if (annotations[i].f(a2, data, size, list) == -1) {
+                logger_write_pos(logger, __FILE__, __LINE__,
+                        "parsing annotation failed");
+            } else {
+                break; /* only match one annotation */
             }
         }
     }

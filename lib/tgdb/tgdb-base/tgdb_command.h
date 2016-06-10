@@ -61,13 +61,8 @@ struct tgdb_command {
 	 */
     enum tgdb_command_choice command_choice;
 
-    /**
-	 * The client command associated with this command.
-	 */
-    struct tgdb_client_command *client_command;
-
     /** Private data the client context can use. */
-    void *tgdb_client_private_data;
+    int tgdb_client_private_data;
 };
 
 /**
@@ -89,7 +84,7 @@ struct tgdb_command {
  * Always is successful, will call exit on failed malloc
  */
 struct tgdb_command *tgdb_command_create(const char *tgdb_command_data,
-        enum tgdb_command_choice command_choice, void *client_data);
+        enum tgdb_command_choice command_choice, int client_data);
 
 /** 
  * This will free a TGDB queue command.
@@ -100,15 +95,5 @@ struct tgdb_command *tgdb_command_create(const char *tgdb_command_data,
  * The command to free
  */
 void tgdb_command_destroy(void *item);
-
-/**
- * This will print a TGDB queue command to stderr.
- * These are the commands given by TGDB to the debugger.
- * This is a function for debugging. 
- *
- * \param item
- * The command to print
- */
-void tgdb_command_print(void *item);
 
 #endif

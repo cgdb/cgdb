@@ -519,7 +519,7 @@ tgdb_send(struct tgdb *tgdb, const char *command,
         ibuf_addchar(temp_command, '\n');
 
     /* Create the client command */
-    tc = tgdb_command_create(ibuf_get(temp_command), command_choice, NULL);
+    tc = tgdb_command_create(ibuf_get(temp_command), command_choice, -1);
 
     ibuf_free(temp_command);
     temp_command = NULL;

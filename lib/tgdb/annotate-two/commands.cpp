@@ -388,19 +388,17 @@ int
 commands_prepare_for_command(struct annotate_two *a2,
         struct commands *c, struct tgdb_command *com)
 {
-
-    enum annotate_commands *a_com =
-            (enum annotate_commands *) com->tgdb_client_private_data;
+    int a_com = com->tgdb_client_private_data;
 
     /* Set the commands state to nothing */
     commands_set_state(c, VOID_COMMAND, NULL);
 
-    if (a_com == NULL) {
+    if (a_com == -1) {
         data_set_state(a2, USER_COMMAND);
         return 0;
     }
 
-    switch (*a_com) {
+    switch (a_com) {
         case ANNOTATE_INFO_SOURCES:
             commands_set_state(c, INFO_SOURCES, NULL);
             break;
@@ -507,37 +505,18 @@ commands_issue_command(struct commands *c,
 {
     char *ncom = commands_create_command(c, com, data);
     struct tgdb_command *client_command = NULL;
-    enum annotate_commands *nacom =
-            (enum annotate_commands *) cgdb_malloc(sizeof (enum
-                    annotate_commands));
-
-    *nacom = com;
-
-    if (ncom == NULL) {
-        logger_write_pos(logger, __FILE__, __LINE__,
-                "commands_issue_command error");
-        return -1;
-    }
 
     /* This should send the command to tgdb-base to handle */
-    if (oob == 0) {
-        client_command = tgdb_command_create(ncom, TGDB_COMMAND_TGDB_CLIENT,
-                (void *) nacom);
-    } else if (oob == 1) {
-        client_command = tgdb_command_create(ncom,
-                TGDB_COMMAND_TGDB_CLIENT_PRIORITY, (void *) nacom);
-    } else if (oob == 4) {
-        client_command = tgdb_command_create(ncom, TGDB_COMMAND_TGDB_CLIENT,
-                (void *) nacom);
-    }
-
-    if (ncom) {
-        free(ncom);
-        ncom = NULL;
-    }
+    if (oob == 0)
+        client_command = tgdb_command_create(ncom, TGDB_COMMAND_TGDB_CLIENT, com);
+    else if (oob == 1)
+        client_command = tgdb_command_create(ncom, TGDB_COMMAND_TGDB_CLIENT_PRIORITY, com);
+    else if (oob == 4)
+        client_command = tgdb_command_create(ncom, TGDB_COMMAND_TGDB_CLIENT, com);
 
     /* Append to the command_container the commands */
     tgdb_list_append(client_command_list, client_command);
 
+    free(ncom);
     return 0;
 }
