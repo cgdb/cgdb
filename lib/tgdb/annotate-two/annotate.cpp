@@ -89,12 +89,6 @@ static int handle_post_prompt(struct annotate_two *a2, const char *buf,
     return 0;
 }
 
-static int handle_unwanted_fields(struct annotate_two *a2, const char *buf,
-        size_t n, struct tgdb_list *list)
-{
-    return 0;
-}
-
 static int handle_error(struct annotate_two *a2, const char *buf, size_t n,
         struct tgdb_list *list)
 {
@@ -183,7 +177,6 @@ static struct annotation {
     "pre-prompt", 10, handle_pre_prompt}, {
     "prompt", 6, handle_prompt}, {
     "post-prompt", 11, handle_post_prompt}, {
-    "field-", 6, handle_unwanted_fields}, {
     "error-begin", 11, handle_error_begin}, {
     "error", 5, handle_error}, {
     "quit", 4, handle_quit}, {
