@@ -442,34 +442,27 @@ commands_prepare_for_command(struct annotate_two *a2,
 static char *commands_create_command(struct commands *c,
         enum annotate_commands com, const char *data)
 {
-    char *ncom = NULL;
-
     switch (com) {
         case ANNOTATE_INFO_SOURCES:
-            ncom = strdup("server interpreter-exec mi \"-file-list-exec-source-files\"\n");
-            break;
+            return strdup("server interpreter-exec mi \"-file-list-exec-source-files\"\n");
         case ANNOTATE_INFO_SOURCE:
             /* server info source */
-            ncom = strdup("server interpreter-exec mi \"-file-list-exec-source-file\"\n");
-            break;
+            return strdup("server interpreter-exec mi \"-file-list-exec-source-file\"\n");
         case ANNOTATE_INFO_BREAKPOINTS:
-            ncom = strdup("server interpreter-exec mi \"-break-info\"\n");
-            break;
+            return strdup("server interpreter-exec mi \"-break-info\"\n");
         case ANNOTATE_TTY:
             /* server tty %s */
-            ncom = sys_aprintf("server interpreter-exec mi \"-inferior-tty-set %s\"\n", data);
-            break;
+            return sys_aprintf("server interpreter-exec mi \"-inferior-tty-set %s\"\n", data);
         case ANNOTATE_COMPLETE:
             /* server complete */
-            ncom = sys_aprintf("server interpreter-exec mi \"complete %s\"\n", data);
-            break;
+            return sys_aprintf("server interpreter-exec mi \"complete %s\"\n", data);
         case ANNOTATE_VOID:
         default:
             logger_write_pos(logger, __FILE__, __LINE__, "switch error");
             break;
     };
 
-    return ncom;
+    return NULL;
 }
 
 int
