@@ -387,7 +387,7 @@ int a2_completion_callback(struct annotate_two *a2, const char *command)
 {
     return commands_issue_command(a2->c,
                     a2->client_command_list,
-                    ANNOTATE_COMPLETE, command, 4);
+                    ANNOTATE_COMPLETE, command, 1);
 }
 
 int a2_user_ran_command(struct annotate_two *a2)

@@ -506,13 +506,11 @@ commands_issue_command(struct commands *c,
     char *ncom = commands_create_command(c, com, data);
     struct tgdb_command *client_command = NULL;
 
+    enum tgdb_command_choice choice = (oob == 1) ?
+           TGDB_COMMAND_TGDB_CLIENT_PRIORITY : TGDB_COMMAND_TGDB_CLIENT;
+
     /* This should send the command to tgdb-base to handle */
-    if (oob == 0)
-        client_command = tgdb_command_create(ncom, TGDB_COMMAND_TGDB_CLIENT, com);
-    else if (oob == 1)
-        client_command = tgdb_command_create(ncom, TGDB_COMMAND_TGDB_CLIENT_PRIORITY, com);
-    else if (oob == 4)
-        client_command = tgdb_command_create(ncom, TGDB_COMMAND_TGDB_CLIENT, com);
+    client_command = tgdb_command_create(ncom, choice, com);
 
     /* Append to the command_container the commands */
     tgdb_list_append(client_command_list, client_command);
