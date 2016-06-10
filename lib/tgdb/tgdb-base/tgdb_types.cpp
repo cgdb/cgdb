@@ -183,6 +183,9 @@ static int tgdb_types_delete_item(void *command)
                     com->choice.update_breakpoints.breakpoint_list;
 
             tgdb_list_free(list, tgdb_types_breakpoint_free);
+            tgdb_list_destroy(list);
+
+            com->choice.update_breakpoints.breakpoint_list = NULL;
             break;
         }
         case TGDB_UPDATE_FILE_POSITION:
@@ -194,14 +197,19 @@ static int tgdb_types_delete_item(void *command)
             free(tfp->relative_path), tfp->relative_path = NULL;
 
             free(tfp);
-            tfp = NULL;
+
+            com->choice.update_file_position.file_position = NULL;
             break;
         }
         case TGDB_UPDATE_SOURCE_FILES:
         {
             struct tgdb_list *list =
                     com->choice.update_source_files.source_files;
+
             tgdb_list_free(list, tgdb_types_source_files_free);
+            tgdb_list_destroy(list);
+
+            com->choice.update_source_files.source_files = NULL;
             break;
         }
         case TGDB_INFERIOR_EXITED:
@@ -209,22 +217,27 @@ static int tgdb_types_delete_item(void *command)
             int *status = com->choice.inferior_exited.exit_status;
 
             free(status);
-            status = NULL;
+            com->choice.inferior_exited.exit_status = NULL;
         }
             break;
         case TGDB_UPDATE_COMPLETIONS:
         {
             struct tgdb_list *list =
                     com->choice.update_completions.completion_list;
+
             tgdb_list_free(list, tgdb_types_source_files_free);
+            tgdb_list_destroy(list);
+
+            com->choice.update_completions.completion_list = NULL;
             break;
         }
         case TGDB_UPDATE_CONSOLE_PROMPT_VALUE:
         {
             const char *value =
                     com->choice.update_console_prompt_value.prompt_value;
+
             free((char *) value);
-            value = NULL;
+            com->choice.update_console_prompt_value.prompt_value = NULL;
             break;
         }
         case TGDB_DEBUGGER_COMMAND_DELIVERED: {
@@ -237,8 +250,9 @@ static int tgdb_types_delete_item(void *command)
         {
             struct tgdb_debugger_exit_status *status =
                     com->choice.quit.exit_status;
+
             free(status);
-            status = NULL;
+            com->choice.quit.exit_status = NULL;
             break;
         }
     }
