@@ -212,7 +212,6 @@ static void commands_process_info_source(struct commands *c,
     }
 }
 
-
 static void gdbwire_stream_record_callback(void *context,
     struct gdbwire_mi_stream_record *stream_record)
 {
@@ -265,7 +264,7 @@ static void gdbwire_result_record_callback(void *context,
                 commands_process_info_source(c, result_record);
                 break;
         }
-        commands_set_state(c, VOID_COMMAND, NULL);
+        commands_set_state(c, VOID_COMMAND);
     }
 }
 
@@ -349,8 +348,7 @@ void commands_shutdown(struct commands *c)
 }
 
 void
-commands_set_state(struct commands *c,
-        enum COMMAND_STATE state, struct tgdb_list *list)
+commands_set_state(struct commands *c, enum COMMAND_STATE state)
 {
     c->cur_command_state = state;
 }
@@ -364,7 +362,7 @@ static void
 commands_prepare_info_source(struct annotate_two *a2, struct commands *c)
 {
     data_set_state(a2, INTERNAL_COMMAND);
-    commands_set_state(c, INFO_SOURCE, NULL);
+    commands_set_state(c, INFO_SOURCE);
 }
 
 void commands_process(struct commands *c, char a, struct tgdb_list *list)
@@ -391,7 +389,7 @@ commands_prepare_for_command(struct annotate_two *a2,
     int a_com = com->tgdb_client_private_data;
 
     /* Set the commands state to nothing */
-    commands_set_state(c, VOID_COMMAND, NULL);
+    commands_set_state(c, VOID_COMMAND);
 
     if (a_com == -1) {
         data_set_state(a2, USER_COMMAND);
@@ -400,18 +398,18 @@ commands_prepare_for_command(struct annotate_two *a2,
 
     switch (a_com) {
         case ANNOTATE_INFO_SOURCES:
-            commands_set_state(c, INFO_SOURCES, NULL);
+            commands_set_state(c, INFO_SOURCES);
             break;
         case ANNOTATE_INFO_SOURCE:
             commands_prepare_info_source(a2, c);
             break;
         case ANNOTATE_INFO_BREAKPOINTS:
-            commands_set_state(c, INFO_BREAKPOINTS, NULL);
+            commands_set_state(c, INFO_BREAKPOINTS);
             break;
         case ANNOTATE_TTY:
             break;              /* Nothing to do */
         case ANNOTATE_COMPLETE:
-            commands_set_state(c, COMMAND_COMPLETE, NULL);
+            commands_set_state(c, COMMAND_COMPLETE);
             io_debug_write_fmt("<%s\n>", com->tgdb_command_data);
             break;
         case ANNOTATE_VOID:

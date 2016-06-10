@@ -310,8 +310,7 @@ int a2_get_current_location(struct annotate_two *a2)
 
 int a2_get_inferior_sources(struct annotate_two *a2)
 {
-    return commands_issue_command(a2->c,
-                    a2->client_command_list,
+    return commands_issue_command(a2->c, a2->client_command_list,
                     ANNOTATE_INFO_SOURCES, NULL, 0);
 }
 
@@ -385,8 +384,7 @@ pid_t a2_get_debugger_pid(struct annotate_two *a2)
 
 int a2_completion_callback(struct annotate_two *a2, const char *command)
 {
-    return commands_issue_command(a2->c,
-                    a2->client_command_list,
+    return commands_issue_command(a2->c, a2->client_command_list,
                     ANNOTATE_COMPLETE, command, 1);
 }
 

@@ -113,7 +113,7 @@ void data_set_state(struct annotate_two *a2, enum internal_state state)
              * user hits ^c from the gdb window, the error occurs because 
              * commands state is INFO_SOURCES instead of VOID.
              */
-            commands_set_state(a2->c, VOID_COMMAND, NULL);
+            commands_set_state(a2->c, VOID_COMMAND);
 
             break;
         case POST_PROMPT:

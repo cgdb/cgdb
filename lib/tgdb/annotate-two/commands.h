@@ -29,8 +29,7 @@ void commands_shutdown(struct commands *c);
 /* command_set_state: Sets the state of the command package. This should usually be called
  *                      after an annotation has been read.
  */
-void commands_set_state(struct commands *c,
-        enum COMMAND_STATE state, struct tgdb_list *list);
+void commands_set_state(struct commands *c, enum COMMAND_STATE state);
 
 /* commands_set_field_num: This is used for breakpoint annotations.
  *             field_num is the field that the breakpoint annotation is on.
