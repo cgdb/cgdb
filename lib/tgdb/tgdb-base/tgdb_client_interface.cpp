@@ -18,8 +18,6 @@ struct tgdb_client_context {
      * The current client debugger being used.
 	 */
     struct annotate_two *tgdb_debugger_context;
-
-    struct logger *logger;
 };
 
 struct tgdb_client_context *tgdb_client_create_context(const char
@@ -30,13 +28,12 @@ struct tgdb_client_context *tgdb_client_create_context(const char
 
     tcc = (struct tgdb_client_context *)
             cgdb_malloc(sizeof (struct tgdb_client_context));
-    tcc->logger = logger_in;
 
     tcc->tgdb_debugger_context = a2_create_context(
         debugger_path, argc, argv, config_dir, logger_in);
 
     if (tcc->tgdb_debugger_context == NULL) {
-        logger_write_pos(tcc->logger, __FILE__, __LINE__,
+        logger_write_pos(logger_in, __FILE__, __LINE__,
                 "a2_create_instance failed");
         free(tcc);
         return NULL;

@@ -13,8 +13,6 @@
 #include "fs_util.h"
 #include "fork_util.h"          /* For pty_pair_ptr */
 
-#define TTY_NAME_SIZE 64
-
 /**
  * This is the main context for the annotate two subsytem.
  */

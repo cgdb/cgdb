@@ -16,10 +16,6 @@
 
 #include "tgdb_list.h"
 
-    /* A reference to a command that has been created by TGDB */
-    struct tgdb_command;
-    struct tgdb_response;
-
 /******************************************************************************/
 /**
  * @name Utilitly commands to run on a command.
@@ -135,12 +131,6 @@
 
     /** Delete a breakpoint.  */
         TGDB_BREAKPOINT_DELETE,
-
-    /** Disable a breakpoint.  */
-        TGDB_BREAKPOINT_DISABLE,
-
-    /** Enable a breakpoint.  */
-        TGDB_BREAKPOINT_ENABLE
     };
 
  /**
@@ -174,14 +164,6 @@
 
     /** The line number in the file.  */
         int line_number;
-    };
-
- /**
-  * This is used to return a path to the front end.
-  */
-    struct tgdb_source_file {
-    /** The absolute path to the file of interest.  */
-        char *absolute_path;
     };
 
  /**
