@@ -413,6 +413,23 @@
     tgdb_request_ptr tgdb_request_complete(struct tgdb *tgdb, const char *line);
 
   /**
+   * Used to get disassembly for function.
+   *
+   * \param tgdb
+   * An instance of the tgdb library to operate on.
+   *
+   * \return
+   * Will return as a tgdb request command on success, otherwise NULL.
+   */
+    enum disassemble_func_type {
+        DISASSEMBLE_FUNC_DISASSEMBLY,
+        DISASSEMBLE_FUNC_SOURCE_LINES,
+        DISASSEMBLE_FUNC_RAW_INSTRUCTIONS,
+    };
+    tgdb_request_ptr tgdb_request_disassemble_func(struct tgdb *tgdb,
+            enum disassemble_func_type type, const char *file, const char *function);
+
+  /**
    * Free the tgdb request pointer data.
    *
    * \param request_ptr

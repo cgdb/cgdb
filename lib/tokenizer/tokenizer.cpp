@@ -5,7 +5,7 @@
 
 /* Some default file extensions */
 const char *c_extensions[] = {
-    ".c", ".cc", ".cpp", ".cxx", ".c++", ".h", ".hpp", ".hxx", ".hh", ".ipp", ".inl", ".moc"
+    ".c", ".cc", ".cpp", ".cxx", ".c++", ".h", ".hpp", ".hxx", ".hh", ".ipp", ".inl", ".moc", ".s"
 };
 const char *d_extensions[] = { ".d", ".di" };
 const char *go_extensions[] = { ".go" };

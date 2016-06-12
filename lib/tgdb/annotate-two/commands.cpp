@@ -50,6 +50,11 @@ struct commands {
     struct tgdb_list *tab_completions;
 
     /**
+     * The disassemble command output.
+     */
+    char **disasm;
+
+    /**
      * A complete hack.
      *
      * The commands interface currently needs to append responses to
@@ -163,6 +168,20 @@ commands_process_info_sources(struct commands *c,
     }
 }
 
+static void send_disassemble_func_complete_response(struct commands *c,
+        struct gdbwire_mi_result_record *result_record)
+{
+    struct tgdb_response *response = (struct tgdb_response *)
+        cgdb_malloc(sizeof (struct tgdb_response));
+    response->header = TGDB_DISASSEMBLE_FUNC;
+
+    response->choice.disassemble_function.error = 
+        (result_record->result_class == GDBWIRE_MI_ERROR);
+            
+    response->choice.disassemble_function.disasm = c->disasm;
+    tgdb_types_append_command(c->response_list, response);
+}
+
 static void send_command_complete_response(struct commands *c)
 {
     struct tgdb_response *response = (struct tgdb_response *)
@@ -225,6 +244,16 @@ static void gdbwire_stream_record_callback(void *context,
              * annotations can be ignored.
              */
             break;
+        case INFO_DISASSEMBLE_FUNC:
+            if (stream_record->kind == GDBWIRE_MI_CONSOLE) {
+                char *str = stream_record->cstring;
+                size_t length = strlen(str);
+                if (str[length-1] == '\n') {
+                    str[length-1] = 0;
+                }
+                sbpush(c->disasm, str);
+            }
+            break;
         case COMMAND_COMPLETE:
             if (stream_record->kind == GDBWIRE_MI_CONSOLE) {
                 char *str = stream_record->cstring;
@@ -247,25 +276,26 @@ static void gdbwire_async_record_callback(void *context,
 static void gdbwire_result_record_callback(void *context,
         struct gdbwire_mi_result_record *result_record)
 {
-    if (result_record->result_class == GDBWIRE_MI_DONE) {
-        struct commands *c = (struct commands*)context;
+    struct commands *c = (struct commands*)context;
 
-        switch (c->cur_command_state) {
-            case INFO_BREAKPOINTS:
-                commands_process_breakpoints(c, result_record);
-                break;
-            case INFO_SOURCES:
-                commands_process_info_sources(c, result_record);
-                break;
-            case COMMAND_COMPLETE:
-                send_command_complete_response(c);
-                break;
-            case INFO_SOURCE:
-                commands_process_info_source(c, result_record);
-                break;
-        }
-        commands_set_state(c, VOID_COMMAND);
+    switch (c->cur_command_state) {
+        case INFO_BREAKPOINTS:
+            commands_process_breakpoints(c, result_record);
+            break;
+        case INFO_SOURCES:
+            commands_process_info_sources(c, result_record);
+            break;
+        case INFO_DISASSEMBLE_FUNC:
+            send_disassemble_func_complete_response(c, result_record);
+            break;
+        case COMMAND_COMPLETE:
+            send_command_complete_response(c);
+            break;
+        case INFO_SOURCE:
+            commands_process_info_source(c, result_record);
+            break;
     }
+    commands_set_state(c, VOID_COMMAND);
 }
 
 static void gdbwire_prompt_callback(void *context, const char *prompt)
@@ -294,6 +324,8 @@ struct commands *commands_initialize(void)
     c->cur_command_state = VOID_COMMAND;
 
     c->tab_completions = tgdb_list_init();
+
+    c->disasm = NULL;
 
     struct gdbwire_callbacks callbacks = wire_callbacks;
     callbacks.context = (void*)c;
@@ -339,6 +371,11 @@ void commands_shutdown(struct commands *c)
 
     tgdb_list_destroy(c->tab_completions);
 
+    for (int i = 0; i < sbcount(c->disasm); i++) {
+        free(c->disasm[i]);
+    }
+    sbfree(c->disasm);
+
     /* TODO: free source_files queue */
 
     gdbwire_destroy(c->wire);
@@ -371,14 +408,12 @@ void commands_process(struct commands *c, char a, struct tgdb_list *list)
     // patches this whole mess will be unraveled.
     c->response_list = list;
 
-    if (commands_get_state(c) == INFO_SOURCES) {
-        gdbwire_push_data(c->wire, &a, 1);
-    } else if (commands_get_state(c) == INFO_BREAKPOINTS) {
-        gdbwire_push_data(c->wire, &a, 1);
-    } else if (commands_get_state(c) == COMMAND_COMPLETE) {
-        gdbwire_push_data(c->wire, &a, 1);
-    } else if (commands_get_state(c) == INFO_SOURCE) {
-        gdbwire_push_data(c->wire, &a, 1);
+    switch (commands_get_state(c)) {
+        case VOID_COMMAND:
+            break;
+        default:
+            gdbwire_push_data(c->wire, &a, 1);
+            break;
     }
 }
 
@@ -411,6 +446,14 @@ commands_prepare_for_command(struct annotate_two *a2,
         case ANNOTATE_COMPLETE:
             commands_set_state(c, COMMAND_COMPLETE);
             io_debug_write_fmt("<%s\n>", com->tgdb_command_data);
+            break;
+        case ANNOTATE_DISASSEMBLE_FUNC:
+            for (int i = 0; i < sbcount(c->disasm); i++) {
+                free(c->disasm[i]);
+            }
+            sbfree(c->disasm);
+            
+            commands_set_state(c, INFO_DISASSEMBLE_FUNC);
             break;
         case ANNOTATE_VOID:
             break;
@@ -448,6 +491,19 @@ static char *commands_create_command(struct commands *c,
         case ANNOTATE_INFO_SOURCE:
             /* server info source */
             return strdup("server interpreter-exec mi \"-file-list-exec-source-file\"\n");
+        case ANNOTATE_DISASSEMBLE_FUNC:
+            /* disassemble 'driver.cpp'::main
+                 /m: source lines included
+                 /s: source lines included, output in pc order
+                 /r: raw instructions included in hex
+                 single argument: function surrounding is dumped
+                 two arguments: start,end or start,+length
+                 disassemble 'driver.cpp'::main
+                 interp mi "disassemble /s 'driver.cpp'::main,+10"
+                 interp mi "disassemble /r 'driver.cpp'::main,+10"
+             */
+            return sys_aprintf("server interp mi \"disassemble%s%s\"\n",
+                               data ? " " : "", data ? data : "");
         case ANNOTATE_INFO_BREAKPOINTS:
             return strdup("server interpreter-exec mi \"-break-info\"\n");
         case ANNOTATE_TTY:

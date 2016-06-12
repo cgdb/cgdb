@@ -396,6 +396,9 @@ pid_t tgdb_client_get_debugger_pid(struct tgdb_client_context *tcc);
 int tgdb_client_open_new_tty(struct tgdb_client_context *tcc,
         int *inferior_stdin, int *inferior_stdout);
 
+int tgdb_client_disassemble_func(struct tgdb_client_context *tcc,
+    int raw, int source, const char *file, const char *function);
+
 /** 
  * \param tcc
  * The client context.

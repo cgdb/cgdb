@@ -200,7 +200,9 @@
     /** Modify a breakpoint (ie delete/create/disable) */
         TGDB_REQUEST_MODIFY_BREAKPOINT,
     /** Ask GDB to give a list of tab completions for a given string */
-        TGDB_REQUEST_COMPLETE
+        TGDB_REQUEST_COMPLETE,
+    /** Ask GDB to disassemble a function */
+        TGDB_REQUEST_DISASSEMBLE_FUNC
     };
 
     struct tgdb_request {
@@ -231,6 +233,13 @@
                 /* The line to ask GDB for completions for */
                 const char *line;
             } complete;
+
+            struct {
+                int source;
+                int raw;
+                const char *file;
+                const char *function;
+            } disassemble_func;
         } choice;
     };
 
@@ -272,6 +281,12 @@
      *
      */
         TGDB_UPDATE_COMPLETIONS,
+
+    /**
+     * Disassemble function output
+     *
+     */
+        TGDB_DISASSEMBLE_FUNC,
 
     /** The prompt has changed, here is the new value.  */
         TGDB_UPDATE_CONSOLE_PROMPT_VALUE,
@@ -328,6 +343,12 @@
                  * representing each possible completion. */
                 struct tgdb_list *completion_list;
             } update_completions;
+
+            /* header == TGDB_DISASSEMBLE_FUNC */
+            struct {
+                int error;
+                char **disasm;
+            } disassemble_function;
 
             /* header == TGDB_UPDATE_CONSOLE_PROMPT_VALUE */
             struct {

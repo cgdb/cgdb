@@ -118,6 +118,9 @@ static int tgdb_types_print_item(void *command)
             fprintf(fd, "completions end\n");
             break;
         }
+        case TGDB_DISASSEMBLE_FUNC:
+            //$ TODO
+            break;
         case TGDB_UPDATE_CONSOLE_PROMPT_VALUE:
         {
             const char *value =
@@ -229,6 +232,17 @@ static int tgdb_types_delete_item(void *command)
             tgdb_list_destroy(list);
 
             com->choice.update_completions.completion_list = NULL;
+            break;
+        }
+        case TGDB_DISASSEMBLE_FUNC:
+        {
+            int i;
+            char **disasm = com->choice.disassemble_function.disasm;
+
+            for (i = 0; i < sbcount(disasm); i++) {
+                free(disasm[i]);
+            }
+            sbfree(disasm);
             break;
         }
         case TGDB_UPDATE_CONSOLE_PROMPT_VALUE:

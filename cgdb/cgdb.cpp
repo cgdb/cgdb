@@ -1072,6 +1072,20 @@ static void process_commands(struct tgdb *tgdb_in)
                 do_tab_completion(list);
                 break;
             }
+            case TGDB_DISASSEMBLE_FUNC:
+            {
+#if 0
+                //$ TODO mikesart: display disassembly
+                int i;
+                char **disasm = item->choice.disassemble_function.disasm;
+
+                for (i = 0; i < sbcount(disasm); i++) {
+                    if_print_message("%s", disasm[i]);
+                }
+                if_print_message("\n");
+#endif
+                break;
+            }
             case TGDB_UPDATE_CONSOLE_PROMPT_VALUE:
             {
                 const char *new_prompt =
@@ -1136,6 +1150,7 @@ does_request_require_console_update(struct tgdb_request *request, int *update)
             break;
         case TGDB_REQUEST_INFO_SOURCES:
         case TGDB_REQUEST_CURRENT_LOCATION:
+        case TGDB_REQUEST_DISASSEMBLE_FUNC:
             *update = 0;
             break;
         case TGDB_REQUEST_DEBUGGER_COMMAND:

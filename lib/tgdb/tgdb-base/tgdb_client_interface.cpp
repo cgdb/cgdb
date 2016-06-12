@@ -141,6 +141,13 @@ int tgdb_client_open_new_tty(struct tgdb_client_context *tcc,
         inferior_stdin, inferior_stdout);
 }
 
+int tgdb_client_disassemble_func(struct tgdb_client_context *tcc,
+    int raw, int source, const char *file, const char *function)
+{
+    return a2_disassemble_func(tcc->tgdb_debugger_context,
+        raw, source, file, function);
+}
+
 const char *tgdb_client_get_tty_name(struct tgdb_client_context *tcc)
 {
     return a2_get_tty_name(tcc->tgdb_debugger_context);

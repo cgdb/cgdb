@@ -308,6 +308,49 @@ int a2_get_current_location(struct annotate_two *a2)
                            ANNOTATE_INFO_SOURCE, NULL, 1);
 }
 
+int a2_disassemble_func(struct annotate_two *a2, int raw, int source,
+    const char *file, const char *function)
+{
+    /* GDB 7.11 adds /s command to disassemble
+
+    https://sourceware.org/git/gitweb.cgi?p=binutils-gdb.git;a=commit;h=6ff0ba5f7b8a2b10642bbb233a32043595c55670
+        The "source centric" /m option to the disassemble command is often
+        unhelpful, e.g., in the presence of optimized code.
+        This patch adds a /s modifier that is better.
+        For one, /m only prints instructions from the originating source file,
+        leaving out instructions from e.g., inlined functions from other files.
+
+    disassemble
+         /m: source lines included
+         /s: source lines included, output in pc order (7.10 and higher)
+         /r: raw instructions included in hex
+         single argument: function surrounding is dumped
+         two arguments: start,end or start,+length
+         disassemble 'driver.cpp'::main
+         interp mi "disassemble /s 'driver.cpp'::main,+10"
+         interp mi "disassemble /r 'driver.cpp'::main,+10"
+     */
+    int ret;
+    char *data = NULL;
+
+    if (raw || source || function) {
+        const char *raw_flag = raw ? "/r " : " ";
+        //$ TODO mikesart: Add -gdb-version check for 7.11 and the /s command
+        const char *source_flag = source ? "/s " : " ";
+
+        if (file)
+            data = sys_aprintf("%s%s'%s'::%s", raw_flag, source_flag, file, function);
+        else
+            data = sys_aprintf("%s%s%s", raw_flag, source_flag, function ? function : "");
+    }
+
+    ret = commands_issue_command(a2->c, a2->client_command_list,
+                                  ANNOTATE_DISASSEMBLE_FUNC, data, 0);
+
+    free(data);
+    return ret;
+}
+
 int a2_get_inferior_sources(struct annotate_two *a2)
 {
     return commands_issue_command(a2->c, a2->client_command_list,
@@ -362,19 +405,13 @@ const char *a2_return_client_command(struct annotate_two *a2, enum tgdb_command_
 char *a2_client_modify_breakpoint(struct annotate_two *a2,
         const char *file, int line, enum tgdb_breakpoint_action b)
 {
-    char *val = (char *) cgdb_malloc(sizeof (char) * (strlen(file) + 128));
+    switch (b) {
+    case TGDB_BREAKPOINT_ADD:    return sys_aprintf("break \"%s\":%d", file, line);
+    case TGDB_BREAKPOINT_DELETE: return sys_aprintf("clear \"%s\":%d", file, line);
+    case TGDB_TBREAKPOINT_ADD:   return sys_aprintf("tbreak \"%s\":%d", file, line);
+    }
 
-    if (b == TGDB_BREAKPOINT_ADD) {
-        sprintf(val, "break \"%s\":%d", file, line);
-        return val;
-    } else if (b == TGDB_BREAKPOINT_DELETE) {
-        sprintf(val, "clear \"%s\":%d", file, line);
-        return val;
-    } else if (b == TGDB_TBREAKPOINT_ADD) {
-        sprintf(val, "tbreak \"%s\":%d", file, line);
-        return val;
-    } else
-        return NULL;
+    return NULL;
 }
 
 pid_t a2_get_debugger_pid(struct annotate_two *a2)
