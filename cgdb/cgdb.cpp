@@ -280,6 +280,7 @@ static int is_gdb_tui_command(const char* line)
         "layo",
         "layou",
         "layout",
+        "tui" /* tui enable */
     };
 
     /* Skip leading white space */
