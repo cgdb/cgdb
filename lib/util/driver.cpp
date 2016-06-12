@@ -54,6 +54,9 @@ int main( int argc, char **argv )
 {
     int fg, bg, bold;
 
+	// This line has a tab
+		// Two tabs here
+
     printf( "\n\033[1;33m --- Terminal Color Chart ---\033[0m\n\n" );
 
     printf( "                 40m     41m     42m     43m     44m     45m     46m     47m\n" );

@@ -59,13 +59,22 @@ struct sviewer {
     sviewer_mark global_marks[MARK_COUNT]; /* Global A-Z marks */
     sviewer_mark jump_back_mark;           /* Location where last jump occurred from */
     WINDOW *win;                           /* Curses window */
+
+    int regex_is_searching;
+    struct hl_regex_info *hlregex;
+};
+
+struct source_line {
+    char *line;
+    int len;
+    struct hl_line_attr *attrs;
 };
 
 struct buffer {
-    char **tlines;              /* Stretchy buffer array containing lines of file */
-    char *cur_line;             /* cur line may have unique color */
+    struct source_line *lines;  /* Stretch buffer array with line information */
     int max_width;              /* Width of longest line in file */
     char *file_data;            /* Entire file pointer if read in that way */
+    int tabstop;                /* Tabstop value used to load file */
     enum tokenizer_language_support language;   /* The language type of this file */
 };
 
@@ -77,16 +86,12 @@ struct line_flags {
 struct list_node;
 struct list_node {
     char *path;                 /* Full path to source file */
-    struct buffer *buf;         /* Current buffer - points to color_buf or orig_buf */
-    struct buffer color_buf;    /* Color file buffer */
-    struct buffer orig_buf;     /* Original File buffer ( no color ) */
+    struct buffer file_buf;     /* File buffer */
     line_flags *lflags;         /* Breakpoints */
     int sel_line;               /* Current line selected in viewer */
     int sel_col;                /* Current column selected in viewer */
     int exe_line;               /* Current line executing, or -1 if not set */
 
-    int sel_col_rbeg;           /* Current beg column matched in regex */
-    int sel_col_rend;           /* Current end column matched in regex */
     int sel_rline;              /* Current line used by regex */
 
     enum tokenizer_language_support language;   /* The language type of this file */
@@ -121,9 +126,9 @@ struct sviewer *source_new(int pos_r, int pos_c, int height, int width);
  *   path:   Full path to the source file (this is considered to be a
  *           unique identifier -- no duplicate paths in the list!)
  *
- * Return Value:  Zero on success, non-zero on error.
+ * Return Value:  pointer to your brand new node.
  */
-int source_add(struct sviewer *sview, const char *path);
+struct list_node *source_add(struct sviewer *sview, const char *path);
 
 int source_highlight(struct list_node *node);
 

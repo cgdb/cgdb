@@ -901,10 +901,9 @@ static int status_bar_regex_input(struct sviewer *sview, int key)
         case '\n':
         case CGDB_KEY_CTRL_M:
             /* Save for future searches via 'n' or 'N' */
-            if (regex_last != NULL) {
-                ibuf_free(regex_last);
-            }
+            ibuf_free(regex_last);
             regex_last = ibuf_dup(regex_cur);
+
             regex_direction_last = regex_direction_cur;
             source_search_regex(sview, ibuf_get(regex_last), 2,
                     regex_direction_last, regex_icase);
@@ -916,6 +915,8 @@ static int status_bar_regex_input(struct sviewer *sview, int key)
             /* Backspace or DEL key */
             if (ibuf_length(regex_cur) == 0) {
                 done = 1;
+                source_search_regex(sview, "", 2,
+                        regex_direction_cur, regex_icase);
             } else {
                 ibuf_delchar(regex_cur);
                 source_search_regex(sview, ibuf_get(regex_cur), 1,
@@ -943,6 +944,7 @@ static int status_bar_regex_input(struct sviewer *sview, int key)
     if (done) {
         ibuf_free(regex_cur);
         regex_cur = NULL;
+
         if_set_focus(CGDB);
     }
 
@@ -1297,7 +1299,7 @@ static int cgdb_input(int key, int *last_key)
             return 0;
         case '/':
         case '?':
-            if (src_win->cur != NULL) {
+            if (src_win->cur) {
                 regex_cur = ibuf_init();
                 regex_direction_cur = ('/' == key);
                 orig_line_regex = src_win->cur->sel_line;
@@ -1422,8 +1424,7 @@ int internal_if_input(int key, int *last_key)
         } else if (focus == CGDB_STATUS_BAR && sbc_kind == SBC_REGEX) {
             ibuf_free(regex_cur);
             regex_cur = NULL;
-            free(src_win->cur->buf->cur_line);
-            src_win->cur->buf->cur_line = NULL;
+
             src_win->cur->sel_rline = orig_line_regex;
             src_win->cur->sel_line = orig_line_regex;
         }

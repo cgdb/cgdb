@@ -1054,20 +1054,30 @@ int hl_ansi_get_color_attrs(hl_groups_ptr hl_groups,
     return 0;
 }
 
+static void hl_printspan(WINDOW *win, const char *line, int line_len, int attr)
+{
+    wattron(win, attr);
+    waddnstr(win, line, line_len);
+    wattroff(win, attr);
+}
+
 void hl_printline(WINDOW *win, const char *line, int line_len,
         const hl_line_attr *attrs, int x, int y, int col, int width)
 {
-    int attr = 0;
     int count;
+    int attr = 0;
+    int use_current_pos = (x == -1) && (y == -1);
 
-    if (y < 0)
-        return;
-    else if (x < 0) {
-        col -= x;
-        x = 0;
+    if (!use_current_pos) {
+        if (y < 0)
+            return;
+        else if (x < 0) {
+            col -= x;
+            x = 0;
+        }
+
+        wmove(win, y, x);
     }
-
-    wmove(win, y, x);
 
     count = MIN(line_len - col, width);
     if (count <= 0) {
@@ -1083,11 +1093,9 @@ void hl_printline(WINDOW *win, const char *line, int line_len,
                 attr = attrs[i].attr;
             }
             else if (attrs[i].col < col + count) {
-                int len = attrs[i].col -col;
+                int len = attrs[i].col - col;
 
-                wattron(win, attr);
-                wprintw(win, "%.*s", len, line + col);
-                wattroff(win, attr);
+                hl_printspan(win, line + col, len, attr);
 
                 col += len;
                 count -= len;
@@ -1095,9 +1103,7 @@ void hl_printline(WINDOW *win, const char *line, int line_len,
 
                 attr = attrs[i].attr;
             } else {
-                wattron(win, attr);
-                wprintw(win, "%.*s", count, line + col);
-                wattroff(win, attr);
+                hl_printspan(win, line + col, count, attr);
 
                 width -= count;
                 count = 0;
@@ -1106,10 +1112,7 @@ void hl_printline(WINDOW *win, const char *line, int line_len,
     }
 
     if (count) {
-        wattron(win, attr);
-        wprintw(win, "%.*s", count, line + col);
-        wattroff(win, attr);
-
+        hl_printspan(win, line + col, count, attr);
         width -= count;
     }
 
@@ -1117,5 +1120,62 @@ void hl_printline(WINDOW *win, const char *line, int line_len,
         wclrtoeol(win);
 }
 
+void hl_printline_highlight(WINDOW *win, const char *line, int line_len,
+        const hl_line_attr *attrs, int x, int y, int col, int width)
+{
+    int count;
+    int attr = 0;
+    int use_current_pos = (x == -1) && (y == -1);
+
+    if (!use_current_pos) {
+        if (y < 0)
+            return;
+        else if (x < 0) {
+            col -= x;
+            x = 0;
+        }
+
+        wmove(win, y, x);
+    }
+
+    count = MIN(line_len - col, width);
+    if (count <= 0)
+        return;
+
+    if (attrs) {
+        int i;
+
+        for (i = 0; i < sbcount(attrs); i++) {
+            if (attrs[i].col <= col) {
+                attr = attrs[i].attr;
+            }
+            else if (attrs[i].col < col + count) {
+                int len = attrs[i].col - col;
+
+                if (attr)
+                    hl_printspan(win, line + col, len, attr);
+                else
+                    wmove(win, y, getcurx(win) + len);
+
+                col += len;
+                count -= len;
+                width -= len;
+
+                attr = attrs[i].attr;
+            } else {
+                if (attr)
+                    hl_printspan(win, line + col, count, attr);
+                else
+                    wmove(win, y, getcurx(win) + count);
+
+                width -= count;
+                count = 0;
+            }
+        }
+    }
+
+    if (count && attr)
+        hl_printspan(win, line + col, count, attr);
+}
 /*@}*/
 /* }}}*/

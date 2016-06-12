@@ -66,18 +66,15 @@ struct tokenizer *tokenizer_init(void);
  */
 void tokenizer_destroy(struct tokenizer *t);
 
-/* tokenizer_set_file
- * ------------------
- *
- *  This functions will prepare the tokenizer to parse a particular file.
+/**
+ *  This functions will prepare the tokenizer to parse a particular buffer.
  *  
  *  t:      The tokenizer object to work on
- *  file:   The absolute path to the file to tokenize.
  *
  *  Return: -1 on error. 0 on success
  */
-int tokenizer_set_file(struct tokenizer *t, const char *file,
-        enum tokenizer_language_support l);
+int tokenizer_set_buffer(struct tokenizer *t, const char *buffer,
+                         enum tokenizer_language_support l);
 
 /* tokenizer_get_token
  * -------------------
@@ -88,18 +85,11 @@ int tokenizer_set_file(struct tokenizer *t, const char *file,
  *
  *  Return: -1 on error, 0 on end of file, 1 on success
  */
-int tokenizer_get_token(struct tokenizer *t);
-
-/* tokenizer_type
- * --------------
- *
- *  This will return the type of token a tokenizer is.
- *  
- *  t:      The tokenizer object to work on
- *
- *  Returns: the token type
- */
-enum tokenizer_type tokenizer_get_packet_type(struct tokenizer *t);
+struct token_data {
+    enum tokenizer_type e;
+    const char *data;
+};
+int tokenizer_get_token(struct tokenizer *t, struct token_data *token_data);
 
 /* tokenizer_print_enum
  * --------------------
@@ -111,17 +101,6 @@ enum tokenizer_type tokenizer_get_packet_type(struct tokenizer *t);
  * Returns: NULL on error, or the enum on success.
  */
 const char *tokenizer_get_printable_enum(enum tokenizer_type e);
-
-/* tokenizer_get_data
- * ------------------
- *
- *  This gets the actual token.
- *
- *  t:      The tokenizer object to work on
- *
- *  Returns: The token data. This is from the heap. The user must free it.
- */
-char *tokenizer_get_data(struct tokenizer *t);
 
 /* tokenizer_get_default_file_type
  *

@@ -201,7 +201,68 @@ struct hl_line_attr {
     int col;
     int attr;
 };
+
+/**
+ * Print a line with highlighting.
+ *
+ * @param win
+ * The window to write to.
+ *
+ * @param line
+ * The line to write.
+ *
+ * @param line_len
+ * The length of the line to write.
+ *
+ * @param attrs
+ * The attributes to write.
+ *
+ * @param x
+ * The x position to write to, -1 for current position.
+ *
+ * @param y
+ * The y position to write to, -1 for current position.
+ *
+ * @param col
+ * The column to write to.
+ *
+ * @param width
+ */
 void hl_printline(WINDOW *win, const char *line, int line_len,
+        const hl_line_attr *attrs, int x, int y, int col, int width);
+
+/**
+ * Print a line with highlighting.
+ *
+ * This differs from hl_printline by only printing the text with attributes.
+ * This is useful if you want to first print the line with syntax
+ * highlighting and then do another pass with regex highlighting (or some
+ * other attributes to highlight on top of the syntax).
+ *
+ * @param win
+ * The window to write to.
+ *
+ * @param line
+ * The line to write.
+ *
+ * @param line_len
+ * The length of the line to write.
+ *
+ * @param attrs
+ * The attributes to write.
+ *
+ * @param x
+ * The x position to write to, -1 for current position.
+ *
+ * @param y
+ * The y position to write to, -1 for current position.
+ *
+ * @param col
+ * The column to write to.
+ *
+ * @param width
+ */
+void hl_printline_highlight(WINDOW *win, const char *line, int line_len,
         const hl_line_attr *attrs, int x, int y, int col, int width);
 
 /*@}*/

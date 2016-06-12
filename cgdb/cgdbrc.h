@@ -110,7 +110,7 @@ typedef enum {
 
 /** All of the different configuration options */
 enum cgdbrc_option_kind {
-    /* Arrow style is deprecated, use CGDBRC_EXECUTING_LINE_DISPLAY insetad */
+    /* Arrow style is deprecated, use CGDBRC_EXECUTING_LINE_DISPLAY instead */
     CGDBRC_ARROWSTYLE,
     CGDBRC_AUTOSOURCERELOAD,
     CGDBRC_CGDB_MODE_KEY,
