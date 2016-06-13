@@ -22,8 +22,24 @@ static int
 handle_source(struct annotate_two *a2, const char *buf, size_t n,
         struct tgdb_list *list)
 {
-    /* set up the info_source command to get file info */
-    return a2_get_current_location(a2);
+    a2->request_source_location = 1;
+    return 0;
+}
+
+static int
+handle_frame_end(struct annotate_two *a2, const char *buf, size_t n,
+        struct tgdb_list *list)
+{
+    a2->request_source_location = 1;
+    return 0;
+}
+
+static int
+handle_frames_invalid(struct annotate_two *a2, const char *buf, size_t n,
+        struct tgdb_list *list)
+{
+    a2->request_source_location = 1;
+    return 0;
 }
 
 static int handle_misc_pre_prompt(struct annotate_two *a2, const char *buf,
@@ -62,6 +78,11 @@ static int handle_misc_post_prompt(struct annotate_two *a2, const char *buf,
 static int handle_pre_prompt(struct annotate_two *a2, const char *buf, size_t n,
         struct tgdb_list *list)
 {
+    if (a2->request_source_location) {
+        a2_get_current_location(a2);
+        a2->request_source_location = 0;
+    }
+
     data_set_state(a2, AT_PROMPT);
 
     return 0;
@@ -152,6 +173,8 @@ static struct annotation {
 } annotations[] = {
     {
     "source", 6, handle_source}, {
+    "frame-end", 9, handle_frame_end }, {
+    "frames-invalid", 14, handle_frames_invalid }, {
     "pre-commands", 12, handle_misc_pre_prompt}, {
     "commands", 8, handle_misc_prompt}, {
     "post-commands", 13, handle_misc_post_prompt}, {

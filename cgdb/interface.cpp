@@ -397,7 +397,6 @@ static void separator_display(int draw)
 static void update_status_win(enum win_refresh dorefresh)
 {
     int pos;
-    char filename[FSUTIL_PATH_MAX];
     int attr;
 
     attr = hl_groups_get_attr(hl_groups_instance, HLG_STATUS_BAR);
@@ -436,8 +435,11 @@ static void update_status_win(enum win_refresh dorefresh)
     /* Default: Current Filename */
     else {
         /* Print filename */
-        if (src_win != NULL && source_current_file(src_win, filename) != NULL)
+        const char *filename = source_current_file(src_win);
+
+        if (filename) {
             if_display_message("", dorefresh, WIDTH - 1, "%s", filename);
+        }
     }
 
     if (dorefresh == WIN_REFRESH)

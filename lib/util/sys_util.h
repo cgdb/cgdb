@@ -9,6 +9,10 @@
 #include <stdlib.h>
 #endif /* HAVE_STDLIB_H */
 
+#ifdef HAVE_STDINT_H
+#include <stdint.h>
+#endif
+
 /* These are wrappers for the memory management functions 
  * If a memory allocation fails cgdb will exit
  * They act identical to the POSIX calls
@@ -33,6 +37,21 @@ int cgdb_close(int fd);
  * 0 on success or -1 on error.
  */
 int cgdb_string_to_int(char *str, int *num);
+
+/**
+ * Convert a string to an integer.
+ *
+ * @param str
+ * The hex string to convert.
+ *
+ * @param num
+ * The integer result on success.
+ * On failure, the value passed in will remain unchanged.
+ *
+ * @return
+ * 0 on success or -1 on error.
+ */
+int cgdb_hexstr_to_u64(const char *str, uint64_t *num);
 
 /**
  * Check to see if cgdb supports debugger attachment detection.

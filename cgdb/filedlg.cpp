@@ -136,8 +136,10 @@ int filedlg_add_file_choice(struct filedlg *fd, const char *file_choice)
      * The downside to not showing them all is that a user might
      * not understand why certain files aren't showing up. O well.
      */
-    if (fs_verify_file_exists(file_choice) == 0)
-        return -4;
+    if (file_choice[0] != '*') {
+        if (fs_verify_file_exists(file_choice) == 0)
+            return -4;
+    }
 
     /* find index to insert by comparing:
      * Absolute paths go to the end

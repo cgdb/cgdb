@@ -18,6 +18,10 @@
 #include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 
+#if HAVE_CTYPE_H
+#include <ctype.h>
+#endif
+
 #if HAVE_ERRNO_H
 #include <errno.h>
 #endif /* HAVE_ERRNO_H */
@@ -92,6 +96,26 @@ int cgdb_string_to_int(char *str, int *num) {
                 *num = convert_to_int_result;
                 result = 0;
             }
+        }
+    }
+
+    return result;
+}
+
+int cgdb_hexstr_to_u64(const char *str, uint64_t *num)
+{
+    int result = -1;
+
+    if (str && num) {
+        uint64_t strtoull_result;
+        char *end_ptr;
+
+        errno = 0;
+        strtoull_result = strtoull(str, &end_ptr, 16);
+        if (errno == 0 && str != end_ptr &&
+            (*end_ptr == '\0' || *end_ptr == ' ')) {
+            *num = strtoull_result;
+            result = 0;
         }
     }
 

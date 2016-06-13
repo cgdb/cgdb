@@ -86,6 +86,11 @@ struct annotate_two {
 	 * The current response list.
 	 */
     struct tgdb_list *cur_response_list;
+
+    /**
+     * Request the source location from gdb.
+     */
+    int request_source_location;
 };
 
 #endif /* __ANNOTATE_TWO_H__ */

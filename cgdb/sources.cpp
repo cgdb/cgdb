@@ -44,6 +44,10 @@
 #include <ctype.h>
 #endif
 
+#ifdef HAVE_STDINT_H
+#include <stdint.h>
+#endif
+
 /* Local Includes */
 #include "cgdb.h"
 #include "highlight.h"
@@ -65,13 +69,13 @@ int sources_syntax_on = 1;
 /* Local Functions */
 /* --------------- */
 
-/* get_node:  Returns a pointer to the node that matches the given path.
+/* source_get_node:  Returns a pointer to the node that matches the given path.
  * ---------
  *   path:  Full path to source file
  *
  * Return Value:  Pointer to the matching node, or NULL if not found.
  */
-static struct list_node *get_node(struct sviewer *sview, const char *path)
+struct list_node *source_get_node(struct sviewer *sview, const char *path)
 {
     if (sview && path) {
         struct list_node *cur;
@@ -102,6 +106,12 @@ static int get_timestamp(const char *path, time_t * timestamp)
     int val;
     struct stat s;
 
+    /* Special buffer not backed by file */
+    if (path[0] == '*') {
+        *timestamp = 0;
+        return 0;
+    }
+
     val = path ? stat(path, &s) : -1;
     *timestamp = val ? 0 : s.st_mtime;
     return val;
@@ -111,6 +121,7 @@ static void init_file_buffer(struct buffer *buf)
 {
     buf->lines = NULL;
     buf->max_width = 0;
+    buf->addrs = NULL;
     buf->tabstop = 4;
     buf->file_data = NULL;
     buf->language = TOKENIZER_LANGUAGE_UNKNOWN;
@@ -121,17 +132,25 @@ static void release_file_buffer(struct buffer *buf)
     if (buf) {
         int i;
 
+        for (i = 0; i < sbcount(buf->lines); i++) {
+            sbfree(buf->lines[i].attrs);
+            buf->lines[i].attrs = NULL;
+
+            if (!buf->file_data) {
+                free(buf->lines[i].line);
+                buf->lines[i].line = NULL;
+            }
+        }
+
         /* Free entire file buffer */
         sbfree(buf->file_data);
         buf->file_data = NULL;
 
-        for (i = 0; i < sbcount(buf->lines); i++) {
-            sbfree(buf->lines[i].attrs);
-            buf->lines[i].attrs = NULL;
-        }
-
         sbfree(buf->lines);
         buf->lines = NULL;
+
+        sbfree(buf->addrs);
+        buf->addrs = NULL;
 
         buf->max_width = 0;
         buf->language = TOKENIZER_LANGUAGE_UNKNOWN;
@@ -230,6 +249,10 @@ static int load_file_buf(struct buffer *buf, const char *filename)
     FILE *file;
     long file_size;
     int ret = -1;
+
+    /* Special buffer not backed by file */
+    if (filename[0] == '*')
+        return 0;
 
     file = fopen(filename, "rb");
     if (!file)
@@ -372,7 +395,7 @@ static enum hl_group_kind hlg_from_tokenizer_type(enum tokenizer_type type, cons
     }
 }
 
-int highlight_node(struct buffer *buf)
+static int highlight_node(struct list_node *node)
 {
     int i;
     int ret;
@@ -381,49 +404,83 @@ int highlight_node(struct buffer *buf)
     int lasttype = -1;
     struct token_data tok_data;
     struct tokenizer *t = tokenizer_init();
+    struct buffer *buf = &node->file_buf;
 
     for (i = 0; i < sbcount(buf->lines); i++) {
         sbfree(buf->lines[i].attrs);
         buf->lines[i].attrs = NULL;
     }
 
-    if (tokenizer_set_buffer(t, buf->file_data, buf->language) == -1) {
-        if_print_message("%s:%d tokenizer_set_buffer error", __FILE__, __LINE__);
-        return -1;
-    }
+    if (!buf->file_data) {
+        for (line = 0; line < sbcount(buf->lines); line++) {
+            struct source_line *sline = &buf->lines[line];
 
-    while ((ret = tokenizer_get_token(t, &tok_data)) > 0) {
-        /*if_print_message  ( "TOKEN(%d:%s)\n", e, tokenizer_get_printable_enum ( e ) ); */
-
-        if (tok_data.e == TOKENIZER_NEWLINE) {
-            if (length > buf->max_width)
-                buf->max_width = length;
+            tokenizer_set_buffer(t, sline->line, buf->language);
 
             length = 0;
             lasttype = -1;
-            line++;
-        } else {
-            enum hl_group_kind hlg = hlg_from_tokenizer_type(tok_data.e, tok_data.data);
+            while ((ret = tokenizer_get_token(t, &tok_data)) > 0) {
+                if (tok_data.e == TOKENIZER_NEWLINE)
+                    break;
 
-            if (hlg == HLG_LAST) {
-                logger_write_pos(logger, __FILE__, __LINE__, "Bad hlg_type for '%s', e==%d\n", tok_data.data, tok_data.e);
-                hlg = HLG_TEXT;
+                enum hl_group_kind hlg = hlg_from_tokenizer_type(tok_data.e, tok_data.data);
+
+                /* Add attribute if highlight group has changed */
+                if (lasttype != hlg) {
+                    struct hl_line_attr line_attr;
+
+                    line_attr.col = length;
+                    line_attr.attr = hl_groups_get_attr(
+                        hl_groups_instance, hlg);
+
+                    sbpush(buf->lines[line].attrs, line_attr);
+
+                    lasttype = hlg;
+                }
+
+                /* Add the text and bump our length */
+                length += strlen(tok_data.data);
             }
+        }
 
-            /* Add attribute if highlight group has changed */
-            if (lasttype != hlg) {
-                struct hl_line_attr line_attr;
+    } else {
+        if (tokenizer_set_buffer(t, buf->file_data, buf->language) == -1) {
+            if_print_message("%s:%d tokenizer_set_buffer error", __FILE__, __LINE__);
+            return -1;
+        }
 
-                line_attr.col = length;
-                line_attr.attr = hl_groups_get_attr(hl_groups_instance, hlg);
+        while ((ret = tokenizer_get_token(t, &tok_data)) > 0) {
+            if (tok_data.e == TOKENIZER_NEWLINE) {
+                if (length > buf->max_width)
+                    buf->max_width = length;
 
-                sbpush(buf->lines[line].attrs, line_attr);
+                length = 0;
+                lasttype = -1;
+                line++;
+            } else {
+                enum hl_group_kind hlg = hlg_from_tokenizer_type(tok_data.e, tok_data.data);
 
-                lasttype = hlg;
+                if (hlg == HLG_LAST) {
+                    logger_write_pos(logger, __FILE__, __LINE__, "Bad hlg_type for '%s', e==%d\n", tok_data.data, tok_data.e);
+                    hlg = HLG_TEXT;
+                }
+
+                /* Add attribute if highlight group has changed */
+                if (lasttype != hlg) {
+                    struct hl_line_attr line_attr;
+
+                    line_attr.col = length;
+                    line_attr.attr = hl_groups_get_attr(
+                        hl_groups_instance, hlg);
+
+                    sbpush(buf->lines[line].attrs, line_attr);
+
+                    lasttype = hlg;
+                }
+
+                /* Add the text and bump our length */
+                length += strlen(tok_data.data);
             }
-
-            /* Add the text and bump our length */
-            length += strlen(tok_data.data);
         }
     }
 
@@ -446,7 +503,7 @@ int source_highlight(struct list_node *node)
      */
     if (do_color && (node->file_buf.language != node->language)) {
         node->file_buf.language = node->language;
-        highlight_node(&node->file_buf);
+        highlight_node(node);
     }
 
     /* Allocate the breakpoints array */
@@ -481,6 +538,8 @@ struct sviewer *source_new(int pos_r, int pos_c, int height, int width)
     rv->jump_back_mark.node = NULL;
     rv->jump_back_mark.line = -1;
 
+    rv->addr_frame = 0;
+
     rv->regex_is_searching = 0;
     rv->hlregex = NULL;
 
@@ -490,6 +549,10 @@ struct sviewer *source_new(int pos_r, int pos_c, int height, int width)
 struct list_node *source_add(struct sviewer *sview, const char *path)
 {
     struct list_node *new_node;
+
+    new_node = source_get_node(sview, path);
+    if (new_node)
+        return new_node;
 
     new_node = (struct list_node *)cgdb_malloc(sizeof (struct list_node));
     new_node->path = strdup(path);
@@ -502,6 +565,9 @@ struct list_node *source_add(struct sviewer *sview, const char *path)
     new_node->sel_rline = 0;
     new_node->exe_line = -1;
     new_node->last_modification = 0;    /* No timestamp yet */
+    new_node->language = TOKENIZER_LANGUAGE_UNKNOWN;
+    new_node->addr_start = 0;
+    new_node->addr_end = 0;
 
     /* Initialize all local marks to -1 */
     memset(new_node->local_marks, 0xff, sizeof(new_node->local_marks));
@@ -517,6 +583,23 @@ struct list_node *source_add(struct sviewer *sview, const char *path)
     }
 
     return new_node;
+}
+
+void source_add_disasm_line(struct list_node *node, const char *line)
+{
+    uint64_t addr;
+    struct source_line sline;
+
+    sline.line = cgdb_strdup(line);
+    sline.attrs = NULL;
+    sline.len = strlen(line);
+
+    cgdb_hexstr_to_u64(line, &addr);
+    sbpush(node->file_buf.addrs, addr);
+
+    struct line_flags lf = { 0, 0 };
+    sbpush(node->file_buf.lines, sline);
+    sbpush(node->lflags, lf);
 }
 
 int source_del(struct sviewer *sview, const char *path)
@@ -565,7 +648,7 @@ int source_del(struct sviewer *sview, const char *path)
 
 int source_length(struct sviewer *sview, const char *path)
 {
-    struct list_node *cur = get_node(sview, path);
+    struct list_node *cur = source_get_node(sview, path);
 
     /* Load the file if it's not already */
     if (load_file(cur))
@@ -574,13 +657,9 @@ int source_length(struct sviewer *sview, const char *path)
     return sbcount(cur->file_buf.lines);
 }
 
-char *source_current_file(struct sviewer *sview, char *path)
+char *source_current_file(struct sviewer *sview)
 {
-    if (!sview || !sview->cur)
-        return NULL;
-
-    strcpy(path, sview->cur->path);
-    return path;
+    return (sview && sview->cur) ? sview->cur->path : NULL;
 }
 
 /* source_get_mark_char:  Return mark char for line.
@@ -847,9 +926,9 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
         int column_offset = 0;
         int line_highlight_attr = 0;
         /* Is this the current selected line? */
-        int is_sel_line = (sview->cur->sel_line == line);
+        int is_sel_line = (line > 0 && sview->cur->sel_line == line);
         /* Is this the current executing line */
-        int is_exe_line = (sview->cur->exe_line == line);
+        int is_exe_line = (line > 0 && sview->cur->exe_line == line);
         struct source_line *sline = (line < 0 || line >= count)?
             NULL:&sview->cur->file_buf.lines[line];
         struct hl_line_attr *printline_attrs = (sline)?sline->attrs:0;
@@ -1082,7 +1161,7 @@ int source_set_exec_line(struct sviewer *sview, const char *path, int sel_line, 
 {
     if (path) {
         /* If they passed us a path, try to locate that node */
-        sview->cur = get_node(sview, path);
+        sview->cur = source_get_node(sview, path);
 
         /* Not found.... */
         if (!sview->cur) {
@@ -1108,6 +1187,41 @@ int source_set_exec_line(struct sviewer *sview, const char *path, int sel_line, 
         sview->cur->exe_line = clamp_line(sview, exe_line - 1);
 
     return 0;
+}
+
+int source_set_exec_addr(struct sviewer *sview, const char *path, uint64_t addr)
+{
+    if (path) {
+        /* If we were given a specific path, use it */
+        sview->cur = source_get_node(sview, path);
+    } else {
+        struct list_node *cur;
+
+        /* Search for a node which contains this address */
+        for (cur = sview->list_head; cur != NULL; cur = cur->next) {
+            if (addr >= cur->addr_start && addr <= cur->addr_end) {
+                sview->cur = cur;
+                break;
+            }
+        }
+    }
+
+    if (!sview->cur)
+        return -1;
+
+    if (addr >= sview->cur->addr_start && addr <= sview->cur->addr_end) {
+        int i;
+
+        for (i = 0; i < sbcount(sview->cur->file_buf.addrs); i++) {
+            if (sview->cur->file_buf.addrs[i] == addr) {
+                sview->cur->sel_line = clamp_line(sview, i);
+                sview->cur->exe_line = clamp_line(sview, i);
+                return 0;
+            }
+        }
+    }
+
+    return -1;
 }
 
 void source_free(struct sviewer *sview)
@@ -1207,11 +1321,11 @@ void source_enable_break(struct sviewer *sview, const char *path,
     struct list_node *node = 0;
 
     if (fullname) {
-        node = get_node(sview, fullname);
+        node = source_get_node(sview, fullname);
     }
 
     if (!node && path) {
-        node = get_node(sview, path);
+        node = source_get_node(sview, path);
     }
 
     if (!load_file(node)) {

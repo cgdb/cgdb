@@ -1,7 +1,7 @@
 /**
  * This file is an amalgamation of C source files from gdbwire.
  *
- * It was created using gdbwire 1.0 and git revision a99de3f.
+ * It was created using gdbwire 1.0 and git revision 8090521.
  */
 
 /***** Begin file gdbwire_string.c *******************************************/
@@ -1842,23 +1842,43 @@ gdbwire_mi_parser_push_data(struct gdbwire_mi_parser *parser, const char *data,
 {
     struct gdbwire_string *line = 0;
     enum gdbwire_result result = GDBWIRE_OK;
+    int has_newline = 0;
+    size_t index;
 
     GDBWIRE_ASSERT(parser && data);
+
+    /**
+     * No need to parse an MI command until a newline occurs.
+     *
+     * A gdb/mi command may be a very long line. For this reason, it is
+     * better to check the data passed into this function once for a newline
+     * rather than checking all the data every time this function is called.
+     * This optimizes the case where this function is called one character
+     * at a time.
+     */
+    for (index = size; index > 0; --index) {
+        if (data[index-1] == '\n' || data[index-1] == '\r') {
+            has_newline = 1;
+            break;
+        }
+    }
+
     GDBWIRE_ASSERT(gdbwire_string_append_data(parser->buffer, data, size) == 0);
 
-    // Loop until no more lines available
-    for (;;) {
-        result = gdbwire_mi_parser_get_next_line(parser->buffer, &line);
-        GDBWIRE_ASSERT_GOTO(result == GDBWIRE_OK, result, cleanup);
-
-        if (line) {
-            result = gdbwire_mi_parser_parse_line(parser,
-                gdbwire_string_data(line));
-            gdbwire_string_destroy(line);
-            line = 0;
+    if (has_newline) {
+        for (;;) {
+            result = gdbwire_mi_parser_get_next_line(parser->buffer, &line);
             GDBWIRE_ASSERT_GOTO(result == GDBWIRE_OK, result, cleanup);
-        } else {
-            break;
+
+            if (line) {
+                result = gdbwire_mi_parser_parse_line(parser,
+                    gdbwire_string_data(line));
+                gdbwire_string_destroy(line);
+                line = 0;
+                GDBWIRE_ASSERT_GOTO(result == GDBWIRE_OK, result, cleanup);
+            } else {
+                break;
+            }
         }
     }
 

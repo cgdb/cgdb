@@ -130,6 +130,7 @@ static struct annotate_two *initialize_annotate_two(void)
     a2->a2_gdb_init_file[0] = '\0';
 
     a2->cur_response_list = NULL;
+    a2->request_source_location = 0;
 
     return a2;
 }

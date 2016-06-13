@@ -14,9 +14,9 @@
 #include <sys/types.h>
 #endif /* HAVE_SYS_TYPES_H */
 
-#if HAVE_REGEX_H
-#include <regex.h>
-#endif /* HAVE_REGEX_H */
+#if HAVE_CTYPE_H
+#include <ctype.h>
+#endif
 
 /* Local includes */
 #include "commands.h"
@@ -53,6 +53,7 @@ struct commands {
      * The disassemble command output.
      */
     char **disasm;
+    uint64_t address_start, address_end;
 
     /**
      * A complete hack.
@@ -180,6 +181,8 @@ static void send_disassemble_func_complete_response(struct commands *c,
         (result_record->result_class == GDBWIRE_MI_ERROR);
             
     response->choice.disassemble_function.disasm = c->disasm;
+    response->choice.disassemble_function.addr_start = c->address_start;
+    response->choice.disassemble_function.addr_end = c->address_end;
     tgdb_types_append_command(c->response_list, response);
 }
 
@@ -195,7 +198,7 @@ static void send_command_complete_response(struct commands *c)
 
 static void
 commands_send_source_file(struct commands *c, char *fullname, char *file,
-        char *address, char *from, char *func, int line)
+        uint64_t address, char *from, char *func, int line)
 {
     /* This section allocates a new structure to add into the queue 
      * All of its members will need to be freed later.
@@ -205,8 +208,12 @@ commands_send_source_file(struct commands *c, char *fullname, char *file,
     struct tgdb_response *response = (struct tgdb_response *)
             cgdb_malloc(sizeof (struct tgdb_response));
 
-    tfp->path = (fullname)?cgdb_strdup(fullname):cgdb_strdup(file);
-    tfp->addr = (address)?cgdb_strdup(address):0;
+    if (fullname || file) {
+        tfp->path = (fullname)?cgdb_strdup(fullname):cgdb_strdup(file);
+    } else {
+        tfp->path = 0;
+    }
+    tfp->addr = address;
     tfp->from = (from)?cgdb_strdup(from):0;
     tfp->func = (func)?cgdb_strdup(func):0;
     tfp->line_number = line;
@@ -246,10 +253,12 @@ static void commands_process_info_frame(struct commands *c,
     if (result == GDBWIRE_OK) {
         struct gdbwire_mi_stack_frame *frame =
             mi_command->variant.stack_info_frame.frame;
+        uint64_t address = 0;
+        cgdb_hexstr_to_u64(frame->address, &address);
 
         if (frame->address || frame->file || frame->fullname) {
             commands_send_source_file(c, frame->fullname, frame->file,
-                    frame->address, frame->from, frame->func, frame->line);
+                    address, frame->from, frame->func, frame->line);
         } else {
             require_source = true;
         }
@@ -281,12 +290,28 @@ static void gdbwire_stream_record_callback(void *context,
             break;
         case INFO_DISASSEMBLE_FUNC:
             if (stream_record->kind == GDBWIRE_MI_CONSOLE) {
+                uint64_t address;
+                int result;
                 char *str = stream_record->cstring;
                 size_t length = strlen(str);
                 if (str[length-1] == '\n') {
                     str[length-1] = 0;
                 }
-                sbpush(c->disasm, str);
+
+                /* Trim the gdb current location pointer off */
+                if (length > 2 && str[0] == '=' && str[1] == '>') {
+                    str[0] = ' ';
+                    str[1] = ' ';
+                }
+
+                sbpush(c->disasm, cgdb_strdup(str));
+
+                result = cgdb_hexstr_to_u64(str, &address);
+                if (result == 0 && address) {
+                    c->address_start = c->address_start ?
+                         MIN(address, c->address_start) : address;
+                    c->address_end = MAX(address, c->address_end);
+                }
             }
             break;
         case COMMAND_COMPLETE:
@@ -409,11 +434,6 @@ void commands_shutdown(struct commands *c)
 
     tgdb_list_destroy(c->tab_completions);
 
-    for (int i = 0; i < sbcount(c->disasm); i++) {
-        free(c->disasm[i]);
-    }
-    sbfree(c->disasm);
-
     /* TODO: free source_files queue */
 
     gdbwire_destroy(c->wire);
@@ -492,10 +512,9 @@ commands_prepare_for_command(struct annotate_two *a2,
             io_debug_write_fmt("<%s\n>", com->tgdb_command_data);
             break;
         case ANNOTATE_DISASSEMBLE_FUNC:
-            for (int i = 0; i < sbcount(c->disasm); i++) {
-                free(c->disasm[i]);
-            }
-            sbfree(c->disasm);
+            c->disasm = 0;
+            c->address_start = 0;
+            c->address_end = 0;
             
             commands_set_state(c, INFO_DISASSEMBLE_FUNC);
             break;

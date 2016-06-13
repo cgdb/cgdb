@@ -66,6 +66,11 @@ void tokenizer_destroy(struct tokenizer *t)
 
 int tokenizer_set_buffer(struct tokenizer *t, const char *buffer, enum tokenizer_language_support l)
 {
+    if (t->str_buffer) {
+        (*t->yy_delete_buffer_func)(t->str_buffer);
+        t->str_buffer = NULL;
+    }
+
     if (l < TOKENIZER_ENUM_START_POS || l >= TOKENIZER_LANGUAGE_UNKNOWN)
         return 0;
 

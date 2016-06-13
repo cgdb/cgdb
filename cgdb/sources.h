@@ -60,6 +60,8 @@ struct sviewer {
     sviewer_mark jump_back_mark;           /* Location where last jump occurred from */
     WINDOW *win;                           /* Curses window */
 
+    uint64_t addr_frame;                   /* Current frame address 
+                                              Zero if unknown. */
     int regex_is_searching;
     struct hl_regex_info *hlregex;
 };
@@ -72,6 +74,7 @@ struct source_line {
 
 struct buffer {
     struct source_line *lines;  /* Stretch buffer array with line information */
+    uint64_t *addrs;            /* The list of corresponding addresses */
     int max_width;              /* Width of longest line in file */
     char *file_data;            /* Entire file pointer if read in that way */
     int tabstop;                /* Tabstop value used to load file */
@@ -99,6 +102,9 @@ struct list_node {
     time_t last_modification;   /* timestamp of last modification */
 
     int local_marks[MARK_COUNT];/* Line numbers for local (a..z) marks */
+
+    uint64_t addr_start;        /* Disassembly start address */
+    uint64_t addr_end;          /* Disassembly end address */
 
     struct list_node *next;     /* Pointer to next link in list */
 };
@@ -130,7 +136,11 @@ struct sviewer *source_new(int pos_r, int pos_c, int height, int width);
  */
 struct list_node *source_add(struct sviewer *sview, const char *path);
 
+void source_add_disasm_line(struct list_node *node, const char *line);
+
 int source_highlight(struct list_node *node);
+
+struct list_node *source_get_node(struct sviewer *sview, const char *path);
 
 /* source_del:  Remove a file from the list of source files.
  * -----------
@@ -161,7 +171,7 @@ int source_length(struct sviewer *sview, const char *path);
  *  Return Value: NULL if no file is being displayed, otherwise a pointer to
  *                the current path of the file being displayed.
  */
-char *source_current_file(struct sviewer *sview, char *path);
+char *source_current_file(struct sviewer *sview);
 
 /* source_display:  Display a portion of a file in a curses window.
  * ---------------
@@ -222,6 +232,8 @@ void source_set_sel_line(struct sviewer *sview, int line);
  *               5 -> file does not exist
  */
 int source_set_exec_line(struct sviewer *sview, const char *path, int sel_line, int exe_line);
+
+int source_set_exec_addr(struct sviewer *sview, const char *path, uint64_t addr);
 
 /* source_search_regex_init: Should be called before source_search_regex
  * -------------------------
