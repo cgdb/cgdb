@@ -122,7 +122,7 @@ static void init_file_buffer(struct buffer *buf)
     buf->lines = NULL;
     buf->max_width = 0;
     buf->addrs = NULL;
-    buf->tabstop = 4;
+    buf->tabstop = cgdbrc_get_int(CGDBRC_TABSTOP);
     buf->file_data = NULL;
     buf->language = TOKENIZER_LANGUAGE_UNKNOWN;
 }
@@ -137,7 +137,7 @@ static void release_file_buffer(struct buffer *buf)
             buf->lines[i].attrs = NULL;
 
             if (!buf->file_data) {
-                free(buf->lines[i].line);
+                sbfree(buf->lines[i].line);
                 buf->lines[i].line = NULL;
             }
         }
@@ -590,9 +590,13 @@ void source_add_disasm_line(struct list_node *node, const char *line)
     uint64_t addr;
     struct source_line sline;
 
-    sline.line = cgdb_strdup(line);
+    sline.line = NULL;
+    sbsetcount(sline.line, strlen(line) + 1);
+    strcpy(sline.line, line);
+    sline.line = detab_buffer(sline.line, node->file_buf.tabstop);
+
     sline.attrs = NULL;
-    sline.len = strlen(line);
+    sline.len = sbcount(sline.line);
 
     cgdb_hexstr_to_u64(line, &addr);
     sbpush(node->file_buf.addrs, addr);
