@@ -106,13 +106,10 @@
    * \param tgdb
    * An instance of the tgdb library to operate on.
    *
-   * \param is_busy
-   * Will return as 1 if tgdb is busy, otherwise 0.
-   *
    * \return
-   * 0 on success, or -1 on error
+   * Will return as 1 if tgdb is busy, otherwise 0.
    */
-    int tgdb_is_busy(struct tgdb *tgdb, int *is_busy);
+    int tgdb_is_busy(struct tgdb *tgdb);
 
 /*@}*/
 /* }}}*/

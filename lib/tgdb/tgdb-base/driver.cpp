@@ -69,16 +69,10 @@ static struct termios term_attributes;
 /* Run or queue a TGDB command */
 static int handle_request(struct tgdb *tgdb_in, struct tgdb_request *request)
 {
-    int val, is_busy;
-
     if (!tgdb_in || !request)
         return -1;
 
-    val = tgdb_is_busy(tgdb_in, &is_busy);
-    if (val == -1)
-        return -1;
-
-    if (is_busy)
+    if (tgdb_is_busy(tgdb_in))
         tgdb_queue_append(tgdb_in, request);
     else
         tgdb_process_command(tgdb_in, request);
