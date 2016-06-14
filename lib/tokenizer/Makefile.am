@@ -9,6 +9,7 @@ noinst_LIBRARIES = libtokenizer.a
 libtokenizer_a_SOURCES = \
     adalexer.lpp \
     clexer.lpp \
+    asmlexer.lpp \
     dlexer.lpp \
     golexer.lpp \
     cgdbhelplexer.lpp \

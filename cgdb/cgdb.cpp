@@ -1066,7 +1066,7 @@ static void process_commands(struct tgdb *tgdb_in)
 
                         /* No disasm found - request it */
                         request_ptr = tgdb_request_disassemble_func(tgdb,
-                            DISASSEMBLE_FUNC_DISASSEMBLY, NULL, NULL);
+                            DISASSEMBLE_FUNC_SOURCE_LINES, NULL, NULL);
                         handle_request(tgdb, request_ptr);
                     }
                 }
@@ -1160,7 +1160,7 @@ static void process_commands(struct tgdb *tgdb_in)
                             node = source_add(sview, path);
 
                             //$ TODO mikesart: Add asm colors
-                            node->language = TOKENIZER_LANGUAGE_C;
+                            node->language = TOKENIZER_LANGUAGE_ASM;
                             node->addr_start = addr_start;
                             node->addr_end = addr_end;
 

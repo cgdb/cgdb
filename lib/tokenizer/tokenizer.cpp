@@ -5,8 +5,9 @@
 
 /* Some default file extensions */
 const char *c_extensions[] = {
-    ".c", ".cc", ".cpp", ".cxx", ".c++", ".h", ".hpp", ".hxx", ".hh", ".ipp", ".inl", ".moc", ".s"
+    ".c", ".cc", ".cpp", ".cxx", ".c++", ".h", ".hpp", ".hxx", ".hh", ".ipp", ".inl", ".moc",
 };
+const char *asm_extensions[] = { ".s" };
 const char *d_extensions[] = { ".d", ".di" };
 const char *go_extensions[] = { ".go" };
 const char *rust_extensions[] = { ".rs" };
@@ -21,6 +22,7 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
     void _LANG ## __delete_buffer (YY_BUFFER_STATE b);
 
 DECLARE_LEX_FUNCTIONS(c);
+DECLARE_LEX_FUNCTIONS(asm);
 DECLARE_LEX_FUNCTIONS(d);
 DECLARE_LEX_FUNCTIONS(go);
 DECLARE_LEX_FUNCTIONS(rust);
@@ -84,6 +86,8 @@ int tokenizer_set_buffer(struct tokenizer *t, const char *buffer, enum tokenizer
 
     if (l == TOKENIZER_LANGUAGE_C) {
         INIT_LEX(c);
+    } else if (l == TOKENIZER_LANGUAGE_ASM) {
+        INIT_LEX(asm);
     } else if (l == TOKENIZER_LANGUAGE_D) {
         INIT_LEX(d);
     } else if (l == TOKENIZER_LANGUAGE_GO) {
@@ -146,6 +150,10 @@ enum tokenizer_language_support tokenizer_get_default_file_type(const char
     for (i = 0; i < sizeof (c_extensions) / sizeof (char *); i++)
         if (strcasecmp(file_extension, c_extensions[i]) == 0)
             return TOKENIZER_LANGUAGE_C;
+
+    for (i = 0; i < sizeof (asm_extensions) / sizeof (char *); i++)
+        if (strcasecmp(file_extension, asm_extensions[i]) == 0)
+            return TOKENIZER_LANGUAGE_ASM;
 
     for (i = 0; i < sizeof (d_extensions) / sizeof (char *); i++)
         if (strcasecmp(file_extension, d_extensions[i]) == 0)

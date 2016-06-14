@@ -87,6 +87,8 @@ int main(int argc, char **argv)
 
     if (strcmp(argv[2], "c") == 0)
         l = TOKENIZER_LANGUAGE_C;
+    else if (strcmp(argv[2], "asm") == 0)
+        l = TOKENIZER_LANGUAGE_ASM;
     else if (strcmp(argv[2], "d") == 0)
         l = TOKENIZER_LANGUAGE_D;
     else if (strcmp(argv[2], "go") == 0)
