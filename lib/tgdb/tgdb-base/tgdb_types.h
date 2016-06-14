@@ -107,6 +107,8 @@
      * single stepping through loops.
      */
         TGDB_UNTIL,
+
+    /** This will instruct TGDB to run the disassembly command.  */
         TGDB_DISASSEMBLE,
 
     /** This will instruct TGDB to tell the debugger to go up a frame.  */
@@ -222,6 +224,8 @@
         TGDB_REQUEST_MODIFY_BREAKPOINT,
     /** Ask GDB to give a list of tab completions for a given string */
         TGDB_REQUEST_COMPLETE,
+    /** Ask GDB to disassemble a $pc */
+        TGDB_REQUEST_DISASSEMBLE_PC,
     /** Ask GDB to disassemble a function */
         TGDB_REQUEST_DISASSEMBLE_FUNC
     };
@@ -254,6 +258,10 @@
                 /* The line to ask GDB for completions for */
                 const char *line;
             } complete;
+
+            struct {
+                int lines;
+            } disassemble;
 
             struct {
                 int source;
@@ -302,6 +310,12 @@
      *
      */
         TGDB_UPDATE_COMPLETIONS,
+
+    /**
+     * Disassemble $pc output
+     *
+     */
+        TGDB_DISASSEMBLE_PC,
 
     /**
      * Disassemble function output

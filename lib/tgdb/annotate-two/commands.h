@@ -15,6 +15,8 @@ enum COMMAND_STATE {
     INFO_BREAKPOINTS,
     /* Related to the 'info sources' command */
     INFO_SOURCES,
+    /* Related to the 'x' command */
+    INFO_DISASSEMBLE_PC,
     /* Related to the 'disassemble' command */
     INFO_DISASSEMBLE_FUNC,
     /* Related to the 'info frame' command */

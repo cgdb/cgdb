@@ -1127,9 +1127,19 @@ static void process_commands(struct tgdb *tgdb_in)
                 do_tab_completion(list);
                 break;
             }
+            case TGDB_DISASSEMBLE_PC:
             case TGDB_DISASSEMBLE_FUNC:
-                if (item->choice.disassemble_function.error == 0) {
-                
+            {
+                if (item->choice.disassemble_function.error) {
+                    tgdb_request_ptr request_ptr;
+
+                    //$ TODO mikesart: Get module name in here somehow? Passed in when calling tgdb_request_disassemble?
+                    //      or info sharedlibrary?
+                    //$ TODO mikesart: Need way to make sure we don't recurse here on error.
+                    //$ TODO mikesart: 100 lines? Way to load more at end?
+                    request_ptr = tgdb_request_disassemble_pc(tgdb, 100);
+                    handle_request(tgdb, request_ptr);
+                } else {
                     uint64_t addr_start = item->choice.disassemble_function.addr_start;
                     uint64_t addr_end = item->choice.disassemble_function.addr_end;
                     char **disasm = item->choice.disassemble_function.disasm;
@@ -1143,8 +1153,9 @@ static void process_commands(struct tgdb *tgdb_in)
                         sviewer *sview = if_get_sview();
 
                         if (addr_start) {
-                            path = sys_aprintf("** %s (%" PRIx64 " - %" PRIx64 ") **",
-                                            disasm[0], addr_start, addr_end);
+                            path = sys_aprintf(
+                                "** %s (%" PRIx64 " - %" PRIx64 ") **",
+                                disasm[0], addr_start, addr_end);
                         } else {
                             path = sys_aprintf("** %s **", disasm[0]);
                         }
@@ -1170,8 +1181,9 @@ static void process_commands(struct tgdb *tgdb_in)
 
                         free(path);
                     }
-                    break;
                 }
+                break;
+            }
             case TGDB_UPDATE_CONSOLE_PROMPT_VALUE:
             {
                 const char *new_prompt =
@@ -1236,6 +1248,7 @@ does_request_require_console_update(struct tgdb_request *request, int *update)
             break;
         case TGDB_REQUEST_INFO_SOURCES:
         case TGDB_REQUEST_CURRENT_LOCATION:
+        case TGDB_REQUEST_DISASSEMBLE_PC:
         case TGDB_REQUEST_DISASSEMBLE_FUNC:
             *update = 0;
             break;

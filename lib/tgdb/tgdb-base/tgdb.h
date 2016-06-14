@@ -409,6 +409,18 @@
    */
     tgdb_request_ptr tgdb_request_complete(struct tgdb *tgdb, const char *line);
 
+    
+    /**
+     * Used to get the disassemble of the current $pc.
+     *
+     * \param tgdb
+     * An instance of the tgdb library to operate on.
+     *
+     * \param lines
+     * The number of lines to disassemble after the pc.
+     */
+    tgdb_request_ptr tgdb_request_disassemble_pc(struct tgdb *tgdb, int lines);
+
   /**
    * Used to get disassembly for function.
    *

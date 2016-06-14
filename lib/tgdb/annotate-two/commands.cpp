@@ -288,12 +288,15 @@ static void gdbwire_stream_record_callback(void *context,
              * annotations can be ignored.
              */
             break;
+        case INFO_DISASSEMBLE_PC:
         case INFO_DISASSEMBLE_FUNC:
             if (stream_record->kind == GDBWIRE_MI_CONSOLE) {
                 uint64_t address;
                 int result;
                 char *str = stream_record->cstring;
                 size_t length = strlen(str);
+                char *colon = 0, colon_char = 0;
+
                 if (str[length-1] == '\n') {
                     str[length-1] = 0;
                 }
@@ -306,7 +309,18 @@ static void gdbwire_stream_record_callback(void *context,
 
                 sbpush(c->disasm, cgdb_strdup(str));
 
+                colon = strchr((char*)str, ':');
+                if (colon) {
+                    colon_char = *colon;
+                    *colon = 0;
+                }
+
                 result = cgdb_hexstr_to_u64(str, &address);
+
+                if (colon) {
+                    *colon = colon_char;
+                }
+
                 if (result == 0 && address) {
                     c->address_start = c->address_start ?
                          MIN(address, c->address_start) : address;
@@ -345,6 +359,7 @@ static void gdbwire_result_record_callback(void *context,
         case INFO_SOURCES:
             commands_process_info_sources(c, result_record);
             break;
+        case INFO_DISASSEMBLE_PC:
         case INFO_DISASSEMBLE_FUNC:
             send_disassemble_func_complete_response(c, result_record);
             break;
@@ -511,6 +526,13 @@ commands_prepare_for_command(struct annotate_two *a2,
             commands_set_state(c, COMMAND_COMPLETE);
             io_debug_write_fmt("<%s\n>", com->tgdb_command_data);
             break;
+        case ANNOTATE_DISASSEMBLE_PC:
+            c->disasm = 0;
+            c->address_start = 0;
+            c->address_end = 0;
+            
+            commands_set_state(c, INFO_DISASSEMBLE_PC);
+            break;
         case ANNOTATE_DISASSEMBLE_FUNC:
             c->disasm = 0;
             c->address_start = 0;
@@ -557,6 +579,8 @@ static char *commands_create_command(struct commands *c,
         case ANNOTATE_INFO_FRAME:
             /* server info frame */
             return strdup("server interpreter-exec mi \"-stack-info-frame\"\n");
+        case ANNOTATE_DISASSEMBLE_PC:
+            return sys_aprintf("server interpreter-exec mi \"x/%si $pc\"\n", data);
         case ANNOTATE_DISASSEMBLE_FUNC:
             /* disassemble 'driver.cpp'::main
                  /m: source lines included

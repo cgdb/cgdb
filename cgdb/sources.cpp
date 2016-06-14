@@ -560,7 +560,7 @@ struct list_node *source_add(struct sviewer *sview, const char *path)
     init_file_buffer(&new_node->file_buf);
 
     new_node->lflags = NULL;
-    new_node->sel_line = 0;
+    new_node->sel_line = -1;
     new_node->sel_col = 0;
     new_node->sel_rline = 0;
     new_node->exe_line = -1;
@@ -589,6 +589,7 @@ void source_add_disasm_line(struct list_node *node, const char *line)
 {
     uint64_t addr;
     struct source_line sline;
+    char *colon = 0, colon_char = 0;
 
     sline.line = NULL;
     sbsetcount(sline.line, strlen(line) + 1);
@@ -598,7 +599,18 @@ void source_add_disasm_line(struct list_node *node, const char *line)
     sline.attrs = NULL;
     sline.len = sbcount(sline.line);
 
+    colon = strchr((char*)line, ':');
+    if (colon) {
+        colon_char = *colon;
+        *colon = 0;
+    }
+
     cgdb_hexstr_to_u64(line, &addr);
+
+    if (colon) {
+        *colon = colon_char;
+    }
+
     sbpush(node->file_buf.addrs, addr);
 
     struct line_flags lf = { 0, 0 };
@@ -930,9 +942,9 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
         int column_offset = 0;
         int line_highlight_attr = 0;
         /* Is this the current selected line? */
-        int is_sel_line = (line > 0 && sview->cur->sel_line == line);
+        int is_sel_line = (line >= 0 && sview->cur->sel_line == line);
         /* Is this the current executing line */
-        int is_exe_line = (line > 0 && sview->cur->exe_line == line);
+        int is_exe_line = (line >= 0 && sview->cur->exe_line == line);
         struct source_line *sline = (line < 0 || line >= count)?
             NULL:&sview->cur->file_buf.lines[line];
         struct hl_line_attr *printline_attrs = (sline)?sline->attrs:0;
