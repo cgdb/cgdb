@@ -1240,14 +1240,9 @@ tgdb_request_ptr tgdb_queue_pop(struct tgdb * tgdb)
     return item;
 }
 
-int tgdb_queue_size(struct tgdb *tgdb, int *size)
+int tgdb_queue_size(struct tgdb *tgdb)
 {
-    if (!tgdb || !size)
-        return -1;
-
-    *size = queue_size(tgdb->gdb_client_request_queue);
-
-    return 0;
+    return queue_size(tgdb->gdb_client_request_queue);
 }
 
 /* }}}*/

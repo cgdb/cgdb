@@ -1241,31 +1241,26 @@ static void process_commands(struct tgdb *tgdb_in)
  * 0 on success or -1 on error
  */
 static int
-does_request_require_console_update(struct tgdb_request *request, int *update)
+does_request_require_console_update(struct tgdb_request *request)
 {
-    if (!request || !update)
-        return -1;
-
     switch (request->header) {
         case TGDB_REQUEST_CONSOLE_COMMAND:
-            *update = 1;
+            return 1;
             break;
         case TGDB_REQUEST_INFO_SOURCES:
         case TGDB_REQUEST_CURRENT_LOCATION:
         case TGDB_REQUEST_DISASSEMBLE_PC:
         case TGDB_REQUEST_DISASSEMBLE_FUNC:
-            *update = 0;
+            return 0;
             break;
         case TGDB_REQUEST_DEBUGGER_COMMAND:
         case TGDB_REQUEST_MODIFY_BREAKPOINT:
         case TGDB_REQUEST_COMPLETE:
-            *update = 1;
+            return 1;
             break;
         default:
             return -1;
     }
-
-    return 0;
 }
 
 /* gdb_input: Receives data from tgdb:
@@ -1317,7 +1312,8 @@ static int gdb_input()
      */
     if (is_finished) {
 
-        tgdb_queue_size(tgdb, &size);
+        size = tgdb_queue_size(tgdb);
+
         /* This is the second case, this command was queued. */
         if (size > 0) {
             struct tgdb_request *request = tgdb_queue_pop(tgdb);
@@ -1341,14 +1337,10 @@ static int gdb_input()
         }
       /** If the user is currently completing, do not update the prompt */
         else if (!completion_ptr) {
-            int update = 1, ret_val;
+            int update = 1;
 
             if (last_request) {
-                ret_val =
-                        does_request_require_console_update(last_request,
-                        &update);
-                if (ret_val == -1)
-                    return -1;
+                update = does_request_require_console_update(last_request);
 
                 tgdb_request_destroy(last_request);
                 last_request = NULL;

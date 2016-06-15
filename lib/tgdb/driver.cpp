@@ -248,7 +248,7 @@ static int gdb_input(void)
     if (is_finished) {
         int qsize;
 
-        tgdb_queue_size(tgdb, &qsize);
+        qsize = tgdb_queue_size(tgdb);
         if (qsize > 0) {
             struct tgdb_request *request = tgdb_queue_pop(tgdb);
             char *prompt;

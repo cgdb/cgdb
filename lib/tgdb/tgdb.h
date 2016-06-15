@@ -479,13 +479,10 @@
    * \param tgdb
    * An instance of the tgdb library to operate on.
    *
-   * \size
-   * The number of items in the list.
-   *
    * \return
-   * 0 on success or -1 on error
+   * The number of items in the list.
    */
-    int tgdb_queue_size(struct tgdb *tgdb, int *size);
+    int tgdb_queue_size(struct tgdb *tgdb);
 
 /* }}}*/
 
