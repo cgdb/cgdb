@@ -362,11 +362,6 @@ int tgdb_shutdown(struct tgdb *tgdb)
 
 /* }}}*/
 
-char *tgdb_err_msg(struct tgdb *tgdb)
-{
-    return NULL;
-}
-
 void command_completion_callback(struct tgdb *tgdb)
 {
     tgdb->IS_SUBSYSTEM_READY_FOR_NEXT_COMMAND = 1;

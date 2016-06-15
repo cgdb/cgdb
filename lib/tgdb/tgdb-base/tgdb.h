@@ -89,18 +89,6 @@
 /*@{*/
 
   /**
-   * If a function returns an error, this can be called to report more
-   * about the type of error, or the error message itself.
-   *
-   * \param tgdb
-   * An instance of the tgdb library to operate on.
-   *
-   * @return
-   * Error Message or NULL on error
-   */
-    char *tgdb_err_msg(struct tgdb *tgdb);
-
-  /**
    * This will check to see if TGDB is currently capable of receiving another command.
    * 
    * \param tgdb
