@@ -1213,6 +1213,9 @@ int source_set_exec_addr(struct sviewer *sview, const char *path, uint64_t addr)
     } else {
         struct list_node *cur;
 
+        if (!addr)
+            addr = sview->addr_frame;
+
         /* Search for a node which contains this address */
         for (cur = sview->list_head; cur != NULL; cur = cur->next) {
             if (addr >= cur->addr_start && addr <= cur->addr_end) {

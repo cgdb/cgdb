@@ -828,7 +828,8 @@ Send an until command to GDB.
 
 @item :d
 @itemx :disassemble
-Send a disassemble command to GDB.
+Send a disassemble command to GDB. CGDB will display the current function
+with disassemble.
 
 @item :up
 Send an up command to GDB.

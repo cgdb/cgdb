@@ -1051,11 +1051,11 @@ static void process_commands(struct tgdb *tgdb_in)
                     int ret;
 
                     /* Try to show the disasm for ths function */
-                    ret = source_set_exec_addr(sview, NULL, sview->addr_frame);
+                    ret = source_set_exec_addr(sview, NULL, 0);
 
                     if (!ret) {
                         if_draw();
-                    } else if (ret == -1) {
+                    } else if (sview->addr_frame) {
                         tgdb_request_ptr request_ptr;
 
                         /* No disasm found - request it */
@@ -1144,8 +1144,12 @@ static void process_commands(struct tgdb *tgdb_in)
                     uint64_t addr_end = item->choice.disassemble_function.addr_end;
                     char **disasm = item->choice.disassemble_function.disasm;
 
-                    //$ TODO mikesart: If we got an error here and no disasm exists, we should use
-                    // TGDB_DISASSEMBLE and just disassemble 100 instructions or something?
+                    //$ TODO: If addr_start is equal to addr_end of some other
+                    // buffer, then append it to that buffer?
+
+                    //$ TODO: If there is a disassembly view, update the location
+                    // even if we don't display it? Useful with global marks, etc.
+
                     if (disasm && disasm[0]) {
                         int i;
                         char *path;
@@ -1176,7 +1180,7 @@ static void process_commands(struct tgdb *tgdb_in)
                             source_highlight(node);
                         }
 
-                        source_set_exec_addr(sview, path, if_get_sview()->addr_frame);
+                        source_set_exec_addr(sview, path, 0);
                         if_draw();
 
                         free(path);

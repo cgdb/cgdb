@@ -108,9 +108,6 @@
      */
         TGDB_UNTIL,
 
-    /** This will instruct TGDB to run the disassembly command.  */
-        TGDB_DISASSEMBLE,
-
     /** This will instruct TGDB to tell the debugger to go up a frame.  */
         TGDB_UP,
 

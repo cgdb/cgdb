@@ -201,6 +201,8 @@ static int command_parse_highlight(int param);
 static int command_parse_map(int param);
 static int command_parse_unmap(int param);
 
+static int command_do_disassemble(int param);
+
 typedef int (*action_t) (int param);
 typedef struct COMMANDS {
     const char *name;
@@ -232,6 +234,8 @@ COMMANDS commands[] = {
     /* syntax       */ {"syntax", (action_t)command_parse_syntax, 0},
     /* unmap        */ {"unmap", (action_t)command_parse_unmap, 0},
     /* unmap        */ {"unm", (action_t)command_parse_unmap, 0},
+    /* disassemble  */ {"disassemble", (action_t)command_do_disassemble, 0},
+    /* disassemble  */ {"dis", (action_t)command_do_disassemble, 0},
     /* continue     */ {"continue", (action_t)command_do_tgdbcommand, TGDB_CONTINUE},
     /* continue     */ {"c", (action_t)command_do_tgdbcommand, TGDB_CONTINUE},
     /* down         */ {"down", (action_t)command_do_tgdbcommand, TGDB_DOWN},
@@ -248,9 +252,7 @@ COMMANDS commands[] = {
     /* start        */ {"start", (action_t)command_do_tgdbcommand, TGDB_START},
     /* until        */ {"until", (action_t)command_do_tgdbcommand, TGDB_UNTIL},
     /* until        */ {"u", (action_t)command_do_tgdbcommand, TGDB_UNTIL},
-    /* disassemble  */ {"disassemble", (action_t)command_do_tgdbcommand, TGDB_DISASSEMBLE},
-    /* disassemble  */ {"dis", (action_t)command_do_tgdbcommand, TGDB_DISASSEMBLE},
-    /* up           */ {"up", (action_t)command_do_tgdbcommand, TGDB_UP},
+    /* up           */ {"up", (action_t)command_do_tgdbcommand, TGDB_UP}
 };
 
 int command_sort_find(const void *_left_cmd, const void *_right_cmd)
@@ -767,6 +769,27 @@ static int command_parse_unmap(int param)
     }
 
     enter_map_id = 0;
+
+    return 0;
+}
+
+int command_do_disassemble(int param)
+{
+    int ret;
+    struct sviewer *sview = if_get_sview();
+
+    ret = source_set_exec_addr(sview, NULL, 0);
+
+    if (!ret) {
+        if_draw();
+    } else if (sview->addr_frame) {
+        tgdb_request_ptr request_ptr;
+
+        /* No disasm found - request it */
+        request_ptr = tgdb_request_disassemble_func(tgdb,
+                DISASSEMBLE_FUNC_SOURCE_LINES, NULL, NULL);
+        handle_request(tgdb, request_ptr);
+    }
 
     return 0;
 }
