@@ -5,8 +5,7 @@ AM_CXXFLAGS = \
     -I$(top_srcdir)/lib/kui \
     -I$(top_srcdir)/lib/rline \
     -I$(top_srcdir)/lib/util \
-    -I$(top_srcdir)/lib/tgdb/tgdb-base \
-    -I$(top_srcdir)/lib/tgdb/annotate-two \
+    -I$(top_srcdir)/lib/tgdb \
     -I$(top_srcdir)/lib/tokenizer
 
 bin_PROGRAMS = cgdb
@@ -17,12 +16,10 @@ cgdb_LDFLAGS = \
     -L$(top_builddir)/lib/rline \
     -L$(top_builddir)/lib/tokenizer \
     -L$(top_builddir)/lib/util \
-    -L$(top_builddir)/lib/tgdb/annotate-two \
-    -L$(top_builddir)/lib/tgdb/tgdb-base
+    -L$(top_builddir)/lib/tgdb
 
 cgdb_LDADD = \
-    $(top_builddir)/lib/tgdb/tgdb-base/libtgdb.a \
-    $(top_builddir)/lib/tgdb/annotate-two/libtgdb_a2.a \
+    $(top_builddir)/lib/tgdb/libtgdb.a \
     $(top_builddir)/lib/tokenizer/libtokenizer.a \
     $(top_builddir)/lib/kui/libkui.a \
     $(top_builddir)/lib/rline/librline.a \

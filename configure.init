@@ -253,8 +253,6 @@ AC_OUTPUT(
     lib/kui/Makefile \
     lib/rline/Makefile \
     lib/tgdb/Makefile \
-    lib/tgdb/annotate-two/Makefile \
-    lib/tgdb/tgdb-base/Makefile \
     lib/tokenizer/Makefile \
     lib/util/Makefile \
     doc/Makefile \
