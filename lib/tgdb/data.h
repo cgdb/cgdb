@@ -11,7 +11,6 @@
 #define __DATA_H__
 
 #include "tgdb_types.h"
-#include "tgdb_command.h"
 #include "annotate_two.h"
 
     struct data;

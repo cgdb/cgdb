@@ -24,7 +24,7 @@
 #endif
 
 #include "tgdb.h"
-#include "tgdb_command.h"
+#include "commands.h"
 #include "fs_util.h"
 #include "ibuf.h"
 #include "io.h"
@@ -1102,6 +1102,7 @@ tgdb_process_info_sources(struct tgdb *tgdb, tgdb_request_ptr request)
     int ret;
 
     ret = a2_get_inferior_sources(tgdb->tcc);
+
     tgdb_process_client_commands(tgdb);
 
     return ret;

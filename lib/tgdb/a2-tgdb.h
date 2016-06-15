@@ -10,7 +10,6 @@
 #endif /* HAVE_SYS_TYPES_H */
 
 #include "tgdb_types.h"
-#include "tgdb_command.h"
 #include "logger.h"
 
 /*! \file

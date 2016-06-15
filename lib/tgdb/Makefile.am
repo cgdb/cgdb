@@ -9,7 +9,6 @@ noinst_LIBRARIES = libtgdb.a
 libtgdb_a_SOURCES = \
     tgdb.cpp \
     tgdb.h \
-    tgdb_command.cpp \
     tgdb_command.h \
     tgdb_types.cpp \
     tgdb_types.h \
