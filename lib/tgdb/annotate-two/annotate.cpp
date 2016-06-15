@@ -133,18 +133,17 @@ static int handle_quit(struct annotate_two *a2, const char *buf, size_t n,
 static int handle_exited(struct annotate_two *a2, const char *buf, size_t n,
         struct tgdb_list *list)
 {
-    char *tmp = (char *) malloc(sizeof (char) * (n + 1));
-    int *i = (int *) malloc(sizeof (int));
+    int exit_status;
     struct tgdb_response *response;
 
-    sprintf(tmp, "%s", buf + 7);    /* Skip the 'exited ' part */
-    *i = atoi(tmp);
-    free(tmp);
-    tmp = NULL;
+    // Buf should be something like:
+    //    "exited 0"
+    exit_status = (n >= 7) ? atoi(buf + 7) : -1;
+
     response = (struct tgdb_response *)
             cgdb_malloc(sizeof (struct tgdb_response));
     response->header = TGDB_INFERIOR_EXITED;
-    response->choice.inferior_exited.exit_status = i;
+    response->choice.inferior_exited.exit_status = exit_status;
     tgdb_types_append_command(list, response);
     return 0;
 }

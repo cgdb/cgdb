@@ -369,7 +369,7 @@
 
             /* header == TGDB_INFERIOR_EXITED */
             struct {
-                int *exit_status;
+                int exit_status;
             } inferior_exited;
 
             /* header == TGDB_UPDATE_COMPLETIONS */
