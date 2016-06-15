@@ -25,11 +25,11 @@
 
 #include "tgdb.h"
 #include "tgdb_command.h"
-#include "tgdb_client_interface.h"
 #include "fs_util.h"
 #include "ibuf.h"
 #include "io.h"
 #include "queue.h"
+#include "a2-tgdb.h"
 
 #include "pseudo.h"             /* SLAVE_SIZE constant */
 #include "fork_util.h"
@@ -49,7 +49,7 @@ static int num_loggers = 0;
 struct tgdb {
 
   /** A client context to abstract the debugger.  */
-    struct tgdb_client_context *tcc;
+    struct annotate_two *tcc;
 
   /** Reading from this will read from the debugger's output */
     int debugger_stdout;
@@ -171,7 +171,7 @@ static int tgdb_process_client_commands(struct tgdb *tgdb)
     tgdb_list_iterator *iterator;
     struct tgdb_command *command;
 
-    client_command_list = tgdb_client_get_client_commands(tgdb->tcc);
+    client_command_list = a2_get_client_commands(tgdb->tcc);
     iterator = tgdb_list_get_first(client_command_list);
 
     while (iterator) {
@@ -319,17 +319,17 @@ struct tgdb *tgdb_initialize(const char *debugger,
     tgdb->gdb_input_queue = queue_init();
     tgdb->oob_input_queue = queue_init();
 
-    tgdb->tcc = tgdb_client_create_context(debugger, argc, argv, config_dir,
+    tgdb->tcc = a2_create_context(debugger, argc, argv, config_dir,
             logger);
 
     /* create an instance and initialize a tgdb_client_context */
     if (tgdb->tcc == NULL) {
         logger_write_pos(logger, __FILE__, __LINE__,
-                "tgdb_client_create_context failed");
+                "a2_create_context failed");
         return NULL;
     }
 
-    if (tgdb_client_initialize_context(tgdb->tcc,
+    if (a2_initialize(tgdb->tcc,
                     &(tgdb->debugger_stdin),
                     &(tgdb->debugger_stdout),
                     &(tgdb->inferior_stdin), &(tgdb->inferior_stdout)) == -1) {
@@ -357,7 +357,7 @@ int tgdb_shutdown(struct tgdb *tgdb)
 
     --num_loggers;
 
-    return tgdb_client_destroy_context(tgdb->tcc);
+    return a2_shutdown(tgdb->tcc);
 }
 
 /* }}}*/
@@ -370,13 +370,13 @@ void command_completion_callback(struct tgdb *tgdb)
 static const char *tgdb_get_client_command(struct tgdb *tgdb,
         enum tgdb_command_type c)
 {
-    return tgdb_client_return_command(tgdb->tcc, c);
+    return a2_return_client_command(tgdb->tcc, c);
 }
 
 static char *tgdb_client_modify_breakpoint_call(struct tgdb *tgdb,
         const char *file, int line, enum tgdb_breakpoint_action b)
 {
-    return tgdb_client_modify_breakpoint(tgdb->tcc, file, line, b);
+    return a2_client_modify_breakpoint(tgdb->tcc, file, line, b);
 }
 
 /* These functions are used to determine the state of libtgdb */
@@ -391,7 +391,7 @@ static char *tgdb_client_modify_breakpoint_call(struct tgdb *tgdb,
 static int tgdb_can_issue_command(struct tgdb *tgdb)
 {
     if (tgdb->IS_SUBSYSTEM_READY_FOR_NEXT_COMMAND &&
-            tgdb_client_is_client_ready(tgdb->tcc) &&
+            a2_is_client_ready(tgdb->tcc) &&
             (queue_size(tgdb->gdb_input_queue) == 0))
         return 1;
 
@@ -406,7 +406,7 @@ static int tgdb_can_issue_command(struct tgdb *tgdb)
  */
 static int tgdb_has_command_to_run(struct tgdb *tgdb)
 {
-    if (tgdb_client_is_client_ready(tgdb->tcc) &&
+    if (a2_is_client_ready(tgdb->tcc) &&
             ((queue_size(tgdb->gdb_input_queue) > 0) ||
                     (queue_size(tgdb->oob_input_queue) > 0)))
         return 1;
@@ -517,7 +517,7 @@ tgdb_send(struct tgdb *tgdb, const char *command,
         return -1;
     }
 
-    if (tgdb_client_tgdb_ran_command(tgdb->tcc) == -1) {
+    if (a2_user_ran_command(tgdb->tcc) == -1) {
         logger_write_pos(logger, __FILE__, __LINE__,
                 "tgdb_client_tgdb_ran_command failed");
         return -1;
@@ -597,7 +597,7 @@ static int tgdb_deliver_command(struct tgdb *tgdb, struct tgdb_command *command)
     tgdb->IS_SUBSYSTEM_READY_FOR_NEXT_COMMAND = 0;
 
     /* A command for the debugger */
-    if (tgdb_client_prepare_for_command(tgdb->tcc, command) == -1)
+    if (a2_prepare_for_command(tgdb->tcc, command) == -1)
         return -1;
 
     /* A regular command from the client */
@@ -655,7 +655,7 @@ static int tgdb_unqueue_and_deliver_command(struct tgdb *tgdb)
         /* If at the misc prompt, don't run the internal tgdb commands,
          * In fact throw them out for now, since they are only 
          * 'info breakpoints' */
-        if (tgdb_client_can_tgdb_run_commands(tgdb->tcc) == 1) {
+        if (a2_is_misc_prompt(tgdb->tcc) == 1) {
             if (item->command_choice != TGDB_COMMAND_CONSOLE) {
                 tgdb_command_destroy(item);
                 goto tgdb_unqueue_and_deliver_command_tag;
@@ -763,7 +763,7 @@ static int tgdb_add_quit_command(struct tgdb *tgdb)
  */
 static int tgdb_get_quit_command(struct tgdb *tgdb, int *tgdb_will_quit)
 {
-    pid_t pid = tgdb_client_get_debugger_pid(tgdb->tcc);
+    pid_t pid = a2_get_debugger_pid(tgdb->tcc);
     int status = 0;
     pid_t ret;
     struct tgdb_debugger_exit_status *tstatus;
@@ -871,7 +871,7 @@ size_t tgdb_process(struct tgdb * tgdb, char *buf, size_t n, int *is_finished)
         size_t infbuf_size;
         int result;
 
-        result = tgdb_client_parse_io(tgdb->tcc,
+        result = a2_parse_io(tgdb->tcc,
                 local_buf, size,
                 buf, &buf_size, infbuf, &infbuf_size, tgdb->command_list);
 
@@ -884,7 +884,7 @@ size_t tgdb_process(struct tgdb * tgdb, char *buf, size_t n, int *is_finished)
             command_completion_callback(tgdb);
         } else if (result == -1) {
             logger_write_pos(logger, __FILE__, __LINE__,
-                    "tgdb_client_parse_io failed");
+                    "a2_parse_io failed");
         }
     }
 
@@ -947,7 +947,7 @@ void tgdb_delete_responses(struct tgdb *tgdb)
 
 int tgdb_tty_new(struct tgdb *tgdb)
 {
-    int ret = tgdb_client_open_new_tty(tgdb->tcc,
+    int ret = a2_open_new_tty(tgdb->tcc,
             &tgdb->inferior_stdin,
             &tgdb->inferior_stdout);
 
@@ -963,7 +963,7 @@ int tgdb_get_inferior_fd(struct tgdb *tgdb)
 
 const char *tgdb_tty_name(struct tgdb *tgdb)
 {
-    return tgdb_client_get_tty_name(tgdb->tcc);
+    return a2_get_tty_name(tgdb->tcc);
 }
 
 /* }}}*/
@@ -1101,7 +1101,7 @@ tgdb_process_info_sources(struct tgdb *tgdb, tgdb_request_ptr request)
 {
     int ret;
 
-    ret = tgdb_client_get_inferior_source_files(tgdb->tcc);
+    ret = a2_get_inferior_sources(tgdb->tcc);
     tgdb_process_client_commands(tgdb);
 
     return ret;
@@ -1112,7 +1112,7 @@ tgdb_process_current_location(struct tgdb *tgdb, tgdb_request_ptr request)
 {
     int ret = 0;
 
-    ret = tgdb_client_get_current_location(tgdb->tcc);
+    ret = a2_get_current_location(tgdb->tcc);
     tgdb_process_client_commands(tgdb);
 
     return ret;
@@ -1152,7 +1152,7 @@ static int tgdb_process_complete(struct tgdb *tgdb, tgdb_request_ptr request)
 {
     int ret;
 
-    ret = tgdb_client_completion_callback(tgdb->tcc,
+    ret = a2_completion_callback(tgdb->tcc,
             request->choice.complete.line);
     tgdb_process_client_commands(tgdb);
 
@@ -1163,8 +1163,7 @@ static int tgdb_process_disassemble_pc(struct tgdb *tgdb, tgdb_request_ptr reque
 {
     int ret;
 
-    ret = tgdb_client_disassemble_pc(
-        tgdb->tcc, request->choice.disassemble.lines);
+    ret = a2_disassemble_pc(tgdb->tcc, request->choice.disassemble.lines);
     tgdb_process_client_commands(tgdb);
 
     return ret;
@@ -1174,7 +1173,7 @@ static int tgdb_process_disassemble_func(struct tgdb *tgdb, tgdb_request_ptr req
 {
     int ret;
 
-    ret = tgdb_client_disassemble_func(tgdb->tcc,
+    ret = a2_disassemble_func(tgdb->tcc,
         request->choice.disassemble_func.raw,
         request->choice.disassemble_func.source,
         request->choice.disassemble_func.file,
