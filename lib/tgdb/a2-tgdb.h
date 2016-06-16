@@ -158,19 +158,6 @@ int a2_shutdown(struct annotate_two *a2);
 /*@{*/
 
 /** 
- * Returns the last error message ?
- * Not implemented yet.
- * What should it return? How should errors be handled?
- *
- * \param ctx
- * The annotate two context.
- *
- * @return
- * 0 on success, otherwise -1 on error.
- */
-int a2_err_msg(struct annotate_two *a2);
-
-/** 
  * This determines if the annotate two context is ready to receive
  * another command.
  *

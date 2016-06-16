@@ -258,12 +258,6 @@ int a2_shutdown(struct annotate_two *a2)
     return 0;
 }
 
-/* TODO: Implement error messages. */
-int a2_err_msg(struct annotate_two *a2)
-{
-    return -1;
-}
-
 int a2_is_client_ready(struct annotate_two *a2)
 {
     if (!a2->tgdb_initialized)
