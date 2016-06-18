@@ -66,20 +66,6 @@ static int is_tab_completing = 0;
 /* Original terminal attributes */
 static struct termios term_attributes;
 
-/* Run or queue a TGDB command */
-static int handle_request(struct tgdb *tgdb_in, struct tgdb_request *request)
-{
-    if (!tgdb_in || !request)
-        return -1;
-
-    if (tgdb_is_busy(tgdb_in))
-        tgdb_queue_append(tgdb_in, request);
-    else
-        tgdb_process_command(tgdb_in, request);
-
-    return 0;
-}
-
 static void change_prompt(char *prompt)
 {
     rline_set_prompt(rline, prompt);
@@ -87,8 +73,6 @@ static void change_prompt(char *prompt)
 
 static void rlctx_send_user_command(char *line)
 {
-    tgdb_request_ptr request_ptr;
-
     /* This happens when rl_callback_read_char gets EOF */
     if (line == NULL)
         return;
@@ -98,12 +82,7 @@ static void rlctx_send_user_command(char *line)
         rline_add_history(rline, line);
 
     /* Send this command to TGDB */
-    request_ptr = tgdb_request_run_console_command(tgdb, line);
-    if (!request_ptr)
-        logger_write_pos(logger, __FILE__, __LINE__,
-                "rlctx_send_user_command\n");
-
-    handle_request(tgdb, request_ptr);
+    tgdb_request_run_console_command(tgdb, line);
 
     free(line);
 }
@@ -112,7 +91,6 @@ static int tab_completion(int a, int b)
 {
     char *cur_line;
     int ret;
-    tgdb_request_ptr request_ptr;
 
     is_tab_completing = 1;
 
@@ -121,12 +99,7 @@ static int tab_completion(int a, int b)
         logger_write_pos(logger, __FILE__, __LINE__,
                 "rline_get_current_line error\n");
 
-    request_ptr = tgdb_request_complete(tgdb, cur_line);
-    if (!request_ptr)
-        logger_write_pos(logger, __FILE__, __LINE__,
-                "tgdb_request_complete error\n");
-
-    handle_request(tgdb, request_ptr);
+    tgdb_request_complete(tgdb, cur_line);
     return 0;
 }
 

@@ -315,11 +315,8 @@
    *
    * \param command
    * The null terminated command to pass to GDB as a console command.
-   * 
-   * \return
-   * Will return as a tgdb request command on success, otherwise NULL.
    */
-    tgdb_request_ptr tgdb_request_run_console_command(struct tgdb *tgdb,
+    void tgdb_request_run_console_command(struct tgdb *tgdb,
             const char *command);
 
   /**
@@ -327,25 +324,8 @@
    *
    * \param tgdb
    * An instance of the tgdb library to operate on.
-   *
-   * \return
-   * Will return as a tgdb request command on success, otherwise NULL.
    */
-    tgdb_request_ptr tgdb_request_inferiors_source_files(struct tgdb *tgdb);
-
-  /**
-   * This will ask the debugger for it's current file and line number.
-   * It will return to the caller a tgdb_response with the 
-   * response->update_source_files set. This is the same response you 
-   * will get when TGDB asynchronously sends the update_file_postition.
-   *
-   * \param tgdb
-   * An instance of the tgdb library to operate on.
-   * 
-   * \return
-   * Will return as a tgdb request command on success, otherwise NULL.
-   */
-    tgdb_request_ptr tgdb_request_current_location(struct tgdb *tgdb);
+   void tgdb_request_inferiors_source_files(struct tgdb *tgdb);
 
   /**
    * This tells libtgdb to run a command through the debugger.
@@ -355,11 +335,8 @@
    *
    * \param c
    * This is the command that libtgdb should run through the debugger.
-   *
-   * @return
-   * Will return as a tgdb request command on success, otherwise NULL.
    */
-    tgdb_request_ptr tgdb_request_run_debugger_command(struct tgdb *tgdb,
+    void tgdb_request_run_debugger_command(struct tgdb *tgdb,
             enum tgdb_command_type c);
 
   /**
@@ -380,7 +357,7 @@
    * @return
    * Will return as a tgdb request command on success, otherwise NULL.
    */
-    tgdb_request_ptr tgdb_request_modify_breakpoint(struct tgdb *tgdb,
+    void tgdb_request_modify_breakpoint(struct tgdb *tgdb,
             const char *file, int line, enum tgdb_breakpoint_action b);
 
   /**
@@ -391,11 +368,8 @@
    *
    * \param line
    * The line to tab complete.
-   *
-   * \return
-   * Will return as a tgdb request command on success, otherwise NULL.
    */
-    tgdb_request_ptr tgdb_request_complete(struct tgdb *tgdb, const char *line);
+    void tgdb_request_complete(struct tgdb *tgdb, const char *line);
 
     
     /**
@@ -407,23 +381,20 @@
      * \param lines
      * The number of lines to disassemble after the pc.
      */
-    tgdb_request_ptr tgdb_request_disassemble_pc(struct tgdb *tgdb, int lines);
+    void tgdb_request_disassemble_pc(struct tgdb *tgdb, int lines);
 
   /**
    * Used to get disassembly for function.
    *
    * \param tgdb
    * An instance of the tgdb library to operate on.
-   *
-   * \return
-   * Will return as a tgdb request command on success, otherwise NULL.
    */
     enum disassemble_func_type {
         DISASSEMBLE_FUNC_DISASSEMBLY,
         DISASSEMBLE_FUNC_SOURCE_LINES,
         DISASSEMBLE_FUNC_RAW_INSTRUCTIONS,
     };
-    tgdb_request_ptr tgdb_request_disassemble_func(struct tgdb *tgdb,
+    void tgdb_request_disassemble_func(struct tgdb *tgdb,
             enum disassemble_func_type type, const char *file, const char *function);
 
   /**
@@ -433,6 +404,10 @@
    * Request pointer from tgdb_request_* function to destroy.
    */
     void tgdb_request_destroy(tgdb_request_ptr request_ptr);
+
+    struct tgdb_request *tgdb_get_last_request();
+    void tgdb_set_last_request(struct tgdb_request *request);
+    int tgdb_does_request_require_console_update(struct tgdb_request *request);
 
 /*@}*/
 /* }}}*/

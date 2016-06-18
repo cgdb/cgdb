@@ -447,8 +447,6 @@ void commands_shutdown(struct commands *c)
     if (c == NULL)
         return;
 
-    tgdb_list_destroy(c->tab_completions);
-
     /* TODO: free source_files queue */
 
     gdbwire_destroy(c->wire);
@@ -523,6 +521,7 @@ commands_prepare_for_command(struct annotate_two *a2,
         case ANNOTATE_TTY:
             break;              /* Nothing to do */
         case ANNOTATE_COMPLETE:
+            c->tab_completions = tgdb_list_init();
             commands_set_state(c, COMMAND_COMPLETE);
             io_debug_write_fmt("<%s\n>", com->tgdb_command_data);
             break;

@@ -99,7 +99,6 @@ const char *readline_history_filename = "readline_history.txt";
 /* --------------- */
 
 struct tgdb *tgdb;              /* The main TGDB context */
-struct tgdb_request *last_request = NULL;
 
 char cgdb_home_dir[MAXLINE];    /* Path to home directory with trailing slash */
 char *readline_history_path;    /* After readline init is called, this will 
@@ -305,35 +304,6 @@ static int is_gdb_tui_command(const char* line)
 }
 
 /**
- * If the TGDB instance is not busy, it will run the requested command.
- * Otherwise, the command will get queued to run later.
- *
- * \param tgdb_in
- * An instance of the tgdb library to operate on.
- *
- * \param request
- * The requested command to have TGDB process.
- *
- * \return
- * 0 on success or -1 on error
- */
-int handle_request(struct tgdb *tgdb_in, struct tgdb_request *request)
-{
-    if (!tgdb_in || !request)
-        return -1;
-
-    if (tgdb_is_busy(tgdb_in)) {
-        tgdb_queue_append(tgdb_in, request);
-    } else {
-        tgdb_request_destroy(last_request);
-        last_request = request;
-        tgdb_process_command(tgdb_in, request);
-    }
-
-    return 0;
-}
-
-/**
  * Runs a command in the shell.  The shell may be interactive, and CGDB
  * will be paused for the duration of the shell.  Any leading stuff, like
  * 'shell ' or '!' should be removed prior to calling this function.
@@ -403,7 +373,6 @@ void rlctx_send_user_command(char *line)
     const char *cline;
     int length;
     char *rline_prompt;
-    tgdb_request_ptr request_ptr;
 
     if (line == NULL) {
         /* NULL line means rl_callback_read_char received EOF */
@@ -461,13 +430,8 @@ void rlctx_send_user_command(char *line)
         rline_clear(rline);
         rline_rl_forced_update_display(rline);
     } else {
-        request_ptr = tgdb_request_run_console_command(tgdb, cline);
-        if (!request_ptr)
-            logger_write_pos(logger, __FILE__, __LINE__,
-                    "rlctx_send_user_command\n");
-
         /* Send this command to TGDB */
-        handle_request(tgdb, request_ptr);
+        tgdb_request_run_console_command(tgdb, cline);
     }
 
     ibuf_clear(current_line);
@@ -479,7 +443,6 @@ static int tab_completion(int a, int b)
 {
     char *cur_line;
     int ret;
-    tgdb_request_ptr request_ptr;
 
     is_tab_completing = 1;
 
@@ -488,12 +451,7 @@ static int tab_completion(int a, int b)
         logger_write_pos(logger, __FILE__, __LINE__,
                 "rline_get_current_line error\n");
 
-    request_ptr = tgdb_request_complete(tgdb, cur_line);
-    if (!request_ptr)
-        logger_write_pos(logger, __FILE__, __LINE__,
-                "tgdb_request_complete error\n");
-
-    handle_request(tgdb, request_ptr);
+    tgdb_request_complete(tgdb, cur_line);
     return 0;
 }
 
@@ -1056,12 +1014,9 @@ static void process_commands(struct tgdb *tgdb_in)
                     if (!ret) {
                         if_draw();
                     } else if (sview->addr_frame) {
-                        tgdb_request_ptr request_ptr;
-
                         /* No disasm found - request it */
-                        request_ptr = tgdb_request_disassemble_func(tgdb,
+                        tgdb_request_disassemble_func(tgdb,
                             DISASSEMBLE_FUNC_SOURCE_LINES, NULL, NULL);
-                        handle_request(tgdb, request_ptr);
                     }
                 }
 
@@ -1131,14 +1086,11 @@ static void process_commands(struct tgdb *tgdb_in)
             case TGDB_DISASSEMBLE_FUNC:
             {
                 if (item->choice.disassemble_function.error) {
-                    tgdb_request_ptr request_ptr;
-
                     //$ TODO mikesart: Get module name in here somehow? Passed in when calling tgdb_request_disassemble?
                     //      or info sharedlibrary?
                     //$ TODO mikesart: Need way to make sure we don't recurse here on error.
                     //$ TODO mikesart: 100 lines? Way to load more at end?
-                    request_ptr = tgdb_request_disassemble_pc(tgdb, 100);
-                    handle_request(tgdb, request_ptr);
+                    tgdb_request_disassemble_pc(tgdb, 100);
                 } else {
                     uint64_t addr_start = item->choice.disassemble_function.addr_start;
                     uint64_t addr_end = item->choice.disassemble_function.addr_end;
@@ -1223,46 +1175,6 @@ static void process_commands(struct tgdb *tgdb_in)
     tgdb_delete_responses(tgdb);
 }
 
-/**
- * This function looks at the request that CGDB has made and determines if it 
- * effects the GDB console window. For instance, if the request makes output go
- * to that window, then the user would like to see another prompt there when the 
- * command finishes. However, if the command is 'o', to get all the sources and 
- * display them, then this doesn't effect the GDB console window and the window
- * should not redisplay the prompt.
- *
- * \param request
- * The request to analysize
- *
- * \param update
- * Will return as 1 if the console window should be updated, or 0 otherwise
- *
- * \return
- * 0 on success or -1 on error
- */
-static int
-does_request_require_console_update(struct tgdb_request *request)
-{
-    switch (request->header) {
-        case TGDB_REQUEST_CONSOLE_COMMAND:
-            return 1;
-            break;
-        case TGDB_REQUEST_INFO_SOURCES:
-        case TGDB_REQUEST_CURRENT_LOCATION:
-        case TGDB_REQUEST_DISASSEMBLE_PC:
-        case TGDB_REQUEST_DISASSEMBLE_FUNC:
-            return 0;
-            break;
-        case TGDB_REQUEST_DEBUGGER_COMMAND:
-        case TGDB_REQUEST_MODIFY_BREAKPOINT:
-        case TGDB_REQUEST_COMPLETE:
-            return 1;
-            break;
-        default:
-            return -1;
-    }
-}
-
 /* gdb_input: Receives data from tgdb:
  *
  *  Returns:  -1 on error, 0 on success
@@ -1329,8 +1241,6 @@ static int gdb_input()
                 if_print("\n");
             }
 
-            tgdb_request_destroy(last_request);
-            last_request = request;
             tgdb_process_command(tgdb, request);
 
             /* This is the first case */
@@ -1338,12 +1248,11 @@ static int gdb_input()
       /** If the user is currently completing, do not update the prompt */
         else if (!completion_ptr) {
             int update = 1;
+            struct tgdb_request *last_request = tgdb_get_last_request();
 
             if (last_request) {
-                update = does_request_require_console_update(last_request);
-
-                tgdb_request_destroy(last_request);
-                last_request = NULL;
+                update = tgdb_does_request_require_console_update(last_request);
+                tgdb_set_last_request(NULL);
             }
 
             if (update)

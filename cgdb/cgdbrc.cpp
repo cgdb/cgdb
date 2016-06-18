@@ -590,13 +590,7 @@ int command_do_bang(int param)
 
 int command_do_tgdbcommand(enum tgdb_command_type param)
 {
-    tgdb_request_ptr request_ptr;
-
-    request_ptr = tgdb_request_run_debugger_command(tgdb, param);
-    if (!request_ptr)
-        return -1;
-    handle_request(tgdb, request_ptr);
-
+    tgdb_request_run_debugger_command(tgdb, param);
     return 0;
 }
 
@@ -783,12 +777,9 @@ int command_do_disassemble(int param)
     if (!ret) {
         if_draw();
     } else if (sview->addr_frame) {
-        tgdb_request_ptr request_ptr;
-
         /* No disasm found - request it */
-        request_ptr = tgdb_request_disassemble_func(tgdb,
+        tgdb_request_disassemble_func(tgdb,
                 DISASSEMBLE_FUNC_SOURCE_LINES, NULL, NULL);
-        handle_request(tgdb, request_ptr);
     }
 
     return 0;

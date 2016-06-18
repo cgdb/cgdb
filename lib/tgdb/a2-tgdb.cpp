@@ -367,44 +367,32 @@ int a2_get_inferior_sources(struct annotate_two *a2)
 
 const char *a2_return_client_command(struct annotate_two *a2, enum tgdb_command_type c)
 {
-    const char *ret = NULL;
-
     switch (c) {
         case TGDB_CONTINUE:
-            ret = "continue";
-            break;
+            return "continue";
         case TGDB_FINISH:
-            ret = "finish";
-            break;
+            return "finish";
         case TGDB_NEXT:
-            ret = "next";
-            break;
+            return "next";
         case TGDB_START:
-            ret = "start";
-            break;
+            return "start";
         case TGDB_RUN:
-            ret = "run";
-            break;
+            return "run";
         case TGDB_KILL:
-            ret = "kill";
-            break;
+            return "kill";
         case TGDB_STEP:
-            ret = "step";
-            break;
+            return "step";
         case TGDB_UNTIL:
-            ret = "until";
-            break;
+            return "until";
         case TGDB_UP:
-            ret = "up";
-            break;
+            return "up";
         case TGDB_DOWN:
-            ret = "down";
-            break;
+            return "down";
         case TGDB_ERROR:
             break;
     }
 
-    return ret;
+    return NULL;
 }
 
 char *a2_client_modify_breakpoint(struct annotate_two *a2,

@@ -61,7 +61,6 @@ enum win_refresh {
  */
 struct tgdb;
 struct tgdb_request;
-int handle_request(struct tgdb *tgdb, struct tgdb_request *request);
 
 void cleanup();
 

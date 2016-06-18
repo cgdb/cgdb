@@ -1029,7 +1029,6 @@ toggle_breakpoint(struct sviewer *sview, enum tgdb_breakpoint_action t)
 {
     char *path;
     int line;
-    tgdb_request_ptr request_ptr;
 
     if (!sview || !sview->cur || !sview->cur->path)
         return 0;
@@ -1045,12 +1044,7 @@ toggle_breakpoint(struct sviewer *sview, enum tgdb_breakpoint_action t)
     if (sview->cur->lflags[line].breakpt)
         t = TGDB_BREAKPOINT_DELETE;
 
-    request_ptr = tgdb_request_modify_breakpoint(tgdb, path, line + 1, t);
-    if (!request_ptr)
-        return -1;
-
-    handle_request(tgdb, request_ptr);
-
+    tgdb_request_modify_breakpoint(tgdb, path, line + 1, t);
     return 0;
 }
 
@@ -1129,10 +1123,8 @@ static void source_input(struct sviewer *sview, int key)
             extern int kui_input_acceptable;
 
             kui_input_acceptable = 0;
-            tgdb_request_ptr request_ptr;
 
-            request_ptr = tgdb_request_inferiors_source_files(tgdb);
-            handle_request(tgdb, request_ptr);
+            tgdb_request_inferiors_source_files(tgdb);
         }
             break;
         case ' ':
@@ -1352,55 +1344,22 @@ static int cgdb_input(int key, int *last_key)
             return 0;
         case CGDB_KEY_F5:
             /* Issue GDB run command */
-        {
-            tgdb_request_ptr request_ptr;
-
-            request_ptr =
-                    tgdb_request_run_debugger_command(tgdb, TGDB_RUN);
-            handle_request(tgdb, request_ptr);
-        }
+            tgdb_request_run_debugger_command(tgdb, TGDB_RUN);
             return 0;
         case CGDB_KEY_F6:
             /* Issue GDB continue command */
-        {
-            tgdb_request_ptr request_ptr;
-
-            request_ptr =
-                    tgdb_request_run_debugger_command(tgdb,
-                                                      TGDB_CONTINUE);
-            handle_request(tgdb, request_ptr);
-        }
+            tgdb_request_run_debugger_command(tgdb, TGDB_CONTINUE);
             return 0;
         case CGDB_KEY_F7:
             /* Issue GDB finish command */
-        {
-            tgdb_request_ptr request_ptr;
-
-            request_ptr =
-                    tgdb_request_run_debugger_command(tgdb,
-                                                      TGDB_FINISH);
-            handle_request(tgdb, request_ptr);
-        }
+            tgdb_request_run_debugger_command(tgdb, TGDB_FINISH);
             return 0;
         case CGDB_KEY_F8:
             /* Issue GDB next command */
-        {
-            tgdb_request_ptr request_ptr;
-
-            request_ptr =
-                    tgdb_request_run_debugger_command(tgdb, TGDB_NEXT);
-            handle_request(tgdb, request_ptr);
-        }
-            return 0;
+            tgdb_request_run_debugger_command(tgdb, TGDB_NEXT);
         case CGDB_KEY_F10:
             /* Issue GDB step command */
-        {
-            tgdb_request_ptr request_ptr;
-
-            request_ptr =
-                    tgdb_request_run_debugger_command(tgdb, TGDB_STEP);
-            handle_request(tgdb, request_ptr);
-        }
+            tgdb_request_run_debugger_command(tgdb, TGDB_STEP);
             return 0;
         case CGDB_KEY_CTRL_L:
             if_layout();
