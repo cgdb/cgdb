@@ -20,10 +20,8 @@
 
 /* Local includes */
 #include "commands.h"
-#include "data.h"
 #include "io.h"
 #include "tgdb_types.h"
-#include "globals.h"
 #include "logger.h"
 #include "sys_util.h"
 #include "queue.h"
@@ -33,6 +31,7 @@
 #include "tgdb_list.h"
 #include "annotate_two.h"
 #include "gdbwire.h"
+#include "state_machine.h"
 
 /**
  * This structure represents most of the I/O parsing state of the 

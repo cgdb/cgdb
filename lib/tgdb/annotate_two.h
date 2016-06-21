@@ -12,53 +12,32 @@
 #include "fs_util.h"
 #include "fork_util.h"          /* For pty_pair_ptr */
 
-/**
- * This is the main context for the annotate two subsytem.
- */
+/** This is the main context for the annotate two subsytem. */
 struct annotate_two {
 
-    /** 
-	 * This is set when this context has initialized itself
-	 */
+    /**  This is set when this context has initialized itself */
     int tgdb_initialized;
 
-    /** 
-	 * writing to this will write to the stdin of the debugger
-	 */
+    /** writing to this will write to the stdin of the debugger */
     int debugger_stdin;
 
-    /**
-     * Reading from reads the stdout/stderr of the debugger
-	 */
+    /** Reading from reads the stdout/stderr of the debugger */
     int debugger_out;
 
     /** The master, slave and slavename of the pty device */
     pty_pair_ptr pty_pair;
 
-    /** 
-	 * pid of child process.
-	 */
+    /** pid of child process. */
     pid_t debugger_pid;
 
-    /**
-	 * ???
-	 */
+    /** Marks whether gdb command has finished. Ie, at gdb prompt or not. */
     int command_finished;
 
-    /** 
-	 * The config directory that this context can write too.
-	 */
+    /** The config directory that this context can write too. */
     char config_dir[FSUTIL_PATH_MAX];
 
-    /**
-	 * The init file for the debugger.
-	 */
+    /** The init file for the debugger. */
     char a2_gdb_init_file[FSUTIL_PATH_MAX];
-
-    /** 
-	 * This represents the data subsystem
-	 */
-    struct data *data;
 
     /** 
 	 * This module is used for parsing the output of gdb for annotate 2 
@@ -71,19 +50,10 @@ struct annotate_two {
 	 */
     struct commands *c;
 
-    /** 
-	 * This module is used for keeping shared global data
-	 */
-    struct globals *g;
-
-    /** 
-	 * This is a list of all the commands generated since in the last call. 
-	 */
+    /** This is a list of all the commands generated since in the last call.  */
     struct tgdb_list *client_command_list;
 
-    /**
-	 * The current response list.
-	 */
+    /** The current response list. */
     struct tgdb_list *cur_response_list;
 
     /**

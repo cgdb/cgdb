@@ -83,22 +83,16 @@
      */
         TGDB_NEXT,
 
-    /** 
-     * This will instruct TGDB to tell the debugger to (re-)start the program. 
-     */
+    /** This will instruct TGDB to tell the debugger to (re-)start the program. */
         TGDB_START,
 
-    /** 
-     * This will instruct TGDB to tell the debugger to (re-)run the program.
-     */
+    /** This will instruct TGDB to tell the debugger to (re-)run the program. */
         TGDB_RUN,
 
-    /** 
-     * This will instruct TGDB to tell the debugger to kill the program.
-     */
+    /** This will instruct TGDB to tell the debugger to kill the program. */
         TGDB_KILL,
 
-    /** This will instruct TGDB to tell the debugger to step.  */
+    /** This will instruct TGDB to tell the debugger to step. */
         TGDB_STEP,
 
     /** 
@@ -108,15 +102,13 @@
      */
         TGDB_UNTIL,
 
-    /** This will instruct TGDB to tell the debugger to go up a frame.  */
+    /** This will instruct TGDB to tell the debugger to go up a frame. */
         TGDB_UP,
 
-    /** This will instruct TGDB to tell the debugger to go down a frame.  */
+    /** This will instruct TGDB to tell the debugger to go down a frame. */
         TGDB_DOWN,
 
-    /** 
-     * Hmmm. This is probably bad :). Actually, I can't remember why its here.
-     */
+    /** Hmmm. This is probably bad :). Actually, I can't remember why its here. */
         TGDB_ERROR
     };
 
@@ -126,19 +118,17 @@
   */
     enum tgdb_breakpoint_action {
 
-    /** Add a breakpoint.  */
+    /** Add a breakpoint. */
         TGDB_BREAKPOINT_ADD,
 
     /** Add a temporary breakpoint */
         TGDB_TBREAKPOINT_ADD,
 
-    /** Delete a breakpoint.  */
+    /** Delete a breakpoint. */
         TGDB_BREAKPOINT_DELETE,
     };
 
- /**
-  * This structure represents a breakpoint.
-  */
+ /** This structure represents a breakpoint. */
     struct tgdb_breakpoint {
 
     /** This is the file that the breakpoint is set in. */
@@ -147,10 +137,10 @@
     /** This is the fullname to the file that the breakpoint is set in. */
         char *fullname;
 
-    /** The line number where the breakpoint is set.  */
+    /** The line number where the breakpoint is set. */
         int line;
 
-    /** 0 if it is not enabled or 1 if it is enabled.  */
+    /** 0 if it is not enabled or 1 if it is enabled. */
         int enabled;
     };
 
@@ -198,16 +188,14 @@
      */
         int exit_status;
 
-    /**
-     * This is the return value of the debugger upon normal termination.
-     */
+    /** This is the return value of the debugger upon normal termination. */
         int return_value;
     };
 
     enum INTERFACE_REQUEST_COMMANDS {
     /** Request for TGDB to run a console command through the debugger */
         TGDB_REQUEST_CONSOLE_COMMAND,
-    /** 
+    /**
      * Request for TGDB to get all of the source files that the debugger 
      * currently knows about the inferior. */
         TGDB_REQUEST_INFO_SOURCES,

@@ -28,6 +28,27 @@ struct state_machine;
 struct state_machine *state_machine_initialize(void);
 void state_machine_shutdown(struct state_machine *sm);
 
+enum internal_state {
+    VOID,                   /* not interesting */
+    AT_PROMPT,              /* the prompt is being displayed */
+    USER_AT_PROMPT,         /* the user is typing at prompt */
+    POST_PROMPT,            /* the user is done at the prompt */
+    USER_COMMAND,           /* this is a command issued by the user */
+    GUI_COMMAND,            /* this is a command issued to gdb by tgdb (not
+    the user) */
+    INTERNAL_COMMAND        /* This is a command issued by tgdb */
+};
+
+/* data_set_state:   Sets the state of the data package. This should usually be called
+ *                   after an annotation has been read.
+ */
+void data_set_state(struct annotate_two *a2, enum internal_state state);
+
+/* data_get_state:   Gets the state of the data package
+ * Returns:          The current state.
+ */
+enum internal_state data_get_state(struct state_machine *d);
+
 /**
  * \param data
  * The buffer to parse.
@@ -48,5 +69,10 @@ int a2_handle_data(struct annotate_two *a2,
         struct state_machine *sm,
         const char *data, const size_t size,
         char *gui_data, size_t * gui_size, struct tgdb_list *command_list);
+
+/* This unit holds global data to tgdb. It helps keep track of obscure states */
+
+int globals_is_misc_prompt(struct state_machine *sm);
+void globals_set_misc_prompt_command(struct state_machine *sm, unsigned short set);
 
 #endif
