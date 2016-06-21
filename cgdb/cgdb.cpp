@@ -1090,6 +1090,14 @@ static void process_commands(struct tgdb *tgdb_in)
                     //      or info sharedlibrary?
                     //$ TODO mikesart: Need way to make sure we don't recurse here on error.
                     //$ TODO mikesart: 100 lines? Way to load more at end?
+
+
+                    /* Spew out a warning about disassemble failing
+                     * and disasm next 100 instructions. */
+                    // TODO:
+                    // if_print_message("\nWarning: %s\n",
+                    //    item->choice.disassemble_function.disasm[0]);
+
                     tgdb_request_disassemble_pc(tgdb, 100);
                 } else {
                     uint64_t addr_start = item->choice.disassemble_function.addr_start;

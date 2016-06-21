@@ -66,6 +66,8 @@ struct rline {
     int rline_rl_completion_query_items;
 };
 
+static tgdb_list_iterator *rline_local_iter = NULL;
+
 static void custom_deprep_term_function()
 {
 }
@@ -271,8 +273,6 @@ int rline_rl_callback_read_char(struct rline *rline)
 
     return 0;
 }
-
-static tgdb_list_iterator *rline_local_iter;
 
 /**
  * Return to readline a possible completion.

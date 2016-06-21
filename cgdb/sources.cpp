@@ -1207,14 +1207,14 @@ int source_set_exec_line(struct sviewer *sview, const char *path, int sel_line, 
 
 int source_set_exec_addr(struct sviewer *sview, const char *path, uint64_t addr)
 {
+    if (!addr)
+        addr = sview->addr_frame;
+
     if (path) {
         /* If we were given a specific path, use it */
         sview->cur = source_get_node(sview, path);
     } else {
         struct list_node *cur;
-
-        if (!addr)
-            addr = sview->addr_frame;
 
         /* Search for a node which contains this address */
         for (cur = sview->list_head; cur != NULL; cur = cur->next) {
