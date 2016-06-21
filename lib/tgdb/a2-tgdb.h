@@ -183,7 +183,7 @@ int a2_shutdown(struct annotate_two *a2);
 
 /*@{*/
 
-/** 
+/**
  * This determines if the annotate two context is ready to receive
  * another command.
  *
@@ -221,7 +221,7 @@ int a2_user_ran_command(struct annotate_two *a2);
  */
 int a2_prepare_for_command(struct annotate_two *a2, struct tgdb_command *com);
 
-/** 
+/**
  * This is a hack. It should be removed eventually.
  * It tells tgdb-base not to send its internal commands when this is true.
  *
@@ -288,19 +288,6 @@ int a2_parse_io(struct annotate_two *a2,
         char *inferior_output, size_t * inferior_output_size,
         struct tgdb_list *list);
 
-/**
- * Returns all of the commands the annotate two subsystem generated during
- * the last call.
- *
- * \param ctx
- * The annotate two context.
- *
- * @return
- * NULL if no commands were generated.
- * Otherwise, a list of tgdb_client_commands.
- */
-struct tgdb_list *a2_get_client_commands(struct annotate_two *a2);
-
 /*@}*/
 
 /******************************************************************************/
@@ -312,78 +299,7 @@ struct tgdb_list *a2_get_client_commands(struct annotate_two *a2);
 
 /*@{*/
 
-/**
- * Get's the fullname, filename and line number GDB is currently at.
- *
- * \param ctx
- * The annotate two context.
- *
- * @return
- * 0 on success, otherwise -1 on error.
- */
 int a2_get_current_location(struct annotate_two *a2);
-
-/**
- * Gets all the source files that the inferior makes up.
- *
- * \param ctx
- * The annotate two context.
- *
- * @return
- * 0 on success, otherwise -1 on error.
- */
-int a2_get_inferior_sources(struct annotate_two *a2);
-
-/**
- * This is called when readline determines a command needs to be completed.
- *
- * \param ctx
- * The annotate two context.
- *
- * \param command
- * The command to be completed
- *
- * @return
- * 0 on success, otherwise -1 on error.
- */
-int a2_completion_callback(struct annotate_two *a2, const char *command);
-
-int a2_disassemble_pc(struct annotate_two *a2, int lines);
-int a2_disassemble_func(struct annotate_two *a2, int raw, int source);
-
-/** 
- * This returns the command to send to gdb for the enum C.
- * It will return NULL on error, otherwise correct string on output.
- *
- * \param ctx
- * The annotate two context.
- *
- * \param c
- * The command to run.
- *
- * @return
- * Command on success, otherwise NULL on error.
- */
-const char *a2_return_client_command(struct annotate_two *a2, enum tgdb_command_type c);
-
-/** 
- * \param ctx
- * The annotate two context.
- *
- * \param file
- * The file to set the breakpoint in.
- *
- * \param line
- * The line in FILE to set the breakpoint in.
- *
- * \param b
- * Determines what the user wants to do with the breakpoint.
- *
- * @return
- * NULL on error or message to print to terminal
- */
-char *a2_client_modify_breakpoint(struct annotate_two *a2,
-        const char *file, int line, enum tgdb_breakpoint_action b);
 
 /** 
  * \param ctx
@@ -419,15 +335,6 @@ pid_t a2_get_debugger_pid(struct annotate_two *a2);
  * 0 on success, otherwise -1 on error.
  */
 int a2_open_new_tty(struct annotate_two *a2, int *inferior_stdin, int *inferior_stdout);
-
-/** 
- * \param ctx
- * The annotate two context.
- *
- * @return
- * tty name on success, otherwise NULL on error.
- */
-const char *a2_get_tty_name(struct annotate_two *a2);
 
 /*@}*/
 
