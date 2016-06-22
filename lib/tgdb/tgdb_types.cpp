@@ -67,18 +67,13 @@ static int tgdb_types_print_item(void *command)
         }
         case TGDB_UPDATE_SOURCE_FILES:
         {
-            struct tgdb_list *list =
-                    com->choice.update_source_files.source_files;
-            tgdb_list_iterator *i;
-            char *s;
+            int i;
+            char **source_files = com->choice.update_source_files.source_files;
 
             fprintf(fd, "Inferior source files start\n");
-            i = tgdb_list_get_first(list);
 
-            while (i) {
-                s = (char *) tgdb_list_get_item(i);
-                fprintf(fd, "TGDB_SOURCE_FILE (%s)\n", s);
-                i = tgdb_list_next(i);
+            for (i = 0; i < sbcount(source_files); i++) {
+                fprintf(fd, "TGDB_SOURCE_FILE (%s)\n", source_files[i]);
             }
             fprintf(fd, "Inferior source files end\n");
             break;
@@ -205,11 +200,13 @@ static int tgdb_types_delete_item(void *command)
         }
         case TGDB_UPDATE_SOURCE_FILES:
         {
-            struct tgdb_list *list =
-                    com->choice.update_source_files.source_files;
+            int i;
+            char **source_files = com->choice.update_source_files.source_files;
 
-            tgdb_list_free(list, tgdb_types_source_files_free);
-            tgdb_list_destroy(list);
+            for (i = 0; i < sbcount(source_files); i++) {
+                free(source_files[i]);
+            }
+            sbfree(source_files);
 
             com->choice.update_source_files.source_files = NULL;
             break;

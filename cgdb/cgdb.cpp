@@ -1019,13 +1019,10 @@ static void process_commands(struct tgdb *tgdb_in)
                 /* This is a list of all the source files */
             case TGDB_UPDATE_SOURCE_FILES:
             {
-                struct tgdb_list *list =
-                        item->choice.update_source_files.source_files;
-                tgdb_list_iterator *i = tgdb_list_get_first(list);
+                char **source_files = item->choice.update_source_files.source_files;
                 sviewer *sview = if_get_sview();
                 struct list_node *cur;
                 int added_disasm = 0;
-                char *s;
 
                 if_clear_filedlg();
 
@@ -1038,15 +1035,15 @@ static void process_commands(struct tgdb *tgdb_in)
                     }
                 }
 
-                if (!i && !added_disasm) {
+                if (!sbcount(source_files) && !added_disasm) {
                     /* No files returned? */
                     if_display_message("Error:", WIN_REFRESH, 0,
                                        " No sources available! Was the program compiled with debug?");
                 } else {
-                    while (i) {
-                        s = (char *)tgdb_list_get_item(i);
-                        if_add_filedlg_choice(s);
-                        i = tgdb_list_next(i);
+                    int i;
+
+                    for (i = 0; i < sbcount(source_files); i++) {
+                        if_add_filedlg_choice(source_files[i]);
                     }
 
                     if_set_focus(FILE_DLG);

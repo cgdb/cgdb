@@ -135,8 +135,7 @@ static void commands_process_breakpoints(struct commands *c,
     }
 }
 
-static void commands_send_source_files(struct commands *c,
-        struct tgdb_list *source_files)
+static void commands_send_source_files(struct commands *c, char **source_files)
 {
     struct tgdb_response *response = (struct tgdb_response *)
             cgdb_malloc(sizeof (struct tgdb_response));
@@ -158,12 +157,12 @@ commands_process_info_sources(struct commands *c,
     result = gdbwire_get_mi_command(GDBWIRE_MI_FILE_LIST_EXEC_SOURCE_FILES,
         result_record, &mi_command);
     if (result == GDBWIRE_OK) {
-        struct tgdb_list *source_files = tgdb_list_init();
+        char **source_files = NULL;
         struct gdbwire_mi_source_file *files =
             mi_command->variant.file_list_exec_source_files.files;
         while (files) {
             char *file = (files->fullname)?files->fullname:files->file;
-            tgdb_list_append(source_files, strdup(file));
+            sbpush(source_files, strdup(file));
             files = files->next;
         }
 
@@ -344,7 +343,6 @@ static void gdbwire_stream_record_callback(void *context,
         case DATA_DISASSEMBLE_MODE_QUERY:
             break;
     }
-
 }
 
 static void gdbwire_async_record_callback(void *context,

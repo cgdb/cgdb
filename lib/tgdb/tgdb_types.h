@@ -327,7 +327,7 @@
             struct {
                 /* This list has elements of 'const char *' representing each 
                  * filename. The filename may be relative or absolute. */
-                struct tgdb_list *source_files;
+                char **source_files;
             } update_source_files;
 
             /* header == TGDB_INFERIOR_EXITED */
