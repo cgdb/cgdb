@@ -189,6 +189,7 @@ if [ "$CGDB_WEB" != "" ]; then
     echo '' >> $CGDB_RELEASE_DOCS_SH
     echo 'echo "-- Uploading multiple page HTML"' >> $CGDB_RELEASE_DOCS_SH
     echo "cp -r docs/cgdb.html/* $CGDB_WEB/docs/" >> $CGDB_RELEASE_DOCS_SH
+    echo "mv $CGDB_WEB/docs/index.html $CGDB_WEB/docs/cgdb-split.html" >> $CGDB_RELEASE_DOCS_SH
     echo '' >> $CGDB_RELEASE_DOCS_SH
     echo "echo \"Verify and commit the changes in $CGDB_WEB to update the" \
          "site.\"" >> $CGDB_RELEASE_DOCS_SH
