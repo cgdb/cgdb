@@ -77,30 +77,29 @@ struct commands {
 };
 
 static void
-commands_send_breakpoints(struct commands *c, struct tgdb_list *bkpt_list)
+commands_send_breakpoints(struct commands *c,
+    struct tgdb_breakpoint *breakpoints)
 {
     struct tgdb_response *response = (struct tgdb_response *)
         cgdb_malloc(sizeof (struct tgdb_response));
 
     response->header = TGDB_UPDATE_BREAKPOINTS;
-    response->choice.update_breakpoints.breakpoint_list = bkpt_list;
+    response->choice.update_breakpoints.breakpoints = breakpoints;
 
     tgdb_types_append_command(c->response_list, response);
 }
 
 static void commands_process_breakpoint(
-        struct tgdb_list *breakpoint_list,
+        struct tgdb_breakpoint *&breakpoints,
         struct gdbwire_mi_breakpoint *breakpoint)
 {
     if ((breakpoint->fullname || breakpoint->file) && breakpoint->line != 0) {
-        struct tgdb_breakpoint *tb = (struct tgdb_breakpoint *)
-            cgdb_malloc(sizeof (struct tgdb_breakpoint));
-        tb->file = cgdb_strdup(breakpoint->file);
-        tb->fullname = cgdb_strdup(breakpoint->fullname);
-        tb->line = breakpoint->line;
-        tb->enabled = breakpoint->enabled;
-
-        tgdb_list_append(breakpoint_list, tb);
+        struct tgdb_breakpoint tb;
+        tb.file = cgdb_strdup(breakpoint->file);
+        tb.fullname = cgdb_strdup(breakpoint->fullname);
+        tb.line = breakpoint->line;
+        tb.enabled = breakpoint->enabled;
+        sbpush(breakpoints, tb);
     }
 }
 
@@ -112,17 +111,17 @@ static void commands_process_breakpoints(struct commands *c,
     result = gdbwire_get_mi_command(GDBWIRE_MI_BREAK_INFO,
         result_record, &mi_command);
     if (result == GDBWIRE_OK) {
-        struct tgdb_list *bkpt_list = tgdb_list_init();
+        struct tgdb_breakpoint *breakpoints = NULL;
         struct gdbwire_mi_breakpoint *breakpoint =
             mi_command->variant.break_info.breakpoints;
         while (breakpoint) {
-            commands_process_breakpoint(bkpt_list, breakpoint);
+            commands_process_breakpoint(breakpoints, breakpoint);
 
             if (breakpoint->multi) {
                 struct gdbwire_mi_breakpoint *multi_bkpt =
                     breakpoint->multi_breakpoints;
                 while (multi_bkpt) {
-                    commands_process_breakpoint(bkpt_list, multi_bkpt);
+                    commands_process_breakpoint(breakpoints, multi_bkpt);
                     multi_bkpt = multi_bkpt->next;
                 }
             }
@@ -130,7 +129,7 @@ static void commands_process_breakpoints(struct commands *c,
             breakpoint = breakpoint->next;
         }
 
-        commands_send_breakpoints(c, bkpt_list);
+        commands_send_breakpoints(c, breakpoints);
 
         gdbwire_mi_command_free(mi_command);
     }

@@ -39,27 +39,17 @@ static int tgdb_types_print_item(void *command)
     switch (com->header) {
         case TGDB_UPDATE_BREAKPOINTS:
         {
-            struct tgdb_list *list =
-                    com->choice.update_breakpoints.breakpoint_list;
-            tgdb_list_iterator *iterator;
-            struct tgdb_breakpoint *tb;
+            int i;
 
             fprintf(fd, "Breakpoint start\n");
 
-            iterator = tgdb_list_get_first(list);
-
-            while (iterator) {
-                tb = (struct tgdb_breakpoint *) tgdb_list_get_item(iterator);
-
-                if (tb == NULL)
-                    logger_write_pos(logger, __FILE__, __LINE__,
-                            "breakpoint is NULL");
+            for (i = 0; i < sbcount(com->choice.update_breakpoints.breakpoints); i++) {
+                struct tgdb_breakpoint *tb = &com->choice.update_breakpoints.breakpoints[i];
 
                 fprintf(fd,
                         "\tFILE(%s) FULLNAME(%s) LINE(%d) ENABLED(%d)\n",
                         tb->file, tb->fullname, tb->line, tb->enabled);
 
-                iterator = tgdb_list_next(iterator);
             }
 
             fprintf(fd, "Breakpoint end\n");
@@ -183,13 +173,20 @@ static int tgdb_types_delete_item(void *command)
     switch (com->header) {
         case TGDB_UPDATE_BREAKPOINTS:
         {
-            struct tgdb_list *list =
-                    com->choice.update_breakpoints.breakpoint_list;
+            int i;
+            struct tgdb_breakpoint *breakpoints =
+                com->choice.update_breakpoints.breakpoints;
 
-            tgdb_list_free(list, tgdb_types_breakpoint_free);
-            tgdb_list_destroy(list);
+            for (i = 0; i < sbcount(breakpoints); i++) {
 
-            com->choice.update_breakpoints.breakpoint_list = NULL;
+                struct tgdb_breakpoint *tb = &breakpoints[i];
+
+                free(tb->file);
+                free(tb->fullname);
+            }
+
+            sbfree(breakpoints);
+            com->choice.update_breakpoints.breakpoints = NULL;
             break;
         }
         case TGDB_UPDATE_FILE_POSITION:

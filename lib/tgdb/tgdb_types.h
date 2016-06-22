@@ -70,46 +70,33 @@
   * tgdb_run_debugger_command.
   */
     enum tgdb_command_type {
-
     /** This will instruct TGDB to tell the debugger to continue.  */
         TGDB_CONTINUE = 0,
-
     /** This will instruct TGDB to tell the debugger to finish.  */
         TGDB_FINISH,
-
     /** 
      * This will instruct TGDB to tell the debugger to go to the next 
      * source level instruction.
      */
         TGDB_NEXT,
-
     /** This will instruct TGDB to tell the debugger to (re-)start the program. */
         TGDB_START,
-
     /** This will instruct TGDB to tell the debugger to (re-)run the program. */
         TGDB_RUN,
-
     /** This will instruct TGDB to tell the debugger to kill the program. */
         TGDB_KILL,
-
     /** This will instruct TGDB to tell the debugger to step. */
         TGDB_STEP,
-
     /** 
      * This will instruct TGDB to tell the debugger to continue running
      * until a source line past the current line.  This is used to avoid
      * single stepping through loops.
      */
         TGDB_UNTIL,
-
     /** This will instruct TGDB to tell the debugger to go up a frame. */
         TGDB_UP,
-
     /** This will instruct TGDB to tell the debugger to go down a frame. */
         TGDB_DOWN,
-
-    /** Hmmm. This is probably bad :). Actually, I can't remember why its here. */
-        TGDB_ERROR
     };
 
  /**
@@ -117,29 +104,22 @@
   * Currently, enable/disable are not supported.
   */
     enum tgdb_breakpoint_action {
-
     /** Add a breakpoint. */
         TGDB_BREAKPOINT_ADD,
-
     /** Add a temporary breakpoint */
         TGDB_TBREAKPOINT_ADD,
-
     /** Delete a breakpoint. */
         TGDB_BREAKPOINT_DELETE,
     };
 
  /** This structure represents a breakpoint. */
     struct tgdb_breakpoint {
-
     /** This is the file that the breakpoint is set in. */
         char *file;
-
     /** This is the fullname to the file that the breakpoint is set in. */
         char *fullname;
-
     /** The line number where the breakpoint is set. */
         int line;
-
     /** 0 if it is not enabled or 1 if it is enabled. */
         int enabled;
     };
@@ -155,24 +135,24 @@
   */
     struct tgdb_file_position {
 
-    /**
-     * The path to the file.
-     *
-     * This will usually be absolute. If the absolute path is not available
-     * for GDB it will be a relative path.
-     */
+        /**
+         * The path to the file.
+         *
+         * This will usually be absolute. If the absolute path is not available
+         * for GDB it will be a relative path.
+         */
         char *path;
 
-    /** The line number in the file.  */
+        /** The line number in the file.  */
         int line_number;
 
-    /** Line number corresponding to the $pc or 0 if unknown.  */
+        /** Line number corresponding to the $pc or 0 if unknown.  */
         uint64_t addr;
 
-    /** Shared library where this function is defined or NULL if unknown.  */
+        /** Shared library where this function is defined or NULL if unknown. */
         char *from;
 
-    /** Function name or NULL if unknown.  */
+        /** Function name or NULL if unknown.  */
         char *func;
     };
 
@@ -335,7 +315,7 @@
             struct {
                 /* This list has elements of 'struct tgdb_breakpoint *' 
                  * representing each breakpoint. */
-                struct tgdb_list *breakpoint_list;
+                struct tgdb_breakpoint *breakpoints;
             } update_breakpoints;
 
             /* header == TGDB_UPDATE_FILE_POSITION */
