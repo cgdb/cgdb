@@ -933,228 +933,240 @@ static int user_input_loop()
     return 0;
 }
 
+static void update_debugger_command_delivered(struct tgdb_response *response)
+{
+    int debugger_command =
+        response->choice.debugger_command_delivered.debugger_command;
+    const char *command =
+        response->choice.debugger_command_delivered.command;
+
+    if (debugger_command) {
+        if_print("\n");
+    } else if (cgdbrc_get_int(CGDBRC_SHOWDEBUGCOMMANDS)) {
+        if_sdc_print(command);
+    }
+}
+
+/* This updates all the breakpoints */
+static void update_breakpoints(struct tgdb_response *response)
+{
+    source_set_breakpoints(if_get_sview(),
+        response->choice.update_breakpoints.breakpoints);
+    if_show_file(NULL, 0, 0);
+}
+
+/* This means a source file or line number changed */
+static void update_file_position(struct tgdb_response *response)
+{
+    /**
+     * Updating the location that cgdb should point the user to.
+     *
+     * A variety of different locations can come back from gdb.
+     * We currently have the following fields of interest:
+     *   path, line number and address.
+     *
+     * The path may be NULL, relative or absolute. When it is
+     * relative or absolute, it might point to a file that does
+     * not exist on disk.
+     *
+     * The address or line number are not always available.
+     *
+     * So currently, our best bet is to show the file/line
+     * if it's available. If it's not, show the disassembly.
+     * If that's not available, show nothing.
+     */
+    struct tgdb_file_position *tfp;
+    struct sviewer *sview = if_get_sview();
+    int source_reload_status = -1;
+
+    tfp = response->choice.update_file_position.file_position;
+
+    sview->addr_frame = tfp->addr;
+
+    if (tfp->path) {
+        /* Update the file */
+        source_reload_status = 
+            source_reload(if_get_sview(), tfp->path, 0);
+
+        if_show_file(tfp->path, tfp->line_number, tfp->line_number);
+    }
+
+    /**
+     * Sometimes gdb provides a path that can not be found
+     * on disk. For instance, for glibc where the source isn't
+     * available. In this scenario, show the assembly instead.
+     */
+    if (source_reload_status == -1 && sview->addr_frame) {
+        int ret;
+
+        /* Try to show the disasm for ths function */
+        ret = source_set_exec_addr(sview, sview->addr_frame);
+
+        if (!ret) {
+            if_draw();
+        } else if (sview->addr_frame) {
+            /* No disasm found - request it */
+            tgdb_request_disassemble_func(tgdb,
+                DISASSEMBLE_FUNC_SOURCE_LINES);
+        }
+    }
+}
+
+/* This is a list of all the source files */
+static void update_source_files(struct tgdb_response *response)
+{
+    char **source_files = response->choice.update_source_files.source_files;
+    sviewer *sview = if_get_sview();
+    struct list_node *cur;
+    int added_disasm = 0;
+
+    if_clear_filedlg();
+
+    /* Search for a node which contains this address */
+    for (cur = sview->list_head; cur != NULL; cur = cur->next) {
+        if (cur->path[0] == '*')
+        {
+            added_disasm = 1;
+            if_add_filedlg_choice(cur->path);
+        }
+    }
+
+    if (!sbcount(source_files) && !added_disasm) {
+        /* No files returned? */
+        if_display_message("Error:", WIN_REFRESH, 0,
+                           " No sources available! Was the program compiled with debug?");
+    } else {
+        int i;
+
+        for (i = 0; i < sbcount(source_files); i++) {
+            if_add_filedlg_choice(source_files[i]);
+        }
+
+        if_set_focus(FILE_DLG);
+    }
+    kui_input_acceptable = 1;
+}
+
+static void update_quit(struct tgdb_response *response)
+{
+    if_display_message("Program exited with value", WIN_REFRESH, 0, " %d",
+        (int8_t)response->choice.inferior_exited.exit_status);
+}
+
+static void update_completions(struct tgdb_response *response)
+{
+    do_tab_completion(response->choice.update_completions.completion_list);
+}
+
+static void update_disassemble(struct tgdb_response *response)
+{
+    if (response->choice.disassemble_function.error) {
+        //$ TODO mikesart: Get module name in here somehow? Passed in when calling tgdb_request_disassemble?
+        //      or info sharedlibrary?
+        //$ TODO mikesart: Need way to make sure we don't recurse here on error.
+        //$ TODO mikesart: 100 lines? Way to load more at end?
+
+
+        /* Spew out a warning about disassemble failing
+         * and disasm next 100 instructions. */
+        // TODO:
+        // if_print_message("\nWarning: %s\n",
+        //    item->choice.disassemble_function.disasm[0]);
+
+        tgdb_request_disassemble_pc(tgdb, 100);
+    } else {
+        uint64_t addr_start = response->choice.disassemble_function.addr_start;
+        uint64_t addr_end = response->choice.disassemble_function.addr_end;
+        char **disasm = response->choice.disassemble_function.disasm;
+
+        //$ TODO: If addr_start is equal to addr_end of some other
+        // buffer, then append it to that buffer?
+
+        //$ TODO: If there is a disassembly view, update the location
+        // even if we don't display it? Useful with global marks, etc.
+
+        if (disasm && disasm[0]) {
+            int i;
+            char *path;
+            struct list_node *node;
+            sviewer *sview = if_get_sview();
+
+            if (addr_start) {
+                path = sys_aprintf(
+                    "** %s (%" PRIx64 " - %" PRIx64 ") **",
+                    disasm[0], addr_start, addr_end);
+            } else {
+                path = sys_aprintf("** %s **", disasm[0]);
+            }
+
+            node = source_get_node(sview, path);
+            if (!node) {
+                node = source_add(sview, path);
+
+                //$ TODO mikesart: Add asm colors
+                node->language = TOKENIZER_LANGUAGE_ASM;
+                node->addr_start = addr_start;
+                node->addr_end = addr_end;
+
+                for (i = 0; i < sbcount(disasm); i++) {
+                    source_add_disasm_line(node, disasm[i]);
+                }
+
+                source_highlight(node);
+            }
+
+            source_set_exec_addr(sview, sview->addr_frame);
+            if_draw();
+
+            free(path);
+        }
+    }
+}
+
+static void update_prompt(struct tgdb_response *response)
+{
+    change_prompt(response->choice.update_console_prompt_value.prompt_value);
+}
+
 static void process_commands(struct tgdb *tgdb_in)
 {
     struct tgdb_response *item;
 
-    while ((item = tgdb_get_response(tgdb_in)) != NULL) {
-        switch (item->header) {
-            /* This updates all the breakpoints */
-            case TGDB_UPDATE_BREAKPOINTS:
-                source_set_breakpoints(if_get_sview(),
-                    item->choice.update_breakpoints.breakpoints);
-                if_show_file(NULL, 0, 0);
-                break;
-
-            case TGDB_UPDATE_FILE_POSITION:
-            {
-                /**
-                 * Updating the location that cgdb should point the user to.
-                 *
-                 * A variety of different locations can come back from gdb.
-                 * We currently have the following fields of interest:
-                 *   path, line number and address.
-                 *
-                 * The path may be NULL, relative or absolute. When it is
-                 * relative or absolute, it might point to a file that does
-                 * not exist on disk.
-                 *
-                 * The address or line number are not always available.
-                 *
-                 * So currently, our best bet is to show the file/line
-                 * if it's available. If it's not, show the disassembly.
-                 * If that's not available, show nothing.
-                 */
-                struct tgdb_file_position *tfp;
-                struct sviewer *sview = if_get_sview();
-                int source_reload_status = -1;
-
-                tfp = item->choice.update_file_position.file_position;
-
-                sview->addr_frame = tfp->addr;
-
-                if (tfp->path) {
-                    /* Update the file */
-                    source_reload_status = 
-                        source_reload(if_get_sview(), tfp->path, 0);
-
-                    if_show_file(tfp->path, tfp->line_number, tfp->line_number);
-                }
-
-                /**
-                 * Sometimes gdb provides a path that can not be found
-                 * on disk. For instance, for glibc where the source isn't
-                 * available. In this scenario, show the assembly instead.
-                 */
-                if (source_reload_status == -1 && sview->addr_frame) {
-                    int ret;
-
-                    /* Try to show the disasm for ths function */
-                    ret = source_set_exec_addr(sview, sview->addr_frame);
-
-                    if (!ret) {
-                        if_draw();
-                    } else if (sview->addr_frame) {
-                        /* No disasm found - request it */
-                        tgdb_request_disassemble_func(tgdb,
-                            DISASSEMBLE_FUNC_SOURCE_LINES);
-                    }
-                }
-
-                break;
-            }
-
-                /* This is a list of all the source files */
-            case TGDB_UPDATE_SOURCE_FILES:
-            {
-                char **source_files = item->choice.update_source_files.source_files;
-                sviewer *sview = if_get_sview();
-                struct list_node *cur;
-                int added_disasm = 0;
-
-                if_clear_filedlg();
-
-                /* Search for a node which contains this address */
-                for (cur = sview->list_head; cur != NULL; cur = cur->next) {
-                    if (cur->path[0] == '*')
-                    {
-                        added_disasm = 1;
-                        if_add_filedlg_choice(cur->path);
-                    }
-                }
-
-                if (!sbcount(source_files) && !added_disasm) {
-                    /* No files returned? */
-                    if_display_message("Error:", WIN_REFRESH, 0,
-                                       " No sources available! Was the program compiled with debug?");
-                } else {
-                    int i;
-
-                    for (i = 0; i < sbcount(source_files); i++) {
-                        if_add_filedlg_choice(source_files[i]);
-                    }
-
-                    if_set_focus(FILE_DLG);
-                }
-                kui_input_acceptable = 1;
-                break;
-            }
-
-            case TGDB_INFERIOR_EXITED:
-            {
-                /*
-                 * int *status = item->data;
-                 * This could eventually go here, but for now, the update breakpoint 
-                 * display function makes the status bar go back to the name of the file.
-                 *
-                 * if_display_message ( "Program exited with value", WIN_REFRESH, 0, " %d", *status );
-                 */
-
-                /* Clear the cache */
-                break;
-            }
-            case TGDB_UPDATE_COMPLETIONS:
-            {
-                struct tgdb_list *list =
-                        item->choice.update_completions.completion_list;
-                do_tab_completion(list);
-                break;
-            }
-            case TGDB_DISASSEMBLE_PC:
-            case TGDB_DISASSEMBLE_FUNC:
-            {
-                if (item->choice.disassemble_function.error) {
-                    //$ TODO mikesart: Get module name in here somehow? Passed in when calling tgdb_request_disassemble?
-                    //      or info sharedlibrary?
-                    //$ TODO mikesart: Need way to make sure we don't recurse here on error.
-                    //$ TODO mikesart: 100 lines? Way to load more at end?
-
-
-                    /* Spew out a warning about disassemble failing
-                     * and disasm next 100 instructions. */
-                    // TODO:
-                    // if_print_message("\nWarning: %s\n",
-                    //    item->choice.disassemble_function.disasm[0]);
-
-                    tgdb_request_disassemble_pc(tgdb, 100);
-                } else {
-                    uint64_t addr_start = item->choice.disassemble_function.addr_start;
-                    uint64_t addr_end = item->choice.disassemble_function.addr_end;
-                    char **disasm = item->choice.disassemble_function.disasm;
-
-                    //$ TODO: If addr_start is equal to addr_end of some other
-                    // buffer, then append it to that buffer?
-
-                    //$ TODO: If there is a disassembly view, update the location
-                    // even if we don't display it? Useful with global marks, etc.
-
-                    if (disasm && disasm[0]) {
-                        int i;
-                        char *path;
-                        struct list_node *node;
-                        sviewer *sview = if_get_sview();
-
-                        if (addr_start) {
-                            path = sys_aprintf(
-                                "** %s (%" PRIx64 " - %" PRIx64 ") **",
-                                disasm[0], addr_start, addr_end);
-                        } else {
-                            path = sys_aprintf("** %s **", disasm[0]);
-                        }
-
-                        node = source_get_node(sview, path);
-                        if (!node) {
-                            node = source_add(sview, path);
-
-                            //$ TODO mikesart: Add asm colors
-                            node->language = TOKENIZER_LANGUAGE_ASM;
-                            node->addr_start = addr_start;
-                            node->addr_end = addr_end;
-
-                            for (i = 0; i < sbcount(disasm); i++) {
-                                source_add_disasm_line(node, disasm[i]);
-                            }
-
-                            source_highlight(node);
-                        }
-
-                        source_set_exec_addr(sview, sview->addr_frame);
-                        if_draw();
-
-                        free(path);
-                    }
-                }
-                break;
-            }
-            case TGDB_UPDATE_CONSOLE_PROMPT_VALUE:
-            {
-                const char *new_prompt =
-                        item->choice.update_console_prompt_value.prompt_value;
-                change_prompt(new_prompt);
-                break;
-            }
-            case TGDB_DEBUGGER_COMMAND_DELIVERED:
-            {
-                int debugger_command =
-                    item->choice.debugger_command_delivered.debugger_command;
-                const char *command =
-                    item->choice.debugger_command_delivered.command;
-
-                if (debugger_command) {
-                    if_print("\n");
-                } else if (cgdbrc_get_int(CGDBRC_SHOWDEBUGCOMMANDS)) {
-                    if_sdc_print(command);
-                }
-
-                break;
-            }
-            case TGDB_QUIT:
-                cleanup();
-                exit(0);
-                break;
-                /* Default */
-            default:
-                break;
+    while ((item = tgdb_get_response(tgdb_in)) != NULL)
+    {
+        switch (item->header)
+        {
+        case TGDB_DEBUGGER_COMMAND_DELIVERED:
+            update_debugger_command_delivered(item);
+            break;
+        case TGDB_UPDATE_BREAKPOINTS:
+            update_breakpoints(item);
+            break;
+        case TGDB_UPDATE_FILE_POSITION:
+            update_file_position(item);
+            break;
+        case TGDB_UPDATE_SOURCE_FILES:
+            update_source_files(item);
+            break;
+        case TGDB_INFERIOR_EXITED:
+            update_quit(item);
+            break;
+        case TGDB_UPDATE_COMPLETIONS:
+            update_completions(item);
+            break;
+        case TGDB_DISASSEMBLE_PC:
+        case TGDB_DISASSEMBLE_FUNC:
+            update_disassemble(item);
+            break;
+        case TGDB_UPDATE_CONSOLE_PROMPT_VALUE:
+            update_prompt(item);
+            break;
+        case TGDB_QUIT:
+            cleanup();
+            exit(0);
+            break;
+        default:
+            break;
         }
     }
 
