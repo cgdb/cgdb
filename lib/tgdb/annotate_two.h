@@ -51,7 +51,7 @@ struct annotate_two {
     struct commands *c;
 
     /** This is a list of all the commands generated since in the last call.  */
-    struct tgdb_list *client_command_list;
+    struct tgdb_command **client_commands;
 
     /** The current response list. */
     struct tgdb_list *cur_response_list;

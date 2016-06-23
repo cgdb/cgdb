@@ -240,28 +240,21 @@ tgdb_does_request_require_console_update(struct tgdb_request *request)
  */
 static int tgdb_process_client_commands(struct tgdb *tgdb)
 {
-    struct tgdb_list *client_command_list;
-    tgdb_list_iterator *iterator;
-    struct tgdb_command *command;
+    int i;
 
-    client_command_list = tgdb->tcc->client_command_list;
-    iterator = tgdb_list_get_first(client_command_list);
-
-    while (iterator) {
-        command = (struct tgdb_command *) tgdb_list_get_item(iterator);
+    for (i = 0; i < sbcount(tgdb->tcc->client_commands); i++)
+    {
+        struct tgdb_command *command = tgdb->tcc->client_commands[i];
 
         if (tgdb_run_or_queue_command(tgdb, command) == -1) {
             logger_write_pos(logger, __FILE__, __LINE__,
                     "tgdb_run_or_queue_command failed");
             return -1;
         }
-
-        iterator = tgdb_list_next(iterator);
     }
 
-    /* free the list of client commands */
-    tgdb_list_clear(client_command_list);
-
+    /* Clear the client command array */
+    sbsetcount(tgdb->tcc->client_commands, 0);
     return 0;
 }
 
@@ -495,8 +488,7 @@ static int tgdb_disassemble_pc(struct annotate_two *a2, int lines)
     char *data = NULL;
 
     data = lines ? sys_aprintf("%d", lines) : NULL;
-    ret = commands_issue_command(a2->c, a2->client_command_list,
-                                 ANNOTATE_DISASSEMBLE_PC, data, 0);
+    ret = commands_issue_command(a2, ANNOTATE_DISASSEMBLE_PC, data, 0);
 
     free(data);
     return ret;
@@ -532,8 +524,7 @@ static int tgdb_disassemble_func(struct annotate_two *a2, int raw, int source)
         data = sys_aprintf("%s", "/s");
     }
 
-    ret = commands_issue_command(a2->c, a2->client_command_list,
-                                  ANNOTATE_DISASSEMBLE_FUNC, data, 0);
+    ret = commands_issue_command(a2, ANNOTATE_DISASSEMBLE_FUNC, data, 0);
 
     free(data);
     return ret;
@@ -1258,18 +1249,15 @@ int tgdb_process_command(struct tgdb *tgdb, tgdb_request_ptr request)
         }
     } else {
         if (request->header == TGDB_REQUEST_INFO_SOURCES) {
-            ret = commands_issue_command(tgdb->tcc->c,
-                    tgdb->tcc->client_command_list,
+            ret = commands_issue_command(tgdb->tcc,
                     ANNOTATE_INFO_SOURCES, NULL, 0);
         }
         else if (request->header == TGDB_REQUEST_CURRENT_LOCATION) {
-            ret = commands_issue_command(tgdb->tcc->c,
-                    tgdb->tcc->client_command_list,
+            ret = commands_issue_command(tgdb->tcc,
                     ANNOTATE_INFO_FRAME, NULL, 1);
         }
         else if (request->header == TGDB_REQUEST_COMPLETE) {
-            ret = commands_issue_command(tgdb->tcc->c,
-                    tgdb->tcc->client_command_list,
+            ret = commands_issue_command(tgdb->tcc,
                     ANNOTATE_COMPLETE, request->choice.complete.line, 1);
         }
         else if (request->header == TGDB_REQUEST_DISASSEMBLE_PC) {

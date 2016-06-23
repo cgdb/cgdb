@@ -31,7 +31,7 @@ enum COMMAND_STATE {
 };
 
 /* commands_initialize: Initialize the commands unit */
-struct commands *commands_initialize(void);
+struct commands *commands_initialize(struct annotate_two *a2);
 void commands_shutdown(struct commands *c);
 
 /* command_set_state: Sets the state of the command package. This should usually be called
@@ -60,9 +60,8 @@ enum COMMAND_STATE commands_get_state(struct commands *c);
  *
  *  Returns -1 on error, 0 on success
  */
-int commands_issue_command(struct commands *c,
-        struct tgdb_list *client_command_list,
-        enum annotate_commands commands, const char *data, int oob);
+int commands_issue_command(struct annotate_two *a2,
+    enum annotate_commands commmand, const char *data, int oob);
 
 /* commands_process: This function receives the output from gdb when gdb
  *                   is running a command on behalf of this package.
@@ -70,8 +69,7 @@ int commands_issue_command(struct commands *c,
  *    a     -> the character received from gdb.
  *    com   -> commands to give back to gdb.
  */
-void commands_process(struct commands *c, char a,
-        struct tgdb_list *response_list, struct tgdb_list *client_command_list);
+void commands_process(struct commands *c, char a);
 
 
 /* commands_prepare_for_command:
@@ -94,8 +92,7 @@ int commands_prepare_for_command(struct annotate_two *a2, struct commands *c,
  *
  * Returns: -1 on error, 0 on success
  */
-int commands_user_ran_command(struct commands *c,
-        struct tgdb_list *client_command_list);
+int commands_user_ran_command(struct annotate_two *a2);
 
 /**
  * The current command type. TGDB is capable of having any commands of this
