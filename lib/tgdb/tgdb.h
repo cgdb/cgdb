@@ -358,7 +358,8 @@
    * Will return as a tgdb request command on success, otherwise NULL.
    */
     void tgdb_request_modify_breakpoint(struct tgdb *tgdb,
-            const char *file, int line, enum tgdb_breakpoint_action b);
+        const char *file, int line, uint64_t addr,
+        enum tgdb_breakpoint_action b);
 
   /**
    * Used to get all of the possible tab completion options for LINE.

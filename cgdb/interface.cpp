@@ -1027,24 +1027,35 @@ static int status_bar_input(struct sviewer *sview, int key)
 static int
 toggle_breakpoint(struct sviewer *sview, enum tgdb_breakpoint_action t)
 {
-    char *path;
     int line;
+    uint64_t addr = 0;
+    char *path = NULL;
 
     if (!sview || !sview->cur || !sview->cur->path)
-        return 0;
+        return -1;
 
     line = sview->cur->sel_line;
 
-    /* Get filename (strip path off -- GDB is dumb) */
-    path = strrchr(sview->cur->path, '/') + 1;
-    if (path == (char *)NULL + 1)
-        path = sview->cur->path;
+    if (sview->cur->path[0] == '*')
+    {
+        addr = sview->cur->file_buf.addrs[line];
+        if (!addr)
+            return -1;
+    }
+    else
+    {
+
+        /* Get filename (strip path off -- GDB is dumb) */
+        path = strrchr(sview->cur->path, '/') + 1;
+        if (path == (char *)NULL + 1)
+            path = sview->cur->path;
+    }
 
     /* delete an existing breakpoint */
     if (sview->cur->lflags[line].breakpt)
         t = TGDB_BREAKPOINT_DELETE;
 
-    tgdb_request_modify_breakpoint(tgdb, path, line + 1, t);
+    tgdb_request_modify_breakpoint(tgdb, path, line + 1, addr, t);
     return 0;
 }
 

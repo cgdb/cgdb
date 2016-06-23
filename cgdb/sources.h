@@ -86,7 +86,6 @@ struct line_flags {
     unsigned char has_mark : 1;
 };
 
-struct list_node;
 struct list_node {
     char *path;                 /* Full path to source file */
     struct buffer file_buf;     /* File buffer */
@@ -94,7 +93,6 @@ struct list_node {
     int sel_line;               /* Current line selected in viewer */
     int sel_col;                /* Current column selected in viewer */
     int exe_line;               /* Current line executing, or -1 if not set */
-
     int sel_rline;              /* Current line used by regex */
 
     enum tokenizer_language_support language;   /* The language type of this file */
