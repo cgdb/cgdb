@@ -62,7 +62,7 @@ enum COMMAND_STATE commands_get_state(struct commands *c);
  */
 int commands_issue_command(struct commands *c,
         struct tgdb_list *client_command_list,
-        enum annotate_commands com, const char *data, int oob);
+        enum annotate_commands commands, const char *data, int oob);
 
 /* commands_process: This function receives the output from gdb when gdb
  *                   is running a command on behalf of this package.
@@ -73,22 +73,6 @@ int commands_issue_command(struct commands *c,
 void commands_process(struct commands *c, char a,
         struct tgdb_list *response_list, struct tgdb_list *client_command_list);
 
-/* This gives the gui all of the completions that were just read from gdb 
- * through a 'complete' command.
- *
- */
-void commands_send_gui_completions(struct commands *c, struct tgdb_list *list);
-
-/* The 3 functions below are for tgdb only.
- * These functions are responsible for keeping tgdb up to date with gdb.
- * If a particular piece of information is needed after each command the user
- * is allowed to give to gdb, then these are the functions that will find out
- * the missing info.
- * These functions should NOT be called for the gui to get work done, and they
- * should not be used for tgdb to get work done. 
- *
- * THEY ARE STRICTLY FOR KEEPING TGDB UP TO DATE WITH GDB
- */
 
 /* commands_prepare_for_command:
  * -----------------------------
@@ -126,14 +110,10 @@ enum tgdb_command_choice {
      */
     TGDB_COMMAND_FRONT_END,
 
-    /**
-     * A command from the console
-     */
+    /** A command from the console */
     TGDB_COMMAND_CONSOLE,
 
-    /**
-     * A command from a client of TGDB
-     */
+    /** A command from a client of TGDB */
     TGDB_COMMAND_TGDB_CLIENT,
 
     /**
@@ -156,7 +136,7 @@ struct tgdb_command {
     /**
      * The actual command to give.
      */
-    char *tgdb_command_data;
+    char *gdb_command;
 
     /**
      * The type of command this one is.
@@ -164,7 +144,7 @@ struct tgdb_command {
     enum tgdb_command_choice command_choice;
 
     /** Private data the client context can use. */
-    int tgdb_client_private_data;
+    enum annotate_commands command;
 };
 
 /**
@@ -186,7 +166,8 @@ struct tgdb_command {
  * Always is successful, will call exit on failed malloc
  */
 struct tgdb_command *tgdb_command_create(const char *tgdb_command_data,
-        enum tgdb_command_choice command_choice, int client_data);
+        enum tgdb_command_choice command_choice,
+        enum annotate_commands command);
 
 /**
  * This will free a TGDB queue command.

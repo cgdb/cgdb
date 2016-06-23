@@ -511,7 +511,7 @@ int
 commands_prepare_for_command(struct annotate_two *a2,
         struct commands *c, struct tgdb_command *com)
 {
-    int a_com = com->tgdb_client_private_data;
+    enum annotate_commands a_com = com->command;
 
     /* Set the commands state to nothing */
     commands_set_state(c, VOID_COMMAND);
@@ -540,7 +540,7 @@ commands_prepare_for_command(struct annotate_two *a2,
         case ANNOTATE_COMPLETE:
             c->tab_completions = tgdb_list_init();
             commands_set_state(c, COMMAND_COMPLETE);
-            io_debug_write_fmt("<%s\n>", com->tgdb_command_data);
+            io_debug_write_fmt("<%s\n>", com->gdb_command);
             break;
         case ANNOTATE_DATA_DISASSEMBLE_MODE_QUERY:
             c->disassemble_supports_s_mode = 0;
@@ -568,7 +568,7 @@ commands_prepare_for_command(struct annotate_two *a2,
     };
 
     data_set_state(a2, INTERNAL_COMMAND);
-    io_debug_write_fmt("<%s\n>", com->tgdb_command_data);
+    io_debug_write_fmt("<%s\n>", com->gdb_command);
 
     return 0;
 }
@@ -586,7 +586,7 @@ commands_prepare_for_command(struct annotate_two *a2,
  * A command ready to be run through the debugger or NULL on error.
  * The memory is malloc'd, and must be freed.
  */
-static char *commands_create_command(struct commands *c,
+static char *create_gdb_command(struct commands *c,
         enum annotate_commands com, const char *data)
 {
     switch (com) {
@@ -631,16 +631,17 @@ static char *commands_create_command(struct commands *c,
     return NULL;
 }
 
-struct tgdb_command *tgdb_command_create(const char *tgdb_command_data,
-        enum tgdb_command_choice command_choice, int client_data)
+struct tgdb_command *tgdb_command_create(const char *gdb_command,
+        enum tgdb_command_choice command_choice,
+        enum annotate_commands command)
 {
     struct tgdb_command *tc;
 
     tc = (struct tgdb_command *) cgdb_malloc(sizeof (struct tgdb_command));
 
+    tc->gdb_command = gdb_command? strdup(gdb_command) : NULL;
     tc->command_choice = command_choice;
-    tc->tgdb_client_private_data = client_data;
-    tc->tgdb_command_data = tgdb_command_data ? strdup(tgdb_command_data) : NULL;
+    tc->command = command;
 
     return tc;
 }
@@ -649,7 +650,7 @@ void tgdb_command_destroy(void *item)
 {
     struct tgdb_command *tc = (struct tgdb_command *) item;
 
-    free(tc->tgdb_command_data);
+    free(tc->gdb_command);
     free(tc);
 }
 
@@ -682,7 +683,7 @@ commands_issue_command(struct commands *c,
         struct tgdb_list *client_command_list,
         enum annotate_commands com, const char *data, int oob)
 {
-    char *ncom = commands_create_command(c, com, data);
+    char *ncom = create_gdb_command(c, com, data);
     struct tgdb_command *client_command = NULL;
 
     enum tgdb_command_choice choice = (oob == 1) ?

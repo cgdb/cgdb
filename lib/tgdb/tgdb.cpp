@@ -33,6 +33,7 @@
 #include "queue.h"
 #include "a2-tgdb.h"
 #include "annotate_two.h"
+#include "state_machine.h"
 
 #include "pseudo.h"             /* SLAVE_SIZE constant */
 #include "fork_util.h"
@@ -664,7 +665,8 @@ tgdb_send(struct tgdb *tgdb, const char *command,
     }
 
     /* Create the client command */
-    tc = tgdb_command_create(command, command_choice, -1);
+    tc = tgdb_command_create(command, command_choice,
+        (enum annotate_commands)-1);
 
     free(temp_command);
     temp_command = NULL;
@@ -749,18 +751,21 @@ static int tgdb_deliver_command(struct tgdb *tgdb, struct tgdb_command *command)
 {
     tgdb->IS_SUBSYSTEM_READY_FOR_NEXT_COMMAND = 0;
 
+    /* Send what we're doing to log file */
+    io_debug_write_fmt(" tgdb_deliver_command: <%s>", command->gdb_command);
+
     /* A command for the debugger */
     if (a2_prepare_for_command(tgdb->tcc, command) == -1)
         return -1;
 
     /* A regular command from the client */
-    io_debug_write_fmt("<%s>", command->tgdb_command_data);
+    io_debug_write_fmt("<%s>", command->gdb_command);
 
-    io_writen(tgdb->debugger_stdin, command->tgdb_command_data,
-            strlen(command->tgdb_command_data));
+    io_writen(tgdb->debugger_stdin, command->gdb_command,
+            strlen(command->gdb_command));
 
     if (command->command_choice != TGDB_COMMAND_CONSOLE) {
-        char *s = command->tgdb_command_data;
+        char *s = command->gdb_command;
         struct tgdb_response *response = (struct tgdb_response *)
                 cgdb_malloc(sizeof (struct tgdb_response));
         response->header = TGDB_DEBUGGER_COMMAND_DELIVERED;
