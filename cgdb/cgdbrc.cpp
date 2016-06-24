@@ -768,6 +768,14 @@ static int command_parse_unmap(int param)
     return 0;
 }
 
+static void variable_changed_cb(struct ConfigVariable *variable)
+{
+    /* User switched source/disasm mode. Request a frame update
+       so the appropriate data is displayed in the source window. */
+    if (!strcmp(variable->name, "disasm"))
+        tgdb_request_current_location(tgdb);
+}
+
 int command_do_disassemble(int param)
 {
     int ret;
@@ -795,8 +803,6 @@ int command_parse_set(void)
      */
 
     int rv = 1;
-    int boolean = 1;
-    const char *value = NULL;
 
     switch ((rv = yylex())) {
         case EOL:{
@@ -804,6 +810,8 @@ int command_parse_set(void)
         }
             break;
         case IDENTIFIER:{
+            int boolean = 1;
+            const char *value = NULL;
             const char *token = get_token();
             int length = strlen(token);
             struct ConfigVariable *variable = NULL;
@@ -922,6 +930,9 @@ int command_parse_set(void)
                         rv = 1;
                         break;
                 }
+
+                /* Tell callback function this variable has changed. */
+                variable_changed_cb(variable);
             }
         }
             break;

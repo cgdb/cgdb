@@ -1145,6 +1145,17 @@ void tgdb_request_inferiors_source_files(struct tgdb * tgdb)
     handle_request(tgdb, request_ptr);
 }
 
+void tgdb_request_current_location(struct tgdb * tgdb)
+{
+    tgdb_request_ptr request_ptr;
+
+    request_ptr = (tgdb_request_ptr)cgdb_malloc(sizeof (struct tgdb_request));
+
+    request_ptr->header = TGDB_REQUEST_CURRENT_LOCATION;
+
+    handle_request(tgdb, request_ptr);
+}
+
 void
 tgdb_request_run_debugger_command(struct tgdb * tgdb, enum tgdb_command_type c)
 {
@@ -1254,7 +1265,7 @@ int tgdb_process_command(struct tgdb *tgdb, tgdb_request_ptr request)
         }
         else if (request->header == TGDB_REQUEST_CURRENT_LOCATION) {
             ret = commands_issue_command(tgdb->tcc,
-                    ANNOTATE_INFO_FRAME, NULL, 1);
+                    ANNOTATE_INFO_FRAME, NULL, 0);
         }
         else if (request->header == TGDB_REQUEST_COMPLETE) {
             ret = commands_issue_command(tgdb->tcc,

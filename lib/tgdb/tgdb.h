@@ -328,6 +328,14 @@
    void tgdb_request_inferiors_source_files(struct tgdb *tgdb);
 
   /**
+   * Get the current location of the inferior.
+   *
+   * \param tgdb
+   * An instance of the tgdb library to operate on.
+   */
+   void tgdb_request_current_location(struct tgdb *tgdb);
+
+  /**
    * This tells libtgdb to run a command through the debugger.
    *
    * \param tgdb
