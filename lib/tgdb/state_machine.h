@@ -42,7 +42,8 @@ enum internal_state {
 /* data_set_state:   Sets the state of the data package. This should usually be called
  *                   after an annotation has been read.
  */
-void data_set_state(struct annotate_two *a2, enum internal_state state);
+void data_set_state(struct annotate_two *a2, enum internal_state state,
+        struct tgdb_list *list);
 
 /* data_get_state:   Gets the state of the data package
  * Returns:          The current state.
@@ -50,25 +51,30 @@ void data_set_state(struct annotate_two *a2, enum internal_state state);
 enum internal_state data_get_state(struct state_machine *d);
 
 /**
- * \param data
- * The buffer to parse.
+ * This receives all of the output from the debugger. It is all routed
+ * through this function.
  *
- * \param size
- * The size of the buffer data.
+ * \param input_data
+ * This is the stdout from the debugger. This is the data that parse_io
+ * will parse.
  *
- * \param gui_data
- * This is the information in DATA that was not an annotation.
+ * \param input_data_size
+ * This is the size of input_data.
  *
- * \param gui_size
- * The size of the buffer gui_data.
+ * \param debugger_output
+ * This is an out variable. It contains data that has been determined to
+ * be the output of the debugger that the user should see.
+ *
+ * \param debugger_output_size
+ * This is the size of debugger_output
  *
  * \param command_list
  * If a command was generated from an annotation, its put in here.
  */
-int a2_handle_data(struct annotate_two *a2,
-        struct state_machine *sm,
-        const char *data, const size_t size,
-        char *gui_data, size_t * gui_size, struct tgdb_list *command_list);
+void a2_parse_io(struct annotate_two *a2,
+    const char *input_data, const size_t input_data_size,
+    char *debugger_output, size_t *debugger_output_size,
+    struct tgdb_list *command_list);
 
 /* This unit holds global data to tgdb. It helps keep track of obscure states */
 

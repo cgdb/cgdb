@@ -80,7 +80,7 @@ commands_send_breakpoints(struct annotate_two *a2,
 
     response->choice.update_breakpoints.breakpoints = breakpoints;
 
-    tgdb_types_append_command(a2->cur_response_list, response);
+    tgdb_types_append_command(a2->response_list, response);
 }
 
 static void commands_process_breakpoint(
@@ -156,7 +156,7 @@ static void commands_send_source_files(struct annotate_two *a2,
     struct tgdb_response *response =
         tgdb_create_response(TGDB_UPDATE_SOURCE_FILES);
     response->choice.update_source_files.source_files = source_files;
-    tgdb_types_append_command(a2->cur_response_list, response);
+    tgdb_types_append_command(a2->response_list, response);
 }
 
 /* This function is capable of parsing the output of 'info source'.
@@ -198,7 +198,7 @@ static void send_disassemble_func_complete_response(struct annotate_two *a2,
     response->choice.disassemble_function.disasm = a2->c->disasm;
     response->choice.disassemble_function.addr_start = a2->c->address_start;
     response->choice.disassemble_function.addr_end = a2->c->address_end;
-    tgdb_types_append_command(a2->cur_response_list, response);
+    tgdb_types_append_command(a2->response_list, response);
 }
 
 static void send_command_complete_response(struct annotate_two *a2)
@@ -207,7 +207,7 @@ static void send_command_complete_response(struct annotate_two *a2)
         tgdb_create_response(TGDB_UPDATE_COMPLETIONS);
     response->choice.update_completions.completion_list =
         a2->c->tab_completions;
-    tgdb_types_append_command(a2->cur_response_list, response);
+    tgdb_types_append_command(a2->response_list, response);
 }
 
 static void
@@ -234,7 +234,7 @@ commands_send_source_file(struct annotate_two *a2, char *fullname, char *file,
 
     response->choice.update_file_position.file_position = tfp;
 
-    tgdb_types_append_command(a2->cur_response_list, response);
+    tgdb_types_append_command(a2->response_list, response);
 }
 
 static void commands_process_info_source(struct annotate_two *a2,
@@ -476,9 +476,10 @@ enum COMMAND_STATE commands_get_state(struct commands *c)
 }
 
 static void
-commands_prepare_info_source(struct annotate_two *a2, struct commands *c)
+commands_prepare_info_source(struct annotate_two *a2, struct commands *c,
+    struct tgdb_list *list)
 {
-    data_set_state(a2, INTERNAL_COMMAND);
+    data_set_state(a2, INTERNAL_COMMAND, list);
     commands_set_state(c, INFO_SOURCE);
 }
 
@@ -495,15 +496,17 @@ void commands_process(struct commands *c, char a)
 
 int
 commands_prepare_for_command(struct annotate_two *a2,
-        struct commands *c, struct tgdb_command *com)
+        struct commands *c, struct tgdb_command *com, struct tgdb_list *list)
 {
     enum annotate_commands a_com = com->command;
+
+    a2->response_list = list;
 
     /* Set the commands state to nothing */
     commands_set_state(c, VOID_COMMAND);
 
     if (a_com == -1) {
-        data_set_state(a2, USER_COMMAND);
+        data_set_state(a2, USER_COMMAND, list);
         return 0;
     }
 
@@ -512,10 +515,10 @@ commands_prepare_for_command(struct annotate_two *a2,
             commands_set_state(c, INFO_SOURCES);
             break;
         case ANNOTATE_INFO_SOURCE:
-            commands_prepare_info_source(a2, c);
+            commands_prepare_info_source(a2, c, list);
             break;
         case ANNOTATE_INFO_FRAME:
-            data_set_state(a2, INTERNAL_COMMAND);
+            data_set_state(a2, INTERNAL_COMMAND, list);
             commands_set_state(c, INFO_FRAME);
             break;
         case ANNOTATE_INFO_BREAKPOINTS:
@@ -553,7 +556,7 @@ commands_prepare_for_command(struct annotate_two *a2,
             break;
     };
 
-    data_set_state(a2, INTERNAL_COMMAND);
+    data_set_state(a2, INTERNAL_COMMAND, list);
     io_debug_write_fmt("<%s\n>", com->gdb_command);
 
     return 0;

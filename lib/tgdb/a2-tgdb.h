@@ -213,7 +213,8 @@ int a2_user_ran_command(struct annotate_two *a2);
  * @return
  * -1 on error, 0 on success
  */
-int a2_prepare_for_command(struct annotate_two *a2, struct tgdb_command *com);
+int a2_prepare_for_command(struct annotate_two *a2, struct tgdb_command
+*com, struct tgdb_list *list);
 
 /**
  * This is a hack. It should be removed eventually.
@@ -226,61 +227,6 @@ int a2_prepare_for_command(struct annotate_two *a2, struct tgdb_command *com);
  * 1 if it is at a misc prompt, 0 if it is not.
  */
 int a2_is_misc_prompt(struct annotate_two *a2);
-
-/*@}*/
-
-/******************************************************************************/
-/**
- * @name Input/Output commands
- * These functions are for communicating I/O with an annotate two context.
- */
-/******************************************************************************/
-
-/*@{*/
-
- /** 
-  * This receives all of the output from the debugger. It is all routed 
-  * through this function. 
-  *
-  * \param ctx
-  * The annotate two context.
-  *
-  * \param input_data
-  * This is the stdout from the debugger. This is the data that parse_io 
-  * will parse.
-  *
-  * \param input_data_size
-  * This is the size of input_data.
-  *
-  * \param debugger_output
-  * This is an out variable. It contains data that has been determined to
-  * be the output of the debugger that the user should see.
-  *
-  * \param debugger_output_size
-  * This is the size of debugger_output
-  *
-  * \param inferior_output
-  * This is an out variable. It contains data that has been determined to
-  * be the output of the inferior that the user should see.
-  *
-  * \param inferior_output_size
-  * This is the size of inferior_output
-  *
-  * \param list
-  * Any commands that the annotate_two context has discovered will
-  * be added to the queue Q. This will eventually update the client
-  * of the libtgdb library.
-  *
-  * @return
-  * 1 when it has finished a command, 
-  * 0 on success but hasn't received enough I/O to finish the command, 
-  * otherwise -1 on error.
-  */
-int a2_parse_io(struct annotate_two *a2,
-        const char *input_data, const size_t input_data_size,
-        char *debugger_output, size_t * debugger_output_size,
-        char *inferior_output, size_t * inferior_output_size,
-        struct tgdb_list *list);
 
 /*@}*/
 

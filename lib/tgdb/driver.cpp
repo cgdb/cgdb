@@ -199,8 +199,6 @@ static int gdb_input(void)
         }
     }
 
-    /*tgdb_traverse_responses ( tgdb ); */
-
     while ((item = tgdb_get_response(tgdb)) != NULL) {
         if (item->header == TGDB_UPDATE_COMPLETIONS) {
             struct tgdb_list *list =

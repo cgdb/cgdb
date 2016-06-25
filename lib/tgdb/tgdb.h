@@ -215,15 +215,6 @@
     struct tgdb_response *tgdb_get_response(struct tgdb *tgdb);
 
   /**
-   * This will traverse all of the responses that the context tgdb currently
-   * has and will print them. It is currently used for debugging purposes.
-   *
-   * \param tgdb
-   * An instance of the tgdb library to operate on.
-   */
-    void tgdb_traverse_responses(struct tgdb *tgdb);
-
-  /**
    * This will free all of the memory used by the responses that tgdb returns.
    *
    * \param tgdb

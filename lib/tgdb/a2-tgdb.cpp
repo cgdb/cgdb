@@ -87,7 +87,6 @@ static struct annotate_two *initialize_annotate_two(void)
     a2->config_dir[0] = '\0';
     a2->a2_gdb_init_file[0] = '\0';
 
-    a2->cur_response_list = NULL;
     a2->request_source_location = 0;
 
     return a2;
@@ -209,8 +208,6 @@ int a2_shutdown(struct annotate_two *a2)
         free(tc);
     }
 
-    tgdb_list_free(a2->cur_response_list, tgdb_types_free_command);
-    tgdb_list_destroy(a2->cur_response_list);
     return 0;
 }
 
@@ -224,28 +221,6 @@ int a2_is_client_ready(struct annotate_two *a2)
         return 1;
 
     return 0;
-}
-
-int a2_parse_io(struct annotate_two *a2,
-        const char *input_data, const size_t input_data_size,
-        char *debugger_output, size_t * debugger_output_size,
-        char *inferior_output, size_t * inferior_output_size,
-        struct tgdb_list *list)
-{
-    int val;
-
-    a2->command_finished = 0;
-    a2->cur_response_list = list;
-
-    val = a2_handle_data(a2, a2->sm, input_data, input_data_size,
-            debugger_output, debugger_output_size, list);
-
-    a2->cur_response_list = NULL;
-
-    if (a2->command_finished)
-        return 1;
-    else
-        return 0;
 }
 
 int a2_get_current_location(struct annotate_two *a2)
@@ -263,9 +238,10 @@ int a2_user_ran_command(struct annotate_two *a2)
     return commands_user_ran_command(a2);
 }
 
-int a2_prepare_for_command(struct annotate_two *a2, struct tgdb_command *com)
+int a2_prepare_for_command(struct annotate_two *a2,
+    struct tgdb_command *com, struct tgdb_list *list)
 {
-    return commands_prepare_for_command(a2, a2->c, com);
+    return commands_prepare_for_command(a2, a2->c, com, list);
 }
 
 int a2_is_misc_prompt(struct annotate_two *a2)

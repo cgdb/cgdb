@@ -30,19 +30,6 @@
 /*@{*/
 
  /**
-  * This will print a client generated command to stderr.
-  * These are the commands that are returned to the front end.
-  * It is currently used for debugging purposes.
-  *
-  * \param command
-  * The command to print. It should be of type 'struct tgdb_response'
-  *
-  * @return
-  * Will return -1 if the print command failed. Otherwise, 0.
-  */
-    int tgdb_types_print_command(void *command);
-
- /**
   * This will free a client generated command.
   * These are the commands that are returned to the front end.
   *

@@ -82,7 +82,7 @@ void commands_process(struct commands *c, char a);
  *  Returns: -1 if this command should not be run. 0 otherwise.
  */
 int commands_prepare_for_command(struct annotate_two *a2, struct commands *c,
-        struct tgdb_command *com);
+        struct tgdb_command *com, struct tgdb_list *list);
 
 /* commands_user_ran_command:
  * --------------------------

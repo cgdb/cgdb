@@ -8,8 +8,8 @@
 #endif /* HAVE_STDLIB_H */
 
 #if HAVE_SIGNAL_H
-#include <signal.h>             /* sig_atomic_t */
-#endif /* HAVE_SIGNAL_H */
+#include <signal.h> /* sig_atomic_t */
+#endif
 
 #if HAVE_STRING_H
 #include <string.h>
@@ -121,14 +121,16 @@ struct tgdb {
 
   /** These are 2 very important state variables.  */
 
-  /**
-   * If set to 1, libtgdb thinks the lower level subsystem is capable of 
-   * receiving another command. It needs this so that it doesn't send 2
-   * commands to the lower level before it can say it can't receive a command.
-   * At some point, maybe this can be removed?
-   * When its set to 0, libtgdb thinks it can not send the lower level another
-   * command.  */
-    int IS_SUBSYSTEM_READY_FOR_NEXT_COMMAND;
+    /**
+     * If set to 1, libtgdb thinks the lower level subsystem is capable of
+     * receiving another command. It needs this so that it doesn't send 2
+     * commands to the lower level before it can say it can't receive a command.
+     * At some point, maybe this can be removed?
+     * When its set to 0, libtgdb thinks it can not send the lower level another
+     * command.
+     *
+     * Basically whether gdb is at prompt or not. */
+    int is_gdb_ready_for_next_command;
 
   /** If ^c was hit by user */
     sig_atomic_t control_c;
@@ -275,7 +277,7 @@ static struct tgdb *initialize_tgdb_context(void)
     tgdb->gdb_input_queue = NULL;
     tgdb->oob_input_queue = NULL;
 
-    tgdb->IS_SUBSYSTEM_READY_FOR_NEXT_COMMAND = 1;
+    tgdb->is_gdb_ready_for_next_command = 1;
 
     tgdb->command_list = tgdb_list_init();
     tgdb->has_sigchld_recv = 0;
@@ -541,7 +543,7 @@ static int tgdb_disassemble_func(struct annotate_two *a2, int raw, int source)
  */
 static int tgdb_can_issue_command(struct tgdb *tgdb)
 {
-    if (tgdb->IS_SUBSYSTEM_READY_FOR_NEXT_COMMAND &&
+    if (tgdb->is_gdb_ready_for_next_command &&
             a2_is_client_ready(tgdb->tcc) &&
             (queue_size(tgdb->gdb_input_queue) == 0))
         return 1;
@@ -740,13 +742,13 @@ tgdb_run_or_queue_command(struct tgdb *tgdb, struct tgdb_command *command)
  */
 static int tgdb_deliver_command(struct tgdb *tgdb, struct tgdb_command *command)
 {
-    tgdb->IS_SUBSYSTEM_READY_FOR_NEXT_COMMAND = 0;
+    tgdb->is_gdb_ready_for_next_command = 0;
 
     /* Send what we're doing to log file */
     io_debug_write_fmt(" tgdb_deliver_command: <%s>", command->gdb_command);
 
     /* A command for the debugger */
-    if (a2_prepare_for_command(tgdb->tcc, command) == -1)
+    if (a2_prepare_for_command(tgdb->tcc, command, tgdb->command_list) == -1)
         return -1;
 
     /* A regular command from the client */
@@ -972,6 +974,7 @@ size_t tgdb_process(struct tgdb * tgdb, char *buf, size_t n, int *is_finished)
                     "tgdb_get_quit_command error");
             return -1;
         }
+
         tgdb->has_sigchld_recv = 0;
         if (tgdb_will_quit)
             goto tgdb_finish;
@@ -992,35 +995,26 @@ size_t tgdb_process(struct tgdb * tgdb, char *buf, size_t n, int *is_finished)
         goto tgdb_finish;
     }
 
-    local_buf[size] = '\0';
-
     /* 2. At this point local_buf has everything new from this read.
      * Basically this function is responsible for separating the annotations
      * that gdb writes from the data. 
      *
      * buf and buf_size are the data to be returned from the user.
      */
+
+    /* Reset command_finished var. This will get set to 1
+       when prompt annotation is parsed. */
+    tgdb->tcc->command_finished = 0;
+    local_buf[size] = '\0';
+    a2_parse_io(tgdb->tcc, local_buf, size, buf, &buf_size,
+        tgdb->command_list);
+
+    tgdb_process_client_commands(tgdb);
+
+    if (tgdb->tcc->command_finished == 1)
     {
-        /* unused for now */
-        char *infbuf = NULL;
-        size_t infbuf_size;
-        int result;
-
-        result = a2_parse_io(tgdb->tcc,
-                local_buf, size,
-                buf, &buf_size, infbuf, &infbuf_size, tgdb->command_list);
-
-        tgdb_process_client_commands(tgdb);
-
-        if (result == 0) {
-            /* success, and more to parse, ss isn't done */
-        } else if (result == 1) {
-            /* success, and finished command */
-            tgdb->IS_SUBSYSTEM_READY_FOR_NEXT_COMMAND = 1;
-        } else if (result == -1) {
-            logger_write_pos(logger, __FILE__, __LINE__,
-                    "a2_parse_io failed");
-        }
+        /* success, and finished command */
+        tgdb->is_gdb_ready_for_next_command = 1;
     }
 
     /* 3. if ^c has been sent, clear the buffers.
@@ -1063,11 +1057,6 @@ struct tgdb_response *tgdb_get_response(struct tgdb *tgdb)
     tgdb->command_list_iterator = tgdb_list_next(tgdb->command_list_iterator);
 
     return command;
-}
-
-void tgdb_traverse_responses(struct tgdb *tgdb)
-{
-    tgdb_list_foreach(tgdb->command_list, tgdb_types_print_command);
 }
 
 struct tgdb_response *tgdb_create_response(enum tgdb_response_type header)
