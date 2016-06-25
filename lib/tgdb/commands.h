@@ -75,10 +75,8 @@ void commands_process(struct commands *c, char a);
  *  Prepare's the client for the command COM to be run.
  *
  *  com:    The command to be run.
- *
- *  Returns: -1 if this command should not be run. 0 otherwise.
  */
-int commands_prepare_for_command(struct annotate_two *a2, struct commands *c,
+void commands_prepare_for_command(struct annotate_two *a2, struct commands *c,
         struct tgdb_command *com);
 
 /* commands_user_ran_command:
@@ -171,7 +169,7 @@ struct tgdb_command *tgdb_command_create(const char *tgdb_command_data,
  * \param item
  * The tgdb_command to free
  */
-void tgdb_command_destroy(void *item);
+void tgdb_command_destroy(struct tgdb_command *tc);
 
 /**
  * Return if the debugger supports the /s flag for the disassemble command.

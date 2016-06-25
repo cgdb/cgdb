@@ -80,7 +80,6 @@
 #include "io.h"
 #include "fork_util.h"
 #include "terminal.h"
-#include "queue.h"
 #include "rline.h"
 #include "ibuf.h"
 #include "usage.h"

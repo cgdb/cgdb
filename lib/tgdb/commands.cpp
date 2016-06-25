@@ -25,9 +25,7 @@
 #include "tgdb_types.h"
 #include "logger.h"
 #include "sys_util.h"
-#include "queue.h"
 #include "ibuf.h"
-#include "queue.h"
 #include "gdbwire.h"
 #include "state_machine.h"
 
@@ -489,7 +487,7 @@ void commands_process(struct commands *c, char a)
     }
 }
 
-int
+void
 commands_prepare_for_command(struct annotate_two *a2,
         struct commands *c, struct tgdb_command *com)
 {
@@ -500,7 +498,7 @@ commands_prepare_for_command(struct annotate_two *a2,
 
     if (a_com == -1) {
         data_set_state(a2, USER_COMMAND);
-        return 0;
+        return;
     }
 
     switch (a_com) {
@@ -551,8 +549,6 @@ commands_prepare_for_command(struct annotate_two *a2,
 
     data_set_state(a2, INTERNAL_COMMAND);
     io_debug_write_fmt("<%s\n>", com->gdb_command);
-
-    return 0;
 }
 
 /** 
@@ -628,10 +624,8 @@ struct tgdb_command *tgdb_command_create(const char *gdb_command,
     return tc;
 }
 
-void tgdb_command_destroy(void *item)
+void tgdb_command_destroy(struct tgdb_command *tc)
 {
-    struct tgdb_command *tc = (struct tgdb_command *) item;
-
     free(tc->gdb_command);
     free(tc);
 }

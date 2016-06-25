@@ -19,7 +19,6 @@
 #include "io.h"
 #include "state_machine.h"
 #include "commands.h"
-#include "queue.h"
 #include "sys_util.h"
 #include "ibuf.h"
 
@@ -42,7 +41,7 @@ int a2_open_new_tty(struct annotate_two *a2, int *inferior_stdin, int *inferior_
     *inferior_stdout = pty_pair_get_masterfd(a2->pty_pair);
 
     commands_issue_command(a2, ANNOTATE_TTY,
-        pty_pair_get_slavename(a2->pty_pair), 0);
+        pty_pair_get_slavename(a2->pty_pair), 1);
 
     return 0;
 }
@@ -235,9 +234,9 @@ int a2_user_ran_command(struct annotate_two *a2)
     return commands_user_ran_command(a2);
 }
 
-int a2_prepare_for_command(struct annotate_two *a2, struct tgdb_command *com)
+void a2_prepare_for_command(struct annotate_two *a2, struct tgdb_command *com)
 {
-    return commands_prepare_for_command(a2, a2->c, com);
+    commands_prepare_for_command(a2, a2->c, com);
 }
 
 int a2_is_misc_prompt(struct annotate_two *a2)

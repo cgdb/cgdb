@@ -257,7 +257,7 @@ int a2_user_ran_command(struct annotate_two *a2);
  * @return
  * -1 on error, 0 on success
  */
-int a2_prepare_for_command(struct annotate_two *a2, struct tgdb_command *com);
+void a2_prepare_for_command(struct annotate_two *a2, struct tgdb_command *com);
 
 /**
  * This is a hack. It should be removed eventually.

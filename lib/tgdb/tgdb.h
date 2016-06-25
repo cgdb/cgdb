@@ -70,30 +70,6 @@
 /*@}*/
 /* }}}*/
 
-/* Status Commands {{{*/
-/******************************************************************************/
-/**
- * @name Status Commands
- * These functions are for querying the tgdb context.
- */
-/******************************************************************************/
-
-/*@{*/
-
-  /**
-   * This will check to see if TGDB is currently capable of receiving another command.
-   * 
-   * \param tgdb
-   * An instance of the tgdb library to operate on.
-   *
-   * \return
-   * Will return as 1 if tgdb is busy, otherwise 0.
-   */
-    int tgdb_is_busy(struct tgdb *tgdb);
-
-/*@}*/
-/* }}}*/
-
 /* Input/Output commands {{{*/
 /******************************************************************************/
 /**
@@ -412,20 +388,6 @@
  * TGDB to be able to run.
  */
 /******************************************************************************/
-
-  /**
-   * Have TGDB append a command to it's list of commands it needs to run.
-   * 
-   * \param tgdb
-   * An instance of the tgdb library to operate on.
-   * 
-   * \param request
-   * The requested command to have TGDB process.
-   *
-   * \return
-   * 0 on success or -1 on error
-   */
-    int tgdb_queue_append(struct tgdb *tgdb, tgdb_request_ptr request);
 
   /**
    * Get a tgdb_request command back from TGDB.

@@ -49,7 +49,6 @@
 #include "io.h"
 #include "terminal.h"
 #include "rline.h"
-#include "queue.h"
 #include "fork_util.h"
 
 #define MAXLINE 4096
