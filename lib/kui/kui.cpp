@@ -47,8 +47,22 @@
 
 /* includes {{{ */
 
-#include <string.h>             /* strdup */
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#if HAVE_STDIO_H
+#include <stdio.h>
+#endif
+
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+
+#if HAVE_STRING_H
+#include <string.h>
+#endif
+
 #include <fcntl.h>
 #include <errno.h>
 #include "kui.h"

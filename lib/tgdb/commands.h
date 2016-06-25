@@ -1,8 +1,6 @@
 #ifndef __COMMANDS_H__
 #define __COMMANDS_H__
 
-#include "a2-tgdb.h"
-
 struct commands;
 
 /* These are the state that an internal command could lead to */

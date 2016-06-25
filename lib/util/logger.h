@@ -1,13 +1,7 @@
 #ifndef __LOGGER_H__
 #define __LOGGER_H__
 
-#if HAVE_CONFIG_H
 #include "config.h"
-#endif /* HAVE_CONFIG_H */
-
-#if HAVE_STDIO_H
-#include <stdio.h>
-#endif /* HAVE_STDIO_H */
 
 /* Doxygen headers {{{ */
 /*!

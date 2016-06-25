@@ -1,24 +1,25 @@
 #if HAVE_CONFIG_H
 #include "config.h"
-#endif /* HAVE_CONFIG_H */
+#endif
 
-#if HAVE_STDLIB_H
-#include <stdlib.h>
-#endif /* HAVE_STDLIB_H */
+#if HAVE_STDIO_H
+#include <stdio.h>
+#endif
 
 #if HAVE_STRING_H
 #include <string.h>
-#endif /* HAVE_STRING_H */
+#endif
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
-#endif /* HAVE_SYS_TYPES_H */
+#endif
 
 #if HAVE_CTYPE_H
-#include <ctype.h>
+#include <ctype.h> /* isspace, isdigit */
 #endif
 
 /* Local includes */
+#include "a2-tgdb.h"
 #include "commands.h"
 #include "io.h"
 #include "tgdb_types.h"
@@ -26,9 +27,7 @@
 #include "sys_util.h"
 #include "queue.h"
 #include "ibuf.h"
-#include "a2-tgdb.h"
 #include "queue.h"
-#include "annotate_two.h"
 #include "gdbwire.h"
 #include "state_machine.h"
 

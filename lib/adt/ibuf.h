@@ -1,14 +1,6 @@
 #ifndef __IBUF_H__
 #define __IBUF_H__
 
-#if HAVE_CONFIG_H
-#include "config.h"
-#endif /* HAVE_CONFIG_H */
-
-#if HAVE_STDLIB_H
-#include <stdlib.h>
-#endif /* HAVE_STDLIB_H */
-
 /* A simple interface to an infinite string */
 struct ibuf;
 

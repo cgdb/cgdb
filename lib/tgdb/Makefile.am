@@ -10,11 +10,9 @@ libtgdb_a_SOURCES = \
     tgdb.cpp \
     tgdb.h \
     tgdb_command.h \
-    tgdb_types.cpp \
     tgdb_types.h \
     a2-tgdb.cpp \
     a2-tgdb.h \
-    annotate_two.h \
     commands.cpp \
     commands.h \
     state_machine.cpp \

@@ -11,14 +11,6 @@
  */
 
 /* includes {{{*/
-#if HAVE_CONFIG_H
-#include "config.h"
-#endif                          /* HAVE_CONFIG_H */
-
-#if HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif                          /* HAVE_SYS_TYPES_H */
-
 #include "tgdb_types.h"
 /* }}}*/
 

@@ -12,17 +12,6 @@
 #ifndef __STATE_MACHINE_H__
 #define __STATE_MACHINE_H__
 
-#if HAVE_CONFIG_H
-#include "config.h"
-#endif /* HAVE_CONFIG_H */
-
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif /* HAVE_SYS_TYPES_H */
-
-#include "tgdb_types.h"
-#include "a2-tgdb.h"
-
 struct state_machine;
 
 struct state_machine *state_machine_initialize(void);

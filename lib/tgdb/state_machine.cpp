@@ -10,14 +10,15 @@
 #include <string.h>
 #endif /* HAVE_STRING_H */
 
-#if HAVE_STDLIB_H
-#include <stdlib.h>
-#endif /* HAVE_STDLIB_H */
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif /* HAVE_SYS_TYPES_H */
 
+#include "tgdb_types.h"
+#include "a2-tgdb.h"
 #include "state_machine.h"
 #include "commands.h"
 #include "logger.h"
-#include "annotate_two.h"
 #include "sys_util.h"
 #include "ibuf.h"
 #include "io.h"

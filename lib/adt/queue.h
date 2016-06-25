@@ -1,14 +1,6 @@
 #ifndef __QUEUE_H__
 #define __QUEUE_H__
 
-#if HAVE_CONFIG_H
-#include "config.h"
-#endif /* HAVE_CONFIG_H */
-
-#if HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif /* HAVE_SYS_TYPES_H */
-
 struct queue;
 
 typedef void (*item_func) (void *item);

@@ -1,48 +1,27 @@
 #if HAVE_CONFIG_H
 #include "config.h"
-#endif /* HAVE_CONFIG_H */
+#endif
 
 #if HAVE_STDLIB_H
 #include <stdlib.h>
-#endif /* HAVE_STDLIB_H */
+#endif
 
 #if HAVE_STRING_H
 #include <string.h>
-#endif /* HAVE_STRING_H */
+#endif
 
 #if HAVE_STDIO_H
 #include <stdio.h>
-#endif /* HAVE_STDIO_H */
-
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif /* HAVE_UNISTD_H */
-
-#if HAVE_SYS_STAT_H
-#include <sys/stat.h>
 #endif
 
-#if HAVE_SIGNAL_H
-#include <signal.h>
-#endif /* HAVE_SIGNAL_H */
-
-#if HAVE_ERRNO_H
-#include <errno.h>
-#endif /* HAVE_ERRNO_H */
-
 #include "a2-tgdb.h"
-#include "fork_util.h"
-#include "fs_util.h"
-#include "pseudo.h"
 #include "logger.h"
 #include "io.h"
 #include "state_machine.h"
 #include "commands.h"
-#include "tgdb_types.h"
 #include "queue.h"
 #include "sys_util.h"
 #include "ibuf.h"
-#include "annotate_two.h"
 
 /* Here are the two functions that deal with getting tty information out
  * of the annotate_two subsystem.
@@ -220,6 +199,7 @@ int a2_shutdown(struct annotate_two *a2)
     return 0;
 }
 
+int tgdb_delete_response(struct tgdb_response *com);
 void a2_delete_responses(struct annotate_two *a2)
 {
     int i;
