@@ -101,6 +101,7 @@ typedef enum { WIN_SPLIT_FREE = -3, /* split point not on quarter mark */
 
 /** All of the different configuration options */
 enum cgdbrc_option_kind {
+    CGDBRC_ARROWSELECTEDLINE,
     CGDBRC_ARROWSTYLE,
     CGDBRC_AUTOSOURCERELOAD,
     CGDBRC_CGDB_MODE_KEY,

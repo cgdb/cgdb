@@ -295,7 +295,7 @@ static int load_file(struct list_node *node)
  *   lwidth: The width of the line number, used to limit printing to the width
  *           of the screen.  Kinda ugly.
  */
-static void draw_current_line(struct sviewer *sview, int line, int lwidth)
+static void draw_current_line(struct sviewer *sview, int line, int lwidth, int arrow_attr)
 {
 
     int height = 0;             /* Height of curses window */
@@ -306,14 +306,11 @@ static void draw_current_line(struct sviewer *sview, int line, int lwidth)
     char *otext = NULL;         /* The current line (unhighlighted) */
     unsigned int length = 0;    /* Length of the line */
     int column_offset = 0;      /* Text to skip due to arrow */
-    int arrow_attr;
+    //int arrow_attr;
     int highlight_attr;
     enum ArrowStyle config_arrowstyle =
             cgdbrc_get(CGDBRC_ARROWSTYLE)->variant.arrow_style;
     int highlight_tabstop = cgdbrc_get(CGDBRC_TABSTOP)->variant.int_val;
-
-    if (hl_groups_get_attr(hl_groups_instance, HLG_ARROW, &arrow_attr) == -1)
-        return;
 
     if (hl_groups_get_attr(hl_groups_instance, HLG_LINE_HIGHLIGHT,
                     &highlight_attr) == -1)
@@ -597,6 +594,9 @@ int source_display(struct sviewer *sview, int focus)
     lwidth = (int) log10(sview->cur->buf.length) + 1;
     sprintf(fmt, "%%%dd", lwidth);
 
+    
+   
+
     for (i = 0; i < height; i++, line++) {
         wmove(sview->win, i, 0);
         if (has_colors()) {
@@ -615,13 +615,21 @@ int source_display(struct sviewer *sview, int focus)
                 for (j = 2 + lwidth; j < width; j++)
                     waddch(sview->win, ' ');
 
-                /* Mark the current line with an arrow */
-            } else if (line == sview->cur->exe_line) {
+                /* Mark the current line with an arrow or the selected line if in focus and arrowalllines is on */
+            } else if ( line == sview->cur->exe_line || (focus && cgdbrc_get(CGDBRC_ARROWSELECTEDLINE)->variant.int_val && sview->cur->sel_line == line) ) {
                 switch (sview->cur->buf.breakpts[line]) {
                     case 0:
-                        if (hl_groups_get_attr(hl_groups_instance, HLG_ARROW,
+                        {
+                            enum hl_group_kind arr_attr;
+                            if (line == sview->cur->sel_line && line != sview->cur->exe_line)
+                                arr_attr = HLG_ARROW_SEL;
+                            else
+                                arr_attr = HLG_ARROW;
+
+                            if (hl_groups_get_attr(hl_groups_instance, arr_attr,
                                         &attr) == -1)
                             return -1;
+                        }
                         break;
                     case 1:
                         if (hl_groups_get_attr(hl_groups_instance,
@@ -638,7 +646,7 @@ int source_display(struct sviewer *sview, int focus)
                 wprintw(sview->win, fmt, line + 1);
                 wattroff(sview->win, attr);
 
-                draw_current_line(sview, line, lwidth);
+                draw_current_line(sview, line, lwidth, attr);
 
                 /* Look for breakpoints */
             } else if (sview->cur->buf.breakpts[line]) {
