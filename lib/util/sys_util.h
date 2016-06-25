@@ -92,6 +92,7 @@ char *sys_aprintf(const char *fmt, ...);
 #define sblast( a ) ( ( a )[ stb__sbn( a ) - 1 ] )
 #define sbforeach( v, arr ) for ( ( v ) = ( arr ); ( v ) < ( arr ) + sbcount( arr ); ++( v ) )
 #define sbsetcount( a, n ) ( stb__sbmaybegrow( a, n ), stb__sbn( a ) = n )
+#define sbpopfront(a) (sbpush(a,*(a)), stb__shl(a), (a)[--stb__sbn(a)])
 
 
 #define stb__sbraw( a ) ( ( int * )( a )-2 )
@@ -99,8 +100,10 @@ char *sys_aprintf(const char *fmt, ...);
 #define stb__sbn( a ) stb__sbraw( a )[ 1 ]
 
 int stb__sbgrowf( void **arr, int increment, int itemsize );
+void stb__shlf(void **arr, int itemsize);
 #define stb__sbneedgrow( a, n ) ( ( a ) == 0 || stb__sbn( a ) + n >= stb__sbm( a ) )
 #define stb__sbmaybegrow( a, n ) ( stb__sbneedgrow( a, ( n ) ) ? stb__sbgrow( a, n ) : 0 )
 #define stb__sbgrow( a, n ) stb__sbgrowf( ( void ** )&( a ), ( n ), sizeof( *( a ) ) )
+#define stb__shl(a) stb__shlf((void **)&(a), sizeof(*(a)))
 
 #endif

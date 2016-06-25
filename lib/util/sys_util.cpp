@@ -180,9 +180,8 @@ int log10_uint(unsigned int val)
     return 0;
 }
 
-/* stb__sbgrowf: internal stretchy buffer grow function.
- */
-int stb__sbgrowf( void **arr, int increment, int itemsize )
+/* stb__sbgrowf: internal stretchy buffer grow function. */
+int stb__sbgrowf(void **arr, int increment, int itemsize)
 {
     int m = *arr ? 2 * stb__sbm( *arr ) + increment : increment + 1;
     void *p = cgdb_realloc( *arr ? stb__sbraw( *arr ) : 0,
@@ -194,6 +193,16 @@ int stb__sbgrowf( void **arr, int increment, int itemsize )
     stb__sbm( *arr ) = m;
 
     return 0;
+}
+
+void stb__shlf(void **arr, int itemsize)
+{
+    int n = stb__sbn(*arr);
+    char *arrptr = (char *)(*arr);
+
+    memmove(arrptr, arrptr + itemsize, itemsize * (n - 1));
+
+    stb__sbn(*arr) = n - 1;
 }
 
 char *sys_aprintf(const char *fmt, ...)
