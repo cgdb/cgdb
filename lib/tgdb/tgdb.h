@@ -392,12 +392,12 @@
      */
     void tgdb_request_disassemble_pc(struct tgdb *tgdb, int lines);
 
-  /**
-   * Used to get disassembly for function.
-   *
-   * \param tgdb
-   * An instance of the tgdb library to operate on.
-   */
+   /**
+    * Get disassembly for entire function.
+    *
+    * \param tgdb
+    * An instance of the tgdb library to operate on.
+    */
     enum disassemble_func_type {
         DISASSEMBLE_FUNC_DISASSEMBLY,
         DISASSEMBLE_FUNC_SOURCE_LINES,

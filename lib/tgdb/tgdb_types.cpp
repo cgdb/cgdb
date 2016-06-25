@@ -122,10 +122,9 @@ static int tgdb_types_print_item(void *command)
         }
         case TGDB_QUIT:
         {
-            struct tgdb_debugger_exit_status *status =
-                    com->choice.quit.exit_status;
             fprintf(fd, "TGDB_QUIT EXIT_STATUS(%d)RETURN_VALUE(%d)\n",
-                    status->exit_status, status->return_value);
+                    com->choice.quit.exit_status,
+                    com->choice.quit.return_value);
             break;
         }
     }
@@ -249,14 +248,7 @@ static int tgdb_types_delete_item(void *command)
             break;
         }
         case TGDB_QUIT:
-        {
-            struct tgdb_debugger_exit_status *status =
-                    com->choice.quit.exit_status;
-
-            free(status);
-            com->choice.quit.exit_status = NULL;
             break;
-        }
     }
 
     free(com);

@@ -629,7 +629,7 @@ int command_do_logo(int param)
 int command_do_quit(int param)
 {
     /* FIXME: Test to see if debugged program is still running */
-    cleanup();
+    cgdb_cleanup();
     exit(0);
     return 0;
 }

@@ -161,23 +161,7 @@
         char *func;
     };
 
- /**
-  * This tells the front end how the debugger terminated.
-  */
-    struct tgdb_debugger_exit_status {
-
-    /**
-     * If this is 0, the debugger terminated normally and return_value is valid
-     * If this is -1, the debugger terminated abnormally and return_value is 
-     * invalid
-     */
-        int exit_status;
-
-    /** This is the return value of the debugger upon normal termination. */
-        int return_value;
-    };
-
-    enum INTERFACE_REQUEST_COMMANDS {
+    enum tgdb_request_type {
     /** Request for TGDB to run a console command through the debugger */
         TGDB_REQUEST_CONSOLE_COMMAND,
     /**
@@ -202,7 +186,7 @@
 
     struct tgdb_request {
     /** This is the type of request.  */
-        enum INTERFACE_REQUEST_COMMANDS header;
+        enum tgdb_request_type header;
 
         union {
             struct {
@@ -249,7 +233,7 @@
   *  When TGDB is responding to a request or when an event is being generated
   *  the front end will find out about it through one of these enums.
   */
-    enum INTERFACE_RESPONSE_COMMANDS {
+    enum tgdb_response_type {
 
     /** All breakpoints that are set.  */
         TGDB_UPDATE_BREAKPOINTS,
@@ -315,7 +299,7 @@
   */
     struct tgdb_response {
     /** This is the type of response.  */
-        enum INTERFACE_RESPONSE_COMMANDS header;
+        enum tgdb_response_type header;
 
         union {
             /* header == TGDB_UPDATE_BREAKPOINTS */
@@ -382,10 +366,24 @@
 
             /* header == TGDB_QUIT */
             struct {
-                struct tgdb_debugger_exit_status *exit_status;
+                /**
+                 * This tells the front end how the debugger terminated.
+                 *
+                 * If this is 0, the debugger terminated normally and
+                 * return_value is valid
+                 * If this is -1, the debugger terminated abnormally and
+                 * return_value is invalid
+                 */
+                int exit_status;
+                /** This is the return value of the debugger upon normal
+                 * termination. */
+                int return_value;
             } quit;
 
         } choice;
     };
+
+    struct tgdb_response *tgdb_create_response(enum tgdb_response_type header);
+
 
 #endif                          /* __TGDB_TYPES_H__ */

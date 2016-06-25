@@ -72,7 +72,6 @@ int a2_handle_data(struct annotate_two *a2,
 
 /* This unit holds global data to tgdb. It helps keep track of obscure states */
 
-int globals_is_misc_prompt(struct state_machine *sm);
-void globals_set_misc_prompt_command(struct state_machine *sm, unsigned short set);
+int sm_is_misc_prompt(struct state_machine *sm);
 
 #endif

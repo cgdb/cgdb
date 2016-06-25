@@ -270,5 +270,5 @@ int a2_prepare_for_command(struct annotate_two *a2, struct tgdb_command *com)
 
 int a2_is_misc_prompt(struct annotate_two *a2)
 {
-    return globals_is_misc_prompt(a2->sm);
+    return sm_is_misc_prompt(a2->sm);
 }

@@ -23,8 +23,6 @@
 /* Keys */
 #define CGDB_BACKSPACE_KEY(c) (c == 8 || c == 127 || c == KEY_BACKSPACE)
 
-#define CGDB_KEY_RESIZE KEY_MAX
-
 #define MAXLINE 4096
 
 /* From the ncurses doupdate() man page:
@@ -56,13 +54,8 @@ enum win_refresh {
     WIN_REFRESH
 };
 
-/* TODO: Remove the below 3 lines. This is a reorganization effort to allow 
- * TGDB to understand the new request/response mechanism that TGDB supports.
- */
-struct tgdb;
-struct tgdb_request;
-
-void cleanup();
+/* Clean cgdb up (when exiting) */
+void cgdb_cleanup();
 
 /*
  * See documentation in cgdb.c.

@@ -877,20 +877,11 @@ ssize_t tgdb_recv_inferior_data(struct tgdb * tgdb, char *buf, size_t n)
  */
 static int tgdb_add_quit_command(struct tgdb *tgdb)
 {
-    struct tgdb_debugger_exit_status *tstatus;
     struct tgdb_response *response;
 
-    tstatus = (struct tgdb_debugger_exit_status *)
-            cgdb_malloc(sizeof (struct tgdb_debugger_exit_status));
-
-    /* Child did not exit normally */
-    tstatus->exit_status = -1;
-    tstatus->return_value = 0;
-
-    response = (struct tgdb_response *)cgdb_malloc(
-        sizeof (struct tgdb_response));
-    response->header = TGDB_QUIT;
-    response->choice.quit.exit_status = tstatus;
+    response = tgdb_create_response(TGDB_QUIT);
+    response->choice.quit.exit_status = -1;
+    response->choice.quit.return_value = 0;
 
     tgdb_types_append_command(tgdb->command_list, response);
 
@@ -915,17 +906,12 @@ static int tgdb_get_quit_command(struct tgdb *tgdb, int *tgdb_will_quit)
     pid_t pid = a2_get_debugger_pid(tgdb->tcc);
     int status = 0;
     pid_t ret;
-    struct tgdb_debugger_exit_status *tstatus;
-    struct tgdb_response *response = (struct tgdb_response *)
-            cgdb_malloc(sizeof (struct tgdb_response));
+    struct tgdb_response *response = tgdb_create_response(TGDB_QUIT);
 
     if (!tgdb_will_quit)
         return -1;
 
     *tgdb_will_quit = 0;
-
-    tstatus = (struct tgdb_debugger_exit_status *)
-            cgdb_malloc(sizeof (struct tgdb_debugger_exit_status));
 
     ret = waitpid(pid, &status, WNOHANG);
 
@@ -939,15 +925,15 @@ static int tgdb_get_quit_command(struct tgdb *tgdb, int *tgdb_will_quit)
 
     if ((WIFEXITED(status)) == 0) {
         /* Child did not exit normally */
-        tstatus->exit_status = -1;
-        tstatus->return_value = 0;
+        response->choice.quit.exit_status = -1;
+        response->choice.quit.return_value = 0;
+
     } else {
-        tstatus->exit_status = 0;
-        tstatus->return_value = WEXITSTATUS(status);
+        response->choice.quit.exit_status = 0;
+        response->choice.quit.return_value = WEXITSTATUS(status);
+
     }
 
-    response->header = TGDB_QUIT;
-    response->choice.quit.exit_status = tstatus;
     tgdb_types_append_command(tgdb->command_list, response);
     *tgdb_will_quit = 1;
 
@@ -1082,6 +1068,16 @@ struct tgdb_response *tgdb_get_response(struct tgdb *tgdb)
 void tgdb_traverse_responses(struct tgdb *tgdb)
 {
     tgdb_list_foreach(tgdb->command_list, tgdb_types_print_command);
+}
+
+struct tgdb_response *tgdb_create_response(enum tgdb_response_type header)
+{
+    struct tgdb_response *response;
+
+    response = (struct tgdb_response *)cgdb_calloc(1, sizeof(struct tgdb_response));
+    response->header = header;
+
+    return response;
 }
 
 void tgdb_delete_responses(struct tgdb *tgdb)

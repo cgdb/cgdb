@@ -76,9 +76,8 @@ commands_send_breakpoints(struct annotate_two *a2,
     struct tgdb_breakpoint *breakpoints)
 {
     struct tgdb_response *response = (struct tgdb_response *)
-        cgdb_malloc(sizeof (struct tgdb_response));
+        tgdb_create_response(TGDB_UPDATE_BREAKPOINTS);
 
-    response->header = TGDB_UPDATE_BREAKPOINTS;
     response->choice.update_breakpoints.breakpoints = breakpoints;
 
     tgdb_types_append_command(a2->cur_response_list, response);
@@ -154,10 +153,8 @@ static void commands_process_breakpoints(struct annotate_two *a2,
 static void commands_send_source_files(struct annotate_two *a2,
         char **source_files)
 {
-    struct tgdb_response *response = (struct tgdb_response *)
-            cgdb_malloc(sizeof (struct tgdb_response));
-
-    response->header = TGDB_UPDATE_SOURCE_FILES;
+    struct tgdb_response *response =
+        tgdb_create_response(TGDB_UPDATE_SOURCE_FILES);
     response->choice.update_source_files.source_files = source_files;
     tgdb_types_append_command(a2->cur_response_list, response);
 }
@@ -192,9 +189,8 @@ commands_process_info_sources(struct annotate_two *a2,
 static void send_disassemble_func_complete_response(struct annotate_two *a2,
         struct gdbwire_mi_result_record *result_record)
 {
-    struct tgdb_response *response = (struct tgdb_response *)
-        cgdb_malloc(sizeof (struct tgdb_response));
-    response->header = TGDB_DISASSEMBLE_FUNC;
+    struct tgdb_response *response =
+        tgdb_create_response(TGDB_DISASSEMBLE_FUNC);
 
     response->choice.disassemble_function.error = 
         (result_record->result_class == GDBWIRE_MI_ERROR);
@@ -207,9 +203,8 @@ static void send_disassemble_func_complete_response(struct annotate_two *a2,
 
 static void send_command_complete_response(struct annotate_two *a2)
 {
-    struct tgdb_response *response = (struct tgdb_response *)
-        cgdb_malloc(sizeof (struct tgdb_response));
-    response->header = TGDB_UPDATE_COMPLETIONS;
+    struct tgdb_response *response =
+        tgdb_create_response(TGDB_UPDATE_COMPLETIONS);
     response->choice.update_completions.completion_list =
         a2->c->tab_completions;
     tgdb_types_append_command(a2->cur_response_list, response);
@@ -224,8 +219,8 @@ commands_send_source_file(struct annotate_two *a2, char *fullname, char *file,
      */
     struct tgdb_file_position *tfp = (struct tgdb_file_position *)
             cgdb_malloc(sizeof (struct tgdb_file_position));
-    struct tgdb_response *response = (struct tgdb_response *)
-            cgdb_malloc(sizeof (struct tgdb_response));
+    struct tgdb_response *response =
+            tgdb_create_response(TGDB_UPDATE_FILE_POSITION);
 
     if (fullname || file) {
         tfp->path = (fullname)?cgdb_strdup(fullname):cgdb_strdup(file);
@@ -237,7 +232,6 @@ commands_send_source_file(struct annotate_two *a2, char *fullname, char *file,
     tfp->func = (func)?cgdb_strdup(func):0;
     tfp->line_number = line;
 
-    response->header = TGDB_UPDATE_FILE_POSITION;
     response->choice.update_file_position.file_position = tfp;
 
     tgdb_types_append_command(a2->cur_response_list, response);

@@ -971,23 +971,28 @@ static void update_file_position(struct tgdb_response *response)
      *
      * The address or line number are not always available.
      *
-     * So currently, our best bet is to show the file/line
-     * if it's available. If it's not, show the disassembly.
-     * If that's not available, show nothing.
+     * So currently, our best bet is to
+     * - show the file/line
+     * - if file/line unavailable, show the function disassembly
+     * - if function disassembly unavailable, show disassembly
+     * - if disassembly unavailable, show nothing
      */
     struct tgdb_file_position *tfp;
     struct sviewer *sview = if_get_sview();
     int source_reload_status = -1;
 
     tfp = response->choice.update_file_position.file_position;
-
+    
+    /* Tell source viewer what the current $pc address is. */
     sview->addr_frame = tfp->addr;
 
+    /* If we got a pathname and we're not showing disasm... */
     if (tfp->path && !cgdbrc_get_int(CGDBRC_DISASM)) {
         /* Update the file */
         source_reload_status = 
             source_reload(if_get_sview(), tfp->path, 0);
 
+        /* Show the source file at this line number */
         if_show_file(tfp->path, tfp->line_number, tfp->line_number);
     }
 
@@ -999,7 +1004,7 @@ static void update_file_position(struct tgdb_response *response)
     if (source_reload_status == -1 && sview->addr_frame) {
         int ret;
 
-        /* Try to show the disasm for ths function */
+        /* Try to show the disasm for the current $pc address */
         ret = source_set_exec_addr(sview, sview->addr_frame);
 
         if (!ret) {
@@ -1162,7 +1167,7 @@ static void process_commands(struct tgdb *tgdb_in)
             update_prompt(item);
             break;
         case TGDB_QUIT:
-            cleanup();
+            cgdb_cleanup();
             exit(0);
             break;
         default:
@@ -1537,9 +1542,8 @@ static int main_loop(void)
 /* Exposed Functions */
 /* ----------------- */
 
-/* cleanup: Invoked by the various err_xxx funtions when dying.
- * -------- */
-void cleanup()
+/* Invoked by the various err_xxx funtions when dying. */
+void cgdb_cleanup()
 {
     char *log_file, *tmp_log_file;
     int has_recv_data;
@@ -1711,31 +1715,31 @@ int init_kui(void)
             cgdbrc_get_mapped_key_timeoutlen());
     if (!kui_ctx) {
         logger_write_pos(logger, __FILE__, __LINE__,
-                "Unable to initialize input library");
-        cleanup();
+            "Unable to initialize input library");
+        cgdb_cleanup();
         exit(-1);
     }
 
     kui_map = kui_ms_create();
     if (!kui_map) {
         logger_write_pos(logger, __FILE__, __LINE__,
-                "Unable to initialize input library");
-        cleanup();
+            "Unable to initialize input library");
+        cgdb_cleanup();
         exit(-1);
     }
 
     kui_imap = kui_ms_create();
     if (!kui_imap) {
         logger_write_pos(logger, __FILE__, __LINE__,
-                "Unable to initialize input library");
-        cleanup();
+            "Unable to initialize input library");
+        cgdb_cleanup();
         exit(-1);
     }
 
     if (kui_manager_set_map_set(kui_ctx, kui_map) == -1) {
         logger_write_pos(logger, __FILE__, __LINE__,
-                "Unable to initialize input library");
-        cleanup();
+            "Unable to initialize input library");
+        cgdb_cleanup();
         exit(-1);
     }
 
@@ -1814,26 +1818,26 @@ int main(int argc, char *argv[])
     /* Create the home directory */
     if (init_home_dir() == -1) {
         logger_write_pos(logger, __FILE__, __LINE__,
-                "Unable to create home dir ~/.cgdb");
-        cleanup();
+            "Unable to create home dir ~/.cgdb");
+        cgdb_cleanup();
         exit(-1);
     }
 
     if (init_readline() == -1) {
         logger_write_pos(logger, __FILE__, __LINE__, "Unable to init readline");
-        cleanup();
+        cgdb_cleanup();
         exit(-1);
     }
 
     if (tty_cbreak(STDIN_FILENO, &term_attributes) == -1) {
         logger_write_pos(logger, __FILE__, __LINE__, "tty_cbreak error");
-        cleanup();
+        cgdb_cleanup();
         exit(-1);
     }
 
     if (init_kui() == -1) {
         logger_write_pos(logger, __FILE__, __LINE__, "init_kui error");
-        cleanup();
+        cgdb_cleanup();
         exit(-1);
     }
 
@@ -1849,36 +1853,36 @@ int main(int argc, char *argv[])
         case 1:
             logger_write_pos(logger, __FILE__, __LINE__,
                     "Unable to initialize the curses library");
-            cleanup();
+            cgdb_cleanup();
             exit(-1);
         case 2:
             logger_write_pos(logger, __FILE__, __LINE__,
                     "Unable to handle signal: SIGWINCH");
-            cleanup();
+            cgdb_cleanup();
             exit(-1);
         case 3:
             logger_write_pos(logger, __FILE__, __LINE__,
                     "Unable to setup highlighting groups");
-            cleanup();
+            cgdb_cleanup();
             exit(-1);
         case 4:
             logger_write_pos(logger, __FILE__, __LINE__,
                     "New GDB window failed -- out of memory?");
-            cleanup();
+            cgdb_cleanup();
             exit(-1);
     }
 
     /* Initialize the pipe that is used for resize */
     if (init_resize_pipe() == -1) {
         logger_write_pos(logger, __FILE__, __LINE__, "init_resize_pipe error");
-        cleanup();
+        cgdb_cleanup();
         exit(-1);
     }
 
     /* Initialize the pipe that is used for signals */
     if (init_signal_pipe() == -1) {
         logger_write_pos(logger, __FILE__, __LINE__, "init_signal_pipe error");
-        cleanup();
+        cgdb_cleanup();
         exit(-1);
     }
 
@@ -1886,6 +1890,6 @@ int main(int argc, char *argv[])
     main_loop();
 
     /* Shut down curses and exit */
-    cleanup();
+    cgdb_cleanup();
     return 0;
 }

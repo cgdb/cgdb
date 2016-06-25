@@ -40,7 +40,7 @@ static int tgdb_parse_annotation(struct annotate_two *a2, char *data,
  * annotate unit and this unit is free of all responsibility :)
  */
 
-enum state {
+enum sm_state {
     DATA,                       /* data from debugger */
     NEW_LINE,                   /* got '\n' */
     CONTROL_Z,                  /* got first ^Z '\032' */
@@ -49,32 +49,28 @@ enum state {
 };
 
 /** The data needed to parse the output of GDB. */
-struct state_machine {
-
-    /** The maximum size of the prompt. */
-#define GDB_PROMPT_SIZE 1024
-
+struct state_machine
+{
     /** the state of the data context */
     enum internal_state data_state;
 
-    /** The debugger's prompt. */
-    char gdb_prompt[GDB_PROMPT_SIZE];
-
-    /** The size of gdb_prompt. */
-    int gdb_prompt_size;
+    /** The debugger's current prompt. */
+    struct ibuf *gdb_prompt;
 
     /** What the debugger's prompt was before. */
-    char gdb_prompt_last[GDB_PROMPT_SIZE];
+    struct ibuf *gdb_prompt_last;
 
     /** Annotations will be stored here. */
     struct ibuf *tgdb_buffer;
 
     /** The state of the annotation parser ( current context ). */
-    enum state tgdb_state;
+    enum sm_state tgdb_state;
 
-    /** Is a misc prompt command be run. */
+    /** If a misc prompt command be run. */
     unsigned short misc_prompt_command;
 };
+
+int mi_get_result_record(struct ibuf *buf, char **lstart, int *id);
 
 struct state_machine *state_machine_initialize(void)
 {
@@ -82,9 +78,8 @@ struct state_machine *state_machine_initialize(void)
             (struct state_machine *) cgdb_malloc(sizeof (struct state_machine));
 
     sm->data_state = VOID;
-    sm->gdb_prompt_size = 0;
-    sm->gdb_prompt[0] = 0;
-    sm->gdb_prompt_last[0] = 0;
+    sm->gdb_prompt = ibuf_init();
+    sm->gdb_prompt_last = ibuf_init();
     sm->tgdb_buffer = ibuf_init();
     sm->tgdb_state = DATA;
     sm->misc_prompt_command = 0;
@@ -94,6 +89,12 @@ struct state_machine *state_machine_initialize(void)
 
 void state_machine_shutdown(struct state_machine *sm)
 {
+    ibuf_free(sm->gdb_prompt);
+    sm->gdb_prompt = NULL;
+
+    ibuf_free(sm->gdb_prompt_last);
+    sm->gdb_prompt_last = NULL;
+
     ibuf_free(sm->tgdb_buffer);
     free(sm);
     sm = NULL;
@@ -118,22 +119,20 @@ void data_set_state(struct annotate_two *a2, enum internal_state state)
         case VOID:
             break;
         case AT_PROMPT:
-            a2->sm->gdb_prompt_size = 0;
+            ibuf_clear(a2->sm->gdb_prompt);
             break;
         case USER_AT_PROMPT:
-            /* Null-Terminate the prompt */
-            a2->sm->gdb_prompt[a2->sm->gdb_prompt_size] = '\0';
+            if (strcmp(ibuf_get(a2->sm->gdb_prompt),
+                    ibuf_get(a2->sm->gdb_prompt_last)) != 0) {
+                ibuf_clear(a2->sm->gdb_prompt_last);
+                ibuf_add(a2->sm->gdb_prompt_last, ibuf_get(a2->sm->gdb_prompt));
 
-            if (strcmp(a2->sm->gdb_prompt, a2->sm->gdb_prompt_last) != 0) {
-                strcpy(a2->sm->gdb_prompt_last, a2->sm->gdb_prompt);
                 /* Update the prompt */
                 if (a2->cur_response_list) {
-                    struct tgdb_response *response = (struct tgdb_response *)
-                            cgdb_malloc(sizeof (struct tgdb_response));
-
-                    response->header = TGDB_UPDATE_CONSOLE_PROMPT_VALUE;
+                    struct tgdb_response *response =
+                        tgdb_create_response(TGDB_UPDATE_CONSOLE_PROMPT_VALUE);
                     response->choice.update_console_prompt_value.prompt_value =
-                            cgdb_strdup(a2->sm->gdb_prompt_last);
+                            cgdb_strdup(ibuf_get(a2->sm->gdb_prompt_last));
                     tgdb_list_append(a2->cur_response_list, response);
                 }
             }
@@ -168,8 +167,7 @@ static void data_process(struct annotate_two *a2, char a, char *buf, int *n)
             buf[(*n)++] = a;
             break;
         case AT_PROMPT:
-            a2->sm->gdb_prompt[a2->sm->gdb_prompt_size++] = a;
-/*            buf[(*n)++] = a;*/
+            ibuf_addchar(a2->sm->gdb_prompt, a);
             break;
         case USER_AT_PROMPT:
             break;
@@ -290,14 +288,9 @@ int a2_handle_data(struct annotate_two *a2, struct state_machine *sm,
     return 0;
 }
 
-int globals_is_misc_prompt(struct state_machine *sm)
+int sm_is_misc_prompt(struct state_machine *sm)
 {
         return sm->misc_prompt_command;
-}
-
-void globals_set_misc_prompt_command(struct state_machine *sm, unsigned short set)
-{
-    sm->misc_prompt_command = set;
 }
 
 static int
@@ -342,7 +335,7 @@ static int handle_misc_pre_prompt(struct annotate_two *a2, const char *buf,
 static int handle_misc_prompt(struct annotate_two *a2, const char *buf,
         size_t n, struct tgdb_list *list)
 {
-    globals_set_misc_prompt_command(a2->sm, 1);
+    a2->sm->misc_prompt_command = 1;
     data_set_state(a2, USER_AT_PROMPT);
     a2->command_finished = 1;
     return 0;
@@ -351,7 +344,7 @@ static int handle_misc_prompt(struct annotate_two *a2, const char *buf,
 static int handle_misc_post_prompt(struct annotate_two *a2, const char *buf,
         size_t n, struct tgdb_list *list)
 {
-    globals_set_misc_prompt_command(a2->sm, 0);
+    a2->sm->misc_prompt_command = 0;
     data_set_state(a2, POST_PROMPT);
 
     return 0;
@@ -422,9 +415,7 @@ static int handle_exited(struct annotate_two *a2, const char *buf, size_t n,
     //    "exited 0"
     exit_status = (n >= 7) ? atoi(buf + 7) : -1;
 
-    response = (struct tgdb_response *)
-            cgdb_malloc(sizeof (struct tgdb_response));
-    response->header = TGDB_INFERIOR_EXITED;
+    response = tgdb_create_response(TGDB_INFERIOR_EXITED);
     response->choice.inferior_exited.exit_status = exit_status;
     tgdb_types_append_command(list, response);
     return 0;
