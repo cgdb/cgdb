@@ -28,7 +28,6 @@
 #include "ibuf.h"
 #include "a2-tgdb.h"
 #include "queue.h"
-#include "tgdb_list.h"
 #include "annotate_two.h"
 #include "gdbwire.h"
 #include "state_machine.h"
@@ -52,7 +51,7 @@ struct commands {
     /**
      * The current tab completion items.
      */
-    struct tgdb_list *tab_completions;
+    char **completions;
 
     /**
      * The disassemble command output.
@@ -205,8 +204,7 @@ static void send_command_complete_response(struct annotate_two *a2)
 {
     struct tgdb_response *response =
         tgdb_create_response(TGDB_UPDATE_COMPLETIONS);
-    response->choice.update_completions.completion_list =
-        a2->c->tab_completions;
+    response->choice.update_completions.completions = a2->c->completions;
     sbpush(a2->responses, response);
 }
 
@@ -348,7 +346,7 @@ static void gdbwire_stream_record_callback(void *context,
                 if (str[length-1] == '\n') {
                     str[length-1] = 0;
                 }
-                tgdb_list_append(c->tab_completions, cgdb_strdup(str));
+                sbpush(c->completions, cgdb_strdup(str));
             }
             break;
         case DATA_DISASSEMBLE_MODE_QUERY:
@@ -427,8 +425,7 @@ struct commands *commands_initialize(struct annotate_two *a2)
             (struct commands *) cgdb_malloc(sizeof (struct commands));
     c->a2 = a2;
     c->cur_command_state = VOID_COMMAND;
-
-    c->tab_completions = 0;
+    c->completions = NULL;
 
     c->disasm = NULL;
 
@@ -524,7 +521,7 @@ commands_prepare_for_command(struct annotate_two *a2,
         case ANNOTATE_TTY:
             break;              /* Nothing to do */
         case ANNOTATE_COMPLETE:
-            c->tab_completions = tgdb_list_init();
+            c->completions = 0;
             commands_set_state(c, COMMAND_COMPLETE);
             io_debug_write_fmt("<%s\n>", com->gdb_command);
             break;

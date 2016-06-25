@@ -25,7 +25,7 @@
 /* Creating and Destroying a libtgdb context. {{{*/
 /******************************************************************************/
 /**
- * @name Createing and Destroying a libtgdb context.
+ * @name Creating and Destroying a libtgdb context.
  * These functions are for createing and destroying a tgdb context.
  */
 /******************************************************************************/

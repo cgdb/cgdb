@@ -22,9 +22,6 @@
 #include "tgdb_types.h"
 #include "tgdb_list.h"
 #include "sys_util.h"
-#include "ibuf.h"
-#include "tgdb_list.h"
-#include "queue.h"
 
 static int tgdb_types_source_files_free(void *data)
 {
@@ -89,13 +86,14 @@ int tgdb_delete_response(struct tgdb_response *com)
             break;
         case TGDB_UPDATE_COMPLETIONS:
         {
-            struct tgdb_list *list =
-                    com->choice.update_completions.completion_list;
+            int i;
+            char **completions = com->choice.update_completions.completions;
 
-            tgdb_list_free(list, tgdb_types_source_files_free);
-            tgdb_list_destroy(list);
+            for (i = 0; i < sbcount(completions); i++)
+                free(completions[i]);
+            sbfree(completions);
 
-            com->choice.update_completions.completion_list = NULL;
+            com->choice.update_completions.completions = NULL;
             break;
         }
         case TGDB_DISASSEMBLE_PC:

@@ -38,7 +38,6 @@
 #include "pseudo.h"             /* SLAVE_SIZE constant */
 #include "fork_util.h"
 #include "sys_util.h"
-#include "tgdb_list.h"
 #include "logger.h"
 
 /* }}} */
@@ -354,7 +353,7 @@ static int tgdb_initialize_logger_interface(struct tgdb *tgdb, char *config_dir)
     return 0;
 }
 
-/* Createing and Destroying a libtgdb context. {{{*/
+/* Creating and Destroying a libtgdb context. {{{*/
 
 struct tgdb *tgdb_initialize(const char *debugger,
         int argc, char **argv, int *debugger_fd)

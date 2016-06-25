@@ -78,7 +78,6 @@
 #include "fs_util.h"
 #include "cgdbrc.h"
 #include "io.h"
-#include "tgdb_list.h"
 #include "fork_util.h"
 #include "terminal.h"
 #include "queue.h"
@@ -669,18 +668,22 @@ readline_completion_display_func(char **matches, int num_matches,
                 "handle_tab_completion_request error\n");
 }
 
-int do_tab_completion(struct tgdb_list *list)
+int do_tab_completion(char **completions)
 {
-    if (rline_rl_complete(rline, list, &readline_completion_display_func) == -1) {
+    int ret;
+
+    ret = rline_rl_complete(rline, completions, &readline_completion_display_func);
+    if (ret == -1)
+    {
         logger_write_pos(logger, __FILE__, __LINE__,
                 "rline_rl_complete error\n");
         return -1;
     }
 
-  /** 
-   * If completion_ptr is non-null, then this means CGDB still has to display
-   * the completion to the user. is_tab_completing can not be turned off until
-   * the completions are displayed to the user. */
+    /** 
+     * If completion_ptr is non-null, then this means CGDB still has to display
+     * the completion to the user. is_tab_completing can not be turned off until
+     * the completions are displayed to the user. */
     if (!completion_ptr)
         is_tab_completing = 0;
 
@@ -1060,7 +1063,7 @@ static void update_quit(struct tgdb_response *response)
 
 static void update_completions(struct tgdb_response *response)
 {
-    do_tab_completion(response->choice.update_completions.completion_list);
+    do_tab_completion(response->choice.update_completions.completions);
 }
 
 static void update_disassemble(struct tgdb_response *response)

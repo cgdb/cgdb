@@ -281,9 +281,9 @@
 
             /* header == TGDB_UPDATE_COMPLETIONS */
             struct {
-                /* This list has elements of 'const char *' 
+                /* This sb array has elements of 'const char *'
                  * representing each possible completion. */
-                struct tgdb_list *completion_list;
+                char **completions;
             } update_completions;
 
             /* header == TGDB_DISASSEMBLE_FUNC */
