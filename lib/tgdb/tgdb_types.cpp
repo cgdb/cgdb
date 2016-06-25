@@ -20,6 +20,7 @@
 
 /* Local includes */
 #include "tgdb_types.h"
+#include "tgdb_list.h"
 #include "sys_util.h"
 #include "ibuf.h"
 #include "tgdb_list.h"
@@ -34,7 +35,7 @@ static int tgdb_types_source_files_free(void *data)
     return 0;
 }
 
-static int tgdb_delete_response(struct tgdb_response *com)
+int tgdb_delete_response(struct tgdb_response *com)
 {
     if (!com)
         return -1;
@@ -131,16 +132,4 @@ static int tgdb_delete_response(struct tgdb_response *com)
     free(com);
     com = NULL;
     return 0;
-}
-
-int tgdb_types_free_command(void *command)
-{
-    return tgdb_delete_response((struct tgdb_response *) command);
-}
-
-void
-tgdb_types_append_command(struct tgdb_list *command_list,
-        struct tgdb_response *response)
-{
-    tgdb_list_append(command_list, response);
 }

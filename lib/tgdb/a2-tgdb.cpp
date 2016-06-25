@@ -124,9 +124,12 @@ static int tgdb_setup_config_file(struct annotate_two *a2, const char *dir)
 struct annotate_two *a2_create_context(const char *debugger,
         int argc, char **argv, const char *config_dir, struct logger *logger_in)
 {
-
-    struct annotate_two *a2 = initialize_annotate_two();
     char a2_debug_file[FSUTIL_PATH_MAX];
+    struct annotate_two *a2 = (struct annotate_two *)
+        cgdb_calloc(1, sizeof(struct annotate_two));
+
+    a2->debugger_stdin = -1;
+    a2->debugger_out = -1;
 
     if (!tgdb_setup_config_file(a2, config_dir)) {
         logger_write_pos(logger_in, __FILE__, __LINE__,
@@ -190,15 +193,19 @@ int a2_initialize(struct annotate_two *a2,
     return 0;
 }
 
-/* TODO: Implement shutdown properly */
 int a2_shutdown(struct annotate_two *a2)
 {
     int i;
 
     cgdb_close(a2->debugger_stdin);
+    a2->debugger_stdin = -1;
 
     state_machine_shutdown(a2->sm);
     commands_shutdown(a2->c);
+
+    a2_delete_responses(a2);
+    sbfree(a2->responses);
+    a2->responses = NULL;
 
     for (i = 0; i < sbcount(a2->client_commands); i++)
     {
@@ -207,20 +214,30 @@ int a2_shutdown(struct annotate_two *a2)
         free(tc->gdb_command);
         free(tc);
     }
+    sbfree(a2->client_commands);
+    a2->client_commands = NULL;
 
     return 0;
 }
+
+void a2_delete_responses(struct annotate_two *a2)
+{
+    int i;
+
+    for (i = 0; i < sbcount(a2->responses); i++)
+        tgdb_delete_response(a2->responses[i]);
+
+    sbsetcount(a2->responses, 0);
+}
+
 
 int a2_is_client_ready(struct annotate_two *a2)
 {
     if (!a2->tgdb_initialized)
         return 0;
 
-    /* If the user is at the prompt */
-    if (data_get_state(a2->sm) == USER_AT_PROMPT)
-        return 1;
-
-    return 0;
+    /* Return 1 if the user is at the prompt */
+    return (data_get_state(a2->sm) == USER_AT_PROMPT);
 }
 
 int a2_get_current_location(struct annotate_two *a2)
@@ -238,10 +255,9 @@ int a2_user_ran_command(struct annotate_two *a2)
     return commands_user_ran_command(a2);
 }
 
-int a2_prepare_for_command(struct annotate_two *a2,
-    struct tgdb_command *com, struct tgdb_list *list)
+int a2_prepare_for_command(struct annotate_two *a2, struct tgdb_command *com)
 {
-    return commands_prepare_for_command(a2, a2->c, com, list);
+    return commands_prepare_for_command(a2, a2->c, com);
 }
 
 int a2_is_misc_prompt(struct annotate_two *a2)

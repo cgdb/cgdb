@@ -166,6 +166,14 @@ int a2_initialize(struct annotate_two *a2,
  */
 int a2_shutdown(struct annotate_two *a2);
 
+/**
+   * This will free all of the memory used by the responses that tgdb returns.
+   *
+   * \param tgdb
+   * An instance of the tgdb library to operate on.
+   */
+void a2_delete_responses(struct annotate_two *a2);
+
 /*@}*/
 
 /******************************************************************************/
@@ -213,8 +221,7 @@ int a2_user_ran_command(struct annotate_two *a2);
  * @return
  * -1 on error, 0 on success
  */
-int a2_prepare_for_command(struct annotate_two *a2, struct tgdb_command
-*com, struct tgdb_list *list);
+int a2_prepare_for_command(struct annotate_two *a2, struct tgdb_command *com);
 
 /**
  * This is a hack. It should be removed eventually.

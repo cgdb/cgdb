@@ -136,14 +136,6 @@ struct tgdb {
     sig_atomic_t control_c;
 
   /**
-   * This is the queue of commands TGDB has currently made to give to the 
-   * front end.  */
-    struct tgdb_list *command_list;
-
-  /** An iterator into command_list. */
-    tgdb_list_iterator *command_list_iterator;
-
-  /**
    * When GDB dies (purposely or not), the SIGCHLD is sent to the application controlling TGDB.
    * This data structure represents the fact that SIGCHLD has been sent.
    *
@@ -279,7 +271,6 @@ static struct tgdb *initialize_tgdb_context(void)
 
     tgdb->is_gdb_ready_for_next_command = 1;
 
-    tgdb->command_list = tgdb_list_init();
     tgdb->has_sigchld_recv = 0;
 
     logger = NULL;
@@ -748,7 +739,7 @@ static int tgdb_deliver_command(struct tgdb *tgdb, struct tgdb_command *command)
     io_debug_write_fmt(" tgdb_deliver_command: <%s>", command->gdb_command);
 
     /* A command for the debugger */
-    if (a2_prepare_for_command(tgdb->a2, command, tgdb->command_list) == -1)
+    if (a2_prepare_for_command(tgdb->a2, command) == -1)
         return -1;
 
     /* A regular command from the client */
@@ -765,7 +756,7 @@ static int tgdb_deliver_command(struct tgdb *tgdb, struct tgdb_command *command)
         response->choice.debugger_command_delivered.debugger_command =
             (command->command_choice == TGDB_COMMAND_FRONT_END)?1:0;
         response->choice.debugger_command_delivered.command = cgdb_strdup(s);
-        tgdb_types_append_command(tgdb->command_list, response);
+        sbpush(tgdb->a2->responses, response);
     }
 
     return 0;
@@ -884,9 +875,7 @@ static int tgdb_add_quit_command(struct tgdb *tgdb)
     response = tgdb_create_response(TGDB_QUIT);
     response->choice.quit.exit_status = -1;
     response->choice.quit.return_value = 0;
-
-    tgdb_types_append_command(tgdb->command_list, response);
-
+    sbpush(tgdb->a2->responses, response);
     return 0;
 }
 
@@ -905,10 +894,10 @@ static int tgdb_add_quit_command(struct tgdb *tgdb)
  */
 static int tgdb_get_quit_command(struct tgdb *tgdb, int *tgdb_will_quit)
 {
-    pid_t pid = a2_get_debugger_pid(tgdb->a2);
     int status = 0;
     pid_t ret;
     struct tgdb_response *response = tgdb_create_response(TGDB_QUIT);
+    pid_t pid = a2_get_debugger_pid(tgdb->a2);
 
     if (!tgdb_will_quit)
         return -1;
@@ -936,9 +925,7 @@ static int tgdb_get_quit_command(struct tgdb *tgdb, int *tgdb_will_quit)
 
     }
 
-    tgdb_types_append_command(tgdb->command_list, response);
     *tgdb_will_quit = 1;
-
     return 0;
 }
 
@@ -1006,8 +993,7 @@ size_t tgdb_process(struct tgdb * tgdb, char *buf, size_t n, int *is_finished)
        when prompt annotation is parsed. */
     tgdb->a2->command_finished = 0;
     local_buf[size] = '\0';
-    a2_parse_io(tgdb->a2, local_buf, size, buf, &buf_size,
-        tgdb->command_list);
+    a2_parse_io(tgdb->a2, local_buf, size, buf, &buf_size);
 
     tgdb_process_client_commands(tgdb);
 
@@ -1032,11 +1018,6 @@ size_t tgdb_process(struct tgdb * tgdb, char *buf, size_t n, int *is_finished)
 
   tgdb_finish:
 
-    /* Set the iterator to the beginning. So when the user
-     * calls tgdb_get_command it, it will be in the right spot.
-     */
-    tgdb->command_list_iterator = tgdb_list_get_first(tgdb->command_list);
-
     *is_finished = !tgdb_is_busy(tgdb);
 
     return buf_size;
@@ -1044,19 +1025,16 @@ size_t tgdb_process(struct tgdb * tgdb, char *buf, size_t n, int *is_finished)
 
 /* Getting Data out of TGDB {{{*/
 
-struct tgdb_response *tgdb_get_response(struct tgdb *tgdb)
+struct tgdb_response *tgdb_get_response(struct tgdb *tgdb, int index)
 {
-    struct tgdb_response *command;
+    struct tgdb_response *response = NULL;
+    if (index < sbcount(tgdb->a2->responses))
+    {
+        /* Return pointer to this response */
+        response = tgdb->a2->responses[index];
+    }
 
-    if (tgdb->command_list_iterator == NULL)
-        return NULL;
-
-    command = (struct tgdb_response *) tgdb_list_get_item(
-                tgdb->command_list_iterator);
-
-    tgdb->command_list_iterator = tgdb_list_next(tgdb->command_list_iterator);
-
-    return command;
+    return response;
 }
 
 struct tgdb_response *tgdb_create_response(enum tgdb_response_type header)
@@ -1071,7 +1049,7 @@ struct tgdb_response *tgdb_create_response(enum tgdb_response_type header)
 
 void tgdb_delete_responses(struct tgdb *tgdb)
 {
-    tgdb_list_free(tgdb->command_list, tgdb_types_free_command);
+    a2_delete_responses(tgdb->a2);
 }
 
 /* }}}*/

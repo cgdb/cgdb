@@ -1,7 +1,6 @@
 #ifndef __COMMANDS_H__
 #define __COMMANDS_H__
 
-#include "tgdb_types.h"
 #include "a2-tgdb.h"
 
 struct commands;
@@ -82,7 +81,7 @@ void commands_process(struct commands *c, char a);
  *  Returns: -1 if this command should not be run. 0 otherwise.
  */
 int commands_prepare_for_command(struct annotate_two *a2, struct commands *c,
-        struct tgdb_command *com, struct tgdb_list *list);
+        struct tgdb_command *com);
 
 /* commands_user_ran_command:
  * --------------------------
@@ -172,7 +171,7 @@ struct tgdb_command *tgdb_command_create(const char *tgdb_command_data,
  * This is a function for debugging.
  *
  * \param item
- * The command to free
+ * The tgdb_command to free
  */
 void tgdb_command_destroy(void *item);
 
@@ -184,4 +183,21 @@ void tgdb_command_destroy(void *item);
  */
 int commands_disassemble_supports_s_mode(struct commands *c);
 
-#endif
+/* commands_issue_command:
+ * -----------------------
+ *
+ *  Issue a given command to gdb.
+ */
+void commands_issue_command(struct annotate_two *a2,
+    enum annotate_commands commmand, const char *data, int oob, int *id);
+
+/* commands_process: This function receives the output from gdb when gdb
+ *                   is running a command on behalf of this package.
+ *
+ *    a     -> the character received from gdb.
+ *    com   -> commands to give back to gdb.
+ */
+int commands_process_cgdb_gdbmi(struct annotate_two *a2, struct ibuf *buf,
+    int result_record, char *result_line, int id);
+
+#endif /* __COMMANDS_H__ */

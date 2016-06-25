@@ -18,40 +18,6 @@
 #include <stdint.h>
 #endif
 
-#include "tgdb_list.h"
-
-/******************************************************************************/
-/**
- * @name Utilitly commands to run on a command.
- * These functions take a 'struct tgdb_response' as a parameter.
- */
-/******************************************************************************/
-
-/*@{*/
-
- /**
-  * This will free a client generated command.
-  * These are the commands that are returned to the front end.
-  *
-  * \param command
-  * The command to print. It should be of type 'struct tgdb_response'
-  * 
-  * @return
-  * Will return -1 if free'ing failed. Otherwise, 0.
-  */
-    int tgdb_types_free_command(void *command);
-
- /**
-  * This will append a new command into TGDB's queue.
-  *
-  * \param command_list
-  * \param response
-  */
-    void tgdb_types_append_command(struct tgdb_list *command_list,
-            struct tgdb_response *response);
-
-/*@}*/
-
  /**
   * The client can give any of these commands to TGDB through 
   * tgdb_run_debugger_command.
@@ -371,6 +337,7 @@
     };
 
     struct tgdb_response *tgdb_create_response(enum tgdb_response_type header);
+    int tgdb_delete_response(struct tgdb_response *response);
 
 
 #endif                          /* __TGDB_TYPES_H__ */

@@ -199,8 +199,11 @@ static int gdb_input(void)
         }
     }
 
-    while ((item = tgdb_get_response(tgdb)) != NULL) {
-        if (item->header == TGDB_UPDATE_COMPLETIONS) {
+    int index = 0;
+    while ((item = tgdb_get_response(tgdb, index++)) != NULL)
+    {
+        if (item->header == TGDB_UPDATE_COMPLETIONS)
+        {
             struct tgdb_list *list =
                     item->choice.update_completions.completion_list;
             do_tab_completion(list);

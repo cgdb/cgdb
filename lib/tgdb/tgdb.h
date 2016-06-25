@@ -212,7 +212,7 @@
    * A valid response if responses still exist.
    * Null if no more responses exist.
    */
-    struct tgdb_response *tgdb_get_response(struct tgdb *tgdb);
+    struct tgdb_response *tgdb_get_response(struct tgdb *tgdb, int index);
 
   /**
    * This will free all of the memory used by the responses that tgdb returns.

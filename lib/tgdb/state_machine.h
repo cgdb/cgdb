@@ -42,8 +42,7 @@ enum internal_state {
 /* data_set_state:   Sets the state of the data package. This should usually be called
  *                   after an annotation has been read.
  */
-void data_set_state(struct annotate_two *a2, enum internal_state state,
-        struct tgdb_list *list);
+void data_set_state(struct annotate_two *a2, enum internal_state state);
 
 /* data_get_state:   Gets the state of the data package
  * Returns:          The current state.
@@ -67,14 +66,10 @@ enum internal_state data_get_state(struct state_machine *d);
  *
  * \param debugger_output_size
  * This is the size of debugger_output
- *
- * \param command_list
- * If a command was generated from an annotation, its put in here.
  */
 void a2_parse_io(struct annotate_two *a2,
     const char *input_data, const size_t input_data_size,
-    char *debugger_output, size_t *debugger_output_size,
-    struct tgdb_list *command_list);
+    char *debugger_output, size_t *debugger_output_size);
 
 /* This unit holds global data to tgdb. It helps keep track of obscure states */
 

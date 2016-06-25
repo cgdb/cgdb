@@ -23,7 +23,7 @@
 #include "io.h"
 
 static int tgdb_parse_annotation(struct annotate_two *a2, char *data,
-    size_t size, struct tgdb_list *list);
+    size_t size);
 
 /* This package looks for annotations coming from gdb's output.
  * The program that is being debugged does not have its output pass
@@ -105,8 +105,7 @@ enum internal_state data_get_state(struct state_machine *sm)
     return sm->data_state;
 }
 
-void data_set_state(struct annotate_two *a2, enum internal_state state,
-        struct tgdb_list *list)
+void data_set_state(struct annotate_two *a2, enum internal_state state)
 {
     /* if tgdb is at an internal command, than nothing changes that
      * state unless tgdb gets to the prompt annotation. This means that
@@ -129,13 +128,11 @@ void data_set_state(struct annotate_two *a2, enum internal_state state,
                 ibuf_add(a2->sm->gdb_prompt_last, ibuf_get(a2->sm->gdb_prompt));
 
                 /* Update the prompt */
-                if (list) {
-                    struct tgdb_response *response =
-                        tgdb_create_response(TGDB_UPDATE_CONSOLE_PROMPT_VALUE);
-                    response->choice.update_console_prompt_value.prompt_value =
-                            cgdb_strdup(ibuf_get(a2->sm->gdb_prompt_last));
-                    tgdb_list_append(list, response);
-                }
+                struct tgdb_response *response =
+                    tgdb_create_response(TGDB_UPDATE_CONSOLE_PROMPT_VALUE);
+                response->choice.update_console_prompt_value.prompt_value =
+                        cgdb_strdup(ibuf_get(a2->sm->gdb_prompt_last));
+                sbpush(a2->responses, response);
             }
 
             a2->command_finished = 1;
@@ -189,7 +186,7 @@ static void data_process(struct annotate_two *a2, char a, char *buf, int *n)
 
 void a2_parse_io(struct annotate_two *a2,
         const char *data, const size_t size,
-        char *gui_data, size_t * gui_size, struct tgdb_list *command_list)
+        char *gui_data, size_t * gui_size)
 {
     int i, counter = 0;
     struct state_machine *sm = a2->sm;
@@ -217,7 +214,7 @@ void a2_parse_io(struct annotate_two *a2,
                     case ANNOTATION:   /* Found an annotation */
                         sm->tgdb_state = NL_DATA;
                         tgdb_parse_annotation(a2, ibuf_get(sm->tgdb_buffer),
-                                ibuf_length(sm->tgdb_buffer), command_list);
+                                ibuf_length(sm->tgdb_buffer));
                         ibuf_clear(sm->tgdb_buffer);
                         break;
                     case NL_DATA:
@@ -295,31 +292,28 @@ int sm_is_misc_prompt(struct state_machine *sm)
 }
 
 static int
-handle_source(struct annotate_two *a2, const char *buf, size_t n,
-        struct tgdb_list *list)
+handle_source(struct annotate_two *a2, const char *buf, size_t n)
 {
     a2->request_source_location = 1;
     return 0;
 }
 
 static int
-handle_frame_end(struct annotate_two *a2, const char *buf, size_t n,
-        struct tgdb_list *list)
+handle_frame_end(struct annotate_two *a2, const char *buf, size_t n)
 {
     a2->request_source_location = 1;
     return 0;
 }
 
 static int
-handle_frames_invalid(struct annotate_two *a2, const char *buf, size_t n,
-        struct tgdb_list *list)
+handle_frames_invalid(struct annotate_two *a2, const char *buf, size_t n)
 {
     a2->request_source_location = 1;
     return 0;
 }
 
 static int handle_misc_pre_prompt(struct annotate_two *a2, const char *buf,
-        size_t n, struct tgdb_list *list)
+        size_t n)
 {
     /* If tgdb is sending a command, then continue past it */
     if (data_get_state(a2->sm) == INTERNAL_COMMAND) {
@@ -327,86 +321,81 @@ static int handle_misc_pre_prompt(struct annotate_two *a2, const char *buf,
             logger_write_pos(logger, __FILE__, __LINE__,
                     "Could not send command");
     } else {
-        data_set_state(a2, AT_PROMPT, list);
+        data_set_state(a2, AT_PROMPT);
     }
 
     return 0;
 }
 
 static int handle_misc_prompt(struct annotate_two *a2, const char *buf,
-        size_t n, struct tgdb_list *list)
+        size_t n)
 {
     a2->sm->misc_prompt_command = 1;
-    data_set_state(a2, USER_AT_PROMPT, list);
+    data_set_state(a2, USER_AT_PROMPT);
     a2->command_finished = 1;
     return 0;
 }
 
 static int handle_misc_post_prompt(struct annotate_two *a2, const char *buf,
-        size_t n, struct tgdb_list *list)
+        size_t n)
 {
     a2->sm->misc_prompt_command = 0;
-    data_set_state(a2, POST_PROMPT, list);
+    data_set_state(a2, POST_PROMPT);
 
     return 0;
 }
 
-static int handle_pre_prompt(struct annotate_two *a2, const char *buf, size_t n,
-        struct tgdb_list *list)
+static int handle_pre_prompt(struct annotate_two *a2, const char *buf, size_t n)
 {
     if (a2->request_source_location) {
         a2_get_current_location(a2);
         a2->request_source_location = 0;
     }
 
-    data_set_state(a2, AT_PROMPT, list);
+    data_set_state(a2, AT_PROMPT);
 
     return 0;
 }
 
-static int handle_prompt(struct annotate_two *a2, const char *buf, size_t n,
-        struct tgdb_list *list)
+static int handle_prompt(struct annotate_two *a2, const char *buf, size_t n)
 {
     /* All done. */
-    data_set_state(a2, USER_AT_PROMPT, list);
+    data_set_state(a2, USER_AT_PROMPT);
     return 0;
 }
 
 static int handle_post_prompt(struct annotate_two *a2, const char *buf,
-        size_t n, struct tgdb_list *list)
+        size_t n)
 {
-    data_set_state(a2, POST_PROMPT, list);
+    data_set_state(a2, POST_PROMPT);
     return 0;
 }
 
-static int handle_error(struct annotate_two *a2, const char *buf, size_t n,
-        struct tgdb_list *list)
+static int handle_error(struct annotate_two *a2, const char *buf, size_t n)
 {
-    data_set_state(a2, POST_PROMPT, list);    /* TEMPORARY */
+    data_set_state(a2, POST_PROMPT);    /* TEMPORARY */
     return 0;
 }
 
 static int handle_error_begin(struct annotate_two *a2, const char *buf,
-        size_t n, struct tgdb_list *list)
+        size_t n)
 {
     /* After a signal is sent (^c), the debugger will then output 
      * something like "Quit\n", so that should be displayed to the user.
      * Unfortunately, the debugger ( gdb ) isn't nice enough to return a 
      * post-prompt when a signal is received.
      */
-    data_set_state(a2, VOID, list);
+    data_set_state(a2, VOID);
     return 0;
 }
 
-static int handle_quit(struct annotate_two *a2, const char *buf, size_t n,
-        struct tgdb_list *list)
+static int handle_quit(struct annotate_two *a2, const char *buf, size_t n)
 {
-    data_set_state(a2, POST_PROMPT, list);    /* TEMPORARY */
+    data_set_state(a2, POST_PROMPT);    /* TEMPORARY */
     return 0;
 }
 
-static int handle_exited(struct annotate_two *a2, const char *buf, size_t n,
-        struct tgdb_list *list)
+static int handle_exited(struct annotate_two *a2, const char *buf, size_t n)
 {
     int exit_status;
     struct tgdb_response *response;
@@ -417,7 +406,6 @@ static int handle_exited(struct annotate_two *a2, const char *buf, size_t n,
 
     response = tgdb_create_response(TGDB_INFERIOR_EXITED);
     response->choice.inferior_exited.exit_status = exit_status;
-    tgdb_types_append_command(list, response);
     return 0;
 }
 
@@ -440,8 +428,7 @@ static struct annotation {
     /**
 	 * The function to call when the annotation is found.
 	 */
-    int (*f) (struct annotate_two * a2, const char *buf, size_t n,
-            struct tgdb_list * list);
+    int (*f) (struct annotate_two * a2, const char *buf, size_t n);
 } annotations[] = {
     {
     "source", 6, handle_source}, {
@@ -472,14 +459,14 @@ static struct annotation {
     NULL, 0, NULL}
 };
 
-static int tgdb_parse_annotation(struct annotate_two *a2, char *data, size_t size,
-        struct tgdb_list *list)
+static int tgdb_parse_annotation(struct annotate_two *a2, char *data,
+    size_t size)
 {
     int i;
 
     for (i = 0; annotations[i].data != NULL; ++i) {
         if (strncmp(data, annotations[i].data, annotations[i].size) == 0) {
-            if (annotations[i].f(a2, data, size, list) == -1) {
+            if (annotations[i].f(a2, data, size) == -1) {
                 logger_write_pos(logger, __FILE__, __LINE__,
                         "parsing annotation failed");
             } else {
