@@ -53,7 +53,6 @@ ssize_t io_writen(int fd, const void *vptr, size_t n);
 int io_debug_init(const char *filename);
 
 /* io_debug_write: Writes null terminated data cstring to debug file.  */
-void io_debug_write(const char *write);
 void io_debug_write_fmt(const char *fmt, ...) ATTRIBUTE_PRINTF( 1, 2 );
 
 /* io_display_char: Displays the char c in fd. 

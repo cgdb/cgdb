@@ -428,11 +428,6 @@ int main_loop(int gdbfd)
     return 0;
 }
 
-static void print_message(const char *command)
-{
-    printf("tgdb:[%s]\n", command);
-}
-
 int main(int argc, char **argv)
 {
 

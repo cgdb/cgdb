@@ -102,12 +102,6 @@ int io_debug_init(const char *filename)
     return 0;
 }
 
-void io_debug_write(const char *write)
-{
-    fprintf(dfd, "%s%s%s", debug_begin, write, debug_end);
-    fflush(dfd);
-}
-
 void io_debug_write_fmt(const char *fmt, ...)
 {
     va_list ap;

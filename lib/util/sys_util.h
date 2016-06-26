@@ -70,16 +70,10 @@ int cgdb_is_debugger_attached();
 */
 int log10_uint(unsigned int val);
 
-char *sys_aprintf(const char *fmt, ...);
+char *sys_aprintf(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
 
 #define MAX(a, b)  (((a) > (b)) ? (a) : (b))
 #define MIN(a, b)  (((a) < (b)) ? (a) : (b))
-
-#if HAVE_ATTRIBUTE_PRINTF
-#define ATTRIBUTE_PRINTF( _x, _y ) __attribute__( ( __format__( __printf__, _x, _y ) ) )
-#else
-#define ATTRIBUTE_PRINTF( _x, _y )
-#endif
 
 // ---- stretchy buffers (From Sean's stb.h)
 // https://github.com/nothings/stb/blob/master/stretchy_buffer.h
