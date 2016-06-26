@@ -138,11 +138,13 @@ static int highlight_node(struct list_node *node)
                 ibuf_add(ibuf, tokenizer_get_data(t));
                 break;
             default:
+                ibuf_free(ibuf);
                 return -1;
                 break;
         }
     }
 
+    ibuf_free(ibuf);
     return 0;
 }
 
