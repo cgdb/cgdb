@@ -93,7 +93,7 @@ static char *parse(struct scroller *scr, const char *orig, const char *buf)
                 break;
                 /* Default case -> Only keep printable characters */
             default:
-                if (isprint((int) buf[j])) {
+                if (!iscntrl((int) buf[j])) {
                     rv[i] = buf[j];
                     i++;
                 }
