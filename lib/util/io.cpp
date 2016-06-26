@@ -52,14 +52,8 @@
 
 #include "io.h"
 #include "logger.h"
-
-#define MAXLINE 4096
-
-static FILE *dfd = NULL;
-static int debug_on = 0;
-
-static const char *debug_begin = "";
-static const char *debug_end = "";
+#include "sys_util.h"
+#include "cgdb_clog.h"
 
 static void process_error(void)
 {
@@ -77,46 +71,6 @@ static void process_error(void)
         logger_write_pos(logger, __FILE__, __LINE__, "ERRNO = EINVAL");
     else if (errno == EFAULT)
         logger_write_pos(logger, __FILE__, __LINE__, "ERRNO = EFAULT");
-}
-
-int io_debug_init(const char *filename)
-{
-    char config_dir[MAXLINE];
-
-    if (filename == NULL)
-        return -1;
-
-    strcpy(config_dir, filename);
-
-    if ((dfd = fopen(config_dir, "w")) == NULL) {
-        logger_write_pos(logger, __FILE__, __LINE__,
-                "could not open debug file");
-        return -1;
-    }
-
-    /* A nifty trick to have debug dump to the terminal
-     * dfd = stderr;*/
-
-    debug_on = 1;
-
-    return 0;
-}
-
-void io_debug_write_fmt(const char *fmt, ...)
-{
-    va_list ap;
-    char va_buf[MAXLINE];
-
-    va_start(ap, fmt);
-#ifdef   HAVE_VSNPRINTF
-    vsnprintf(va_buf, sizeof (va_buf), fmt, ap);    /* this is safe */
-#else
-    vsprintf(va_buf, fmt, ap);  /* this is not safe */
-#endif
-    va_end(ap);
-
-    fprintf(dfd, "%s", va_buf);
-    fflush(dfd);
 }
 
 int io_read_byte(char *c, int source)
@@ -180,31 +134,12 @@ ssize_t io_read(int fd, void *buf, size_t count)
     } else if (amountRead == 0) {   /* EOF */
         return 0;
     } else {
-        char *tmp = (char *) buf;
-
-        tmp[amountRead] = '\0';
-        if (debug_on == 1) {
-            int i;
-
-            fprintf(dfd, "%s", debug_begin);
-            for (i = 0; i < amountRead; ++i) {
-                if (((char *) buf)[i] == '\r')
-                    fprintf(dfd, "(%s)", "\\r");
-                else if (((char *) buf)[i] == '\n')
-                    fprintf(dfd, "(%s)\n", "\\n");
-                else if (((char *) buf)[i] == '\032')
-                    fprintf(dfd, "(%s)", "\\032");
-                else if (((char *) buf)[i] == '\b')
-                    fprintf(dfd, "(%s)", "\\b");
-                else
-                    fprintf(dfd, "%c", ((char *) buf)[i]);
-            }
-            fprintf(dfd, "%s", debug_end);
-            fflush(dfd);
-        }
-        return amountRead;
-
+        char *str = sys_quote_nonprintables((char *)buf, amountRead);
+        clog_debug(CLOG(TGDB_LOGGER), "%s", str);
+        sbfree(str);
     }
+
+    return amountRead;
 }
 
 ssize_t io_writen(int fd, const void *vptr, size_t n)

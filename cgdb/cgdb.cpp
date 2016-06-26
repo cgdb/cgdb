@@ -193,7 +193,7 @@ static int is_tab_completing = 0;
  * to tell GDB that the user wants to enter more data on the next line.
  *
  * For this reason, CGDB keeps this buffer. It adds the command the user
- * is typeing to this buffer. When a line comes that does not end in a \,
+ * is typing to this buffer. When a line comes that does not end in a \,
  * then the command is sent to GDB.
  */
 static struct ibuf *current_line = NULL;

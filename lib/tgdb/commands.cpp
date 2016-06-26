@@ -520,7 +520,6 @@ commands_prepare_for_command(struct annotate_two *a2,
         case ANNOTATE_COMPLETE:
             c->completions = 0;
             commands_set_state(c, COMMAND_COMPLETE);
-            io_debug_write_fmt("<%s\n>", com->gdb_command);
             break;
         case ANNOTATE_DATA_DISASSEMBLE_MODE_QUERY:
             c->disassemble_supports_s_mode = 0;
@@ -548,7 +547,6 @@ commands_prepare_for_command(struct annotate_two *a2,
     };
 
     data_set_state(a2, INTERNAL_COMMAND);
-    io_debug_write_fmt("<%s\n>", com->gdb_command);
 }
 
 /** 

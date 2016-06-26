@@ -74,6 +74,7 @@ char *sys_aprintf(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
 
 #define MAX(a, b)  (((a) > (b)) ? (a) : (b))
 #define MIN(a, b)  (((a) < (b)) ? (a) : (b))
+char *sys_quote_nonprintables(char *str, int len);
 
 // ---- stretchy buffers (From Sean's stb.h)
 // https://github.com/nothings/stb/blob/master/stretchy_buffer.h
@@ -88,6 +89,8 @@ char *sys_aprintf(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
 #define sbsetcount( a, n ) ( stb__sbmaybegrow( a, n ), stb__sbn( a ) = n )
 #define sbpopfront(a) (sbpush(a,*(a)), stb__shl(a), (a)[--stb__sbn(a)])
 
+void sbpushstr(char **arr, const char *str, int len);
+void sbpushstrf(char **arr, const char *fmt, ...) ATTRIBUTE_PRINTF(2, 3);
 
 #define stb__sbraw( a ) ( ( int * )( a )-2 )
 #define stb__sbm( a ) stb__sbraw( a )[ 0 ]

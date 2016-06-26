@@ -40,21 +40,6 @@ ssize_t io_read(int fd, void *buf, size_t count);
  */
 ssize_t io_writen(int fd, const void *vptr, size_t n);
 
-/* io_debug_init: Puts tgdb in a mode where it writes a debug log of everything
- *    that is read from gdb. That is basically the entire session. This info
- *    is useful in determining what is going on under tgdb since the gui 
- *    is good at hiding that info from the user.
- *    
- *    filename is the file that the debug info will go to. If it is null, the 
- *    debug data will be writing to $HOME/.tgdb/tgdb_debug.txt
- *
- *    Returns: 0 on success, or -1 if can not open file.
- */
-int io_debug_init(const char *filename);
-
-/* io_debug_write: Writes null terminated data cstring to debug file.  */
-void io_debug_write_fmt(const char *fmt, ...) ATTRIBUTE_PRINTF( 1, 2 );
-
 /* io_display_char: Displays the char c in fd. 
  *    This is useful when c is a '\r' or '\n' because it will be displayed
  *    that way in the file.

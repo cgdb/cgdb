@@ -34,6 +34,7 @@
 #include "pseudo.h" /* SLAVE_SIZE constant */
 #include "sys_util.h"
 #include "logger.h"
+#include "cgdb_clog.h"
 
 /* }}} */
 
@@ -373,6 +374,16 @@ static int tgdb_initialize_logger_interface(struct tgdb *tgdb, char *config_dir)
         return -1;
     }
 
+    /* Puts cgdb in a mode where it writes a debug log of everything
+     * that is read from gdb. That is basically the entire session.
+     * This info is useful in determining what is going on under tgdb
+     * since the gui is good at hiding that info from the user.
+     *
+     * Change level to CLOG_ERROR to write only error messages.
+     *   clog_set_level(TGDB_LOGGER, CLOG_ERROR);
+     */
+    clog_open(TGDB_LOGGER, "%s/a2_tgdb_debug%d.txt", config_dir);
+
     return 0;
 }
 
@@ -453,7 +464,12 @@ int tgdb_shutdown(struct tgdb *tgdb)
     sbfree(tgdb->oob_input_queue);
 
 
-    return a2_shutdown(tgdb->a2);
+    a2_shutdown(tgdb->a2);
+
+    clog_info(CLOG(TGDB_LOGGER), "Closing logfile.");
+    clog_free(TGDB_LOGGER);
+
+    return 0;
 }
 
 /* }}}*/
@@ -713,13 +729,12 @@ static void tgdb_deliver_command(struct tgdb *tgdb, struct tgdb_command *command
     tgdb->is_gdb_ready_for_next_command = 0;
 
     /* Send what we're doing to log file */
-    io_debug_write_fmt(" tgdb_deliver_command: <%s>", command->gdb_command);
+    char *str = sys_quote_nonprintables(command->gdb_command, -1);
+    clog_debug(CLOG(TGDB_LOGGER), "%s", str);
+    sbfree(str);
 
     /* A command for the debugger */
     a2_prepare_for_command(tgdb->a2, command);
-
-    /* A regular command from the client */
-    io_debug_write_fmt("<%s>", command->gdb_command);
 
     io_writen(tgdb->debugger_stdin, command->gdb_command,
             strlen(command->gdb_command));

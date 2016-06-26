@@ -102,7 +102,6 @@ static int tgdb_setup_config_file(struct annotate_two *a2, const char *dir)
 struct annotate_two *a2_create_context(const char *debugger,
         int argc, char **argv, const char *config_dir, struct logger *logger_in)
 {
-    char a2_debug_file[FSUTIL_PATH_MAX];
     struct annotate_two *a2 = (struct annotate_two *)
         cgdb_calloc(1, sizeof(struct annotate_two));
 
@@ -115,12 +114,7 @@ struct annotate_two *a2_create_context(const char *debugger,
         return NULL;
     }
 
-    /* Initialize the debug file that a2_tgdb writes to */
-    fs_util_get_path(config_dir, "a2_tgdb_debug.txt", a2_debug_file);
-    io_debug_init(a2_debug_file);
-
-    a2->debugger_pid =
-            invoke_debugger(debugger, argc, argv,
+    a2->debugger_pid = invoke_debugger(debugger, argc, argv,
             &a2->debugger_stdin, &a2->debugger_out, 0, a2->a2_gdb_init_file);
 
     /* Couldn't invoke process */

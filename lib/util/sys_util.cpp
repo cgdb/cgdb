@@ -205,6 +205,45 @@ void stb__shlf(void **arr, int itemsize)
     stb__sbn(*arr) = n - 1;
 }
 
+void sbpushstr(char **arr, const char *str, int len)
+{
+    if (len == -1)
+        len = strlen(str);
+
+    if (!*arr)
+        sbpush(*arr, 0);
+
+    if (len > 0)
+    {
+        char *dst = sbadd(*arr, len) - 1;
+
+        memmove(dst, str, len);
+        dst[len] = 0;
+    }
+}
+
+void sbpushstrf(char **arr, const char *fmt, ...)
+{
+    int len;
+    va_list ap;
+
+    if (!*arr)
+        sbpush(*arr, 0);
+
+    va_start(ap, fmt);
+    len = vsnprintf(NULL, 0, fmt, ap);
+    va_end(ap);
+
+    if (len > 0)
+    {
+        char *dst = sbadd(*arr, len) - 1;
+
+        va_start(ap, fmt);
+        vsnprintf(dst, len + 1, fmt, ap);
+        va_end(ap);
+    }
+}
+
 char *sys_aprintf(const char *fmt, ...)
 {
     int n;
@@ -225,4 +264,41 @@ char *sys_aprintf(const char *fmt, ...)
     }
 
     return NULL;
+}
+
+char *sys_quote_nonprintables(char *str, int len)
+{
+    int i;
+    char *ret = NULL;
+
+    if (len == -1)
+        len = strlen(str);
+
+    /* Nil terminate our return string */
+    sbpush(ret, 0);
+
+    for (i = 0; i < len; ++i)
+    {
+        const char *ch = NULL;
+
+        if (str[i] == '\r')
+            ch = "\\r";
+        else if (str[i] == '\n')
+            ch = "\\n";
+        else if (str[i] == '\032')
+            ch = "\\032";
+        else if (str[i] == '\033')
+            ch = "\\033";
+        else if (str[i] == '\b')
+            ch = "\\b";
+        else if (str[i] == '\t')
+            ch = "\\t";
+
+        if (ch)
+            sbpushstrf(&ret, "(%s)", ch);
+        else
+            sbpushstr(&ret, &str[i], 1);
+    }
+
+    return ret;
 }
