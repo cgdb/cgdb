@@ -22,9 +22,12 @@
 #include <errno.h>
 #endif /* HAVE_ERRNO_H */
 
-#define MAXLINE 4096
-
 #include "logger.h"
+#include "sys_util.h"
+#define CLOG_MAIN
+#include "clog.h"
+
+#define MAXLINE 4096
 
 struct logger *logger = NULL;
 
