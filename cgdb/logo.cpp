@@ -2,7 +2,7 @@
  * ------
  * Data for ASCII logos.
  *
- * These logos were generated thanks to Jörg Seyfferth and his web-based
+ * These logos were generated thanks to Jorg Seyfferth and his web-based
  * ASCII-text generator:  http://www.network-science.de/ascii/
  */
 
