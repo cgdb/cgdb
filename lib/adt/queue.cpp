@@ -1,5 +1,5 @@
-#include "queue.h"
 #include "sys_util.h"
+#include "queue.h"
 
 struct node {
     void *data;

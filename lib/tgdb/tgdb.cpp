@@ -33,12 +33,9 @@
 #include "io.h"
 #include "pseudo.h" /* SLAVE_SIZE constant */
 #include "sys_util.h"
-#include "logger.h"
 #include "cgdb_clog.h"
 
 /* }}} */
-
-static int num_loggers = 0;
 
 struct tgdb_request *last_request = NULL;
 
@@ -296,8 +293,6 @@ static struct tgdb *initialize_tgdb_context(void)
 
     tgdb->has_sigchld_recv = 0;
 
-    logger = NULL;
-
     return tgdb;
 }
 
@@ -326,8 +321,7 @@ static int tgdb_initialize_config_dir(struct tgdb *tgdb, char *config_dir)
 
     /* Create the config directory */
     if (!fs_util_create_dir_in_base(home_dir, tgdb_dir)) {
-        logger_write_pos(logger, __FILE__, __LINE__,
-                "fs_util_create_dir_in_base error");
+        clog_error(CLOG_CGDB, "fs_util_create_dir_in_base error");
         return -1;
     }
 
@@ -350,29 +344,9 @@ static int tgdb_initialize_config_dir(struct tgdb *tgdb, char *config_dir)
  */
 static int tgdb_initialize_logger_interface(struct tgdb *tgdb, char *config_dir)
 {
-
-    /* Get the home directory */
-    const char *tgdb_log_file = "tgdb_log.txt";
-    char tgdb_log_path[FSUTIL_PATH_MAX];
-
-    fs_util_get_path(config_dir, tgdb_log_file, tgdb_log_path);
-
-    /* Initialize the logger */
-    if (num_loggers == 0) {
-        logger = logger_create();
-
-        if (!logger) {
-            printf("Error: Could not create log file\n");
-            return -1;
-        }
-    }
-
-    ++num_loggers;
-
-    if (logger_set_file(logger, tgdb_log_path) == -1) {
-        printf("Error: Could not open log file\n");
-        return -1;
-    }
+    /* Open our cgdb and tgdb io logfiles */
+    clog_open(CLOG_CGDB_ID, "%s/cgdb_log%d.txt", config_dir);
+    clog_open(CLOG_GDBIO_ID, "%s/a2_tgdb_debug%d.txt", config_dir);
 
     /* Puts cgdb in a mode where it writes a debug log of everything
      * that is read from gdb. That is basically the entire session.
@@ -380,9 +354,16 @@ static int tgdb_initialize_logger_interface(struct tgdb *tgdb, char *config_dir)
      * since the gui is good at hiding that info from the user.
      *
      * Change level to CLOG_ERROR to write only error messages.
-     *   clog_set_level(TGDB_LOGGER, CLOG_ERROR);
+     *   clog_set_level(CLOG_GDBIO, CLOG_ERROR);
      */
-    clog_open(TGDB_LOGGER, "%s/a2_tgdb_debug%d.txt", config_dir);
+    clog_set_level(CLOG_GDBIO_ID, CLOG_DEBUG);
+    clog_set_fmt(CLOG_GDBIO_ID, CGDB_CLOG_FORMAT);
+
+    /* General cgdb logging. Only logging warnings and debug messages
+       by default. */
+    clog_set_level(CLOG_CGDB_ID, CLOG_WARN);
+    clog_set_fmt(CLOG_CGDB_ID, CGDB_CLOG_FORMAT);
+
 
     return 0;
 }
@@ -398,7 +379,7 @@ struct tgdb *tgdb_initialize(const char *debugger,
 
     /* Create config directory */
     if (tgdb_initialize_config_dir(tgdb, config_dir) == -1) {
-        logger_write_pos(logger, __FILE__, __LINE__, "tgdb_initialize error");
+        clog_error(CLOG_CGDB, "tgdb_initialize error");
         return NULL;
     }
 
@@ -407,12 +388,11 @@ struct tgdb *tgdb_initialize(const char *debugger,
         return NULL;
     }
 
-    tgdb->a2 = a2_create_context(debugger, argc, argv, config_dir, logger);
+    tgdb->a2 = a2_create_context(debugger, argc, argv, config_dir);
 
     /* create an instance and initialize a tgdb_client_context */
     if (tgdb->a2 == NULL) {
-        logger_write_pos(logger, __FILE__, __LINE__,
-                "a2_create_context failed");
+        clog_error(CLOG_CGDB, "a2_create_context failed");
         return NULL;
     }
 
@@ -420,8 +400,7 @@ struct tgdb *tgdb_initialize(const char *debugger,
                     &(tgdb->debugger_stdin),
                     &(tgdb->debugger_stdout),
                     &(tgdb->inferior_stdin), &(tgdb->inferior_stdout)) == -1) {
-        logger_write_pos(logger, __FILE__, __LINE__,
-                "tgdb_client_initialize failed");
+        clog_error(CLOG_CGDB, "tgdb_client_initialize failed");
         return NULL;
     }
 
@@ -434,16 +413,6 @@ struct tgdb *tgdb_initialize(const char *debugger,
 
 int tgdb_shutdown(struct tgdb *tgdb)
 {
-    /* Free the logger */
-    if (num_loggers == 1) {
-        if (logger_destroy(logger) == -1) {
-            printf("Could not destroy logger interface\n");
-            return -1;
-        }
-    }
-
-    --num_loggers;
-
     int i;
     for (i = 0; i < sbcount(tgdb->gdb_input_queue); i++) {
         struct tgdb_command *tc = tgdb->gdb_input_queue[i];
@@ -462,14 +431,16 @@ int tgdb_shutdown(struct tgdb *tgdb)
         tgdb_command_destroy(tc);
     }
     sbfree(tgdb->oob_input_queue);
+    return a2_shutdown(tgdb->a2);
+}
 
+void tgdb_close_logfiles()
+{
+    clog_info(CLOG_CGDB, "Closing logfile.");
+    clog_free(CLOG_CGDB_ID);
 
-    a2_shutdown(tgdb->a2);
-
-    clog_info(CLOG(TGDB_LOGGER), "Closing logfile.");
-    clog_free(TGDB_LOGGER);
-
-    return 0;
+    clog_info(CLOG_GDBIO, "Closing logfile.");
+    clog_free(CLOG_GDBIO_ID);
 }
 
 /* }}}*/
@@ -704,14 +675,13 @@ tgdb_run_or_queue_command(struct tgdb *tgdb, struct tgdb_command *command)
                 break;
             case TGDB_COMMAND_CONSOLE:
             default:
-                logger_write_pos(logger, __FILE__, __LINE__,
-                    "unimplemented command");
+                clog_error(CLOG_CGDB, "unimplemented command");
                 break;
         }
     }
 }
 
-/** 
+/**
  * Will send a command to the debugger immediately. No queueing will be done
  * at this point.
  *
@@ -730,7 +700,7 @@ static void tgdb_deliver_command(struct tgdb *tgdb, struct tgdb_command *command
 
     /* Send what we're doing to log file */
     char *str = sys_quote_nonprintables(command->gdb_command, -1);
-    clog_debug(CLOG(TGDB_LOGGER), "%s", str);
+    clog_debug(CLOG_GDBIO, "%s", str);
     sbfree(str);
 
     /* A command for the debugger */
@@ -803,7 +773,7 @@ static void tgdb_unqueue_and_deliver_command(struct tgdb *tgdb)
 int tgdb_send_inferior_char(struct tgdb *tgdb, char c)
 {
     if (io_write_byte(tgdb->inferior_stdout, c) == -1) {
-        logger_write_pos(logger, __FILE__, __LINE__, "io_write_byte failed");
+        clog_error(CLOG_CGDB, "io_write_byte failed");
         return -1;
     }
 
@@ -833,7 +803,7 @@ ssize_t tgdb_recv_inferior_data(struct tgdb * tgdb, char *buf, size_t n)
 
     /* read all the data possible from the child that is ready. */
     if ((size = io_read(tgdb->inferior_stdin, local_buf, n)) < 0) {
-        logger_write_pos(logger, __FILE__, __LINE__, "inferior_fd read failed");
+        clog_error(CLOG_CGDB, "inferior_fd read failed");
         return -1;
     }
 
@@ -891,7 +861,7 @@ static int tgdb_get_quit_command(struct tgdb *tgdb, int *tgdb_will_quit)
     ret = waitpid(pid, &status, WNOHANG);
 
     if (ret == -1) {
-        logger_write_pos(logger, __FILE__, __LINE__, "waitpid error");
+        clog_error(CLOG_CGDB, "waitpid error");
         return -1;
     } else if (ret == 0) {
         /* This SIGCHLD wasn't for GDB */
@@ -941,8 +911,7 @@ size_t tgdb_process(struct tgdb * tgdb, char *buf, size_t n, int *is_finished)
         int val = tgdb_get_quit_command(tgdb, &tgdb_will_quit);
 
         if (val == -1) {
-            logger_write_pos(logger, __FILE__, __LINE__,
-                    "tgdb_get_quit_command error");
+            clog_error(CLOG_CGDB, "tgdb_get_quit_command error");
             return -1;
         }
 
@@ -956,8 +925,7 @@ size_t tgdb_process(struct tgdb * tgdb, char *buf, size_t n, int *is_finished)
 
     /* 1. read all the data possible from gdb that is ready. */
     if ((size = io_read(tgdb->debugger_stdout, local_buf, n)) < 0) {
-        logger_write_pos(logger, __FILE__, __LINE__,
-                "could not read from masterfd");
+        clog_error(CLOG_CGDB, "could not read from masterfd");
         buf_size = -1;
         tgdb_add_quit_command(tgdb);
         goto tgdb_finish;
@@ -991,8 +959,7 @@ size_t tgdb_process(struct tgdb * tgdb, char *buf, size_t n, int *is_finished)
      *        If a signal has been received, clear the queue and return
      */
     if (tgdb_handle_signals(tgdb) == -1) {
-        logger_write_pos(logger, __FILE__, __LINE__,
-                "tgdb_handle_signals failed");
+        clog_error(CLOG_CGDB, "tgdb_handle_signals failed");
         return -1;
     }
 
@@ -1367,24 +1334,6 @@ int tgdb_signal_notification(struct tgdb *tgdb, int signum)
     }
 
     return 0;
-}
-
-/* }}}*/
-
-/* Config Options {{{*/
-
-int tgdb_set_verbose_error_handling(struct tgdb *tgdb, int value)
-{
-    if (value == -1)
-        return logger_is_recording(logger);
-
-    if (value == 1 || value == 0)
-        logger_set_record(logger, value);
-
-    if (value == 1)
-        logger_set_fd(logger, stderr);
-
-    return logger_is_recording(logger);
 }
 
 /* }}}*/

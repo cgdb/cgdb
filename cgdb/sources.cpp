@@ -50,15 +50,14 @@
 
 /* Local Includes */
 #include "cgdb.h"
+#include "sys_util.h"
 #include "highlight.h"
 #include "sources.h"
 #include "logo.h"
-#include "sys_util.h"
 #include "fs_util.h"
 #include "cgdbrc.h"
 #include "highlight_groups.h"
 #include "interface.h"
-#include "logger.h"
 #include "tgdb_types.h"
 
 int sources_syntax_on = 1;
@@ -176,29 +175,6 @@ static int release_file_memory(struct list_node *node)
     release_file_buffer(&node->file_buf);
 
     return 0;
-}
-
-/**
- * Get file size from file pointer.
- *
- * \param file
- * file pointer
- *
- * \return
- * file size on success, or -1 on error.
- */
-static long get_file_size(FILE *file)
-{
-    if (fseek(file, 0, SEEK_END) != -1) {
-        long size;
-
-        size = ftell(file);
-        fseek(file, 0, SEEK_SET);
-
-        return size;
-    }
-
-    return -1;
 }
 
 static char *detab_buffer(char *buffer, int tabstop)
@@ -461,7 +437,7 @@ static int highlight_node(struct list_node *node)
                 enum hl_group_kind hlg = hlg_from_tokenizer_type(tok_data.e, tok_data.data);
 
                 if (hlg == HLG_LAST) {
-                    logger_write_pos(logger, __FILE__, __LINE__, "Bad hlg_type for '%s', e==%d\n", tok_data.data, tok_data.e);
+                    clog_error(CLOG_CGDB, "Bad hlg_type for '%s', e==%d\n", tok_data.data, tok_data.e);
                     hlg = HLG_TEXT;
                 }
 

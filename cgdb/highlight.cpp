@@ -18,10 +18,10 @@
 
 /* Local Includes */
 #include "cgdb.h"
+#include "sys_util.h"
 #include "highlight.h"
 #include "sources.h"
 #include "highlight_groups.h"
-#include "sys_util.h"
 
 struct hl_regex_info {
     regex_t t;

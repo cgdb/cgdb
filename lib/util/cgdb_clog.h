@@ -1,10 +1,20 @@
 #ifndef __CGDB_CLOG_H__
 #define __CGDB_CLOG_H__
 
-const int TGDB_LOGGER = 2;
+#include <map>
+#include <string>
 
+const int CLOG_CGDB_ID = 1;
+#define CLOG_CGDB CLOG(CLOG_CGDB_ID)
+
+const int CLOG_GDBIO_ID = 2;
+#define CLOG_GDBIO CLOG(CLOG_GDBIO_ID)
+
+#include "config.h"
 #include "fs_util.h"
 #include "clog.h"
+
+#define CGDB_CLOG_FORMAT "%d %t %f:%n(%F) %l:%m\n\n"
 
 /**
  * Attempt to open the tgdb log file.
@@ -21,25 +31,18 @@ const int TGDB_LOGGER = 2;
  * @return
  * 0 on success, -1 on failure
  */
-inline int clog_open(int id, const char *fmt, const char *config_dir)
-{
-    int i;
+int clog_open(int id, const char *fmt, const char *config_dir);
 
-    /* Try to open a log file exclusively. This allows us to run
-     * several instances of cgdb without the logfiles getting borked. */
-    for (i = 1; i < 100; i++)
-    {
-        char filename[FSUTIL_PATH_MAX];
-
-        /* Initialize the debug file that a2_tgdb writes to */
-        snprintf(filename, sizeof(filename), fmt, config_dir, i);
-
-        if (clog_init_path(id, filename) == 0)
-            return 0;
-    }
-
-    return -1;
-}
-
+/**
+ * Get the filename associated with the logger id.
+ *
+ * @param id
+ * The logger id
+ *
+ * @return
+ * The absolute path to the filename.
+ * Will return NULL on error.
+ */
+const char *clog_filename(int id);
 
 #endif

@@ -26,6 +26,7 @@
 #include <errno.h>
 #endif /* HAVE_ERRNO_H */
 
+#define CLOG_MAIN
 #include "sys_util.h"
 
 void *cgdb_calloc(size_t nmemb, size_t size)
@@ -164,6 +165,26 @@ int cgdb_is_debugger_attached()
     }
 
     return result;
+}
+
+long get_file_size(FILE *file)
+{
+    if (fseek(file, 0, SEEK_END) != -1) {
+        long size;
+
+        size = ftell(file);
+        fseek(file, 0, SEEK_SET);
+
+        return size;
+    }
+
+    return -1;
+}
+
+long get_file_size_by_name(const char *filename)
+{
+    FILE *fd = fopen(filename, "r");
+    return get_file_size(fd);
 }
 
 int log10_uint(unsigned int val)

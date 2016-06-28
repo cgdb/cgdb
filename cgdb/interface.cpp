@@ -73,11 +73,12 @@
 #include <ctype.h>
 #endif
 
+#include <assert.h>
+
 /* Local Includes */
-#include "assert.h"
 #include "cgdb.h"
+#include "sys_util.h"
 #include "config.h"
-#include "logger.h"
 #include "interface.h"
 #include "kui_term.h"
 #include "scroller.h"
@@ -88,7 +89,6 @@
 #include "highlight.h"
 #include "highlight_groups.h"
 #include "fs_util.h"
-#include "sys_util.h"
 #include "logo.h"
 
 /* ----------- */
@@ -1178,27 +1178,27 @@ static int set_up_signal(void)
     action.sa_flags = 0;
 
     if (sigaction(SIGWINCH, &action, NULL) < 0) {
-        logger_write_pos(logger, __FILE__, __LINE__, "sigaction failed ");
+        clog_error(CLOG_CGDB, "sigaction failed ");
         return -1;
     }
 
     if (sigaction(SIGINT, &action, NULL) < 0) {
-        logger_write_pos(logger, __FILE__, __LINE__, "sigaction failed ");
+        clog_error(CLOG_CGDB, "sigaction failed ");
         return -1;
     }
 
     if (sigaction(SIGTERM, &action, NULL) < 0) {
-        logger_write_pos(logger, __FILE__, __LINE__, "sigaction failed ");
+        clog_error(CLOG_CGDB, "sigaction failed ");
         return -1;
     }
 
     if (sigaction(SIGQUIT, &action, NULL) < 0) {
-        logger_write_pos(logger, __FILE__, __LINE__, "sigaction failed ");
+        clog_error(CLOG_CGDB, "sigaction failed ");
         return -1;
     }
 
     if (sigaction(SIGCHLD, &action, NULL) < 0) {
-        logger_write_pos(logger, __FILE__, __LINE__, "sigaction failed ");
+        clog_error(CLOG_CGDB, "sigaction failed ");
         return -1;
     }
 
@@ -1453,7 +1453,7 @@ int if_input(int key)
 static void if_print_internal(const char *buf, enum ScrInputKind kind)
 {
     if (!gdb_win) {
-        logger_write_pos(logger, __FILE__, __LINE__, "%s", buf);
+        clog_error(CLOG_CGDB, "%s", buf);
         return;
     }
 

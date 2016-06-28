@@ -19,12 +19,11 @@
 #endif
 
 /* Local includes */
+#include "sys_util.h"
 #include "a2-tgdb.h"
 #include "commands.h"
 #include "io.h"
 #include "tgdb_types.h"
-#include "logger.h"
-#include "sys_util.h"
 #include "ibuf.h"
 #include "gdbwire.h"
 #include "state_machine.h"
@@ -541,8 +540,7 @@ commands_prepare_for_command(struct annotate_two *a2,
             commands_set_state(c, INFO_DISASSEMBLE_FUNC);
             break;
         default:
-            logger_write_pos(logger, __FILE__, __LINE__,
-                    "commands_prepare_for_command error");
+            clog_error(CLOG_CGDB, "commands_prepare_for_command error");
             break;
     };
 
@@ -600,7 +598,7 @@ static char *create_gdb_command(struct commands *c,
         case ANNOTATE_DATA_DISASSEMBLE_MODE_QUERY:
             return sys_aprintf("server interpreter-exec mi \"-data-disassemble -s 0 -e 0 -- 4\"\n");
         default:
-            logger_write_pos(logger, __FILE__, __LINE__, "switch error");
+            clog_error(CLOG_CGDB, "switch error");
             break;
     };
 

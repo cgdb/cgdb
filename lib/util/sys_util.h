@@ -13,6 +13,8 @@
 #include <stdint.h>
 #endif
 
+#include "cgdb_clog.h"
+
 /* These are wrappers for the memory management functions 
  * If a memory allocation fails cgdb will exit
  * They act identical to the POSIX calls
@@ -65,6 +67,28 @@ int cgdb_supports_debugger_attach_detection();
  * Return 0 for no, 1 for yes, -1 for error.
  */
 int cgdb_is_debugger_attached();
+
+/**
+ * Get file size from file pointer.
+ *
+ * \param file
+ * file pointer
+ *
+ * \return
+ * file size on success, or -1 on error.
+ */
+long get_file_size(FILE *file);
+
+/**
+ * Get file size from file name.
+ *
+ * \param file
+ * The file name.
+ *
+ * \return
+ * file size on success, or -1 on error.
+ */
+long get_file_size_by_name(const char *filename);
 
 /* Unsigned integer version of log10
 */

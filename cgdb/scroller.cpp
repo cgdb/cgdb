@@ -32,10 +32,10 @@
 
 /* Local Includes */
 #include "cgdb.h"
+#include "sys_util.h"
 #include "cgdbrc.h"
 #include "highlight_groups.h"
 #include "scroller.h"
-#include "sys_util.h"
 
 /* --------------- */
 /* Local Functions */

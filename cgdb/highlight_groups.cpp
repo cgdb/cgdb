@@ -24,7 +24,6 @@
 #include "highlight_groups.h"
 #include "command_lexer.h"
 #include "sys_util.h"
-#include "logger.h"
 #include "cgdbrc.h"
 
 /* internal {{{*/
@@ -542,7 +541,7 @@ int hl_groups_setup(hl_groups_ptr hl_groups)
         val = setup_group(hl_groups, spec->kind, spec->mono_attrs,
                 spec->color_attrs, spec->fore_color, spec->back_color);
         if (val == -1) {
-            logger_write_pos(logger, __FILE__, __LINE__, "setup group.");
+            clog_error(CLOG_CGDB, "setup group.");
             return -1;
         }
     }
@@ -555,7 +554,7 @@ int hl_groups_setup(hl_groups_ptr hl_groups)
                               group_info->mono_attrs, group_info->color_attrs,
                               group_info->fg_color, group_info->bg_color);
             if (val == -1) {
-                logger_write_pos(logger, __FILE__, __LINE__, "setup group.");
+                clog_error(CLOG_CGDB, "setup group.");
                 return -1;
             }
         }
@@ -634,7 +633,7 @@ int hl_groups_parse_config(hl_groups_ptr hl_groups)
     token = yylex();
     if (token != IDENTIFIER) {
 #ifdef LOG_HIGHLIGHT_COMMAND_ERRORS
-        logger_write_pos(logger, __FILE__, __LINE__, "Missing group name.");
+        clog_error(CLOG_CGDB, "Missing group name.");
 #endif
         return 1;
     }
@@ -644,8 +643,8 @@ int hl_groups_parse_config(hl_groups_ptr hl_groups)
     val = get_hl_group_kind_from_name(name, &group_kind);
     if (val == -1) {
 #ifdef LOG_HIGHLIGHT_COMMAND_ERRORS
-        logger_write_pos(logger, __FILE__, __LINE__,
-                "Bad parameter name (\"%s\").", name);
+        clog_error(CLOG_CGDB,
+            "Bad parameter name (\"%s\").", name);
 #endif
         return 1;
     }
@@ -666,8 +665,8 @@ int hl_groups_parse_config(hl_groups_ptr hl_groups)
             break;
         if (token != IDENTIFIER) {
 #ifdef LOG_HIGHLIGHT_COMMAND_ERRORS
-            logger_write_pos(logger, __FILE__, __LINE__,
-                    "Bad parameter name (\"%s\").", get_token());
+            clog_error(CLOG_CGDB,
+                "Bad parameter name (\"%s\").", get_token());
 #endif
             return 1;
         }
@@ -688,8 +687,8 @@ int hl_groups_parse_config(hl_groups_ptr hl_groups)
         /* A '=' must come next. */
         if (yylex() != '=') {
 #ifdef LOG_HIGHLIGHT_COMMAND_ERRORS
-            logger_write_pos(logger, __FILE__, __LINE__,
-                    "Missing '=' in \"highlight\" command.");
+            clog_error(CLOG_CGDB,
+                "Missing '=' in \"highlight\" command.");
 #endif
             return 1;
         }
@@ -704,8 +703,8 @@ int hl_groups_parse_config(hl_groups_ptr hl_groups)
                     /* Add in the attribute. */
                     if (token != IDENTIFIER) {
 #ifdef LOG_HIGHLIGHT_COMMAND_ERRORS
-                        logger_write_pos(logger, __FILE__, __LINE__,
-                                "Bad attribute name: \"%s\".", get_token());
+                        clog_error(CLOG_CGDB,
+                            "Bad attribute name: \"%s\".", get_token());
 #endif
                         return 1;
                     }
@@ -714,15 +713,14 @@ int hl_groups_parse_config(hl_groups_ptr hl_groups)
                     pair = lookup_attr_pair_by_name(name);
                     if (!pair) {
 #ifdef LOG_HIGHLIGHT_COMMAND_ERRORS
-                        logger_write_pos(logger, __FILE__, __LINE__,
-                                "Unknown attribute name");
+                        clog_error(CLOG_CGDB, "Unknown attribute name");
 #endif
                         return 1;
                     }
                     if (pair->value == -1) {
 #ifdef LOG_HIGHLIGHT_COMMAND_ERRORS
-                        logger_write_pos(logger, __FILE__, __LINE__,
-                                "Unknown attribute name: \"%s\".", name);
+                        clog_error(CLOG_CGDB,
+                            "Unknown attribute name: \"%s\".", name);
 #endif
                         return 1;
                     }
@@ -760,7 +758,7 @@ int hl_groups_parse_config(hl_groups_ptr hl_groups)
                         color_spec = color_spec_for_name(name);
                         if (color_spec == NULL) {
 #ifdef LOG_HIGHLIGHT_COMMAND_ERRORS
-                            logger_write_pos(logger, __FILE__, __LINE__,
+                            clog_error(CLOG_CGDB, 
                                     "Unknown color: \"%s\".", name);
 #endif
                             return 1;

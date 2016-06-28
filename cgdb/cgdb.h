@@ -55,7 +55,7 @@ enum win_refresh {
 };
 
 /* Clean cgdb up (when exiting) */
-void cgdb_cleanup();
+void cgdb_cleanup_and_exit(int val);
 
 /*
  * See documentation in cgdb.c.

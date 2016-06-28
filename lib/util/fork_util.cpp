@@ -34,11 +34,10 @@
 #include <errno.h>
 #endif /* HAVE_ERRNO_H */
 
-#include "fork_util.h"
 #include "sys_util.h"
+#include "fork_util.h"
 #include "fs_util.h"
 #include "pseudo.h"
-#include "logger.h"
 #include "terminal.h"
 
 struct pty_pair {
@@ -63,7 +62,7 @@ pty_pair_ptr pty_pair_create(void)
     val = pty_open(&(ptr->masterfd), &(ptr->slavefd), local_slavename,
             SLAVE_SIZE, NULL, NULL);
     if (val == -1) {
-        logger_write_pos(logger, __FILE__, __LINE__, "PTY open");
+        clog_error(CLOG_CGDB, "PTY open");
         return NULL;
     }
 
@@ -81,7 +80,7 @@ int pty_pair_destroy(pty_pair_ptr pty_pair)
     cgdb_close(pty_pair->slavefd);
 
     if (pty_release(pty_pair->slavename) == -1) {
-        logger_write_pos(logger, __FILE__, __LINE__, "pty_release error");
+        clog_error(CLOG_CGDB, "pty_release error");
         return -1;
     }
 
@@ -120,7 +119,7 @@ int pty_free_process(int *masterfd, char *sname)
     cgdb_close(*masterfd);
 
     if (pty_release(sname) == -1) {
-        logger_write_pos(logger, __FILE__, __LINE__, "pty_release error");
+        clog_error(CLOG_CGDB, "pty_release error");
         return -1;
     }
 
@@ -161,12 +160,12 @@ static int pty_free_memory(char *s, int fd, int argc, char *argv[])
     int error = 0, i;
 
     if (s && pty_release(s) == -1) {
-        logger_write_pos(logger, __FILE__, __LINE__, "pty_release failed");
+        clog_error(CLOG_CGDB, "pty_release failed");
         error = -1;
     }
 
     if (fd != -1 && close(fd) == -1) {
-        logger_write_pos(logger, __FILE__, __LINE__, "close failed");
+        clog_error(CLOG_CGDB, "close failed");
         error = -1;
     }
 
@@ -225,8 +224,7 @@ int invoke_debugger(const char *path,
     local_argv[j] = NULL;
 
     if (fs_util_file_exists_in_path(local_argv[0]) == -1) {
-        logger_write_pos(logger, __FILE__, __LINE__,
-                         "Debugger \"%s\" not found", local_argv[0]);
+        clog_error(CLOG_CGDB, "Debugger \"%s\" not found", local_argv[0]);
         pty_free_memory(slavename, masterfd, argc, local_argv);
         return -1;
     }
@@ -235,7 +233,7 @@ int invoke_debugger(const char *path,
 
     if (pid == -1) {            /* error, free memory and return  */
         pty_free_memory(slavename, masterfd, argc, local_argv);
-        logger_write_pos(logger, __FILE__, __LINE__, "fork failed");
+        clog_error(CLOG_CGDB, "fork failed");
         return -1;
     } else if (pid == 0) {      /* child */
         FILE *fd = fopen(slavename, "r");

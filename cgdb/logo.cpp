@@ -29,8 +29,8 @@
 
 /* Local Includes */
 #include "cgdb.h"
-#include "logo.h"
 #include "sys_util.h"
+#include "logo.h"
 #include "highlight_groups.h"
 
 /* Logo index */

@@ -14,12 +14,11 @@
 #include <sys/types.h>
 #endif /* HAVE_SYS_TYPES_H */
 
+#include "sys_util.h"
 #include "tgdb_types.h"
 #include "a2-tgdb.h"
 #include "state_machine.h"
 #include "commands.h"
-#include "logger.h"
-#include "sys_util.h"
 #include "ibuf.h"
 #include "io.h"
 
@@ -222,8 +221,7 @@ void a2_parse_io(struct annotate_two *a2,
                         sm->tgdb_state = NEW_LINE;
                         break;
                     default:
-                        logger_write_pos(logger, __FILE__, __LINE__,
-                                "Bad state transition");
+                        clog_error(CLOG_CGDB, "Bad state transition");
                         break;
                 }               /* end switch */
                 break;
@@ -246,8 +244,7 @@ void a2_parse_io(struct annotate_two *a2,
                         ibuf_addchar(sm->tgdb_buffer, data[i]);
                         break;
                     default:
-                        logger_write_pos(logger, __FILE__, __LINE__,
-                                "Bad state transition");
+                        clog_error(CLOG_CGDB, "Bad state transition");
                         break;
                 }               /* end switch */
                 break;
@@ -275,8 +272,7 @@ void a2_parse_io(struct annotate_two *a2,
                         ibuf_addchar(sm->tgdb_buffer, data[i]);
                         break;
                     default:
-                        logger_write_pos(logger, __FILE__, __LINE__,
-                                "Bad state transition");
+                        clog_error(CLOG_CGDB, "Bad state transition");
                         break;
                 }               /* end switch */
                 break;
@@ -319,8 +315,7 @@ static int handle_misc_pre_prompt(struct annotate_two *a2, const char *buf,
     /* If tgdb is sending a command, then continue past it */
     if (data_get_state(a2->sm) == INTERNAL_COMMAND) {
         if (io_write_byte(a2->debugger_stdin, '\n') == -1)
-            logger_write_pos(logger, __FILE__, __LINE__,
-                    "Could not send command");
+            clog_error(CLOG_CGDB, "Could not send command");
     } else {
         data_set_state(a2, AT_PROMPT);
     }
@@ -468,8 +463,7 @@ static int tgdb_parse_annotation(struct annotate_two *a2, char *data,
     for (i = 0; annotations[i].data != NULL; ++i) {
         if (strncmp(data, annotations[i].data, annotations[i].size) == 0) {
             if (annotations[i].f(a2, data, size) == -1) {
-                logger_write_pos(logger, __FILE__, __LINE__,
-                        "parsing annotation failed");
+                clog_error(CLOG_CGDB, "parsing annotation failed");
             } else {
                 break; /* only match one annotation */
             }

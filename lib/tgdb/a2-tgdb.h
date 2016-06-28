@@ -162,7 +162,7 @@ enum annotate_commands {
  * NULL on error, A valid descriptor upon success
  */
 struct annotate_two *a2_create_context(const char *debugger_path,
-        int argc, char **argv, const char *config_dir, struct logger *logger);
+        int argc, char **argv, const char *config_dir);
 
 /** 
  * This initializes the libannotate_two libarary.
