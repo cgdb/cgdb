@@ -1,0 +1,170 @@
+%option prefix="rust_"
+%option outfile="rustlexer.c"
+
+B       [01_]
+O       [0-7_]
+D       [0-9_]
+H       [0-9a-fA-F_]
+L       [a-zA-Z_]
+T       [0-9a-zA-Z_]
+IDENTIFIER {L}+{T}*
+
+%{
+
+#include <stdio.h>
+#include "tokenizer.h"
+%}
+
+%x comment
+%x string_literal
+
+%%
+"bool"                  { return(TOKENIZER_TYPE); }
+"isize"                 { return(TOKENIZER_TYPE); }
+"usize"                 { return(TOKENIZER_TYPE); }
+"char"                  { return(TOKENIZER_TYPE); }
+"u8"                    { return(TOKENIZER_TYPE); }
+"u16"                   { return(TOKENIZER_TYPE); }
+"u32"                   { return(TOKENIZER_TYPE); }
+"u64"                   { return(TOKENIZER_TYPE); }
+"f32"                   { return(TOKENIZER_TYPE); }
+"f64"                   { return(TOKENIZER_TYPE); }
+"i8"                    { return(TOKENIZER_TYPE); }
+"i16"                   { return(TOKENIZER_TYPE); }
+"i32"                   { return(TOKENIZER_TYPE); }
+"i64"                   { return(TOKENIZER_TYPE); }
+"str"                   { return(TOKENIZER_TYPE); }
+"Self"                  { return(TOKENIZER_TYPE); }
+"Copy"                  { return(TOKENIZER_TYPE); }
+"Display"               { return(TOKENIZER_TYPE); }
+"Debug"                 { return(TOKENIZER_TYPE); }
+"Send"                  { return(TOKENIZER_TYPE); }
+"Sized"                 { return(TOKENIZER_TYPE); }
+"Sync"                  { return(TOKENIZER_TYPE); }
+"Drop"                  { return(TOKENIZER_TYPE); }
+"Fn"                    { return(TOKENIZER_TYPE); }
+"FnMut"                 { return(TOKENIZER_TYPE); }
+"Box"                   { return(TOKENIZER_TYPE); }
+"ToOwned"               { return(TOKENIZER_TYPE); }
+"Clone"                 { return(TOKENIZER_TYPE); }
+"PartialEq"             { return(TOKENIZER_TYPE); }
+"PartialOrd"            { return(TOKENIZER_TYPE); }
+"Eq"                    { return(TOKENIZER_TYPE); }
+"Ord"                   { return(TOKENIZER_TYPE); }
+"AsRef"                 { return(TOKENIZER_TYPE); }
+"AsMut"                 { return(TOKENIZER_TYPE); }
+"Into"                  { return(TOKENIZER_TYPE); }
+"From"                  { return(TOKENIZER_TYPE); }
+"Default"               { return(TOKENIZER_TYPE); }
+"Iterator"              { return(TOKENIZER_TYPE); }
+"Extend"                { return(TOKENIZER_TYPE); }
+"IntoIterator"          { return(TOKENIZER_TYPE); }
+"DoubleEndedIterator"   { return(TOKENIZER_TYPE); }
+"ExactSizeIterator"     { return(TOKENIZER_TYPE); }
+"SliceConcatExt"        { return(TOKENIZER_TYPE); }
+"String"                { return(TOKENIZER_TYPE); }
+"ToString"              { return(TOKENIZER_TYPE); }
+"Vec"                   { return(TOKENIZER_TYPE); }
+"Option"                { return(TOKENIZER_TYPE); }
+"Result"                { return(TOKENIZER_TYPE); }
+"Some"                  { return(TOKENIZER_TYPE); }
+"None"                  { return(TOKENIZER_TYPE); }
+
+"abstract"              { return(TOKENIZER_KEYWORD); }
+"alignof"               { return(TOKENIZER_KEYWORD); }
+"as"                    { return(TOKENIZER_KEYWORD); }
+"become"                { return(TOKENIZER_KEYWORD); }
+"box"                   { return(TOKENIZER_KEYWORD); }
+"break"                 { return(TOKENIZER_KEYWORD); }
+"const"                 { return(TOKENIZER_KEYWORD); }
+"continue"              { return(TOKENIZER_KEYWORD); }
+"crate"                 { return(TOKENIZER_KEYWORD); }
+"do"                    { return(TOKENIZER_KEYWORD); }
+"else"                  { return(TOKENIZER_KEYWORD); }
+"enum"                  { return(TOKENIZER_KEYWORD); }
+"extern"                { return(TOKENIZER_KEYWORD); }
+"false"                 { return(TOKENIZER_KEYWORD); }
+"final"                 { return(TOKENIZER_KEYWORD); }
+"fn"                    { return(TOKENIZER_KEYWORD); }
+"for"                   { return(TOKENIZER_KEYWORD); }
+"if"                    { return(TOKENIZER_KEYWORD); }
+"impl"                  { return(TOKENIZER_KEYWORD); }
+"in"                    { return(TOKENIZER_KEYWORD); }
+"let"                   { return(TOKENIZER_KEYWORD); }
+"loop"                  { return(TOKENIZER_KEYWORD); }
+"macro"                 { return(TOKENIZER_KEYWORD); }
+"match"                 { return(TOKENIZER_KEYWORD); }
+"move"                  { return(TOKENIZER_KEYWORD); }
+"mut"                   { return(TOKENIZER_KEYWORD); }
+"offsetof"              { return(TOKENIZER_KEYWORD); }
+"override"              { return(TOKENIZER_KEYWORD); }
+"priv"                  { return(TOKENIZER_KEYWORD); }
+"proc"                  { return(TOKENIZER_KEYWORD); }
+"pub"                   { return(TOKENIZER_KEYWORD); }
+"pure"                  { return(TOKENIZER_KEYWORD); }
+"ref"                   { return(TOKENIZER_KEYWORD); }
+"return"                { return(TOKENIZER_KEYWORD); }
+"self"                  { return(TOKENIZER_KEYWORD); }
+"sizeof"                { return(TOKENIZER_KEYWORD); }
+"static"                { return(TOKENIZER_KEYWORD); }
+"struct"                { return(TOKENIZER_KEYWORD); }
+"super"                 { return(TOKENIZER_KEYWORD); }
+"trait"                 { return(TOKENIZER_KEYWORD); }
+"true"                  { return(TOKENIZER_KEYWORD); }
+"type"                  { return(TOKENIZER_KEYWORD); }
+"typeof"                { return(TOKENIZER_KEYWORD); }
+"unsafe"                { return(TOKENIZER_KEYWORD); }
+"unsized"               { return(TOKENIZER_KEYWORD); }
+"virtual"               { return(TOKENIZER_KEYWORD); }
+"where"                 { return(TOKENIZER_KEYWORD); }
+"while"                 { return(TOKENIZER_KEYWORD); }
+"yield"                 { return(TOKENIZER_KEYWORD); }
+
+"/*"                    { BEGIN(comment); return(TOKENIZER_COMMENT); }
+<comment>[^*\r\n]*      { return(TOKENIZER_COMMENT); }
+<comment>"*"+[^*/\r\n]* { return(TOKENIZER_COMMENT); }
+<comment>\n             { return(TOKENIZER_NEWLINE); }
+<comment>\r             { return(TOKENIZER_NEWLINE); }
+<comment>\r\n           { return(TOKENIZER_NEWLINE); }
+<comment>"*"+"/"        { BEGIN(INITIAL); return(TOKENIZER_COMMENT); }
+
+\/\/[^\r\n]*            { return(TOKENIZER_COMMENT); }
+
+"use"                   { return(TOKENIZER_DIRECTIVE); }
+"mod"                   { return(TOKENIZER_DIRECTIVE); }
+[a-z_]+!                { return(TOKENIZER_DIRECTIVE); }
+#!?\[.*]                { return(TOKENIZER_DIRECTIVE); }
+
+\"                                          { BEGIN(string_literal);    return(TOKENIZER_LITERAL); }
+<string_literal>(\\[^\r\n]|[^\\"\r\n])*     { return(TOKENIZER_LITERAL); }
+<string_literal>\n                          { return(TOKENIZER_NEWLINE); }
+<string_literal>\r                          { return(TOKENIZER_NEWLINE); }
+<string_literal>\r\n                        { return(TOKENIZER_NEWLINE); }
+<string_literal>\"                          { BEGIN(INITIAL);           return(TOKENIZER_LITERAL); }
+
+{D}{D}*([E|e][-+]?{D}+|\.{D}+([E|e][-+]?{D}+)?)? { return(TOKENIZER_LITERAL); } 
+0b{B}+      { return(TOKENIZER_LITERAL); }
+0o{O}+      { return(TOKENIZER_LITERAL); }
+0x{H}+      { return(TOKENIZER_LITERAL); }
+
+'.'                     { return(TOKENIZER_LITERAL); }
+'\\.'                   { return(TOKENIZER_LITERAL); }
+
+\n                            { return(TOKENIZER_NEWLINE); }
+\r\n                          { return(TOKENIZER_NEWLINE); }
+\r                            { return(TOKENIZER_NEWLINE); }
+[ \t\v\f]                     { return(TOKENIZER_TEXT);    }
+{IDENTIFIER}                  { return(TOKENIZER_TEXT);    }
+.                             { return(TOKENIZER_TEXT);    }
+
+%%
+
+int rust_wrap ( void ) {
+	{
+		/* Silly impossible function call to stop warning of unused functions */
+		if ( 0 ) {
+			yyunput(0, "");
+		}
+	}
+    return 1;
+}
