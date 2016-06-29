@@ -80,8 +80,7 @@ int fs_util_create_dir(const char *dir)
         if (S_ISDIR(st.st_mode))
             return 1;
         else {
-            clog_error(CLOG_CGDB,
-                    "file %s is not a directory", actual_dir);
+            clog_error(CLOG_CGDB, "file %s is not a directory", actual_dir);
             return 0;
         }
     } else {

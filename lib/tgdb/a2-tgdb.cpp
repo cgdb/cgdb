@@ -62,7 +62,7 @@ static struct annotate_two *initialize_annotate_two(void)
 
     /* null terminate */
     a2->config_dir[0] = '\0';
-    a2->a2_gdb_init_file[0] = '\0';
+    a2->gdb_init_file[0] = '\0';
 
     a2->request_source_location = 0;
 
@@ -84,14 +84,14 @@ static int tgdb_setup_config_file(struct annotate_two *a2, const char *dir)
 
     strncpy(a2->config_dir, dir, strlen(dir) + 1);
 
-    fs_util_get_path(dir, "a2_gdb_init", a2->a2_gdb_init_file);
+    fs_util_get_path(dir, "gdb_init_commands", a2->gdb_init_file);
 
-    if ((fp = fopen(a2->a2_gdb_init_file, "w"))) {
-        fprintf(fp, "set annotate 2\n" "set height 0\n");
+    if ((fp = fopen(a2->gdb_init_file, "w"))) {
+        fprintf(fp, "set annotate 2\n"
+                    "set height 0\n");
         fclose(fp);
     } else {
-        clog_error(CLOG_CGDB, "fopen error '%s'",
-            a2->a2_gdb_init_file);
+        clog_error(CLOG_CGDB, "fopen error '%s'", a2->gdb_init_file);
         return 0;
     }
 
@@ -113,7 +113,7 @@ struct annotate_two *a2_create_context(const char *debugger,
     }
 
     a2->debugger_pid = invoke_debugger(debugger, argc, argv,
-            &a2->debugger_stdin, &a2->debugger_out, 0, a2->a2_gdb_init_file);
+            &a2->debugger_stdin, &a2->debugger_out, 0, a2->gdb_init_file);
 
     /* Couldn't invoke process */
     if (a2->debugger_pid == -1)

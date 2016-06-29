@@ -35,7 +35,7 @@ struct annotate_two {
     char config_dir[FSUTIL_PATH_MAX];
 
     /** The init file for the debugger. */
-    char a2_gdb_init_file[FSUTIL_PATH_MAX];
+    char gdb_init_file[FSUTIL_PATH_MAX];
 
     /** 
 	 * This module is used for parsing the output of gdb for annotate 2 

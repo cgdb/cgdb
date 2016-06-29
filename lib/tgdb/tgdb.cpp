@@ -313,19 +313,21 @@ static struct tgdb *initialize_tgdb_context(void)
  * \return
  * -1 on error, or 0 on success
  */
-static int tgdb_initialize_config_dir(struct tgdb *tgdb, char *config_dir)
+static int tgdb_initialize_config_dir(struct tgdb *tgdb,
+    char *config_dir, char *logs_dir)
 {
-    /* Get the home directory */
     char *home_dir = getenv("HOME");
-    const char *tgdb_dir = ".tgdb";
 
-    /* Create the config directory */
-    if (!fs_util_create_dir_in_base(home_dir, tgdb_dir)) {
+    /* Make sure the toplevel .cgdb dir exists */
+    snprintf(config_dir, FSUTIL_PATH_MAX, "%s/.cgdb", home_dir);
+    fs_util_create_dir(config_dir);
+
+    /* Try to create full .cgdb/logs directory */
+    snprintf(logs_dir, FSUTIL_PATH_MAX, "%s/.cgdb/logs", home_dir);
+    if (!fs_util_create_dir(logs_dir)) {
         clog_error(CLOG_CGDB, "fs_util_create_dir_in_base error");
         return -1;
     }
-
-    fs_util_get_path(home_dir, tgdb_dir, config_dir);
 
     return 0;
 }
@@ -346,7 +348,7 @@ static int tgdb_initialize_logger_interface(struct tgdb *tgdb, char *config_dir)
 {
     /* Open our cgdb and tgdb io logfiles */
     clog_open(CLOG_CGDB_ID, "%s/cgdb_log%d.txt", config_dir);
-    clog_open(CLOG_GDBIO_ID, "%s/a2_tgdb_debug%d.txt", config_dir);
+    clog_open(CLOG_GDBIO_ID, "%s/cgdb_gdb_io_log%d.txt", config_dir);
 
     /* Puts cgdb in a mode where it writes a debug log of everything
      * that is read from gdb. That is basically the entire session.
@@ -376,14 +378,15 @@ struct tgdb *tgdb_initialize(const char *debugger,
     /* Initialize the libtgdb context */
     struct tgdb *tgdb = initialize_tgdb_context();
     char config_dir[FSUTIL_PATH_MAX];
+    char logs_dir[FSUTIL_PATH_MAX];
 
     /* Create config directory */
-    if (tgdb_initialize_config_dir(tgdb, config_dir) == -1) {
+    if (tgdb_initialize_config_dir(tgdb, config_dir, logs_dir) == -1) {
         clog_error(CLOG_CGDB, "tgdb_initialize error");
         return NULL;
     }
 
-    if (tgdb_initialize_logger_interface(tgdb, config_dir) == -1) {
+    if (tgdb_initialize_logger_interface(tgdb, logs_dir) == -1) {
         printf("Could not initialize logger interface\n");
         return NULL;
     }
