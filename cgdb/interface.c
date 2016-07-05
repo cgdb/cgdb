@@ -1017,7 +1017,7 @@ toggle_breakpoint(struct sviewer *sview, enum tgdb_breakpoint_action t)
 
     return 0;
 }
-
+char line_num_buff[8] = "\0\0\0\0\0\0\0\0";
 /* source_input: Handles user input to the source window.
  * -------------
  *
@@ -1061,8 +1061,13 @@ static void source_input(struct sviewer *sview, int key)
             if (last_key_pressed == 'g')
                 source_set_sel_line(sview, 1);
             break;
-        case 'G':              /* end of file */
-            source_set_sel_line(sview, 10000000);
+        case 'G':              /* end of file, or a line number*/
+	    if(strlen(line_num_buff)){
+		    long line = strtol(line_num_buff, NULL, 10);
+		    source_set_sel_line(sview, line);
+	    } else {
+		    source_set_sel_line(sview, 10000000);
+	    }
             break;
         case '=':
             /* inc window by 1 */
@@ -1106,12 +1111,45 @@ static void source_input(struct sviewer *sview, int key)
             toggle_breakpoint(sview, t);
         }
             break;
+	case '0':
+	case '1':
+	case '2':
+	case '3':
+	case '4':
+	case '5':
+	case '6':
+	case '7':
+	case '8':
+	case '9':
+	    {
+		    /*
+		     * We are storing digits typed into a buffer as long 
+		     * as 10000000. This is because the 'G' command above
+		     * only handles this length anyway, behavior is already
+		     * undefined!
+		     *
+		     * This check prevents overflowing the buffer, which allows 
+		     * for the unchecked versions of the strlen function
+		     */
+		    if(strlen(line_num_buff) < sizeof(line_num_buff)){
+			    line_num_buff[strlen(line_num_buff)] = (char)key;
+		    }
+		    return;
+		    
+	    }
+	    break;
         default:
             break;
     }
+    /*
+     * If we did not read a digit, we need to clear the buffer we use
+     * to store the typed digits
+     */
+    memset(line_num_buff, '\0', sizeof(line_num_buff));
 
     /* Some extended features that are set by :set sc */
     if_draw();
+
 }
 
 /* Sets up the signal handler for SIGWINCH
