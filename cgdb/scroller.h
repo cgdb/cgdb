@@ -63,7 +63,22 @@ struct scroller {
         int c;                  /* Current column number */
         int pos;                /* Cursor position in last line */
     } current;
-    WINDOW *win;                /* The scoller's own window */
+
+    /** If in search mode. 1 if searching, 0 otherwise */
+    int in_search_mode;
+    /** The current regex if in_search_mode is true */
+    struct hl_regex_info *hlregex;
+
+    /**
+     * Determine the searching status. 1 searching, 2 is done searching.
+     */
+    int regex_is_searching;
+
+    /** 
+     * The original row, or last selected row, when searching.
+     */
+    int search_r;
+    WINDOW *win; /* The scoller's own window */
 };
 
 /* --------- */
@@ -158,5 +173,44 @@ void scr_clear(struct scroller *scr);
  *   focus:  If the window has focus
  */
 void scr_refresh(struct scroller *scr, int focus, enum win_refresh dorefresh);
+
+/**
+ * Should be called before scr_search_regex
+ *
+ * This function initializes scr before it can search for a regex
+ *
+ * @param scr
+ * Pointer to the scroller object
+ */
+void scr_search_regex_init(struct scroller *scr);
+
+/**
+ * Searches for regex in current scroller and displays line.
+ *
+ * @param scr
+ * Pointer to the scroller object
+ *
+ * @param regex
+ * The regular expression to search for. If NULL, then no regex will be tried.
+ *
+ * @param opt
+ * If 1, Then the search is temporary ( User has not hit enter )
+ * If 2, The search is perminant
+ *
+ * @param direction
+ * If 0 then forward, else reverse
+ *
+ * @param icase
+ * If 0 ignore case.
+ *
+ * @return
+ * Zero on match, 
+ * -1 if sview->cur is NULL
+ * -2 if regex is NULL
+ * -3 if regcomp fails
+ * non-zero on failure.
+ */
+int scr_search_regex(struct scroller *scr, const char *regex, int opt,
+    int direction, int icase);
 
 #endif
