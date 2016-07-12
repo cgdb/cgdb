@@ -241,6 +241,11 @@ struct scroller *scr_new(int pos_r, int pos_c, int height, int width)
     /* Start with a single (blank) line */
     rv->lines = NULL;
     scroller_addline(rv, strdup(""), NULL, SCR_INPUT_DEBUGGER);
+
+    rv->jump_back_mark.r = -1;
+    rv->jump_back_mark.c = -1;
+    memset(rv->marks, 0xff, sizeof(rv->marks));
+
     return rv;
 }
 
@@ -523,6 +528,56 @@ void scr_search_regex_init(struct scroller *scr)
 
     /* Start searching at the beginning of the selected line */
     scr->search_r = scr->current.r;
+}
+
+int scr_set_mark(struct scroller *scr, int key)
+{
+    if (key >= 'a' && key <= 'z')
+    {
+        /* Local buffer mark */
+        scr->marks[key - 'a'].r = scr->current.r;
+        scr->marks[key - 'a'].c = scr->current.c;
+        return 1;
+    }
+
+    return 0;
+}
+
+int scr_goto_mark(struct scroller *scr, int key)
+{
+    scroller_mark mark_temp;
+    scroller_mark *mark = NULL;
+
+    if (key >= 'a' && key <= 'z')
+    {
+        /* Local buffer mark */
+        mark = &scr->marks[key - 'a'];
+    }
+    else if (key == '\'')
+    {
+        /* Jump back to where we last jumped from */
+        mark_temp = scr->jump_back_mark;
+        mark = &mark_temp;
+    }
+    else if (key == '.')
+    {
+        /* Jump to last line */
+        mark_temp.r = sbcount(scr->lines) - 1;
+        mark_temp.c = get_last_col(scr, scr->current.r);
+        mark = &mark_temp;
+    }
+
+    if (mark && (mark->r >= 0))
+    {
+        scr->jump_back_mark.r = scr->current.r;
+        scr->jump_back_mark.c = scr->current.c;
+
+        scr->current.r = mark->r;
+        scr->current.c = mark->c;
+        return 1;
+    }
+
+    return 0;
 }
 
 void scr_refresh(struct scroller *scr, int focus, enum win_refresh dorefresh)

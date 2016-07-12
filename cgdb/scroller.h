@@ -20,6 +20,9 @@
 #include <ncurses/curses.h>
 #endif /* HAVE_CURSES_H */
 
+/* Count of marks */
+#define MARK_COUNT 26
+
 /* --------------- */
 /* Data Structures */
 /* --------------- */
@@ -36,6 +39,12 @@ struct scroller_line {
     int line_len;
     enum ScrInputKind kind;
     struct hl_line_attr *attrs;
+};
+
+struct scroller_mark
+{
+    int r;
+    int c;
 };
 
 struct scroller {
@@ -79,6 +88,9 @@ struct scroller {
      */
     int search_r;
     WINDOW *win; /* The scoller's own window */
+
+    scroller_mark marks[MARK_COUNT]; /* Local a-z marks */
+    scroller_mark jump_back_mark;    /* Location where last jump occurred from */
 };
 
 /* --------- */
@@ -212,5 +224,8 @@ void scr_search_regex_init(struct scroller *scr);
  */
 int scr_search_regex(struct scroller *scr, const char *regex, int opt,
     int direction, int icase);
+
+int scr_set_mark(struct scroller *scr, int key);
+int scr_goto_mark(struct scroller *scr, int key);
 
 #endif

@@ -316,6 +316,9 @@ This is defaulted to the @key{ESC} key.
 @item i
 Puts the user into @dfn{GDB mode}.
 
+@item s
+Puts the user into scroll mode in the @dfn{GDB mode}.
+
 @item Ctrl-T
 Opens a new tty for the debugged program.
 
@@ -461,6 +464,12 @@ Move up a page.
 @item page down
 Move down a page.
 
+@item Ctrl-u
+Move up 1/2 a page.
+
+@item Ctrl-d
+Move down 1/2 a page.
+
 @item F11
 @itemx home key
 @itemx gg
@@ -492,6 +501,18 @@ next forward search.
 
 @item N
 next reverse search.
+
+@item m[a-z]
+Set a mark at the cursor position. 
+
+@item '[a-z]
+Jump to the corresponding mark.
+
+@item ''
+Jump to the last jump location.
+
+@item '.
+Jump to the last line.
 
 @item q
 @itemx i
