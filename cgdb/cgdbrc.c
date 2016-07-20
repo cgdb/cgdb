@@ -61,20 +61,20 @@ static int cgdbrc_set_val(struct cgdbrc_config_option config_option);
  * It is initialized with the default values.
  */
 static struct cgdbrc_config_option cgdbrc_config_options[CGDBRC_WRAPSCAN + 1] = {
-    {CGDBRC_ARROWSTYLE, {ARROWSTYLE_SHORT}},
-    {CGDBRC_AUTOSOURCERELOAD, {1}},
-    {CGDBRC_CGDB_MODE_KEY, {CGDB_KEY_ESC}},
-    {CGDBRC_IGNORECASE, {0}},
-    {CGDBRC_SHOWTGDBCOMMANDS, {0}},
-    {CGDBRC_SYNTAX, {TOKENIZER_LANGUAGE_UNKNOWN}},
-    {CGDBRC_TABSTOP, {8}},
-    {CGDBRC_TIMEOUT, {1}},
-    {CGDBRC_TIMEOUT_LEN, {1000}},
-    {CGDBRC_TTIMEOUT, {1}},
-    {CGDBRC_TTIMEOUT_LEN, {100}},
-    {CGDBRC_WINMINHEIGHT, {0}},
-    {CGDBRC_WINSPLIT, {WIN_SPLIT_EVEN}},
-    {CGDBRC_WRAPSCAN, {1}}
+    {CGDBRC_ARROWSTYLE, {.arrow_style = ARROWSTYLE_SHORT}},
+    {CGDBRC_AUTOSOURCERELOAD, {.int_val = 1}},
+    {CGDBRC_CGDB_MODE_KEY, {.int_val = CGDB_KEY_ESC}},
+    {CGDBRC_IGNORECASE, {.int_val = 0}},
+    {CGDBRC_SHOWTGDBCOMMANDS, {.int_val = 0}},
+    {CGDBRC_SYNTAX, {.language_support_val = TOKENIZER_LANGUAGE_UNKNOWN}},
+    {CGDBRC_TABSTOP, {.int_val = 8}},
+    {CGDBRC_TIMEOUT, {.int_val = 1}},
+    {CGDBRC_TIMEOUT_LEN, {.int_val = 1000}},
+    {CGDBRC_TTIMEOUT, {.int_val = 1}},
+    {CGDBRC_TTIMEOUT_LEN, {.int_val = 100}},
+    {CGDBRC_WINMINHEIGHT, {.int_val = 0}},
+    {CGDBRC_WINSPLIT, {.win_split_val = WIN_SPLIT_EVEN}},
+    {CGDBRC_WRAPSCAN, {.int_val = 1}}
 };
 
 static struct std_list *cgdbrc_attach_list;
@@ -92,56 +92,57 @@ static struct ConfigVariable {
 } VARIABLES[] = {
 
     /* keep this stuff sorted! !sort */
+
     /* arrowstyle */
     {
-    "arrowstyle", "as", CONFIG_TYPE_FUNC_STRING, command_set_arrowstyle},
+    "arrowstyle", "as", CONFIG_TYPE_FUNC_STRING, (void *)command_set_arrowstyle},
             /* autosourcereload */
     {
     "autosourcereload", "asr", CONFIG_TYPE_BOOL,
-                &cgdbrc_config_options[CGDBRC_AUTOSOURCERELOAD].variant.
+                (void *)&cgdbrc_config_options[CGDBRC_AUTOSOURCERELOAD].variant.
                 int_val},
             /* cgdbmodekey */
     {
     "cgdbmodekey", "cgdbmodekey", CONFIG_TYPE_FUNC_STRING,
-                command_set_cgdb_mode_key},
+                (void *)command_set_cgdb_mode_key},
             /* ignorecase */
     {
     "ignorecase", "ic", CONFIG_TYPE_BOOL,
-                &cgdbrc_config_options[CGDBRC_IGNORECASE].variant.int_val},
+                (void *)&cgdbrc_config_options[CGDBRC_IGNORECASE].variant.int_val},
             /* showtgdbcommands */
     {
-    "showtgdbcommands", "stc", CONFIG_TYPE_FUNC_BOOL, &command_set_stc},
+    "showtgdbcommands", "stc", CONFIG_TYPE_FUNC_BOOL, (void *)&command_set_stc},
             /* syntax */
     {
-    "syntax", "syn", CONFIG_TYPE_FUNC_STRING, command_set_syntax_type},
+    "syntax", "syn", CONFIG_TYPE_FUNC_STRING, (void *)command_set_syntax_type},
             /* tabstop   */
     {
     "tabstop", "ts", CONFIG_TYPE_INT,
-                &cgdbrc_config_options[CGDBRC_TABSTOP].variant.int_val},
+                (void *)&cgdbrc_config_options[CGDBRC_TABSTOP].variant.int_val},
             /* timeout   */
     {
-    "timeout", "to", CONFIG_TYPE_FUNC_BOOL, &command_set_timeout},
+    "timeout", "to", CONFIG_TYPE_FUNC_BOOL, (void *)&command_set_timeout},
             /* timeoutlen   */
     {
-    "timeoutlen", "tm", CONFIG_TYPE_FUNC_INT, &command_set_timeoutlen},
+    "timeoutlen", "tm", CONFIG_TYPE_FUNC_INT, (void *)&command_set_timeoutlen},
             /* ttimeout   */
     {
-    "ttimeout", "ttimeout", CONFIG_TYPE_FUNC_BOOL, &command_set_ttimeout},
+    "ttimeout", "ttimeout", CONFIG_TYPE_FUNC_BOOL, (void *)&command_set_ttimeout},
             /* ttimeoutlen   */
     {
-    "ttimeoutlen", "ttm", CONFIG_TYPE_FUNC_INT, &command_set_ttimeoutlen},
+    "ttimeoutlen", "ttm", CONFIG_TYPE_FUNC_INT, (void *)&command_set_ttimeoutlen},
             /* winminheight */
     {
-    "winminheight", "wmh", CONFIG_TYPE_FUNC_INT, &command_set_winminheight},
+    "winminheight", "wmh", CONFIG_TYPE_FUNC_INT, (void *)&command_set_winminheight},
             /* winsplit */
     {
-    "winsplit", "winsplit", CONFIG_TYPE_FUNC_STRING, command_set_winsplit},
+    "winsplit", "winsplit", CONFIG_TYPE_FUNC_STRING, (void *)command_set_winsplit},
             /* wrapscan */
     {
-"wrapscan", "ws", CONFIG_TYPE_BOOL,
-                &cgdbrc_config_options[CGDBRC_WRAPSCAN].variant.int_val},};
+    "wrapscan", "ws", CONFIG_TYPE_BOOL,
+                (void *)&cgdbrc_config_options[CGDBRC_WRAPSCAN].variant.int_val},};
 
-static int command_do_tgdbcommand(int param);
+static int command_do_tgdbcommand(enum tgdb_command_type param);
 
 static int command_focus_cgdb(int param);
 static int command_focus_gdb(int param);
@@ -169,43 +170,43 @@ typedef struct COMMANDS {
 } COMMANDS;
 
 COMMANDS commands[] = {
-    /* bang         */ {"bang", command_do_bang, 0},
-    /* edit         */ {"edit", command_source_reload, 0},
-    /* edit         */ {"e", command_source_reload, 0},
-    /* focus        */ {"focus", command_do_focus, 0},
-    /* help         */ {"help", command_do_help, 0},
-    /* highlight            */ {"highlight", command_parse_highlight, 0},
-    /* highlight            */ {"hi", command_parse_highlight, 0},
-    /* imap         */ {"imap", command_parse_map, 0},
-    /* imap         */ {"im", command_parse_map, 0},
-    /* iunmap       */ {"iunmap", command_parse_unmap, 0},
-    /* iunmap       */ {"iu", command_parse_unmap, 0},
-    /* insert       */ {"insert", command_focus_gdb, 0},
-    /* map          */ {"map", command_parse_map, 0},
-    /* quit         */ {"quit", command_do_quit, 0},
-    /* quit         */ {"q", command_do_quit, 0},
-    /* shell        */ {"shell", command_do_shell, 0},
-    /* shell        */ {"sh", command_do_shell, 0},
-    /* syntax       */ {"syntax", command_parse_syntax, 0},
-    /* unmap        */ {"unmap", command_parse_unmap, 0},
-    /* unmap        */ {"unm", command_parse_unmap, 0},
-    /* continue     */ {"continue", command_do_tgdbcommand, TGDB_CONTINUE},
-    /* continue     */ {"c", command_do_tgdbcommand, TGDB_CONTINUE},
-    /* down             */ {"down", command_do_tgdbcommand, TGDB_DOWN},
-    /* finish       */ {"finish", command_do_tgdbcommand, TGDB_FINISH},
-    /* finish       */ {"f", command_do_tgdbcommand, TGDB_FINISH},
-    /* next         */ {"next", command_do_tgdbcommand, TGDB_NEXT},
-    /* next         */ {"n", command_do_tgdbcommand, TGDB_NEXT},
-    /* run          */ {"run", command_do_tgdbcommand, TGDB_RUN},
-    /* run          */ {"r", command_do_tgdbcommand, TGDB_RUN},
-    /* kill         */ {"kill", command_do_tgdbcommand, TGDB_KILL},
-    /* kill         */ {"k", command_do_tgdbcommand, TGDB_KILL},
-    /* step         */ {"step", command_do_tgdbcommand, TGDB_STEP},
-    /* step         */ {"s", command_do_tgdbcommand, TGDB_STEP},
-    /* start        */ {"start", command_do_tgdbcommand, TGDB_START},
-    /* until        */ {"until", command_do_tgdbcommand, TGDB_UNTIL},
-    /* until        */ {"u", command_do_tgdbcommand, TGDB_UNTIL},
-    /* up               */ {"up", command_do_tgdbcommand, TGDB_UP},
+    /* bang         */ {"bang", (action_t)command_do_bang, 0},
+    /* edit         */ {"edit", (action_t)command_source_reload, 0},
+    /* edit         */ {"e", (action_t)command_source_reload, 0},
+    /* focus        */ {"focus", (action_t)command_do_focus, 0},
+    /* help         */ {"help", (action_t)command_do_help, 0},
+    /* highlight    */ {"highlight", (action_t)command_parse_highlight, 0},
+    /* highlight    */ {"hi", (action_t)command_parse_highlight, 0},
+    /* imap         */ {"imap", (action_t)command_parse_map, 0},
+    /* imap         */ {"im", (action_t)command_parse_map, 0},
+    /* iunmap       */ {"iunmap", (action_t)command_parse_unmap, 0},
+    /* iunmap       */ {"iu", (action_t)command_parse_unmap, 0},
+    /* insert       */ {"insert", (action_t)command_focus_gdb, 0},
+    /* map          */ {"map", (action_t)command_parse_map, 0},
+    /* quit         */ {"quit", (action_t)command_do_quit, 0},
+    /* quit         */ {"q", (action_t)command_do_quit, 0},
+    /* shell        */ {"shell", (action_t)command_do_shell, 0},
+    /* shell        */ {"sh", (action_t)command_do_shell, 0},
+    /* syntax       */ {"syntax", (action_t)command_parse_syntax, 0},
+    /* unmap        */ {"unmap", (action_t)command_parse_unmap, 0},
+    /* unmap        */ {"unm", (action_t)command_parse_unmap, 0},
+    /* continue     */ {"continue", (action_t)command_do_tgdbcommand, TGDB_CONTINUE},
+    /* continue     */ {"c", (action_t)command_do_tgdbcommand, TGDB_CONTINUE},
+    /* down         */ {"down", (action_t)command_do_tgdbcommand, TGDB_DOWN},
+    /* finish       */ {"finish", (action_t)command_do_tgdbcommand, TGDB_FINISH},
+    /* finish       */ {"f", (action_t)command_do_tgdbcommand, TGDB_FINISH},
+    /* next         */ {"next", (action_t)command_do_tgdbcommand, TGDB_NEXT},
+    /* next         */ {"n", (action_t)command_do_tgdbcommand, TGDB_NEXT},
+    /* run          */ {"run", (action_t)command_do_tgdbcommand, TGDB_RUN},
+    /* run          */ {"r", (action_t)command_do_tgdbcommand, TGDB_RUN},
+    /* kill         */ {"kill", (action_t)command_do_tgdbcommand, TGDB_KILL},
+    /* kill         */ {"k", (action_t)command_do_tgdbcommand, TGDB_KILL},
+    /* step         */ {"step", (action_t)command_do_tgdbcommand, TGDB_STEP},
+    /* step         */ {"s", (action_t)command_do_tgdbcommand, TGDB_STEP},
+    /* start        */ {"start", (action_t)command_do_tgdbcommand, TGDB_START},
+    /* until        */ {"until", (action_t)command_do_tgdbcommand, TGDB_UNTIL},
+    /* until        */ {"u", (action_t)command_do_tgdbcommand, TGDB_UNTIL},
+    /* up           */ {"up", (action_t)command_do_tgdbcommand, TGDB_UP},
 };
 
 int command_sort_find(const void *_left_cmd, const void *_right_cmd)
@@ -228,7 +229,7 @@ COMMANDS *get_command(const char *cmd)
 {
     COMMANDS command = { cmd, NULL, 0 };
 
-    return bsearch((void *) &command, (void *) commands,
+    return (COMMANDS *)bsearch((void *) &command, (void *) commands,
             COMMANDS_COUNT, COMMANDS_SIZE, command_sort_find);
 }
 
@@ -450,7 +451,7 @@ int command_do_bang(int param)
     return 0;
 }
 
-int command_do_tgdbcommand(int param)
+int command_do_tgdbcommand(enum tgdb_command_type param)
 {
     tgdb_request_ptr request_ptr;
 
@@ -783,9 +784,9 @@ int command_parse_set(void)
     return rv;
 }
 
+typedef struct yy_buffer_state *YY_BUFFER_STATE;
 int command_parse_string(const char *buffer)
 {
-    typedef struct yy_buffer_state *YY_BUFFER_STATE;
     extern YY_BUFFER_STATE yy_scan_string(const char *yy_str);
     extern void yy_delete_buffer(YY_BUFFER_STATE state);
     int rv = 1;

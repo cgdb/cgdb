@@ -436,7 +436,7 @@ int tgdb_client_completion_callback(struct tgdb_client_context *tcc,
  * @return
  * Command on success, otherwise NULL on error.
  */
-char *tgdb_client_return_command(struct tgdb_client_context *tcc,
+const char *tgdb_client_return_command(struct tgdb_client_context *tcc,
         enum tgdb_command_type c);
 
 /** 

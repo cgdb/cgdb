@@ -61,7 +61,7 @@ static struct tgdb_client_debugger_interfaces {
     int (*tgdb_client_completion_callback) (void *ctx,
             const char *completion_command);
 
-    char *(*tgdb_client_return_command) (void *ctx, enum tgdb_command_type c);
+    const char *(*tgdb_client_return_command) (void *ctx, enum tgdb_command_type c);
 
     char *(*tgdb_client_modify_breakpoint) (void *ctx,
             const char *file, int line, enum tgdb_breakpoint_action b);
@@ -171,6 +171,8 @@ static struct tgdb_client_debugger_interfaces {
                 /* tgdb_client_can_tgdb_run_commands */
                 NULL,
                 /* tgdb_client_parse_io */
+                NULL,
+                /* tgdb_client_get_client_commands */
                 NULL,
                 /* tgdb_client_get_filename_pair */
                 NULL,
@@ -431,7 +433,7 @@ int tgdb_client_completion_callback(struct tgdb_client_context *tcc,
             tgdb_debugger_context, completion_command);
 }
 
-char *tgdb_client_return_command(struct tgdb_client_context *tcc,
+const char *tgdb_client_return_command(struct tgdb_client_context *tcc,
         enum tgdb_command_type c)
 {
 

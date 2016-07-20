@@ -10,10 +10,6 @@
 #ifndef __DATA_H__
 #define __DATA_H__
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "tgdb_types.h"
 #include "tgdb_command.h"
 #include "annotate_two.h"
@@ -55,7 +51,4 @@ extern "C" {
     void data_process(struct annotate_two *a2,
             char a, char *buf, int *n, struct tgdb_list *list);
 
-#ifdef __cplusplus
-}
-#endif
 #endif

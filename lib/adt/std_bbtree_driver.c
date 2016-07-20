@@ -56,15 +56,15 @@ typedef struct {
 
 static int my_compare(const void *a, const void *b)
 {
-    const char *cha = a;
-    const char *chb = b;
+    const char *cha = (const char *)a;
+    const char *chb = (const char *)b;
 
     return *cha - *chb;
 }
 
 static int my_traverse(void *key, void *value, void *data)
 {
-    char *ch = key;
+    char *ch = (char *)key;
 
     assert((*ch) > 0);
     return 0;

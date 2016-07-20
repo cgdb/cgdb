@@ -1,5 +1,8 @@
 %option prefix="d_"
 %option outfile="lex.yy.c"
+%option noyywrap
+%option nounput
+%option noinput
 
 B       [01_]
 D       [0-9_]
@@ -250,14 +253,3 @@ r\"                                         { BEGIN(wysiwyg_literal);    return(
 .                             { return(TOKENIZER_TEXT);    }
 
 %%
-
-int d_wrap ( void ) {
-        {
-                /* Silly impossible function call to stop warning of unused functions */
-                if ( 0 ) {
-                        yyunput(0, "");
-                }
-        }
-
-    return 1;
-}

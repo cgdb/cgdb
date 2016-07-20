@@ -382,7 +382,7 @@ int a2_completion_callback(void *ctx, const char *command);
  * @return
  * Command on success, otherwise NULL on error.
  */
-char *a2_return_client_command(void *ctx, enum tgdb_command_type c);
+const char *a2_return_client_command(void *ctx, enum tgdb_command_type c);
 
 /** 
  * \param ctx

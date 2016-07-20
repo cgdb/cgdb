@@ -161,14 +161,14 @@ struct std_hashtable *std_hash_table_new_full(STDHashFunc hash_func,
     struct std_hashtable *hash_table;
     unsigned int i;
 
-    hash_table = malloc(sizeof (struct std_hashtable));
+    hash_table = (struct std_hashtable *)malloc(sizeof (struct std_hashtable));
     hash_table->size = HASH_TABLE_MIN_SIZE;
     hash_table->nnodes = 0;
     hash_table->hash_func = hash_func ? hash_func : std_direct_hash;
     hash_table->key_equal_func = key_equal_func;
     hash_table->key_destroy_func = key_destroy_func;
     hash_table->value_destroy_func = value_destroy_func;
-    hash_table->nodes = malloc(sizeof (struct ghashnode *) * hash_table->size);
+    hash_table->nodes = (struct ghashnode **)malloc(sizeof (struct ghashnode *) * hash_table->size);
 
     for (i = 0; i < hash_table->size; i++)
         hash_table->nodes[i] = NULL;
@@ -622,7 +622,7 @@ static void std_hash_table_resize(struct std_hashtable *hash_table)
     new_size = std_spaced_primes_closest(hash_table->nnodes);
     new_size = CLAMP(new_size, HASH_TABLE_MIN_SIZE, HASH_TABLE_MAX_SIZE);
 
-    new_nodes = malloc(sizeof (struct ghashnode *) * new_size);
+    new_nodes = (struct ghashnode **)malloc(sizeof (struct ghashnode *) * new_size);
 
     for (i = 0; i < hash_table->size; i++)
         for (node = hash_table->nodes[i]; node; node = next) {
@@ -643,7 +643,7 @@ static struct ghashnode *std_hash_node_new(void *key, void *value)
 {
     struct ghashnode *hash_node;
 
-    hash_node = malloc(sizeof (struct ghashnode));
+    hash_node = (struct ghashnode *)malloc(sizeof (struct ghashnode));
 
     hash_node->key = key;
     hash_node->value = value;

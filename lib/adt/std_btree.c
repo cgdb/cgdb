@@ -21,7 +21,7 @@ struct std_btree {
     /**
      * A pointer to the root node of the tree.
      */
-    std_btree_node root;
+    std_btree_node_ptr root;
 
     /**
      * A pointer to the destructor for data elements in this tree.
@@ -40,17 +40,17 @@ struct std_btree_node {
      * if the root changes, for example if someone calls remove() on the
      * root node.
      */
-    std_btree tree;
+    std_btree_ptr tree;
 
     /**
      * The parent of this node.
      */
-    std_btree_node parent;
+    std_btree_node_ptr parent;
 
     /**
      * The children of this node.
      */
-    std_btree_node children[2];
+    std_btree_node_ptr children[2];
 
     /**
      * The data stored in this node.
@@ -68,23 +68,23 @@ struct std_btree_node {
  * Destroys the data at the specified node, if a destructor method has
  * been defined.
  */
-static void std_btree_destroy_data(std_btree_node node);
+static void std_btree_destroy_data(std_btree_node_ptr node);
 
 /* std_btree_unlink: 
  *
  * Unlinks the given node from the rest of the tree so that it can be
  * destroyed without any dangling references left behind.
  */
-static void std_btree_unlink(std_btree_node node);
+static void std_btree_unlink(std_btree_node_ptr node);
 
 /*
  * Exported Functions
  */
 
 /* std_btree_create */
-std_btree std_btree_create(const STDDestroyNotify destroy_func)
+std_btree_ptr std_btree_create(const STDDestroyNotify destroy_func)
 {
-    std_btree tree = (std_btree) malloc(sizeof (struct std_btree));
+    std_btree_ptr tree = (std_btree_ptr) malloc(sizeof (struct std_btree));
 
     /* Be extra paranoid */
     if (tree) {
@@ -96,7 +96,7 @@ std_btree std_btree_create(const STDDestroyNotify destroy_func)
 }
 
 /* std_btree_destroy */
-int std_btree_destroy(std_btree tree)
+int std_btree_destroy(std_btree_ptr tree)
 {
     if (tree) {
         std_btree_remove(tree->root);
@@ -107,7 +107,7 @@ int std_btree_destroy(std_btree tree)
 }
 
 /* std_btree_root */
-std_btree_iterator std_btree_root(const std_btree tree)
+std_btree_iterator std_btree_root(const std_btree_ptr tree)
 {
     /* Bounds check */
     assert(tree != NULL);
@@ -148,11 +148,11 @@ std_btree_iterator std_btree_parent(const std_btree_iterator iter)
 }
 
 /* std_btree_add */
-int std_btree_add(std_btree tree,
+int std_btree_add(std_btree_ptr tree,
         std_btree_iterator iter, enum std_btree_child child, void *data)
 {
     /* Declarations */
-    std_btree_node new_node = NULL;
+    std_btree_node_ptr new_node = NULL;
 
     /* Bounds check */
     assert(tree != NULL);
@@ -164,7 +164,7 @@ int std_btree_add(std_btree tree,
     }
 
     /* Create the new node */
-    new_node = (std_btree_node) malloc(sizeof (struct std_btree_node));
+    new_node = (std_btree_node_ptr) malloc(sizeof (struct std_btree_node));
 
     new_node->tree = tree;
     new_node->parent = iter;
@@ -251,7 +251,7 @@ int std_btree_isleaf(std_btree_iterator iter)
  */
 
 /* std_btree_destroy_data */
-static void std_btree_destroy_data(std_btree_node node)
+static void std_btree_destroy_data(std_btree_node_ptr node)
 {
     if (node->tree->destructor != NULL) {
         node->tree->destructor(node->data);
@@ -259,7 +259,7 @@ static void std_btree_destroy_data(std_btree_node node)
 }
 
 /* std_btree_unlink: */
-static void std_btree_unlink(std_btree_node node)
+static void std_btree_unlink(std_btree_node_ptr node)
 {
     if (std_btree_isroot(node)) {
 

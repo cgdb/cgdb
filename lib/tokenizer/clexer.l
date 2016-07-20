@@ -1,5 +1,8 @@
 %option prefix="c_"
 %option outfile="lex.yy.c"
+%option noyywrap
+%option nounput
+%option noinput
 
 D       [0-9]
 H       [0-9a-fA-F_]
@@ -145,14 +148,3 @@ IDENTIFIER {L}+{T}*
 .                       { return(TOKENIZER_TEXT);    }
 
 %%
-
-int c_wrap ( void ) {
-	{
-		/* Silly impossible function call to stop warning of unused functions */
-		if ( 0 ) {
-			yyunput(0, "");
-		}
-	}
-
-    return 1;
-}

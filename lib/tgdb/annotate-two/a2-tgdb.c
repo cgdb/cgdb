@@ -366,9 +366,9 @@ int a2_get_inferior_sources(void *ctx)
     return 0;
 }
 
-char *a2_return_client_command(void *ctx, enum tgdb_command_type c)
+const char *a2_return_client_command(void *ctx, enum tgdb_command_type c)
 {
-    char *ret = NULL;
+    const char *ret = NULL;
 
     switch (c) {
         case TGDB_CONTINUE:

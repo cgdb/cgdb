@@ -58,7 +58,7 @@ static int regex_direction;     /* Direction to search */
  *  width:  The width of the window
  *  string: The message to print
  */
-static void print_in_middle(WINDOW * win, int line, int width, char *string)
+static void print_in_middle(WINDOW * win, int line, int width, const char *string)
 {
     int x, y;
     int j;
@@ -83,7 +83,7 @@ struct filedlg *filedlg_new(int pos_r, int pos_c, int height, int width)
     struct filedlg *fd;
 
     /* Allocate a new structure */
-    if ((fd = malloc(sizeof (struct filedlg))) == NULL)
+    if ((fd = (struct filedlg *)malloc(sizeof (struct filedlg))) == NULL)
         return NULL;
 
     /* Initialize the structure */
@@ -91,7 +91,7 @@ struct filedlg *filedlg_new(int pos_r, int pos_c, int height, int width)
     keypad(fd->win, TRUE);
 
     /* Initialize the buffer */
-    if ((fd->buf = malloc(sizeof (struct file_buffer))) == NULL)
+    if ((fd->buf = (struct file_buffer *)malloc(sizeof (struct file_buffer))) == NULL)
         return NULL;
 
     fd->buf->length = 0;
@@ -159,7 +159,7 @@ int filedlg_add_file_choice(struct filedlg *fd, const char *file_choice)
     index = i;
 
     fd->buf->length = fd->buf->length + 1;
-    fd->buf->files = realloc(fd->buf->files, sizeof (char *) * fd->buf->length);
+    fd->buf->files = (char **)realloc(fd->buf->files, sizeof (char *) * fd->buf->length);
 
     /* shift everything down and then insert into index */
     for (i = fd->buf->length - 1; i > index; i--)
@@ -263,7 +263,7 @@ int filedlg_display(struct filedlg *fd)
     int file;
     int i;
     int attr;
-    static char *label = "Select a file or press q to cancel.";
+    static const char label[] = "Select a file or press q to cancel.";
 
     curs_set(0);
 

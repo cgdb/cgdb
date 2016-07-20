@@ -1,6 +1,9 @@
 %option prefix="gdbmi_"
 %option outfile="lex.yy.c"
 %option yylineno
+%option noyywrap
+%option nounput
+%option noinput
 
 DIGIT       [0-9]
 L       [a-zA-Z_]
@@ -44,13 +47,3 @@ IDENTIFIER {L}+{T}*
 
 
 %%
-
-/* I don't know what this function does.  However, it avoids a link error.  */
-int 
-gdbmi_wrap (void)
-{
-  if (0)
-    yyunput(0, "");
-
-  return 1;
-}

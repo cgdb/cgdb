@@ -28,7 +28,7 @@ int array[10000];
 
 static int my_hash_callback_remove(void *key, void *value, void *user_data)
 {
-    int *d = value;
+    int *d = (int *)value;
 
     if ((*d) % 2)
         return 1;
@@ -39,7 +39,7 @@ static int my_hash_callback_remove(void *key, void *value, void *user_data)
 static void
 my_hash_callback_remove_test(void *key, void *value, void *user_data)
 {
-    int *d = value;
+    int *d = (int *)value;
 
     if ((*d) % 2)
         fprintf(stderr, "%s:%d should not be reached\n", __FILE__, __LINE__);
@@ -47,7 +47,7 @@ my_hash_callback_remove_test(void *key, void *value, void *user_data)
 
 static void my_hash_callback(void *key, void *value, void *user_data)
 {
-    int *d = value;
+    int *d = (int *)value;
 
     *d = 1;
 }
@@ -130,7 +130,7 @@ static unsigned int honeyman_hash(const void *key)
 
 static int second_hash_cmp(const void *a, const void *b)
 {
-    return (strcmp(a, b) == 0);
+    return (strcmp((const char *)a, (const char *)b) == 0);
 }
 
 static unsigned int one_hash(const void *key)
@@ -231,7 +231,7 @@ static void second_hash_test(int simple_hash)
 
         orig_key = orig_val = NULL;
         found = std_hash_table_lookup_extended(h, key,
-                (void *) &orig_key, (void *) &orig_val);
+                (void **) &orig_key, (void **) &orig_val);
         assert(found);
 
         std_hash_table_remove(h, key);
@@ -250,8 +250,8 @@ static void second_hash_test(int simple_hash)
 
 static int find_first(void *key, void *value, void *user_data)
 {
-    int *v = value;
-    int *test = user_data;
+    int *v = (int *)value;
+    int *test = (int *)user_data;
 
     return (*v == *test);
 }
@@ -291,7 +291,7 @@ int main(int argc, char *argv[])
         array[i] = i;
         std_hash_table_insert(hash_table, &array[i], &array[i]);
     }
-    pvalue = std_hash_table_find(hash_table, find_first, &value);
+    pvalue = (int *)std_hash_table_find(hash_table, find_first, &value);
     if (!pvalue || *pvalue != value)
         fprintf(stderr, "%s:%d should not be reached\n", __FILE__, __LINE__);
 

@@ -4,12 +4,12 @@
 #include <string.h>
 
 /* Some default file extensions */
-char *c_extensions[] = {
+const char *c_extensions[] = {
     ".c", ".C", ".cc", ".cpp", ".cxx", ".c++", ".h", ".hpp", ".hxx", ".hh", ".ipp", ".inl", ".moc"
 };
-char *d_extensions[] = { ".d", ".di" };
-char *go_extensions[] = { ".go" };
-char *ada_extensions[] = { ".adb", ".ads", ".ada", ".ADB", ".ADS", ".ADA" };
+const char *d_extensions[] = { ".d", ".di" };
+const char *go_extensions[] = { ".go" };
+const char *ada_extensions[] = { ".adb", ".ads", ".ada", ".ADB", ".ADS", ".ADA" };
 
 extern int c_lex(void);
 extern FILE *c_in;
@@ -91,7 +91,7 @@ int tokenizer_get_token(struct tokenizer *t)
     if (t == NULL || t->tokenizer_lex == NULL)
         return 0;
 
-    t->tpacket = (t->tokenizer_lex) ();
+    t->tpacket = (enum tokenizer_type)(t->tokenizer_lex) ();
     ibuf_clear(t->i);
     ibuf_add(t->i, (const char *) *(t->tokenizer_text));
 

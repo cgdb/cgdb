@@ -123,7 +123,7 @@ static int highlight_node(struct list_node *node)
             case TOKENIZER_NEWLINE:
                 node->buf.length++;
                 node->buf.tlines =
-                        realloc(node->buf.tlines,
+                        (char **)realloc(node->buf.tlines,
                         sizeof (char *) * node->buf.length);
                 node->buf.tlines[node->buf.length - 1] = strdup(ibuf_get(ibuf));
 
@@ -161,7 +161,7 @@ void highlight(struct list_node *node)
 
         node->buf.length = node->orig_buf.length;
         node->buf.max_width = node->orig_buf.max_width;
-        node->buf.tlines = cgdb_malloc(sizeof (char *) * node->orig_buf.length);
+        node->buf.tlines = (char **)cgdb_malloc(sizeof (char *) * node->orig_buf.length);
         for (i = 0; i < node->orig_buf.length; i++)
             node->buf.tlines[i] = cgdb_strdup(node->orig_buf.tlines[i]);
     } else
@@ -285,7 +285,7 @@ void hl_wprintw(WINDOW * win, const char *line, int width, int offset)
              * the color attribute needs to be maintained for when we
              * start printing in the loop below.  This way the text
              * printed will be done in the correct color. */
-            color = (int) line[++i];
+            color = (enum hl_group_kind) line[++i];
         } else if (line[i] == '\t') {
             /* Tab character, expand to size set by user */
             j += highlight_tabstop - (j % highlight_tabstop);
@@ -314,7 +314,7 @@ void hl_wprintw(WINDOW * win, const char *line, int width, int offset)
         if (line[i] == HL_CHAR) {
             if (++i < length) {
                 wattroff(win, attr);
-                color = (int) line[i];
+                color = (enum hl_group_kind) line[i];
 
                 if (hl_groups_get_attr(hl_groups_instance, color, &attr) == -1) {
                     logger_write_pos(logger, __FILE__, __LINE__,

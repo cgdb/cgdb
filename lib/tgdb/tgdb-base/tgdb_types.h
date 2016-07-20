@@ -14,10 +14,6 @@
  * any information about the current debugging session.
  */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "tgdb_list.h"
 
     /* A reference to a command that has been created by TGDB */
@@ -423,7 +419,7 @@ extern "C" {
         } choice;
     };
 
-#ifdef __cplusplus
-}
-#endif
+//#ifdef __cplusplus
+//}
+//#endif
 #endif                          /* __TGDB_TYPES_H__ */

@@ -70,7 +70,7 @@ static enum gdbmi_input_command gdbmi_input_command_lookup(const char *command)
 /* Creating, Destroying and printing gdbmi_oc  */
 gdbmi_oc_ptr create_gdbmi_oc(void)
 {
-    gdbmi_oc_ptr oc_ptr = calloc(1, sizeof (struct gdbmi_oc));
+    gdbmi_oc_ptr oc_ptr = (gdbmi_oc_ptr)calloc(1, sizeof (struct gdbmi_oc));
 
     if (!oc_ptr)
         return NULL;
@@ -209,23 +209,23 @@ int print_gdbmi_oc(gdbmi_oc_ptr param)
  * \param orig
  * The string to convert
  *
- * \param new
- * The new string, the memory will be allocated in this function and passed back.
+ * \param new_str
+ * The new_str string, the memory will be allocated in this function and passed back.
  *
  * \return
  * 0 on success, -1 on error.
  */
-static int convert_cstring(const char *orig, char **new)
+static int convert_cstring(const char *orig, char **new_str)
 {
     int length;
     char *nstring;
     int i, cur;
 
-    if (!orig || !new)
+    if (!orig || !new_str)
         return -1;
 
     length = strlen(orig);
-    nstring = malloc(sizeof (char) * (length + 1));
+    nstring = (char *)malloc(sizeof (char) * (length + 1));
     cur = 0;
 
     /* Loop from 1 to length -1 to skip the first and last char, 
@@ -257,7 +257,7 @@ static int convert_cstring(const char *orig, char **new)
     }
     nstring[cur] = '\0';
 
-    *new = nstring;
+    *new_str = nstring;
 
     return 0;
 }
@@ -821,7 +821,7 @@ gdbmi_get_output_commands(gdbmi_output_ptr output_ptr,
 
 gdbmi_oc_cstring_ll_ptr create_gdbmi_cstring_ll(void)
 {
-    return calloc(1, sizeof (struct gdbmi_oc_cstring_ll));
+    return (gdbmi_oc_cstring_ll_ptr)calloc(1, sizeof (struct gdbmi_oc_cstring_ll));
 }
 
 int destroy_gdbmi_cstring_ll(gdbmi_oc_cstring_ll_ptr param)
@@ -876,7 +876,7 @@ int print_gdbmi_cstring_ll(gdbmi_oc_cstring_ll_ptr param)
 
 gdbmi_oc_file_path_info_ptr create_gdbmi_file_path_info(void)
 {
-    return calloc(1, sizeof (struct gdbmi_oc_file_path_info));
+    return (gdbmi_oc_file_path_info_ptr)calloc(1, sizeof (struct gdbmi_oc_file_path_info));
 }
 
 int destroy_gdbmi_file_path_info(gdbmi_oc_file_path_info_ptr param)
@@ -935,7 +935,7 @@ int print_gdbmi_file_path_info(gdbmi_oc_file_path_info_ptr param)
 
 gdbmi_oc_breakpoint_ptr create_gdbmi_breakpoint(void)
 {
-    return calloc(1, sizeof (struct gdbmi_oc_breakpoint));
+    return (gdbmi_oc_breakpoint_ptr)calloc(1, sizeof (struct gdbmi_oc_breakpoint));
 }
 
 int destroy_gdbmi_breakpoint(gdbmi_oc_breakpoint_ptr param)

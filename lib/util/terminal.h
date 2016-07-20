@@ -1,10 +1,6 @@
 #ifndef __TERMINAL_H__
 #define __TERMINAL_H__
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #if HAVE_CONFIG_H
 #include "config.h"
 #endif                          /* HAVE_CONFIG_H */
@@ -101,7 +97,4 @@ extern "C" {
  */
     int tty_set_attributes(int fd, struct termios *buf);
 
-#ifdef __cplusplus
-}
-#endif
 #endif

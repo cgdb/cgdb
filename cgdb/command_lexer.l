@@ -1,3 +1,7 @@
+%option noyywrap
+%option nounput
+%option noinput
+
 D           [0-9]
 L           [a-zA-Z_]
 
@@ -60,15 +64,3 @@ const char * get_token( void )
 }
 
 %%
-
-int yywrap( void )
-{
-	{
-		/* Silly impossible function call to stop warning of unused functions */
-		if ( 0 ) {
-			yyunput(0, "");
-		}
-	}
-
-    return 1;
-}

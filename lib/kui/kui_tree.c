@@ -38,7 +38,7 @@ struct kui_tree_node {
 	 * If this is a bottleneck, it can be changed into a hash, or something
 	 * more efficient.
 	 */
-    std_list children;
+    std_list_ptr children;
 };
 
 /**
@@ -127,7 +127,7 @@ struct kui_tree_node *kui_tree_node_create(void)
  * 0 on success, or -1 on error.
  */
 static int kui_tree_find(int key,
-        std_list children, int *found, struct kui_tree_node **ktnode)
+        std_list_ptr children, int *found, struct kui_tree_node **ktnode)
 {
     struct kui_tree_node *node;
     std_list_iterator iter;

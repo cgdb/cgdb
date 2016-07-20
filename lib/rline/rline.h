@@ -62,7 +62,7 @@ typedef int completion_cb(int, int);
  * NULL on error, a valid context on success.
  */
 struct rline *rline_initialize(int slavefd, command_cb * command,
-        completion_cb * completion, char *TERM);
+        completion_cb * completion, const char *TERM);
 
 /**
  * This will terminate a librline session. No functions should be called on
@@ -308,7 +308,7 @@ int rline_get_rl_completion_query_items(struct rline *rline);
  * 0 on success or -1 on error
  */
 int rline_get_keyseq(struct rline *rline, const char *named_function,
-        std_list keyseq_list);
+        std_list_ptr keyseq_list);
 
 /*@}*/
 /* }}}*/

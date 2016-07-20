@@ -1,6 +1,9 @@
 %option prefix="ada_"
 %option outfile="lex.yy.c"
 %option case-insensitive
+%option noyywrap
+%option nounput
+%option noinput
 
 D                       [0-9]
 L                       [a-zA-Z_]
@@ -112,14 +115,3 @@ L                       [a-zA-Z_]
 {L}+                    { return(TOKENIZER_TEXT); 	 }
 .                       { return(TOKENIZER_TEXT);    }
 %%
-
-int ada_wrap ( void ) {
-	{
-		/* Silly impossible function call to stop warning of unused functions */
-		if ( 0 ) {
-			yyunput(0, "");
-		}
-	}
-
-	return 1;
-}

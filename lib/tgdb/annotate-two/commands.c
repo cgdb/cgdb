@@ -285,7 +285,7 @@ commands_parse_source(struct commands *c,
         if (*cur == ':') {
             if (i == 3) {
                 int length = strlen(cur + 1);
-                char *temp = cgdb_malloc(sizeof (char) * (length + 1));
+                char *temp = (char *)cgdb_malloc(sizeof (char) * (length + 1));
 
                 if (sscanf(cur + 1, "%s", temp) != 1)
                     logger_write_pos(logger, __FILE__, __LINE__,
@@ -304,7 +304,7 @@ commands_parse_source(struct commands *c,
 
     {
         int length = strlen(copy);
-        char *temp = cgdb_malloc(sizeof (char) * (length + 1));
+        char *temp = (char *)cgdb_malloc(sizeof (char) * (length + 1));
 
         if (strncmp("source ", copy, 7) == 0 && length > 7) {
             int j;
@@ -384,7 +384,7 @@ static int parse_breakpoint(struct commands *c)
         if (pmatch[cur].rm_so != -1) {
             int size = pmatch[cur].rm_eo - pmatch[cur].rm_so;
 
-            matches[cur] = cgdb_malloc(sizeof (char) * (size) + 1);
+            matches[cur] = (char *)cgdb_malloc(sizeof (char) * (size) + 1);
             strncpy(matches[cur], &info_ptr[pmatch[cur].rm_so], size);
             matches[cur][size] = 0;
         }
@@ -653,12 +653,12 @@ static void commands_process_source_line(struct commands *c)
 
     for (i = 0; i < length; ++i) {
         if (i > 0 && info_ptr[i - 1] == ',' && info_ptr[i] == ' ') {
-            nfile = calloc(sizeof (char), i - start);
+            nfile = (char *)calloc(sizeof (char), i - start);
             strncpy(nfile, info_ptr + start, i - start - 1);
             start += ((i + 1) - start);
             tgdb_list_append(c->inferior_source_files, nfile);
         } else if (i == length - 1) {
-            nfile = calloc(sizeof (char), i - start + 2);
+            nfile = (char *)calloc(sizeof (char), i - start + 2);
             strncpy(nfile, info_ptr + start, i - start + 1);
             tgdb_list_append(c->inferior_source_files, nfile);
         }
@@ -878,7 +878,7 @@ commands_prepare_for_command(struct annotate_two *a2,
             (enum annotate_commands *) com->tgdb_client_private_data;
 
     /* Set the commands state to nothing */
-    commands_set_state(c, VOID, NULL);
+    commands_set_state(c, VOID_COMMAND, NULL);
 
     /* The list command is no longer running */
     global_list_finished(a2->g);

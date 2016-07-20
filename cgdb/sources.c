@@ -253,7 +253,7 @@ static int load_file(struct list_node *node)
 
             /* Inefficient - Reallocates memory at each line */
             node->orig_buf.length++;
-            node->orig_buf.tlines = realloc(node->orig_buf.tlines,
+            node->orig_buf.tlines = (char**)realloc(node->orig_buf.tlines,
                     sizeof (char *) * node->orig_buf.length);
             node->orig_buf.tlines[node->orig_buf.length - 1] = strdup(line);
         }
@@ -273,13 +273,13 @@ static int load_file(struct list_node *node)
 
         node->buf.length = node->orig_buf.length;
         node->buf.max_width = node->orig_buf.max_width;
-        node->buf.tlines = cgdb_malloc(sizeof (char *) * node->orig_buf.length);
+        node->buf.tlines = (char **)cgdb_malloc(sizeof (char *) * node->orig_buf.length);
         for (i = 0; i < node->orig_buf.length; i++)
             node->buf.tlines[i] = cgdb_strdup(node->orig_buf.tlines[i]);
     }
 
     /* Allocate the breakpoints array */
-    node->buf.breakpts = malloc(sizeof (char) * node->buf.length);
+    node->buf.breakpts = (char *)malloc(sizeof (char) * node->buf.length);
     for (i = 0; i < node->buf.length; i++)
         node->buf.breakpts[i] = 0;
 
@@ -414,7 +414,7 @@ struct sviewer *source_new(int pos_r, int pos_c, int height, int width)
     struct sviewer *rv;
 
     /* Allocate a new structure */
-    if ((rv = malloc(sizeof (struct sviewer))) == NULL)
+    if ((rv = (struct sviewer *)malloc(sizeof (struct sviewer))) == NULL)
         return NULL;
 
     /* Initialize the structure */
@@ -429,7 +429,7 @@ int source_add(struct sviewer *sview, const char *path)
 {
     struct list_node *new_node;
 
-    new_node = malloc(sizeof (struct list_node));
+    new_node = (struct list_node *)malloc(sizeof (struct list_node));
     new_node->path = strdup(path);
     new_node->lpath = NULL;
     new_node->buf.length = 0;

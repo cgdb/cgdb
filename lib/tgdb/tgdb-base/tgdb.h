@@ -10,10 +10,6 @@
  * and the low level debugger the front end is trying to communicate with.
  */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /* includes {{{*/
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -26,7 +22,7 @@ extern "C" {
 #include "tgdb_types.h"
 /* }}}*/
 
-/* Createing and Destroying a libtgdb context. {{{*/
+/* Creating and Destroying a libtgdb context. {{{*/
 /******************************************************************************/
 /**
  * @name Createing and Destroying a libtgdb context.
@@ -598,7 +594,4 @@ extern "C" {
 /*@}*/
 /* }}}*/
 
-#ifdef __cplusplus
-}
-#endif
 #endif                          /* __TGDB_H__ */

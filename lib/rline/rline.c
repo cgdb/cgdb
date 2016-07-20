@@ -72,9 +72,10 @@ static void custom_deprep_term_function()
 
 /* Createing and Destroying a librline context. {{{*/
 struct rline *rline_initialize(int slavefd, command_cb * command,
-        completion_cb * completion, char *TERM)
+        completion_cb * completion, const char *TERM)
 {
     struct rline *rline = (struct rline *) malloc(sizeof (struct rline));
+    static char word_break_chars[] = " \t\n!@#$%^&*()+=|~`}{[]\"';:?/>.<,-";
 
     if (!rline)
         return NULL;
@@ -131,7 +132,7 @@ struct rline *rline_initialize(int slavefd, command_cb * command,
      */
     rl_completion_query_items = -1;
     rl_variable_bind("page-completions", "0");
-    rl_completer_word_break_characters = " \t\n!@#$%^&*()+=|~`}{[]\"';:?/>.<,-";
+    rl_completer_word_break_characters = word_break_chars;
     rl_completer_quote_characters = "'";
 
     return rline;
@@ -297,7 +298,7 @@ char *rline_rl_completion_entry_function(const char *text, int matches)
      * In C++ if you do "b 'classname::functionam<Tab>". This will complete
      * the line like "b 'classname::functioname'".
      */
-        char *local = tgdb_list_get_item(rline_local_iter);
+        char *local = (char *)tgdb_list_get_item(rline_local_iter);
         char *word = local + rl_point - strlen(text);
 
         rline_local_iter = tgdb_list_next(rline_local_iter);
@@ -313,9 +314,10 @@ char *rline_rl_completion_entry_function(const char *text, int matches)
  * The default readline word break includes a ' ', which would not
  * result in 'b main' as the completion result.
  */
-char *rline_rl_cpvfunc_t(void)
+static char *rline_rl_cpvfunc_t(void)
 {
-    return "";
+    static char buf[] = "";
+    return buf;
 }
 
 int
@@ -419,7 +421,7 @@ int rline_get_rl_completion_query_items(struct rline *rline)
 
 int
 rline_get_keyseq(struct rline *rline, const char *named_function,
-        std_list keyseq_list)
+        std_list_ptr keyseq_list)
 {
     rl_command_func_t *func;
     char **invoking_keyseqs = NULL;

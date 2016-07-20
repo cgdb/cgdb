@@ -209,7 +209,7 @@ struct kui_map_set {
     struct kui_tree *ktree;
 
     /* A linked list of the maps being checked for. */
-    std_list maps;
+    std_list_ptr maps;
 };
 
 static int kui_map_destroy_callback(void *data)
@@ -356,17 +356,17 @@ struct kuictx {
     /**
 	 * The list of kui_map_set structures.
 	 */
-    std_list kui_map_set_list;
+    std_list_ptr kui_map_set_list;
 
     /**
 	 * A list of characters, used as a buffer for stdin.
 	 */
-    std_list buffer;
+    std_list_ptr buffer;
 
     /**
 	 * A volitale buffer. This is reset upon every call to kui_getkey.
 	 */
-    std_list volatile_buffer;
+    std_list_ptr volatile_buffer;
 
     /**
 	 * The callback function used to get data read in.
@@ -472,7 +472,7 @@ int kui_destroy(struct kuictx *kctx)
     return ret;
 }
 
-std_list kui_get_map_sets(struct kuictx * kctx)
+std_list_ptr kui_get_map_sets(struct kuictx * kctx)
 {
     if (!kctx)
         return NULL;
@@ -853,7 +853,7 @@ static int kui_update_buffer(struct kuictx *kctx,
             iter != std_list_end(kctx->volatile_buffer);
             iter = std_list_next(iter)) {
 
-        int *val = malloc(sizeof (int));
+        int *val = (int *)malloc(sizeof (int));
         void *data;
 
         if (!val)
@@ -876,7 +876,7 @@ static int kui_update_buffer(struct kuictx *kctx,
         length = intlen(the_map_found->literal_value);
 
         for (i = length - 1; i >= 0; --i) {
-            int *val = malloc(sizeof (int));
+            int *val = (int *)malloc(sizeof (int));
 
             if (!val)
                 return -1;
@@ -946,7 +946,7 @@ static int kui_findkey(struct kuictx *kctx, int *was_map_found)
             break;
 
         /* Append to the list */
-        val = malloc(sizeof (int));
+        val = (int *)malloc(sizeof (int));
         if (!val)
             return -1;
         *val = key;
@@ -1182,7 +1182,7 @@ int kui_manager_destroy(struct kui_manager *kuim)
     return ret;
 }
 
-std_list kui_manager_get_map_sets(struct kui_manager * kuim)
+std_list_ptr kui_manager_get_map_sets(struct kui_manager * kuim)
 {
     if (!kuim)
         return NULL;
@@ -1280,11 +1280,11 @@ kui_manager_set_key_mapping_timeout(struct kui_manager *kuim, unsigned int msec)
 
 int
 kui_manager_get_terminal_keys_kui_map(struct kui_manager *kuim,
-        enum cgdb_key key, std_list kui_map_set)
+        enum cgdb_key key, std_list_ptr kui_map_set)
 {
     struct kui_map_set *map_set;
     struct kuictx *terminalkeys;
-    std_list map_sets;
+    std_list_ptr map_sets;
     std_list_iterator iter, kui_map_set_iter;
     void *data;
     const char *keycode_str;
@@ -1315,7 +1315,7 @@ kui_manager_get_terminal_keys_kui_map(struct kui_manager *kuim,
             kui_map_set_iter = std_list_next(kui_map_set_iter)) {
         if (std_list_get_data(kui_map_set_iter, &data) == -1)
             return -1;
-        kui_ms_register_map(map_set, data, keycode_str);
+        kui_ms_register_map(map_set, (const char *)data, keycode_str);
     }
 
     return 0;

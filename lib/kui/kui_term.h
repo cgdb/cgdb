@@ -55,7 +55,7 @@ int kui_term_is_cgdb_key(int key);
  * The ascii character sequence on success. If key is not a cgdb_key
  * or if this function fails, NULL will return.
  */
-char *kui_term_get_ascii_char_sequence_from_key(int key);
+const char *kui_term_get_ascii_char_sequence_from_key(int key);
 
 /**
  * Get's the cgdb_key from the keycode.

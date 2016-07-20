@@ -1,6 +1,6 @@
-#line 2 "dlexer.c"
+#line 2 "../../../cgdb/lib/tokenizer/dlexer.c"
 
-#line 4 "dlexer.c"
+#line 4 "../../../cgdb/lib/tokenizer/dlexer.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -359,6 +359,9 @@ void d_free (void *  );
 #define YY_AT_BOL() (YY_CURRENT_BUFFER_LVALUE->yy_at_bol)
 
 /* Begin user sect3 */
+
+#define d_wrap(n) 1
+#define YY_SKIP_YYWRAP
 
 typedef unsigned char YY_CHAR;
 
@@ -1415,8 +1418,9 @@ int d__flex_debug = 0;
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char *d_text;
-#line 1 "dlexer.l"
-#line 13 "dlexer.l"
+#line 1 "../../../cgdb/lib/tokenizer/dlexer.l"
+#define YY_NO_INPUT 1
+#line 16 "../../../cgdb/lib/tokenizer/dlexer.l"
 
 #include <stdio.h>
 #include "tokenizer.h"
@@ -1427,7 +1431,7 @@ int nesting_level;
 
 
 
-#line 1431 "dlexer.c"
+#line 1435 "../../../cgdb/lib/tokenizer/dlexer.c"
 
 #define INITIAL 0
 #define comment 1
@@ -1491,8 +1495,6 @@ extern int d_wrap (void );
 #endif
 #endif
 
-    static void yyunput (int c,char *buf_ptr  );
-    
 #ifndef yytext_ptr
 static void yy_flex_strncpy (char *,yyconst char *,int );
 #endif
@@ -1619,9 +1621,9 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 26 "dlexer.l"
+#line 29 "../../../cgdb/lib/tokenizer/dlexer.l"
 
-#line 1625 "dlexer.c"
+#line 1627 "../../../cgdb/lib/tokenizer/dlexer.c"
 
 	if ( !(yy_init) )
 		{
@@ -1706,1067 +1708,1067 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 27 "dlexer.l"
+#line 30 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 28 "dlexer.l"
+#line 31 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 29 "dlexer.l"
+#line 32 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 30 "dlexer.l"
+#line 33 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 31 "dlexer.l"
+#line 34 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 32 "dlexer.l"
+#line 35 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 33 "dlexer.l"
+#line 36 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 34 "dlexer.l"
+#line 37 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 35 "dlexer.l"
+#line 38 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 36 "dlexer.l"
+#line 39 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 37 "dlexer.l"
+#line 40 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 38 "dlexer.l"
+#line 41 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 39 "dlexer.l"
+#line 42 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 40 "dlexer.l"
+#line 43 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 41 "dlexer.l"
+#line 44 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 42 "dlexer.l"
+#line 45 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 43 "dlexer.l"
+#line 46 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 44 "dlexer.l"
+#line 47 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 45 "dlexer.l"
+#line 48 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 46 "dlexer.l"
+#line 49 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 47 "dlexer.l"
+#line 50 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 48 "dlexer.l"
+#line 51 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 49 "dlexer.l"
+#line 52 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 50 "dlexer.l"
+#line 53 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 51 "dlexer.l"
+#line 54 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 52 "dlexer.l"
+#line 55 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 53 "dlexer.l"
+#line 56 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 54 "dlexer.l"
+#line 57 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 55 "dlexer.l"
+#line 58 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 56 "dlexer.l"
+#line 59 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 57 "dlexer.l"
+#line 60 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 58 "dlexer.l"
+#line 61 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 59 "dlexer.l"
+#line 62 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 60 "dlexer.l"
+#line 63 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 61 "dlexer.l"
+#line 64 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 62 "dlexer.l"
+#line 65 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 63 "dlexer.l"
+#line 66 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 64 "dlexer.l"
+#line 67 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 65 "dlexer.l"
+#line 68 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 66 "dlexer.l"
+#line 69 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 67 "dlexer.l"
+#line 70 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 68 "dlexer.l"
+#line 71 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 69 "dlexer.l"
+#line 72 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 70 "dlexer.l"
+#line 73 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 71 "dlexer.l"
+#line 74 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 72 "dlexer.l"
+#line 75 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 73 "dlexer.l"
+#line 76 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 74 "dlexer.l"
+#line 77 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 75 "dlexer.l"
+#line 78 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 76 "dlexer.l"
+#line 79 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 77 "dlexer.l"
+#line 80 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 78 "dlexer.l"
+#line 81 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 79 "dlexer.l"
+#line 82 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 80 "dlexer.l"
+#line 83 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 81 "dlexer.l"
+#line 84 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 82 "dlexer.l"
+#line 85 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 83 "dlexer.l"
+#line 86 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 84 "dlexer.l"
+#line 87 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 85 "dlexer.l"
+#line 88 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
-#line 86 "dlexer.l"
+#line 89 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
-#line 87 "dlexer.l"
+#line 90 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TYPE); }
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 89 "dlexer.l"
+#line 92 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
-#line 90 "dlexer.l"
+#line 93 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
-#line 91 "dlexer.l"
+#line 94 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
-#line 92 "dlexer.l"
+#line 95 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
-#line 93 "dlexer.l"
+#line 96 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 67:
 YY_RULE_SETUP
-#line 94 "dlexer.l"
+#line 97 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 68:
 YY_RULE_SETUP
-#line 95 "dlexer.l"
+#line 98 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 69:
 YY_RULE_SETUP
-#line 96 "dlexer.l"
+#line 99 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 70:
 YY_RULE_SETUP
-#line 97 "dlexer.l"
+#line 100 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 71:
 YY_RULE_SETUP
-#line 98 "dlexer.l"
+#line 101 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 72:
 YY_RULE_SETUP
-#line 99 "dlexer.l"
+#line 102 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 73:
 YY_RULE_SETUP
-#line 100 "dlexer.l"
+#line 103 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 74:
 YY_RULE_SETUP
-#line 101 "dlexer.l"
+#line 104 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 75:
 YY_RULE_SETUP
-#line 102 "dlexer.l"
+#line 105 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 76:
 YY_RULE_SETUP
-#line 103 "dlexer.l"
+#line 106 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 77:
 YY_RULE_SETUP
-#line 104 "dlexer.l"
+#line 107 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 78:
 YY_RULE_SETUP
-#line 105 "dlexer.l"
+#line 108 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 79:
 YY_RULE_SETUP
-#line 106 "dlexer.l"
+#line 109 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 80:
 YY_RULE_SETUP
-#line 107 "dlexer.l"
+#line 110 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 81:
 YY_RULE_SETUP
-#line 108 "dlexer.l"
+#line 111 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 82:
 YY_RULE_SETUP
-#line 109 "dlexer.l"
+#line 112 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 83:
 YY_RULE_SETUP
-#line 110 "dlexer.l"
+#line 113 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 84:
 YY_RULE_SETUP
-#line 111 "dlexer.l"
+#line 114 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 85:
 YY_RULE_SETUP
-#line 112 "dlexer.l"
+#line 115 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 86:
 YY_RULE_SETUP
-#line 113 "dlexer.l"
+#line 116 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 87:
 YY_RULE_SETUP
-#line 114 "dlexer.l"
+#line 117 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 88:
 YY_RULE_SETUP
-#line 115 "dlexer.l"
+#line 118 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 89:
 YY_RULE_SETUP
-#line 116 "dlexer.l"
+#line 119 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 90:
 YY_RULE_SETUP
-#line 117 "dlexer.l"
+#line 120 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 91:
 YY_RULE_SETUP
-#line 118 "dlexer.l"
+#line 121 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 92:
 YY_RULE_SETUP
-#line 119 "dlexer.l"
+#line 122 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 93:
 YY_RULE_SETUP
-#line 120 "dlexer.l"
+#line 123 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 94:
 YY_RULE_SETUP
-#line 121 "dlexer.l"
+#line 124 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 95:
 YY_RULE_SETUP
-#line 122 "dlexer.l"
+#line 125 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 96:
 YY_RULE_SETUP
-#line 123 "dlexer.l"
+#line 126 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 97:
 YY_RULE_SETUP
-#line 124 "dlexer.l"
+#line 127 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 98:
 YY_RULE_SETUP
-#line 125 "dlexer.l"
+#line 128 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 99:
 YY_RULE_SETUP
-#line 126 "dlexer.l"
+#line 129 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 100:
 YY_RULE_SETUP
-#line 127 "dlexer.l"
+#line 130 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 101:
 YY_RULE_SETUP
-#line 128 "dlexer.l"
+#line 131 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 102:
 YY_RULE_SETUP
-#line 129 "dlexer.l"
+#line 132 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 103:
 YY_RULE_SETUP
-#line 130 "dlexer.l"
+#line 133 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 104:
 YY_RULE_SETUP
-#line 131 "dlexer.l"
+#line 134 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 105:
 YY_RULE_SETUP
-#line 132 "dlexer.l"
+#line 135 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 106:
 YY_RULE_SETUP
-#line 133 "dlexer.l"
+#line 136 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 107:
 YY_RULE_SETUP
-#line 134 "dlexer.l"
+#line 137 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 108:
 YY_RULE_SETUP
-#line 135 "dlexer.l"
+#line 138 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 109:
 YY_RULE_SETUP
-#line 136 "dlexer.l"
+#line 139 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_KEYWORD); }
 	YY_BREAK
 case 110:
 YY_RULE_SETUP
-#line 138 "dlexer.l"
+#line 141 "../../../cgdb/lib/tokenizer/dlexer.l"
 { BEGIN(comment);     return(TOKENIZER_COMMENT); }
 	YY_BREAK
 case 111:
 YY_RULE_SETUP
-#line 139 "dlexer.l"
+#line 142 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_COMMENT); }
 	YY_BREAK
 case 112:
 YY_RULE_SETUP
-#line 140 "dlexer.l"
+#line 143 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_COMMENT); }
 	YY_BREAK
 case 113:
 /* rule 113 can match eol */
 YY_RULE_SETUP
-#line 141 "dlexer.l"
+#line 144 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_NEWLINE); }
 	YY_BREAK
 case 114:
 YY_RULE_SETUP
-#line 142 "dlexer.l"
+#line 145 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_NEWLINE); }
 	YY_BREAK
 case 115:
 /* rule 115 can match eol */
 YY_RULE_SETUP
-#line 143 "dlexer.l"
+#line 146 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_NEWLINE); }
 	YY_BREAK
 case 116:
 YY_RULE_SETUP
-#line 144 "dlexer.l"
+#line 147 "../../../cgdb/lib/tokenizer/dlexer.l"
 { BEGIN(INITIAL);     return(TOKENIZER_COMMENT); }
 	YY_BREAK
 case 117:
 YY_RULE_SETUP
-#line 146 "dlexer.l"
+#line 149 "../../../cgdb/lib/tokenizer/dlexer.l"
 { BEGIN(nesting_comment); nesting_level = (0); return(TOKENIZER_COMMENT); }
 	YY_BREAK
 case 118:
 YY_RULE_SETUP
-#line 147 "dlexer.l"
+#line 150 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_COMMENT); }
 	YY_BREAK
 case 119:
 YY_RULE_SETUP
-#line 148 "dlexer.l"
+#line 151 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_COMMENT); }
 	YY_BREAK
 case 120:
 YY_RULE_SETUP
-#line 149 "dlexer.l"
+#line 152 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_COMMENT); }
 	YY_BREAK
 case 121:
 YY_RULE_SETUP
-#line 150 "dlexer.l"
+#line 153 "../../../cgdb/lib/tokenizer/dlexer.l"
 { nesting_level++; return(TOKENIZER_COMMENT); }
 	YY_BREAK
 case 122:
 /* rule 122 can match eol */
 YY_RULE_SETUP
-#line 151 "dlexer.l"
+#line 154 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_NEWLINE); }
 	YY_BREAK
 case 123:
 YY_RULE_SETUP
-#line 152 "dlexer.l"
+#line 155 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_NEWLINE); }
 	YY_BREAK
 case 124:
 /* rule 124 can match eol */
 YY_RULE_SETUP
-#line 153 "dlexer.l"
+#line 156 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_NEWLINE); }
 	YY_BREAK
 case 125:
 YY_RULE_SETUP
-#line 154 "dlexer.l"
+#line 157 "../../../cgdb/lib/tokenizer/dlexer.l"
 { if (nesting_level-- == 0) BEGIN(INITIAL);  return(TOKENIZER_COMMENT); }
 	YY_BREAK
 case 126:
 YY_RULE_SETUP
-#line 156 "dlexer.l"
+#line 159 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_COMMENT); }
 	YY_BREAK
 case 127:
 YY_RULE_SETUP
-#line 158 "dlexer.l"
+#line 161 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_DIRECTIVE); }
 	YY_BREAK
 case 128:
 YY_RULE_SETUP
-#line 159 "dlexer.l"
+#line 162 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_DIRECTIVE); }
 	YY_BREAK
 case 129:
 YY_RULE_SETUP
-#line 160 "dlexer.l"
+#line 163 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_DIRECTIVE); }
 	YY_BREAK
 case 130:
 YY_RULE_SETUP
-#line 161 "dlexer.l"
+#line 164 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_DIRECTIVE); }
 	YY_BREAK
 case 131:
 YY_RULE_SETUP
-#line 162 "dlexer.l"
+#line 165 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_DIRECTIVE); }
 	YY_BREAK
 case 132:
 YY_RULE_SETUP
-#line 163 "dlexer.l"
+#line 166 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_DIRECTIVE); }
 	YY_BREAK
 case 133:
 YY_RULE_SETUP
-#line 164 "dlexer.l"
+#line 167 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_DIRECTIVE); }
 	YY_BREAK
 case 134:
 YY_RULE_SETUP
-#line 165 "dlexer.l"
+#line 168 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_DIRECTIVE); }
 	YY_BREAK
 case 135:
 YY_RULE_SETUP
-#line 166 "dlexer.l"
+#line 169 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_DIRECTIVE); }
 	YY_BREAK
 case 136:
 YY_RULE_SETUP
-#line 167 "dlexer.l"
+#line 170 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_DIRECTIVE); }
 	YY_BREAK
 case 137:
 YY_RULE_SETUP
-#line 168 "dlexer.l"
+#line 171 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_DIRECTIVE); }
 	YY_BREAK
 case 138:
 YY_RULE_SETUP
-#line 169 "dlexer.l"
+#line 172 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_DIRECTIVE); }
 	YY_BREAK
 case 139:
 YY_RULE_SETUP
-#line 170 "dlexer.l"
+#line 173 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_DIRECTIVE); }
 	YY_BREAK
 case 140:
 YY_RULE_SETUP
-#line 171 "dlexer.l"
+#line 174 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_DIRECTIVE); }
 	YY_BREAK
 case 141:
 YY_RULE_SETUP
-#line 172 "dlexer.l"
+#line 175 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_DIRECTIVE); }
 	YY_BREAK
 case 142:
 YY_RULE_SETUP
-#line 173 "dlexer.l"
+#line 176 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_DIRECTIVE); }
 	YY_BREAK
 case 143:
 YY_RULE_SETUP
-#line 174 "dlexer.l"
+#line 177 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_DIRECTIVE); }
 	YY_BREAK
 case 144:
 YY_RULE_SETUP
-#line 177 "dlexer.l"
+#line 180 "../../../cgdb/lib/tokenizer/dlexer.l"
 { BEGIN(string_literal);     return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 145:
 YY_RULE_SETUP
-#line 178 "dlexer.l"
+#line 181 "../../../cgdb/lib/tokenizer/dlexer.l"
 { BEGIN(string_literal);     return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 146:
 YY_RULE_SETUP
-#line 179 "dlexer.l"
+#line 182 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 147:
 /* rule 147 can match eol */
 YY_RULE_SETUP
-#line 180 "dlexer.l"
+#line 183 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_NEWLINE); }
 	YY_BREAK
 case 148:
 YY_RULE_SETUP
-#line 181 "dlexer.l"
+#line 184 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_NEWLINE); }
 	YY_BREAK
 case 149:
 /* rule 149 can match eol */
 YY_RULE_SETUP
-#line 182 "dlexer.l"
+#line 185 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_NEWLINE); }
 	YY_BREAK
 case 150:
 YY_RULE_SETUP
-#line 183 "dlexer.l"
+#line 186 "../../../cgdb/lib/tokenizer/dlexer.l"
 { BEGIN(INITIAL);            return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 151:
 YY_RULE_SETUP
-#line 184 "dlexer.l"
+#line 187 "../../../cgdb/lib/tokenizer/dlexer.l"
 { BEGIN(INITIAL);            return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 152:
 YY_RULE_SETUP
-#line 186 "dlexer.l"
+#line 189 "../../../cgdb/lib/tokenizer/dlexer.l"
 { BEGIN(wysiwyg_literal);    return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 153:
 YY_RULE_SETUP
-#line 187 "dlexer.l"
+#line 190 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 154:
 /* rule 154 can match eol */
 YY_RULE_SETUP
-#line 188 "dlexer.l"
+#line 191 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_NEWLINE); }
 	YY_BREAK
 case 155:
 YY_RULE_SETUP
-#line 189 "dlexer.l"
+#line 192 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_NEWLINE); }
 	YY_BREAK
 case 156:
 /* rule 156 can match eol */
 YY_RULE_SETUP
-#line 190 "dlexer.l"
+#line 193 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_NEWLINE); }
 	YY_BREAK
 case 157:
 YY_RULE_SETUP
-#line 191 "dlexer.l"
+#line 194 "../../../cgdb/lib/tokenizer/dlexer.l"
 { BEGIN(INITIAL);            return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 158:
 YY_RULE_SETUP
-#line 192 "dlexer.l"
+#line 195 "../../../cgdb/lib/tokenizer/dlexer.l"
 { BEGIN(INITIAL);            return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 159:
 YY_RULE_SETUP
-#line 194 "dlexer.l"
+#line 197 "../../../cgdb/lib/tokenizer/dlexer.l"
 { BEGIN(alt_wysiwyg_literal);    return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 160:
 YY_RULE_SETUP
-#line 195 "dlexer.l"
+#line 198 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 161:
 /* rule 161 can match eol */
 YY_RULE_SETUP
-#line 196 "dlexer.l"
+#line 199 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_NEWLINE); }
 	YY_BREAK
 case 162:
 YY_RULE_SETUP
-#line 197 "dlexer.l"
+#line 200 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_NEWLINE); }
 	YY_BREAK
 case 163:
 /* rule 163 can match eol */
 YY_RULE_SETUP
-#line 198 "dlexer.l"
+#line 201 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_NEWLINE); }
 	YY_BREAK
 case 164:
 YY_RULE_SETUP
-#line 199 "dlexer.l"
+#line 202 "../../../cgdb/lib/tokenizer/dlexer.l"
 { BEGIN(INITIAL);            return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 165:
 YY_RULE_SETUP
-#line 200 "dlexer.l"
+#line 203 "../../../cgdb/lib/tokenizer/dlexer.l"
 { BEGIN(INITIAL);            return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 166:
 YY_RULE_SETUP
-#line 203 "dlexer.l"
+#line 206 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 167:
 YY_RULE_SETUP
-#line 204 "dlexer.l"
+#line 207 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 168:
 YY_RULE_SETUP
-#line 205 "dlexer.l"
+#line 208 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 169:
 YY_RULE_SETUP
-#line 206 "dlexer.l"
+#line 209 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 170:
 YY_RULE_SETUP
-#line 207 "dlexer.l"
+#line 210 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 171:
 YY_RULE_SETUP
-#line 208 "dlexer.l"
+#line 211 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 172:
 YY_RULE_SETUP
-#line 209 "dlexer.l"
+#line 212 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 173:
 YY_RULE_SETUP
-#line 210 "dlexer.l"
+#line 213 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 174:
 YY_RULE_SETUP
-#line 211 "dlexer.l"
+#line 214 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 175:
 YY_RULE_SETUP
-#line 212 "dlexer.l"
+#line 215 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 176:
 YY_RULE_SETUP
-#line 213 "dlexer.l"
+#line 216 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 177:
 YY_RULE_SETUP
-#line 215 "dlexer.l"
+#line 218 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 178:
 YY_RULE_SETUP
-#line 216 "dlexer.l"
+#line 219 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 179:
 YY_RULE_SETUP
-#line 217 "dlexer.l"
+#line 220 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 180:
 YY_RULE_SETUP
-#line 218 "dlexer.l"
+#line 221 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 181:
 YY_RULE_SETUP
-#line 219 "dlexer.l"
+#line 222 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 182:
 YY_RULE_SETUP
-#line 221 "dlexer.l"
+#line 224 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 183:
 YY_RULE_SETUP
-#line 222 "dlexer.l"
+#line 225 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 184:
 YY_RULE_SETUP
-#line 223 "dlexer.l"
+#line 226 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 185:
 YY_RULE_SETUP
-#line 224 "dlexer.l"
+#line 227 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 186:
 YY_RULE_SETUP
-#line 225 "dlexer.l"
+#line 228 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 187:
 YY_RULE_SETUP
-#line 226 "dlexer.l"
+#line 229 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 188:
 YY_RULE_SETUP
-#line 227 "dlexer.l"
+#line 230 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 189:
 YY_RULE_SETUP
-#line 228 "dlexer.l"
+#line 231 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 190:
 YY_RULE_SETUP
-#line 229 "dlexer.l"
+#line 232 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 191:
 YY_RULE_SETUP
-#line 230 "dlexer.l"
+#line 233 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 192:
 YY_RULE_SETUP
-#line 231 "dlexer.l"
+#line 234 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 193:
 YY_RULE_SETUP
-#line 232 "dlexer.l"
+#line 235 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 194:
 YY_RULE_SETUP
-#line 233 "dlexer.l"
+#line 236 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 195:
 YY_RULE_SETUP
-#line 234 "dlexer.l"
+#line 237 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 196:
 YY_RULE_SETUP
-#line 235 "dlexer.l"
+#line 238 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 197:
 YY_RULE_SETUP
-#line 236 "dlexer.l"
+#line 239 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 198:
 YY_RULE_SETUP
-#line 237 "dlexer.l"
+#line 240 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 199:
 YY_RULE_SETUP
-#line 239 "dlexer.l"
+#line 242 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 200:
 YY_RULE_SETUP
-#line 240 "dlexer.l"
+#line 243 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 201:
 YY_RULE_SETUP
-#line 241 "dlexer.l"
+#line 244 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 202:
 YY_RULE_SETUP
-#line 242 "dlexer.l"
+#line 245 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 203:
 YY_RULE_SETUP
-#line 243 "dlexer.l"
+#line 246 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_LITERAL); }
 	YY_BREAK
 case 204:
 /* rule 204 can match eol */
 YY_RULE_SETUP
-#line 245 "dlexer.l"
+#line 248 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_NEWLINE); }
 	YY_BREAK
 case 205:
 /* rule 205 can match eol */
 YY_RULE_SETUP
-#line 246 "dlexer.l"
+#line 249 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_NEWLINE); }
 	YY_BREAK
 case 206:
 YY_RULE_SETUP
-#line 247 "dlexer.l"
+#line 250 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_NEWLINE); }
 	YY_BREAK
 case 207:
 YY_RULE_SETUP
-#line 248 "dlexer.l"
+#line 251 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TEXT);    }
 	YY_BREAK
 case 208:
 YY_RULE_SETUP
-#line 249 "dlexer.l"
+#line 252 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TEXT);    }
 	YY_BREAK
 case 209:
 YY_RULE_SETUP
-#line 250 "dlexer.l"
+#line 253 "../../../cgdb/lib/tokenizer/dlexer.l"
 { return(TOKENIZER_TEXT);    }
 	YY_BREAK
 case 210:
 YY_RULE_SETUP
-#line 252 "dlexer.l"
+#line 255 "../../../cgdb/lib/tokenizer/dlexer.l"
 ECHO;
 	YY_BREAK
-#line 2770 "dlexer.c"
+#line 2772 "../../../cgdb/lib/tokenizer/dlexer.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(comment):
 case YY_STATE_EOF(nesting_comment):
@@ -3098,43 +3100,6 @@ static int yy_get_next_buffer (void)
 	yy_is_jam = (yy_current_state == 731);
 
 	return yy_is_jam ? 0 : yy_current_state;
-}
-
-    static void yyunput (int c, register char * yy_bp )
-{
-	register char *yy_cp;
-    
-    yy_cp = (yy_c_buf_p);
-
-	/* undo effects of setting up d_text */
-	*yy_cp = (yy_hold_char);
-
-	if ( yy_cp < YY_CURRENT_BUFFER_LVALUE->yy_ch_buf + 2 )
-		{ /* need to shift things up to make room */
-		/* +2 for EOB chars. */
-		register int number_to_move = (yy_n_chars) + 2;
-		register char *dest = &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[
-					YY_CURRENT_BUFFER_LVALUE->yy_buf_size + 2];
-		register char *source =
-				&YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[number_to_move];
-
-		while ( source > YY_CURRENT_BUFFER_LVALUE->yy_ch_buf )
-			*--dest = *--source;
-
-		yy_cp += (int) (dest - source);
-		yy_bp += (int) (dest - source);
-		YY_CURRENT_BUFFER_LVALUE->yy_n_chars =
-			(yy_n_chars) = YY_CURRENT_BUFFER_LVALUE->yy_buf_size;
-
-		if ( yy_cp < YY_CURRENT_BUFFER_LVALUE->yy_ch_buf + 2 )
-			YY_FATAL_ERROR( "flex scanner push-back overflow" );
-		}
-
-	*--yy_cp = (char) c;
-
-	(yytext_ptr) = yy_bp;
-	(yy_hold_char) = *yy_cp;
-	(yy_c_buf_p) = yy_cp;
 }
 
 #ifndef YY_NO_INPUT
@@ -3769,18 +3734,7 @@ void d_free (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 252 "dlexer.l"
+#line 255 "../../../cgdb/lib/tokenizer/dlexer.l"
 
 
-
-int d_wrap ( void ) {
-        {
-                /* Silly impossible function call to stop warning of unused functions */
-                if ( 0 ) {
-                        yyunput(0, "");
-                }
-        }
-
-    return 1;
-}
 

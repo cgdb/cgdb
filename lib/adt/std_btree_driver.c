@@ -26,11 +26,11 @@
  */
 
 /* Tests */
-static int test_add(std_btree tree);
-static int test_remove(std_btree tree);
-static int test_replace(std_btree tree);
-static int test_isroot(std_btree tree);
-static int test_isleaf(std_btree tree);
+static int test_add(std_btree_ptr tree);
+static int test_remove(std_btree_ptr tree);
+static int test_replace(std_btree_ptr tree);
+static int test_isroot(std_btree_ptr tree);
+static int test_isleaf(std_btree_ptr tree);
 
 /* Destructor method used by tree */
 static int destructor(char *string);
@@ -41,7 +41,7 @@ static int destructor(char *string);
  */
 int main(int argc, char *argv[])
 {
-    std_btree tree = NULL;
+    std_btree_ptr tree = NULL;
     int result = 0;
 
     /* Create a tree */
@@ -76,13 +76,17 @@ int main(int argc, char *argv[])
  * Local function implementations
  */
 
-static int test_add(std_btree tree)
+static int test_add(std_btree_ptr tree)
 {
     std_btree_iterator i = NULL;
+    static char data_first[] = "First string";
+    static char data_right[] = "Right of root";
+    static char data_left[] = "Left of 2nd node (right of root)";
+    static char data_newright[] = "New right of root";
 
     debug("Test starting: Add\n");
 
-    if (std_btree_add(tree, NULL, STD_BTREE_LEFT, "First string")) {
+    if (std_btree_add(tree, NULL, STD_BTREE_LEFT, data_first)) {
         debug("Add \"First string\" as root node failed\n");
         return 1;
     }
@@ -93,19 +97,19 @@ static int test_add(std_btree tree)
         return 2;
     }
 
-    if (std_btree_add(tree, i, STD_BTREE_RIGHT, "Right of root")) {
+    if (std_btree_add(tree, i, STD_BTREE_RIGHT, data_right)) {
         debug("Add \"Right of root\" failed\n");
         return 3;
     }
 
     if (std_btree_add(tree, std_btree_child(i, STD_BTREE_RIGHT),
-                    STD_BTREE_LEFT, "Left of 2nd node (right of root)")) {
+                    STD_BTREE_LEFT, data_left)) {
         debug("Add \"Left of 2nd node\" failed\n");
         return 4;
     }
 
     /* Child already exists, expect to fail */
-    if (std_btree_add(tree, i, STD_BTREE_RIGHT, "New right of root") == 0) {
+    if (std_btree_add(tree, i, STD_BTREE_RIGHT, data_newright) == 0) {
         debug("Add \"New right of root\" didn't fail, but it should have\n");
         return 5;
     }
@@ -114,17 +118,20 @@ static int test_add(std_btree tree)
     return 0;
 }
 
-static int test_remove(std_btree tree)
+static int test_remove(std_btree_ptr tree)
 {
+    static char data_left[] = "Left of root";
+    static char data_lleft[] = "Left of left of root";
+    static char data_right[] = "Right of left of root";
     std_btree_iterator i = std_btree_root(tree);
 
     debug("Test starting: Remove\n");
 
-    std_btree_add(tree, i, STD_BTREE_LEFT, "Left of root");
+    std_btree_add(tree, i, STD_BTREE_LEFT, data_left);
     i = std_btree_child(i, STD_BTREE_LEFT);
 
-    std_btree_add(tree, i, STD_BTREE_LEFT, "Left of left of root");
-    std_btree_add(tree, i, STD_BTREE_RIGHT, "Right of left of root");
+    std_btree_add(tree, i, STD_BTREE_LEFT, data_lleft);
+    std_btree_add(tree, i, STD_BTREE_RIGHT, data_right);
 
     if (std_btree_remove(std_btree_child(i, STD_BTREE_LEFT))) {
         debug("Remove \"Left of left of roof\" failed\n");
@@ -140,13 +147,14 @@ static int test_remove(std_btree tree)
     return 0;
 }
 
-static int test_replace(std_btree tree)
+static int test_replace(std_btree_ptr tree)
 {
+    static char data[] = "New root in town, baby!";
     std_btree_iterator i = std_btree_root(tree);
 
     debug("Test starting: Replace\n");
 
-    if (std_btree_replace(i, "New root in town, baby!")) {
+    if (std_btree_replace(i, data)) {
         debug("Replace root node with new data failed\n");
         return 1;
     }
@@ -155,7 +163,7 @@ static int test_replace(std_btree tree)
     return 0;
 }
 
-static int test_isroot(std_btree tree)
+static int test_isroot(std_btree_ptr tree)
 {
     std_btree_iterator i = std_btree_root(tree);
 
@@ -175,7 +183,7 @@ static int test_isroot(std_btree tree)
     return 0;
 }
 
-static int test_isleaf(std_btree tree)
+static int test_isleaf(std_btree_ptr tree)
 {
     std_btree_iterator i = std_btree_root(tree);
 

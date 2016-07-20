@@ -43,7 +43,7 @@
 static int count(const char *s, char c)
 {
     int rv = 0;
-    char *x = strchr(s, c);
+    char *x = strchr((char *)s, c);
 
     while (x) {
         rv++;
@@ -102,7 +102,7 @@ static char *parse(struct scroller *scr, const char *orig, const char *buf)
     for (j = strlen(rv) - 1; j > i && isspace((int) rv[j]); j--);
     rv[j + 1] = 0;
 
-    return realloc(rv, strlen(rv) + 1);
+    return (char *)realloc(rv, strlen(rv) + 1);
 }
 
 /* ----------------- */
@@ -115,7 +115,7 @@ struct scroller *scr_new(int pos_r, int pos_c, int height, int width)
 {
     struct scroller *rv;
 
-    if ((rv = malloc(sizeof (struct scroller))) == NULL)
+    if ((rv = (struct scroller *)malloc(sizeof (struct scroller))) == NULL)
         return NULL;
 
     rv->current.r = 0;
@@ -124,7 +124,7 @@ struct scroller *scr_new(int pos_r, int pos_c, int height, int width)
     rv->win = newwin(height, width, pos_r, pos_c);
 
     /* Start with a single (blank) line */
-    rv->buffer = malloc(sizeof (char *));
+    rv->buffer = (char **)malloc(sizeof (char *));
     rv->buffer[0] = strdup("");
     rv->length = 1;
 
@@ -234,14 +234,14 @@ void scr_add(struct scroller *scr, const char *buf)
     char *x;                    /* Pointer to next new line character */
 
     /* Find next newline in the string */
-    x = strchr(buf, '\n');
+    x = strchr((char *)buf, '\n');
     length = strlen(scr->buffer[scr->length - 1]);
     distance = x ? x - buf : strlen(buf);
 
     /* Append to the last line in the buffer */
     if (distance > 0) {
         char *temp = scr->buffer[scr->length - 1];
-        char *buf2 = malloc(distance + 1);
+        char *buf2 = (char *)malloc(distance + 1);
 
         strncpy(buf2, buf, distance);
         buf2[distance] = 0;
@@ -255,17 +255,17 @@ void scr_add(struct scroller *scr, const char *buf)
         char *newbuf;
 
         buf = x + 1;
-        x = strchr(buf, '\n');
+        x = strchr((char *)buf, '\n');
         distance = x ? x - buf : strlen(buf);
 
         /* Create a new buffer that stops at the next newline */
-        newbuf = malloc(distance + 1);
+        newbuf = (char *)malloc(distance + 1);
         memset(newbuf, 0, distance + 1);
         strncpy(newbuf, buf, distance);
 
         /* Expand the buffer */
         scr->length++;
-        scr->buffer = realloc(scr->buffer, sizeof (char *) * scr->length);
+        scr->buffer = (char **)realloc(scr->buffer, sizeof (char *) * scr->length);
         scr->current.pos = 0;
 
         /* Add the new line */
@@ -301,7 +301,7 @@ void scr_refresh(struct scroller *scr, int focus)
     }
     r = scr->current.r;
     c = scr->current.c;
-    buffer = malloc(width + 1);
+    buffer = (char *)malloc(width + 1);
     buffer[width] = 0;
 
     /* Start drawing at the bottom of the viewable space, and work our way up */

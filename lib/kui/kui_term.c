@@ -25,12 +25,14 @@
 #endif /* HAVE_STDIO_H */
 
 /* term.h prototypes */
-extern int tgetent();
-extern int tgetflag();
-extern int tgetnum();
-extern char *tgetstr();
-extern int tputs();
-extern char *tgoto();
+#ifdef __cplusplus
+#define EXTERN_C extern "C"
+#else
+#define EXTERN_C extern
+#endif
+
+EXTERN_C int tgetent(char *, const char *);
+EXTERN_C char *tgetstr(const char *, char **);
 
 #include "kui_term.h"
 
@@ -46,13 +48,13 @@ struct tlist {
     /* The key */
     enum cgdb_key key;
     /* the termcap capability name  */
-    char *tname;
+    const char *tname;
     /* the termcap key sequence */
-    char *tname_seq;
+    const char *tname_seq;
     /* the terminfo capability name  */
-    char *tiname;
+    const char *tiname;
     /* the terminfo key sequence */
-    char *tiname_seq;
+    const char *tiname_seq;
 } seqlist[] = {
     {
     CGDB_KEY_END, "@7", NULL, "kend", NULL}, {
@@ -91,7 +93,7 @@ struct tlist {
 /* This represents all of the hard coded key data.  */
 struct keydata {
     enum cgdb_key key;
-    char *key_seq;
+    const char *key_seq;
 } hard_coded_bindings[] = {
     {
     CGDB_KEY_ESC, "\033"},
@@ -426,7 +428,7 @@ int kui_term_is_cgdb_key(int key)
     return 0;
 }
 
-char *kui_term_get_ascii_char_sequence_from_key(int key)
+const char *kui_term_get_ascii_char_sequence_from_key(int key)
 {
     int i;
 

@@ -218,7 +218,7 @@ int kui_ms_deregister_map(struct kui_map_set *kui_ms, const char *key);
  * The list of maps, or NULL on error.
  * If there are no maps, of course the empty list will be returned.
  */
-std_list kui_ms_get_maps(struct kui_map_set *kui_ms);
+std_list_ptr kui_ms_get_maps(struct kui_map_set *kui_ms);
 
 /*@}*/
 
@@ -322,7 +322,7 @@ int kui_destroy(struct kuictx *kctx);
  * The list of map sets, or NULL on error.
  * If there are no map sets, of course the empty list will be returned.
  */
-std_list kui_get_map_sets(struct kuictx *kctx);
+std_list_ptr kui_get_map_sets(struct kuictx *kctx);
 
 /**
  * This will clear all of the map sets from the KUI.
@@ -479,7 +479,7 @@ int kui_manager_destroy(struct kui_manager *kuim);
  * The list of map sets, or NULL on error.
  * If there are no map sets, of course the empty list will be returned.
  */
-std_list kui_manager_get_map_sets(struct kui_manager *kuim);
+std_list_ptr kui_manager_get_map_sets(struct kui_manager *kuim);
 
 /**
  * This will clear all of the map sets from the KUI manager.
@@ -616,7 +616,7 @@ int kui_manager_set_key_mapping_timeout(struct kui_manager *kuim,
  * 0 on success or -1 on error
  */
 int kui_manager_get_terminal_keys_kui_map(struct kui_manager *kuim,
-        enum cgdb_key key, std_list kui_map_set);
+        enum cgdb_key key, std_list_ptr kui_map_set);
 /*@}*/
 
 /* }}} */

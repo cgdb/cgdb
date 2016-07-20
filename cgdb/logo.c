@@ -44,7 +44,7 @@
 
 struct Logo{
    int h;                  /* Height of logo */
-   char *data[11];         /* Increase the array size as necessary */
+   const char *data[11];         /* Increase the array size as necessary */
 };
 
 static struct Logo CGDB_LOGO[CGDB_NUM_LOGOS] =
@@ -96,7 +96,7 @@ static struct Logo CGDB_LOGO[CGDB_NUM_LOGOS] =
    }
 };
 
-static char *usage[] = {
+static const char *usage[] = {
     "type  q<Enter>            to exit      ",
     "type  help<Enter>         for GDB help ",
     "type  <ESC>:help<Enter>   for CGDB help"
@@ -106,7 +106,7 @@ static char *usage[] = {
 /* Functions */
 /* --------- */
 
-static void center_line(WINDOW *win, int row, int width, char *data)
+static void center_line(WINDOW *win, int row, int width, const char *data)
 {
     mvwprintw(win, row, (width - strlen(data))/2, data);
 }

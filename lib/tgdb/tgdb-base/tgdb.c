@@ -393,7 +393,7 @@ void command_completion_callback(struct tgdb *tgdb)
     tgdb->IS_SUBSYSTEM_READY_FOR_NEXT_COMMAND = 1;
 }
 
-static char *tgdb_get_client_command(struct tgdb *tgdb,
+static const char *tgdb_get_client_command(struct tgdb *tgdb,
         enum tgdb_command_type c)
 {
     return tgdb_client_return_command(tgdb->tcc, c);
@@ -523,7 +523,7 @@ static int tgdb_handle_signals(struct tgdb *tgdb)
  * 0 on success, or -1 on error.
  */
 static int
-tgdb_send(struct tgdb *tgdb, char *command,
+tgdb_send(struct tgdb *tgdb, const char *command,
         enum tgdb_command_choice command_choice)
 {
 
@@ -685,7 +685,7 @@ static int tgdb_unqueue_and_deliver_command(struct tgdb *tgdb)
          */
         struct tgdb_command *item = NULL;
 
-        item = queue_pop(tgdb->oob_input_queue);
+        item = (struct tgdb_command *)queue_pop(tgdb->oob_input_queue);
         tgdb_deliver_command(tgdb, item);
         tgdb_command_destroy(item);
     }
@@ -693,7 +693,7 @@ static int tgdb_unqueue_and_deliver_command(struct tgdb *tgdb)
     else if (queue_size(tgdb->gdb_input_queue) > 0) {
         struct tgdb_command *item = NULL;
 
-        item = queue_pop(tgdb->gdb_input_queue);
+        item = (struct tgdb_command *)queue_pop(tgdb->gdb_input_queue);
 
         /* If at the misc prompt, don't run the internal tgdb commands,
          * In fact throw them out for now, since they are only 
@@ -1384,7 +1384,7 @@ tgdb_request_ptr tgdb_queue_pop(struct tgdb * tgdb)
     if (!tgdb)
         return NULL;
 
-    item = queue_pop(tgdb->gdb_client_request_queue);
+    item = (tgdb_request_ptr)queue_pop(tgdb->gdb_client_request_queue);
 
     return item;
 }

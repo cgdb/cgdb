@@ -97,7 +97,7 @@ static struct std_bbtreenode *std_bbtree_node_new(void *key, void *value)
 {
     struct std_bbtreenode *node;
 
-    node = malloc(sizeof (struct std_bbtreenode));
+    node = (struct std_bbtreenode *)malloc(sizeof (struct std_bbtreenode));
 
     node->balance = 0;
     node->left = NULL;
@@ -160,7 +160,7 @@ struct std_bbtree *std_bbtree_new_full(STDCompareDataFunc key_compare_func,
     if (!key_compare_func)
         return NULL;
 
-    tree = malloc(sizeof (struct std_bbtree));
+    tree = (struct std_bbtree *)malloc(sizeof (struct std_bbtree));
     tree->root = NULL;
     tree->key_compare = key_compare_func;
     tree->key_destroy_func = key_destroy_func;

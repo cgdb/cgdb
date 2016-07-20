@@ -132,14 +132,14 @@ opt_result_record: result_record NEWLINE {
 result_record: opt_token CARROT result_class {
   $$ = create_gdbmi_result_record ();
   $$->token = $1;
-  $$->result_class = $3;
+  $$->result_class = (enum gdbmi_result_class)$3;
   $$->result = NULL;
 };
 
 result_record: opt_token CARROT result_class COMMA result_list {
   $$ = create_gdbmi_result_record ();
   $$->token = $1;
-  $$->result_class = $3;
+  $$->result_class = (enum gdbmi_result_class)$3;
   $$->result = $5;
 };
 
@@ -158,15 +158,15 @@ oob_record: stream_record {
 async_record: opt_token async_record_class async_class {
   $$ = create_gdbmi_async_record ();
   $$->token = $1;
-  $$->async_record = $2;
-  $$->async_class = $3;
+  $$->async_record = (enum gdbmi_async_record_choice)$2;
+  $$->async_class = (enum gdbmi_async_class)$3;
 };
 
 async_record: opt_token async_record_class async_class COMMA result_list {
   $$ = create_gdbmi_async_record ();
   $$->token = $1;
-  $$->async_record = $2;
-  $$->async_class = $3;
+  $$->async_record = (enum gdbmi_async_record_choice)$2;
+  $$->async_class = (enum gdbmi_async_class)$3;
   $$->result = $5;
 };
 
@@ -275,7 +275,7 @@ list: OPEN_BRACKET result_list CLOSED_BRACKET {
 
 stream_record: stream_record_class CSTRING {
   $$ = create_gdbmi_stream_record ();
-  $$->stream_record = $1;
+  $$->stream_record = (enum gdbmi_stream_record_choice)$1;
   $$->cstring = strdup ( gdbmi_text );
 };
 

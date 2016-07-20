@@ -35,12 +35,12 @@
  * The standard binary tree type.  Declare an instance of std_btree in your
  * code and initialize it with std_btree_create.
  */
-typedef struct std_btree *std_btree;
+typedef struct std_btree *std_btree_ptr;
 
 /**
  * A reference to a node in the binary tree.
  */
-typedef struct std_btree_node *std_btree_node, *std_btree_iterator;
+typedef struct std_btree_node *std_btree_node_ptr, *std_btree_iterator;
 
 /**
  * Enumeration used to identify left/right children in accessor methods.
@@ -57,7 +57,7 @@ enum std_btree_child { STD_BTREE_LEFT, STD_BTREE_RIGHT };
  * @return
  * A new (empty) binary tree on success, NULL on failure.
  */
-std_btree std_btree_create(const STDDestroyNotify destroy_func);
+std_btree_ptr std_btree_create(const STDDestroyNotify destroy_func);
 
 /**
  * Standard binary tree destructor.  Releases all memory associated with the
@@ -70,7 +70,7 @@ std_btree std_btree_create(const STDDestroyNotify destroy_func);
  * @return
  * Zero on success, non-zero on failure.
  */
-int std_btree_destroy(std_btree tree);
+int std_btree_destroy(std_btree_ptr tree);
 
 /**
  * Get an iterator for this tree.
@@ -81,7 +81,7 @@ int std_btree_destroy(std_btree tree);
  * @return
  * An iterator pointing to the root node of this tree, NULL if tree is empty.
  */
-std_btree_iterator std_btree_root(const std_btree tree);
+std_btree_iterator std_btree_root(const std_btree_ptr tree);
 
 /**
  * Get the data for the node referenced by the specified iterator.
@@ -146,7 +146,7 @@ std_btree_iterator std_btree_parent(const std_btree_iterator iter);
  * @return
  * Zero on success, non-zero on failure.
  */
-int std_btree_add(std_btree tree,
+int std_btree_add(std_btree_ptr tree,
         std_btree_iterator iter, enum std_btree_child child, void *data);
 
 /**

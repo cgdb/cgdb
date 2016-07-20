@@ -1,5 +1,8 @@
 %option prefix="go_"
 %option outfile="lex.yy.c"
+%option noyywrap
+%option nounput
+%option noinput
 
 O       [0-7]
 D       [0-9]
@@ -134,13 +137,3 @@ unicode_val     ({unicode_char}|{little_u_val}|{big_u_val}|{esc_char})
 .                       { return(TOKENIZER_TEXT);    }
 
 %%
-
-int go_wrap ( void ) {
-	{
-		/* Silly impossible function call to stop warning of unused functions */
-		if ( 0 ) {
-			yyunput(0, "");
-		}
-	}
-    return 1;
-}

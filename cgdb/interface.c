@@ -152,7 +152,8 @@ static enum StatusBarCommandKind sbc_kind;
  */
 static int init_curses()
 {
-    if (putenv("ESCDELAY=0") == -1)
+    char escdelay[] = "ESCDELAY=0";
+    if (putenv(escdelay) == -1)
         fprintf(stderr, "(%s:%d) putenv failed\r\n", __FILE__, __LINE__);
 
     initscr();                  /* Start curses mode */
@@ -347,7 +348,7 @@ static void update_status_win(void)
     }
     /* A colon command typed at the status bar */
     else if (focus == CGDB_STATUS_BAR && sbc_kind == SBC_NORMAL) {
-        char *command = ibuf_get(cur_sbc);
+        const char *command = ibuf_get(cur_sbc);
 
         if (!command)
             command = "";
@@ -607,15 +608,15 @@ static void increase_win_height(int jump_or_tty)
             /* no tty window */
             if (cur_win_split == WIN_SPLIT_FREE) {
                 /* cur position is not on mark, find nearest mark */
-                cur_win_split = (int) (2 * window_height_shift) / height;
+                cur_win_split = (WIN_SPLIT_TYPE) ((2 * window_height_shift) / height);
 
                 /* handle rounding on either side of mid-way mark */
                 if (window_height_shift > 0) {
-                    cur_win_split++;
+                    cur_win_split = (WIN_SPLIT_TYPE)(cur_win_split + 1);
                 }
             } else {
                 /* increase to next mark */
-                cur_win_split++;
+                cur_win_split = (WIN_SPLIT_TYPE)(cur_win_split + 1);
             }
 
             /* check split bounds */
@@ -668,15 +669,15 @@ static void decrease_win_height(int jump_or_tty)
             /* no tty window */
             if (cur_win_split == WIN_SPLIT_FREE) {
                 /* cur position is not on mark, find nearest mark */
-                cur_win_split = (int) (2 * window_height_shift) / height;
+                cur_win_split = (WIN_SPLIT_TYPE) ((2 * window_height_shift) / height);
 
                 /* handle rounding on either side of mid-way mark */
                 if (window_height_shift < 0) {
-                    cur_win_split--;
+                    cur_win_split = (WIN_SPLIT_TYPE)(cur_win_split - 1);
                 }
             } else {
                 /* decrease to next mark */
-                cur_win_split--;
+                cur_win_split = (WIN_SPLIT_TYPE)(cur_win_split - 1);
             }
 
             /* check split bounds */

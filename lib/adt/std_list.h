@@ -21,7 +21,7 @@ struct std_list;
  * A typedef for an std_list.
  * This is what the programmer should declare.
  */
-typedef struct std_list *std_list;
+typedef struct std_list *std_list_ptr;
 
 /**
  * A forward declaration, only around to satisfy the iterator typedef.

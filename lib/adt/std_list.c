@@ -69,7 +69,7 @@ static struct std_list_node *std_list_node_create(void)
 {
     struct std_list_node *list_node;
 
-    list_node = malloc(sizeof (struct std_list_node));
+    list_node = (struct std_list_node *)malloc(sizeof (struct std_list_node));
 
     if (!list_node)
         return NULL;
@@ -116,7 +116,7 @@ struct std_list *std_list_create(STDDestroyNotify destroy_func)
 {
     struct std_list *list;
 
-    list = malloc(sizeof (struct std_list));
+    list = (struct std_list *)malloc(sizeof (struct std_list));
 
     if (!list)
         return NULL;

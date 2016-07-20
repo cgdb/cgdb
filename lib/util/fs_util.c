@@ -130,7 +130,7 @@ int fs_util_file_exists_in_path(char * filePath)
     char testPath[1024];
     int result = -1;
     char *pathStr = getenv("PATH");
-    local_pathStr = malloc(strlen(pathStr) + 1);
+    local_pathStr = (char *)malloc(strlen(pathStr) + 1);
     strcpy(local_pathStr, pathStr);
     
     if (stat(filePath, &buff) >= 0)

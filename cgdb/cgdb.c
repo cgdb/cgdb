@@ -458,7 +458,7 @@ tab_completion_create(char **matches, int num_matches, int max_length)
     comptr = (tab_completion_ptr) cgdb_malloc(sizeof (struct
                     tab_completion_ctx));
 
-    comptr->matches = cgdb_malloc(sizeof (char *) * (num_matches + 1));
+    comptr->matches = (char **)cgdb_malloc(sizeof (char *) * (num_matches + 1));
     for (i = 0; i <= num_matches; ++i)
         comptr->matches[i] = cgdb_strdup(matches[i]);
 
@@ -884,7 +884,7 @@ static int user_input(void)
 
     /* Process the key */
     if (kui_term_is_cgdb_key(key)) {
-        char *seqbuf = kui_term_get_ascii_char_sequence_from_key(key);
+        const char *seqbuf = kui_term_get_ascii_char_sequence_from_key(key);
 
         if (seqbuf == NULL) {
             logger_write_pos(logger, __FILE__, __LINE__,
@@ -999,7 +999,7 @@ static void process_commands(struct tgdb *tgdb_in)
                 if_clear_filedlg();
 
                 while (i) {
-                    s = tgdb_list_get_item(i);
+                    s = (char *)tgdb_list_get_item(i);
                     if_add_filedlg_choice(s);
                     i = tgdb_list_next(i);
                 }
@@ -1129,7 +1129,7 @@ does_request_require_console_update(struct tgdb_request *request, int *update)
  */
 static int gdb_input()
 {
-    char *buf = malloc(GDB_MAXBUF + 1);
+    char *buf = (char *)malloc(GDB_MAXBUF + 1);
     int size;
     int is_finished;
 
@@ -1219,7 +1219,7 @@ static int gdb_input()
 static int readline_input()
 {
     const int MAX = 1024;
-    char *buf = malloc(MAX + 1);
+    char *buf = (char *)malloc(MAX + 1);
     int size;
 
     int masterfd = pty_pair_get_masterfd(pty_pair);
@@ -1259,7 +1259,7 @@ static int readline_input()
  */
 static ssize_t child_input()
 {
-    char *buf = malloc(GDB_MAXBUF + 1);
+    char *buf = (char *)malloc(GDB_MAXBUF + 1);
     ssize_t size;
 
     /* Read from GDB */
@@ -1651,7 +1651,7 @@ int add_readline_key_sequence(const char *readline_str, enum cgdb_key key)
 {
     int ret_val;
 
-    std_list keyseq_list = std_list_create(destroyReadlineKeySeq);
+    std_list_ptr keyseq_list = std_list_create(destroyReadlineKeySeq);
 
     ret_val = rline_get_keyseq(rline, readline_str, keyseq_list);
     if (ret_val == -1) {

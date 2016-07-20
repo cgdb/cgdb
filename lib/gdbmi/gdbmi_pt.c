@@ -40,7 +40,7 @@ int print_gdbmi_result_class(enum gdbmi_result_class param)
 /* Creating and  Destroying */
 gdbmi_pdata_ptr create_gdbmi_pdata(void)
 {
-    return calloc(1, sizeof (struct gdbmi_pdata));
+    return (gdbmi_pdata_ptr)calloc(1, sizeof (struct gdbmi_pdata));
 }
 
 int destroy_gdbmi_pdata(gdbmi_pdata_ptr param)
@@ -56,7 +56,7 @@ int destroy_gdbmi_pdata(gdbmi_pdata_ptr param)
 /* Creating, Destroying and printing gdbmi_output  */
 gdbmi_output_ptr create_gdbmi_output(void)
 {
-    return calloc(1, sizeof (struct gdbmi_output));
+    return (gdbmi_output_ptr)calloc(1, sizeof (struct gdbmi_output));
 }
 
 int destroy_gdbmi_output(gdbmi_output_ptr param)
@@ -124,7 +124,7 @@ int print_gdbmi_output(gdbmi_output_ptr param)
 /* Creating, Destroying and printing record  */
 gdbmi_result_record_ptr create_gdbmi_result_record(void)
 {
-    return calloc(1, sizeof (struct gdbmi_result_record));
+    return (gdbmi_result_record_ptr)calloc(1, sizeof (struct gdbmi_result_record));
 }
 
 int destroy_gdbmi_result_record(gdbmi_result_record_ptr param)
@@ -166,7 +166,7 @@ int print_gdbmi_result_record(gdbmi_result_record_ptr param)
 /* Creating, Destroying and printing result  */
 gdbmi_result_ptr create_gdbmi_result(void)
 {
-    return calloc(1, sizeof (struct gdbmi_result_record));
+    return (gdbmi_result_ptr)calloc(1, sizeof (struct gdbmi_result_record));
 }
 
 int destroy_gdbmi_result(gdbmi_result_ptr param)
@@ -249,7 +249,7 @@ int print_gdbmi_oob_record_choice(enum gdbmi_oob_record_choice param)
 /* Creating, Destroying and printing oob_record  */
 gdbmi_oob_record_ptr create_gdbmi_oob_record(void)
 {
-    return calloc(1, sizeof (struct gdbmi_oob_record));
+    return (gdbmi_oob_record_ptr)calloc(1, sizeof (struct gdbmi_oob_record));
 }
 
 int destroy_gdbmi_oob_record(gdbmi_oob_record_ptr param)
@@ -366,7 +366,7 @@ int print_gdbmi_stream_record_choice(enum gdbmi_stream_record_choice param)
 /* Creating, Destroying and printing async_record  */
 gdbmi_async_record_ptr create_gdbmi_async_record(void)
 {
-    return calloc(1, sizeof (struct gdbmi_async_record));
+    return (gdbmi_async_record_ptr)calloc(1, sizeof (struct gdbmi_async_record));
 }
 
 int destroy_gdbmi_async_record(gdbmi_async_record_ptr param)
@@ -444,7 +444,7 @@ int print_gdbmi_value_choice(enum gdbmi_value_choice param)
 /* Creating, Destroying and printing value  */
 gdbmi_value_ptr create_gdbmi_value(void)
 {
-    return calloc(1, sizeof (struct gdbmi_value));
+    return (gdbmi_value_ptr)calloc(1, sizeof (struct gdbmi_value));
 }
 
 int destroy_gdbmi_value(gdbmi_value_ptr param)
@@ -528,7 +528,7 @@ int print_gdbmi_value(gdbmi_value_ptr param)
 /* Creating, Destroying and printing tuple  */
 gdbmi_tuple_ptr create_gdbmi_tuple(void)
 {
-    return calloc(1, sizeof (struct gdbmi_tuple));
+    return (gdbmi_tuple_ptr)calloc(1, sizeof (struct gdbmi_tuple));
 }
 
 int destroy_gdbmi_tuple(gdbmi_tuple_ptr param)
@@ -584,7 +584,7 @@ int print_gdbmi_list_choice(enum gdbmi_list_choice param)
 /* Creating, Destroying and printing list  */
 gdbmi_list_ptr create_gdbmi_list(void)
 {
-    return calloc(1, sizeof (struct gdbmi_list));
+    return (gdbmi_list_ptr)calloc(1, sizeof (struct gdbmi_list));
 }
 
 int destroy_gdbmi_list(gdbmi_list_ptr param)
@@ -661,7 +661,7 @@ int print_gdbmi_list(gdbmi_list_ptr param)
 /* Creating, Destroying and printing stream_record  */
 gdbmi_stream_record_ptr create_gdbmi_stream_record(void)
 {
-    return calloc(1, sizeof (struct gdbmi_stream_record));
+    return (gdbmi_stream_record_ptr)calloc(1, sizeof (struct gdbmi_stream_record));
 }
 
 int destroy_gdbmi_stream_record(gdbmi_stream_record_ptr param)

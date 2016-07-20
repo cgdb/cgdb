@@ -32,18 +32,18 @@
 #define debug(args...)
 #endif
 
-typedef struct ibuf *ibuf;
+typedef struct ibuf *ibuf_ptr;
 
 /*
  * Local function prototypes
  */
 
 /* Tests */
-static int test_add(ibuf s);
-static int test_addchar(ibuf s);
-static int test_delchar(ibuf s);
-static int test_dup(ibuf s);
-static int test_trim(ibuf s);
+static int test_add(ibuf_ptr s);
+static int test_addchar(ibuf_ptr s);
+static int test_delchar(ibuf_ptr s);
+static int test_dup(ibuf_ptr s);
+static int test_trim(ibuf_ptr s);
 
 /* main:
  *
@@ -51,7 +51,7 @@ static int test_trim(ibuf s);
  */
 int main(int argc, char *argv[])
 {
-    ibuf s = NULL;
+    ibuf_ptr s = NULL;
     int result = 0;
 
     /* Create a tree */
@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
  * Local function implementations
  */
 
-static int test_add(ibuf s)
+static int test_add(ibuf_ptr s)
 {
 
     /* Add the strings "hello" and " world" to the ibuf */
@@ -104,7 +104,7 @@ static int test_add(ibuf s)
     return 0;
 }
 
-static int test_addchar(ibuf s)
+static int test_addchar(ibuf_ptr s)
 {
 
     /* Add an exclamation to the hello world string. */
@@ -121,7 +121,7 @@ static int test_addchar(ibuf s)
     return 0;
 }
 
-static int test_delchar(ibuf s)
+static int test_delchar(ibuf_ptr s)
 {
 
     /* Delete the last '!' from the string. */
@@ -149,10 +149,10 @@ static int test_delchar(ibuf s)
     return 0;
 }
 
-static int test_dup(ibuf s)
+static int test_dup(ibuf_ptr s)
 {
 
-    ibuf t;
+    ibuf_ptr t;
 
     /* Test duplicating a string. */
     ibuf_add(s, "test string 1");
@@ -189,7 +189,7 @@ static int test_dup(ibuf s)
     return 0;
 }
 
-static int test_trim(ibuf s)
+static int test_trim(ibuf_ptr s)
 {
 
     /* Test #1: Empty string. */
