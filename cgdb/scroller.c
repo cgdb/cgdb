@@ -91,12 +91,8 @@ static char *parse(struct scroller *scr, const char *orig, const char *buf)
             case '\r':
                 i = 0;
                 break;
-                /* Default case -> Only keep printable characters */
             default:
-                if (isprint((int) buf[j])) {
-                    rv[i] = buf[j];
-                    i++;
-                }
+                rv[i++] = buf[j];
                 break;
         }
     }
