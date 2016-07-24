@@ -13,6 +13,8 @@ libcgdbutil_a_SOURCES = \
     pseudo.h \
     sys_util.cpp \
     sys_util.h \
+    sys_win.cpp \
+    sys_win.h \
     terminal.cpp \
     terminal.h
 

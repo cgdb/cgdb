@@ -28,8 +28,9 @@
 #endif /* HAVE_SYS_TIME_H */
 
 /* Local Includes */
-#include "cgdb.h"
 #include "sys_util.h"
+#include "sys_win.h"
+#include "cgdb.h"
 #include "logo.h"
 #include "highlight_groups.h"
 
@@ -163,7 +164,7 @@ static const char *usage[] = {
 /* Functions */
 /* --------- */
 
-static void center_line(WINDOW *win, int row, int width, const char *data, int datawidth, int attr)
+static void center_line(SWINDOW *win, int row, int width, const char *data, int datawidth, int attr)
 {
     int i;
     char *line = NULL;
@@ -206,7 +207,7 @@ void logo_reset()
     logoindex = (logoindex + 1) % CGDB_NUM_LOGOS;
 }
 
-void logo_display(WINDOW *win)
+void logo_display(SWINDOW *win)
 {
     int height, width;                 /* Dimensions of the window */
     int line;                          /* Starting line */
@@ -223,13 +224,15 @@ void logo_display(WINDOW *win)
     attr = hl_groups_get_attr(hl_groups_instance, HLG_LOGO);
 
     /* Get dimensions */
-    getmaxyx(win, height, width);
+    height = swin_getmaxy(win);
+    width = swin_getmaxx(win);
 
     /* Clear the window */
-    werase(win);
+    swin_werase(win);
 
     /* If the logo fits on the screen, draw it */
-    if ((CGDB_LOGO[logoindex].h <= height - usage_height - 2)) {
+    if ((CGDB_LOGO[logoindex].h <= height - usage_height - 2))
+    {
         line = (height - CGDB_LOGO[logoindex].h - usage_height - 2) / 2;
 
         for(i = 0; i < CGDB_LOGO[logoindex].h; i++) {
@@ -245,5 +248,5 @@ void logo_display(WINDOW *win)
     for (i = 0; i < usage_height; i++)
         center_line(win, line++, width, usage[i], strlen(usage[i]), attr);
 
-    curs_set(0);         /* Hide the cursor */
+    swin_curs_set(0);         /* Hide the cursor */
 }

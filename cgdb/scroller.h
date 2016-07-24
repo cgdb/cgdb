@@ -9,17 +9,6 @@
 #ifndef _SCROLLER_H_
 #define _SCROLLER_H_
 
-/* Local Includes */
-#if HAVE_CONFIG_H
-#include "config.h"
-#endif /* HAVE_CONFIG_H */
-
-#if HAVE_CURSES_H
-#include <curses.h>
-#elif HAVE_NCURSES_CURSES_H
-#include <ncurses/curses.h>
-#endif /* HAVE_CURSES_H */
-
 /* Count of marks */
 #define MARK_COUNT 26
 
@@ -87,7 +76,7 @@ struct scroller {
      * The original row, or last selected row, when searching.
      */
     int search_r;
-    WINDOW *win; /* The scoller's own window */
+    SWINDOW *win; /* The scoller's own window */
 
     scroller_mark marks[MARK_COUNT]; /* Local a-z marks */
     scroller_mark jump_back_mark;    /* Location where last jump occurred from */

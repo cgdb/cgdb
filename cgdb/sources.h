@@ -14,23 +14,7 @@
 #ifndef _SOURCES_H_
 #define _SOURCES_H_
 
-#if HAVE_CONFIG_H
-#include "config.h"
-#endif /* HAVE_CONFIG_H */
-
-/* System Includes */
-#if HAVE_CURSES_H
-#include <curses.h>
-#elif HAVE_NCURSES_CURSES_H
-#include <ncurses/curses.h>
-#endif /* HAVE_CURSES_H */
-
-/* System Includes */
-#if HAVE_TIME_H
-#include <time.h>
-#endif /* HAVE_TIME_H */
-
-#include "tokenizer.h"
+#include "sys_win.h"
 
 /* ----------- */
 /* Definitions */
@@ -58,7 +42,7 @@ struct sviewer {
     struct list_node *cur;                 /* Current node we're displaying */
     sviewer_mark global_marks[MARK_COUNT]; /* Global A-Z marks */
     sviewer_mark jump_back_mark;           /* Location where last jump occurred from */
-    WINDOW *win;                           /* Curses window */
+    SWINDOW *win;                          /* Curses window */
 
     uint64_t addr_frame;                   /* Current frame address 
                                               Zero if unknown. */

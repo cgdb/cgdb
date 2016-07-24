@@ -2,12 +2,6 @@
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
-#if HAVE_CURSES_H
-#include <curses.h>
-#elif HAVE_NCURSES_CURSES_H
-#include <ncurses/curses.h>
-#endif /* HAVE_CURSES_H */
-
 #if HAVE_STRING_H
 #include <string.h>
 #endif /* HAVE_STRING_H */
@@ -34,6 +28,7 @@
 EXTERN_C int tgetent(char *, const char *);
 EXTERN_C char *tgetstr(const char *, char **);
 
+#include "sys_win.h"
 #include "kui_term.h"
 
 #define MAXLINE 4096
@@ -340,7 +335,7 @@ static int import_keyseq(struct tlist *list, struct kui_map_set *map)
     }
 
     /* Set up the terminfo seq */
-    list->tiname_seq = tigetstr((char *)list->tiname);
+    list->tiname_seq = swin_tigetstr((char *)list->tiname);
     if (list->tiname_seq == 0) {
         /* fprintf ( stderr, "CAPNAME (%s) is not present in this TERM's terminfo description\n", i->tiname); */
     } else if (list->tiname_seq == (char *) -1) {

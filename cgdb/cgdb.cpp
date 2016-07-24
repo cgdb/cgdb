@@ -26,12 +26,6 @@
 #include <stdio.h>
 #endif /* HAVE_STDIO_H */
 
-#if HAVE_CURSES_H
-#include <curses.h>
-#elif HAVE_NCURSES_CURSES_H
-#include <ncurses/curses.h>
-#endif /* HAVE_CURSES_H */
-
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
@@ -67,8 +61,10 @@
 #include <inttypes.h>
 
 /* Local Includes */
+#include "sys_win.h"
 #include "cgdb.h"
 #include "sys_util.h"
+#include "tokenizer.h"
 #include "interface.h"
 #include "scroller.h"
 #include "sources.h"
@@ -316,12 +312,12 @@ int run_shell_command(const char *command)
     int rv;
 
     /* Cleanly scroll the screen up for a prompt */
-    scrl(1);
-    move(LINES - 1, 0);
+    swin_scrl(1);
+    swin_move(swin_lines() - 1, 0);
     printf("\n");
 
     /* Put the terminal in cooked mode and turn on echo */
-    endwin();
+    swin_endwin();
     tty_set_attributes(STDIN_FILENO, &term_attributes);
 
     /* NULL or empty string means invoke user's shell */
@@ -1546,8 +1542,8 @@ void cgdb_cleanup_and_exit(int val)
     ibuf_free(current_line);
 
     /* Cleanly scroll the screen up for a prompt */
-    scrl(1);
-    move(LINES - 1, 0);
+    swin_scrl(1);
+    swin_move(swin_lines() - 1, 0);
     printf("\n");
 
     rline_write_history(rline, readline_history_path);

@@ -143,7 +143,7 @@ int hl_groups_shutdown(hl_groups_ptr hl_groups);
 int hl_groups_setup(hl_groups_ptr hl_groups);
 
 /**
- * Get the attributes that may be passed to wattron to tell the curses library
+ * Get the attributes that may be passed to swin_wattron to tell the curses library
  * how to print this particular group.
  *
  * Note, this function can not fail.
@@ -228,7 +228,7 @@ struct hl_line_attr {
  *
  * @param width
  */
-void hl_printline(WINDOW *win, const char *line, int line_len,
+void hl_printline(SWINDOW *win, const char *line, int line_len,
         const hl_line_attr *attrs, int x, int y, int col, int width);
 
 /**
@@ -262,7 +262,7 @@ void hl_printline(WINDOW *win, const char *line, int line_len,
  *
  * @param width
  */
-void hl_printline_highlight(WINDOW *win, const char *line, int line_len,
+void hl_printline_highlight(SWINDOW *win, const char *line, int line_len,
         const hl_line_attr *attrs, int x, int y, int col, int width);
 
 /*@}*/

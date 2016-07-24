@@ -43,7 +43,8 @@
     windows. Thanks to Daniel Cohen for the original implementation
     of this idea! You can change the window orientation by using the
     command 'set winsplitorientation=horizontal or vertical'.
-    horizontal is the default orientation.
+    horizontal is the default orientation. Type Ctrl-w to switch between
+    vertical and horizontal viewing.
 
   * Remove the TTY mode and TTY window from CGDB. This previously allowed
     you to send input to the program being debugged through the TTY

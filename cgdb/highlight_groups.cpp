@@ -15,12 +15,7 @@
 #include <string.h>
 #endif /* HAVE_STRING_H */
 
-#if HAVE_CURSES_H
-#include <curses.h>
-#elif HAVE_NCURSES_CURSES_H
-#include <ncurses/curses.h>
-#endif /* HAVE_CURSES_H */
-
+#include "sys_win.h"
 #include "highlight_groups.h"
 #include "command_lexer.h"
 #include "sys_util.h"
@@ -105,28 +100,28 @@ struct default_hl_group_info {
  * could eventually be configurable.
  */
 static const struct default_hl_group_info default_groups_for_curses[] = {
-    {HLG_KEYWORD, A_BOLD, A_BOLD, COLOR_BLUE, COLOR_BLACK},
-    {HLG_TYPE, A_BOLD, A_BOLD, COLOR_GREEN, COLOR_BLACK},
-    {HLG_LITERAL, A_BOLD, A_BOLD, COLOR_RED, COLOR_BLACK},
-    {HLG_COMMENT, A_NORMAL, A_NORMAL, COLOR_YELLOW, COLOR_BLACK},
-    {HLG_DIRECTIVE, A_BOLD, A_BOLD, COLOR_CYAN, COLOR_BLACK},
-    {HLG_TEXT, A_NORMAL, A_NORMAL, COLOR_WHITE, COLOR_BLACK},
-    {HLG_SEARCH, A_NORMAL, A_NORMAL, COLOR_BLACK, COLOR_WHITE},
-    {HLG_STATUS_BAR, A_NORMAL, A_NORMAL, COLOR_BLACK, COLOR_WHITE},
-    {HLG_EXECUTING_LINE_ARROW, A_BOLD, A_BOLD, COLOR_GREEN, COLOR_BLACK},
-    {HLG_SELECTED_LINE_ARROW, A_BOLD, A_BOLD, COLOR_WHITE, COLOR_BLACK},
-    {HLG_EXECUTING_LINE_HIGHLIGHT, A_BOLD, A_BOLD, COLOR_BLACK, COLOR_GREEN},
-    {HLG_SELECTED_LINE_HIGHLIGHT, A_BOLD, A_BOLD, COLOR_BLACK, COLOR_WHITE},
-    {HLG_EXECUTING_LINE_BLOCK, A_BOLD, A_BOLD, COLOR_GREEN, COLOR_BLACK},
-    {HLG_SELECTED_LINE_BLOCK, A_BOLD, A_BOLD, COLOR_WHITE, COLOR_BLACK},
-    {HLG_ENABLED_BREAKPOINT, A_BOLD, A_BOLD, COLOR_RED, COLOR_BLACK},
-    {HLG_DISABLED_BREAKPOINT, A_BOLD, A_BOLD, COLOR_YELLOW, COLOR_BLACK},
-    {HLG_SELECTED_LINE_NUMBER, A_BOLD, A_BOLD, COLOR_WHITE, COLOR_BLACK},
-    {HLG_EXECUTING_LINE_NUMBER, A_BOLD, A_BOLD, COLOR_GREEN, COLOR_BLACK},
-    {HLG_SCROLL_MODE_STATUS, A_BOLD, A_BOLD, COLOR_WHITE, COLOR_BLACK},
-    {HLG_LOGO, A_BOLD, A_BOLD, COLOR_BLUE, COLOR_BLACK},
-    {HLG_MARK, A_BOLD, A_BOLD, COLOR_WHITE, COLOR_BLACK},
-    {HLG_LAST, A_NORMAL, A_NORMAL, -1, -1}
+    {HLG_KEYWORD, SWIN_A_BOLD, SWIN_A_BOLD, COLOR_BLUE, COLOR_BLACK},
+    {HLG_TYPE, SWIN_A_BOLD, SWIN_A_BOLD, COLOR_GREEN, COLOR_BLACK},
+    {HLG_LITERAL, SWIN_A_BOLD, SWIN_A_BOLD, COLOR_RED, COLOR_BLACK},
+    {HLG_COMMENT, SWIN_A_NORMAL, SWIN_A_NORMAL, COLOR_YELLOW, COLOR_BLACK},
+    {HLG_DIRECTIVE, SWIN_A_BOLD, SWIN_A_BOLD, COLOR_CYAN, COLOR_BLACK},
+    {HLG_TEXT, SWIN_A_NORMAL, SWIN_A_NORMAL, COLOR_WHITE, COLOR_BLACK},
+    {HLG_SEARCH, SWIN_A_NORMAL, SWIN_A_NORMAL, COLOR_BLACK, COLOR_WHITE},
+    {HLG_STATUS_BAR, SWIN_A_NORMAL, SWIN_A_NORMAL, COLOR_BLACK, COLOR_WHITE},
+    {HLG_EXECUTING_LINE_ARROW, SWIN_A_BOLD, SWIN_A_BOLD, COLOR_GREEN, COLOR_BLACK},
+    {HLG_SELECTED_LINE_ARROW, SWIN_A_BOLD, SWIN_A_BOLD, COLOR_WHITE, COLOR_BLACK},
+    {HLG_EXECUTING_LINE_HIGHLIGHT, SWIN_A_BOLD, SWIN_A_BOLD, COLOR_BLACK, COLOR_GREEN},
+    {HLG_SELECTED_LINE_HIGHLIGHT, SWIN_A_BOLD, SWIN_A_BOLD, COLOR_BLACK, COLOR_WHITE},
+    {HLG_EXECUTING_LINE_BLOCK, SWIN_A_BOLD, SWIN_A_BOLD, COLOR_GREEN, COLOR_BLACK},
+    {HLG_SELECTED_LINE_BLOCK, SWIN_A_BOLD, SWIN_A_BOLD, COLOR_WHITE, COLOR_BLACK},
+    {HLG_ENABLED_BREAKPOINT, SWIN_A_BOLD, SWIN_A_BOLD, COLOR_RED, COLOR_BLACK},
+    {HLG_DISABLED_BREAKPOINT, SWIN_A_BOLD, SWIN_A_BOLD, COLOR_YELLOW, COLOR_BLACK},
+    {HLG_SELECTED_LINE_NUMBER, SWIN_A_BOLD, SWIN_A_BOLD, COLOR_WHITE, COLOR_BLACK},
+    {HLG_EXECUTING_LINE_NUMBER, SWIN_A_BOLD, SWIN_A_BOLD, COLOR_GREEN, COLOR_BLACK},
+    {HLG_SCROLL_MODE_STATUS, SWIN_A_BOLD, SWIN_A_BOLD, COLOR_WHITE, COLOR_BLACK},
+    {HLG_LOGO, SWIN_A_BOLD, SWIN_A_BOLD, COLOR_BLUE, COLOR_BLACK},
+    {HLG_MARK, SWIN_A_BOLD, SWIN_A_BOLD, COLOR_WHITE, COLOR_BLACK},
+    {HLG_LAST, SWIN_A_NORMAL, SWIN_A_NORMAL, -1, -1}
 };
 
 /** 
@@ -135,28 +130,28 @@ static const struct default_hl_group_info default_groups_for_curses[] = {
  */
 static const struct default_hl_group_info default_groups_for_background_dark[]
         = {
-    {HLG_KEYWORD, A_BOLD, A_BOLD, COLOR_BLUE, -1},
-    {HLG_TYPE, A_BOLD, A_BOLD, COLOR_GREEN, -1},
-    {HLG_LITERAL, A_BOLD, A_BOLD, COLOR_RED, -1},
-    {HLG_COMMENT, A_NORMAL, A_NORMAL, COLOR_YELLOW, -1},
-    {HLG_DIRECTIVE, A_BOLD, A_BOLD, COLOR_CYAN, -1},
-    {HLG_TEXT, A_NORMAL, A_NORMAL, -1, -1},
-    {HLG_SEARCH, A_REVERSE, A_REVERSE, -1, -1},
-    {HLG_STATUS_BAR, A_REVERSE, A_REVERSE, -1, -1},
-    {HLG_EXECUTING_LINE_ARROW, A_BOLD, A_BOLD, COLOR_GREEN, -1},
-    {HLG_SELECTED_LINE_ARROW, A_BOLD, A_BOLD, COLOR_WHITE, -1},
-    {HLG_EXECUTING_LINE_HIGHLIGHT, A_BOLD, A_BOLD, COLOR_BLACK, COLOR_GREEN},
-    {HLG_SELECTED_LINE_HIGHLIGHT, A_BOLD, A_BOLD, COLOR_BLACK, COLOR_WHITE},
-    {HLG_EXECUTING_LINE_BLOCK, A_REVERSE, A_REVERSE, COLOR_GREEN, -1},
-    {HLG_SELECTED_LINE_BLOCK, A_REVERSE, A_REVERSE, COLOR_WHITE, -1},
-    {HLG_ENABLED_BREAKPOINT, A_BOLD, A_BOLD, COLOR_RED, -1},
-    {HLG_DISABLED_BREAKPOINT, A_BOLD, A_BOLD, COLOR_YELLOW, -1},
-    {HLG_SELECTED_LINE_NUMBER, A_BOLD, A_BOLD, COLOR_WHITE, -1},
-    {HLG_EXECUTING_LINE_NUMBER, A_BOLD, A_BOLD, COLOR_GREEN, -1},
-    {HLG_SCROLL_MODE_STATUS, A_BOLD, A_BOLD, -1, -1},
-    {HLG_LOGO, A_BOLD, A_BOLD, COLOR_BLUE, -1},
-    {HLG_MARK, A_BOLD, A_BOLD, COLOR_WHITE, -1},
-    {HLG_LAST, A_NORMAL, A_NORMAL, -1, -1}
+    {HLG_KEYWORD, SWIN_A_BOLD, SWIN_A_BOLD, COLOR_BLUE, -1},
+    {HLG_TYPE, SWIN_A_BOLD, SWIN_A_BOLD, COLOR_GREEN, -1},
+    {HLG_LITERAL, SWIN_A_BOLD, SWIN_A_BOLD, COLOR_RED, -1},
+    {HLG_COMMENT, SWIN_A_NORMAL, SWIN_A_NORMAL, COLOR_YELLOW, -1},
+    {HLG_DIRECTIVE, SWIN_A_BOLD, SWIN_A_BOLD, COLOR_CYAN, -1},
+    {HLG_TEXT, SWIN_A_NORMAL, SWIN_A_NORMAL, -1, -1},
+    {HLG_SEARCH, SWIN_A_REVERSE, SWIN_A_REVERSE, -1, -1},
+    {HLG_STATUS_BAR, SWIN_A_REVERSE, SWIN_A_REVERSE, -1, -1},
+    {HLG_EXECUTING_LINE_ARROW, SWIN_A_BOLD, SWIN_A_BOLD, COLOR_GREEN, -1},
+    {HLG_SELECTED_LINE_ARROW, SWIN_A_BOLD, SWIN_A_BOLD, COLOR_WHITE, -1},
+    {HLG_EXECUTING_LINE_HIGHLIGHT, SWIN_A_BOLD, SWIN_A_BOLD, COLOR_BLACK, COLOR_GREEN},
+    {HLG_SELECTED_LINE_HIGHLIGHT, SWIN_A_BOLD, SWIN_A_BOLD, COLOR_BLACK, COLOR_WHITE},
+    {HLG_EXECUTING_LINE_BLOCK, SWIN_A_REVERSE, SWIN_A_REVERSE, COLOR_GREEN, -1},
+    {HLG_SELECTED_LINE_BLOCK, SWIN_A_REVERSE, SWIN_A_REVERSE, COLOR_WHITE, -1},
+    {HLG_ENABLED_BREAKPOINT, SWIN_A_BOLD, SWIN_A_BOLD, COLOR_RED, -1},
+    {HLG_DISABLED_BREAKPOINT, SWIN_A_BOLD, SWIN_A_BOLD, COLOR_YELLOW, -1},
+    {HLG_SELECTED_LINE_NUMBER, SWIN_A_BOLD, SWIN_A_BOLD, COLOR_WHITE, -1},
+    {HLG_EXECUTING_LINE_NUMBER, SWIN_A_BOLD, SWIN_A_BOLD, COLOR_GREEN, -1},
+    {HLG_SCROLL_MODE_STATUS, SWIN_A_BOLD, SWIN_A_BOLD, -1, -1},
+    {HLG_LOGO, SWIN_A_BOLD, SWIN_A_BOLD, COLOR_BLUE, -1},
+    {HLG_MARK, SWIN_A_BOLD, SWIN_A_BOLD, COLOR_WHITE, -1},
+    {HLG_LAST, SWIN_A_NORMAL, SWIN_A_NORMAL, -1, -1}
 };
 
 struct hl_group_name {
@@ -234,15 +229,15 @@ struct attr_pair {
 
 /** The list of terminal attributes that CGDB supports */
 static const struct attr_pair attr_names[] = {
-    {"bold", A_BOLD},
-    {"underline", A_UNDERLINE},
-    {"reverse", A_REVERSE},
-    {"inverse", A_REVERSE},
-    {"standout", A_STANDOUT},
-    {"NONE", A_NORMAL},
-    {"normal", A_NORMAL},
-    {"blink", A_BLINK},
-    {"dim", A_DIM},
+    {"bold", SWIN_A_BOLD},
+    {"underline", SWIN_A_UNDERLINE},
+    {"reverse", SWIN_A_REVERSE},
+    {"inverse", SWIN_A_REVERSE},
+    {"standout", SWIN_A_STANDOUT},
+    {"NONE", SWIN_A_NORMAL},
+    {"normal", SWIN_A_NORMAL},
+    {"blink", SWIN_A_BLINK},
+    {"dim", SWIN_A_DIM},
     {NULL, 0}
 };
 
@@ -340,12 +335,12 @@ static int hl_get_ansicolor_pair(hl_groups_ptr hl_groups, int bgcolor, int fgcol
         /* Initialize 64 [1..8][1..8] color entries */
         for (fg = COLOR_BLACK; fg <= COLOR_WHITE; fg++) {
             for (bg = COLOR_BLACK; bg <= COLOR_WHITE; bg++) {
-                init_pair(color_pair, fg, bg);
+                swin_init_pair(color_pair, fg, bg);
                 color_pair_table[bg + 1][fg + 1] = color_pair++;
             }
         }
 
-        /* init_pair:
+        /* swin_init_pair:
          *  The value of the first argument must be between 1 and COLOR_PAIRS-1,
          * except that if default colors are used (see use_default_colors) the
          * upper limit is adjusted to allow for extra pairs which use a default
@@ -354,12 +349,12 @@ static int hl_get_ansicolor_pair(hl_groups_ptr hl_groups, int bgcolor, int fgcol
 
         /* Initialize colors with default bg: [0][1..8] */
         for (fg = COLOR_BLACK; fg <= COLOR_WHITE; fg++) {
-            init_pair(color_pair, fg, -1);
+            swin_init_pair(color_pair, fg, -1);
             color_pair_table[0][fg + 1] = color_pair++;
         }
         /* Initialize colors with default fg: [1..8][0] */
         for (bg = COLOR_BLACK; bg <= COLOR_WHITE; bg++) {
-            init_pair(color_pair, -1, bg);
+            swin_init_pair(color_pair, -1, bg);
             color_pair_table[bg + 1][0] = color_pair++;
         }
 
@@ -418,32 +413,24 @@ setup_group(hl_groups_ptr hl_groups, enum hl_group_kind group,
     if (fore_color == UNSPECIFIED_COLOR && back_color == UNSPECIFIED_COLOR)
         return 0;
 
-#ifdef NCURSES_VERSION
     if (hl_groups->ansi_color) {
         /* Ansi mode is enabled so we've got 16 colors and 64 color pairs.
            Set the color_pair index for this bg / fg color combination. */
         info->color_pair = hl_get_ansicolor_pair(hl_groups, back_color, fore_color);
         return 0;
     }
-#endif
-
-    /* Don't allow -1 to be used in curses mode */
-#ifndef NCURSES_VERSION
-    if (fore_color < 0 || back_color < 0)
-        return 0;
-#endif
 
     /* If either the foreground or background color is unspecified, we
      * need to read the other so we don't clobber it. */
     if (fore_color == UNSPECIFIED_COLOR) {
-        short old_fore_color, old_back_color;
+        int old_fore_color, old_back_color;
 
-        pair_content(info->color_pair, &old_fore_color, &old_back_color);
+        swin_pair_content(info->color_pair, &old_fore_color, &old_back_color);
         fore_color = old_fore_color;
     } else if (back_color == UNSPECIFIED_COLOR) {
-        short old_fore_color, old_back_color;
+        int old_fore_color, old_back_color;
 
-        pair_content(info->color_pair, &old_fore_color, &old_back_color);
+        swin_pair_content(info->color_pair, &old_fore_color, &old_back_color);
         back_color = old_back_color;
     }
 
@@ -459,8 +446,8 @@ setup_group(hl_groups_ptr hl_groups, enum hl_group_kind group,
     }
 
     /* Set up the color pair. */
-    if (info->color_pair < COLOR_PAIRS) {
-        if (init_pair(info->color_pair, fore_color, back_color) != OK)
+    if (info->color_pair < swin_color_pairs()) {
+        if (swin_init_pair(info->color_pair, fore_color, back_color) != 0)
             return -1;
     } else
         return -1;
@@ -521,18 +508,14 @@ int hl_groups_setup(hl_groups_ptr hl_groups)
     if (!hl_groups)
         return -1;
 
-#ifdef NCURSES_VERSION
     ginfo = default_groups_for_background_dark;
-#else
-    ginfo = default_groups_for_curses;
-#endif
 
-    hl_groups->in_color = cgdbrc_get_int(CGDBRC_COLOR) && has_colors();
+    hl_groups->in_color = cgdbrc_get_int(CGDBRC_COLOR) && swin_has_colors();
 
     hl_groups->ansi_esc_parsing = cgdbrc_get_int(CGDBRC_DEBUGWINCOLOR);
 
     hl_groups->ansi_color = hl_groups->in_color &&
-                            (COLORS >= 8) && (COLOR_PAIRS >= 64);
+                            (swin_colors() >= 8) && (swin_color_pairs() >= 64);
 
     /* Set up the default groups. */
     for (i = 0; ginfo[i].kind != HLG_LAST; ++i) {
@@ -570,7 +553,7 @@ int
 hl_groups_get_attr(hl_groups_ptr hl_groups, enum hl_group_kind kind)
 {
     struct hl_group_info *info = lookup_group_info_by_key(hl_groups, kind);
-    int attr = (kind == HLG_EXECUTING_LINE_HIGHLIGHT) ? A_BOLD : A_NORMAL;
+    int attr = (kind == HLG_EXECUTING_LINE_HIGHLIGHT) ?  SWIN_A_BOLD : SWIN_A_NORMAL;
 
     switch(kind)
     {
@@ -582,7 +565,7 @@ hl_groups_get_attr(hl_groups_ptr hl_groups, enum hl_group_kind kind)
         case HLG_MAGENTA:
         case HLG_CYAN:
         case HLG_WHITE:
-            attr = COLOR_PAIR(hl_get_ansicolor_pair(
+            attr = swin_color_pair(hl_get_ansicolor_pair(
                 hl_groups, -1, kind - HLG_BLACK));
             return attr;
         case HLG_BOLD_BLACK:
@@ -593,7 +576,7 @@ hl_groups_get_attr(hl_groups_ptr hl_groups, enum hl_group_kind kind)
         case HLG_BOLD_MAGENTA:
         case HLG_BOLD_CYAN:
         case HLG_BOLD_WHITE:
-            attr = A_BOLD | COLOR_PAIR(
+            attr = SWIN_A_BOLD | swin_color_pair(
                 hl_get_ansicolor_pair(hl_groups, -1, kind - HLG_BOLD_BLACK));
             return attr;
     }
@@ -604,7 +587,7 @@ hl_groups_get_attr(hl_groups_ptr hl_groups, enum hl_group_kind kind)
         else {
             attr = info->color_attrs;
             if (info->color_pair)
-                attr |= COLOR_PAIR(info->color_pair);
+                attr |= swin_color_pair(info->color_pair);
         }
     }
 
@@ -766,9 +749,9 @@ int hl_groups_parse_config(hl_groups_ptr hl_groups)
                         color = color_spec->nr8Color;
                         if (color_spec->nr8ForegroundBold) {
                             if (color_attrs == UNSPECIFIED_COLOR)
-                                color_attrs = A_BOLD;
+                                color_attrs = SWIN_A_BOLD;
                             else
-                                color_attrs |= A_BOLD;
+                                color_attrs |= SWIN_A_BOLD;
                         }
                         break;
 
@@ -925,7 +908,7 @@ int hl_ansi_get_color_attrs(hl_groups_ptr hl_groups,
     int i = 0;
     int fg = -1;
     int bg = -1;
-    int a = A_NORMAL;
+    int a = SWIN_A_NORMAL;
 
     *attr = 0;
 
@@ -961,30 +944,30 @@ int hl_ansi_get_color_attrs(hl_groups_ptr hl_groups,
             switch(num)
             {
             case 0: /* Reset current attributes */
-                a = A_NORMAL;
+                a = SWIN_A_NORMAL;
                 fg = -1;
                 bg = -1;
                 break;
             case 1: /* Set BrightOrBold */
-                a |= A_BOLD;
+                a |= SWIN_A_BOLD;
                 break;
             case 2: /* Unset BrightOrBold */
             case 22: /* Unset BrightOrBold */
-                a &= ~A_BOLD;
+                a &= ~SWIN_A_BOLD;
                 break;
             case 4: /* SetBackOrUnderline */
             case 5: /* SetBackOrUnderline */
-                a |= A_UNDERLINE;
+                a |= SWIN_A_UNDERLINE;
                 break;
             case 3: /* SetItalicOrInverse */
             case 7: /* Use inverse colors */
-                a |= A_REVERSE;
+                a |= SWIN_A_REVERSE;
                 break;
             case 23: /*Unset ItalicOrInverse */
-                a &= ~A_REVERSE;
+                a &= ~SWIN_A_REVERSE;
                 break;
             case 24: /* UnsetBackOrUnderline */
-                a &= ~A_UNDERLINE;
+                a &= ~SWIN_A_UNDERLINE;
                 break;
             case 27: /* Use normal colors */
             case 39: /* Reset text color to defaults */
@@ -999,9 +982,9 @@ int hl_ansi_get_color_attrs(hl_groups_ptr hl_groups,
                 i += ansi_get_color_code_index(buf + i, &num);
                 if (num >= 0 && num < 16) {
                     fg = num & 7;
-                    a |= ((num & 0x8) ? A_BOLD : 0);
+                    a |= ((num & 0x8) ? SWIN_A_BOLD : 0);
                 } else {
-                    a |= A_REVERSE | A_BOLD;
+                    a |= SWIN_A_REVERSE | SWIN_A_BOLD;
                 }
                 break;
             case 48:
@@ -1009,10 +992,10 @@ int hl_ansi_get_color_attrs(hl_groups_ptr hl_groups,
                 i += ansi_get_color_code_index(buf + i, &num);
                 if (num >= 0 && num < 16) {
                     bg = num & 7;
-                    a |= ((num & 0x8) ? A_BOLD : 0);
+                    a |= ((num & 0x8) ? SWIN_A_BOLD : 0);
                 }
                 else {
-                    a |= A_REVERSE | A_BOLD;
+                    a |= SWIN_A_REVERSE | SWIN_A_BOLD;
                 }
                 break;
                 /* Set ANSI text color */
@@ -1026,12 +1009,12 @@ int hl_ansi_get_color_attrs(hl_groups_ptr hl_groups,
                 /* Set bright ANSI text color */
             case 90: case 91: case 92: case 93: case 94: case 95: case 96: case 97:
                 fg = num - 90;
-                a |= A_BOLD;
+                a |= SWIN_A_BOLD;
                 break;
                 /* Set bright ANSI background color */
             case 100: case 101: case 102: case 103: case 104: case 105: case 106: case 107:
                 bg = num - 100;
-                a |= A_BOLD;
+                a |= SWIN_A_BOLD;
                 break;
             }
 
@@ -1039,7 +1022,7 @@ int hl_ansi_get_color_attrs(hl_groups_ptr hl_groups,
             {
                 int color_pair = hl_get_ansicolor_pair(hl_groups, bg, fg);
 
-                *attr = a | COLOR_PAIR(color_pair);
+                *attr = a | swin_color_pair(color_pair);
                 return i + 1;
             }
 
@@ -1052,14 +1035,14 @@ int hl_ansi_get_color_attrs(hl_groups_ptr hl_groups,
     return 0;
 }
 
-static void hl_printspan(WINDOW *win, const char *line, int line_len, int attr)
+static void hl_printspan(SWINDOW *win, const char *line, int line_len, int attr)
 {
-    wattron(win, attr);
-    waddnstr(win, line, line_len);
-    wattroff(win, attr);
+    swin_wattron(win, attr);
+    swin_waddnstr(win, line, line_len);
+    swin_wattroff(win, attr);
 }
 
-void hl_printline(WINDOW *win, const char *line, int line_len,
+void hl_printline(SWINDOW *win, const char *line, int line_len,
         const hl_line_attr *attrs, int x, int y, int col, int width)
 {
     int count;
@@ -1074,12 +1057,12 @@ void hl_printline(WINDOW *win, const char *line, int line_len,
             x = 0;
         }
 
-        wmove(win, y, x);
+        swin_wmove(win, y, x);
     }
 
     count = MIN(line_len - col, width);
     if (count <= 0) {
-        wclrtoeol(win);
+        swin_wclrtoeol(win);
         return;
     }
 
@@ -1115,10 +1098,10 @@ void hl_printline(WINDOW *win, const char *line, int line_len,
     }
 
     if (width)
-        wclrtoeol(win);
+        swin_wclrtoeol(win);
 }
 
-void hl_printline_highlight(WINDOW *win, const char *line, int line_len,
+void hl_printline_highlight(SWINDOW *win, const char *line, int line_len,
         const hl_line_attr *attrs, int x, int y, int col, int width)
 {
     int count;
@@ -1133,7 +1116,7 @@ void hl_printline_highlight(WINDOW *win, const char *line, int line_len,
             x = 0;
         }
 
-        wmove(win, y, x);
+        swin_wmove(win, y, x);
     }
 
     count = MIN(line_len - col, width);
@@ -1153,7 +1136,7 @@ void hl_printline_highlight(WINDOW *win, const char *line, int line_len,
                 if (attr)
                     hl_printspan(win, line + col, len, attr);
                 else
-                    wmove(win, y, getcurx(win) + len);
+                    swin_wmove(win, y, swin_getcurx(win) + len);
 
                 col += len;
                 count -= len;
@@ -1164,7 +1147,7 @@ void hl_printline_highlight(WINDOW *win, const char *line, int line_len,
                 if (attr)
                     hl_printspan(win, line + col, count, attr);
                 else
-                    wmove(win, y, getcurx(win) + count);
+                    swin_wmove(win, y, swin_getcurx(win) + count);
 
                 width -= count;
                 count = 0;

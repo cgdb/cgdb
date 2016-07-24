@@ -2,12 +2,6 @@
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
-#if HAVE_CURSES_H
-#include <curses.h>
-#elif HAVE_NCURSES_CURSES_H
-#include <ncurses/curses.h>
-#endif
-
 #if HAVE_STDIO_H
 #include <stdio.h>
 #endif /* HAVE_STDIO_H */
@@ -53,7 +47,14 @@
 #include <getopt.h>
 #endif
 
-#include <sys_util.h>
+#if HAVE_CURSES_H
+#include <curses.h>
+#elif HAVE_NCURSES_CURSES_H
+#include <ncurses/curses.h>
+#endif /* HAVE_CURSES_H */
+
+//#include "sys_win.h"
+#include "sys_util.h"
 #include "kui.h"
 #include "kui_term.h"
 
