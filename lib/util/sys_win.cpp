@@ -8,6 +8,7 @@
 #include <ncurses/curses.h>
 #endif
 
+#include "sys_util.h"
 #include "sys_win.h"
 
 const int SWIN_A_NORMAL = A_NORMAL;
@@ -150,10 +151,21 @@ int swin_getcury(const SWINDOW *win)
     return getcury((WINDOW *)win);
 }
 
+int swin_getbegx(const SWINDOW *win)
+{
+    return getbegx((WINDOW *)win);
+}
+
+int swin_getbegy(const SWINDOW *win)
+{
+    return getbegy((WINDOW *)win);
+}
+
 int swin_getmaxx(const SWINDOW *win)
 {
     return getmaxx((WINDOW *)win);
 }
+
 int swin_getmaxy(const SWINDOW *win)
 {
     return getmaxy((WINDOW *)win);

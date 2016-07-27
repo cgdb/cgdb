@@ -70,9 +70,9 @@
 #include <assert.h>
 
 /* Local Includes */
+#include "sys_util.h"
 #include "sys_win.h"
 #include "cgdb.h"
-#include "sys_util.h"
 #include "config.h"
 #include "tokenizer.h"
 #include "interface.h"
@@ -123,9 +123,8 @@ WIN_SPLIT_ORIENTATION_TYPE cur_split_orientation = WSO_HORIZONTAL;
 /* Local Variables */
 /* --------------- */
 static int curses_initialized = 0;  /* Flag: Curses has been initialized */
-static int curses_colors = 0;   /* Flag: Terminal supports colors */
-static struct scroller *gdb_win = NULL; /* The GDB input/output window */
-static struct sviewer *src_win = NULL;  /* The source viewer window */
+static struct scroller *gdb_scroller = NULL;
+static struct sviewer *src_viewer = NULL;  /* The source viewer window */
 static SWINDOW *status_win = NULL;   /* The status line */
 static SWINDOW *vseparator_win = NULL;   /* Separator gets own window */
 static enum Focus focus = GDB;  /* Which pane is currently focused */
@@ -176,12 +175,14 @@ static int init_curses()
 {
     char escdelay[] = "ESCDELAY=0";
 
-    if (putenv(escdelay) == -1)
-        fprintf(stderr, "(%s:%d) putenv failed\r\n", __FILE__, __LINE__);
+    if (putenv(escdelay))
+    {
+        clog_error(CLOG_CGDB, "putenv(\"%s\") failed", escdelay);
+    }
 
     swin_initscr();                  /* Start curses mode */
 
-    if ((curses_colors = swin_has_colors())) {
+    if (swin_has_colors()) {
         swin_start_color();
         swin_use_default_colors();
     }
@@ -207,7 +208,10 @@ static int get_src_col(void)
     return 0;
 }
 
-static int get_src_status_height(void);
+static int get_src_status_height(void)
+{
+    return 1;
+}
 
 static int get_src_height(void)
 {
@@ -250,11 +254,6 @@ static int get_src_status_row(void)
 static int get_src_status_col(void)
 {
     return get_src_col();
-}
-
-static int get_src_status_height(void)
-{
-    return 1;
 }
 
 static int get_src_status_width(void)
@@ -395,6 +394,7 @@ static void update_status_win(enum win_refresh dorefresh)
 
     /* Print white background */
     swin_wattron(status_win, attr);
+
     for (pos = 0; pos < WIDTH; pos++)
         swin_mvwprintw(status_win, 0, pos, " ");
     /* Show the user which window is focused */
@@ -402,6 +402,7 @@ static void update_status_win(enum win_refresh dorefresh)
         swin_mvwprintw(status_win, 0, WIDTH - 1, "*");
     else if (focus == CGDB || focus == CGDB_STATUS_BAR)
         swin_mvwprintw(status_win, 0, WIDTH - 1, " ");
+
     swin_wattroff(status_win, attr);
 
     /* Print the regex that the user is looking for Forward */
@@ -426,7 +427,7 @@ static void update_status_win(enum win_refresh dorefresh)
     /* Default: Current Filename */
     else {
         /* Print filename */
-        const char *filename = source_current_file(src_win);
+        const char *filename = source_current_file(src_viewer);
 
         if (filename) {
             if_display_message("", dorefresh, WIDTH - 1, "%s", filename);
@@ -508,18 +509,18 @@ void if_draw(void)
         swin_wnoutrefresh(status_win);
 
     if (get_src_height() > 0)
-        source_display(src_win, focus == CGDB, WIN_NO_REFRESH);
+        source_display(src_viewer, focus == CGDB, WIN_NO_REFRESH);
 
     separator_display(cur_split_orientation == WSO_VERTICAL);
 
     if (get_gdb_height() > 0)
-        scr_refresh(gdb_win, focus == GDB, WIN_NO_REFRESH);
+        scr_refresh(gdb_scroller, focus == GDB, WIN_NO_REFRESH);
 
     /* This check is here so that the cursor goes to the 
      * cgdb window. The cursor would stay in the gdb window 
      * on cygwin */
     if (get_src_height() > 0 && focus == CGDB)
-        swin_wnoutrefresh(src_win->win);
+        swin_wnoutrefresh(src_viewer->win);
 
     swin_doupdate();
 }
@@ -560,61 +561,85 @@ static void validate_window_sizes(void)
         window_shift = min_window_size_shift;
 }
 
+/*
+ * create_swindow: (re)create window with specified position and size.
+ */
+static void create_swindow(SWINDOW **win, int nlines, int ncols, int begin_y, int begin_x)
+{
+    if (*win)
+    {
+        int x = swin_getbegx(*win);
+        int y = swin_getbegy(*win);
+        int w = swin_getmaxx(*win);
+        int h = swin_getmaxy(*win);
+
+        /* If the window position + size hasn't changed, bail */
+        if (x == begin_x && y == begin_y && w == ncols && h == nlines)
+            return;
+
+        /* Delete the existing window */
+        swin_delwin(*win);
+        *win = NULL;
+    }
+
+    if (nlines > 0 && ncols > 0)
+    {
+        /* Create the ncurses window */
+        *win = swin_newwin(nlines, ncols, begin_y, begin_x);
+        swin_werase(*win);
+    }
+}
+
 /* if_layout: Update the layout of the screen based on current terminal size.
  * ----------
  *
- * Return Value: Zero on success, non-zero on failure.
+ * Return Value: Zero on success, -1 on failure.
  */
 static int if_layout()
 {
+    SWINDOW *gdb_scroller_win = NULL;
+    SWINDOW *src_viewer_win = NULL;
+
     if (!curses_initialized)
-        return 2;
+        return -1;
 
     /* Verify the window size is reasonable */
     validate_window_sizes();
 
-    /* Initialize the GDB I/O window */
-    if (gdb_win == NULL) {
-        gdb_win =
-                scr_new(get_gdb_row(), get_gdb_col(), get_gdb_height(),
-                get_gdb_width());
-        if (gdb_win == NULL)
-            return 2;
-    } else {                    /* Resize the GDB I/O window */
-        if (get_gdb_height() > 0)
-            scr_move(gdb_win, get_gdb_row(), get_gdb_col(), get_gdb_height(),
-                    get_gdb_width());
+    /* Resize the source viewer window */
+    create_swindow(&src_viewer_win, get_src_height(), get_src_width(),
+        get_src_row(), get_src_col());
+    if (src_viewer) {
+        source_move(src_viewer, src_viewer_win);
+    } else {
+        src_viewer = source_new(src_viewer_win);
     }
 
-    /* Initialize the source viewer window */
-    if (src_win == NULL) {
-        src_win =
-                source_new(get_src_row(), get_src_col(), get_src_height(),
-                get_src_width());
-        if (src_win == NULL)
-            return 3;
-    } else {                    /* Resize the source viewer window */
-        if (get_src_height() > 0)
-            source_move(src_win, get_src_row(), get_src_col(),
-                    get_src_height(), get_src_width());
+    /* Resize the GDB I/O window */
+    create_swindow(&gdb_scroller_win, get_gdb_height(), get_gdb_width(),
+        get_gdb_row(), get_gdb_col());
+    if (gdb_scroller) {
+        scr_move(gdb_scroller, gdb_scroller_win);
+    } else {
+        gdb_scroller = scr_new(gdb_scroller_win);
     }
 
     /* Initialize the status bar window */
-    status_win = swin_newwin(get_src_status_height(), get_src_status_width(),
-            get_src_status_row(), get_src_status_col());
+    create_swindow(&status_win, get_src_status_height(),
+        get_src_status_width(), get_src_status_row(), get_src_status_col());
 
+    /* Redraw the interface */
     if_draw();
 
     return 0;
 }
 
-/* if_resize: Checks if a resize event occurred, and updates display if so.
+/* if_resize_term: Checks if a resize event occurred, and updates display if so.
  * ----------
  *
  * Return Value:  Zero on success, non-zero on failure.
  */
-void rl_resize(int rows, int cols);
-static int if_resize()
+int if_resize_term(void)
 {
     if (ioctl(fileno(stdout), TIOCGWINSZ, &screen_size) != -1) {
         if (screen_size.ws_row != swin_lines() ||
@@ -629,14 +654,6 @@ static int if_resize()
         return if_layout();
 
     }
-
-    return 0;
-}
-
-int if_resize_term(void)
-{
-    if (if_resize())
-        return -1;
 
     return 0;
 }
@@ -852,7 +869,7 @@ static int gdb_input_regex_input(struct scroller *scr, int key)
 
     if (done)
     {
-        gdb_win->in_search_mode = 0;
+        gdb_scroller->in_search_mode = 0;
 
         ibuf_free(regex_cur);
         regex_cur = NULL;
@@ -877,19 +894,19 @@ static int gdb_input(int key, int *last_key)
 {
     int result = 0;
 
-    if (gdb_win->in_search_mode)
-        return gdb_input_regex_input(gdb_win, key);
+    if (gdb_scroller->in_search_mode)
+        return gdb_input_regex_input(gdb_scroller, key);
 
-    if (gdb_win->in_scroll_mode) {
+    if (gdb_scroller->in_scroll_mode) {
 
         /* Handle setting (mX) and going ('X) to gdb buffer marks */
         if (last_key_pressed == 'm' || last_key_pressed == '\'') {
             int ret = 0;
 
             if (last_key_pressed == 'm')
-                ret = scr_set_mark(gdb_win, key);
+                ret = scr_set_mark(gdb_scroller, key);
             else if(last_key_pressed == '\'')
-                ret = scr_goto_mark(gdb_win, key);
+                ret = scr_goto_mark(gdb_scroller, key);
 
             if (ret) {
                 *last_key = 0;
@@ -907,39 +924,39 @@ static int gdb_input(int key, int *last_key)
                 /* Mark keys - ignore them */
                 break;
             case CGDB_KEY_CTRL_U:
-                scr_up(gdb_win, get_gdb_height() / 2);
+                scr_up(gdb_scroller, get_gdb_height() / 2);
                 break;
             case CGDB_KEY_PPAGE:
-                scr_up(gdb_win, get_gdb_height() - 1);
+                scr_up(gdb_scroller, get_gdb_height() - 1);
                 break;
             case CGDB_KEY_CTRL_D:
-                scr_down(gdb_win, get_gdb_height() / 2);
+                scr_down(gdb_scroller, get_gdb_height() / 2);
                 break;
             case CGDB_KEY_NPAGE:
-                scr_down(gdb_win, get_gdb_height() - 1);
+                scr_down(gdb_scroller, get_gdb_height() - 1);
                 break;
             case CGDB_KEY_HOME:
             case CGDB_KEY_F11:
-                scr_home(gdb_win);
+                scr_home(gdb_scroller);
                 break;
             case 'G':
             case CGDB_KEY_END:
             case CGDB_KEY_F12:
-                scr_end(gdb_win);
+                scr_end(gdb_scroller);
                 break;
             case 'k':
             case CGDB_KEY_UP:
             case CGDB_KEY_CTRL_P:
-                scr_up(gdb_win, 1);
+                scr_up(gdb_scroller, 1);
                 break;
             case 'j':
             case CGDB_KEY_DOWN:
             case CGDB_KEY_CTRL_N:
-                scr_down(gdb_win, 1);
+                scr_down(gdb_scroller, 1);
                 break;
             case 'g':
                 if (last_key_pressed == 'g') {
-                    scr_home(gdb_win);
+                    scr_home(gdb_scroller);
                 }
                 break;
             case 'q':
@@ -947,15 +964,15 @@ static int gdb_input(int key, int *last_key)
             case '\r':
             case '\n':
             case CGDB_KEY_CTRL_M:
-                scr_end(gdb_win);
-                gdb_win->in_scroll_mode = 0;
+                scr_end(gdb_scroller);
+                gdb_scroller->in_scroll_mode = 0;
                 break;
             case 'n':
-                scr_search_regex(gdb_win, ibuf_get(regex_last), 2,
+                scr_search_regex(gdb_scroller, ibuf_get(regex_last), 2,
                     regex_direction_last, cgdbrc_get_int(CGDBRC_IGNORECASE));
                 break;
             case 'N':
-                scr_search_regex(gdb_win, ibuf_get(regex_last), 2,
+                scr_search_regex(gdb_scroller, ibuf_get(regex_last), 2,
                     !regex_direction_last, cgdbrc_get_int(CGDBRC_IGNORECASE));
                 break;
             case '/':
@@ -963,21 +980,21 @@ static int gdb_input(int key, int *last_key)
                 /* Capturing regular expressions */
                 regex_cur = ibuf_init();
                 regex_direction_cur = ('/' == key);
-                orig_line_regex = gdb_win->current.r;
+                orig_line_regex = gdb_scroller->current.r;
 
                 sbc_kind = SBC_REGEX;
 
-                scr_search_regex_init(gdb_win);
+                scr_search_regex_init(gdb_scroller);
                 break;
         }
 
     } else {
         switch (key) {
             case CGDB_KEY_PPAGE:
-                scr_up(gdb_win, get_gdb_height() - 1);
+                scr_up(gdb_scroller, get_gdb_height() - 1);
                 break;
             case CGDB_KEY_CTRL_L:
-                scr_clear(gdb_win);
+                scr_clear(gdb_scroller);
 
                 /* The return 1 tells readline that gdb did not handle the
                  * Ctrl-l. That way readline will handle it. Because
@@ -1081,7 +1098,7 @@ static int status_bar_normal_input(int key)
         case '\n':
         case CGDB_KEY_CTRL_M:
             /* Found a command */
-            if_run_command(src_win, cur_sbc);
+            if_run_command(src_viewer, cur_sbc);
             done = 1;
             break;
         case 8:
@@ -1330,18 +1347,30 @@ static int set_up_signal(void)
 int if_init(void)
 {
     if (init_curses())
-        return 1;
+    {
+        clog_error(CLOG_CGDB, "Unable to initialize the ncurses library");
+        return -1;
+    }
 
     hl_groups_instance = hl_groups_initialize();
     if (!hl_groups_instance)
-        return 3;
+    {
+        clog_error(CLOG_CGDB, "Unable to setup highlighting groups");
+        return -1;
+    }
 
     if (hl_groups_setup(hl_groups_instance) == -1)
-        return 3;
+    {
+        clog_error(CLOG_CGDB, "Unable to setup highlighting groups");
+        return -1;
+    }
 
     /* Set up the signal handler to catch SIGWINCH */
     if (set_up_signal() == -1)
-        return 2;
+    {
+        clog_error(CLOG_CGDB, "Unable to handle signal: SIGWINCH");
+        return -1;
+    }
 
     if (ioctl(fileno(stdout), TIOCGWINSZ, &screen_size) == -1) {
         screen_size.ws_row = swin_lines();
@@ -1349,8 +1378,7 @@ int if_init(void)
     }
 
     /* Create the file dialog object */
-    if ((fd = filedlg_new(0, 0, HEIGHT, WIDTH)) == NULL)
-        return 5;
+    fd = filedlg_new(0, 0, HEIGHT, WIDTH);
 
     /* Set up window layout */
     window_shift = (int) ((HEIGHT / 2) * (cur_win_split / 2.0));
@@ -1384,14 +1412,14 @@ static int cgdb_input(int key, int *last_key)
 {
     int regex_icase = cgdbrc_get_int(CGDBRC_IGNORECASE);
 
-    if (src_win && src_win->cur) {
+    if (src_viewer && src_viewer->cur) {
         int ret = 0;
 
         /* Handle setting (mX) and going ('X) to source buffer marks */
         if (last_key_pressed == 'm')
-            ret = source_set_mark(src_win, key);
+            ret = source_set_mark(src_viewer, key);
         else if (last_key_pressed == '\'')
-            ret = source_goto_mark(src_win, key);
+            ret = source_goto_mark(src_viewer, key);
 
         if (ret) {
             /* When m[a-zA-Z] matches, don't let the marker char
@@ -1409,7 +1437,7 @@ static int cgdb_input(int key, int *last_key)
 
     switch (key) {
         case 's':
-            gdb_win->in_scroll_mode = 1;
+            gdb_scroller->in_scroll_mode = 1;
             if_set_focus(GDB);
             return 0;
         case 'i':
@@ -1425,28 +1453,28 @@ static int cgdb_input(int key, int *last_key)
             return 0;
         case '/':
         case '?':
-            if (src_win->cur) {
+            if (src_viewer->cur) {
                 regex_cur = ibuf_init();
                 regex_direction_cur = ('/' == key);
-                orig_line_regex = src_win->cur->sel_line;
+                orig_line_regex = src_viewer->cur->sel_line;
 
                 sbc_kind = SBC_REGEX;
                 if_set_focus(CGDB_STATUS_BAR);
 
                 /* Capturing regular expressions */
-                source_search_regex_init(src_win);
+                source_search_regex_init(src_viewer);
 
                 /* Initialize the function for finding a regex and tell user */
                 if_draw();
             }
             return 0;
         case 'n':
-            source_search_regex(src_win, ibuf_get(regex_last), 2,
+            source_search_regex(src_viewer, ibuf_get(regex_last), 2,
                                 regex_direction_last, regex_icase);
             if_draw();
             break;
         case 'N':
-            source_search_regex(src_win, ibuf_get(regex_last), 2,
+            source_search_regex(src_viewer, ibuf_get(regex_last), 2,
                                 !regex_direction_last, regex_icase);
             if_draw();
             break;
@@ -1498,7 +1526,7 @@ static int cgdb_input(int key, int *last_key)
             return 0;
     }
 
-    source_input(src_win, key);
+    source_input(src_viewer, key);
     return 0;
 }
 
@@ -1520,8 +1548,8 @@ int internal_if_input(int key, int *last_key)
             ibuf_free(regex_cur);
             regex_cur = NULL;
 
-            src_win->cur->sel_rline = orig_line_regex;
-            src_win->cur->sel_line = orig_line_regex;
+            src_viewer->cur->sel_rline = orig_line_regex;
+            src_viewer->cur->sel_line = orig_line_regex;
             sbc_kind = SBC_NORMAL;
         }
         else if (focus == GDB && sbc_kind == SBC_REGEX)
@@ -1529,7 +1557,7 @@ int internal_if_input(int key, int *last_key)
             ibuf_free(regex_cur);
             regex_cur = NULL;
 
-            gdb_win->in_search_mode = 0;
+            gdb_scroller->in_search_mode = 0;
             sbc_kind = SBC_NORMAL;
 
             new_focus = GDB;
@@ -1569,7 +1597,7 @@ int internal_if_input(int key, int *last_key)
         }
             return 0;
         case CGDB_STATUS_BAR:
-            return status_bar_input(src_win, key);
+            return status_bar_input(src_viewer, key);
     }
 
     /* Never gets here */
@@ -1587,20 +1615,20 @@ int if_input(int key)
 
 static void if_print_internal(const char *buf, enum ScrInputKind kind)
 {
-    if (!gdb_win) {
+    if (!gdb_scroller) {
         clog_error(CLOG_CGDB, "%s", buf);
         return;
     }
 
     /* Print it to the scroller */
-    scr_add(gdb_win, buf, kind);
+    scr_add(gdb_scroller, buf, kind);
 
     if (get_gdb_height() > 0) {
-        scr_refresh(gdb_win, focus == GDB, WIN_NO_REFRESH);
+        scr_refresh(gdb_scroller, focus == GDB, WIN_NO_REFRESH);
 
         /* Make sure cursor reappears in source window if focus is there */
         if (focus == CGDB)
-            swin_wnoutrefresh(src_win->win);
+            swin_wnoutrefresh(src_viewer->win);
 
         swin_doupdate();
     }
@@ -1647,7 +1675,7 @@ void if_print_message(const char *fmt, ...)
 
 void if_show_file(char *path, int sel_line, int exe_line)
 {
-    if (source_set_exec_line(src_win, path, sel_line, exe_line) == 0)
+    if (source_set_exec_line(src_viewer, path, sel_line, exe_line) == 0)
         if_draw();
 }
 
@@ -1663,12 +1691,12 @@ void if_display_help(void)
     if (!fs_verify_file_exists(cgdb_help_file))
         fs_util_get_path(TOPBUILDDIR, "doc/cgdb.txt", cgdb_help_file);
 
-    ret_val = source_set_exec_line(src_win, cgdb_help_file, 1, 0);
+    ret_val = source_set_exec_line(src_viewer, cgdb_help_file, 1, 0);
 
     if (ret_val == 0)
     {
-        src_win->cur->language = TOKENIZER_LANGUAGE_CGDBHELP;
-        source_highlight(src_win->cur);
+        src_viewer->cur->language = TOKENIZER_LANGUAGE_CGDBHELP;
+        source_highlight(src_viewer->cur);
         if_draw();
     }
     else if (ret_val == 5)      /* File does not exist */
@@ -1680,12 +1708,12 @@ void if_display_logo(int reset)
     if (reset)
         logo_reset();
 
-    src_win->cur = NULL;
+    src_viewer->cur = NULL;
 }
 
 struct sviewer *if_get_sview()
 {
-    return src_win;
+    return src_viewer;
 }
 
 void if_clear_filedlg(void)
@@ -1714,14 +1742,14 @@ void if_shutdown(void)
         status_win = NULL;
     }
 
-    if (gdb_win) {
-        scr_free(gdb_win);
-        gdb_win = NULL;
+    if (gdb_scroller) {
+        scr_free(gdb_scroller);
+        gdb_scroller = NULL;
     }
 
-    if (src_win) {
-        source_free(src_win);
-        src_win = NULL;
+    if (src_viewer) {
+        source_free(src_viewer);
+        src_viewer = NULL;
     }
 
     if (vseparator_win) {
@@ -1785,13 +1813,13 @@ void if_set_winsplit(WIN_SPLIT_TYPE new_split)
 
 void if_highlight_sviewer(enum tokenizer_language_support l)
 {
-    /* src_win->cur is NULL when reading cgdbrc */
-    if (src_win && src_win->cur) {
+    /* src_viewer->cur is NULL when reading cgdbrc */
+    if (src_viewer && src_viewer->cur) {
         if ( l == TOKENIZER_LANGUAGE_UNKNOWN )
-            l = tokenizer_get_default_file_type(strrchr(src_win->cur->path, '.'));
+            l = tokenizer_get_default_file_type(strrchr(src_viewer->cur->path, '.'));
 
-        src_win->cur->language = l;
-        source_highlight(src_win->cur);
+        src_viewer->cur->language = l;
+        source_highlight(src_viewer->cur);
         if_draw();
     }
 }

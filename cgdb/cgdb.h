@@ -50,4 +50,6 @@ void cgdb_cleanup_and_exit(int val);
  */
 int run_shell_command(const char *command);
 
+void rl_resize(int rows, int cols);
+
 #endif

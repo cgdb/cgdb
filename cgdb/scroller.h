@@ -89,14 +89,9 @@ struct scroller {
 /* scr_new: Creates and initializes a new scroller
  * --------
  *
- *   pos_r:   Position on screen -- row
- *   pos_c:   Position on screen -- column
- *   height:  Height of the scroller on the screen (rows)
- *   width:   Width of the scroller on the screen (columns)
- *
- * Return Value: A pointer to a new scroller, or NULL on error.
+ * Return Value: A pointer to a new scroller.
  */
-struct scroller *scr_new(int pos_r, int pos_c, int height, int width);
+struct scroller *scr_new(SWINDOW *window);
 
 /* scr_free: Releases the memory allocated by a scroller
  * ---------
@@ -143,17 +138,15 @@ void scr_end(struct scroller *scr);
  */
 void scr_add(struct scroller *scr, const char *buf, enum ScrInputKind kind);
 
-/* scr_move: Reposition the buffer on the screen
- * ---------
+/* Reposition the buffer on the screen
  *
- *   scr:     Pointer to the scroller object
- *   pos_r:   Position on screen -- row
- *   pos_c:   Position on screen -- column
- *   height:  Height of the scroller on the screen (rows)
- *   width:   Width of the scroller on the screen (columns)
+ * @param scr
+ * Pointer to the scroller object
+ *
+ * @param win
+ * The new window
  */
-void scr_move(struct scroller *scr,
-        int pos_r, int pos_c, int height, int width);
+void scr_move(struct scroller *scr, SWINDOW *win);
 
 /**
  * Clear the scroller.

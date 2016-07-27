@@ -49,9 +49,9 @@
 #endif
 
 /* Local Includes */
+#include "sys_util.h"
 #include "sys_win.h"
 #include "cgdb.h"
-#include "sys_util.h"
 #include "highlight.h"
 #include "tokenizer.h"
 #include "sources.h"
@@ -498,8 +498,7 @@ int source_highlight(struct list_node *node)
     return -1;
 }
 
-
-struct sviewer *source_new(int pos_r, int pos_c, int height, int width)
+struct sviewer *source_new(SWINDOW *win)
 {
     struct sviewer *rv;
 
@@ -507,7 +506,7 @@ struct sviewer *source_new(int pos_r, int pos_c, int height, int width)
     rv = (struct sviewer *)cgdb_malloc(sizeof (struct sviewer));
 
     /* Initialize the structure */
-    rv->win = swin_newwin(height, width, pos_r, pos_c);
+    rv->win = win;
     rv->cur = NULL;
     rv->list_head = NULL;
 
@@ -660,6 +659,7 @@ char *source_current_file(struct sviewer *sview)
  * --------------------
  *
  *   sview:  The source viewer object
+ *   node: 
  *   line: line to check for mark
  *   return: -1 on error, 0 if no char exists on line, otherwise char
  */
@@ -954,9 +954,11 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
         }
 
         if (!swin_has_colors()) {
+            /* TODO:
             swin_wprintw(sview->win, "%.*s\n",
                     sview->cur->file_buf.lines[line].line,
                     sview->cur->file_buf.lines[line].len);
+            */
             continue;
         }
 
@@ -1093,12 +1095,10 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
     return 0;
 }
 
-void source_move(struct sviewer *sview,
-        int pos_r, int pos_c, int height, int width)
+void source_move(struct sviewer *sview, SWINDOW *win)
 {
     swin_delwin(sview->win);
-    sview->win = swin_newwin(height, width, pos_r, pos_c);
-    swin_werase(sview->win);
+    sview->win = win;
 }
 
 static int clamp_line(struct sviewer *sview, int line)
@@ -1241,7 +1241,7 @@ int source_set_exec_addr(struct sviewer *sview, uint64_t addr)
 void source_free(struct sviewer *sview)
 {
     /* Free all file buffers */
-    while (sview->list_head != NULL)
+    while (sview->list_head)
         source_del(sview, sview->list_head->path);
 
     hl_regex_free(&sview->hlregex);

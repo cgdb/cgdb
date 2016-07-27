@@ -75,6 +75,9 @@ int swin_wattroff(SWINDOW *win, int attrs);
 
 int swin_getcurx(const SWINDOW *win);
 int swin_getcury(const SWINDOW *win);
+
+int swin_getbegx(const SWINDOW *win);
+int swin_getbegy(const SWINDOW *win);
 int swin_getmaxx(const SWINDOW *win);
 int swin_getmaxy(const SWINDOW *win);
 
@@ -92,8 +95,8 @@ int swin_waddch(SWINDOW *win, const SWIN_CHTYPE ch);
 int swin_wclrtoeol(SWINDOW *win);
 
 int swin_waddnstr(SWINDOW *win, const char *str, int n);
-int swin_wprintw(SWINDOW *win, const char *fmt, ...);
-int swin_mvwprintw(SWINDOW *win, int y, int x, const char *fmt, ...);
+int swin_wprintw(SWINDOW *win, const char *fmt, ...) ATTRIBUTE_PRINTF(2, 3);
+int swin_mvwprintw(SWINDOW *win, int y, int x, const char *fmt, ...) ATTRIBUTE_PRINTF(4, 5);
 
 /* From the ncurses doupdate() man page:
  *

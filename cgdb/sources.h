@@ -42,8 +42,8 @@ struct sviewer {
     struct list_node *cur;                 /* Current node we're displaying */
     sviewer_mark global_marks[MARK_COUNT]; /* Global A-Z marks */
     sviewer_mark jump_back_mark;           /* Location where last jump occurred from */
-    SWINDOW *win;                          /* Curses window */
 
+    SWINDOW *win;                          /* Curses window */
     uint64_t addr_frame;                   /* Current frame address 
                                               Zero if unknown. */
     int regex_is_searching;
@@ -98,14 +98,9 @@ struct list_node {
 /* source_new:  Create a new source viewer object.
  * -----------
  *
- *   pos_r:   Position of the viewer (row)
- *   pos_c:   Position of the viewer (column)
- *   height:  Height (in lines) of the viewer
- *   width:   Width (in columns) of the viewer
- *
- * Return Value:  A new sviewer object on success, NULL on failure.
+ * Return Value:  A new sviewer object on success.
  */
-struct sviewer *source_new(int pos_r, int pos_c, int height, int width);
+struct sviewer *source_new(SWINDOW *window);
 
 /* source_add:  Add a file to the list of source files.
  * -----------
@@ -165,17 +160,15 @@ char *source_current_file(struct sviewer *sview);
  */
 int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh);
 
-/* source_move:  Relocate the source window.
- * ------------
+/* Relocate the source window.
  *
- *   sview:   Source viewer object
- *   pos_r:   Position of the viewer (row)
- *   pos_c:   Position of the viewer (column)
- *   height:  Height (in lines) of the viewer
- *   width:   Width (in columns) of the viewer
+ * @param sview
+ * Source viewer object
+ *
+ * @param win
+ * The new window
  */
-void source_move(struct sviewer *sview,
-        int pos_r, int pos_c, int height, int width);
+void source_move(struct sviewer *sview, SWINDOW *win);
 
 /* source_vscroll:  Change current position in source file.
  * --------------

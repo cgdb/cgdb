@@ -61,9 +61,9 @@
 #include <inttypes.h>
 
 /* Local Includes */
+#include "sys_util.h"
 #include "sys_win.h"
 #include "cgdb.h"
-#include "sys_util.h"
 #include "tokenizer.h"
 #include "interface.h"
 #include "scroller.h"
@@ -1832,19 +1832,10 @@ int main(int argc, char *argv[])
     parse_cgdbrc_file();
 
     /* Initialize the display */
-    switch (if_init()) {
-        case 1:
-            clog_error(CLOG_CGDB, "Unable to initialize the curses library");
-            cgdb_cleanup_and_exit(-1);
-        case 2:
-            clog_error(CLOG_CGDB, "Unable to handle signal: SIGWINCH");
-            cgdb_cleanup_and_exit(-1);
-        case 3:
-            clog_error(CLOG_CGDB, "Unable to setup highlighting groups");
-            cgdb_cleanup_and_exit(-1);
-        case 4:
-            clog_error(CLOG_CGDB, "New GDB window failed -- out of memory?");
-            cgdb_cleanup_and_exit(-1);
+    if (if_init() == -1)
+    {
+        clog_error(CLOG_CGDB, "if_init() failed.");
+        cgdb_cleanup_and_exit(-1);
     }
 
     /* Initialize the pipe that is used for resize */

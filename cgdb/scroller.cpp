@@ -25,9 +25,9 @@
 #endif /* HAVE_STRING_H */
 
 /* Local Includes */
+#include "sys_util.h"
 #include "sys_win.h"
 #include "cgdb.h"
-#include "sys_util.h"
 #include "cgdbrc.h"
 #include "highlight_groups.h"
 #include "scroller.h"
@@ -213,12 +213,11 @@ static void scroller_addline(struct scroller *scr, char *line,
 
 /* See scroller.h for function descriptions. */
 
-struct scroller *scr_new(int pos_r, int pos_c, int height, int width)
+struct scroller *scr_new(SWINDOW *win)
 {
     struct scroller *rv;
 
-    if ((rv = (struct scroller *)cgdb_malloc(sizeof (struct scroller))) == NULL)
-        return NULL;
+    rv = (struct scroller *)cgdb_malloc(sizeof(struct scroller));
 
     rv->current.r = 0;
     rv->current.c = 0;
@@ -227,7 +226,7 @@ struct scroller *scr_new(int pos_r, int pos_c, int height, int width)
     rv->last_inferior_line = NULL;
     rv->last_inferior_attr = -1;
     rv->lines_to_display = 0;
-    rv->win = swin_newwin(height, width, pos_r, pos_c);
+    rv->win = win;
 
     rv->in_search_mode = 0;
     rv->hlregex = NULL;
@@ -441,11 +440,10 @@ void scr_add(struct scroller *scr, const char *buf, enum ScrInputKind kind)
     free(tempbuf);
 }
 
-void scr_move(struct scroller *scr, int pos_r, int pos_c, int height, int width)
+void scr_move(struct scroller *scr, SWINDOW *win)
 {
     swin_delwin(scr->win);
-    scr->win = swin_newwin(height, width, pos_r, pos_c);
-    swin_werase(scr->win);
+    scr->win = win;
 }
 
 void scr_clear(struct scroller *scr) {

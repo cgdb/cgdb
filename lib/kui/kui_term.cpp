@@ -28,6 +28,7 @@
 EXTERN_C int tgetent(char *, const char *);
 EXTERN_C char *tgetstr(const char *, char **);
 
+#include "sys_util.h"
 #include "sys_win.h"
 #include "kui_term.h"
 

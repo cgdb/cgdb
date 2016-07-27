@@ -15,6 +15,7 @@
 #include <string.h>
 #endif /* HAVE_STRING_H */
 
+#include "sys_util.h"
 #include "sys_win.h"
 #include "highlight_groups.h"
 #include "command_lexer.h"

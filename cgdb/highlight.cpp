@@ -17,9 +17,9 @@
 #endif /* HAVE_REGEX_H */
 
 /* Local Includes */
+#include "sys_util.h"
 #include "sys_win.h"
 #include "cgdb.h"
-#include "sys_util.h"
 #include "highlight.h"
 #include "tokenizer.h"
 #include "sources.h"
