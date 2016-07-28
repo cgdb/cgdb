@@ -41,6 +41,10 @@ int swin_color_pairs(); /* number of color pairs supported */
 int swin_has_colors();
 int swin_start_color();
 int swin_use_default_colors();
+
+/* Resizes the standard and current windows to the specified dimensions, and
+   adjusts other bookkeeping data used by the ncurses library that record the
+   window dimensions such as the LINES and COLS variables. */
 int swin_resizeterm(int lines, int columns);
 
 SWINDOW *swin_newwin(int nlines, int ncols, int begin_y, int begin_x);
@@ -62,9 +66,6 @@ char *swin_tigetstr(const char *capname);
 /* Move cursor */
 int swin_move(int y, int x);
 int swin_wmove(SWINDOW *win, int y, int x);
-
-/* Move window */
-int swin_mvwin(SWINDOW *win, int y, int x);
 
 /* Set cursor state */
 int swin_curs_set(int visibility);

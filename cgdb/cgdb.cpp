@@ -321,17 +321,11 @@ int run_shell_command(const char *command)
     tty_set_attributes(STDIN_FILENO, &term_attributes);
 
     /* NULL or empty string means invoke user's shell */
-    if (command == NULL || strlen(command) == 0) {
-
+    if (!command || !command[0]) {
         /* Check for SHELL environment variable */
         char *shell = getenv("SHELL");
 
-        if (shell == NULL) {
-            /* Run /bin/sh instead */
-            rv = system("/bin/sh");
-        } else {
-            rv = system(shell);
-        }
+        rv = system(shell ? shell : "/bin/sh");
     } else {
         /* Execute the command passed in via system() */
         rv = system(command);

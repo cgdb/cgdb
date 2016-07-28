@@ -111,11 +111,6 @@ int swin_wmove(SWINDOW *win, int y, int x)
     return wmove((WINDOW *)win, y, x);
 }
 
-int swin_mvwin(SWINDOW *win, int y, int x)
-{
-    return mvwin((WINDOW *)win, y, x);
-}
-
 int swin_wattron(SWINDOW *win, int attrs)
 {
     return wattron((WINDOW *)win, attrs);

@@ -540,10 +540,8 @@ static int capture_regex(struct filedlg *fd)
 
 int filedlg_recv_char(struct filedlg *fd, int key, char *file, int last_key_pressed)
 {
-    int height;
-
     /* Initialize size variables */
-    height = swin_getmaxy(fd->win);
+    int height = swin_getmaxy(fd->win);
 
     filedlg_display(fd);
 
