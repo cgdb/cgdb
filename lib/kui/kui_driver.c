@@ -356,7 +356,7 @@ static int create_mappings(struct kui_manager *kuim)
     }
 #endif
 #endif
-    if (kui_manager_add_map_set(kuim, map) == -1)
+    if (kui_manager_set_map_set(kuim, map) == -1)
         return -1;
 
     return 0;

@@ -354,9 +354,9 @@ int kui_ms_deregister_map(struct kui_map_set *kui_ms, const char *key)
  */
 struct kuictx {
     /**
-	 * The list of kui_map_set structures.
+	 * The current map set for this KUI context.
 	 */
-    std_list_ptr kui_map_set_list;
+    struct kui_map_set *map_set;
 
     /**
 	 * A list of characters, used as a buffer for stdin.
@@ -414,13 +414,8 @@ struct kuictx *kui_create(int stdinfd,
 
     kctx->callback = callback;
     kctx->state_data = state_data;
-    kctx->kui_map_set_list = std_list_create(NULL);
+    kctx->map_set = NULL;
     kctx->ms = ms;
-
-    if (!kctx->kui_map_set_list) {
-        kui_destroy(kctx);
-        return NULL;
-    }
 
     kctx->fd = stdinfd;
 
@@ -448,11 +443,7 @@ int kui_destroy(struct kuictx *kctx)
     if (!kctx)
         return -1;
 
-    if (kctx->kui_map_set_list) {
-        if (std_list_destroy(kctx->kui_map_set_list) == -1)
-            ret = -1;
-        kctx->kui_map_set_list = NULL;
-    }
+    kctx->map_set = NULL;
 
     if (kctx->buffer) {
         if (std_list_destroy(kctx->buffer) == -1)
@@ -472,23 +463,15 @@ int kui_destroy(struct kuictx *kctx)
     return ret;
 }
 
-std_list_ptr kui_get_map_sets(struct kuictx * kctx)
+struct kui_map_set *kui_get_map_set(struct kuictx *kctx)
 {
     if (!kctx)
         return NULL;
 
-    return kctx->kui_map_set_list;
+    return kctx->map_set;
 }
 
-int kui_clear_map_sets(struct kuictx *kctx)
-{
-    if (!kctx)
-        return -1;
-
-    return std_list_remove_all(kctx->kui_map_set_list);
-}
-
-int kui_add_map_set(struct kuictx *kctx, struct kui_map_set *kui_ms)
+int kui_set_map_set(struct kuictx *kctx, struct kui_map_set *kui_ms)
 {
     if (!kctx)
         return -1;
@@ -496,8 +479,7 @@ int kui_add_map_set(struct kuictx *kctx, struct kui_map_set *kui_ms)
     if (!kui_ms)
         return -1;
 
-    if (std_list_append(kctx->kui_map_set_list, kui_ms) == -1)
-        return -1;
+    kctx->map_set = kui_ms;
 
     return 0;
 }
@@ -561,45 +543,19 @@ static int kui_findchar(struct kuictx *kctx, int *key)
 }
 
 /**
- * Updates the state data for each map set in the kui
+ * Updates the kui context's map set with the new key.
  *
- * \param data
- * The kui context to operate on.
+ * @param key
+ * The new key to push into the kui context's map set.
  *
- * \param user_data
- * Not used 
- *
- * @return
- * 1 on success, 0 to stop, -1 on error
- */
-static int kui_reset_state_data(void *data, void *user_data)
-{
-    struct kui_map_set *map_set = (struct kui_map_set *) data;
-
-    if (kui_tree_reset_state(map_set->ktree) == -1)
-        return -1;
-
-    return 1;
-}
-
-/**
- * Updates each list in the kui context.
- *
- * \param data
- * The kui context to operate on.
- *
- * \param user_data
- * The key received.
+ * @param map_found
+ * Return's as 1 if a map was found while pushing this key, otherwise 0.
  *
  * @return
- * 1 on success, 0 to stop, -1 on error
+ * 0 on success, -1 on error.
  */
-static int kui_update_each_list(struct kuictx *kctx, int key, int *map_found)
+static int kui_update_map_set(struct kuictx *kctx, int key, int *map_found)
 {
-    std_list_iterator iter;
-    struct kui_map_set *map_set;
-    void *data;
-
     if (!kctx)
         return -1;
 
@@ -609,32 +565,23 @@ static int kui_update_each_list(struct kuictx *kctx, int key, int *map_found)
      * KUI_MAP_STILL_LOOKING. If none of the lists is at this state, then
      * there is no need to keep looking
      */
-    for (iter = std_list_begin(kctx->kui_map_set_list);
-            iter != std_list_end(kctx->kui_map_set_list);
-            iter = std_list_next(iter)) {
 
-        if (std_list_get_data(iter, &data) == -1)
+    if (kui_tree_push_key(kctx->map_set->ktree, key, map_found) == -1)
+        return -1;
+
+    if (*map_found) {
+        /* If a map was found, reset the extra char's read */
+        if (std_list_remove_all(kctx->volatile_buffer) == -1)
             return -1;
-
-        map_set = (struct kui_map_set *) data;
-
-        if (kui_tree_push_key(map_set->ktree, key, map_found) == -1)
-            return -1;
-
-        if (*map_found) {
-            /* If a map was found, reset the extra char's read */
-            if (std_list_remove_all(kctx->volatile_buffer) == -1)
-                return -1;
-        }
     }
 
     return 0;
 }
 
 /**
- * Checks to see if any of the map set's are matching a map.
- * If they are, then the kui context should keep trying to match. Otherwise
- * it should stop trying to match.
+ * Checks to see if the map set is matching a map.
+ * If it is, then the kui context should keep trying to match.
+ * Otherwise it should stop trying to match.
  *
  * \param kctx
  * The kui context to operate on.
@@ -648,9 +595,6 @@ static int kui_update_each_list(struct kuictx *kctx, int key, int *map_found)
 static int kui_should_continue_looking(struct kuictx *kctx,
         int *should_continue)
 {
-    std_list_iterator iter;
-    struct kui_map_set *map_set;
-    void *data;
     enum kui_tree_state map_state;
 
     if (!kctx)
@@ -665,45 +609,14 @@ static int kui_should_continue_looking(struct kuictx *kctx,
      * KUI_MAP_STILL_LOOKING. If none of the lists is at this state, then
      * there is no need to keep looking
      */
-    for (iter = std_list_begin(kctx->kui_map_set_list);
-            iter != std_list_end(kctx->kui_map_set_list);
-            iter = std_list_next(iter)) {
 
-        if (std_list_get_data(iter, &data) == -1)
-            return -1;
-
-        map_set = (struct kui_map_set *) data;
-
-        if (kui_tree_get_state(map_set->ktree, &map_state) == -1)
-            return -1;
-
-        if (map_state == KUI_TREE_MATCHING)
-            *should_continue = 1;
-    }
-
-    return 0;
-}
-
-/**
- * Update each map list's state.
- *
- * \param data
- * The kui context to operate on.
- *
- * \param user_data
- * Unused
- *
- * @return
- * 1 on success, 0 to stop, -1 on error
- */
-static int kui_finalize_state(void *data, void *user_data)
-{
-    struct kui_map_set *map_set = (struct kui_map_set *) data;
-
-    if (kui_tree_finalize_state(map_set->ktree) == -1)
+    if (kui_tree_get_state(kctx->map_set->ktree, &map_state) == -1)
         return -1;
 
-    return 1;
+    if (map_state == KUI_TREE_MATCHING)
+        *should_continue = 1;
+
+    return 0;
 }
 
 /**
@@ -724,9 +637,6 @@ static int kui_finalize_state(void *data, void *user_data)
 static int kui_was_map_found(struct kuictx *kctx,
         int *was_map_found, struct kui_map **the_map_found)
 {
-    std_list_iterator iter;
-    struct kui_map_set *map_set;
-    void *data;
     enum kui_tree_state map_state;
 
     if (!was_map_found)
@@ -737,34 +647,23 @@ static int kui_was_map_found(struct kuictx *kctx,
 
     *was_map_found = 0;
 
-    /* At this point, the loop exited for one of several reasons.
+    /* If the kui context's map set has the value KUI_TREE_FOUND,
+     * than a map was found, and it should be the value used.
      *
-     * Each list has a correct state value. If one of the lists has the value
-     * KUI_MAP_FOUND, then a map was found. This should be the value used.
-     *
-     * If none of the lists has the value kui_map_found, then no map was found.
-     * What a shame. Why did I write all of this code ?!?
+     * Otherwise, no map is found.
      */
-    for (iter = std_list_begin(kctx->kui_map_set_list);
-            iter != std_list_end(kctx->kui_map_set_list);
-            iter = std_list_next(iter)) {
 
-        if (std_list_get_data(iter, &data) == -1)
+    if (kui_tree_get_state(kctx->map_set->ktree, &map_state) == -1)
+        return -1;
+
+    if (map_state == KUI_TREE_FOUND) {
+        void *data;
+
+        if (kui_tree_get_data(kctx->map_set->ktree, &data) == -1)
             return -1;
 
-        map_set = (struct kui_map_set *) data;
-
-        if (kui_tree_get_state(map_set->ktree, &map_state) == -1)
-            return -1;
-
-        if (map_state == KUI_TREE_FOUND) {
-
-            if (kui_tree_get_data(map_set->ktree, &data) == -1)
-                return -1;
-
-            *was_map_found = 1;
-            *the_map_found = (struct kui_map *) data;
-        }
+        *was_map_found = 1;
+        *the_map_found = (struct kui_map *) data;
     }
 
     return 0;
@@ -919,7 +818,7 @@ static int kui_findkey(struct kuictx *kctx, int *was_map_found)
     if (!was_map_found)
         return -1;
 
-    if (!kctx->kui_map_set_list)
+    if (!kctx->map_set)
         return -1;
 
     /* Initialize variables on stack */
@@ -930,9 +829,7 @@ static int kui_findkey(struct kuictx *kctx, int *was_map_found)
     if (std_list_remove_all(kctx->volatile_buffer) == -1)
         return -1;
 
-    /* Reset the state data for all of the lists */
-    if (std_list_foreach(kctx->kui_map_set_list, kui_reset_state_data,
-                    NULL) == -1)
+    if (kui_tree_reset_state(kctx->map_set->ktree) == -1)
         return -1;
 
     /* Start the main loop */
@@ -954,7 +851,7 @@ static int kui_findkey(struct kuictx *kctx, int *was_map_found)
             return -1;
 
         /* Update each list, with the character read, and the position. */
-        if (kui_update_each_list(kctx, key, &map_found) == -1)
+        if (kui_update_map_set(kctx, key, &map_found) == -1)
             return -1;
 
         /* Check to see if at least a single map is being matched */
@@ -976,8 +873,7 @@ static int kui_findkey(struct kuictx *kctx, int *was_map_found)
      * If the user types abcd, the list will still be looking,
      * even though it already found a mapping.
      */
-    if (std_list_foreach(kctx->kui_map_set_list, kui_finalize_state,
-                    NULL) == -1)
+    if (kui_tree_finalize_state(kctx->map_set->ktree) == -1)
         return -1;
 
     /* Check to see if a map was found.
@@ -1074,7 +970,7 @@ static int create_terminal_mappings(struct kui_manager *kuim, struct kuictx *i)
 
     kuim->terminal_key_set = terminal_map;
 
-    if (kui_add_map_set(i, terminal_map) == -1)
+    if (kui_set_map_set(i, terminal_map) == -1)
         return -1;
 
     return 0;
@@ -1182,30 +1078,14 @@ int kui_manager_destroy(struct kui_manager *kuim)
     return ret;
 }
 
-std_list_ptr kui_manager_get_map_sets(struct kui_manager * kuim)
-{
-    if (!kuim)
-        return NULL;
-
-    return kui_get_map_sets(kuim->normal_keys);
-}
-
-int kui_manager_clear_map_sets(struct kui_manager *kuim)
-{
-    if (!kuim)
-        return -1;
-
-    return kui_clear_map_sets(kuim->normal_keys);
-}
-
-int kui_manager_add_map_set(struct kui_manager *kuim,
+int kui_manager_set_map_set(struct kui_manager *kuim,
         struct kui_map_set *kui_ms)
 {
 
     if (!kuim)
         return -1;
 
-    return kui_add_map_set(kuim->normal_keys, kui_ms);
+    return kui_set_map_set(kuim->normal_keys, kui_ms);
 }
 
 int kui_manager_cangetkey(struct kui_manager *kuim)
@@ -1284,8 +1164,7 @@ kui_manager_get_terminal_keys_kui_map(struct kui_manager *kuim,
 {
     struct kui_map_set *map_set;
     struct kuictx *terminalkeys;
-    std_list_ptr map_sets;
-    std_list_iterator iter, kui_map_set_iter;
+    std_list_iterator iter;
     void *data;
     const char *keycode_str;
 
@@ -1298,22 +1177,14 @@ kui_manager_get_terminal_keys_kui_map(struct kui_manager *kuim,
 
     /* The first map set in the terminal_keys */
     terminalkeys = kuim->terminal_keys;
-    map_sets = kui_get_map_sets(terminalkeys);
-
-    if (std_list_length(map_sets) > 0) {
-        iter = std_list_begin(map_sets);
-        if (std_list_get_data(iter, &data) == -1) {
-            return -1;
-        }
-        map_set = (struct kui_map_set *) data;
-    }
+    map_set = kui_get_map_set(terminalkeys);
 
     /* At this point, the kui_map_set is available
      * Add each kui_map_set into it. */
-    for (kui_map_set_iter = std_list_begin(kui_map_set);
-            kui_map_set_iter != std_list_end(kui_map_set);
-            kui_map_set_iter = std_list_next(kui_map_set_iter)) {
-        if (std_list_get_data(kui_map_set_iter, &data) == -1)
+    for (iter = std_list_begin(kui_map_set);
+            iter != std_list_end(kui_map_set);
+            iter = std_list_next(iter)) {
+        if (std_list_get_data(iter, &data) == -1)
             return -1;
         kui_ms_register_map(map_set, (const char *)data, keycode_str);
     }

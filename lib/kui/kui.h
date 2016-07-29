@@ -319,25 +319,12 @@ int kui_destroy(struct kuictx *kctx);
  * The kui context to get the sequence set of
  *
  * @return
- * The list of map sets, or NULL on error.
- * If there are no map sets, of course the empty list will be returned.
+ * The map set or NULL if none.
  */
-std_list_ptr kui_get_map_sets(struct kuictx *kctx);
+struct kui_map_set *kui_get_map_set(struct kuictx *kctx);
 
 /**
- * This will clear all of the map sets from the KUI.
- * It will not release the memory associated with these sets.
- *
- * \param kctx
- * The KUI context to clear the sets from
- *
- * \return 
- * 0 on success or -1 on error.
- */
-int kui_clear_map_sets(struct kuictx *kctx);
-
-/**
- * Add's a kui map set to the kui context.
+ * Set the map set for this kui context.
  *
  * \param kctx
  * The kui context to add the map set of
@@ -348,7 +335,7 @@ int kui_clear_map_sets(struct kuictx *kctx);
  * @return
  * 0 on success, or -1 on error.
  */
-int kui_add_map_set(struct kuictx *kctx, struct kui_map_set *kui_ms);
+int kui_set_map_set(struct kuictx *kctx, struct kui_map_set *kui_ms);
 
 /**
  * Determine's if libkui has data ready to read. It has already been
@@ -470,34 +457,10 @@ int kui_manager_destroy(struct kui_manager *kuim);
 /*@{*/
 
 /**
- * Get's the current map set for the kui context.
+ * Set the kui map for the kui manager's kui context.
  *
  * \param kuim
- * The kui manager context to get the sequence set of
- *
- * @return
- * The list of map sets, or NULL on error.
- * If there are no map sets, of course the empty list will be returned.
- */
-std_list_ptr kui_manager_get_map_sets(struct kui_manager *kuim);
-
-/**
- * This will clear all of the map sets from the KUI manager.
- * It will not release the memory associated with these sets.
- *
- * \param kuim
- * The KUI context to clear the sets from
- *
- * \return 
- * 0 on success or -1 on error.
- */
-int kui_manager_clear_map_sets(struct kui_manager *kuim);
-
-/**
- * Add's a kui map set to the kui context.
- *
- * \param kuim
- * The kui context to add the map set of
+ * The kui context to set the map set of
  *
  * \param kui_ms
  * The new kui map set to use.
@@ -505,7 +468,7 @@ int kui_manager_clear_map_sets(struct kui_manager *kuim);
  * @return
  * 0 on success, or -1 on error.
  */
-int kui_manager_add_map_set(struct kui_manager *kuim,
+int kui_manager_set_map_set(struct kui_manager *kuim,
         struct kui_map_set *kui_ms);
 
 /**

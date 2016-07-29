@@ -854,19 +854,10 @@ static int user_input(void)
 {
     static int key, val;
 
-    /* Clear the current map sets. Give the KUI the map sets 
-     * that should be used with the current focus.
-     */
-    val = kui_manager_clear_map_sets(kui_ctx);
-    if (val == -1) {
-        logger_write_pos(logger, __FILE__, __LINE__, "user_input error");
-        return -1;
-    }
-
     if (if_get_focus() == CGDB)
-        val = kui_manager_add_map_set(kui_ctx, kui_map);
+        val = kui_manager_set_map_set(kui_ctx, kui_map);
     else if (if_get_focus() == GDB)
-        val = kui_manager_add_map_set(kui_ctx, kui_imap);
+        val = kui_manager_set_map_set(kui_ctx, kui_imap);
 
     key = kui_manager_getkey(kui_ctx);
     if (key == -1) {
@@ -1704,7 +1695,7 @@ int init_kui(void)
         exit(-1);
     }
 
-    if (kui_manager_add_map_set(kui_ctx, kui_map) == -1) {
+    if (kui_manager_set_map_set(kui_ctx, kui_map) == -1) {
         logger_write_pos(logger, __FILE__, __LINE__,
                 "Unable to initialize input library");
         cleanup();
