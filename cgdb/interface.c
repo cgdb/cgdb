@@ -794,75 +794,68 @@ static int tty_input(int key)
  */
 static int gdb_input(int key)
 {
-    /* Handle special keys */
-    switch (key) {
-        case CGDB_KEY_PPAGE:
-            scr_up(gdb_win, get_gdb_height() - 1);
-            break;
-        case CGDB_KEY_NPAGE:
-            scr_down(gdb_win, get_gdb_height() - 1);
-            break;
-        case CGDB_KEY_F11:
-            scr_home(gdb_win);
-            break;
-        case CGDB_KEY_F12:
-            scr_end(gdb_win);
-            break;
+    int result = 0;
 
-        case CGDB_KEY_UP:
-        case CGDB_KEY_CTRL_P:
-            if(!gdb_win->in_scroll_mode)
-                return 1;
-            scr_up(gdb_win, 1);
-            break;
-        case CGDB_KEY_DOWN:
-        case CGDB_KEY_CTRL_N:
-            if(!gdb_win->in_scroll_mode)
-                return 1;
-            scr_down(gdb_win, 1);
-            break;
-
-#if 0
-            /* I would like to add better support for control-l in the GDB
-             * window, but this patch didn't make me happy enough to release it.
-             * The problem is, when it clears the screen, it adds a lot of 
-             * whitespace in the buffer. If you hit page-up to look back in
-             * the buffer, it's visible. This is really unacceptable.
-             *
-             * The approach I believe I would like to take with this, is to
-             * have the GDB window behave more like the terminal. That is,
-             * have GDB start at the top line, and move down as input 
-             * becomes available. Then, when you hit ctrl-l, you just move
-             * the prompt to the top line. */
-        case CGDB_KEY_CTRL_L:
-        {
-            int height = get_gdb_height(), i;
-
-            /* Allocate and print enough newlines to clear the gdb buffer. */
-            char *buf = (char *) cgdb_malloc(sizeof (char *) * height);
-
-            for (i = 0; i < height - 1; ++i) {
-                buf[i] = '\n';
-            }
-            buf[i] = '\0';
-            if_print(buf);
-            free(buf);
-
-            /* Sneaky return 1 here. Basically, this allows tricks readline to think
-             * that gdb did not handle the Ctrl-l. That way readline will also handle
-             * it. Because readline uses TERM=dumb, that means that it will clear a 
-             * single line and put out the prompt. */
-            return 1;
-            break;
+    if (gdb_win->in_scroll_mode) {
+        /* In scroll mode, all extra characters are not passed to
+         * the active GDB command. result = 0 above ensures that. */
+        switch (key) {
+            case CGDB_KEY_PPAGE:
+                scr_up(gdb_win, get_gdb_height() - 1);
+                break;
+            case CGDB_KEY_NPAGE:
+                scr_down(gdb_win, get_gdb_height() - 1);
+                break;
+            case CGDB_KEY_HOME:
+            case CGDB_KEY_F11:
+                scr_home(gdb_win);
+                break;
+            case CGDB_KEY_END:
+            case CGDB_KEY_F12:
+                scr_end(gdb_win);
+                break;
+            case 'k':
+            case CGDB_KEY_UP:
+            case CGDB_KEY_CTRL_P:
+                scr_up(gdb_win, 1);
+                break;
+            case 'j':
+            case CGDB_KEY_DOWN:
+            case CGDB_KEY_CTRL_N:
+                scr_down(gdb_win, 1);
+                break;
+            case 'g':
+                if (last_key_pressed == 'g') {
+                    scr_home(gdb_win);
+                }
+                break;
+            case 'G':
+                scr_end(gdb_win);
+                break;
+            case 'q':
+            case 'i':
+            case '\r':
+            case '\n':
+            case CGDB_KEY_CTRL_M:
+                scr_end(gdb_win);
+                gdb_win->in_scroll_mode = 0;
+                break;
         }
-#endif
-        default:
-            return 1;
+
+    } else {
+        switch (key) {
+            case CGDB_KEY_PPAGE:
+                scr_up(gdb_win, get_gdb_height() - 1);
+                break;
+            default:
+                /* This tells the input to go to active GDB command */
+                result = 1;
+        }
     }
 
     if_draw();
 
-    return 0;
+    return result;
 }
 
 /**

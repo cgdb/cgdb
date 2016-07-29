@@ -445,15 +445,27 @@ Send a step command to GDB.
 @section Commands available during GDB mode
 @cindex commands, in GDB mode
 
-When in @dfn{GDB mode}, the user is mostly interested in working with the GDB 
-console.  That is, sending commands to GDB and receiving data back from GDB.
-Almost all data passed into this window is directly sent to readline and then
-to GDB.
+When in @dfn{GDB mode}, the user is in command mode or scroll mode.
+When in command mode, the user is typing in commands to interact with GDB.
+When in scroll mode, the user can scroll through the GDB output.
+You can enter scroll mode by typing @kbd{page up} and quit scroll mode
+by typing @kbd{q}, @kbd{i} or @kbd{enter}.
 
-It is important to understand that CGDB parses the keys entered in
-the GDB window and has the first chance at dealing with them.  If it is
-interested in the keys, it will handle them. Below is a list of keys that
-CGDB is interested in, and does not pass along any further.
+The commands available in @ref{GDB Mode} when in command mode are:
+
+@table @kbd
+@item cgdbmodekey
+Switch back to source window.  This is defaulted to the @key{ESC} key.
+
+@item page up
+Move up a page and enter scroll mode.
+@end table
+
+When in command mode, CGDB will pass along any other keys to the readline
+library. When readline has determined that a command has been received, it
+alerts CGDB, and a command is then sent to GDB.
+
+The commands available in @ref{GDB Mode} when in scroll mode are:
 
 @table @kbd
 @item cgdbmodekey
@@ -466,16 +478,30 @@ Move up a page.
 Move down a page.
 
 @item F11
+@itemx home key
+@itemx gg
 Go to the beginning of the GDB buffer.
 
 @item F12
+@itemx end key
+@itemx G
 Go to the end of the GDB buffer.
-@end table
 
-Any other keys, besides the ones above, CGDB is currently not interested in.  
-CGDB will pass along these keys to the readline library. When readline has 
-determined that a command has been received, it alerts CGDB, and a command is
-then sent to GDB. This is the same method used when invoking GDB directly.
+@item k
+@itemx up arrow
+@itemx Ctrl-p
+Move up a line.
+
+@item j
+@itemx down arrow
+@itemx Ctrl-n
+Move down a line.
+
+@item q
+@itemx i
+@itemx enter
+Exit scroll mode.
+@end table
 
 @node File Dialog Mode
 @section Commands available during the file dialog mode
@@ -892,6 +918,10 @@ disabled breakpoint set.
 @item SelectedLineNr
 This represents the group that is used when CGDB is displaying the currently
 selected line.  This is the line that the cursor is on.
+@item ScrollModeStatus
+This represents the group that is used when CGDB is displaying the currently
+selected line number when in @ref{GDB Mode} and the user is scrolling
+through the GDB buffer.
 @item Logo
 This is the group CGDB uses to display its logo on startup when no source 
 file can be auto detected.

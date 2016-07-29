@@ -192,8 +192,6 @@ void scr_down(struct scroller *scr, int nlines)
     int length;
     int i;
 
-    int at_bottom = 0;
-
     /* Sanity check */
     getmaxyx(scr->win, height, width);
     if (scr->current.c > 0) {
@@ -214,14 +212,10 @@ void scr_down(struct scroller *scr, int nlines)
                 scr->current.c = 0;
             } else {
                 /* At bottom */
-                at_bottom = 1;
                 break;
             }
         }
     }
-
-    if ( at_bottom )
-        scr->in_scroll_mode = 0;
 }
 
 void scr_home(struct scroller *scr)
@@ -240,8 +234,6 @@ void scr_end(struct scroller *scr)
 
     scr->current.r = scr->length - 1;
     scr->current.c = (strlen(scr->buffer[scr->current.r]) / width) * width;
-
-    scr->in_scroll_mode = 0;
 }
 
 void scr_add(struct scroller *scr, const char *buf)
@@ -290,7 +282,10 @@ void scr_add(struct scroller *scr, const char *buf)
         free(newbuf);
     }
 
-    scr_end(scr);
+    /* Don't want to exit scroll mode simply because new data received */
+    if (!scr->in_scroll_mode) {
+        scr_end(scr);
+    }
 }
 
 void scr_move(struct scroller *scr, int pos_r, int pos_c, int height, int width)
@@ -311,7 +306,7 @@ void scr_refresh(struct scroller *scr, int focus)
     int highlight_attr;
 
     /* Steal line highlight attribute for our scroll mode status */
-    if (hl_groups_get_attr(hl_groups_instance, HLG_LINE_HIGHLIGHT, &highlight_attr) == -1)
+    if (hl_groups_get_attr(hl_groups_instance, HLG_SCROLL_MODE_STATUS, &highlight_attr) == -1)
         highlight_attr = A_BOLD;
 
     /* Sanity check */
