@@ -46,12 +46,14 @@ enum ConfigType {
 
 static int command_set_arrowstyle(const char *value);
 static int command_set_cgdb_mode_key(const char *value);
-static int command_set_winsplit(const char *value);
+static int command_set_executing_line_display(const char *value);
+static int command_set_selected_line_display(const char *value);
 static int command_set_timeout(int value);
 static int command_set_timeoutlen(int value);
 static int command_set_ttimeout(int value);
 static int command_set_ttimeoutlen(int value);
 static int command_set_winminheight(int value);
+static int command_set_winsplit(const char *value);
 static int command_set_syntax_type(const char *value);
 static int command_set_stc(int value);
 static int cgdbrc_set_val(struct cgdbrc_config_option config_option);
@@ -61,10 +63,14 @@ static int cgdbrc_set_val(struct cgdbrc_config_option config_option);
  * It is initialized with the default values.
  */
 static struct cgdbrc_config_option cgdbrc_config_options[CGDBRC_WRAPSCAN + 1] = {
-    {CGDBRC_ARROWSTYLE, {.arrow_style = ARROWSTYLE_SHORT}},
+    {CGDBRC_ARROWSTYLE, {.line_display_style = LINE_DISPLAY_SHORT_ARROW}},
     {CGDBRC_AUTOSOURCERELOAD, {.int_val = 1}},
     {CGDBRC_CGDB_MODE_KEY, {.int_val = CGDB_KEY_ESC}},
+    {CGDBRC_EXECUTING_LINE_DISPLAY,
+        {.line_display_style = LINE_DISPLAY_LONG_ARROW}},
     {CGDBRC_IGNORECASE, {.int_val = 0}},
+    {CGDBRC_SELECTED_LINE_DISPLAY,
+        {.line_display_style = LINE_DISPLAY_BLOCK}},
     {CGDBRC_SHOWTGDBCOMMANDS, {.int_val = 0}},
     {CGDBRC_SYNTAX, {.language_support_val = TOKENIZER_LANGUAGE_UNKNOWN}},
     {CGDBRC_TABSTOP, {.int_val = 8}},
@@ -95,7 +101,7 @@ static struct ConfigVariable {
 
     /* arrowstyle */
     {
-    "arrowstyle", "as", CONFIG_TYPE_FUNC_STRING, (void *)command_set_arrowstyle},
+        "arrowstyle", "as", CONFIG_TYPE_FUNC_STRING, (void *)command_set_arrowstyle},
             /* autosourcereload */
     {
     "autosourcereload", "asr", CONFIG_TYPE_BOOL,
@@ -105,10 +111,18 @@ static struct ConfigVariable {
     {
     "cgdbmodekey", "cgdbmodekey", CONFIG_TYPE_FUNC_STRING,
                 (void *)command_set_cgdb_mode_key},
+            /* executinglinedisplay */
+    {
+    "executinglinedisplay", "eld", CONFIG_TYPE_FUNC_STRING,
+                (void *)command_set_executing_line_display},
             /* ignorecase */
     {
     "ignorecase", "ic", CONFIG_TYPE_BOOL,
                 (void *)&cgdbrc_config_options[CGDBRC_IGNORECASE].variant.int_val},
+            /* selectedlinedisplay */
+    {
+    "selectedlinedisplay", "sld", CONFIG_TYPE_FUNC_STRING,
+                (void *)command_set_selected_line_display},
             /* showtgdbcommands */
     {
     "showtgdbcommands", "stc", CONFIG_TYPE_FUNC_BOOL, (void *)&command_set_stc},
@@ -252,14 +266,14 @@ int command_set_arrowstyle(const char *value)
 {
     struct cgdbrc_config_option option;
 
-    option.option_kind = CGDBRC_ARROWSTYLE;
+    option.option_kind = CGDBRC_EXECUTING_LINE_DISPLAY;
 
     if (strcasecmp(value, "short") == 0)
-        option.variant.arrow_style = ARROWSTYLE_SHORT;
+        option.variant.line_display_style = LINE_DISPLAY_SHORT_ARROW;
     else if (strcasecmp(value, "long") == 0)
-        option.variant.arrow_style = ARROWSTYLE_LONG;
+        option.variant.line_display_style = LINE_DISPLAY_LONG_ARROW;
     else if (strcasecmp(value, "highlight") == 0)
-        option.variant.arrow_style = ARROWSTYLE_HIGHLIGHT;
+        option.variant.line_display_style = LINE_DISPLAY_HIGHLIGHT;
     else
         return 1;
 
@@ -288,6 +302,26 @@ int command_set_cgdb_mode_key(const char *value)
     } else {
         return -1;
     }
+
+    return cgdbrc_set_val(option);
+}
+
+int command_set_executing_line_display(const char *value)
+{
+    struct cgdbrc_config_option option;
+
+    option.option_kind = CGDBRC_EXECUTING_LINE_DISPLAY;
+
+    if (strcasecmp(value, "shortarrow") == 0)
+        option.variant.line_display_style = LINE_DISPLAY_SHORT_ARROW;
+    else if (strcasecmp(value, "longarrow") == 0)
+        option.variant.line_display_style = LINE_DISPLAY_LONG_ARROW;
+    else if (strcasecmp(value, "highlight") == 0)
+        option.variant.line_display_style = LINE_DISPLAY_HIGHLIGHT;
+    else if (strcasecmp(value, "block") == 0)
+        option.variant.line_display_style = LINE_DISPLAY_BLOCK;
+    else
+        return 1;
 
     return cgdbrc_set_val(option);
 }
@@ -347,6 +381,26 @@ static int command_set_winminheight(int value)
         return 1;
 
     option.variant.int_val = value;
+    return cgdbrc_set_val(option);
+}
+
+int command_set_selected_line_display(const char *value)
+{
+    struct cgdbrc_config_option option;
+
+    option.option_kind = CGDBRC_SELECTED_LINE_DISPLAY;
+
+    if (strcasecmp(value, "shortarrow") == 0)
+        option.variant.line_display_style = LINE_DISPLAY_SHORT_ARROW;
+    else if (strcasecmp(value, "longarrow") == 0)
+        option.variant.line_display_style = LINE_DISPLAY_LONG_ARROW;
+    else if (strcasecmp(value, "highlight") == 0)
+        option.variant.line_display_style = LINE_DISPLAY_HIGHLIGHT;
+    else if (strcasecmp(value, "block") == 0)
+        option.variant.line_display_style = LINE_DISPLAY_BLOCK;
+    else
+        return 1;
+
     return cgdbrc_set_val(option);
 }
 

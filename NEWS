@@ -1,3 +1,13 @@
+  * Added support for 'executinglinedisplay' and 'selectedlinedisplay'
+    configuration options. See documentation for full explanation.
+    This allows you to configure how CGDB displays both the currently
+    executing line and the currently selected line.
+    The default for executing line is set to longarrow.
+    The default for selected line is set to block.
+
+    The 'arrowstyle' option has been deprecated (but still supported)
+    and users should use the 'executinglinedisplay' option instead.
+
 cgdb-0.6.8 (11/13/2014)
 
   * Fix issue #40, the map commands were adding additional new lines

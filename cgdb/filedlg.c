@@ -318,8 +318,8 @@ int filedlg_display(struct filedlg *fd)
                 wattron(fd->win, A_BOLD);
                 wprintw(fd->win, fmt, file + 1);
                 wattroff(fd->win, A_BOLD);
-                if (hl_groups_get_attr(hl_groups_instance, HLG_ARROW,
-                                &attr) == -1)
+                if (hl_groups_get_attr(hl_groups_instance,
+                    HLG_EXECUTING_LINE_ARROW, &attr) == -1)
                     return -1;
                 wattron(fd->win, attr);
                 waddch(fd->win, '-');

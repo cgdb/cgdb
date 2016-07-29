@@ -79,14 +79,13 @@ int command_parse_file(FILE * fp);
 /* Options types {{{ */
 
 /** 
- * The different ways to highlight the current line the debugger is at.
- * This enum name is incorrect, it should be renamed to something like,
- * 'enum HighlightStyle'.
+ * The different ways to display a line in the CGDB window.
  */
-enum ArrowStyle {
-    ARROWSTYLE_SHORT,
-    ARROWSTYLE_LONG,
-    ARROWSTYLE_HIGHLIGHT
+enum LineDisplayStyle {
+    LINE_DISPLAY_SHORT_ARROW,
+    LINE_DISPLAY_LONG_ARROW,
+    LINE_DISPLAY_HIGHLIGHT,
+    LINE_DISPLAY_BLOCK
 };
 
 /** window split type enumeration*/
@@ -101,10 +100,13 @@ typedef enum { WIN_SPLIT_FREE = -3, /* split point not on quarter mark */
 
 /** All of the different configuration options */
 enum cgdbrc_option_kind {
+    /* Arrow style is deprecated, use CGDBRC_EXECUTING_LINE_DISPLAY insetad */
     CGDBRC_ARROWSTYLE,
     CGDBRC_AUTOSOURCERELOAD,
     CGDBRC_CGDB_MODE_KEY,
+    CGDBRC_EXECUTING_LINE_DISPLAY,
     CGDBRC_IGNORECASE,
+    CGDBRC_SELECTED_LINE_DISPLAY,
     CGDBRC_SHOWTGDBCOMMANDS,
     CGDBRC_SYNTAX,
     CGDBRC_TABSTOP,
@@ -122,7 +124,9 @@ struct cgdbrc_config_option {
     enum cgdbrc_option_kind option_kind;
     union {
         /* option_kind == CGDBRC_ARROWSTYLE */
-        enum ArrowStyle arrow_style;
+        /* option_kind == CGDBRC_EXECUTING_LINE_DISPLAY */
+        /* option_kind == CGDBRC_SELECTED_LINE_DISPLAY */
+        enum LineDisplayStyle line_display_style;
         /* option_kind == CGDBRC_AUTOSOURCERELOAD */
         /* option_kind == CGDBRC_CGDB_MODE_KEY */
         /* option_kind == CGDBRC_IGNORECASE */
