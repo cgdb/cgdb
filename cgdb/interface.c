@@ -63,6 +63,7 @@
 #include "highlight.h"
 #include "highlight_groups.h"
 #include "fs_util.h"
+#include "sys_util.h"
 
 /* ----------- */
 /* Prototypes  */
@@ -128,6 +129,9 @@ static int regex_direction_last;
 static int orig_line_regex;
 
 static char last_key_pressed = 0;   /* Last key user entered in cgdb mode */
+
+/* Line number user wants to 'G' to */
+static struct ibuf *G_line_number = NULL;
 
 /* The cgdb status bar command */
 static struct ibuf *cur_sbc = NULL;
@@ -1062,9 +1066,12 @@ static void source_input(struct sviewer *sview, int key)
             if (last_key_pressed == 'g')
                 source_set_sel_line(sview, 1);
             break;
-        case 'G':              /* end of file */
-            source_set_sel_line(sview, -1);
+        case 'G': {              /* end of file or a line number */
+            int lineno = -1;
+            cgdb_string_to_int(ibuf_get(G_line_number), &lineno);
+            source_set_sel_line(sview, lineno);
             break;
+        }
         case '=':
             /* inc window by 1 */
             increase_win_height(0);
@@ -1109,6 +1116,13 @@ static void source_input(struct sviewer *sview, int key)
             break;
         default:
             break;
+    }
+
+    /* Store digits into G_line_number for 'G' command. */
+    if (key >= '0' && key <= '9') {
+        ibuf_addchar(G_line_number, key);
+    } else {
+        ibuf_clear(G_line_number);
     }
 
     /* Some extended features that are set by :set sc */
@@ -1189,6 +1203,8 @@ int if_init(void)
         case 2:
             return 4;
     }
+
+    G_line_number = ibuf_init();
 
     return 0;
 }
@@ -1508,6 +1524,10 @@ void if_shutdown(void)
 
     if (src_win != NULL)
         source_free(src_win);
+
+    if (G_line_number) {
+        ibuf_free(G_line_number);
+    }
 }
 
 void if_set_focus(Focus f)

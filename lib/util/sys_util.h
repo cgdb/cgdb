@@ -19,4 +19,19 @@ void *cgdb_realloc(void *ptr, size_t size);
 char *cgdb_strdup(const char *s);
 int cgdb_close(int fd);
 
+/**
+ * Convert a string to an integer.
+ *
+ * @param str
+ * The string to convert.
+ *
+ * @param num
+ * The integer result on success.
+ * On failure, the value passed in will remain unchanged.
+ *
+ * @return
+ * 0 on success or -1 on error.
+ */
+int cgdb_string_to_int(char *str, int *num);
+
 #endif

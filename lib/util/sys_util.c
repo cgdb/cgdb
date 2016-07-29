@@ -68,3 +68,24 @@ int cgdb_close(int fd)
 
     return 0;
 }
+
+int cgdb_string_to_int(char *str, int *num) {
+    int result = -1;
+
+    if (str && num) {
+        long int strtol_result;
+        char *end_ptr;
+
+        errno = 0;
+        strtol_result = strtol(str, &end_ptr, 10);
+        if (errno == 0 && str != end_ptr && *end_ptr == '\0') {
+            int convert_to_int_result = (int)strtol_result;
+            if (convert_to_int_result == strtol_result) {
+                *num = convert_to_int_result;
+                result = 0;
+            }
+        }
+    }
+
+    return result;
+}

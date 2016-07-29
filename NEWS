@@ -1,3 +1,8 @@
+  * Extended support for the G command when in CGDB mode. The new supported
+    syntax is [<number>]G, allowing users to jump to a specific line within
+    the source file, rather than just the end of the source file. This is
+    identical to the :<number> command.
+
   * Added support for 'executinglinedisplay' and 'selectedlinedisplay'
     configuration options. See documentation for full explanation.
     This allows you to configure how CGDB displays both the currently

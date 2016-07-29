@@ -386,8 +386,8 @@ Move down 1/2 a page.
 @item gg
 Move to the top of file.
 
-@item G
-Move to the bottom of file.
+@item [<number>]G
+Move to the bottom of file or to a line number within the file.
 
 @item /
 search from current cursor position.
