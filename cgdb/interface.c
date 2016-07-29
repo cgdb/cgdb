@@ -1063,7 +1063,7 @@ static void source_input(struct sviewer *sview, int key)
                 source_set_sel_line(sview, 1);
             break;
         case 'G':              /* end of file */
-            source_set_sel_line(sview, 10000000);
+            source_set_sel_line(sview, -1);
             break;
         case '=':
             /* inc window by 1 */

@@ -849,12 +849,16 @@ void source_hscroll(struct sviewer *sview, int offset)
 void source_set_sel_line(struct sviewer *sview, int line)
 {
     if (sview->cur) {
-        /* Set line (note correction for 0-based line counting) */
-        sview->cur->sel_line = line - 1;
-        if (sview->cur->sel_line < 0)
-            sview->cur->sel_line = 0;
-        if (sview->cur->sel_line >= sview->cur->buf.length)
+        if (line == -1) {
             sview->cur->sel_line = sview->cur->buf.length - 1;
+        } else {
+            /* Set line (note correction for 0-based line counting) */
+            sview->cur->sel_line = line - 1;
+            if (sview->cur->sel_line < 0)
+                sview->cur->sel_line = 0;
+            if (sview->cur->sel_line >= sview->cur->buf.length)
+                sview->cur->sel_line = sview->cur->buf.length - 1;
+        }
 
         sview->cur->sel_rline = sview->cur->sel_line;
     }

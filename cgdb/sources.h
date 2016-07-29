@@ -195,7 +195,7 @@ void source_hscroll(struct sviewer *sview, int offset);
  * --------------------
  *
  *   sview:  Source viewer object
- *   line:   Current line number
+ *   line:   Current line number, or -1 for the last line
  *
  */
 void source_set_sel_line(struct sviewer *sview, int line);
