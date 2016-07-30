@@ -23,5 +23,6 @@ void usage(void)
             "   -h          Print help (this message) and then exit.\n"
 #endif
             "   -d          Set debugger to use.\n"
+            "   -w          Wait for debugger to attach before starting.\n"
             "   --          Marks the end of CGDB's options.\n");
 }

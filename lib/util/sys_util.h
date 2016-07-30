@@ -34,6 +34,14 @@ int cgdb_close(int fd);
  */
 int cgdb_string_to_int(char *str, int *num);
 
+/**
+ * Check to see if cgdb supports debugger attachment detection.
+ *
+ * @return
+ * 1 if it does support detecting debugger attachment, otherwise 0.
+ */
+int cgdb_supports_debugger_attach_detection();
+
 /* Check if debugger is attached to cgdb.
  * Return 0 for no, 1 for yes, -1 for error.
  */

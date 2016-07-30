@@ -1,3 +1,7 @@
+  * Add the -w command line option to CGDB. It directs CGDB to wait
+    to start until either a debugger is attached to it, or until a key
+    is written to it's stdin. This helps simplify debugging cgdb itself.
+
   * Added GDB scroll mode in addition to the existing GDB command mode.
     To enter scroll mode, type 'page up' when in GDB mode and to exit
     type 'q', 'i' or 'Enter'. In scroll mode, you can scroll through

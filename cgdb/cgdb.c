@@ -110,6 +110,7 @@ static pty_pair_ptr pty_pair;
 
 static char *debugger_path = NULL;  /* Path to debugger to use */
 
+/* Set to 1 if the user requested cgdb to wait for the debugger to attach. */
 static int wait_for_debugger_to_attach = 0;
 
 struct kui_manager *kui_ctx = NULL; /* The key input package */
@@ -1745,25 +1746,20 @@ int init_kui(void)
 
 int main(int argc, char *argv[])
 {
-/* Uncomment to debug and attach */
-#if 0
-    int c;
-
-    read(0, &c, 1);
-#endif
-
     parse_long_options(&argc, &argv);
 
     /* Debugging helper - wait for debugger to attach to us before continuing */
     if (wait_for_debugger_to_attach) {
-        int count = 0;
-
-        fprintf( stdout, "Waiting 30 seconds for debugger to attach...\n" );
-        while ( ( count++ < 30 ) && ( cgdb_is_debugger_attached() == 0 ) ) {
-            sleep(1);
+        if (cgdb_supports_debugger_attach_detection()) {
+            printf("Waiting for debugger to attach...\n");
+            while (cgdb_is_debugger_attached() == 0) {
+                sleep(1);
+            }
+        } else {
+            int c;
+            printf("Press any key to continue execution...\n");
+            read(0, &c, 1);
         }
-
-        fprintf( stdout, "Debugger attached: %d\n", cgdb_is_debugger_attached() );
     }
 
     current_line = ibuf_init();
