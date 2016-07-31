@@ -9,12 +9,6 @@
 #include <stdio.h>
 #endif /* HAVE_STDIO_H */
 
-#if HAVE_ATTRIBUTE_PRINTF
-#define ATTRIBUTE_PRINTF( _x, _y ) __attribute__( ( __format__( __printf__, _x, _y ) ) )
-#else
-#define ATTRIBUTE_PRINTF( _x, _y )
-#endif
-
 /* Doxygen headers {{{ */
 /*!
  * \file
