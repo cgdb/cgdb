@@ -721,8 +721,8 @@ this value.  The default value for @var{number} is 0.
 @item :set winsplit=@var{style}
 Set the split point between source and GDB window.  This is especially useful
 as an init setting in your @file{cgdbrc} file.  @xref{Configuring CGDB}.  The 
-possible values for @var{style} are @samp{top_full}, @samp{top_big}, 
-@samp{even}, @samp{bottom_big}, and @samp{bottom_full}.
+possible values for @var{style} are @samp{src_full}, @samp{src_big}, 
+@samp{even}, @samp{gdb_big}, and @samp{gdb_full}.
 
 @item :set wso=@var{style}
 @itemx :set winsplitorientation=@var{style}

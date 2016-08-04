@@ -358,14 +358,26 @@ int command_set_winsplit(const char *value)
 
     option.option_kind = CGDBRC_WINSPLIT;
 
+    /* deprecated: use src_big */
     if (strcasecmp(value, "top_big") == 0)
-        split_type = WIN_SPLIT_TOP_BIG;
+        split_type = WIN_SPLIT_SRC_BIG;
+    /* deprecated: use src_full */
     else if (strcasecmp(value, "top_full") == 0)
-        split_type = WIN_SPLIT_TOP_FULL;
+        split_type = WIN_SPLIT_SRC_FULL;
+    /* deprecated: use gdb_big */
     else if (strcasecmp(value, "bottom_big") == 0)
-        split_type = WIN_SPLIT_BOTTOM_BIG;
+        split_type = WIN_SPLIT_GDB_BIG;
+    /* deprecated: use gdb_full */
     else if (strcasecmp(value, "bottom_full") == 0)
-        split_type = WIN_SPLIT_BOTTOM_FULL;
+        split_type = WIN_SPLIT_GDB_FULL;
+    else if (strcasecmp(value, "src_big") == 0)
+        split_type = WIN_SPLIT_SRC_BIG;
+    else if (strcasecmp(value, "src_full") == 0)
+        split_type = WIN_SPLIT_SRC_FULL;
+    else if (strcasecmp(value, "gdb_big") == 0)
+        split_type = WIN_SPLIT_GDB_BIG;
+    else if (strcasecmp(value, "gdb_full") == 0)
+        split_type = WIN_SPLIT_GDB_FULL;
     else
         split_type = WIN_SPLIT_EVEN;
 

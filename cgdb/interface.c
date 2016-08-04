@@ -773,8 +773,8 @@ static void increase_win_height(int jump_or_tty)
             }
 
             /* check split bounds */
-            if (cur_win_split > WIN_SPLIT_TOP_FULL) {
-                cur_win_split = WIN_SPLIT_TOP_FULL;
+            if (cur_win_split > WIN_SPLIT_SRC_FULL) {
+                cur_win_split = WIN_SPLIT_SRC_FULL;
             }
 
             /* set window height to specified quarter mark */
@@ -834,8 +834,8 @@ static void decrease_win_height(int jump_or_tty)
             }
 
             /* check split bounds */
-            if (cur_win_split < WIN_SPLIT_BOTTOM_FULL) {
-                cur_win_split = WIN_SPLIT_BOTTOM_FULL;
+            if (cur_win_split < WIN_SPLIT_GDB_FULL) {
+                cur_win_split = WIN_SPLIT_GDB_FULL;
             }
 
             /* set window height to specified quarter mark */
