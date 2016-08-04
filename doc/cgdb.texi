@@ -724,11 +724,11 @@ as an init setting in your @file{cgdbrc} file.  @xref{Configuring CGDB}.  The
 possible values for @var{style} are @samp{top_full}, @samp{top_big}, 
 @samp{even}, @samp{bottom_big}, and @samp{bottom_full}.
 
-@item :set so=@var{style}
-@itemx :set splitorientation=@var{style}
-Sets the window split orientation to either @samp{horizontal} (which places the 
-source window above and the GDB window below), or @samp{vertical} (which places the 
-source window on the left and the GDB window on the right). 
+@item :set wso=@var{style}
+@itemx :set winsplitorientation=@var{style}
+Sets the window split orientation to either @samp{horizontal} (which places
+the source window above and the GDB window below), or @samp{vertical} (
+hich places the source window on the left and the GDB window on the right). 
 @xref{Configuring CGDB}.
 
 @item :set ws

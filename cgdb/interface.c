@@ -98,7 +98,8 @@ static int tty_win_height_shift = 0;
 
 /* Current window split state */
 WIN_SPLIT_TYPE cur_win_split = WIN_SPLIT_EVEN;
-SPLIT_ORIENTATION_TYPE cur_split_orientation = SPLIT_HORIZONTAL;
+/* Current window orientation state (horizontal or vertical) */
+WIN_SPLIT_ORIENTATION_TYPE cur_split_orientation = WSO_HORIZONTAL;
 
 /* --------------- */
 /* Local Variables */
@@ -198,24 +199,40 @@ static int get_src_status_height(void);
 
 static int get_src_height(void)
 {
-    if (cur_split_orientation == SPLIT_HORIZONTAL)
-        return ((int) (((screen_size.ws_row + 0.5) / 2) + window_shift));
-    return (screen_size.ws_row) - get_src_status_height();
+    int result;
+
+    switch (cur_split_orientation) {
+        case WSO_HORIZONTAL:
+            result = ((screen_size.ws_row + 0.5) / 2) + window_shift;
+            break;
+        case WSO_VERTICAL:
+            result = screen_size.ws_row - get_src_status_height();
+            break;
+    }
+
+    return result;
 }
 
 static int get_src_width(void)
 {
-    if (cur_split_orientation == SPLIT_VERTICAL)
-        return ((int) (((screen_size.ws_col + 0.5) / 2) + window_shift));
-    return (screen_size.ws_col);
+    int result;
+
+    switch (cur_split_orientation) {
+        case WSO_HORIZONTAL:
+            result = screen_size.ws_col;
+            break;
+        case WSO_VERTICAL:
+            result = ((screen_size.ws_col + 0.5) / 2) + window_shift;
+            break;
+    }
+
+    return result;
 }
 
 /* This is for the source window status bar */
 static int get_src_status_row(void)
 {
-    /* Usually would be 'get_src_row() + get_src_height()' but
-     * the row is 0 */
-    return get_src_height();
+    return get_src_row() + get_src_height();
 }
 
 static int get_src_status_col(void)
@@ -246,7 +263,7 @@ static int get_sep_col(void)
 
 static int get_sep_height(void)
 {
-    return (screen_size.ws_row);
+    return screen_size.ws_row;
 }
 
 static int get_sep_width(void)
@@ -257,16 +274,34 @@ static int get_sep_width(void)
 /* This is for the tty I/O window */
 static int get_tty_row(void)
 {
-    if (cur_split_orientation == SPLIT_HORIZONTAL)
-        return get_src_status_row() + get_src_status_height();
-    return 0;
+    int result;
+
+    switch (cur_split_orientation) {
+        case WSO_HORIZONTAL:
+            result = get_src_status_row() + get_src_status_height();
+            break;
+        case WSO_VERTICAL:
+            result = 0;
+            break;
+    }
+
+    return result;
 }
 
 static int get_tty_col(void)
 {
-    if (cur_split_orientation == SPLIT_VERTICAL)
-        return get_sep_col() + get_sep_width();
-    return 0;
+    int result;
+
+    switch (cur_split_orientation) {
+        case WSO_HORIZONTAL:
+            result = 0;
+            break;
+        case WSO_VERTICAL:
+            result = get_sep_col() + get_sep_width();
+            break;
+    }
+
+    return result;
 }
 
 static int get_tty_height(void)
@@ -278,9 +313,18 @@ static int get_gdb_width(void);
 
 static int get_tty_width(void)
 {
-    if (cur_split_orientation == SPLIT_VERTICAL)
-        return get_gdb_width();
-    return (screen_size.ws_col);
+    int result;
+
+    switch (cur_split_orientation) {
+        case WSO_HORIZONTAL:
+            result = screen_size.ws_col;
+            break;
+        case WSO_VERTICAL:
+            result = get_gdb_width();
+            break;
+    }
+
+    return result;
 }
 
 /* This is for the tty I/O status bar line */
@@ -307,47 +351,81 @@ static int get_tty_status_width(void)
 /* This is for the debugger window */
 static int get_gdb_row(void)
 {
-    if (tty_win_on)
-        return get_tty_status_row() + get_tty_status_height();
+    int result;
 
-    if (cur_split_orientation == SPLIT_HORIZONTAL)
-        return get_src_status_row() + get_src_status_height();
+    if (tty_win_on) {
+        result = get_tty_status_row() + get_tty_status_height();
+    }  else {
+        switch (cur_split_orientation) {
+            case WSO_HORIZONTAL:
+                result = get_src_status_row() + get_src_status_height();
+                break;
+            case WSO_VERTICAL:
+                result = 0;
+                break;
+        }
+    }
 
-    return 0;
+    return result;
 }
 
 static int get_gdb_col(void)
 {
-    if (cur_split_orientation == SPLIT_VERTICAL)
-        return get_sep_col() + get_sep_width();
-    return 0;
+    int result;
+
+    switch (cur_split_orientation) {
+        case WSO_HORIZONTAL:
+            result = 0;
+            break;
+        case WSO_VERTICAL:
+            result = get_sep_col() + get_sep_width();
+            break;
+    }
+
+    return result;
 }
 
 int get_gdb_height(void)
 {
-    if (cur_split_orientation == SPLIT_HORIZONTAL) {
-        int window_size = ((screen_size.ws_row / 2) - window_shift - 1);
-        int odd_screen_size = (screen_size.ws_row % 2);
+    int result;
 
-        if (tty_win_on)
-            return window_size - TTY_WIN_OFFSET + odd_screen_size - 1;
+    switch (cur_split_orientation) {
+        case WSO_HORIZONTAL: {
+            int window_size = ((screen_size.ws_row / 2) - window_shift - 1);
+            int odd_screen_size = (screen_size.ws_row % 2);
 
-        return window_size + odd_screen_size;
+            if (tty_win_on)
+                return window_size - TTY_WIN_OFFSET + odd_screen_size - 1;
+
+            result = window_size + odd_screen_size;
+            break;
+        }
+        case WSO_VERTICAL:
+            result = screen_size.ws_row - (tty_win_on ? TTY_WIN_OFFSET + 1 : 0);
+            break;
     }
 
-    return (screen_size.ws_row) - (tty_win_on ? TTY_WIN_OFFSET + 1 : 0);
+    return result;
 }
 
 static int get_gdb_width(void)
 {
-    if (cur_split_orientation == SPLIT_VERTICAL) {
-        int window_size = ((screen_size.ws_col / 2) - window_shift - 1);
-        int odd_screen_size = (screen_size.ws_col % 2);
+    int result;
 
-        return window_size + odd_screen_size;
+    switch (cur_split_orientation) {
+        case WSO_HORIZONTAL:
+            result = screen_size.ws_col;
+            break;
+        case WSO_VERTICAL: {
+            int window_size = ((screen_size.ws_col / 2) - window_shift - 1);
+            int odd_screen_size = (screen_size.ws_col % 2);
+
+            result = window_size + odd_screen_size;
+            break; 
+        }
     }
 
-    return (screen_size.ws_col);
+    return result;
 }
 
 static void separator_display()
@@ -502,7 +580,7 @@ void if_draw(void)
     if (get_src_height() > 0)
         source_display(src_win, focus == CGDB);
 
-    if (cur_split_orientation == SPLIT_VERTICAL)
+    if (cur_split_orientation == WSO_VERTICAL)
         separator_display();
 
     if (tty_win_on && get_tty_height() > 0)
@@ -528,9 +606,9 @@ void if_draw(void)
  */
 static void validate_window_sizes(void)
 {
-    int h_or_w = cur_split_orientation == SPLIT_HORIZONTAL ? HEIGHT : WIDTH;
+    int h_or_w = cur_split_orientation == WSO_HORIZONTAL ? HEIGHT : WIDTH;
     int tty_window_offset = (tty_win_on
-            && cur_split_orientation == SPLIT_HORIZONTAL)
+            && cur_split_orientation == WSO_HORIZONTAL)
             ? TTY_WIN_OFFSET + 1 : 0;
     int odd_size = (h_or_w + 1) % 2;
     int max_window_size_shift = (h_or_w / 2) - tty_window_offset - odd_size;
@@ -1356,10 +1434,14 @@ static int cgdb_input(int key)
 
             break;
         case CGDB_KEY_CTRL_W:
-            if (cur_split_orientation == SPLIT_HORIZONTAL)
-                cur_split_orientation = SPLIT_VERTICAL;
-            else
-                cur_split_orientation = SPLIT_HORIZONTAL;
+            switch (cur_split_orientation) {
+                case WSO_HORIZONTAL:
+                    cur_split_orientation = WSO_VERTICAL;
+                    break;
+                case WSO_VERTICAL:
+                    cur_split_orientation = WSO_HORIZONTAL;
+                    break;
+            }
 
             if_layout();
 
@@ -1653,13 +1735,13 @@ Focus if_get_focus(void)
 
 void reset_window_shift(void)
 {
-    int h_or_w = cur_split_orientation == SPLIT_HORIZONTAL ? HEIGHT : WIDTH;
+    int h_or_w = cur_split_orientation == WSO_HORIZONTAL ? HEIGHT : WIDTH;
 
     window_shift = (int) ((h_or_w / 2) * (cur_win_split / 2.0));
     if_layout();
 }
 
-void if_set_splitorientation(SPLIT_ORIENTATION_TYPE new_orientation)
+void if_set_winsplitorientation(WIN_SPLIT_ORIENTATION_TYPE new_orientation)
 {
     cur_split_orientation = new_orientation;
     reset_window_shift();

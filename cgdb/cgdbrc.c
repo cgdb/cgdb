@@ -48,13 +48,13 @@ static int command_set_arrowstyle(const char *value);
 static int command_set_cgdb_mode_key(const char *value);
 static int command_set_executing_line_display(const char *value);
 static int command_set_selected_line_display(const char *value);
-static int command_set_splitorientation(const char *value);
 static int command_set_timeout(int value);
 static int command_set_timeoutlen(int value);
 static int command_set_ttimeout(int value);
 static int command_set_ttimeoutlen(int value);
 static int command_set_winminheight(int value);
 static int command_set_winsplit(const char *value);
+static int command_set_winsplitorientation(const char *value);
 static int command_set_syntax_type(const char *value);
 static int command_set_stc(int value);
 static int cgdbrc_set_val(struct cgdbrc_config_option config_option);
@@ -73,7 +73,6 @@ static struct cgdbrc_config_option cgdbrc_config_options[CGDBRC_WRAPSCAN + 1] = 
     {CGDBRC_SELECTED_LINE_DISPLAY,
         {.line_display_style = LINE_DISPLAY_BLOCK}},
     {CGDBRC_SHOWTGDBCOMMANDS, {.int_val = 0}},
-    {CGDBRC_SPLITORIENTATION, {.win_orientation_val = SPLIT_HORIZONTAL}},
     {CGDBRC_SYNTAX, {.language_support_val = TOKENIZER_LANGUAGE_UNKNOWN}},
     {CGDBRC_TABSTOP, {.int_val = 8}},
     {CGDBRC_TIMEOUT, {.int_val = 1}},
@@ -82,6 +81,7 @@ static struct cgdbrc_config_option cgdbrc_config_options[CGDBRC_WRAPSCAN + 1] = 
     {CGDBRC_TTIMEOUT_LEN, {.int_val = 100}},
     {CGDBRC_WINMINHEIGHT, {.int_val = 0}},
     {CGDBRC_WINSPLIT, {.win_split_val = WIN_SPLIT_EVEN}},
+    {CGDBRC_WINSPLITORIENTATION, {.win_split_orientation_val = WSO_HORIZONTAL}},
     {CGDBRC_WRAPSCAN, {.int_val = 1}}
 };
 
@@ -155,8 +155,8 @@ static struct ConfigVariable {
     "winsplit", "winsplit", CONFIG_TYPE_FUNC_STRING, (void *)command_set_winsplit},
             /* splitorientation */
     {
-    "splitorientation", "so", CONFIG_TYPE_FUNC_STRING,
-                (void *)command_set_splitorientation},
+    "winsplitorientation", "wso", CONFIG_TYPE_FUNC_STRING,
+                (void *)command_set_winsplitorientation},
             /* wrapscan */
     {
     "wrapscan", "ws", CONFIG_TYPE_BOOL,
@@ -377,22 +377,22 @@ int command_set_winsplit(const char *value)
     return 0;
 }
 
-int command_set_splitorientation(const char *value)
+int command_set_winsplitorientation(const char *value)
 {
     struct cgdbrc_config_option option;
-    SPLIT_ORIENTATION_TYPE orientation = SPLIT_HORIZONTAL;
+    WIN_SPLIT_ORIENTATION_TYPE orientation = WSO_HORIZONTAL;
 
-    option.option_kind = CGDBRC_SPLITORIENTATION;
+    option.option_kind = CGDBRC_WINSPLITORIENTATION;
 
     if (strcasecmp(value, "horizontal") == 0)
-        orientation = SPLIT_HORIZONTAL;
+        orientation = WSO_HORIZONTAL;
     else if (strcasecmp(value, "vertical") == 0)
-        orientation = SPLIT_VERTICAL;
+        orientation = WSO_VERTICAL;
 
-    option.variant.win_orientation_val = orientation;
+    option.variant.win_split_orientation_val = orientation;
     if (cgdbrc_set_val(option))
         return 1;
-    if_set_splitorientation(orientation);
+    if_set_winsplitorientation(orientation);
 
     return 0;
 }

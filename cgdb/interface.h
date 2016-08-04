@@ -163,10 +163,13 @@ void if_tty_toggle(void);
  */
 void if_draw(void);
 
- /* if_set_winorientation:
-  * ________________
+ /**
+  * Set the window split orientation. (vertical or horizontal)
+  *
+  * @param newOrientation
+  * The orientation to switch to.
   */
-void if_set_splitorientation(SPLIT_ORIENTATION_TYPE newOrientation);
+void if_set_winsplitorientation(WIN_SPLIT_ORIENTATION_TYPE newOrientation);
 
  /* if_set_winsplit:
   * ________________
