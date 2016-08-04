@@ -124,12 +124,11 @@ void if_shutdown(void);
 /* enum Focus: An enumeration representing a focus state. 
  * ------------
  *  GDB: focus on the gdb i/o window
- *  TTY: focus on the debugged program i/o window
  *  CGDB: focus on source window, accepts command input.
  *  CGDB_STATUS_BAR: focus on the status bar, accepts commands.
  *  FILE_DLG: focus on file dialog window
  */
-typedef enum Focus { GDB, TTY, CGDB, CGDB_STATUS_BAR, FILE_DLG } Focus;
+typedef enum Focus { GDB, CGDB, CGDB_STATUS_BAR, FILE_DLG } Focus;
 
 /* if_set_focus: Sets the current input focus to a different window 
  * ------------
@@ -152,11 +151,6 @@ void if_display_help(void);
  * ------------
  */
 void if_search_next(void);
-
-/* if_tty_toggle: 
- * ------------
- */
-void if_tty_toggle(void);
 
 /* if_draw:
  * -----------

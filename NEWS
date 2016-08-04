@@ -1,3 +1,9 @@
+  * Remove the TTY mode and TTY window from CGDB. This previously allowed
+    you to send input to the program being debugged through the TTY
+    window in CGDB. It is better for the user to run their program in
+    one terminal and attach to it with CGDB from another terminal in
+    order to get terminal input and terminal output working correctly.
+
   * Add the -w command line option to CGDB. It directs CGDB to wait
     to start until either a debugger is attached to it, or until a key
     is written to it's stdin. This helps simplify debugging cgdb itself.

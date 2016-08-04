@@ -86,12 +86,6 @@ static int interface_winminheight = 0;
 /* The offset that determines allows gdb/sources window to grow or shrink */
 static int window_shift;
 
-/* This is for the tty I/O window */
-#define TTY_WIN_DEFAULT_HEIGHT ((interface_winminheight>4)?interface_winminheight:4)
-static int tty_win_height_shift = 0;
-
-#define TTY_WIN_OFFSET ( TTY_WIN_DEFAULT_HEIGHT + tty_win_height_shift )
-
 /* Height and width of the terminal */
 #define HEIGHT      (screen_size.ws_row)
 #define WIDTH       (screen_size.ws_col)
@@ -107,11 +101,8 @@ WIN_SPLIT_ORIENTATION_TYPE cur_split_orientation = WSO_HORIZONTAL;
 static int curses_initialized = 0;  /* Flag: Curses has been initialized */
 static int curses_colors = 0;   /* Flag: Terminal supports colors */
 static struct scroller *gdb_win = NULL; /* The GDB input/output window */
-static struct scroller *tty_win = NULL; /* The tty input/output window */
-static int tty_win_on = 0;      /* Flag: tty window being shown */
 static struct sviewer *src_win = NULL;  /* The source viewer window */
 static WINDOW *status_win = NULL;   /* The status line */
-static WINDOW *tty_status_win = NULL;   /* The tty status line */
 static enum Focus focus = GDB;  /* Which pane is currently focused */
 static struct winsize screen_size;  /* Screen size */
 
@@ -271,8 +262,8 @@ static int get_sep_width(void)
     return 1;
 }
 
-/* This is for the tty I/O window */
-static int get_tty_row(void)
+/* This is for the debugger window */
+static int get_gdb_row(void)
 {
     int result;
 
@@ -283,87 +274,6 @@ static int get_tty_row(void)
         case WSO_VERTICAL:
             result = 0;
             break;
-    }
-
-    return result;
-}
-
-static int get_tty_col(void)
-{
-    int result;
-
-    switch (cur_split_orientation) {
-        case WSO_HORIZONTAL:
-            result = 0;
-            break;
-        case WSO_VERTICAL:
-            result = get_sep_col() + get_sep_width();
-            break;
-    }
-
-    return result;
-}
-
-static int get_tty_height(void)
-{
-    return TTY_WIN_OFFSET;
-}
-
-static int get_gdb_width(void);
-
-static int get_tty_width(void)
-{
-    int result;
-
-    switch (cur_split_orientation) {
-        case WSO_HORIZONTAL:
-            result = screen_size.ws_col;
-            break;
-        case WSO_VERTICAL:
-            result = get_gdb_width();
-            break;
-    }
-
-    return result;
-}
-
-/* This is for the tty I/O status bar line */
-static int get_tty_status_row(void)
-{
-    return get_tty_row() + get_tty_height();
-}
-
-static int get_tty_status_col(void)
-{
-    return get_tty_col();
-}
-
-static int get_tty_status_height(void)
-{
-    return 1;
-}
-
-static int get_tty_status_width(void)
-{
-    return get_tty_width();
-}
-
-/* This is for the debugger window */
-static int get_gdb_row(void)
-{
-    int result;
-
-    if (tty_win_on) {
-        result = get_tty_status_row() + get_tty_status_height();
-    }  else {
-        switch (cur_split_orientation) {
-            case WSO_HORIZONTAL:
-                result = get_src_status_row() + get_src_status_height();
-                break;
-            case WSO_VERTICAL:
-                result = 0;
-                break;
-        }
     }
 
     return result;
@@ -394,14 +304,11 @@ int get_gdb_height(void)
             int window_size = ((screen_size.ws_row / 2) - window_shift - 1);
             int odd_screen_size = (screen_size.ws_row % 2);
 
-            if (tty_win_on)
-                return window_size - TTY_WIN_OFFSET + odd_screen_size - 1;
-
             result = window_size + odd_screen_size;
             break;
         }
         case WSO_VERTICAL:
-            result = screen_size.ws_row - (tty_win_on ? TTY_WIN_OFFSET + 1 : 0);
+            result = screen_size.ws_row;
             break;
     }
 
@@ -455,32 +362,16 @@ static void update_status_win(void)
     if (hl_groups_get_attr(hl_groups_instance, HLG_STATUS_BAR, &attr) == -1)
         return;
 
-    /* Update the tty status bar */
-    if (tty_win_on) {
-        wattron(tty_status_win, attr);
-        for (pos = 0; pos < WIDTH; pos++)
-            mvwprintw(tty_status_win, 0, pos, " ");
-
-        mvwprintw(tty_status_win, 0, 0, (char *) tgdb_tty_name(tgdb));
-        wattroff(tty_status_win, attr);
-    }
-
     /* Print white background */
     wattron(status_win, attr);
     for (pos = 0; pos < WIDTH; pos++)
         mvwprintw(status_win, 0, pos, " ");
-    if (tty_win_on)
-        wattron(tty_status_win, attr);
     /* Show the user which window is focused */
     if (focus == GDB)
         mvwprintw(status_win, 0, WIDTH - 1, "*");
-    else if (focus == TTY && tty_win_on)
-        mvwprintw(tty_status_win, 0, WIDTH - 1, "*");
     else if (focus == CGDB || focus == CGDB_STATUS_BAR)
         mvwprintw(status_win, 0, WIDTH - 1, " ");
     wattroff(status_win, attr);
-    if (tty_win_on)
-        wattroff(tty_status_win, attr);
 
     /* Print the regex that the user is looking for Forward */
     if (focus == CGDB_STATUS_BAR && sbc_kind == SBC_REGEX
@@ -574,17 +465,11 @@ void if_draw(void)
     if (get_src_height() != 0 && get_gdb_height() != 0)
         wrefresh(status_win);
 
-    if (tty_win_on)
-        wrefresh(tty_status_win);
-
     if (get_src_height() > 0)
         source_display(src_win, focus == CGDB);
 
     if (cur_split_orientation == WSO_VERTICAL)
         separator_display();
-
-    if (tty_win_on && get_tty_height() > 0)
-        scr_refresh(tty_win, focus == TTY);
 
     if (get_gdb_height() > 0)
         scr_refresh(gdb_win, focus == GDB);
@@ -607,11 +492,8 @@ void if_draw(void)
 static void validate_window_sizes(void)
 {
     int h_or_w = cur_split_orientation == WSO_HORIZONTAL ? HEIGHT : WIDTH;
-    int tty_window_offset = (tty_win_on
-            && cur_split_orientation == WSO_HORIZONTAL)
-            ? TTY_WIN_OFFSET + 1 : 0;
     int odd_size = (h_or_w + 1) % 2;
-    int max_window_size_shift = (h_or_w / 2) - tty_window_offset - odd_size;
+    int max_window_size_shift = (h_or_w / 2) - odd_size;
     int min_window_size_shift = -(h_or_w / 2);
 
     /* update max and min based off of users winminheight request */
@@ -650,19 +532,6 @@ static int if_layout()
                     get_gdb_width());
     }
 
-    /* Initialize TTY I/O window */
-    if (tty_win == NULL) {
-        tty_win =
-                scr_new(get_tty_row(), get_tty_col(), get_tty_height(),
-                get_tty_width());
-        if (tty_win == NULL)
-            return 2;
-    } else {                    /* Resize the GDB I/O window */
-        if (get_tty_height() > 0)
-            scr_move(tty_win, get_tty_row(), get_tty_col(), get_tty_height(),
-                    get_tty_width());
-    }
-
     /* Initialize the source viewer window */
     if (src_win == NULL) {
         src_win =
@@ -679,12 +548,6 @@ static int if_layout()
     /* Initialize the status bar window */
     status_win = newwin(get_src_status_height(), get_src_status_width(),
             get_src_status_row(), get_src_status_col());
-
-    /* Initialize the tty status bar window */
-    if (tty_win_on)
-        tty_status_win =
-                newwin(get_tty_status_height(), get_tty_status_width(),
-                get_tty_status_row(), get_tty_status_col());
 
     if_draw();
 
@@ -732,54 +595,40 @@ int if_resize_term(void)
 }
 
 /*
- * increase_win_height: Increase size of source or tty window
+ * increase_win_height: Increase size of the source window
  * ____________________
  *
- * Param jump_or_tty - if 0, increase source window by 1
- *                     if 1, if tty window is visible, increase it by 1
- *                           else jump source window to next biggest quarter 
+ * Param jump - if 0, increase source window by 1
+ *              if 1, jump source window to next biggest quarter 
  *
  */
-static void increase_win_height(int jump_or_tty)
+static void increase_win_height(int jump)
 {
-    int height = (HEIGHT / 2) - ((tty_win_on) ? TTY_WIN_OFFSET + 1 : 0);
+    int height = HEIGHT / 2;
     int old_window_height_shift = window_shift;
-    int old_tty_win_height_shift = tty_win_height_shift;
 
-    if (jump_or_tty) {
+    if (jump) {
         /* user input: '+' */
-        if (tty_win_on) {
-            /* tty window is visible */
-            height = get_gdb_height() + get_tty_height();
+        if (cur_win_split == WIN_SPLIT_FREE) {
+            /* cur position is not on mark, find nearest mark */
+            cur_win_split = (WIN_SPLIT_TYPE) ((2 * window_shift) / height);
 
-            if (tty_win_height_shift + TTY_WIN_DEFAULT_HEIGHT <
-                    height - interface_winminheight) {
-                /* increase tty window size by 1 */
-                tty_win_height_shift++;
-            }
-        } else {
-            /* no tty window */
-            if (cur_win_split == WIN_SPLIT_FREE) {
-                /* cur position is not on mark, find nearest mark */
-                cur_win_split = (WIN_SPLIT_TYPE) ((2 * window_shift) / height);
-
-                /* handle rounding on either side of mid-way mark */
-                if (window_shift > 0) {
-                    cur_win_split = (WIN_SPLIT_TYPE)(cur_win_split + 1);
-                }
-            } else {
-                /* increase to next mark */
+            /* handle rounding on either side of mid-way mark */
+            if (window_shift > 0) {
                 cur_win_split = (WIN_SPLIT_TYPE)(cur_win_split + 1);
             }
-
-            /* check split bounds */
-            if (cur_win_split > WIN_SPLIT_SRC_FULL) {
-                cur_win_split = WIN_SPLIT_SRC_FULL;
-            }
-
-            /* set window height to specified quarter mark */
-            window_shift = (int) (height * (cur_win_split / 2.0));
+        } else {
+            /* increase to next mark */
+            cur_win_split = (WIN_SPLIT_TYPE)(cur_win_split + 1);
         }
+
+        /* check split bounds */
+        if (cur_win_split > WIN_SPLIT_SRC_FULL) {
+            cur_win_split = WIN_SPLIT_SRC_FULL;
+        }
+
+        /* set window height to specified quarter mark */
+        window_shift = (int) (height * (cur_win_split / 2.0));
     } else {
         /* user input: '=' */
         cur_win_split = WIN_SPLIT_FREE; /* cur split is not on a mark */
@@ -788,59 +637,46 @@ static void increase_win_height(int jump_or_tty)
     }
 
     /* reduce flicker by avoiding unnecessary redraws */
-    if (window_shift != old_window_height_shift ||
-            tty_win_height_shift != old_tty_win_height_shift) {
+    if (window_shift != old_window_height_shift) {
         if_layout();
     }
 }
 
 /*
- * decrease_win_height: Decrease size of source or tty window
+ * decrease_win_height: Decrease size of the source window
  * ____________________
  *
- * Param jump_or_tty - if 0, decrease source window by 1
- *                     if 1, if tty window is visible, decrease it by 1
- *                           else jump source window to next smallest quarter 
+ * Param jump - if 0, decrease source window by 1
+ *              if 1, jump source window to next smallest quarter 
  *
  */
-static void decrease_win_height(int jump_or_tty)
+static void decrease_win_height(int jump)
 {
     int height = HEIGHT / 2;
     int old_window_height_shift = window_shift;
-    int old_tty_win_height_shift = tty_win_height_shift;
 
-    if (jump_or_tty) {
+    if (jump) {
         /* user input: '_' */
-        if (tty_win_on) {
-            /* tty window is visible */
-            if (tty_win_height_shift >
-                    -(TTY_WIN_DEFAULT_HEIGHT - interface_winminheight)) {
-                /* decrease tty window size by 1 */
-                tty_win_height_shift--;
-            }
-        } else {
-            /* no tty window */
-            if (cur_win_split == WIN_SPLIT_FREE) {
-                /* cur position is not on mark, find nearest mark */
-                cur_win_split = (WIN_SPLIT_TYPE) ((2 * window_shift) / height);
+        if (cur_win_split == WIN_SPLIT_FREE) {
+            /* cur position is not on mark, find nearest mark */
+            cur_win_split = (WIN_SPLIT_TYPE) ((2 * window_shift) / height);
 
-                /* handle rounding on either side of mid-way mark */
-                if (window_shift < 0) {
-                    cur_win_split = (WIN_SPLIT_TYPE)(cur_win_split - 1);
-                }
-            } else {
-                /* decrease to next mark */
+            /* handle rounding on either side of mid-way mark */
+            if (window_shift < 0) {
                 cur_win_split = (WIN_SPLIT_TYPE)(cur_win_split - 1);
             }
-
-            /* check split bounds */
-            if (cur_win_split < WIN_SPLIT_GDB_FULL) {
-                cur_win_split = WIN_SPLIT_GDB_FULL;
-            }
-
-            /* set window height to specified quarter mark */
-            window_shift = (int) (height * (cur_win_split / 2.0));
+        } else {
+            /* decrease to next mark */
+            cur_win_split = (WIN_SPLIT_TYPE)(cur_win_split - 1);
         }
+
+        /* check split bounds */
+        if (cur_win_split < WIN_SPLIT_GDB_FULL) {
+            cur_win_split = WIN_SPLIT_GDB_FULL;
+        }
+
+        /* set window height to specified quarter mark */
+        window_shift = (int) (height * (cur_win_split / 2.0));
     } else {
         /* user input: '-' */
         cur_win_split = WIN_SPLIT_FREE; /* cur split is not on a mark */
@@ -849,8 +685,7 @@ static void decrease_win_height(int jump_or_tty)
     }
 
     /* reduce flicker by avoiding unnecessary redraws */
-    if (window_shift != old_window_height_shift ||
-            tty_win_height_shift != old_tty_win_height_shift) {
+    if (window_shift != old_window_height_shift) {
         if_layout();
     }
 }
@@ -896,40 +731,6 @@ static void if_run_command(struct sviewer *sview, struct ibuf *ibuf_command)
     }
 
     if_draw();
-}
-
-/* tty_input: Handles user input to the tty I/O window.
- * ----------
- *
- *   key:  Keystroke received.
- *
- * Return Value:    0 if internal key was used, 
- *                  2 if input to tty,
- *                  -1        : Error resizing terminal -- terminal too small
- */
-static int tty_input(int key)
-{
-    /* Handle special keys */
-    switch (key) {
-        case CGDB_KEY_PPAGE:
-            scr_up(tty_win, get_tty_height() - 1);
-            break;
-        case CGDB_KEY_NPAGE:
-            scr_down(tty_win, get_tty_height() - 1);
-            break;
-        case CGDB_KEY_F11:
-            scr_home(tty_win);
-            break;
-        case CGDB_KEY_F12:
-            scr_end(tty_win);
-            break;
-        default:
-            return 2;
-    }
-
-    if_draw();
-
-    return 0;
 }
 
 /* gdb_input: Handles user input to the GDB window.
@@ -1237,11 +1038,9 @@ static void source_input(struct sviewer *sview, int key)
             decrease_win_height(0);
             break;
         case '+':
-            /* inc to jump or inc tty */
             increase_win_height(1);
             break;
         case '_':
-            /* dec to jump or dec tty */
             decrease_win_height(1);
             break;
         case 'o':
@@ -1373,9 +1172,6 @@ static int cgdb_input(int key)
         case 'i':
             if_set_focus(GDB);
             return 0;
-        case 'I':
-            if_set_focus(TTY);
-            return 0;
         case ':':
             /* Set the type of the command the user is typing in the status bar */
             sbc_kind = SBC_NORMAL;
@@ -1411,24 +1207,10 @@ static int cgdb_input(int key)
                                 !regex_direction_last, regex_icase);
             if_draw();
             break;
-        case 'T':
-            if (tty_win_on) {
-                tty_win_on = 0;
-                focus = CGDB;
-            } else {
-                tty_win_on = 1;
-                focus = TTY;
-            }
-
-            if_layout();
-
-            break;
         case CGDB_KEY_CTRL_T:
             if (tgdb_tty_new(tgdb) == -1) {
                 /* Error */
             } else {
-                scr_free(tty_win);
-                tty_win = NULL;
                 if_layout();
             }
 
@@ -1541,8 +1323,6 @@ int internal_if_input(int key)
     switch (focus) {
         case CGDB:
             return cgdb_input(key);
-        case TTY:
-            return tty_input(key);
         case GDB:
             return gdb_input(key);
         case FILE_DLG:
@@ -1586,21 +1366,8 @@ int if_input(int key)
 
 void if_tty_print(const char *buf)
 {
-    /* If the tty I/O window is not open send output to gdb window */
-    if (!tty_win_on)
-        if_print(buf);
-
-    /* Print it to the scroller */
-    scr_add(tty_win, buf);
-
-    /* Only need to redraw if tty_win is being displayed */
-    if (tty_win_on && get_gdb_height() > 0) {
-        scr_refresh(tty_win, focus == TTY);
-
-        /* Make sure cursor reappears in source window if focus is there */
-        if (focus == CGDB)
-            wrefresh(src_win->win);
-    }
+    /* Send output to the gdb buffer */
+    if_print(buf);
 }
 
 void if_print(const char *buf)
@@ -1682,14 +1449,8 @@ void if_shutdown(void)
     if (status_win != NULL)
         delwin(status_win);
 
-    if (tty_status_win != NULL)
-        delwin(tty_status_win);
-
     if (gdb_win != NULL)
         scr_free(gdb_win);
-
-    if (tty_win != NULL)
-        scr_free(tty_win);
 
     if (src_win != NULL)
         source_free(src_win);
@@ -1705,12 +1466,6 @@ void if_set_focus(Focus f)
         case GDB:
             focus = f;
             if_draw();
-            break;
-        case TTY:
-            if (tty_win_on) {
-                focus = f;
-                if_draw();
-            }
             break;
         case CGDB:
             focus = f;
@@ -1766,8 +1521,6 @@ void if_highlight_sviewer(enum tokenizer_language_support l)
 int if_change_winminheight(int value)
 {
     if (value < 0)
-        return -1;
-    else if (tty_win_on && value > HEIGHT / 3)
         return -1;
     else if (value > HEIGHT / 2)
         return -1;

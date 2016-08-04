@@ -166,7 +166,6 @@ static int command_do_tgdbcommand(enum tgdb_command_type param);
 
 static int command_focus_cgdb(int param);
 static int command_focus_gdb(int param);
-static int command_focus_tty(int param);
 
 static int command_do_bang(int param);
 static int command_do_focus(int param);
@@ -532,12 +531,6 @@ int command_focus_gdb(int param)
     return 0;
 }
 
-int command_focus_tty(int param)
-{
-    if_set_focus(TTY);
-    return 0;
-}
-
 int command_do_bang(int param)
 {
     return 0;
@@ -568,8 +561,6 @@ int command_do_focus(int param)
         command_focus_cgdb(0);
     else if (strcasecmp(value, "gdb") == 0)
         command_focus_gdb(0);
-    else if (strcasecmp(value, "tty") == 0)
-        command_focus_tty(0);
     else
         return 1;
 
