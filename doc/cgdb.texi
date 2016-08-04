@@ -663,7 +663,14 @@ characters.  The default value for @var{number} is 8.
 @item :set wmh=@var{number}
 @itemx :set winminheight=@var{number}
 The minimal height of a window.  Windows will never become smaller than 
-this value.  The default value for @var{number} is 0.
+this value.  The default value for @var{number} is 0. This is useful
+when @var{winsplitorientation} is set to @samp{horizontal}.
+
+@item :set wmw=@var{number}
+@itemx :set winminwidth=@var{number}
+The minimal width of a window.  Windows will never become smaller than 
+this value.  The default value for @var{number} is 0. This is useful
+when @var{winsplitorientation} is set to @samp{vertical}.
 
 @item :set winsplit=@var{style}
 Set the split point between source and GDB window.  This is especially useful

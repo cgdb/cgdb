@@ -79,9 +79,11 @@ extern struct tgdb *tgdb;
 /* Definitions */
 /* ----------- */
 
-/* This determines the minimum number of rows wants to close a window too 
- * A window should never become smaller than this size */
+/* The minimum number of rows the user wants a window to shrink. */
 static int interface_winminheight = 0;
+
+/* The minimum number of columns the user wants a window to shrink. */
+static int interface_winminwidth = 0;
 
 /* The offset that determines allows gdb/sources window to grow or shrink */
 static int window_shift;
@@ -486,7 +488,7 @@ void if_draw(void)
  *
  * This will make sure that the gdb_window, status_bar and source window
  * have appropriate sizes. Each of the windows will not be able to grow
- * smaller than INTERFACE_WINMINHEIGHT in size. It will also restrict the
+ * smaller than WINMINHEIGHT or WINMINWIDTH in size. It will also restrict the
  * size of windows to being within the size of the terminal.
  */
 static void validate_window_sizes(void)
@@ -497,8 +499,16 @@ static void validate_window_sizes(void)
     int min_window_size_shift = -(h_or_w / 2);
 
     /* update max and min based off of users winminheight request */
-    min_window_size_shift += interface_winminheight;
-    max_window_size_shift -= interface_winminheight;
+    switch (cur_split_orientation) {
+        case WSO_HORIZONTAL:
+            min_window_size_shift += interface_winminheight;
+            max_window_size_shift -= interface_winminheight;
+            break;
+        case WSO_VERTICAL:
+            min_window_size_shift += interface_winminwidth;
+            max_window_size_shift -= interface_winminwidth;
+            break;
+    }
 
     /* Make sure that the windows offset is within its bounds: 
      * This checks the window offset.
@@ -605,7 +615,7 @@ int if_resize_term(void)
 static void increase_win_height(int jump)
 {
     int height = HEIGHT / 2;
-    int old_window_height_shift = window_shift;
+    int old_window_shift = window_shift;
 
     if (jump) {
         /* user input: '+' */
@@ -637,7 +647,7 @@ static void increase_win_height(int jump)
     }
 
     /* reduce flicker by avoiding unnecessary redraws */
-    if (window_shift != old_window_height_shift) {
+    if (window_shift != old_window_shift) {
         if_layout();
     }
 }
@@ -653,7 +663,7 @@ static void increase_win_height(int jump)
 static void decrease_win_height(int jump)
 {
     int height = HEIGHT / 2;
-    int old_window_height_shift = window_shift;
+    int old_window_shift = window_shift;
 
     if (jump) {
         /* user input: '_' */
@@ -685,7 +695,7 @@ static void decrease_win_height(int jump)
     }
 
     /* reduce flicker by avoiding unnecessary redraws */
-    if (window_shift != old_window_height_shift) {
+    if (window_shift != old_window_shift) {
         if_layout();
     }
 }
@@ -1526,6 +1536,19 @@ int if_change_winminheight(int value)
         return -1;
 
     interface_winminheight = value;
+    if_layout();
+
+    return 0;
+}
+
+int if_change_winminwidth(int value)
+{
+    if (value < 0)
+        return -1;
+    else if (value > WIDTH / 2)
+        return -1;
+
+    interface_winminwidth = value;
     if_layout();
 
     return 0;

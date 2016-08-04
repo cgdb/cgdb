@@ -189,6 +189,14 @@ void if_highlight_sviewer(enum tokenizer_language_support l);
  */
 int if_change_winminheight(int value);
 
+/* if_change_winminwidth:
+ * 
+ * This sets the minimal width of a window. Windows will never become smaller.
+ *
+ * Returns -1 if value is not acceptable. Otherwise, 0.
+ */
+int if_change_winminwidth(int value);
+
 /**
  * This get's the height size of the GDB window.
  *

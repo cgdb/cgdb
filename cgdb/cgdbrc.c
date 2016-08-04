@@ -53,6 +53,7 @@ static int command_set_timeoutlen(int value);
 static int command_set_ttimeout(int value);
 static int command_set_ttimeoutlen(int value);
 static int command_set_winminheight(int value);
+static int command_set_winminwidth(int value);
 static int command_set_winsplit(const char *value);
 static int command_set_winsplitorientation(const char *value);
 static int command_set_syntax_type(const char *value);
@@ -150,6 +151,9 @@ static struct ConfigVariable {
             /* winminheight */
     {
     "winminheight", "wmh", CONFIG_TYPE_FUNC_INT, (void *)&command_set_winminheight},
+            /* winminwidth */
+    {
+    "winminwidth", "wmw", CONFIG_TYPE_FUNC_INT, (void *)&command_set_winminwidth},
             /* winsplit */
     {
     "winsplit", "winsplit", CONFIG_TYPE_FUNC_STRING, (void *)command_set_winsplit},
@@ -415,6 +419,19 @@ static int command_set_winminheight(int value)
     option.option_kind = CGDBRC_WINMINHEIGHT;
 
     if (if_change_winminheight(value) == -1)
+        return 1;
+
+    option.variant.int_val = value;
+    return cgdbrc_set_val(option);
+}
+
+static int command_set_winminwidth(int value)
+{
+    struct cgdbrc_config_option option;
+
+    option.option_kind = CGDBRC_WINMINWIDTH;
+
+    if (if_change_winminwidth(value) == -1)
         return 1;
 
     option.variant.int_val = value;

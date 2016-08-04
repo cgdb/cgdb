@@ -125,6 +125,7 @@ enum cgdbrc_option_kind {
     CGDBRC_TTIMEOUT,
     CGDBRC_TTIMEOUT_LEN,
     CGDBRC_WINMINHEIGHT,
+    CGDBRC_WINMINWIDTH,
     CGDBRC_WINSPLIT,
     CGDBRC_WINSPLITORIENTATION,
     CGDBRC_WRAPSCAN
@@ -148,6 +149,7 @@ struct cgdbrc_config_option {
         /* option_kind == CGDBRC_TTIMEOUT */
         /* option_kind == CGDBRC_TTIMEOUTLEN */
         /* option_kind == CGDBRC_WINMINHEIGHT */
+        /* option_kind == CGDBRC_WINMINWIDTH */
         /* option_kind == CGDBRC_WRAPSCAN */
         int int_val;
         /* option_kind == CGDBRC_SYNTAX */

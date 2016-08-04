@@ -1,3 +1,14 @@
+  * Add the winminwidth option to CGDB. It controls the minimum width
+    that a window can be resized. It corresponds to the winminheight
+    option. This was introduced now that CGDB can have vertically split
+    windows.
+
+  * Add support for vertical or horizontal splitting of the CGDB/GDB
+    windows. Thanks to Daniel Cohen for the original implementation
+    of this idea! You can change the window orientation by using the
+    command 'set winsplitorientation=horizontal or vertical'.
+    horizontal is the default orientation.
+
   * Remove the TTY mode and TTY window from CGDB. This previously allowed
     you to send input to the program being debugged through the TTY
     window in CGDB. It is better for the user to run their program in
