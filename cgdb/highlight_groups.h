@@ -127,20 +127,21 @@ int hl_groups_setup(hl_groups_ptr hl_groups);
  * Get the attributes that may be passed to wattron to tell the curses library
  * how to print this particular group.
  *
+ * Note, this function can not fail.
+ *
  * \param hl_groups
  * An instance of hl_groups to operate on.
  *
  * \param kind
  * The particular group to get the attributes for.
  *
- * \param attr
- * The attributes associated with this pair.
- *
  * \return
- * 0 on success or -1 on error
+ * The attributes associated with the highlight group and the kind.
+ *
+ * If hl_groups is invalid than A_NORMAL will be returned or A_BOLD when
+ * kind is HLG_EXECUTING_LINE_HIGHLIGHT.
  */
-int hl_groups_get_attr(hl_groups_ptr hl_groups, enum hl_group_kind kind,
-        int *attr);
+int hl_groups_get_attr(hl_groups_ptr hl_groups, enum hl_group_kind kind);
 
 /**
  * Parse a particular command. This may move into the cgdbrc file later on.

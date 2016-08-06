@@ -265,7 +265,7 @@ void hl_wprintw(WINDOW * win, const char *line, int width, int offset)
         wprintw(win, " ");
 
     /* Set the color appropriately */
-    hl_groups_get_attr(hl_groups_instance, color, &attr);
+    attr = hl_groups_get_attr(hl_groups_instance, color);
     wattron(win, attr);
 
     /* Print string 1 char at a time */
@@ -275,7 +275,7 @@ void hl_wprintw(WINDOW * win, const char *line, int width, int offset)
                 wattroff(win, attr);
                 color = (enum hl_group_kind) line[i];
 
-                hl_groups_get_attr(hl_groups_instance, color, &attr);
+                attr = hl_groups_get_attr(hl_groups_instance, color);
                 wattron(win, attr);
             }
         } else {

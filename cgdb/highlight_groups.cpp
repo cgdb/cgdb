@@ -56,6 +56,10 @@ static struct hl_group_info *lookup_group_info_by_key(struct hl_groups *groups,
     struct hl_group_info *lgroups;
     int i;
 
+    if (!groups) {
+        return NULL;
+    }
+
     for (i = 0; i < HLG_LAST; ++i) {
         lgroups = &groups->groups[i];
         if (kind == lgroups->kind)
@@ -468,25 +472,22 @@ int hl_groups_setup(hl_groups_ptr hl_groups)
 }
 
 int
-hl_groups_get_attr(hl_groups_ptr hl_groups, enum hl_group_kind kind, int *attr)
+hl_groups_get_attr(hl_groups_ptr hl_groups, enum hl_group_kind kind)
 {
     struct hl_group_info *info = lookup_group_info_by_key(hl_groups, kind);
+    int attr = (kind == HLG_EXECUTING_LINE_HIGHLIGHT) ? A_BOLD : A_NORMAL;
 
-    /* Default to normal */
-    *attr = (kind == HLG_EXECUTING_LINE_HIGHLIGHT) ? A_BOLD : A_NORMAL;
-
-    if (!hl_groups || !info || !attr)
-        return -1;
-
-    if (!hl_groups->in_color)
-        *attr = info->mono_attrs;
-    else {
-        *attr = info->color_attrs;
-        if (info->color_pair)
-            *attr |= COLOR_PAIR(info->color_pair);
+    if (hl_groups && info) {
+        if (!hl_groups->in_color)
+            attr = info->mono_attrs;
+        else {
+            attr = info->color_attrs;
+            if (info->color_pair)
+                attr |= COLOR_PAIR(info->color_pair);
+        }
     }
 
-    return 0;
+    return attr;
 }
 
 int hl_groups_parse_config(hl_groups_ptr hl_groups)

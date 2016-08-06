@@ -261,10 +261,14 @@ int filedlg_display(struct filedlg *fd)
     int lwidth;
     int file;
     int i;
-    int attr;
+    int statusbar;
     static const char label[] = "Select a file or press q to cancel.";
+    int exelinearrow;
 
     curs_set(0);
+
+    statusbar = hl_groups_get_attr(hl_groups_instance, HLG_STATUS_BAR);
+    exelinearrow = hl_groups_get_attr(hl_groups_instance, HLG_EXECUTING_LINE_ARROW);
 
     /* Check that a file is loaded */
     if (fd == NULL || fd->buf == NULL || fd->buf->files == NULL) {
@@ -319,12 +323,10 @@ int filedlg_display(struct filedlg *fd)
                 wprintw(fd->win, fmt, file + 1);
                 wattroff(fd->win, A_BOLD);
 
-                hl_groups_get_attr(hl_groups_instance,
-                    HLG_EXECUTING_LINE_ARROW, &attr);
-                wattron(fd->win, attr);
+                wattron(fd->win, exelinearrow);
                 waddch(fd->win, '-');
                 waddch(fd->win, '>');
-                wattroff(fd->win, attr);
+                wattroff(fd->win, exelinearrow);
                 if (fd->buf->cur_line != NULL)
                     hl_wprintw(fd->win, fd->buf->cur_line, width - lwidth - 2,
                             fd->buf->sel_col);
@@ -360,8 +362,7 @@ int filedlg_display(struct filedlg *fd)
     wmove(fd->win, height, 0);
 
     /* Print white background */
-    hl_groups_get_attr(hl_groups_instance, HLG_STATUS_BAR, &attr);
-    wattron(fd->win, attr);
+    wattron(fd->win, statusbar);
 
     for (i = 0; i < width; i++)
         mvwprintw(fd->win, height - 1, i, " ");
@@ -371,7 +372,7 @@ int filedlg_display(struct filedlg *fd)
     else if (regex_search)
         mvwprintw(fd->win, height - 1, 0, "RSearch:%s", regex_line);
 
-    wattroff(fd->win, attr);
+    wattroff(fd->win, statusbar);
 
     wmove(fd->win, height - (file - fd->buf->sel_line) - 1, lwidth + 2);
     wrefresh(fd->win);
@@ -384,7 +385,7 @@ void filedlg_display_message(struct filedlg *fd, char *message)
     int height, width, i;
     int attr;
 
-    hl_groups_get_attr(hl_groups_instance, HLG_STATUS_BAR, &attr);
+    attr = hl_groups_get_attr(hl_groups_instance, HLG_STATUS_BAR);
 
     getmaxyx(fd->win, height, width);
 

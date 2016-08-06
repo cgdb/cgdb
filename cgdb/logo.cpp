@@ -120,7 +120,7 @@ void logo_display(WINDOW *win)
     int i, j;                            /* Iterators */
     int attr;
 
-    hl_groups_get_attr (hl_groups_instance, HLG_LOGO, &attr);
+    attr = hl_groups_get_attr (hl_groups_instance, HLG_LOGO);
     
     /* Get dimensions */
     getmaxyx(win, height, width);

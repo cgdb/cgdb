@@ -363,32 +363,22 @@ static void draw_current_line(struct sviewer *sview, int line, int lwidth,
         case EXECUTING_LINE:
             display_style = cgdbrc_get(CGDBRC_EXECUTING_LINE_DISPLAY)->
                     variant.line_display_style;
-            if (hl_groups_get_attr(hl_groups_instance,
-                    HLG_EXECUTING_LINE_ARROW, &arrow_attr) == -1)
-                return;
-
-            if (hl_groups_get_attr(hl_groups_instance,
-                    HLG_EXECUTING_LINE_HIGHLIGHT, &highlight_attr) == -1)
-                return;
-
-            if (hl_groups_get_attr(hl_groups_instance,
-                    HLG_EXECUTING_LINE_BLOCK, &block_attr) == -1)
-                return;
+            arrow_attr = hl_groups_get_attr(hl_groups_instance,
+                    HLG_EXECUTING_LINE_ARROW);
+            highlight_attr = hl_groups_get_attr(hl_groups_instance,
+                    HLG_EXECUTING_LINE_HIGHLIGHT);
+            block_attr = hl_groups_get_attr(hl_groups_instance,
+                    HLG_EXECUTING_LINE_BLOCK);
             break;
         case SELECTED_LINE:
             display_style = cgdbrc_get(CGDBRC_SELECTED_LINE_DISPLAY)->
                     variant.line_display_style;
-            if (hl_groups_get_attr(hl_groups_instance,
-                    HLG_SELECTED_LINE_ARROW, &arrow_attr) == -1)
-                return;
-
-            if (hl_groups_get_attr(hl_groups_instance,
-                    HLG_SELECTED_LINE_HIGHLIGHT, &highlight_attr) == -1)
-                return;
-
-            if (hl_groups_get_attr(hl_groups_instance,
-                    HLG_SELECTED_LINE_BLOCK, &block_attr) == -1)
-                return;
+            arrow_attr = hl_groups_get_attr(hl_groups_instance,
+                    HLG_SELECTED_LINE_ARROW);
+            highlight_attr = hl_groups_get_attr(hl_groups_instance,
+                    HLG_SELECTED_LINE_HIGHLIGHT);
+            block_attr = hl_groups_get_attr(hl_groups_instance,
+                    HLG_SELECTED_LINE_BLOCK);
             break;
     }
 
@@ -725,11 +715,11 @@ int source_display(struct sviewer *sview, int focus)
     int exelinearrow, sellinearrow;
     int enabled_bp, disabled_bp;
 
-    hl_groups_get_attr(hl_groups_instance, HLG_EXECUTING_LINE_ARROW, &exelinearrow);
-    hl_groups_get_attr(hl_groups_instance, HLG_SELECTED_LINE_ARROW, &sellinearrow);
-    hl_groups_get_attr(hl_groups_instance, HLG_SELECTED_LINE_NUMBER, &sellineno);
-    hl_groups_get_attr(hl_groups_instance, HLG_ENABLED_BREAKPOINT, &enabled_bp);
-    hl_groups_get_attr(hl_groups_instance, HLG_DISABLED_BREAKPOINT, &disabled_bp);
+    exelinearrow = hl_groups_get_attr(hl_groups_instance, HLG_EXECUTING_LINE_ARROW);
+    sellinearrow = hl_groups_get_attr(hl_groups_instance, HLG_SELECTED_LINE_ARROW);
+    sellineno = hl_groups_get_attr(hl_groups_instance, HLG_SELECTED_LINE_NUMBER);
+    enabled_bp = hl_groups_get_attr(hl_groups_instance, HLG_ENABLED_BREAKPOINT);
+    disabled_bp = hl_groups_get_attr(hl_groups_instance, HLG_DISABLED_BREAKPOINT);
 
     /* Check that a file is loaded */
     if (sview->cur == NULL || sview->cur->buf->tlines == NULL) {

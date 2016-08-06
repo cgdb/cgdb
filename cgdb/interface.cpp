@@ -386,7 +386,7 @@ static void update_status_win(void)
     char filename[FSUTIL_PATH_MAX];
     int attr;
 
-    hl_groups_get_attr(hl_groups_instance, HLG_STATUS_BAR, &attr);
+    attr = hl_groups_get_attr(hl_groups_instance, HLG_STATUS_BAR);
 
     /* Print white background */
     wattron(status_win, attr);
@@ -437,7 +437,7 @@ void if_display_message(const char *msg, int width, const char *fmt, ...)
     int pos, error_length, length;
     int attr;
 
-    hl_groups_get_attr(hl_groups_instance, HLG_STATUS_BAR, &attr);
+    attr = hl_groups_get_attr(hl_groups_instance, HLG_STATUS_BAR);
 
     curs_set(0);
 
