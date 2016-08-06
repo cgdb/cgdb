@@ -450,16 +450,19 @@ void rlctx_send_user_command(char *line)
     if (length > 0)
         rline_add_history(rline, cline);
 
-    if (is_gdb_tui_command(cline))
-        cline = "echo WARNING: Not executing GDB TUI command.\\n";
+    if (is_gdb_tui_command(cline)) {
+        if_print_message("\nWARNING: Not executing GDB TUI command: %s", cline);
+        rline_clear(rline);
+        rline_rl_forced_update_display(rline);
+    } else {
+        request_ptr = tgdb_request_run_console_command(tgdb, cline);
+        if (!request_ptr)
+            logger_write_pos(logger, __FILE__, __LINE__,
+                    "rlctx_send_user_command\n");
 
-    request_ptr = tgdb_request_run_console_command(tgdb, cline);
-    if (!request_ptr)
-        logger_write_pos(logger, __FILE__, __LINE__,
-                "rlctx_send_user_command\n");
-
-    /* Send this command to TGDB */
-    handle_request(tgdb, request_ptr);
+        /* Send this command to TGDB */
+        handle_request(tgdb, request_ptr);
+    }
 
     ibuf_clear(current_line);
 
