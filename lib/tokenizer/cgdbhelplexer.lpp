@@ -1,6 +1,9 @@
 %option prefix="cgdbhelp_"
 %option outfile="lex.yy.c"
 %option case-insensitive
+%option noyywrap
+%option nounput
+%option noinput
 
 D                       [0-9]
 L                       [a-zA-Z_]
@@ -24,13 +27,16 @@ L                       [a-zA-Z_]
 [`']Normal'             { return TOKENIZER_TEXT; }
 [`']IncSearch'          { return TOKENIZER_SEARCH; }
 [`']StatusLine'         { return TOKENIZER_STATUS_BAR; }
-[`']Arrow'              { return TOKENIZER_ARROW; }
-[`']ArrowSel'           { return TOKENIZER_ARROW_SEL; }
-[`']LineHighlight'      { return TOKENIZER_LINE_HIGHLIGHT; }
+[`']ExecutingLineArrow' { return TOKENIZER_EXECUTING_LINE_ARROW; }
+[`']SelectedLineArrow'  { return TOKENIZER_SELECTED_LINE_ARROW; }
+[`']ExecutingLineHighlight' { return TOKENIZER_EXECUTING_LINE_HIGHLIGHT; }
+[`']SelectedLineHighlight'  { return TOKENIZER_SELECTED_LINE_HIGHLIGHT; }
+[`']ExecutingLineBlock' { return TOKENIZER_EXECUTING_LINE_BLOCK; }
+[`']SelectedLineBlock'  { return TOKENIZER_SELECTED_LINE_BLOCK; }
 [`']Breakpoint'         { return TOKENIZER_ENABLED_BREAKPOINT; }
 [`']DisabledBreakpoint' { return TOKENIZER_DISABLED_BREAKPOINT; }
 [`']SelectedLineNr'     { return TOKENIZER_SELECTED_LINE_NUMBER; }
-[`']SelectedLineArrow'  { return TOKENIZER_ARROW_SEL; }
+[`']ScrollModeStatus'   { return TOKENIZER_SCROLL_MODE_STATUS; }
 [`']Logo'               { return TOKENIZER_LOGO; }
 
 ^[=]+                    { return(TOKENIZER_COMMENT); }
@@ -43,15 +49,3 @@ L                       [a-zA-Z_]
 {L}+                    { return(TOKENIZER_TEXT); 	 }
 .                       { return(TOKENIZER_TEXT);    }
 %%
-
-int cgdbhelp_wrap ( void ) {
-	{
-		/* Silly impossible function call to stop warning of unused functions */
-		if ( 0 ) {
-            char buf[] = "";
-            yyunput(0, buf);
-		}
-	}
-
-	return 1;
-}
