@@ -1,8 +1,33 @@
-/* interface.c:
-* ------------
- * 
+/**
  * Provides the routines for displaying the interface, and interacting with
  * the user via keystrokes.
+ *
+ * When the window orientation is set to horizontal, cgdb will displasy as:
+ *      ---------------
+ *       source window
+ *      ---------------
+ *       status window
+ *      ---------------
+ *       gdb window
+ *      ---------------
+ * In this mode, the winminheight determines how much a window can
+ * shrink vertically. The window_shfit variable keeps track of how far
+ * the source window has been shifted up or down.
+ *
+ * When the window orientation is set to vertical, cgdb will display as:
+ *
+ *      ---------------|------------
+ *       source window | gdb window
+ *                     |
+ *                     |
+ *                     |
+ *                     |
+ *      ---------------|
+ *       status window | 
+ *      ---------------|------------
+ * In this mode, the winminwidth determines how much a window can
+ * shrink horizontally. The window_shfit variable keeps track of how
+ * far the source window has been shifted left or right.
  */
 
 #if HAVE_CONFIG_H
