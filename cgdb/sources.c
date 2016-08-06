@@ -277,7 +277,7 @@ static int load_file_buf(struct buffer *buf, const char *filename)
     FILE *file;
     long file_size;
 
-    if (!(file = fopen(filename, "r")))
+    if (!(file = fopen(filename, "rb")))
         return 1;
 
     file_size = get_file_size(file);
