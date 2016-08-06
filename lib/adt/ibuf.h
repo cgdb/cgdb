@@ -27,9 +27,17 @@ void ibuf_clear(struct ibuf *s);
  */
 void ibuf_addchar(struct ibuf *s, char c);
 
-/* ibuf_add: Adds a char to the infinite buffer
- *  s - the infinite string to modify
- *  d - the string to add
+/**
+ * Adds a char to the infinite buffer.
+ *
+ * @param s
+ * the infinite string to modify
+ *
+ * @param d
+ * the string to add
+ *
+ * @return
+ * The number of characters added to the buffer (the length of d)
  */
 int ibuf_add(struct ibuf *s, const char *d);
 
