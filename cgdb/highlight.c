@@ -80,6 +80,10 @@ static int hlg_from_tokenizer_type(enum tokenizer_type type)
     }
 }
 
+char hl_get_marker(void) {
+    return HL_CHAR;
+}
+
 int highlight_node(const char *filename, struct buffer *buf)
 {
     int ret;

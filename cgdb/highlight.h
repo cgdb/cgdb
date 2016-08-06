@@ -25,6 +25,14 @@
 /* Functions */
 /* --------- */
 
+/**
+ * Get the special market that the highligher is embedding in the text.
+ *
+ * @return
+ * The marker the highligher embeds into the text.
+ */
+char hl_get_marker(void);
+
 /* highlight_node:  Inserts the highlighting tags into the buffer.  Lines in
  * ----------  this file should be displayed with hl_wprintw from now on...
  *

@@ -48,10 +48,6 @@
 #include <ctype.h>
 #endif
 
-#if HAVE_LIMITS_H
-#include <limits.h>             /* CHAR_MAX */
-#endif /* HAVE_LIMITS_H */
-
 /* Local Includes */
 #include "highlight.h"
 #include "sources.h"
@@ -442,10 +438,10 @@ static void draw_current_line(struct sviewer *sview, int line, int lwidth,
             waddch(sview->win, ACS_LTEE);
 
             /* Compute the length of the arrow, respecting tab stops, etc. */
-            if (isspace(otext[0]) || (otext[i] == CHAR_MAX)) {
+            if (isspace(otext[0]) || (otext[i] == hl_get_marker())) {
                 for (i = 0; i < length - 1; i++) {
-                    /* Skip highlight chars (HL_CHAR / CHAR_MAX) */
-                    if ((otext[i] == CHAR_MAX) && otext[i]) {
+                    /* Skip highlight chars */
+                    if ((otext[i] == hl_get_marker()) && otext[i]) {
                         i++;
                         continue;
                     }
@@ -483,8 +479,8 @@ static void draw_current_line(struct sviewer *sview, int line, int lwidth,
             wattron(sview->win, highlight_attr);
             for (i = 0; i < width - lwidth - 2; i++) {
                 if (i < length) {
-                    /* Skip highlight chars (HL_CHAR / CHAR_MAX) */
-                    if ( otext[i] == CHAR_MAX )
+                    /* Skip highlight chars */
+                    if ( otext[i] == hl_get_marker() )
                         i++;
                     else
                         waddch(sview->win, otext[i]);
@@ -501,10 +497,10 @@ static void draw_current_line(struct sviewer *sview, int line, int lwidth,
             waddch(sview->win, VERT_LINE);
 
             /* Compute the length of the arrow, respecting tab stops, etc. */
-            if (isspace(otext[0]) || (otext[i] == CHAR_MAX)) {
+            if (isspace(otext[0]) || (otext[i] == hl_get_marker())) {
                 for (i = 0; i < length - 1; i++) {
-                    /* Skip highlight chars (HL_CHAR / CHAR_MAX) */
-                    if ((otext[i] == CHAR_MAX) && otext[i]) {
+                    /* Skip highlight chars */
+                    if ((otext[i] == hl_get_marker()) && otext[i]) {
                         i++;
                         continue;
                     }
