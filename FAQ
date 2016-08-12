@@ -43,8 +43,7 @@
 	   like this, 'undefined symbol, rl_set_prompt'.
 	2. CGDB depends on ncurses/curses.  The version number is not known.
 	   I have used libncurses.so.5 successfully.
-	3. If you decide to modify the tokenizer library or the config
-	   file module, you will need to have flex installed.
+	3. You will be required to have flex installed.
 	   I have used flex 2.5.4 to build CGDB.
 	4. CGDB uses autoconf/automake to build its configure scripts and
 	   makefiles. At the time of this writing, CGDB was using
