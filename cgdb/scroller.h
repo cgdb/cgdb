@@ -43,6 +43,35 @@ struct scroller {
     int last_tty_attr;
 
     int in_scroll_mode;         /* Currently in scroll mode? */
+    /**
+     * The number of lines to display in the cursor.
+     *
+     * This starts at zero, and only the prompt is displayed in the
+     * scroller. Run cgdb -q to see this.
+     *
+     * Every time another line is added to the scroller, this is increased,
+     * so that more lines are dispalyed. It will ultimatley hit the height
+     * of the scroller and max out.
+     */
+
+    int lines_to_display;
+
+    /**
+     * The last row that the cursor was drawn at.
+     *
+     * There is currently an open issue with the cursor not being removed
+     * from the screen properly by ncurses.
+     *   http://lists.gnu.org/archive/html/bug-ncurses/2016-08/msg00001.html
+     *
+     * When redrawing the window, if the cursor has moved, the previous
+     * cursor is not cleared from the screen with a call to wclrtoeol.
+     *
+     * For now, we call wclear if the cursor was on a line different than
+     * the line we are about to put it on. This variable can be removed
+     * when that is no longer necessary.
+     */
+    int last_cursor_row;
+
     struct {
         int r;                  /* Current line (row) number */
         int c;                  /* Current column number */
@@ -123,6 +152,17 @@ void scr_add(struct scroller *scr, const char *buf, int tty);
  */
 void scr_move(struct scroller *scr,
         int pos_r, int pos_c, int height, int width);
+
+/**
+ * Clear the scroller.
+ *
+ * When the scroller is cleared, only the prompt will be displayed
+ * at the top of the gdb scroller window.
+ *
+ * @param scr
+ * The scroller to clear.
+ */
+void scr_clear(struct scroller *scr);
 
 /* scr_refresh: Refreshes the scroller on the screen, in case the caller
  * ------------ damages the screen area where the scroller is written (or,

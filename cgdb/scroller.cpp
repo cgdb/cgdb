@@ -181,6 +181,8 @@ static void scroller_addline(struct scroller *scr, char *line,
     sl.attrs = attrs;
     sbpush(scr->lines, sl);
 
+    scr->lines_to_display++;
+
     scroller_set_last_tty_attr(scr);
 }
 
@@ -203,6 +205,8 @@ struct scroller *scr_new(int pos_r, int pos_c, int height, int width)
     rv->in_scroll_mode = 0;
     rv->last_tty_line = NULL;
     rv->last_tty_attr = -1;
+    rv->lines_to_display = 0;
+    rv->last_cursor_row = 0;
     rv->win = newwin(height, width, pos_r, pos_c);
 
     /* Start with a single (blank) line */
@@ -478,6 +482,10 @@ static void scr_printline(WINDOW *win, int x, int y, int col,
         wclrtoeol(win);
 }
 
+void scr_clear(struct scroller *scr) {
+    scr->lines_to_display = 0;
+}
+
 void scr_refresh(struct scroller *scr, int focus, enum win_refresh dorefresh)
 {
     int length;                 /* Length of current line */
@@ -501,10 +509,57 @@ void scr_refresh(struct scroller *scr, int focus, enum win_refresh dorefresh)
     r = scr->current.r;
     c = scr->current.c;
 
-    /* Start drawing at the bottom of the viewable space, and work our way up */
+    if (scr->lines_to_display > height) {
+        scr->lines_to_display = height;
+    }
+
+    /**
+     * There is currently an open issue with the cursor not being removed
+     * from the screen properly by ncurses.
+     *   http://lists.gnu.org/archive/html/bug-ncurses/2016-08/msg00001.html
+     *
+     * When redrawing the window, if the cursor has moved, the previous
+     * cursor is not cleared from the screen with a call to wclrtoeol.
+     *
+     * A call to wclear is the only way I've determined to clear the old
+     * cursor. Since it's slow, we only do it when necessary.
+     * That is, if the last cursor position was drawn on a line different
+     * than the next cursor will be.
+     *
+     * I've requested help from the ncurses mailing list, and this
+     * situation may change as I receive new guidance.
+     */
+    if (scr->lines_to_display != scr->last_cursor_row) {
+        wclear(scr->win);
+    }
+
+    /**
+     * Printing the scroller to the gdb window.
+     *
+     * The gdb window has a certain dimension (height and width).
+     * The scroller has a certain number of rows to print.
+     *
+     * When starting cgdb, or when the user clears the screen with Ctrl-L,
+     * the entire scroller buffer is not displayed in the gdb window.
+     *
+     * The gdb readline input will be displayed just below the last
+     * line of output in the scroller.
+     *
+     * In order to display the scroller buffer, first determine how many
+     * lines should be displayed. Then start drawing from the bottom of
+     * the viewable space and work our way up.
+     */
     for (nlines = 1; nlines <= height; nlines++) {
+
+        /* Empty lines below the scroller prompt should be empty.
+         * When in scroller mode, there should be no empty lines on the
+         * bottom. */
+        if (!scr->in_scroll_mode && nlines <= height - scr->lines_to_display) {
+            wmove(scr->win, height - nlines, 0);
+            wclrtoeol(scr->win);
+        } 
         /* Print the current line [segment] */
-        if (r >= 0) {
+        else if (r >= 0) {
             struct scroller_line *sline = &scr->lines[r];
 
             scr_printline(scr->win, 0, height - nlines, c, sline, width);
@@ -520,6 +575,9 @@ void scr_refresh(struct scroller *scr, int focus, enum win_refresh dorefresh)
                         c = ((length - 1) / width) * width;
                 }
             }
+        /* Empty lines above the first line in the scroller should be empty.
+         * Since the scroller starts at the top, this should only occur when
+         * in the scroll mode. */
         } else {
             wmove(scr->win, height - nlines, 0);
             wclrtoeol(scr->win);
@@ -542,10 +600,18 @@ void scr_refresh(struct scroller *scr, int focus, enum win_refresh dorefresh)
     }
 
     length = scr->lines[scr->current.r].line_len - scr->current.c;
-    if (focus && scr->current.r == sbcount(scr->lines) - 1 && length <= width) {
-        /* We're on the last line, draw the cursor */
+
+    /* Only show the cursor when
+     * - the scroller is in focus
+     * - on the last line
+     * - when it is within the width of the screen
+     * - when not in scroller mode
+     */ 
+    if (focus && scr->current.r == sbcount(scr->lines) - 1 &&
+        length <= width && !scr->in_scroll_mode) {
+        scr->last_cursor_row = scr->lines_to_display;
         curs_set(1);
-        wmove(scr->win, height - 1, scr->current.pos % width);
+        wmove(scr->win, scr->lines_to_display-1, scr->current.pos % width);
     } else {
         /* Hide the cursor */
         curs_set(0);

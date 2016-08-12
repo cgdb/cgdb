@@ -839,6 +839,15 @@ static int gdb_input(int key)
             case CGDB_KEY_PPAGE:
                 scr_up(gdb_win, get_gdb_height() - 1);
                 break;
+            case CGDB_KEY_CTRL_L:
+                scr_clear(gdb_win);
+
+                /* The return 1 tells readline that gdb did not handle the
+                 * Ctrl-l. That way readline will handle it. Because
+                 * readline uses TERM=dumb, that means that it will clear
+                 * a single line and put out the prompt. */
+                result = 1;
+                break;
             default:
                 /* This tells the input to go to active GDB command */
                 result = 1;
