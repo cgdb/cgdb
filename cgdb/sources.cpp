@@ -867,10 +867,15 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
 
     wmove(sview->win, height - (line - sview->cur->sel_line), lwidth + 2);
 
-    if (dorefresh == WIN_REFRESH)
-        wrefresh(sview->win);
-    else
-        wnoutrefresh(sview->win);
+    switch(dorefresh) {
+        case WIN_NO_REFRESH:
+            wnoutrefresh(sview->win);
+            break;
+        case WIN_REFRESH:
+            wrefresh(sview->win);
+            break;
+    }
+
     return 0;
 }
 

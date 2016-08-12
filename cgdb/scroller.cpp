@@ -551,8 +551,12 @@ void scr_refresh(struct scroller *scr, int focus, enum win_refresh dorefresh)
         curs_set(0);
     }
 
-    if (dorefresh == WIN_REFRESH)
-        wrefresh(scr->win);
-    else
-        wnoutrefresh(scr->win);
+    switch(dorefresh) {
+        case WIN_NO_REFRESH:
+            wnoutrefresh(scr->win);
+            break;
+        case WIN_REFRESH:
+            wrefresh(scr->win);
+            break;
+    }
 }
