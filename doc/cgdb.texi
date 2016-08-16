@@ -884,7 +884,7 @@ window, or the @dfn{file dialog window}.
 @item SelectedLineArrow
 This represents the group used when the user has the
 @code{selectedlinedisplay} set to @code{shortarrow} or @code{longarrow}.
-@item ExecutedLineArrow
+@item ExecutingLineArrow
 This represents the group used when the user has the
 @code{executinglinedisplay} set to @code{shortarrow} or @code{longarrow}.
 @item SelectedLineHighlight
