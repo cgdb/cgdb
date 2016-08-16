@@ -242,7 +242,7 @@ static char *highlight_line_segment(const char *orig, int start, int end)
     return new_line;
 }
 
-void hl_wprintw(WINDOW * win, const char *line, int width, int offset)
+void hl_wprintw(WINDOW * win, const char *line, int width, int offset, int line_highlight_attr)
 {
     int length;                 /* Length of the line passed in */
     enum hl_group_kind color;   /* Color used to print current char */
@@ -278,19 +278,25 @@ void hl_wprintw(WINDOW * win, const char *line, int width, int offset)
     for (j = 0, p = 0; j < pad && p < width; j++, p++)
         wprintw(win, " ");
 
-    /* Set the color appropriately */
-    attr = hl_groups_get_attr(hl_groups_instance, color);
+    /* Set the color - if we were given line_highlight, use, otherwise load */
+    if (line_highlight_attr)
+        attr = line_highlight_attr;
+    else
+        attr = hl_groups_get_attr(hl_groups_instance, color);
+
     wattron(win, attr);
 
     /* Print string 1 char at a time */
     for (; i < length && p < width; i++) {
         if (line[i] == HL_CHAR) {
             if (++i < length) {
-                wattroff(win, attr);
-                color = (enum hl_group_kind) line[i];
-
-                attr = hl_groups_get_attr(hl_groups_instance, color);
-                wattron(win, attr);
+                /* If we're highlight entire line, skip the line attributes */
+                if (!line_highlight_attr) {
+                    wattroff(win, attr);
+                    color = (enum hl_group_kind) line[i];
+                    attr = hl_groups_get_attr(hl_groups_instance, color);
+                    wattron(win, attr);
+                }
             }
         } else {
             switch (line[i]) {
@@ -307,12 +313,16 @@ void hl_wprintw(WINDOW * win, const char *line, int width, int offset)
         }
     }
 
-    /* Shut off color attribute */
-    wattroff(win, attr);
+    /* If we're highlighting line, draw spaces with attributes set */
+    if (!line_highlight_attr)
+        wattroff(win, attr);
 
-    //$ TODO: Use wclrtoeol(win)?
     for (; p < width; p++)
         wprintw(win, " ");
+
+    /* Turn off attributes if we didn't earlier */
+    if (line_highlight_attr)
+        wattroff(win, attr);
 }
 
 int hl_regex(const char *regex, const char **hl_lines, const char **tlines,

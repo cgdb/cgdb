@@ -48,7 +48,7 @@ int highlight_node(const char *filename, struct buffer *buf);
  *   width:   The maximum width of a line
  *   offset:  Character (in line) to start at (0..length-1)
  */
-void hl_wprintw(WINDOW * win, const char *line, int width, int offset);
+void hl_wprintw(WINDOW * win, const char *line, int width, int offset, int line_highlight_attr);
 
 /* hl_regex: Matches a regular expression to some lines.
  * ---------

@@ -329,10 +329,10 @@ int filedlg_display(struct filedlg *fd)
                 wattroff(fd->win, exelinearrow);
                 if (fd->buf->cur_line != NULL)
                     hl_wprintw(fd->win, fd->buf->cur_line, width - lwidth - 2,
-                            fd->buf->sel_col);
+                            fd->buf->sel_col, 0);
                 else
                     hl_wprintw(fd->win, fd->buf->files[file],
-                            width - lwidth - 2, fd->buf->sel_col);
+                            width - lwidth - 2, fd->buf->sel_col, 0);
             }
             /* Ordinary file */
             else {
@@ -345,10 +345,10 @@ int filedlg_display(struct filedlg *fd)
                 /* No special file information */
                 if (file == fd->buf->sel_line && fd->buf->cur_line != NULL)
                     hl_wprintw(fd->win, fd->buf->cur_line, width - lwidth - 2,
-                            fd->buf->sel_col);
+                            fd->buf->sel_col, 0);
                 else
                     hl_wprintw(fd->win, fd->buf->files[file],
-                            width - lwidth - 2, fd->buf->sel_col);
+                            width - lwidth - 2, fd->buf->sel_col, 0);
             }
         } else {
             wprintw(fd->win, "%s\n", fd->buf->files[file]);

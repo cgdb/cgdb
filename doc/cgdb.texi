@@ -886,6 +886,9 @@ disabled breakpoint set.
 @item SelectedLineNr
 This represents the group that is used when CGDB is displaying the currently
 selected line.  This is the line that the cursor is on.
+@item ExecutingLineNr
+This represents the group that is used when CGDB is displaying the currently
+executing line.
 @item ScrollModeStatus
 This represents the group that is used when CGDB is displaying the currently
 selected line number when in @ref{GDB Mode} and the user is scrolling
