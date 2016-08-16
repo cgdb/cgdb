@@ -119,7 +119,7 @@ static struct ConfigVariable {
                 (void *)command_set_cgdb_mode_key},
             /* color */
     {
-    "color", "col", CONFIG_TYPE_INT,
+    "color", "color", CONFIG_TYPE_BOOL,
                 (void *)&cgdbrc_config_options[CGDBRC_COLOR].variant.int_val},
             /* debugwincolor */
     {

@@ -1,3 +1,6 @@
+  * Add support to enable or disable color in the source window.
+    The default is enabled. See the documentation for more information.
+
   * Add support for showing colors in the debug window. If gdb or the
     program being debugged output an ansi escape code representing color,
         https://en.wikipedia.org/wiki/ANSI_escape_code#Colors

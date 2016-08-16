@@ -569,14 +569,27 @@ readline in vi mode.  If the user types @code{set cgdbmodekey=<PageUp>}
 then the @kbd{Page Up} key will put CGDB into CGDB mode and the @kbd{ESC}
 key will flow through to readline.
 
+@item :set color
+This option is used to enable or disable color support in CGDB.
+The default is on.  When enabled, CGDB can display color when appropriate.
+This typically occurs when syntax highlighting source files in the source
+viewer.  When disabled, CGDB will not display colors.  It may instead use
+other terminal attributes for syntax highlighting, including bold and
+reverse attributes.  See the @code{highlight} commamnd and look for the
+@samp{cterm} option.
+
+It should be noted that even when color is enabled in CGDB, if ncurses
+declares that the terminal does not support colors, CGDB will not use colors.
+
 @item :set dwc
 @itemx :set debugwincolor
 This option controls if the debug window will display colors or not.
-The default value is on. When enabled, if GDB or the program being debugged
-output an ANSI escape code representing color,
-  https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
-then CGDB will display the corresponding color instead of the escape code.
-When disabled, CGDB will display the ANSI escape code in the debug window.
+The default value is on.  When enabled, if GDB or the program being debugged
+output an ANSI escape code representing color, then CGDB will display the
+corresponding color instead of the escape code.  When disabled, CGDB will
+display the ANSI escape code in the debug window.
+See @uref{https://en.wikipedia.org/wiki/ANSI_escape_code#Colors} to learn
+more about ANSI escape codes.
 
 @item :set eld=@var{style}
 @itemx :set executinglinedisplay=@var{style}
