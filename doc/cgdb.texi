@@ -569,6 +569,15 @@ readline in vi mode.  If the user types @code{set cgdbmodekey=<PageUp>}
 then the @kbd{Page Up} key will put CGDB into CGDB mode and the @kbd{ESC}
 key will flow through to readline.
 
+@item :set dwc
+@itemx :set debugwincolor
+This option controls if the debug window will display colors or not.
+The default value is on. When enabled, if GDB or the program being debugged
+output an ANSI escape code representing color,
+  https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
+then CGDB will display the corresponding color instead of the escape code.
+When disabled, CGDB will display the ANSI escape code in the debug window.
+
 @item :set eld=@var{style}
 @itemx :set executinglinedisplay=@var{style}
 Set the executing line display to @var{style}.  Possible values for @var{style}

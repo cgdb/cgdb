@@ -1,3 +1,9 @@
+  * Add support for showing colors in the debug window. If gdb or the
+    program being debugged output an ansi escape code representing color,
+        https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
+    then cgdb will display the corresponding color instead of the escape
+    code. This option is configurable with the set debugwincolor option.
+
   * Add the winminwidth option to CGDB. It controls the minimum width
     that a window can be resized. It corresponds to the winminheight
     option. This was introduced now that CGDB can have vertically split

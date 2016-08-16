@@ -65,11 +65,11 @@ static int cgdbrc_set_val(struct cgdbrc_config_option config_option);
  * It is initialized with the default values.
  */
 static struct cgdbrc_config_option cgdbrc_config_options[CGDBRC_WRAPSCAN + 1] = {
-    {CGDBRC_ANSIESCAPEPARSING, {.int_val = 1}},
     {CGDBRC_ARROWSTYLE, {.line_display_style = LINE_DISPLAY_SHORT_ARROW}},
     {CGDBRC_AUTOSOURCERELOAD, {.int_val = 1}},
     {CGDBRC_CGDB_MODE_KEY, {.int_val = CGDB_KEY_ESC}},
     {CGDBRC_COLOR, {.int_val = 1}},
+    {CGDBRC_DEBUGWINCOLOR, {.int_val = 1}},
     {CGDBRC_EXECUTING_LINE_DISPLAY,
         {.line_display_style = LINE_DISPLAY_LONG_ARROW}},
     {CGDBRC_IGNORECASE, {.int_val = 0}},
@@ -105,10 +105,6 @@ static struct ConfigVariable {
 
     /* keep this stuff sorted! !sort */
 
-            /* ansiescapeparsing */
-    {
-    "ansiescapeparsing", "ansi", CONFIG_TYPE_INT,
-                (void *)&cgdbrc_config_options[CGDBRC_ANSIESCAPEPARSING].variant.int_val},
     /* arrowstyle */
     {
         "arrowstyle", "as", CONFIG_TYPE_FUNC_STRING, (void *)command_set_arrowstyle},
@@ -125,6 +121,10 @@ static struct ConfigVariable {
     {
     "color", "col", CONFIG_TYPE_INT,
                 (void *)&cgdbrc_config_options[CGDBRC_COLOR].variant.int_val},
+            /* debugwincolor */
+    {
+    "debugwincolor", "dwc", CONFIG_TYPE_BOOL,
+                (void *)&cgdbrc_config_options[CGDBRC_DEBUGWINCOLOR].variant.int_val},
             /* executinglinedisplay */
     {
     "executinglinedisplay", "eld", CONFIG_TYPE_FUNC_STRING,

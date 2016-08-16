@@ -511,7 +511,7 @@ int hl_groups_setup(hl_groups_ptr hl_groups)
     hl_groups->in_color = cgdbrc_get_int(CGDBRC_COLOR) &&
                           has_colors();
 
-    hl_groups->ansi_color = cgdbrc_get_int(CGDBRC_ANSIESCAPEPARSING) &&
+    hl_groups->ansi_color = cgdbrc_get_int(CGDBRC_DEBUGWINCOLOR) &&
                             hl_groups->in_color &&
                             (COLORS >= 8) && (COLOR_PAIRS >= 64);
 
