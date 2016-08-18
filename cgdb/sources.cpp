@@ -554,6 +554,13 @@ static int get_line_leading_ws_count(const char *otext, int length, int tabstop)
     return column_offset;
 }
 
+/* source_get_mark_char:  Return mark char for line.
+ * --------------------
+ *
+ *   sview:  The source viewer object
+ *   line: line to check for mark
+ *   return: -1 on error, 0 if no char exists on line, otherwise char
+ */
 static int source_get_mark_char(struct sviewer *sview,
     struct list_node *node, int line)
 {
@@ -619,7 +626,7 @@ int source_goto_mark(struct sviewer *sview, int key)
     if (key >= 'a' && key <= 'z') {
         /* Local buffer mark */
         line = sview->cur->local_marks[key - 'a'];
-	node = (line >= 0) ? sview->cur : NULL;
+        node = (line >= 0) ? sview->cur : NULL;
     } else if (key >= 'A' && key <= 'Z') {
         /* Global buffer mark */
         line = sview->global_marks[key - 'A'].line;
@@ -637,8 +644,8 @@ int source_goto_mark(struct sviewer *sview, int key)
         sview->jump_back_mark.line = sview->cur->sel_line;
         sview->jump_back_mark.node = sview->cur;
 
-	sview->cur = node;
-	source_set_sel_line(sview, line + 1);
+        sview->cur = node;
+        source_set_sel_line(sview, line + 1);
         return 1;
     }
 

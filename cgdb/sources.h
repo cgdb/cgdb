@@ -326,6 +326,7 @@ int source_reload(struct sviewer *sview, const char *path, int force);
  *
  *   sview:  The source viewer object
  *   key: local mark char: a..z or global mark: A..Z
+ *   return: 1 if a mark was set, 0 otherwise
  */
 int source_set_mark(struct sviewer *sview, int key);
 
@@ -334,15 +335,8 @@ int source_set_mark(struct sviewer *sview, int key);
  *
  *   sview:  The source viewer object
  *   key: local mark char: a..z or global mark: A..Z
+ *   return: 1 if a jump was successful, 0 otherwise
  */
 int source_goto_mark(struct sviewer *sview, int key);
-
-/* source_get_mark_char:  Return mark char for line.
- * --------------------
- *
- *   sview:  The source viewer object
- *   line: line to check for mark
- */
-int source_get_mark_char(struct sviewer *sview, int line);
 
 #endif

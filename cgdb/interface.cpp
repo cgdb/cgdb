@@ -1215,6 +1215,22 @@ int if_init(void)
     return 0;
 }
 
+/**
+ * Send input to the CGDB source window.
+ * 
+ * @param key
+ * The key to send to the CGDB source window.
+ *
+ * @param last_key
+ * An output parameter. When set, that will tell cgdb to use the set value,
+ * instead of the current key, as the "last_key_pressed" in the next
+ * call to cgdb_input. This is useful to set mainly when the current input
+ * has consumed more than one character, and the "last_key_pressed" should
+ * be not set on the next call to cgdb_input.
+ *
+ * @return
+ * Currently only returns 0.
+ */
 static int cgdb_input(int key, int *last_key)
 {
     int regex_icase = cgdbrc_get_int(CGDBRC_IGNORECASE);
@@ -1229,6 +1245,13 @@ static int cgdb_input(int key, int *last_key)
             ret = source_goto_mark(src_win, key);
 
         if (ret) {
+            /* When m[a-zA-Z] matches, don't let the marker char
+             * be treated as the last key. That would allow the
+             * chars mgg, to set the marker g, and then move to the top
+             * of the file via gg.
+             * CGDB should see those as mg (set a local mark g), and then
+             * an individual g.
+             */
             *last_key = 0;
             if_draw();
             return 0;
