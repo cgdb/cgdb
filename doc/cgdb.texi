@@ -359,6 +359,21 @@ Move to the top of file.
 @item [<number>]G
 Move to the bottom of file or to a line number within the file.
 
+@item m[a-zA-Z]
+Set a mark at the cursor position.  A lower case letter sets a local mark
+that is valid within one file.  An upper case letter sets a global mark
+valid between files. If there are ten files, each file can have a mark
+@samp{a}, but only one can have a mark @samp{A}.
+
+@item '[a-zA-Z]
+Jump to the corresponding local or global mark.
+
+@item ''
+Jump to the last jump location.
+
+@item '.
+Jump to the currently executing line.
+
 @item /
 search from current cursor position.
 
@@ -618,6 +633,12 @@ The @samp{longarrow} option also draws an arrow next to the source line
 number, but extends the arrow until the source code.  The @samp{highlight}
 option draws the entire line in inverse video and the @samp{block} option
 draws an inverse block (cursor) next to the source code being selected.
+
+@item :set showmarks
+This option controls if the source window will show marks or not.
+The default value is on. When enabled, CGDB will show the marks that
+the user has set in the vertical bar in the source window separating
+the line number from the source code.
 
 @item :set stc
 @itemx :set showtgdbcommands
@@ -918,6 +939,10 @@ through the GDB buffer.
 @item Logo
 This is the group CGDB uses to display its logo on startup when no source 
 file can be auto detected.
+@item Mark
+This is the group CGDB uses to display a mark in the source window.
+Marks are displayed when the @code{showmarks} option is enabled.
+See the @code{showmarks} option for more detail.
 @end table
 
 

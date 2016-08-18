@@ -119,6 +119,7 @@ static const struct default_hl_group_info default_groups_for_curses[] = {
     {HLG_EXECUTING_LINE_NUMBER, A_BOLD, A_BOLD, COLOR_GREEN, COLOR_BLACK},
     {HLG_SCROLL_MODE_STATUS, A_BOLD, A_BOLD, COLOR_WHITE, COLOR_BLACK},
     {HLG_LOGO, A_BOLD, A_BOLD, COLOR_BLUE, COLOR_BLACK},
+    {HLG_MARK, A_BOLD, A_BOLD, COLOR_WHITE, COLOR_BLACK},
     {HLG_LAST, A_NORMAL, A_NORMAL, -1, -1}
 };
 
@@ -148,6 +149,7 @@ static const struct default_hl_group_info default_groups_for_background_dark[]
     {HLG_EXECUTING_LINE_NUMBER, A_BOLD, A_BOLD, COLOR_GREEN, -1},
     {HLG_SCROLL_MODE_STATUS, A_BOLD, A_BOLD, -1, -1},
     {HLG_LOGO, A_BOLD, A_BOLD, COLOR_BLUE, -1},
+    {HLG_MARK, A_BOLD, A_BOLD, COLOR_WHITE, -1},
     {HLG_LAST, A_NORMAL, A_NORMAL, -1, -1}
 };
 
@@ -183,6 +185,7 @@ static struct hl_group_name hl_group_names[] = {
     {HLG_EXECUTING_LINE_NUMBER, "ExecutingLineNr"},
     {HLG_SCROLL_MODE_STATUS, "ScrollModeStatus"},
     {HLG_LOGO, "Logo"},
+    {HLG_MARK, "Mark"},
     {HLG_LAST, NULL}
 };
 

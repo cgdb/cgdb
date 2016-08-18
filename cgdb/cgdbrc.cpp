@@ -140,7 +140,7 @@ static struct ConfigVariable {
                 (void *)command_set_selected_line_display},
             /* showmarks */
     {
-    "showmarks", "marks", CONFIG_TYPE_INT,
+    "showmarks", "showmarks", CONFIG_TYPE_BOOL,
                 (void *)&cgdbrc_config_options[CGDBRC_SHOWMARKS].variant.int_val},
             /* showtgdbcommands */
     {

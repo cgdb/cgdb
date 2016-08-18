@@ -1,3 +1,12 @@
+  * Add support for marks. m[a-z] will set a local file mark and
+    m[A-Z] will set a global mark. '[a-z] will jump to the
+    corresponding local mark and '[A-Z] will jump to the corresponding
+    global mark. As an added bonus '' will jump to the last jump location
+    and '. will jump to the last executing line.
+    The showmarks option was introduced to show the marks in the source
+    window. It defaults to true. You can disable the viewing of marks
+    using 'set noshowmarks'.
+
   * Add support to enable or disable color in the source window.
     The default is enabled. See the documentation for more information.
 

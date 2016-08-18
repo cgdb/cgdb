@@ -47,6 +47,7 @@ enum hl_group_kind {
     HLG_EXECUTING_LINE_NUMBER,
     HLG_SCROLL_MODE_STATUS,
     HLG_LOGO,
+    HLG_MARK,
     HLG_LAST,
 
     /* Straight colors - not configurable */

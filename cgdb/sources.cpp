@@ -652,7 +652,7 @@ int source_goto_mark(struct sviewer *sview, int key)
  *   # │ marker text
  * where,
  *   # is the line number to display or ~ if no line number
- *   │ is the divider between the line number
+ *   │ is the divider between the line number or it is a mark
  *   marker is shortarrow, longarrow, highlight, block, etc
  *   text is the source code to display
  *
@@ -667,6 +667,8 @@ int source_goto_mark(struct sviewer *sview, int key)
  *
  * The │ 
  * - When source window is in focus, the character is bolded, otherwise normal
+ * - If the user has a mark set, the mark will be displayed instead of any
+ *   other character.
  * - Edge case: When the marker is long or short arrow, CGDB prints ├
  *   instead of │ the ├ is colored based on highlighting group for 
  *   the selected or executing arrow.
@@ -703,6 +705,8 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
     int is_sel_line, is_exe_line;
     int highlight_tabstop = cgdbrc_get_int(CGDBRC_TABSTOP);
     const char *cur_line;
+    int showmarks = cgdbrc_get_int(CGDBRC_SHOWMARKS);
+    int mark_attr;
 
     sellineno = hl_groups_get_attr(
         hl_groups_instance, HLG_SELECTED_LINE_NUMBER);
@@ -735,6 +739,8 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
     sel_line_display_is_arrow = 
         sel_display_style == LINE_DISPLAY_SHORT_ARROW ||
         sel_display_style == LINE_DISPLAY_LONG_ARROW;
+
+    mark_attr = hl_groups_get_attr(hl_groups_instance, HLG_MARK);
 
     /* Check that a file is loaded */
     if (sview->cur == NULL || sview->cur->buf->tlines == NULL) {
@@ -804,19 +810,30 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
             wattroff(sview->win, line_attr);
         }
 
-        /* Print the vertical bar */
-        if (is_exe_line && exe_line_display_is_arrow) {
-            wattron(sview->win, exe_arrow_attr);
-            waddch(sview->win, ACS_LTEE);
-            wattroff(sview->win, exe_arrow_attr);
-        } else if (is_sel_line && sel_line_display_is_arrow) {
-            wattron(sview->win, sel_arrow_attr);
-            waddch(sview->win, ACS_LTEE);
-            wattroff(sview->win, sel_arrow_attr);
-        } else {
-            wattron(sview->win, focus_attr);
-            waddch(sview->win, VERT_LINE);
-            wattroff(sview->win, focus_attr);
+        /* Print the vertical bar or mark */
+        {
+            chtype vert_bar_char;
+            int vert_bar_attr;
+            int mc;
+            
+            if (showmarks &&
+                ((mc = source_get_mark_char(sview, sview->cur, line)) > 0)) {
+                vert_bar_char = mc;
+                vert_bar_attr = mark_attr;
+            } else if (is_exe_line && exe_line_display_is_arrow) {
+                vert_bar_attr = exe_arrow_attr;
+                vert_bar_char = ACS_LTEE;
+            } else if (is_sel_line && sel_line_display_is_arrow) {
+                vert_bar_attr = sel_arrow_attr;
+                vert_bar_char = ACS_LTEE;
+            } else {
+                vert_bar_attr = focus_attr;
+                vert_bar_char = VERT_LINE;
+            }
+
+            wattron(sview->win, vert_bar_attr);
+            waddch(sview->win, vert_bar_char);
+            wattroff(sview->win, vert_bar_attr);
         }
 
         /* Print the marker */
@@ -896,19 +913,6 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
         } else {
             hl_wprintw(sview->win, cur_line, width - lwidth - 2,
                     sview->cur->sel_col + column_offset, line_highlight_attr);
-        }
-
-        if (cgdbrc_get_int(CGDBRC_SHOWMARKS)) {
-            /* Show marks if option is set */
-            int mark_char = source_get_mark_char(sview, sview->cur, line);
-
-            if (mark_char > 0) {
-                wmove(sview->win, i, lwidth);
-
-                wattron(sview->win, sel_arrow_attr);
-                waddch(sview->win, mark_char);
-                wattroff(sview->win, sel_arrow_attr);
-            }
         }
     }
 
