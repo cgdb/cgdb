@@ -526,9 +526,22 @@ Move right a line.
 @itemx page up
 Move up a page.
 
+@item Ctrl-u
+Move up 1/2 a page.
+
 @item Ctrl-f
 @itemx page down
 Move down a page.
+
+@item Ctrl-d
+Move down 1/2 a page.
+
+@item gg
+Move to the top of the file dialog.
+
+@item [<number>]G
+Move to the bottom of the file dialog or to a line number within the file
+dialog.
 
 @item /
 search from current cursor position.
