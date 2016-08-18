@@ -80,6 +80,12 @@ int fs_util_file_exists_in_path(char * filePath);
  * ----------------------------
  *
  * Checks if the file exists.
+ *
+ * @param path
+ * The path to determine if it exists or not.
+ *
+ * @return
+ * 1 if the file exists, otherwise 0.
  */
 int fs_verify_file_exists(const char *path);
 
