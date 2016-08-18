@@ -1,3 +1,5 @@
+  * Add an initial Rust syntax highlighter.
+
   * Support vi type <digit>j and <digit>k motions. Previously only
     typing j or k with out a number was supported.
 
