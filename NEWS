@@ -1,3 +1,6 @@
+  * Support vi type <digit>j and <digit>k motions. Previously only
+    typing j or k with out a number was supported.
+
   * Add support for marks. m[a-z] will set a local file mark and
     m[A-Z] will set a global mark. '[a-z] will jump to the
     corresponding local mark and '[A-Z] will jump to the corresponding
