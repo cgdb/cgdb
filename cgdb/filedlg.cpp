@@ -16,10 +16,6 @@
 #include <string.h>
 #endif /* HAVE_STRING_H */
 
-#if HAVE_LIMITS_H
-#include <limits.h> /* INT_MAX */
-#endif
-
 #include "filedlg.h"
 #include "cgdb.h"
 #include "sys_util.h"
@@ -44,14 +40,13 @@ struct file_buffer {
 struct filedlg {
     struct file_buffer *buf;    /* All of the widget's data ( files ) */
     WINDOW *win;                /* Curses window */
+    struct ibuf *G_line_number; /* Line number user wants to 'G' to */
 };
 
 static char regex_line[MAX_LINE];   /* The regex the user enters */
 static int regex_line_pos;      /* The index into the current regex */
 static int regex_search;        /* Currently searching text ? */
 static int regex_direction;     /* Direction to search */
-
-static int G_line_number = -1;      /* Line number user wants to 'G' to */
 
 /* print_in_middle: Prints the message 'string' centered at line in win 
  * ----------------
@@ -96,6 +91,8 @@ struct filedlg *filedlg_new(int pos_r, int pos_c, int height, int width)
     if ((fd->buf = (struct file_buffer *)malloc(sizeof (struct file_buffer))) == NULL)
         return NULL;
 
+    fd->G_line_number = ibuf_init();
+
     fd->buf->length = 0;
     fd->buf->files = NULL;
     fd->buf->cur_line = NULL;
@@ -112,6 +109,7 @@ struct filedlg *filedlg_new(int pos_r, int pos_c, int height, int width)
 void filedlg_free(struct filedlg *fdlg)
 {
     filedlg_clear(fdlg);
+    ibuf_free(fdlg->G_line_number);
     delwin(fdlg->win);
     free(fdlg->buf);
     free(fdlg);
@@ -179,6 +177,8 @@ int filedlg_add_file_choice(struct filedlg *fd, const char *file_choice)
 void filedlg_clear(struct filedlg *fd)
 {
     int i;
+
+    ibuf_clear(fd->G_line_number);
 
     for (i = 0; i < fd->buf->length; i++)
         free(fd->buf->files[i]);
@@ -554,18 +554,24 @@ int filedlg_recv_char(struct filedlg *fd, int key, char *file, int last_key_pres
             if (last_key_pressed == 'g')
                 filedlg_set_sel_line(fd, 0);
             break;
-        case 'G':              /* end of file, or a line number*/
-            filedlg_set_sel_line(fd, G_line_number >= 0 ? G_line_number - 1 : INT_MAX);
+        case 'G': {             /* end of file, or a line number*/
+            int lineno = -1, result;
+            result = cgdb_string_to_int(ibuf_get(fd->G_line_number), &lineno);
+            if (result == 0) {
+                filedlg_set_sel_line(fd, lineno -1);
+            }
             break;
+        }
         default:
             break;
     }
 
     /* Store digits into G_line_number for 'G' command. */
-    if ((key >= '0' && key <= '9') && (G_line_number < INT_MAX / 10 - 9))
-        G_line_number = MAX(0, G_line_number) * 10 + key - '0';
-    else
-        G_line_number = -1;
+    if (key >= '0' && key <= '9') {
+        ibuf_addchar(fd->G_line_number, key);
+    } else {
+        ibuf_clear(fd->G_line_number);
+    }
 
     filedlg_display(fd);
 
