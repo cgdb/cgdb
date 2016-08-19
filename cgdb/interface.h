@@ -157,6 +157,9 @@ Focus if_get_focus(void);
  */
 void if_display_help(void);
 
+/** 
+ * Display a new logo in the source window.
+ */
 void if_display_logo(void);
 
 /* if_search_next: finds the next match in a given direction.

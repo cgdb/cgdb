@@ -769,6 +769,9 @@ Send a finish command to GDB.
 This will display the current manual in text format, in the 
 @dfn{source window}.
 
+@item :logo
+This will display one of CGDB's logos in the @dfn{source window}.
+
 @item :hi @var{group} cterm=@var{attributes} ctermfg=@var{color} ctermbg=@var{color} term=@var{attributes}
 @itemx :highlight @var{group} cterm=@var{attributes} ctermfg=@var{color} ctermbg=@var{color} term=@var{attributes}
 Set the @var{color} and @var{attributes} for a highlighting group.  The syntax 

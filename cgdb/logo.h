@@ -23,6 +23,9 @@
  */
 void logo_display(WINDOW * win);
 
+/**
+ * This chooses another logo to be displayed on the next call to logo_display.
+ */
 void logo_reset();
 
 #endif

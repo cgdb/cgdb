@@ -1,3 +1,6 @@
+  * Add the :logo command to cgdb. This tells CGDB to display a logo
+    in the source window.
+
   * Add an initial Rust syntax highlighter.
 
   * Support vi type <digit>j and <digit>k motions. Previously only
@@ -18,7 +21,7 @@
   * Add support for showing colors in the debug window. If gdb or the
     program being debugged output an ansi escape code representing color,
         https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
-    then cgdb will display the corresponding color instead of the escape
+    then CGDB will display the corresponding color instead of the escape
     code. This option is configurable with the set debugwincolor option.
 
   * Add the winminwidth option to CGDB. It controls the minimum width
@@ -40,7 +43,7 @@
 
   * Add the -w command line option to CGDB. It directs CGDB to wait
     to start until either a debugger is attached to it, or until a key
-    is written to it's stdin. This helps simplify debugging cgdb itself.
+    is written to it's stdin. This helps simplify debugging CGDB itself.
 
   * Added GDB scroll mode in addition to the existing GDB command mode.
     To enter scroll mode, type 'page up' when in GDB mode and to exit
