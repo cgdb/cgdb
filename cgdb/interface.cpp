@@ -1467,20 +1467,15 @@ int if_input(int key)
     return result;
 }
 
-void if_tty_print(const char *buf)
-{
-    /* Send output to the gdb buffer */
-    if_print(buf, 1);
-}
-
-void if_print(const char *buf, int source )
+static void if_print_internal(const char *buf, enum ScrInputKind kind)
 {
     if (!gdb_win) {
         logger_write_pos(logger, __FILE__, __LINE__, "%s", buf);
         return;
     }
+
     /* Print it to the scroller */
-    scr_add(gdb_win, buf, source);
+    scr_add(gdb_win, buf, kind);
 
     if (get_gdb_height() > 0) {
         scr_refresh(gdb_win, focus == GDB, WIN_NO_REFRESH);
@@ -1491,6 +1486,23 @@ void if_print(const char *buf, int source )
 
         doupdate();
     }
+
+}
+
+void if_tty_print(const char *buf)
+{
+    /* Send output to the gdb buffer */
+    if_print_internal(buf, SCR_INPUT_INFERIOR);
+}
+
+void if_print(const char *buf)
+{
+    if_print_internal(buf, SCR_INPUT_DEBUGGER);
+}
+
+void if_rl_print(const char *buf)
+{
+    if_print_internal(buf, SCR_INPUT_READLINE);
 }
 
 void if_print_message(const char *fmt, ...)
@@ -1507,7 +1519,7 @@ void if_print_message(const char *fmt, ...)
 #endif
     va_end(ap);
 
-    if_print(va_buf, GDB);
+    if_print(va_buf);
 }
 
 void if_show_file(char *path, int sel_line, int exe_line)
@@ -1681,7 +1693,7 @@ int if_clear_line()
     line[i] = '\r';
     line[i + 1] = '\0';
 
-    if_print(line, GDB);
+    if_print(line);
 
     return 0;
 }

@@ -146,28 +146,28 @@ static char *parse(struct scroller *scr, struct hl_line_attr **attrs,
     return (length - j > 128) ? (char *)cgdb_realloc(rv, j + 2) : rv;
 }
 
-static void scroller_set_last_tty_attr(struct scroller *scr)
+static void scroller_set_last_inferior_attr(struct scroller *scr)
 {
     int index = sbcount(scr->lines) - 1;
     struct scroller_line *sl = index >= 0 ? &scr->lines[index] : 0;
 
-    /* If this is a tty line and we've got color attributes */
-    if (sl && sl->tty && sbcount(sl->attrs)) {
+    /* If this is an inferior line and we've got color attributes */
+    if (sl && (sl->kind == SCR_INPUT_INFERIOR) && sbcount(sl->attrs)) {
         /* Grab last attribute */
         int attr = sl->attrs[sbcount(sl->attrs) - 1].attr;
 
         /* Store last attribute for following tty lines */
-        scr->last_tty_attr = attr ? attr : -1;
+        scr->last_inferior_attr = attr ? attr : -1;
     }
 }
 
 static void scroller_addline(struct scroller *scr, char *line,
-    struct hl_line_attr *attrs, int tty)
+    struct hl_line_attr *attrs, enum ScrInputKind kind)
 {
     struct scroller_line sl;
 
-    /* Add attribute from last tty line to start of this one */
-    if (tty && (scr->last_tty_attr != -1)) {
+    /* Add attribute from last inferior line to start of this one */
+    if (kind == SCR_INPUT_INFERIOR && (scr->last_inferior_attr != -1)) {
         /* If there isn't already a color attribute for the first column */
         if (!attrs || (attrs[0].col != 0)) {
             int count = sbcount(attrs);
@@ -177,21 +177,21 @@ static void scroller_addline(struct scroller *scr, char *line,
             memmove(attrs+1, attrs, count * sizeof(struct hl_line_attr));
 
             attrs[0].col = 0;
-            attrs[0].attr = scr->last_tty_attr;
+            attrs[0].attr = scr->last_inferior_attr;
         }
 
-        scr->last_tty_attr = -1;
+        scr->last_inferior_attr = -1;
     }
 
     sl.line = line;
     sl.line_len = strlen(line);
-    sl.tty = tty;
+    sl.kind = kind;
     sl.attrs = attrs;
     sbpush(scr->lines, sl);
 
     scr->lines_to_display++;
 
-    scroller_set_last_tty_attr(scr);
+    scroller_set_last_inferior_attr(scr);
 }
 
 /* ----------------- */
@@ -211,15 +211,15 @@ struct scroller *scr_new(int pos_r, int pos_c, int height, int width)
     rv->current.c = 0;
     rv->current.pos = 0;
     rv->in_scroll_mode = 0;
-    rv->last_tty_line = NULL;
-    rv->last_tty_attr = -1;
+    rv->last_inferior_line = NULL;
+    rv->last_inferior_attr = -1;
     rv->lines_to_display = 0;
     rv->last_cursor_row = 0;
     rv->win = newwin(height, width, pos_r, pos_c);
 
     /* Start with a single (blank) line */
     rv->lines = NULL;
-    scroller_addline(rv, strdup(""), NULL, 0);
+    scroller_addline(rv, strdup(""), NULL, SCR_INPUT_DEBUGGER);
     return rv;
 }
 
@@ -235,8 +235,8 @@ void scr_free(struct scroller *scr)
     sbfree(scr->lines);
     scr->lines = NULL;
 
-    free(scr->last_tty_line);
-    scr->last_tty_line = NULL;
+    free(scr->last_inferior_line);
+    scr->last_inferior_line = NULL;
 
     delwin(scr->win);
     scr->win = NULL;
@@ -329,7 +329,8 @@ void scr_end(struct scroller *scr)
     scr->current.c = (strlen(scr->lines[scr->current.r].line) / width) * width;
 }
 
-static void scr_add_buf(struct scroller *scr, const char *buf, int tty)
+static void scr_add_buf(struct scroller *scr, const char *buf,
+    enum ScrInputKind kind)
 {
     char *x;
     int distance;
@@ -345,13 +346,14 @@ static void scr_add_buf(struct scroller *scr, const char *buf, int tty)
             int index = sbcount(scr->lines) - 1;
             char *orig = scr->lines[index].line;
 
-            if ((scr->last_tty_attr != -1) && (tty != scr->lines[index].tty)) {
+            if ((scr->last_inferior_attr != -1) &&
+                    (kind != scr->lines[index].kind)) {
                 struct hl_line_attr attr;
 
                 attr.col = strlen(orig);
-                if (tty) {
-                    attr.attr = scr->last_tty_attr;
-                    scr->last_tty_attr = -1;
+                if (kind == SCR_INPUT_INFERIOR) {
+                    attr.attr = scr->last_inferior_attr;
+                    scr->last_inferior_attr = -1;
                 }
                 else {
                     /* Add that color attribute in */
@@ -361,11 +363,11 @@ static void scr_add_buf(struct scroller *scr, const char *buf, int tty)
                 sbpush(scr->lines[index].attrs, attr);
             }
 
-            scr->lines[index].tty = tty;
+            scr->lines[index].kind = kind;
             scr->lines[index].line = parse(scr, &scr->lines[index].attrs, orig, buf, distance);
             scr->lines[index].line_len = strlen(scr->lines[index].line);
 
-            scroller_set_last_tty_attr(scr);
+            scroller_set_last_inferior_attr(scr);
 
             free(orig);
         }
@@ -380,13 +382,13 @@ static void scr_add_buf(struct scroller *scr, const char *buf, int tty)
         x = strchr((char *)buf, '\n');
         distance = x ? x - buf : strlen(buf);
 
-        /* tty input with no lf. */
-        if (!x && tty && distance && (distance < 4096)) {
+        /* inferior input with no lf. */
+        if (!x && (kind == SCR_INPUT_INFERIOR) && distance && (distance < 4096)) {
             /* Store away and parse when the rest of the line shows up */
-            scr->last_tty_line = strdup(buf);
+            scr->last_inferior_line = strdup(buf);
             /* Add line since we did have a lf */
             scr->current.pos = 0;
-            scroller_addline(scr, strdup(""), NULL, tty);
+            scroller_addline(scr, strdup(""), NULL, kind);
             break;
         }
 
@@ -395,7 +397,7 @@ static void scr_add_buf(struct scroller *scr, const char *buf, int tty)
 
         /* Add the new line */
         line = parse(scr, &attrs, "", buf, distance);
-        scroller_addline(scr, line, attrs, tty);
+        scroller_addline(scr, line, attrs, kind);
     }
 
     /* Don't want to exit scroll mode simply because new data received */
@@ -404,27 +406,29 @@ static void scr_add_buf(struct scroller *scr, const char *buf, int tty)
     }
 }
 
-void scr_add(struct scroller *scr, const char *buf, int tty)
+void scr_add(struct scroller *scr, const char *buf, enum ScrInputKind kind)
 {
     char *tempbuf = NULL;
 
-    if (scr->last_tty_line) {
-        if (!tty) {
-            /* New line coming in isn't tty so spew out last tty line and carry on */
-            scr_add_buf(scr, scr->last_tty_line, 1);
-            free(scr->last_tty_line);
+    if (scr->last_inferior_line) {
+        if (kind != SCR_INPUT_INFERIOR) {
+            /* New line coming in isn't from inferior so spew out
+             * last inferior line and carry on */
+            scr_add_buf(scr, scr->last_inferior_line, SCR_INPUT_INFERIOR);
+            free(scr->last_inferior_line);
         }
         else {
-            /* Combine this tty line with previous tty line */
-            tempbuf = (char *)cgdb_realloc(scr->last_tty_line, strlen(scr->last_tty_line) + strlen(buf) + 1);
+            /* Combine this inferior line with previous inferior line */
+            tempbuf = (char *)cgdb_realloc(scr->last_inferior_line,
+                strlen(scr->last_inferior_line) + strlen(buf) + 1);
             strcat(tempbuf, buf);
             buf = tempbuf;
         }
 
-        scr->last_tty_line = NULL;
+        scr->last_inferior_line = NULL;
     }
 
-    scr_add_buf(scr, buf, tty);
+    scr_add_buf(scr, buf, kind);
 
     scr_end(scr);
 

@@ -53,7 +53,7 @@ int if_input(int key);
  *
  *   buf:  NULL-terminated buffer to display.
  */
-void if_print(const char *buf, int source);
+void if_print(const char *buf);
 
 /* if_print_message: Prints data to the GDB input/output window.
  * -----------------
@@ -68,6 +68,14 @@ void if_print_message(const char *fmt, ...) ATTRIBUTE_PRINTF( 1, 2 );
  *   buf:  NULL-terminated buffer to display.
  */
 void if_tty_print(const char *buf);
+
+/**
+ * Print a readline prompt change.
+ *
+ * @param buf
+ * The buffer that readline has put out to edit the prompt.
+ */
+void if_rl_print(const char *buf);
 
 /* if_show_file: Displays the requested file in the source display window.
  * -------------
