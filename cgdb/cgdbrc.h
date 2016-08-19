@@ -119,8 +119,8 @@ enum cgdbrc_option_kind {
     CGDBRC_EXECUTING_LINE_DISPLAY,
     CGDBRC_IGNORECASE,
     CGDBRC_SELECTED_LINE_DISPLAY,
+    CGDBRC_SHOWDEBUGCOMMANDS,
     CGDBRC_SHOWMARKS,
-    CGDBRC_SHOWTGDBCOMMANDS,
     CGDBRC_SYNTAX,
     CGDBRC_TABSTOP,
     CGDBRC_TIMEOUT,
@@ -147,8 +147,8 @@ struct cgdbrc_config_option {
         /* option_kind == CGDBRC_COLOR */
         /* option_kind == CGDBRC_DEBUGWINCOLOR */
         /* option_kind == CGDBRC_IGNORECASE */
+        /* option_kind == CGDBRC_SHOWDEBUGCOMMANDS */
         /* option_kind == CGDBRC_SHOWMARKS */
-        /* option_kind == CGDBRC_SHOWTGDBCOMMANDS */
         /* option_kind == CGDBRC_TABSTOP */
         /* option_kind == CGDBRC_TIMEOUT */
         /* option_kind == CGDBRC_TIMEOUTLEN */

@@ -77,6 +77,14 @@ void if_tty_print(const char *buf);
  */
 void if_rl_print(const char *buf);
 
+/**
+ * Print a debugger command run by CGDB when showdebugcommands is enabled.
+ *
+ * @param command
+ * The command that CGDB is about to issue to GDB.
+ */
+void if_sdc_print(const char *command);
+
 /* if_show_file: Displays the requested file in the source display window.
  * -------------
  *

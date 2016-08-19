@@ -1518,6 +1518,11 @@ void if_rl_print(const char *buf)
     if_print_internal(buf, SCR_INPUT_READLINE);
 }
 
+void if_sdc_print(const char *buf)
+{
+    if_print_message("cgdb sdc:[%s]\n", buf);
+}
+
 void if_print_message(const char *fmt, ...)
 {
     va_list ap;

@@ -57,7 +57,7 @@ static int command_set_winminwidth(int value);
 static int command_set_winsplit(const char *value);
 static int command_set_winsplitorientation(const char *value);
 static int command_set_syntax_type(const char *value);
-static int command_set_stc(int value);
+static int command_set_sdc(int value);
 static int cgdbrc_set_val(struct cgdbrc_config_option config_option);
 
 /**
@@ -75,8 +75,8 @@ static struct cgdbrc_config_option cgdbrc_config_options[CGDBRC_WRAPSCAN + 1] = 
     {CGDBRC_IGNORECASE, {.int_val = 0}},
     {CGDBRC_SELECTED_LINE_DISPLAY,
         {.line_display_style = LINE_DISPLAY_BLOCK}},
+    {CGDBRC_SHOWDEBUGCOMMANDS, {.int_val = 0}},
     {CGDBRC_SHOWMARKS, {.int_val = 1}},
-    {CGDBRC_SHOWTGDBCOMMANDS, {.int_val = 0}},
     {CGDBRC_SYNTAX, {.language_support_val = TOKENIZER_LANGUAGE_UNKNOWN}},
     {CGDBRC_TABSTOP, {.int_val = 8}},
     {CGDBRC_TIMEOUT, {.int_val = 1}},
@@ -138,13 +138,13 @@ static struct ConfigVariable {
     {
     "selectedlinedisplay", "sld", CONFIG_TYPE_FUNC_STRING,
                 (void *)command_set_selected_line_display},
+            /* showdebugcommands */
+    {
+    "showdebugcommands", "sdc", CONFIG_TYPE_FUNC_BOOL, (void *)&command_set_sdc},
             /* showmarks */
     {
     "showmarks", "showmarks", CONFIG_TYPE_BOOL,
                 (void *)&cgdbrc_config_options[CGDBRC_SHOWMARKS].variant.int_val},
-            /* showtgdbcommands */
-    {
-    "showtgdbcommands", "stc", CONFIG_TYPE_FUNC_BOOL, (void *)&command_set_stc},
             /* syntax */
     {
     "syntax", "syn", CONFIG_TYPE_FUNC_STRING, (void *)command_set_syntax_type},
@@ -355,19 +355,19 @@ int command_set_executing_line_display(const char *value)
     return cgdbrc_set_val(option);
 }
 
-static int command_set_stc(int value)
+static int command_set_sdc(int value)
 {
     if ((value == 0) || (value == 1)) {
         struct cgdbrc_config_option option;
 
-        option.option_kind = CGDBRC_SHOWTGDBCOMMANDS;
+        option.option_kind = CGDBRC_SHOWDEBUGCOMMANDS;
         option.variant.int_val = value;
 
         if (cgdbrc_set_val(option))
             return 1;
 
         /* TODO: Make this not a member function. */
-        tgdb_set_verbose_gui_command_output(tgdb, value);
+        tgdb_set_verbose_gui_command_output(tgdb, value, if_sdc_print);
     } else
         return 1;
 

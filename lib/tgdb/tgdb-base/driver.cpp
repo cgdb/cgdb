@@ -460,15 +460,10 @@ int main_loop(int gdbfd)
     return 0;
 }
 
-static void print_message(const char *fmt, ...)
+static void print_message(const char *command)
 {
-    va_list ap;
-
-    va_start(ap, fmt);
-    vprintf(fmt, ap);
-    va_end(ap);
+    printf("tgdb:[%s]\n", command);
 }
-
 
 int main(int argc, char **argv)
 {
@@ -513,13 +508,13 @@ int main(int argc, char **argv)
         goto driver_end;
     }
 
-    if (tgdb_set_verbose_error_handling(tgdb, 1, print_message) != 1) {
+    if (tgdb_set_verbose_error_handling(tgdb, 1) != 1) {
         logger_write_pos(logger, __FILE__, __LINE__, "driver error");
         goto driver_end;
     }
 
     /* Ask TGDB to print error messages */
-    if (tgdb_set_verbose_gui_command_output(tgdb, 1) != 1) {
+    if (tgdb_set_verbose_gui_command_output(tgdb, 1, print_message) != 1) {
         logger_write_pos(logger, __FILE__, __LINE__, "driver error");
         goto driver_end;
     }

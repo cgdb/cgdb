@@ -574,10 +574,16 @@
    * 0 to not show GUI commands, 1 to show them, otherwise nothing is done.
    * You would use a value other than 0 or 1 just to query if the option is set.
    *
+   * \param command_callback
+   * The function to call when a command is about to be issued.
+   * The command is passed along in the callback. The user can display
+   * it how they wish.
+   *
    * @return
    * 1 if option is set, otherwise 0
    */
-    int tgdb_set_verbose_gui_command_output(struct tgdb *tgdb, int value);
+    int tgdb_set_verbose_gui_command_output(struct tgdb *tgdb, int value,
+        void (*command_callback)(const char *command));
 
   /**
    * This will make TGDB handle error's in a verbose mode.
@@ -597,8 +603,7 @@
    * @return
    * 1 if option is set, otherwise 0
    */
-    int tgdb_set_verbose_error_handling(struct tgdb *tgdb, int value,
-            void (*print_message)(const char *fmt, ...));
+    int tgdb_set_verbose_error_handling(struct tgdb *tgdb, int value);
 
 /*@}*/
 /* }}}*/

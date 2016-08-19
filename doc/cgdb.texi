@@ -653,8 +653,8 @@ The default value is on. When enabled, CGDB will show the marks that
 the user has set in the vertical bar in the source window separating
 the line number from the source code.
 
-@item :set stc
-@itemx :set showtgdbcommands
+@item :set sdc
+@itemx :set showdebugcommands
 If this is on, CGDB will show all of the commands that it sends to GDB. 
 If it is off, CGDB will not show the commands that it gives to GDB. 
 The default is off. 

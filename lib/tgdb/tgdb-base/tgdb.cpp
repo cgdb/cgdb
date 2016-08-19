@@ -128,15 +128,6 @@ struct tgdb {
     sig_atomic_t control_c;
 
   /**
-   * This is the last GUI command that has been run.
-   * It is used to display to the client the GUI commands.
-   *
-   * It will either be NULL when it is not set or it should be
-   * the last GUI command run. If it is non-NULL it should be from the heap.
-   * As anyone is allowed to call free on it.  */
-    char *last_gui_command;
-
-  /**
    * This is a TGDB option.
    * It determines if the user wants to see the commands the GUI is running.
    * 
@@ -144,7 +135,7 @@ struct tgdb {
    * running. Otherwise, if it is 1, it does.  */
     int show_gui_commands;
 
-    void (*print_message)(const char *fmt, ...);
+    void (*command_callback)(const char *command);
 
   /**
    * This is the queue of commands TGDB has currently made to give to the 
@@ -230,9 +221,8 @@ static struct tgdb *initialize_tgdb_context(void)
 
     tgdb->IS_SUBSYSTEM_READY_FOR_NEXT_COMMAND = 1;
 
-    tgdb->last_gui_command = NULL;
     tgdb->show_gui_commands = 0;
-    tgdb->print_message = NULL;
+    tgdb->command_callback = NULL;
 
     tgdb->command_list = tgdb_list_init();
     tgdb->has_sigchld_recv = 0;
@@ -636,15 +626,6 @@ static int tgdb_deliver_command(struct tgdb *tgdb, struct tgdb_command *command)
 {
     tgdb->IS_SUBSYSTEM_READY_FOR_NEXT_COMMAND = 0;
 
-    /* Here is where the command is actually given to the debugger.
-     * Before this is done, if the command is a GUI command, we save it,
-     * so that later, it can be printed to the client. Its for debugging
-     * purposes only, or for people who want to know the commands there
-     * debugger is being given.
-     */
-    if (command->command_choice == TGDB_COMMAND_FRONT_END)
-        tgdb->last_gui_command = cgdb_strdup(command->tgdb_command_data);
-
     /* A command for the debugger */
     if (tgdb_client_prepare_for_command(tgdb->tcc, command) == -1)
         return -1;
@@ -657,17 +638,14 @@ static int tgdb_deliver_command(struct tgdb *tgdb, struct tgdb_command *command)
 
     /* Uncomment this if you wish to see all of the commands, that are 
      * passed to GDB. */
-#if 1
-    {
-        if (tgdb->print_message)
-        {
-            char *s = command->tgdb_command_data;
-            int length = strlen(command->tgdb_command_data);
-
-            tgdb->print_message("tgdb:[%.*s]\n", length - 1, s);
-        }
+    if (tgdb->show_gui_commands && tgdb->command_callback &&
+        command->command_choice != TGDB_COMMAND_CONSOLE) {
+        char *s = command->tgdb_command_data;
+        int length = strlen(command->tgdb_command_data);
+        s[length - 1] = '\0';
+        tgdb->command_callback(command->tgdb_command_data);
+        s[length - 1] ='\n';
     }
-#endif
 
     return 0;
 }
@@ -876,28 +854,6 @@ size_t tgdb_process(struct tgdb * tgdb, char *buf, size_t n, int *is_finished)
      * Currently, I see it as a bigger hack to try to just append this to the
      * beginning of buf.
      */
-    if (tgdb->last_gui_command != NULL) {
-        int ret;
-
-        if (tgdb_is_busy(tgdb, &is_busy) == -1) {
-            logger_write_pos(logger, __FILE__, __LINE__, "tgdb_is_busy failed");
-            return -1;
-        }
-        *is_finished = !is_busy;
-
-        if (tgdb->show_gui_commands) {
-            strncpy(buf, tgdb->last_gui_command, n);
-            ret = strlen(tgdb->last_gui_command);
-        } else {
-            buf[0] = '\n';
-            ret = 1;
-        }
-
-        free(tgdb->last_gui_command);
-        tgdb->last_gui_command = NULL;
-        return ret;
-    }
-
     if (tgdb->has_sigchld_recv) {
         int tgdb_will_quit;
 
@@ -1438,22 +1394,21 @@ int tgdb_signal_notification(struct tgdb *tgdb, int signum)
 /* }}}*/
 
 /* Config Options {{{*/
-int tgdb_set_verbose_gui_command_output(struct tgdb *tgdb, int value)
+int tgdb_set_verbose_gui_command_output(struct tgdb *tgdb, int value,
+    void (*command_callback)(const char *command))
 {
     if ((value == 0) || (value == 1))
         tgdb->show_gui_commands = value;
 
     if (tgdb->show_gui_commands == 1)
+        tgdb->command_callback = command_callback;
         return 1;
 
     return 0;
 }
 
-int tgdb_set_verbose_error_handling(struct tgdb *tgdb, int value,
-    void (*print_message)(const char *fmt, ...))
+int tgdb_set_verbose_error_handling(struct tgdb *tgdb, int value)
 {
-    tgdb->print_message = print_message;
-
     if (value == -1)
         return logger_is_recording(logger);
 
