@@ -78,7 +78,7 @@ static char *parse(struct scroller *scr, struct hl_line_attr **attrs,
     int orig_len = strlen(orig);
     int length = MAX(orig_len, scr->current.pos) + buflen +
         (tab_size - 1) * tabcount + 1;
-    char *rv = (char *) cgdb_calloc(length, 1);
+    char rv[length] = {};
     int i, j;
     int debugwincolor = cgdbrc_get_int(CGDBRC_DEBUGWINCOLOR);
     int width, height;
@@ -159,16 +159,7 @@ static char *parse(struct scroller *scr, struct hl_line_attr **attrs,
         rv[width - 1] = 0;
     }
 
-    /* Remove trailing space from the line if we don't have color */
-    if (*attrs) {
-        j = strlen(rv);
-    } else {
-        for (j = strlen(rv) - 1; j > i && isspace(rv[j]); j--)
-            ;
-    }
-
-    /* Only realloc if it's going to save us more than ~128 bytes */
-    return (length - j > 128) ? (char *)cgdb_realloc(rv, j + 2) : rv;
+    return strdup(rv);
 }
 
 static void scroller_set_last_inferior_attr(struct scroller *scr)
