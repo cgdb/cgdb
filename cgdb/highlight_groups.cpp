@@ -921,7 +921,8 @@ static int ansi_get_color_code_index(const char *buf, int *index)
 }
 
 /* Parse ansi color escape sequence in buf, return ncurses attribute and esc length */
-int hl_ansi_get_color_attrs(hl_groups_ptr hl_groups, const char *buf, int *attr, int force_esc_parsing)
+int hl_ansi_get_color_attrs(hl_groups_ptr hl_groups,
+    const char *buf, int *attr)
 {
     int i = 0;
     int fg = -1;
@@ -930,9 +931,9 @@ int hl_ansi_get_color_attrs(hl_groups_ptr hl_groups, const char *buf, int *attr,
 
     *attr = 0;
 
-    /* If we're not in ansi mode, just return default color pair 0 and don't parse
-       the string. */
-    if (!hl_groups->ansi_esc_parsing && !force_esc_parsing)
+    /* If we're not in ansi mode, just return default color pair 0 and
+     * don't parse the string. */
+    if (!hl_groups->ansi_color)
         return 0;
 
     if ((buf[i++] == '\033') && (buf[i++] == '[')) {

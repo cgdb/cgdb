@@ -151,7 +151,8 @@ static void center_line(WINDOW *win, int row, int width, const char *data, int d
     /* Parse ansi escape color codes in string */
     for (i = 0; i < datalen; i++) {
         if (data[i] == '\033') {
-            int ansi_count = hl_ansi_get_color_attrs(hl_groups_instance, data + i, &attr, 1);
+            int ansi_count = hl_ansi_get_color_attrs(
+                    hl_groups_instance, data + i, &attr);
             if (ansi_count) {
                 line_attr.col = sbcount(line);
                 line_attr.attr = attr;
