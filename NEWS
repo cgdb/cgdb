@@ -1,3 +1,5 @@
+  * Added the 'disassemble' command to CGDB.
+
   * Add the :logo command to cgdb. This tells CGDB to display a logo
     in the source window.
 

@@ -826,6 +826,10 @@ Turn the syntax on or off.
 @itemx :until
 Send an until command to GDB.
 
+@item :d
+@itemx :disassemble
+Send a disassemble command to GDB.
+
 @item :up
 Send an up command to GDB.
 
