@@ -69,17 +69,21 @@ static int count(const char *s, int slen, char c)
  * Return Value:  A newly allocated copy of buf, with modifications made.
  */
 static char *parse(struct scroller *scr, struct hl_line_attr **attrs,
-    const char *orig, const char *buf, int buflen)
+    const char *orig, const char *buf, int buflen, enum ScrInputKind kind)
 {
     // Read in tabstop settings, but don't change them on the fly as we'd have to
     //  store each previous line and recalculate every one of them.
     static const int tab_size = cgdbrc_get_int(CGDBRC_TABSTOP);
     int tabcount = count(buf, buflen, '\t');
     int orig_len = strlen(orig);
-    int length = MAX(orig_len, scr->current.pos) + buflen + (tab_size - 1) * tabcount;
-    char *rv = (char *) cgdb_calloc(length + 1, 1);
+    int length = MAX(orig_len, scr->current.pos) + buflen +
+        (tab_size - 1) * tabcount + 1;
+    char *rv = (char *) cgdb_calloc(length, 1);
     int i, j;
     int debugwincolor = cgdbrc_get_int(CGDBRC_DEBUGWINCOLOR);
+    int width, height;
+
+    getmaxyx(scr->win, height, width);
 
     /* Copy over original buffer */
     strcpy(rv, orig);
@@ -133,6 +137,27 @@ static char *parse(struct scroller *scr, struct hl_line_attr **attrs,
     }
 
     scr->current.pos = i;
+
+    /**
+     * The prompt should never be longer than the width of the terminal.
+     *
+     * The below should only be done for the readline prompt interaction,
+     * not for text coming from gdb/inferior. Otherwise you'll truncate
+     * their text in the scroller!
+     *
+     * When readline is working with the prompt (at least in "dumb" mode)
+     * it assumes that the terminal will only display as many characters as
+     * the terminal is wide. If the terminal is reduced in size (resized to a
+     * smaller width) readline will only clear the number of characters
+     * that will fit into the new terminal width. Our prompt may still
+     * have a lot more characters than that (the characters that existed
+     * in the prompt before the resize). This truncation of the prompt
+     * is solving that problem.
+     */
+    size_t rvlength = strlen(rv);
+    if (kind == SCR_INPUT_READLINE && rvlength >= width) {
+        rv[width - 1] = 0;
+    }
 
     /* Remove trailing space from the line if we don't have color */
     if (*attrs) {
@@ -364,7 +389,8 @@ static void scr_add_buf(struct scroller *scr, const char *buf,
             }
 
             scr->lines[index].kind = kind;
-            scr->lines[index].line = parse(scr, &scr->lines[index].attrs, orig, buf, distance);
+            scr->lines[index].line = parse(
+                scr, &scr->lines[index].attrs, orig, buf, distance, kind);
             scr->lines[index].line_len = strlen(scr->lines[index].line);
 
             scroller_set_last_inferior_attr(scr);
@@ -396,7 +422,7 @@ static void scr_add_buf(struct scroller *scr, const char *buf,
         scr->current.pos = 0;
 
         /* Add the new line */
-        line = parse(scr, &attrs, "", buf, distance);
+        line = parse(scr, &attrs, "", buf, distance, kind);
         scroller_addline(scr, line, attrs, kind);
     }
 
