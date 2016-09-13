@@ -281,15 +281,19 @@ static int is_gdb_tui_command(const char* line)
     while (isspace(*line))
         line++;
     if (*line) {
+        size_t cmd_len;
         const char *cmd_end = line + 1;
 
         /* Find end of command */
         while (*cmd_end && !isspace(*cmd_end))
             cmd_end++;
 
+        cmd_len = cmd_end - line;
         for (i = 0; i < sizeof(tui_commands) / sizeof(tui_commands[0]); i++)
         {
-            if (!strncasecmp(line, tui_commands[i], cmd_end - line))
+            size_t len = strlen(tui_commands[i]);
+
+            if ((len == cmd_len) && !strncasecmp(line, tui_commands[i], len))
                 return 1;
         }
     }
