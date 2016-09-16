@@ -32,6 +32,7 @@
 #include "queue.h"
 #include "tgdb_list.h"
 #include "annotate_two.h"
+#include "gdbwire.h"
 
 /**
  * This structure represents most of the I/O parsing state of the 
@@ -646,55 +647,29 @@ commands_process_info_source(struct commands *c, struct tgdb_list *list, char a)
         ibuf_addchar(c->info_source_string, a);
 }
 
-static void commands_process_source_line(struct commands *c)
-{
-    unsigned long length = ibuf_length(c->info_sources_string), i, start = 0;
-    static char *info_ptr;
-    static char *nfile;
-
-    info_ptr = ibuf_get(c->info_sources_string);
-
-    for (i = 0; i < length; ++i) {
-        if (i > 0 && info_ptr[i - 1] == ',' && info_ptr[i] == ' ') {
-            nfile = (char *)calloc(sizeof (char), i - start);
-            strncpy(nfile, info_ptr + start, i - start - 1);
-            start += ((i + 1) - start);
-            tgdb_list_append(c->inferior_source_files, nfile);
-        } else if (i == length - 1) {
-            nfile = (char *)calloc(sizeof (char), i - start + 2);
-            strncpy(nfile, info_ptr + start, i - start + 1);
-            tgdb_list_append(c->inferior_source_files, nfile);
-        }
-    }
-}
-
 /* process's source files */
 static void commands_process_sources(struct commands *c, char a)
 {
-    static const char *sourcesReadyString = "Source files for which symbols ";
-    static const int sourcesReadyStringLength = 31;
-    static char *info_ptr;
-
     ibuf_addchar(c->info_sources_string, a);
 
     if (a == '\n') {
-        ibuf_delchar(c->info_sources_string);   /* remove '\n' and null terminate */
-        /* valid lines are 
-         * 1. after the first line,
-         * 2. do not end in ':' 
-         * 3. and are not empty 
-         */
-        info_ptr = ibuf_get(c->info_sources_string);
+        enum gdbwire_result result;
+        struct gdbwire_mi_command *mi_command = 0;
+        result = gdbwire_interpreter_exec(ibuf_get(c->info_sources_string),
+            GDBWIRE_MI_FILE_LIST_EXEC_SOURCE_FILES, &mi_command);
+        if (result == GDBWIRE_OK) {
+            struct gdbwire_mi_source_file *files =
+                mi_command->variant.file_list_exec_source_files.files;
+            while (files) {
+                char *file = (files->fullname)?files->fullname:files->file;
+                tgdb_list_append(c->inferior_source_files, strdup(file));
+                files = files->next;
+            }
 
-        if (strncmp(info_ptr, sourcesReadyString, sourcesReadyStringLength) ==
-                0)
-            c->sources_ready = 1;
+            gdbwire_mi_command_free(mi_command);
+        }
 
-        /* is this a valid line */
-        if (ibuf_length(c->info_sources_string) > 0 && c->sources_ready
-                && info_ptr[ibuf_length(c->info_sources_string) - 1] != ':')
-            commands_process_source_line(c);
-
+        c->sources_ready = 1;
         ibuf_clear(c->info_sources_string);
     }
 }
@@ -734,18 +709,13 @@ void commands_free(struct commands *c, void *item)
 
 void commands_send_gui_sources(struct commands *c, struct tgdb_list *list)
 {
-    /* If the inferior program was not compiled with debug, then no sources
-     * will be available. If no sources are available, do not return the
-     * TGDB_UPDATE_SOURCE_FILES command. */
-    if (tgdb_list_size(c->inferior_source_files) > 0) {
-        struct tgdb_response *response = (struct tgdb_response *)
-                cgdb_malloc(sizeof (struct tgdb_response));
+    struct tgdb_response *response = (struct tgdb_response *)
+            cgdb_malloc(sizeof (struct tgdb_response));
 
-        response->header = TGDB_UPDATE_SOURCE_FILES;
-        response->choice.update_source_files.source_files =
-                c->inferior_source_files;
-        tgdb_types_append_command(list, response);
-    }
+    response->header = TGDB_UPDATE_SOURCE_FILES;
+    response->choice.update_source_files.source_files =
+            c->inferior_source_files;
+    tgdb_types_append_command(list, response);
 }
 
 void commands_send_gui_completions(struct commands *c, struct tgdb_list *list)
@@ -956,7 +926,7 @@ static char *commands_create_command(struct commands *c,
 
     switch (com) {
         case ANNOTATE_INFO_SOURCES:
-            ncom = strdup("server info sources\n");
+            ncom = strdup("server interpreter-exec mi \"-file-list-exec-source-files\"\n");
             break;
         case ANNOTATE_LIST:
         {

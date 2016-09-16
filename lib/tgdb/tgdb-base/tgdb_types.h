@@ -296,12 +296,6 @@
      */
         TGDB_UPDATE_SOURCE_FILES,
 
-    /**
-     * This is a response to the tgdb_get_sources function call.
-     * If the sources can not be received you will get this response.
-     */
-        TGDB_SOURCES_DENIED,
-
     /** 
      * This is a response to the function call tgdb_get_filename_pair.
      * It returns the absolute and relative path to the source file requested.
@@ -373,9 +367,6 @@
                  * filename. The filename may be relative or absolute. */
                 struct tgdb_list *source_files;
             } update_source_files;
-
-            /* header == TGDB_SOURCES_DENIED */
-            /* sources_denied; */
 
             /* header == TGDB_FILENAME_PAIR */
             struct {

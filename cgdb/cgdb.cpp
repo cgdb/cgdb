@@ -1042,27 +1042,23 @@ static void process_commands(struct tgdb *tgdb_in)
                 tgdb_list_iterator *i = tgdb_list_get_first(list);
                 char *s;
 
-                if_clear_filedlg();
+                if (i) {
+                    if_clear_filedlg();
 
-                while (i) {
-                    s = (char *)tgdb_list_get_item(i);
-                    if_add_filedlg_choice(s);
-                    i = tgdb_list_next(i);
+                    while (i) {
+                        s = (char *)tgdb_list_get_item(i);
+                        if_add_filedlg_choice(s);
+                        i = tgdb_list_next(i);
+                    }
+
+                    if_set_focus(FILE_DLG);
+                } else {
+                    if_display_message("Error:", WIN_REFRESH, 0,
+                            " No sources available! Was the program compiled with debug?");
                 }
-
-                if_set_focus(FILE_DLG);
                 kui_input_acceptable = 1;
                 break;
             }
-
-                /* The user is trying to get a list of source files that make up
-                 * the debugged program but libtgdb is claiming that gdb knows
-                 * none. */
-            case TGDB_SOURCES_DENIED:
-                if_display_message("Error:", WIN_REFRESH, 0,
-                        " No sources available! Was the program compiled with debug?");
-                kui_input_acceptable = 1;
-                break;
 
                 /* This is the absolute path to the last file the user requested */
             case TGDB_FILENAME_PAIR:
