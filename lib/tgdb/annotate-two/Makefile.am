@@ -17,6 +17,8 @@ libtgdb_a2_a_SOURCES = \
     commands.h \
     data.cpp \
     data.h \
+    gdbwire.c \
+    gdbwire.h \
     globals.cpp \
     globals.h \
     state_machine.cpp \
