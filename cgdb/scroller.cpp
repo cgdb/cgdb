@@ -230,7 +230,6 @@ struct scroller *scr_new(int pos_r, int pos_c, int height, int width)
     rv->last_inferior_line = NULL;
     rv->last_inferior_attr = -1;
     rv->lines_to_display = 0;
-    rv->last_cursor_row = 0;
     rv->win = newwin(height, width, pos_r, pos_c);
 
     /* Start with a single (blank) line */
@@ -491,26 +490,6 @@ void scr_refresh(struct scroller *scr, int focus, enum win_refresh dorefresh)
     }
 
     /**
-     * There is currently an open issue with the cursor not being removed
-     * from the screen properly by ncurses.
-     *   http://lists.gnu.org/archive/html/bug-ncurses/2016-08/msg00001.html
-     *
-     * When redrawing the window, if the cursor has moved, the previous
-     * cursor is not cleared from the screen with a call to wclrtoeol.
-     *
-     * A call to wclear is the only way I've determined to clear the old
-     * cursor. Since it's slow, we only do it when necessary.
-     * That is, if the last cursor position was drawn on a line different
-     * than the next cursor will be.
-     *
-     * I've requested help from the ncurses mailing list, and this
-     * situation may change as I receive new guidance.
-     */
-    if (scr->lines_to_display != scr->last_cursor_row) {
-        wclear(scr->win);
-    }
-
-    /**
      * Printing the scroller to the gdb window.
      *
      * The gdb window has a certain dimension (height and width).
@@ -586,7 +565,6 @@ void scr_refresh(struct scroller *scr, int focus, enum win_refresh dorefresh)
      */ 
     if (focus && scr->current.r == sbcount(scr->lines) - 1 &&
         length <= width && !scr->in_scroll_mode) {
-        scr->last_cursor_row = scr->lines_to_display;
         curs_set(1);
         wmove(scr->win, scr->lines_to_display-1, scr->current.pos % width);
     } else {

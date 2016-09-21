@@ -58,22 +58,6 @@ struct scroller {
 
     int lines_to_display;
 
-    /**
-     * The last row that the cursor was drawn at.
-     *
-     * There is currently an open issue with the cursor not being removed
-     * from the screen properly by ncurses.
-     *   http://lists.gnu.org/archive/html/bug-ncurses/2016-08/msg00001.html
-     *
-     * When redrawing the window, if the cursor has moved, the previous
-     * cursor is not cleared from the screen with a call to wclrtoeol.
-     *
-     * For now, we call wclear if the cursor was on a line different than
-     * the line we are about to put it on. This variable can be removed
-     * when that is no longer necessary.
-     */
-    int last_cursor_row;
-
     struct {
         int r;                  /* Current line (row) number */
         int c;                  /* Current column number */
