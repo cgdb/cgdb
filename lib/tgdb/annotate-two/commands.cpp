@@ -128,18 +128,6 @@ struct commands {
 
     /*@} */
     /* }}} */
-
-  /** The absolute path prefix output by GDB when 'info source' is given */
-    const char *source_prefix;
-
-  /** The length of the line above.  */
-    int source_prefix_length;
-
-  /** The relative path prefix output by GDB when 'info source' is given */
-    const char *source_relative_prefix;
-
-  /** The length of the line above.  */
-    int source_relative_prefix_length;
 };
 
 struct commands *commands_initialize(void)
@@ -175,12 +163,6 @@ struct commands *commands_initialize(void)
     c->tab_completion_ready = 0;
     c->tab_completion_string = ibuf_init();
     c->tab_completions = tgdb_list_init();
-
-    c->source_prefix = "Located in ";
-    c->source_prefix_length = 11;
-
-    c->source_relative_prefix = "Current source file is ";
-    c->source_relative_prefix_length = 23;
 
     return c;
 }
@@ -601,53 +583,6 @@ commands_send_source_relative_source_file(struct commands *c,
     tgdb_types_append_command(list, response);
 }
 
-/* commands_process_info_source:
- * -----------------------------
- *
- * This function is capable of parsing the output of 'info source'.
- * It can get both the absolute and relative path to the source file.
- */
-static void
-commands_process_info_source(struct commands *c, struct tgdb_list *list, char a)
-{
-    unsigned long length;
-    static char *info_ptr;
-
-    if (c->info_source_ready)   /* Already found */
-        return;
-
-    info_ptr = ibuf_get(c->info_source_string);
-    length = ibuf_length(c->info_source_string);
-
-    if (a == '\r')
-        return;
-
-    if (a == '\n') {
-        /* This is the line containing the absolute path to the source file */
-        if (length >= c->source_prefix_length &&
-                strncmp(info_ptr, c->source_prefix,
-                        c->source_prefix_length) == 0) {
-            ibuf_add(c->info_source_absolute_path,
-                    info_ptr + c->source_prefix_length);
-            c->info_source_ready = 1;
-            ibuf_clear(c->info_source_string);
-
-            /* commands_finalize_command will use the populated data */
-
-            /* This is the line contatining the relative path to the source file */
-        } else if (length >= c->source_relative_prefix_length &&
-                strncmp(info_ptr, c->source_relative_prefix,
-                        c->source_relative_prefix_length) == 0) {
-            ibuf_add(c->info_source_relative_path,
-                    info_ptr + c->source_relative_prefix_length);
-            ibuf_clear(c->info_source_string);
-        } else
-            ibuf_clear(c->info_source_string);
-    } else
-        ibuf_addchar(c->info_source_string, a);
-}
-
-/* process's source files */
 static void commands_process_sources(struct commands *c, char a)
 {
     ibuf_addchar(c->info_sources_string, a);
@@ -671,6 +606,32 @@ static void commands_process_sources(struct commands *c, char a)
 
         c->sources_ready = 1;
         ibuf_clear(c->info_sources_string);
+    }
+}
+
+static void commands_process_source(struct commands *c, char a)
+{
+    ibuf_addchar(c->info_source_string, a);
+
+    if (a == '\n') {
+        enum gdbwire_result result;
+        struct gdbwire_mi_command *mi_command = 0;
+        result = gdbwire_interpreter_exec(ibuf_get(c->info_source_string),
+            GDBWIRE_MI_FILE_LIST_EXEC_SOURCE_FILE, &mi_command);
+        if (result == GDBWIRE_OK) {
+            if (mi_command->variant.file_list_exec_source_file.fullname) {
+                ibuf_add(c->info_source_absolute_path,
+                    mi_command->variant.file_list_exec_source_file.fullname);
+            }
+
+            ibuf_add(c->info_source_relative_path,
+                    mi_command->variant.file_list_exec_source_file.file);
+
+            gdbwire_mi_command_free(mi_command);
+        }
+
+        c->info_source_ready = 1;
+        ibuf_clear(c->info_source_string);
     }
 }
 
@@ -742,7 +703,7 @@ void commands_process(struct commands *c, char a, struct tgdb_list *list)
         /* do nothing with data */
     } else if (commands_get_state(c) == INFO_SOURCE_FILENAME_PAIR
             || commands_get_state(c) == INFO_SOURCE_RELATIVE) {
-        commands_process_info_source(c, list, a);
+        commands_process_source(c, a);
     } else if (c->breakpoint_table && c->cur_command_state == FIELD && c->cur_field_num == 5) { /* the file name and line num */
         if (a != '\n' && a != '\r')
             ibuf_addchar(c->breakpoint_string, a);
@@ -975,7 +936,7 @@ static char *commands_create_command(struct commands *c,
             break;
         case ANNOTATE_INFO_SOURCE_RELATIVE:
         case ANNOTATE_INFO_SOURCE_FILENAME_PAIR:
-            ncom = strdup("server info source\n");
+            ncom = strdup("server interpreter-exec mi \"-file-list-exec-source-file\"\n");
             break;
         case ANNOTATE_INFO_BREAKPOINTS:
             ncom = strdup("server info breakpoints\n");
