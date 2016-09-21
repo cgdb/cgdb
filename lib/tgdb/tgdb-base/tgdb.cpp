@@ -128,16 +128,6 @@ struct tgdb {
     sig_atomic_t control_c;
 
   /**
-   * This is a TGDB option.
-   * It determines if the user wants to see the commands the GUI is running.
-   * 
-   * If it is 0, the user does not want to see the commands the GUI is 
-   * running. Otherwise, if it is 1, it does.  */
-    int show_gui_commands;
-
-    void (*command_callback)(const char *command);
-
-  /**
    * This is the queue of commands TGDB has currently made to give to the 
    * front end.  */
     struct tgdb_list *command_list;
@@ -220,9 +210,6 @@ static struct tgdb *initialize_tgdb_context(void)
     tgdb->oob_input_queue = NULL;
 
     tgdb->IS_SUBSYSTEM_READY_FOR_NEXT_COMMAND = 1;
-
-    tgdb->show_gui_commands = 0;
-    tgdb->command_callback = NULL;
 
     tgdb->command_list = tgdb_list_init();
     tgdb->has_sigchld_recv = 0;
@@ -636,15 +623,15 @@ static int tgdb_deliver_command(struct tgdb *tgdb, struct tgdb_command *command)
     io_writen(tgdb->debugger_stdin, command->tgdb_command_data,
             strlen(command->tgdb_command_data));
 
-    /* Uncomment this if you wish to see all of the commands, that are 
-     * passed to GDB. */
-    if (tgdb->show_gui_commands && tgdb->command_callback &&
-        command->command_choice != TGDB_COMMAND_CONSOLE) {
+    if (command->command_choice != TGDB_COMMAND_CONSOLE) {
         char *s = command->tgdb_command_data;
-        int length = strlen(command->tgdb_command_data);
-        s[length - 1] = '\0';
-        tgdb->command_callback(command->tgdb_command_data);
-        s[length - 1] ='\n';
+        struct tgdb_response *response = (struct tgdb_response *)
+                cgdb_malloc(sizeof (struct tgdb_response));
+        response->header = TGDB_DEBUGGER_COMMAND_DELIVERED;
+        response->choice.debugger_command_delivered.debugger_command =
+            (command->command_choice == TGDB_COMMAND_FRONT_END)?1:0;
+        response->choice.debugger_command_delivered.command = cgdb_strdup(s);
+        tgdb_types_append_command(tgdb->command_list, response);
     }
 
     return 0;
@@ -841,9 +828,6 @@ size_t tgdb_process(struct tgdb * tgdb, char *buf, size_t n, int *is_finished)
     ssize_t size;
     size_t buf_size = 0;
     int is_busy;
-
-    /* make the queue empty */
-    tgdb_delete_responses(tgdb);
 
     /* TODO: This is kind of a hack.
      * Since I know that I didn't do a read yet, the next select loop will
@@ -1394,18 +1378,6 @@ int tgdb_signal_notification(struct tgdb *tgdb, int signum)
 /* }}}*/
 
 /* Config Options {{{*/
-int tgdb_set_verbose_gui_command_output(struct tgdb *tgdb, int value,
-    void (*command_callback)(const char *command))
-{
-    if ((value == 0) || (value == 1))
-        tgdb->show_gui_commands = value;
-
-    if (tgdb->show_gui_commands == 1)
-        tgdb->command_callback = command_callback;
-        return 1;
-
-    return 0;
-}
 
 int tgdb_set_verbose_error_handling(struct tgdb *tgdb, int value)
 {

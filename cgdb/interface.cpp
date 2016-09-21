@@ -1520,7 +1520,7 @@ void if_rl_print(const char *buf)
 
 void if_sdc_print(const char *buf)
 {
-    if_print_message("cgdb sdc:[%s]\n", buf);
+    if_print_message("cgdb sdc:%s", buf);
 }
 
 void if_print_message(const char *fmt, ...)

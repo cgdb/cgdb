@@ -513,12 +513,6 @@ int main(int argc, char **argv)
         goto driver_end;
     }
 
-    /* Ask TGDB to print error messages */
-    if (tgdb_set_verbose_gui_command_output(tgdb, 1, print_message) != 1) {
-        logger_write_pos(logger, __FILE__, __LINE__, "driver error");
-        goto driver_end;
-    }
-
     set_up_signal();
 
     main_loop(gdb_fd);

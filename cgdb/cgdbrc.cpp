@@ -365,9 +365,6 @@ static int command_set_sdc(int value)
 
         if (cgdbrc_set_val(option))
             return 1;
-
-        /* TODO: Make this not a member function. */
-        tgdb_set_verbose_gui_command_output(tgdb, value, if_sdc_print);
     } else
         return 1;
 

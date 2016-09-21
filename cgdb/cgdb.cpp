@@ -1112,6 +1112,21 @@ static void process_commands(struct tgdb *tgdb_in)
                 change_prompt(new_prompt);
                 break;
             }
+            case TGDB_DEBUGGER_COMMAND_DELIVERED:
+            {
+                int debugger_command =
+                    item->choice.debugger_command_delivered.debugger_command;
+                const char *command =
+                    item->choice.debugger_command_delivered.command;
+
+                if (debugger_command) {
+                    if_print("\n");
+                } else if (cgdbrc_get_int(CGDBRC_SHOWDEBUGCOMMANDS)) {
+                    if_sdc_print(command);
+                }
+
+                break;
+            }
             case TGDB_QUIT:
                 cleanup();
                 exit(0);
@@ -1121,6 +1136,8 @@ static void process_commands(struct tgdb *tgdb_in)
                 break;
         }
     }
+
+    tgdb_delete_responses(tgdb);
 }
 
 /**

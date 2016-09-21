@@ -562,30 +562,6 @@
 /*@{*/
 
   /**
-   * This sets the verbosity of the GUI's commands.
-   * If the value is set to 0, the GUI's commands will not be shown.
-   * If the value is set to 1, the GUI's commands will be shown.
-   * The default value for TGDB is to be off.
-   *
-   * \param tgdb
-   * An instance of the tgdb library to operate on.
-   *
-   * \param value
-   * 0 to not show GUI commands, 1 to show them, otherwise nothing is done.
-   * You would use a value other than 0 or 1 just to query if the option is set.
-   *
-   * \param command_callback
-   * The function to call when a command is about to be issued.
-   * The command is passed along in the callback. The user can display
-   * it how they wish.
-   *
-   * @return
-   * 1 if option is set, otherwise 0
-   */
-    int tgdb_set_verbose_gui_command_output(struct tgdb *tgdb, int value,
-        void (*command_callback)(const char *command));
-
-  /**
    * This will make TGDB handle error's in a verbose mode.
    * The basically mean's that when TGDB find's an error, the message is
    * printed to stdout/stderr. Normally this is not acceptable because TGDB can

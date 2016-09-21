@@ -330,6 +330,9 @@
     /** The prompt has changed, here is the new value.  */
         TGDB_UPDATE_CONSOLE_PROMPT_VALUE,
 
+    /** A debugger command was run */
+    TGDB_DEBUGGER_COMMAND_DELIVERED,
+
     /**
      * This happens when gdb quits.
      * libtgdb is done. 
@@ -402,6 +405,23 @@
                 /* The new prompt GDB has reported */
                 const char *prompt_value;
             } update_console_prompt_value;
+
+            /* header == TGDB_DEBUGGER_COMMAND_DELIVERED */
+            struct {
+                /**
+                 * This will be 1 if it is a debugger command. That is a
+                 * command that was issued through 
+                 *   tgdb_request_run_debugger_command
+                 * This will be 0 if it is a tgdb command. That is a command
+                 * that cgdb did not request directly, but tgdb required to
+                 * run it to update the state of cgdb. For instance,
+                 * getting the breakpoints or the currently active line.
+                 */
+                int debugger_command;
+
+                /* The debugger command */
+                const char *command;
+            } debugger_command_delivered;
 
             /* header == TGDB_QUIT */
             struct {
