@@ -128,8 +128,7 @@ void data_set_state(struct annotate_two *a2, enum internal_state state)
     }                           /* end switch */
 }
 
-void data_process(struct annotate_two *a2,
-        char a, char *buf, int *n, struct tgdb_list *list)
+void data_process(struct annotate_two *a2, char a, char *buf, int *n)
 {
     switch (a2->data->data_state) {
         case VOID:
@@ -144,7 +143,7 @@ void data_process(struct annotate_two *a2,
         case GUI_COMMAND:
         case INTERNAL_COMMAND:
             if (a2->data->data_state == INTERNAL_COMMAND)
-                commands_process(a2->c, a, list);
+                commands_process(a2->c, a);
             else if (a2->data->data_state == GUI_COMMAND)
                 buf[(*n)++] = a;
 

@@ -90,7 +90,7 @@ int commands_issue_command(struct commands *c,
  *    a     -> the character received from gdb.
  *    com   -> commands to give back to gdb.
  */
-void commands_process(struct commands *c, char a, struct tgdb_list *list);
+void commands_process(struct commands *c, char a);
 
 /* commands_list_command_finished: Returns to the gui the absolute path of
  *                                  the filename requested.

@@ -99,15 +99,12 @@ int a2_handle_data(struct annotate_two *a2, struct state_machine *sm,
                         break;
                     case NEW_LINE:
                         sm->tgdb_state = NEW_LINE;
-                        data_process(a2, '\n', gui_data, &counter,
-                                command_list);
+                        data_process(a2, '\n', gui_data, &counter);
                         break;
                     case CONTROL_Z:
                         sm->tgdb_state = DATA;
-                        data_process(a2, '\n', gui_data, &counter,
-                                command_list);
-                        data_process(a2, '\032', gui_data, &counter,
-                                command_list);
+                        data_process(a2, '\n', gui_data, &counter);
+                        data_process(a2, '\032', gui_data, &counter);
                         break;
                     case ANNOTATION:   /* Found an annotation */
                         sm->tgdb_state = NL_DATA;
@@ -128,8 +125,7 @@ int a2_handle_data(struct annotate_two *a2, struct state_machine *sm,
                 switch (sm->tgdb_state) {
                     case DATA:
                         sm->tgdb_state = DATA;
-                        data_process(a2, '\032', gui_data, &counter,
-                                command_list);
+                        data_process(a2, '\032', gui_data, &counter);
                         break;
                     case NEW_LINE:
                         sm->tgdb_state = CONTROL_Z;
@@ -152,29 +148,22 @@ int a2_handle_data(struct annotate_two *a2, struct state_machine *sm,
             default:
                 switch (sm->tgdb_state) {
                     case DATA:
-                        data_process(a2, data[i], gui_data, &counter,
-                                command_list);
+                        data_process(a2, data[i], gui_data, &counter);
                         break;
                     case NL_DATA:
                         sm->tgdb_state = DATA;
-                        data_process(a2, data[i], gui_data, &counter,
-                                command_list);
+                        data_process(a2, data[i], gui_data, &counter);
                         break;
                     case NEW_LINE:
                         sm->tgdb_state = DATA;
-                        data_process(a2, '\n', gui_data, &counter,
-                                command_list);
-                        data_process(a2, data[i], gui_data, &counter,
-                                command_list);
+                        data_process(a2, '\n', gui_data, &counter);
+                        data_process(a2, data[i], gui_data, &counter);
                         break;
                     case CONTROL_Z:
                         sm->tgdb_state = DATA;
-                        data_process(a2, '\n', gui_data, &counter,
-                                command_list);
-                        data_process(a2, '\032', gui_data, &counter,
-                                command_list);
-                        data_process(a2, data[i], gui_data, &counter,
-                                command_list);
+                        data_process(a2, '\n', gui_data, &counter);
+                        data_process(a2, '\032', gui_data, &counter);
+                        data_process(a2, data[i], gui_data, &counter);
                         break;
                     case ANNOTATION:
                         ibuf_addchar(sm->tgdb_buffer, data[i]);

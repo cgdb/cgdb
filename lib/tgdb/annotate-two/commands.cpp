@@ -693,7 +693,7 @@ void commands_send_gui_completions(struct commands *c, struct tgdb_list *list)
     tgdb_types_append_command(list, response);
 }
 
-void commands_process(struct commands *c, char a, struct tgdb_list *list)
+void commands_process(struct commands *c, char a)
 {
     if (commands_get_state(c) == INFO_SOURCES) {
         commands_process_sources(c, a);

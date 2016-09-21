@@ -48,7 +48,6 @@
  *             based on whatever the character a was.
  *    n     -  This is the current size of buf.
  */
-    void data_process(struct annotate_two *a2,
-            char a, char *buf, int *n, struct tgdb_list *list);
+    void data_process(struct annotate_two *a2, char a, char *buf, int *n);
 
 #endif
