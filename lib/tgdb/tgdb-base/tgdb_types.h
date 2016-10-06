@@ -154,9 +154,6 @@
      */
         char *file;
 
-    /** The name of the function the breakpoint is set at.  */
-        char *funcname;
-
     /** The line number where the breakpoint is set.  */
         int line;
 

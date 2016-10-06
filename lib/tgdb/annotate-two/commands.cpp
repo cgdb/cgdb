@@ -176,11 +176,6 @@ int free_breakpoint(void *item)
         bp->file = NULL;
     }
 
-    if (bp->funcname) {
-        free(bp->funcname);
-        bp->funcname = NULL;
-    }
-
     free(bp);
     bp = NULL;
 
@@ -377,7 +372,6 @@ static int parse_breakpoint(struct commands *c)
 
     tb = (struct tgdb_breakpoint *) cgdb_malloc(sizeof (struct
                     tgdb_breakpoint));
-    tb->funcname = matches[1];
     tb->file = matches[2];
     tb->line = atoi(matches[3]);
 

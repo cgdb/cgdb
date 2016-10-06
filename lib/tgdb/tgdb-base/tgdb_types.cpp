@@ -56,8 +56,8 @@ static int tgdb_types_print_item(void *command)
                             "breakpoint is NULL");
 
                 fprintf(fd,
-                        "\tFILE(%s) FUNCNAME(%s) LINE(%d) ENABLED(%d)\n",
-                        tb->file, tb->funcname, tb->line, tb->enabled);
+                        "\tFILE(%s) LINE(%d) ENABLED(%d)\n",
+                        tb->file, tb->line, tb->enabled);
 
                 iterator = tgdb_list_next(iterator);
             }
@@ -171,8 +171,6 @@ static int tgdb_types_breakpoint_free(void *data)
     /* Free the structure */
     free((char *) tb->file);
     tb->file = NULL;
-    free((char *) tb->funcname);
-    tb->funcname = NULL;
     free(tb);
     tb = NULL;
     return 0;
