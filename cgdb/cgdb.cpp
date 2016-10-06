@@ -988,7 +988,6 @@ static void process_commands(struct tgdb *tgdb_in)
             case TGDB_UPDATE_BREAKPOINTS:
             {
                 struct sviewer *sview = if_get_sview();
-                char *file;
                 struct tgdb_list *list =
                         item->choice.update_breakpoints.breakpoint_list;
                 tgdb_list_iterator *iterator;
@@ -1002,12 +1001,7 @@ static void process_commands(struct tgdb *tgdb_in)
                     tb = (struct tgdb_breakpoint *)
                             tgdb_list_get_item(iterator);
 
-                    file = tb->file;
-
-                    if (tb->enabled)
-                        source_enable_break(sview, file, tb->line);
-                    else
-                        source_disable_break(sview, file, tb->line);
+                    source_enable_break(sview, tb->file, tb->line, tb->enabled);
 
                     iterator = tgdb_list_next(iterator);
                 }

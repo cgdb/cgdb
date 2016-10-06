@@ -1063,21 +1063,8 @@ int source_search_regex(struct sviewer *sview,
             &sview->cur->sel_col_rend, opt, direction, icase);
 }
 
-void source_disable_break(struct sviewer *sview, const char *path, int line)
-{
-    struct list_node *node;
-
-    if ((node = get_relative_node(sview, path)) == NULL)
-        return;
-
-    if (!node->buf && load_file(node))
-        return;
-
-    if (line > 0 && line <= sbcount(node->lflags))
-        node->lflags[line - 1].breakpt = 2;
-}
-
-void source_enable_break(struct sviewer *sview, const char *path, int line)
+void source_enable_break(struct sviewer *sview, const char *path, int line,
+    int enabled)
 {
     struct list_node *node;
 
@@ -1088,7 +1075,7 @@ void source_enable_break(struct sviewer *sview, const char *path, int line)
         return;
 
     if (line > 0 && line < sbcount(node->lflags)) {
-        node->lflags[line - 1].breakpt = 1;
+        node->lflags[line - 1].breakpt = (enabled == 0)?2:1;
     }
 }
 
