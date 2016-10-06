@@ -1063,15 +1063,20 @@ int source_search_regex(struct sviewer *sview,
             &sview->cur->sel_col_rend, opt, direction, icase);
 }
 
-void source_enable_break(struct sviewer *sview, const char *path, int line,
-    int enabled)
+void source_enable_break(struct sviewer *sview, const char *path, 
+        const char *fullname, int line, int enabled)
 {
-    struct list_node *node;
+    struct list_node *node = 0;
 
-    if ((node = get_relative_node(sview, path)) == NULL)
-        return;
+    if (fullname) {
+        node = get_node(sview, fullname);
+    }
 
-    if (!node->buf && load_file(node))
+    if (!node && path) {
+        node = get_relative_node(sview, path);
+    }
+
+    if (!node || (!node->buf && load_file(node)))
         return;
 
     if (line > 0 && line < sbcount(node->lflags)) {

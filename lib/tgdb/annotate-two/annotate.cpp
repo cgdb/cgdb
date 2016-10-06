@@ -105,56 +105,9 @@ static int handle_post_prompt(struct annotate_two *a2, const char *buf,
     return 0;
 }
 
-static int handle_breakpoints_invalid(struct annotate_two *a2, const char *buf,
-        size_t n, struct tgdb_list *list)
-{
-    /* Don't use anymore because GDB is buggy */
-    return 0;
-}
-
-static int handle_breakpoints_headers(struct annotate_two *a2, const char *buf,
-        size_t n, struct tgdb_list *list)
-{
-    commands_set_state(a2->c, BREAKPOINT_HEADERS, list);
-    return 0;
-}
-
-static int handle_breakpoints_table(struct annotate_two *a2, const char *buf,
-        size_t n, struct tgdb_list *list)
-{
-    commands_set_state(a2->c, BREAKPOINT_TABLE_BEGIN, list);
-    return 0;
-}
-
-static int handle_breakpoints_table_end(struct annotate_two *a2,
-        const char *buf, size_t n, struct tgdb_list *list)
-{
-    commands_set_state(a2->c, BREAKPOINT_TABLE_END, list);
-    return 0;
-}
-
 static int handle_unwanted_fields(struct annotate_two *a2, const char *buf,
         size_t n, struct tgdb_list *list)
 {
-    return 0;
-}
-
-static int handle_field(struct annotate_two *a2, const char *buf, size_t n,
-        struct tgdb_list *list)
-{
-    int i = -1;
-
-    commands_parse_field(a2->c, buf, n, &i);
-    commands_set_field_num(a2->c, i);
-    commands_set_state(a2->c, FIELD, list);
-
-    return 0;
-}
-
-static int handle_record(struct annotate_two *a2, const char *buf, size_t n,
-        struct tgdb_list *list)
-{
-    commands_set_state(a2->c, RECORD, list);
     return 0;
 }
 
@@ -254,13 +207,7 @@ static struct annotation {
     "pre-prompt", 10, handle_pre_prompt}, {
     "prompt", 6, handle_prompt}, {
     "post-prompt", 11, handle_post_prompt}, {
-    "breakpoints-invalid", 19, handle_breakpoints_invalid}, {
-    "breakpoints-headers", 19, handle_breakpoints_headers}, {
-    "breakpoints-table-end", 21, handle_breakpoints_table_end}, {
-    "breakpoints-table", 17, handle_breakpoints_table}, {
     "field-", 6, handle_unwanted_fields}, {
-    "field", 5, handle_field}, {
-    "record", 6, handle_record}, {
     "error-begin", 11, handle_error_begin}, {
     "error", 5, handle_error}, {
     "quit", 4, handle_quit}, {

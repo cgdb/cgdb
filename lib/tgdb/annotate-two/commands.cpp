@@ -40,20 +40,11 @@
  */
 struct commands {
 
-  /** The current absolute path the debugger is at in the inferior.  */
-    struct ibuf *absolute_path;
-
   /** The current line number the debugger is at in the inferior.  */
     struct ibuf *line_number;
 
   /** The state of the command context.  */
     enum COMMAND_STATE cur_command_state;
-
-  /**
-   * This is related to parsing the breakpoint annotations.
-   * It keeps track of the current field we are in.
-   */
-    int cur_field_num;
 
   /** breakpoint information */
     /*@{ */
@@ -63,18 +54,6 @@ struct commands {
 
   /** The current breakpoint being parsed.  */
     struct ibuf *breakpoint_string;
-
-  /** ???  */
-    int breakpoint_table;
-
-  /** If the current breakpoint is enabled */
-    int breakpoint_enabled;
-
-  /** ???  */
-    int breakpoint_started;
-
-    /* The regular expression matching the breakpoint GDB output */
-    regex_t regex_bp;
 
     /*@} */
 
@@ -134,21 +113,12 @@ struct commands *commands_initialize(void)
 {
     struct commands *c =
             (struct commands *) cgdb_malloc(sizeof (struct commands));
-    const char *regex = "[io]n (.*) at (.*):([0-9]+)";
-
-    c->absolute_path = ibuf_init();
     c->line_number = ibuf_init();
 
     c->cur_command_state = VOID_COMMAND;
-    c->cur_field_num = 0;
 
     c->breakpoint_list = tgdb_list_init();
     c->breakpoint_string = ibuf_init();
-    c->breakpoint_table = 0;
-    c->breakpoint_enabled = 0;
-    c->breakpoint_started = 0;
-    if (regcomp(&c->regex_bp, regex, REG_EXTENDED) != 0)
-        return NULL;
 
     c->info_source_string = ibuf_init();
     c->info_source_relative_path = ibuf_init();
@@ -176,6 +146,11 @@ int free_breakpoint(void *item)
         bp->file = NULL;
     }
 
+    if (bp->fullname) {
+        free(bp->fullname);
+        bp->fullname = NULL;
+    }
+
     free(bp);
     bp = NULL;
 
@@ -197,9 +172,6 @@ void commands_shutdown(struct commands *c)
     if (c == NULL)
         return;
 
-    ibuf_free(c->absolute_path);
-    c->absolute_path = NULL;
-
     ibuf_free(c->line_number);
     c->line_number = NULL;
 
@@ -208,7 +180,6 @@ void commands_shutdown(struct commands *c)
 
     ibuf_free(c->breakpoint_string);
     c->breakpoint_string = NULL;
-    regfree(&c->regex_bp);
 
     ibuf_free(c->info_source_string);
     c->info_source_string = NULL;
@@ -301,8 +272,6 @@ commands_parse_source(struct commands *c,
         temp = NULL;
     }
 
-    ibuf_clear(c->absolute_path);
-    ibuf_add(c->absolute_path, ibuf_get(file));
     ibuf_clear(c->line_number);
     ibuf_add(c->line_number, ibuf_get(line));
 
@@ -321,144 +290,11 @@ commands_parse_source(struct commands *c,
     return 0;
 }
 
-/** 
- * Parse a breakpoint that GDB passes back when annotate=2 is set.
- * 
- * Unfortunately, the line that this function has to parse is completely 
- * ambiguous. GDB does not output a line that can be read in a 
- * non-ambiguous way. Therefore, TGDB tries its best to read the line 
- * properly. The line is in this format.
- *
- *  '[io]n .* at .*:number'
- *
- * so, TGDB can parser the ':number' part without a problem. However,
- * it may not be able to get function name and filename correctly. If
- * the filename contains ' at ' in it, then TGDB will stop prematurly.
- */
-static int parse_breakpoint(struct commands *c)
-{
-#define BP_REGEX_SIZE (4)
-    char *info_ptr;
-    size_t nmatch = BP_REGEX_SIZE;
-    regmatch_t pmatch[BP_REGEX_SIZE];
-    char *matches[BP_REGEX_SIZE] = { NULL, NULL, NULL, NULL };
-    int cur, val;
-    struct tgdb_breakpoint *tb;
-
-    info_ptr = ibuf_get(c->breakpoint_string);
-    if (!info_ptr)              /* This should never really happen */
-        return -1;
-
-    /* Check to see if this is a watchpoint, if it is,
-     * don't parse for a breakpoint.  */
-    if (strstr(info_ptr, " at ") == NULL)
-        return 0;
-
-    val = regexec(&c->regex_bp, info_ptr, nmatch, pmatch, 0);
-    if (val != 0) {
-        logger_write_pos(logger, __FILE__, __LINE__, "regexec failed");
-        return -1;
-    }
-
-    /* Get the whole match, function, filename and number name */
-    for (cur = 0; cur < BP_REGEX_SIZE; ++cur)
-        if (pmatch[cur].rm_so != -1) {
-            int size = pmatch[cur].rm_eo - pmatch[cur].rm_so;
-
-            matches[cur] = (char *)cgdb_malloc(sizeof (char) * (size) + 1);
-            strncpy(matches[cur], &info_ptr[pmatch[cur].rm_so], size);
-            matches[cur][size] = 0;
-        }
-
-    tb = (struct tgdb_breakpoint *) cgdb_malloc(sizeof (struct
-                    tgdb_breakpoint));
-    tb->file = matches[2];
-    tb->line = atoi(matches[3]);
-
-    if (c->breakpoint_enabled == 1)
-        tb->enabled = 1;
-    else
-        tb->enabled = 0;
-
-    tgdb_list_append(c->breakpoint_list, tb);
-
-    /* Matches 1 && 2 are freed by client. */
-    free(matches[0]);
-    matches[0] = NULL;
-    free(matches[3]);
-    matches[3] = NULL;
-
-    return 0;
-}
-
 void
 commands_set_state(struct commands *c,
         enum COMMAND_STATE state, struct tgdb_list *list)
 {
     c->cur_command_state = state;
-
-    switch (c->cur_command_state) {
-        case RECORD:
-            if (ibuf_length(c->breakpoint_string) > 0) {
-                if (parse_breakpoint(c) == -1)
-                    logger_write_pos(logger, __FILE__, __LINE__,
-                            "parse_breakpoint error");
-
-                ibuf_clear(c->breakpoint_string);
-                c->breakpoint_enabled = 0;
-            }
-            break;
-        case BREAKPOINT_TABLE_END:
-            if (ibuf_length(c->breakpoint_string) > 0)
-                if (parse_breakpoint(c) == -1)
-                    logger_write_pos(logger, __FILE__, __LINE__,
-                            "parse_breakpoint error");
-            {
-                struct tgdb_response *response = (struct tgdb_response *)
-                        cgdb_malloc(sizeof (struct tgdb_response));
-
-                response->header = TGDB_UPDATE_BREAKPOINTS;
-                response->choice.update_breakpoints.breakpoint_list =
-                        c->breakpoint_list;
-
-                /* At this point, annotate needs to send the breakpoints to the gui.
-                 * All of the valid breakpoints are stored in breakpoint_queue. */
-                tgdb_types_append_command(list, response);
-            }
-
-            ibuf_clear(c->breakpoint_string);
-            c->breakpoint_enabled = 0;
-
-            c->breakpoint_started = 0;
-            break;
-        case BREAKPOINT_HEADERS:
-            c->breakpoint_table = 0;
-            break;
-        case BREAKPOINT_TABLE_BEGIN:
-
-            /* The breakpoint queue should be empty at this point */
-            c->breakpoint_table = 1;
-            c->breakpoint_started = 1;
-            break;
-        case INFO_SOURCE_FILENAME_PAIR:
-            break;
-        case INFO_SOURCE_RELATIVE:
-            break;
-        case INFO_SOURCES:
-            break;
-        default:
-            break;
-    }
-}
-
-void commands_set_field_num(struct commands *c, int field_num)
-{
-    c->cur_field_num = field_num;
-
-    /* clear buffer and start over */
-    if (c->breakpoint_table && c->cur_command_state == FIELD
-            && c->cur_field_num == 5)
-        ibuf_clear(c->breakpoint_string);
 }
 
 enum COMMAND_STATE commands_get_state(struct commands *c)
@@ -567,7 +403,7 @@ commands_send_source_relative_source_file(struct commands *c,
     struct tgdb_response *response = (struct tgdb_response *)
             cgdb_malloc(sizeof (struct tgdb_response));
 
-    tfp->absolute_path = strdup(ibuf_get(c->absolute_path));
+    tfp->absolute_path = strdup(ibuf_get(c->info_source_absolute_path));
     tfp->relative_path = strdup(ibuf_get(c->info_source_relative_path));
     tfp->line_number = atoi(ibuf_get(c->line_number));
 
@@ -600,6 +436,60 @@ static void commands_process_sources(struct commands *c, char a)
 
         c->sources_ready = 1;
         ibuf_clear(c->info_sources_string);
+    }
+}
+
+static void commands_process_breakpoint(struct commands *c,
+        struct gdbwire_mi_breakpoint *breakpoint) {
+    if ((breakpoint->fullname || breakpoint->file) && breakpoint->line != 0) {
+        struct tgdb_breakpoint *tb = (struct tgdb_breakpoint *)
+            cgdb_malloc(sizeof (struct tgdb_breakpoint));
+        tb->file = cgdb_strdup(breakpoint->file);
+        tb->fullname = cgdb_strdup(breakpoint->fullname);
+        tb->line = breakpoint->line;
+        tb->enabled = breakpoint->enabled;
+
+        tgdb_list_append(c->breakpoint_list, tb);
+    }
+}
+
+static void commands_process_breakpoints(struct commands *c, char a)
+{
+    ibuf_addchar(c->breakpoint_string, a);
+
+    if (a == '\n') {
+        /**
+         * When using GDB with annotate=2 and also using interpreter-exec,
+         * GDB spits out the annotations in the MI output. All of these
+         * annotations can be ignored. */
+        if (strncmp(ibuf_get(c->breakpoint_string), "^done", 5) == 0) {
+            enum gdbwire_result result;
+            struct gdbwire_mi_command *mi_command = 0;
+            result = gdbwire_interpreter_exec(ibuf_get(c->breakpoint_string),
+                GDBWIRE_MI_BREAK_INFO, &mi_command);
+            if (result == GDBWIRE_OK) {
+                struct gdbwire_mi_breakpoint *breakpoint =
+                    mi_command->variant.break_info.breakpoints;
+                while (breakpoint) {
+                    commands_process_breakpoint(c, breakpoint);
+
+                    if (breakpoint->multi) {
+                        struct gdbwire_mi_breakpoint *multi_bkpt =
+                            breakpoint->multi_breakpoints;
+                        while (multi_bkpt) {
+                            commands_process_breakpoint(c, multi_bkpt);
+                            multi_bkpt = multi_bkpt->next;
+                        }
+                    }
+
+                    breakpoint = breakpoint->next;
+                }
+
+                gdbwire_mi_command_free(mi_command);
+            }
+        }
+
+        ibuf_clear(c->breakpoint_string);
     }
 }
 
@@ -691,6 +581,8 @@ void commands_process(struct commands *c, char a)
 {
     if (commands_get_state(c) == INFO_SOURCES) {
         commands_process_sources(c, a);
+    } else if (commands_get_state(c) == INFO_BREAKPOINTS) {
+        commands_process_breakpoints(c, a);
     } else if (commands_get_state(c) == COMPLETE) {
         commands_process_complete(c, a);
     } else if (commands_get_state(c) == INFO_LIST) {
@@ -698,12 +590,6 @@ void commands_process(struct commands *c, char a)
     } else if (commands_get_state(c) == INFO_SOURCE_FILENAME_PAIR
             || commands_get_state(c) == INFO_SOURCE_RELATIVE) {
         commands_process_source(c, a);
-    } else if (c->breakpoint_table && c->cur_command_state == FIELD && c->cur_field_num == 5) { /* the file name and line num */
-        if (a != '\n' && a != '\r')
-            ibuf_addchar(c->breakpoint_string, a);
-    } else if (c->breakpoint_table && c->cur_command_state == FIELD
-            && c->cur_field_num == 3 && a == 'y') {
-        c->breakpoint_enabled = 1;
     }
 }
 
@@ -719,6 +605,7 @@ void commands_process(struct commands *c, char a)
 static void commands_prepare_info_breakpoints(struct commands *c)
 {
     ibuf_clear(c->breakpoint_string);
+    commands_set_state(c, INFO_BREAKPOINTS, NULL);
 }
 
 /* commands_prepare_tab_completion:
@@ -768,6 +655,17 @@ commands_prepare_list(struct annotate_two *a2, struct commands *c,
 void commands_finalize_command(struct commands *c, struct tgdb_list *list)
 {
     switch (commands_get_state(c)) {
+        case INFO_BREAKPOINTS: {
+            struct tgdb_response *response = (struct tgdb_response *)
+                cgdb_malloc(sizeof (struct tgdb_response));
+
+            response->header = TGDB_UPDATE_BREAKPOINTS;
+            response->choice.update_breakpoints.breakpoint_list =
+                c->breakpoint_list;
+
+            tgdb_types_append_command(list, response);
+            break;
+        }
         case INFO_SOURCE_RELATIVE:
         case INFO_SOURCE_FILENAME_PAIR:
             if (c->info_source_ready == 0) {
@@ -933,7 +831,7 @@ static char *commands_create_command(struct commands *c,
             ncom = strdup("server interpreter-exec mi \"-file-list-exec-source-file\"\n");
             break;
         case ANNOTATE_INFO_BREAKPOINTS:
-            ncom = strdup("server info breakpoints\n");
+            ncom = strdup("server interpreter-exec mi \"-break-info\"\n");
             break;
         case ANNOTATE_TTY:
         {

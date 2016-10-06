@@ -148,11 +148,11 @@
   */
     struct tgdb_breakpoint {
 
-    /**
-     * This is the file that the breakpoint is set in. This path name can be
-     * relative.
-     */
+    /** This is the file that the breakpoint is set in. */
         char *file;
+
+    /** This is the fullname to the file that the breakpoint is set in. */
+        char *fullname;
 
     /** The line number where the breakpoint is set.  */
         int line;

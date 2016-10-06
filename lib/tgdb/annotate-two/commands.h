@@ -11,13 +11,8 @@ struct commands;
 enum COMMAND_STATE {
     /* not a state */
     VOID_COMMAND,
-    /* These are related to the 'info breakpoints' command */
-    BREAKPOINT_HEADERS,
-    BREAKPOINT_TABLE_BEGIN,
-    BREAKPOINT_TABLE_END,
-    FIELD,
-    RECORD,
-
+    /* Related to the 'info breakpoints' command */
+    INFO_BREAKPOINTS,
     /* Related to the 'info sources' command */
     INFO_SOURCES,
     /* Related to the 'server complete' command for tab completion */

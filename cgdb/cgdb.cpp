@@ -1001,7 +1001,8 @@ static void process_commands(struct tgdb *tgdb_in)
                     tb = (struct tgdb_breakpoint *)
                             tgdb_list_get_item(iterator);
 
-                    source_enable_break(sview, tb->file, tb->line, tb->enabled);
+                    source_enable_break(sview, tb->file, tb->fullname,
+                        tb->line, tb->enabled);
 
                     iterator = tgdb_list_next(iterator);
                 }
