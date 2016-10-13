@@ -481,9 +481,16 @@ int scr_search_regex(struct scroller *scr, const char *regex, int opt,
         line = wrap_line(scr, line_start + line_inc);
 
         if (cgdbrc_get_int(CGDBRC_WRAPSCAN))
+        {
+            // Wrapping is on so stop at the line we started on.
             line_end = line_start;
+        }
         else
-            line_end = direction ? sbcount(scr->lines) : -1;
+        {
+            // No wrapping. Stop at line 0 if searching down and last line
+            // if searching up.
+            line_end = direction ? 0 : sbcount(scr->lines) - 1;
+        }
 
         for (;;)
         {

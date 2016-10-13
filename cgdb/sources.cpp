@@ -1298,9 +1298,16 @@ int source_search_regex(struct sviewer *sview,
         line = wrap_line(node, line_start + line_inc);
 
         if (cgdbrc_get_int(CGDBRC_WRAPSCAN))
+        {
+            // Wrapping is on so stop at the line we started on.
             line_end = line_start;
+        }
         else
-            line_end = direction ? sbcount(node->file_buf.lines) : -1;
+        {
+            // No wrapping. Stop at line 0 if searching down and last line
+            // if searching up.
+            line_end = direction ? 0 : sbcount(node->file_buf.lines) - 1;
+        }
 
         for(;;) {
             int ret;
