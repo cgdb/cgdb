@@ -39,30 +39,15 @@
  * annotate_two subsytem.
  */
 struct commands {
-
-  /** The current line number the debugger is at in the inferior.  */
-    struct ibuf *line_number;
-
-  /** The state of the command context.  */
+    /**
+     * The state of the command context.
+     */
     enum COMMAND_STATE cur_command_state;
 
-  /** 'info source' information */
-
-    /*@{ */
-
-  /** The current info source line being parsed */
-    struct ibuf *info_source_string;
-
-    /*@} */
-
-    /* tab completion information {{{ */
-    /*@{ */
-
-  /** All of the tab completion items, parsed in put in a list, 1 at a time. */
+    /**
+     * The current tab completion items.
+     */
     struct tgdb_list *tab_completions;
-
-    /*@} */
-    /* }}} */
 
     /**
      * A complete hack.
@@ -188,6 +173,46 @@ static void send_command_complete_response(struct commands *c)
     tgdb_types_append_command(c->response_list, response);
 }
 
+static void
+commands_send_source_file(struct commands *c, char *fullname, char *file,
+        int line)
+{
+    /* This section allocates a new structure to add into the queue 
+     * All of its members will need to be freed later.
+     */
+    struct tgdb_file_position *tfp = (struct tgdb_file_position *)
+            cgdb_malloc(sizeof (struct tgdb_file_position));
+    struct tgdb_response *response = (struct tgdb_response *)
+            cgdb_malloc(sizeof (struct tgdb_response));
+
+    tfp->absolute_path = (fullname)?strdup(fullname):0;
+    tfp->relative_path = strdup(file);
+    tfp->line_number = line;
+
+    response->header = TGDB_UPDATE_FILE_POSITION;
+    response->choice.update_file_position.file_position = tfp;
+
+    tgdb_types_append_command(c->response_list, response);
+}
+
+static void commands_process_info_source(struct commands *c,
+        struct gdbwire_mi_result_record *result_record)
+{
+    enum gdbwire_result result;
+    struct gdbwire_mi_command *mi_command = 0;
+    result = gdbwire_get_mi_command(GDBWIRE_MI_FILE_LIST_EXEC_SOURCE_FILE,
+        result_record, &mi_command);
+    if (result == GDBWIRE_OK) {
+        commands_send_source_file(c,
+                mi_command->variant.file_list_exec_source_file.fullname,
+                mi_command->variant.file_list_exec_source_file.file,
+                mi_command->variant.file_list_exec_source_file.line);
+
+        gdbwire_mi_command_free(mi_command);
+    }
+}
+
+
 static void gdbwire_stream_record_callback(void *context,
     struct gdbwire_mi_stream_record *stream_record)
 {
@@ -220,7 +245,6 @@ static void gdbwire_async_record_callback(void *context,
 {
 }
 
-
 static void gdbwire_result_record_callback(void *context,
         struct gdbwire_mi_result_record *result_record)
 {
@@ -236,6 +260,9 @@ static void gdbwire_result_record_callback(void *context,
                 break;
             case COMMAND_COMPLETE:
                 send_command_complete_response(c);
+                break;
+            case INFO_SOURCE:
+                commands_process_info_source(c, result_record);
                 break;
         }
         commands_set_state(c, VOID_COMMAND, NULL);
@@ -263,14 +290,9 @@ static struct gdbwire_callbacks wire_callbacks =
 
 struct commands *commands_initialize(void)
 {
-
     struct commands *c =
             (struct commands *) cgdb_malloc(sizeof (struct commands));
-    c->line_number = ibuf_init();
-
     c->cur_command_state = VOID_COMMAND;
-
-    c->info_source_string = ibuf_init();
 
     c->tab_completions = tgdb_list_init();
 
@@ -316,12 +338,6 @@ void commands_shutdown(struct commands *c)
     if (c == NULL)
         return;
 
-    ibuf_free(c->line_number);
-    c->line_number = NULL;
-
-    ibuf_free(c->info_source_string);
-    c->info_source_string = NULL;
-
     tgdb_list_destroy(c->tab_completions);
 
     /* TODO: free source_files queue */
@@ -348,54 +364,7 @@ static void
 commands_prepare_info_source(struct annotate_two *a2, struct commands *c)
 {
     data_set_state(a2, INTERNAL_COMMAND);
-    ibuf_clear(c->info_source_string);
-
     commands_set_state(c, INFO_SOURCE, NULL);
-}
-
-static void
-commands_send_source_file(struct commands *c, char *fullname, char *file,
-        int line, struct tgdb_list *list)
-{
-    /* This section allocates a new structure to add into the queue 
-     * All of its members will need to be freed later.
-     */
-    struct tgdb_file_position *tfp = (struct tgdb_file_position *)
-            cgdb_malloc(sizeof (struct tgdb_file_position));
-    struct tgdb_response *response = (struct tgdb_response *)
-            cgdb_malloc(sizeof (struct tgdb_response));
-
-    tfp->absolute_path = (fullname)?strdup(fullname):0;
-    tfp->relative_path = strdup(file);
-    tfp->line_number = line;
-
-    response->header = TGDB_UPDATE_FILE_POSITION;
-    response->choice.update_file_position.file_position = tfp;
-
-    tgdb_types_append_command(list, response);
-}
-
-static void commands_process_info_source(struct commands *c, char a,
-        struct tgdb_list *list)
-{
-    ibuf_addchar(c->info_source_string, a);
-
-    if (a == '\n') {
-        enum gdbwire_result result;
-        struct gdbwire_mi_command *mi_command = 0;
-        result = gdbwire_interpreter_exec(ibuf_get(c->info_source_string),
-            GDBWIRE_MI_FILE_LIST_EXEC_SOURCE_FILE, &mi_command);
-        if (result == GDBWIRE_OK) {
-            commands_send_source_file(c,
-                    mi_command->variant.file_list_exec_source_file.fullname,
-                    mi_command->variant.file_list_exec_source_file.file,
-                    mi_command->variant.file_list_exec_source_file.line, list);
-
-            gdbwire_mi_command_free(mi_command);
-        }
-
-        ibuf_clear(c->info_source_string);
-    }
 }
 
 void commands_process(struct commands *c, char a, struct tgdb_list *list)
@@ -411,7 +380,7 @@ void commands_process(struct commands *c, char a, struct tgdb_list *list)
     } else if (commands_get_state(c) == COMMAND_COMPLETE) {
         gdbwire_push_data(c->wire, &a, 1);
     } else if (commands_get_state(c) == INFO_SOURCE) {
-        commands_process_info_source(c, a, list);
+        gdbwire_push_data(c->wire, &a, 1);
     }
 }
 
