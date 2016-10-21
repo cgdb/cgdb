@@ -27,14 +27,6 @@ handle_source(struct annotate_two *a2, const char *buf, size_t n,
                     ANNOTATE_INFO_SOURCE, NULL, 1);
 }
 
-static int
-handle_breakpoints_invalid(struct annotate_two *a2, const char *buf, size_t n,
-        struct tgdb_list *list)
-{
-    return commands_issue_command(a2->c, a2->client_command_list,
-                           ANNOTATE_INFO_BREAKPOINTS, NULL, 0);
-}
-
 static int handle_misc_pre_prompt(struct annotate_two *a2, const char *buf,
         size_t n, struct tgdb_list *list)
 {
