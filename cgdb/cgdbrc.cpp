@@ -84,6 +84,7 @@ static struct cgdbrc_config_option cgdbrc_config_options[CGDBRC_WRAPSCAN + 1] = 
     {CGDBRC_TTIMEOUT, {.int_val = 1}},
     {CGDBRC_TTIMEOUT_LEN, {.int_val = 100}},
     {CGDBRC_WINMINHEIGHT, {.int_val = 0}},
+    {CGDBRC_WINMINWIDTH, {.int_val = 0}},
     {CGDBRC_WINSPLIT, {.win_split_val = WIN_SPLIT_EVEN}},
     {CGDBRC_WINSPLITORIENTATION, {.win_split_orientation_val = WSO_HORIZONTAL}},
     {CGDBRC_WRAPSCAN, {.int_val = 1}}
