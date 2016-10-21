@@ -5370,6 +5370,7 @@ void gdbwire_mi_error(yyscan_t yyscanner,
  *   \\ -> \
  *   \n -> new line
  *   \r -> carriage return
+ *   \t -> tab
  *
  * See gdbwire_mi_grammar.txt (GDB/MI Clarifications) for more information.
  *
@@ -5402,6 +5403,10 @@ static char *gdbwire_mi_unescape_cstring(char *str)
                     break;
                 case 'r':
                     result[r++] = '\r';
+                    ++s;
+                    break;
+                case 't':
+                    result[r++] = '\t';
                     ++s;
                     break;
                 case '"':
@@ -5823,10 +5828,10 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   184,   184,   187,   190,   194,   198,   204,   210,   210,
-     222,   229,   235,   241,   249,   253,   257,   261,   278,   331,
-     335,   339,   343,   347,   354,   361,   368,   373,   378,   382,
-     390,   394,   402,   408,   412,   416,   420,   424,   428
+       0,   189,   189,   192,   195,   199,   203,   209,   215,   215,
+     227,   234,   240,   246,   254,   258,   262,   266,   283,   336,
+     340,   344,   348,   352,   359,   366,   373,   378,   383,   387,
+     395,   399,   407,   413,   417,   421,   425,   429,   433
 };
 #endif
 
