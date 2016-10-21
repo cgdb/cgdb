@@ -1,7 +1,7 @@
 /**
  * This file is an amalgamation of C source files from gdbwire.
  *
- * It was created using gdbwire 1.0 and git revision fb4942e.
+ * It was created using gdbwire 1.0 and git revision a99de3f.
  */
 
 /***** Begin file gdbwire_string.c *******************************************/
@@ -2155,6 +2155,9 @@ enum gdbwire_mi_command_kind {
     /* -break-info */
     GDBWIRE_MI_BREAK_INFO,
 
+    /* -stack-info-frame */
+    GDBWIRE_MI_STACK_INFO_FRAME,
+
     /* -file-list-exec-source-file */
     GDBWIRE_MI_FILE_LIST_EXEC_SOURCE_FILE,
     /* -file-list-exec-source-files */
@@ -2355,6 +2358,52 @@ struct gdbwire_mi_breakpoint {
     struct gdbwire_mi_breakpoint *next;
 };
 
+struct gdbwire_mi_stack_frame {
+    /**
+     * The frame number.
+     *
+     * Where 0 is the topmost frame, i.e., the innermost function. 
+     *
+     * Always present.
+     */
+    unsigned level;
+
+    /**
+     * The address ($pc value) of the frame.
+     *
+     * May be NULL if GDB can not determine the frame address.
+     */
+    char *address;
+
+   /**
+    * The function name for the frame. May be NULL if unknown.
+    */
+   char *func;
+
+   /**
+    * The file name for the frame. May be NULL if unknown.
+    */
+   char *file;
+
+   /**
+    * The fullname name for the frame. May be NULL if unknown.
+    */
+   char *fullname;
+
+   /**
+    * Line number corresponding to the $pc. Maybe be 0 if unknown.
+    */
+   int line;
+
+   /**
+    * The shared library where this function is defined.
+    *
+    * This is only given if the frame's function is not known. 
+    * May be NULL if unknown.
+    */
+   char *from;
+};
+
 /**
  * Represents a GDB/MI command.
  */
@@ -2370,6 +2419,11 @@ struct gdbwire_mi_command {
             /** The list of breakpoints, NULL if none exist.  */
             struct gdbwire_mi_breakpoint *breakpoints;
         } break_info;
+
+        /** When kind == GDBWIRE_MI_STACK_INFO_FRAME */
+        struct {
+            struct gdbwire_mi_stack_frame *frame;
+        } stack_info_frame;
 
         /** When kind == GDBWIRE_MI_FILE_LIST_EXEC_SOURCE_FILE */
         struct {
@@ -2514,6 +2568,23 @@ gdbwire_mi_breakpoints_free(struct gdbwire_mi_breakpoint *breakpoints)
         cur = cur->next;
         free(tmp);
     }
+}
+
+/**
+ * Free a stack frame.
+ *
+ * @param frame
+ * The frame to free, OK to pass in NULL.
+ */
+static void
+gdbwire_mi_stack_frame_free(struct gdbwire_mi_stack_frame *frame)
+{
+    free(frame->address);
+    free(frame->func);
+    free(frame->file);
+    free(frame->fullname);
+    free(frame->from);
+    free(frame);
 }
 
 /**
@@ -2676,6 +2747,7 @@ break_info_for_breakpoint(struct gdbwire_mi_result *mi_result,
         (fullname && !breakpoint->fullname) ||
         (original_location && !breakpoint->original_location)) {
         gdbwire_mi_breakpoints_free(breakpoint);
+        breakpoint = 0;
         result = GDBWIRE_NOMEM;
     }
 
@@ -2811,6 +2883,107 @@ cleanup:
 }
 
 /**
+ * Handle the -stack-info-frame command.
+ *
+ * @param result_record
+ * The mi result record that makes up the command output from gdb.
+ *
+ * @param out
+ * The output command, null on error.
+ *
+ * @return
+ * GDBWIRE_OK on success, otherwise failure and out is NULL.
+ */
+static enum gdbwire_result
+stack_info_frame(
+    struct gdbwire_mi_result_record *result_record,
+    struct gdbwire_mi_command **out)
+{
+    struct gdbwire_mi_stack_frame *frame;
+    struct gdbwire_mi_result *mi_result;
+    struct gdbwire_mi_command *mi_command = 0;
+
+    char *level = 0, *address = 0;
+    char *func = 0, *file = 0, *fullname = 0, *line = 0, *from = 0;
+
+    *out = 0;
+
+    GDBWIRE_ASSERT(result_record->result_class == GDBWIRE_MI_DONE);
+    GDBWIRE_ASSERT(result_record->result);
+
+    mi_result = result_record->result;
+
+    GDBWIRE_ASSERT(mi_result->kind == GDBWIRE_MI_TUPLE);
+    GDBWIRE_ASSERT(strcmp(mi_result->variable, "frame") == 0);
+    GDBWIRE_ASSERT(mi_result->variant.result);
+    GDBWIRE_ASSERT(!mi_result->next);
+    mi_result = mi_result->variant.result;
+
+    while (mi_result) {
+        if (mi_result->kind == GDBWIRE_MI_CSTRING) {
+            if (strcmp(mi_result->variable, "level") == 0) {
+                level = mi_result->variant.cstring;
+            } else if (strcmp(mi_result->variable, "addr") == 0) {
+                address = mi_result->variant.cstring;
+            } else if (strcmp(mi_result->variable, "func") == 0) {
+                func = mi_result->variant.cstring;
+            } else if (strcmp(mi_result->variable, "file") == 0) {
+                file = mi_result->variant.cstring;
+            } else if (strcmp(mi_result->variable, "fullname") == 0) {
+                fullname = mi_result->variant.cstring;
+            } else if (strcmp(mi_result->variable, "line") == 0) {
+                line = mi_result->variant.cstring;
+            } else if (strcmp(mi_result->variable, "from") == 0) {
+                from = mi_result->variant.cstring;
+            }
+        }
+
+        mi_result = mi_result->next;
+    }
+
+    GDBWIRE_ASSERT(level && address);
+
+    if (strcmp(address, "<unavailable>") == 0) {
+        address = 0;
+    }
+
+    frame = calloc(1, sizeof(struct gdbwire_mi_stack_frame));
+    if (!frame) {
+        return GDBWIRE_NOMEM;
+    }
+
+    frame->level = atoi(level);
+    frame->address = (address)?strdup(address):0;
+    frame->func = (func)?strdup(func):0;
+    frame->file = (file)?strdup(file):0;
+    frame->fullname = (fullname)?strdup(fullname):0;
+    frame->line = (line)?atoi(line):0;
+    frame->from = (from)?strdup(from):0;
+
+    /* Handle the out of memory situation */
+    if ((address && !frame->address) ||
+        (func && !frame->func) ||
+        (file && !frame->file) ||
+        (fullname && !frame->fullname) ||
+        (from && !frame->from)) {
+        gdbwire_mi_stack_frame_free(frame);
+        return GDBWIRE_NOMEM;
+    }
+
+    mi_command = calloc(1, sizeof(struct gdbwire_mi_command));
+    if (!mi_command) {
+        gdbwire_mi_stack_frame_free(frame);
+        return GDBWIRE_NOMEM;
+    }
+    mi_command->kind = GDBWIRE_MI_STACK_INFO_FRAME;
+    mi_command->variant.stack_info_frame.frame = frame;
+
+    *out = mi_command;
+
+    return GDBWIRE_OK;
+}
+
+/**
  * Handle the -file-list-exec-source-file command.
  *
  * @param result_record
@@ -2830,9 +3003,7 @@ file_list_exec_source_file(
     struct gdbwire_mi_result *mi_result;
     struct gdbwire_mi_command *mi_command = 0;
 
-    char *line, *file, *fullname, *macro_info;
-    int macro_info_exists = 0;
-    int fullname_exists = 0;
+    char *line = 0, *file = 0, *fullname = 0, *macro_info = 0;
 
     *out = 0;
 
@@ -2841,39 +3012,25 @@ file_list_exec_source_file(
 
     mi_result = result_record->result;
 
-    GDBWIRE_ASSERT(mi_result->kind == GDBWIRE_MI_CSTRING);
-    GDBWIRE_ASSERT(strcmp(mi_result->variable, "line") == 0);
-    line = mi_result->variant.cstring;
+    while (mi_result) {
+        if (mi_result->kind == GDBWIRE_MI_CSTRING) {
+            if (strcmp(mi_result->variable, "line") == 0) {
+                line = mi_result->variant.cstring;
+            } else if (strcmp(mi_result->variable, "file") == 0) {
+                file = mi_result->variant.cstring;
+            } else if (strcmp(mi_result->variable, "fullname") == 0) {
+                fullname = mi_result->variant.cstring;
+            } else if (strcmp(mi_result->variable, "macro-info") == 0) {
+                macro_info = mi_result->variant.cstring;
+                GDBWIRE_ASSERT(strlen(macro_info) == 1);
+                GDBWIRE_ASSERT(macro_info[0] == '0' || macro_info[0] == '1');
+            }
+        }
 
-    GDBWIRE_ASSERT(mi_result->next);
-    mi_result = mi_result->next;
-
-    GDBWIRE_ASSERT(mi_result->kind == GDBWIRE_MI_CSTRING);
-    GDBWIRE_ASSERT(strcmp(mi_result->variable, "file") == 0);
-    file = mi_result->variant.cstring;
-
-    if (mi_result->next) {
         mi_result = mi_result->next;
-
-        GDBWIRE_ASSERT(mi_result->kind == GDBWIRE_MI_CSTRING);
-        GDBWIRE_ASSERT(strcmp(mi_result->variable, "fullname") == 0);
-        fullname = mi_result->variant.cstring;
-        fullname_exists = 1;
     }
 
-    if (mi_result->next) {
-        GDBWIRE_ASSERT(mi_result->next);
-        mi_result = mi_result->next;
-
-        GDBWIRE_ASSERT(mi_result->kind == GDBWIRE_MI_CSTRING);
-        GDBWIRE_ASSERT(strcmp(mi_result->variable, "macro-info") == 0);
-        macro_info = mi_result->variant.cstring;
-        GDBWIRE_ASSERT(strlen(macro_info) == 1);
-        GDBWIRE_ASSERT(macro_info[0] == '0' || macro_info[0] == '1');
-        macro_info_exists = 1;
-    }
-
-    GDBWIRE_ASSERT(!mi_result->next);
+    GDBWIRE_ASSERT(line && file);
 
     mi_command = calloc(1, sizeof(struct gdbwire_mi_command));
     if (!mi_command) {
@@ -2888,15 +3045,15 @@ file_list_exec_source_file(
         return GDBWIRE_NOMEM;
     }
     mi_command->variant.file_list_exec_source_file.fullname =
-        (fullname_exists)?strdup(fullname):0;
-    if (fullname_exists &&
+        (fullname)?strdup(fullname):0;
+    if (fullname &&
         !mi_command->variant.file_list_exec_source_file.fullname) {
         gdbwire_mi_command_free(mi_command);
         return GDBWIRE_NOMEM;
     }
     mi_command->variant.file_list_exec_source_file.macro_info_exists =
-        macro_info_exists;
-    if (macro_info_exists) {
+        macro_info != 0;
+    if (macro_info) {
         mi_command->variant.file_list_exec_source_file.macro_info =
             atoi(macro_info);
     }
@@ -3012,6 +3169,9 @@ gdbwire_get_mi_command(enum gdbwire_mi_command_kind kind,
         case GDBWIRE_MI_BREAK_INFO:
             result = break_info(result_record, out);
             break;
+        case GDBWIRE_MI_STACK_INFO_FRAME:
+            result = stack_info_frame(result_record, out);
+            break;
         case GDBWIRE_MI_FILE_LIST_EXEC_SOURCE_FILE:
             result = file_list_exec_source_file(result_record, out);
             break;
@@ -3030,6 +3190,10 @@ void gdbwire_mi_command_free(struct gdbwire_mi_command *mi_command)
             case GDBWIRE_MI_BREAK_INFO:
                 gdbwire_mi_breakpoints_free(
                     mi_command->variant.break_info.breakpoints);
+                break;
+            case GDBWIRE_MI_STACK_INFO_FRAME:
+                gdbwire_mi_stack_frame_free(
+                    mi_command->variant.stack_info_frame.frame);
                 break;
             case GDBWIRE_MI_FILE_LIST_EXEC_SOURCE_FILE:
                 free(mi_command->variant.file_list_exec_source_file.file);

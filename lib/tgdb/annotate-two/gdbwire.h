@@ -1,7 +1,7 @@
 /**
  * This file is an amalgamation of the header files from gdbwire.
  *
- * It was created using gdbwire 1.0 and git revision fb4942e.
+ * It was created using gdbwire 1.0 and git revision a99de3f.
  */
 
 /***** Begin file gdbwire_string.h *******************************************/
@@ -1990,6 +1990,9 @@ enum gdbwire_mi_command_kind {
     /* -break-info */
     GDBWIRE_MI_BREAK_INFO,
 
+    /* -stack-info-frame */
+    GDBWIRE_MI_STACK_INFO_FRAME,
+
     /* -file-list-exec-source-file */
     GDBWIRE_MI_FILE_LIST_EXEC_SOURCE_FILE,
     /* -file-list-exec-source-files */
@@ -2190,6 +2193,52 @@ struct gdbwire_mi_breakpoint {
     struct gdbwire_mi_breakpoint *next;
 };
 
+struct gdbwire_mi_stack_frame {
+    /**
+     * The frame number.
+     *
+     * Where 0 is the topmost frame, i.e., the innermost function. 
+     *
+     * Always present.
+     */
+    unsigned level;
+
+    /**
+     * The address ($pc value) of the frame.
+     *
+     * May be NULL if GDB can not determine the frame address.
+     */
+    char *address;
+
+   /**
+    * The function name for the frame. May be NULL if unknown.
+    */
+   char *func;
+
+   /**
+    * The file name for the frame. May be NULL if unknown.
+    */
+   char *file;
+
+   /**
+    * The fullname name for the frame. May be NULL if unknown.
+    */
+   char *fullname;
+
+   /**
+    * Line number corresponding to the $pc. Maybe be 0 if unknown.
+    */
+   int line;
+
+   /**
+    * The shared library where this function is defined.
+    *
+    * This is only given if the frame's function is not known. 
+    * May be NULL if unknown.
+    */
+   char *from;
+};
+
 /**
  * Represents a GDB/MI command.
  */
@@ -2205,6 +2254,11 @@ struct gdbwire_mi_command {
             /** The list of breakpoints, NULL if none exist.  */
             struct gdbwire_mi_breakpoint *breakpoints;
         } break_info;
+
+        /** When kind == GDBWIRE_MI_STACK_INFO_FRAME */
+        struct {
+            struct gdbwire_mi_stack_frame *frame;
+        } stack_info_frame;
 
         /** When kind == GDBWIRE_MI_FILE_LIST_EXEC_SOURCE_FILE */
         struct {
@@ -2469,6 +2523,9 @@ enum gdbwire_mi_command_kind {
     /* -break-info */
     GDBWIRE_MI_BREAK_INFO,
 
+    /* -stack-info-frame */
+    GDBWIRE_MI_STACK_INFO_FRAME,
+
     /* -file-list-exec-source-file */
     GDBWIRE_MI_FILE_LIST_EXEC_SOURCE_FILE,
     /* -file-list-exec-source-files */
@@ -2669,6 +2726,52 @@ struct gdbwire_mi_breakpoint {
     struct gdbwire_mi_breakpoint *next;
 };
 
+struct gdbwire_mi_stack_frame {
+    /**
+     * The frame number.
+     *
+     * Where 0 is the topmost frame, i.e., the innermost function. 
+     *
+     * Always present.
+     */
+    unsigned level;
+
+    /**
+     * The address ($pc value) of the frame.
+     *
+     * May be NULL if GDB can not determine the frame address.
+     */
+    char *address;
+
+   /**
+    * The function name for the frame. May be NULL if unknown.
+    */
+   char *func;
+
+   /**
+    * The file name for the frame. May be NULL if unknown.
+    */
+   char *file;
+
+   /**
+    * The fullname name for the frame. May be NULL if unknown.
+    */
+   char *fullname;
+
+   /**
+    * Line number corresponding to the $pc. Maybe be 0 if unknown.
+    */
+   int line;
+
+   /**
+    * The shared library where this function is defined.
+    *
+    * This is only given if the frame's function is not known. 
+    * May be NULL if unknown.
+    */
+   char *from;
+};
+
 /**
  * Represents a GDB/MI command.
  */
@@ -2684,6 +2787,11 @@ struct gdbwire_mi_command {
             /** The list of breakpoints, NULL if none exist.  */
             struct gdbwire_mi_breakpoint *breakpoints;
         } break_info;
+
+        /** When kind == GDBWIRE_MI_STACK_INFO_FRAME */
+        struct {
+            struct gdbwire_mi_stack_frame *frame;
+        } stack_info_frame;
 
         /** When kind == GDBWIRE_MI_FILE_LIST_EXEC_SOURCE_FILE */
         struct {
