@@ -79,14 +79,6 @@ static int handle_prompt(struct annotate_two *a2, const char *buf, size_t n,
 {
     /* All done. */
     data_set_state(a2, USER_AT_PROMPT);
-
-    /* 'complete' is done, return the completions to the gui */
-    if (global_has_completion_started(a2->g) == 1) {
-        global_reset_completion_started(a2->g);
-        commands_send_gui_completions(a2->c, list);
-        return 0;
-    }
-
     return 0;
 }
 

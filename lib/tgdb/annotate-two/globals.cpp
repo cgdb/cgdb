@@ -16,12 +16,6 @@
  */
 struct globals {
 
-    /** 
-	 * This determines if the char enter has been typed by the
-	 * user since the prompt annotation has been sent by gdb
-	 */
-    unsigned short completion_started;
-
     /**
 	 * Is a misc prompt command be run.
 	 */
@@ -32,7 +26,6 @@ struct globals *globals_initialize(void)
 {
     struct globals *g = (struct globals *) cgdb_malloc(sizeof (struct globals));
 
-    g->completion_started = 0;
     g->misc_prompt_command = 0;
 
     return g;
@@ -55,19 +48,4 @@ int globals_is_misc_prompt(struct globals *g)
 void globals_set_misc_prompt_command(struct globals *g, unsigned short set)
 {
     g->misc_prompt_command = set;
-}
-
-void global_set_start_completion(struct globals *g)
-{
-    g->completion_started = 1;
-}
-
-int global_has_completion_started(struct globals *g)
-{
-    return g->completion_started;
-}
-
-void global_reset_completion_started(struct globals *g)
-{
-    g->completion_started = 0;
 }

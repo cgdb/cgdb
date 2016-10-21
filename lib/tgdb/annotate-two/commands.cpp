@@ -46,14 +46,6 @@ struct commands {
   /** The state of the command context.  */
     enum COMMAND_STATE cur_command_state;
 
-  /** breakpoint information */
-    /*@{ */
-
-  /** The current breakpoint being parsed.  */
-    struct ibuf *breakpoint_string;
-
-    /*@} */
-
   /** 'info source' information */
 
     /*@{ */
@@ -75,36 +67,185 @@ struct commands {
     /* tab completion information {{{ */
     /*@{ */
 
-  /** ??? Finished parsing the data being looked for.  */
-    int tab_completion_ready;
-
-  /** A tab completion item */
-    struct ibuf *tab_completion_string;
-
   /** All of the tab completion items, parsed in put in a list, 1 at a time. */
     struct tgdb_list *tab_completions;
 
     /*@} */
     /* }}} */
+
+    /**
+     * A complete hack.
+     *
+     * The commands interface currently needs to append responses to
+     * a data structure that comes from another module. I think after
+     * the remaining tgdb refactors are done, this hack will be easy to
+     * remove.
+     */
+    struct tgdb_list *response_list;
+
+    /**
+     * The gdbwire context to talk to GDB with.
+     */
+    struct gdbwire *wire;
 };
+
+static void gdbwire_stream_record_callback(void *context,
+    struct gdbwire_mi_stream_record *stream_record)
+{
+    struct commands *c = (struct commands*)context;
+
+    switch (c->cur_command_state) {
+        case INFO_BREAKPOINTS:
+            /**
+             * When using GDB with annotate=2 and also using interpreter-exec,
+             * GDB spits out the annotations in the MI output. All of these
+             * annotations can be ignored.
+             */
+            break;
+        case COMMAND_COMPLETE:
+            if (stream_record->kind == GDBWIRE_MI_CONSOLE) {
+                char *str = stream_record->cstring;
+                size_t length = strlen(str);
+                if (str[length-1] == '\n') {
+                    str[length-1] = 0;
+                }
+                tgdb_list_append(c->tab_completions, cgdb_strdup(str));
+            }
+            break;
+    }
+
+}
+
+static void gdbwire_async_record_callback(void *context,
+        struct gdbwire_mi_async_record *async_record)
+{
+}
+
+static void send_command_complete_response(struct commands *c)
+{
+    struct tgdb_response *response = (struct tgdb_response *)
+        cgdb_malloc(sizeof (struct tgdb_response));
+    response->header = TGDB_UPDATE_COMPLETIONS;
+    response->choice.update_completions.completion_list =
+        c->tab_completions;
+    tgdb_types_append_command(c->response_list, response);
+}
+
+static void
+commands_send_breakpoints(struct commands *c, struct tgdb_list *bkpt_list)
+{
+    struct tgdb_response *response = (struct tgdb_response *)
+        cgdb_malloc(sizeof (struct tgdb_response));
+
+    response->header = TGDB_UPDATE_BREAKPOINTS;
+    response->choice.update_breakpoints.breakpoint_list = bkpt_list;
+
+    tgdb_types_append_command(c->response_list, response);
+}
+
+static void commands_process_breakpoint(
+        struct tgdb_list *breakpoint_list,
+        struct gdbwire_mi_breakpoint *breakpoint)
+{
+    if ((breakpoint->fullname || breakpoint->file) && breakpoint->line != 0) {
+        struct tgdb_breakpoint *tb = (struct tgdb_breakpoint *)
+            cgdb_malloc(sizeof (struct tgdb_breakpoint));
+        tb->file = cgdb_strdup(breakpoint->file);
+        tb->fullname = cgdb_strdup(breakpoint->fullname);
+        tb->line = breakpoint->line;
+        tb->enabled = breakpoint->enabled;
+
+        tgdb_list_append(breakpoint_list, tb);
+    }
+}
+
+static void commands_process_breakpoints(struct commands *c,
+        struct gdbwire_mi_result_record *result_record)
+{
+    enum gdbwire_result result;
+    struct gdbwire_mi_command *mi_command = 0;
+    result = gdbwire_get_mi_command(GDBWIRE_MI_BREAK_INFO,
+        result_record, &mi_command);
+    if (result == GDBWIRE_OK) {
+        struct tgdb_list *bkpt_list = tgdb_list_init();
+        struct gdbwire_mi_breakpoint *breakpoint =
+            mi_command->variant.break_info.breakpoints;
+        while (breakpoint) {
+            commands_process_breakpoint(bkpt_list, breakpoint);
+
+            if (breakpoint->multi) {
+                struct gdbwire_mi_breakpoint *multi_bkpt =
+                    breakpoint->multi_breakpoints;
+                while (multi_bkpt) {
+                    commands_process_breakpoint(bkpt_list, multi_bkpt);
+                    multi_bkpt = multi_bkpt->next;
+                }
+            }
+
+            breakpoint = breakpoint->next;
+        }
+
+        commands_send_breakpoints(c, bkpt_list);
+
+        gdbwire_mi_command_free(mi_command);
+    }
+}
+
+static void gdbwire_result_record_callback(void *context,
+        struct gdbwire_mi_result_record *result_record)
+{
+    if (result_record->result_class == GDBWIRE_MI_DONE) {
+        struct commands *c = (struct commands*)context;
+
+        switch (c->cur_command_state) {
+            case INFO_BREAKPOINTS:
+                commands_process_breakpoints(c, result_record);
+                break;
+            case COMMAND_COMPLETE:
+                send_command_complete_response(c);
+                break;
+        }
+        commands_set_state(c, VOID_COMMAND, NULL);
+    }
+}
+
+static void gdbwire_prompt_callback(void *context, const char *prompt)
+{
+}
+
+static void gdbwire_parse_error_callback(void *context, const char *mi,
+            const char *token, struct gdbwire_mi_position position)
+{
+}
+
+static struct gdbwire_callbacks wire_callbacks =
+    {
+        0,
+        gdbwire_stream_record_callback,
+        gdbwire_async_record_callback,
+        gdbwire_result_record_callback,
+        gdbwire_prompt_callback,
+        gdbwire_parse_error_callback
+    };
 
 struct commands *commands_initialize(void)
 {
+
     struct commands *c =
             (struct commands *) cgdb_malloc(sizeof (struct commands));
     c->line_number = ibuf_init();
 
     c->cur_command_state = VOID_COMMAND;
 
-    c->breakpoint_string = ibuf_init();
-
     c->info_source_string = ibuf_init();
 
     c->info_sources_string = ibuf_init();
 
-    c->tab_completion_ready = 0;
-    c->tab_completion_string = ibuf_init();
     c->tab_completions = tgdb_list_init();
+
+    struct gdbwire_callbacks callbacks = wire_callbacks;
+    callbacks.context = (void*)c;
+    c->wire = gdbwire_create(callbacks);
 
     return c;
 }
@@ -147,21 +288,17 @@ void commands_shutdown(struct commands *c)
     ibuf_free(c->line_number);
     c->line_number = NULL;
 
-    ibuf_free(c->breakpoint_string);
-    c->breakpoint_string = NULL;
-
     ibuf_free(c->info_source_string);
     c->info_source_string = NULL;
 
     ibuf_free(c->info_sources_string);
     c->info_sources_string = NULL;
 
-    ibuf_free(c->tab_completion_string);
-    c->tab_completion_string = NULL;
-
     tgdb_list_destroy(c->tab_completions);
 
     /* TODO: free source_files queue */
+
+    gdbwire_destroy(c->wire);
 
     free(c);
     c = NULL;
@@ -271,183 +408,28 @@ commands_process_info_sources(struct commands *c, char a,
             commands_send_source_files(c, list, source_files);
 
             gdbwire_mi_command_free(mi_command);
+
         }
 
         ibuf_clear(c->info_sources_string);
     }
 }
 
-static void
-commands_send_breakpoints(struct tgdb_list *list, struct tgdb_list *bkpt_list)
-{
-    struct tgdb_response *response = (struct tgdb_response *)
-        cgdb_malloc(sizeof (struct tgdb_response));
-
-    response->header = TGDB_UPDATE_BREAKPOINTS;
-    response->choice.update_breakpoints.breakpoint_list = bkpt_list;
-
-    tgdb_types_append_command(list, response);
-}
-
-static void commands_process_breakpoint(
-        struct tgdb_list *breakpoint_list,
-        struct gdbwire_mi_breakpoint *breakpoint)
-{
-    if ((breakpoint->fullname || breakpoint->file) && breakpoint->line != 0) {
-        struct tgdb_breakpoint *tb = (struct tgdb_breakpoint *)
-            cgdb_malloc(sizeof (struct tgdb_breakpoint));
-        tb->file = cgdb_strdup(breakpoint->file);
-        tb->fullname = cgdb_strdup(breakpoint->fullname);
-        tb->line = breakpoint->line;
-        tb->enabled = breakpoint->enabled;
-
-        tgdb_list_append(breakpoint_list, tb);
-    }
-}
-
-static void commands_process_breakpoints(struct commands *c, char a,
-        struct tgdb_list *list)
-{
-    ibuf_addchar(c->breakpoint_string, a);
-
-    if (a == '\n') {
-        /**
-         * When using GDB with annotate=2 and also using interpreter-exec,
-         * GDB spits out the annotations in the MI output. All of these
-         * annotations can be ignored. */
-        if (strncmp(ibuf_get(c->breakpoint_string), "^done", 5) == 0) {
-            enum gdbwire_result result;
-            struct gdbwire_mi_command *mi_command = 0;
-            result = gdbwire_interpreter_exec(ibuf_get(c->breakpoint_string),
-                GDBWIRE_MI_BREAK_INFO, &mi_command);
-            if (result == GDBWIRE_OK) {
-                struct tgdb_list *bkpt_list = tgdb_list_init();
-                struct gdbwire_mi_breakpoint *breakpoint =
-                    mi_command->variant.break_info.breakpoints;
-                while (breakpoint) {
-                    commands_process_breakpoint(bkpt_list, breakpoint);
-
-                    if (breakpoint->multi) {
-                        struct gdbwire_mi_breakpoint *multi_bkpt =
-                            breakpoint->multi_breakpoints;
-                        while (multi_bkpt) {
-                            commands_process_breakpoint(bkpt_list, multi_bkpt);
-                            multi_bkpt = multi_bkpt->next;
-                        }
-                    }
-
-                    breakpoint = breakpoint->next;
-                }
-
-                commands_send_breakpoints(list, bkpt_list);
-
-                gdbwire_mi_command_free(mi_command);
-            }
-        }
-
-        ibuf_clear(c->breakpoint_string);
-    }
-}
-
-static void commands_process_completion(struct commands *c)
-{
-    const char *ptr = ibuf_get(c->tab_completion_string);
-    const char *scomplete = "server complete ";
-
-    /* Do not add the "server complete " matches, which is returned with 
-     * GNAT 3.15p version of GDB. Most likely this could happen with other 
-     * implementations that are derived from GDB.
-     */
-    if (strncmp(ptr, scomplete, strlen(scomplete)) != 0)
-        tgdb_list_append(c->tab_completions, strdup(ptr));
-}
-
-/* process's source files */
-static void commands_process_complete(struct commands *c, char a)
-{
-    ibuf_addchar(c->tab_completion_string, a);
-
-    if (a == '\n') {
-        ibuf_delchar(c->tab_completion_string); /* remove '\n' and null terminate */
-
-        if (ibuf_length(c->tab_completion_string) > 0)
-            commands_process_completion(c);
-
-        ibuf_clear(c->tab_completion_string);
-    }
-}
-
-void commands_free(struct commands *c, void *item)
-{
-    free((char *) item);
-}
-
-void commands_send_gui_completions(struct commands *c, struct tgdb_list *list)
-{
-    /* If the inferior program was not compiled with debug, then no sources
-     * will be available. If no sources are available, do not return the
-     * TGDB_UPDATE_SOURCE_FILES command. */
-/*  if (tgdb_list_size ( c->tab_completions ) > 0)*/
-    struct tgdb_response *response = (struct tgdb_response *)
-            cgdb_malloc(sizeof (struct tgdb_response));
-
-    response->header = TGDB_UPDATE_COMPLETIONS;
-    response->choice.update_completions.completion_list = c->tab_completions;
-    tgdb_types_append_command(list, response);
-}
-
 void commands_process(struct commands *c, char a, struct tgdb_list *list)
 {
+    // Wow, this is ugly, but I think by the time I'm done with Michael's
+    // patches this whole mess will be unraveled.
+    c->response_list = list;
+
     if (commands_get_state(c) == INFO_SOURCES) {
         commands_process_info_sources(c, a, list);
     } else if (commands_get_state(c) == INFO_BREAKPOINTS) {
-        commands_process_breakpoints(c, a, list);
-    } else if (commands_get_state(c) == COMPLETE) {
-        commands_process_complete(c, a);
+        gdbwire_push_data(c->wire, &a, 1);
+    } else if (commands_get_state(c) == COMMAND_COMPLETE) {
+        gdbwire_push_data(c->wire, &a, 1);
     } else if (commands_get_state(c) == INFO_SOURCE) {
         commands_process_info_source(c, a, list);
     }
-}
-
-/*******************************************************************************
- * This must be translated to just return the proper command.
- ******************************************************************************/
-
-/* commands_prepare_info_breakpoints: 
- * ----------------------------------
- *  
- *  This prepares the command 'info breakpoints' 
- */
-static void commands_prepare_info_breakpoints(struct commands *c)
-{
-    ibuf_clear(c->breakpoint_string);
-    commands_set_state(c, INFO_BREAKPOINTS, NULL);
-}
-
-/* commands_prepare_tab_completion:
- * --------------------------------
- *
- * This prepares the tab completion command
- */
-static void
-commands_prepare_tab_completion(struct annotate_two *a2, struct commands *c)
-{
-    c->tab_completion_ready = 0;
-    ibuf_clear(c->tab_completion_string);
-    commands_set_state(c, COMPLETE, NULL);
-    global_set_start_completion(a2->g);
-}
-
-/* commands_prepare_info_sources: 
- * ------------------------------
- *
- *  This prepares the command 'info sources' by setting certain variables.
- */
-static void
-commands_prepare_info_sources(struct annotate_two *a2, struct commands *c)
-{
-    ibuf_clear(c->info_sources_string);
-    commands_set_state(c, INFO_SOURCES, NULL);
 }
 
 int
@@ -468,20 +450,21 @@ commands_prepare_for_command(struct annotate_two *a2,
 
     switch (*a_com) {
         case ANNOTATE_INFO_SOURCES:
-            commands_prepare_info_sources(a2, c);
+            ibuf_clear(c->info_sources_string);
+            commands_set_state(c, INFO_SOURCES, NULL);
             break;
         case ANNOTATE_INFO_SOURCE:
             commands_prepare_info_source(a2, c);
             break;
         case ANNOTATE_INFO_BREAKPOINTS:
-            commands_prepare_info_breakpoints(c);
+            commands_set_state(c, INFO_BREAKPOINTS, NULL);
             break;
         case ANNOTATE_TTY:
             break;              /* Nothing to do */
         case ANNOTATE_COMPLETE:
-            commands_prepare_tab_completion(a2, c);
+            commands_set_state(c, COMMAND_COMPLETE, NULL);
             io_debug_write_fmt("<%s\n>", com->tgdb_command_data);
-            break;              /* Nothing to do */
+            break;
         case ANNOTATE_VOID:
             break;
         default:
@@ -520,7 +503,7 @@ static char *commands_create_command(struct commands *c,
             break;
         case ANNOTATE_INFO_SOURCE:
             /* server info source */
-            ncom = strdup("server interp mi \"-file-list-exec-source-file\"\n");
+            ncom = strdup("server interpreter-exec mi \"-file-list-exec-source-file\"\n");
             break;
         case ANNOTATE_INFO_BREAKPOINTS:
             ncom = strdup("server interpreter-exec mi \"-break-info\"\n");
@@ -530,10 +513,8 @@ static char *commands_create_command(struct commands *c,
             ncom = sys_aprintf("server interpreter-exec mi \"-inferior-tty-set %s\"\n", data);
             break;
         case ANNOTATE_COMPLETE:
-            ncom = (char *) cgdb_malloc(sizeof (char) * (18 + strlen(data)));
-            strcpy(ncom, "server complete ");
-            strcat(ncom, data);
-            strcat(ncom, "\n");
+            /* server complete */
+            ncom = sys_aprintf("server interpreter-exec mi \"complete %s\"\n", data);
             break;
         case ANNOTATE_VOID:
         default:

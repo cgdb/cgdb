@@ -16,7 +16,7 @@ enum COMMAND_STATE {
     /* Related to the 'info sources' command */
     INFO_SOURCES,
     /* Related to the 'server complete' command for tab completion */
-    COMPLETE,
+    COMMAND_COMPLETE,
 
     /* Related to the 'info source' command */
     INFO_SOURCE,
