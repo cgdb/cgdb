@@ -71,8 +71,8 @@ static int tgdb_types_print_item(void *command)
                     com->choice.update_file_position.file_position;
 
             fprintf(fd,
-                    "TGDB_UPDATE_FILE_POSITION ABSOLUTE(%s)RELATIVE(%s)LINE(%d)\n",
-                    tfp->absolute_path, tfp->relative_path, tfp->line_number);
+                    "TGDB_UPDATE_FILE_POSITION PATH(%s) LINE(%d)\n",
+                    tfp->path, tfp->line_number);
             break;
         }
         case TGDB_UPDATE_SOURCE_FILES:
@@ -196,8 +196,10 @@ static int tgdb_types_delete_item(void *command)
             struct tgdb_file_position *tfp =
                     com->choice.update_file_position.file_position;
 
-            free(tfp->absolute_path), tfp->absolute_path = NULL;
-            free(tfp->relative_path), tfp->relative_path = NULL;
+            free(tfp->path);
+            free(tfp->addr);
+            free(tfp->from);
+            free(tfp->func);
 
             free(tfp);
 

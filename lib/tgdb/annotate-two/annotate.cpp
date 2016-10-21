@@ -23,8 +23,7 @@ handle_source(struct annotate_two *a2, const char *buf, size_t n,
         struct tgdb_list *list)
 {
     /* set up the info_source command to get file info */
-    return commands_issue_command(a2->c, a2->client_command_list,
-                    ANNOTATE_INFO_SOURCE, NULL, 1);
+    return a2_get_current_location(a2);
 }
 
 static int handle_misc_pre_prompt(struct annotate_two *a2, const char *buf,

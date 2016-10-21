@@ -623,7 +623,7 @@ int command_do_help(int param)
 
 int command_do_logo(int param)
 {
-    if_display_logo();
+    if_display_logo(1);
     return 0;
 }
 

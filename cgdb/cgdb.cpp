@@ -1019,10 +1019,16 @@ static void process_commands(struct tgdb *tgdb_in)
 
                 tfp = item->choice.update_file_position.file_position;
 
-                /* Update the file */
-                source_reload(if_get_sview(), tfp->absolute_path, 0);
+                if (tfp->path) {
+                    /* Update the file */
+                    source_reload(if_get_sview(), tfp->path, 0);
 
-                if_show_file(tfp->absolute_path, tfp->line_number, tfp->line_number);
+                    if_show_file(tfp->path, tfp->line_number, tfp->line_number);
+                } else {
+                    /* Don't have source information - display logo for now */
+                    if_display_logo(0);
+                    if_draw();
+                }
                 break;
             }
 

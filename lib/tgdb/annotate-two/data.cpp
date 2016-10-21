@@ -143,7 +143,8 @@ void data_process(struct annotate_two *a2, char a, char *buf, int *n)
         case GUI_COMMAND:
         case INTERNAL_COMMAND:
             if (a2->data->data_state == INTERNAL_COMMAND)
-                commands_process(a2->c, a, a2->cur_response_list);
+                commands_process(a2->c, a, a2->cur_response_list,
+                    a2->client_command_list);
             else if (a2->data->data_state == GUI_COMMAND)
                 buf[(*n)++] = a;
 

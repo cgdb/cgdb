@@ -305,7 +305,7 @@ struct tgdb_list *a2_get_client_commands(struct annotate_two *a2)
 int a2_get_current_location(struct annotate_two *a2)
 {
     return commands_issue_command(a2->c, a2->client_command_list,
-                           ANNOTATE_INFO_SOURCE, NULL, 1);
+                           ANNOTATE_INFO_FRAME, NULL, 1);
 }
 
 int a2_disassemble_func(struct annotate_two *a2, int raw, int source,

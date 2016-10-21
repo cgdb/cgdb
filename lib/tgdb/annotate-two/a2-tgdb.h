@@ -60,6 +60,11 @@ enum annotate_commands {
     ANNOTATE_INFO_SOURCE,
 
     /**
+     * Shows information on the current frame
+     */
+    ANNOTATE_INFO_FRAME,
+
+    /**
      * Get disassembly for specified function
      */
     ANNOTATE_DISASSEMBLE_FUNC

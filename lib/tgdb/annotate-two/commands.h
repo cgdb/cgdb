@@ -17,6 +17,8 @@ enum COMMAND_STATE {
     INFO_SOURCES,
     /* Related to the 'disassemble' command */
     INFO_DISASSEMBLE_FUNC,
+    /* Related to the 'info frame' command */
+    INFO_FRAME,
     /* Related to the 'server complete' command for tab completion */
     COMMAND_COMPLETE,
 
@@ -64,7 +66,8 @@ int commands_issue_command(struct commands *c,
  *    a     -> the character received from gdb.
  *    com   -> commands to give back to gdb.
  */
-void commands_process(struct commands *c, char a, struct tgdb_list *list);
+void commands_process(struct commands *c, char a,
+        struct tgdb_list *response_list, struct tgdb_list *client_command_list);
 
 /* This gives the gui all of the completions that were just read from gdb 
  * through a 'complete' command.

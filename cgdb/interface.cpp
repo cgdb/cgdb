@@ -1568,10 +1568,12 @@ void if_display_help(void)
         if_display_message("No such file: ", WIN_REFRESH, 0, "%s", cgdb_help_file);
 }
 
-void if_display_logo(void)
+void if_display_logo(int reset)
 {
+    if (reset)
+        logo_reset();
+
     src_win->cur = NULL;
-    logo_reset();
 }
 
 struct sviewer *if_get_sview()

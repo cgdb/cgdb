@@ -63,6 +63,7 @@ struct commands {
      * remove.
      */
     struct tgdb_list *response_list;
+    struct tgdb_list *client_command_list;
 
     /**
      * The gdbwire context to talk to GDB with.
@@ -194,7 +195,7 @@ static void send_command_complete_response(struct commands *c)
 
 static void
 commands_send_source_file(struct commands *c, char *fullname, char *file,
-        int line)
+        char *address, char *from, char *func, int line)
 {
     /* This section allocates a new structure to add into the queue 
      * All of its members will need to be freed later.
@@ -204,8 +205,10 @@ commands_send_source_file(struct commands *c, char *fullname, char *file,
     struct tgdb_response *response = (struct tgdb_response *)
             cgdb_malloc(sizeof (struct tgdb_response));
 
-    tfp->absolute_path = (fullname)?strdup(fullname):0;
-    tfp->relative_path = strdup(file);
+    tfp->path = (fullname)?cgdb_strdup(fullname):cgdb_strdup(file);
+    tfp->addr = (address)?cgdb_strdup(address):0;
+    tfp->from = (from)?cgdb_strdup(from):0;
+    tfp->func = (func)?cgdb_strdup(func):0;
     tfp->line_number = line;
 
     response->header = TGDB_UPDATE_FILE_POSITION;
@@ -225,9 +228,40 @@ static void commands_process_info_source(struct commands *c,
         commands_send_source_file(c,
                 mi_command->variant.file_list_exec_source_file.fullname,
                 mi_command->variant.file_list_exec_source_file.file,
+                0, 0, 0,
                 mi_command->variant.file_list_exec_source_file.line);
 
         gdbwire_mi_command_free(mi_command);
+    }
+}
+
+static void commands_process_info_frame(struct commands *c,
+        struct gdbwire_mi_result_record *result_record)
+{
+    bool require_source = false;
+    enum gdbwire_result result;
+    struct gdbwire_mi_command *mi_command = 0;
+    result = gdbwire_get_mi_command(GDBWIRE_MI_STACK_INFO_FRAME,
+        result_record, &mi_command);
+    if (result == GDBWIRE_OK) {
+        struct gdbwire_mi_stack_frame *frame =
+            mi_command->variant.stack_info_frame.frame;
+
+        if (frame->address || frame->file || frame->fullname) {
+            commands_send_source_file(c, frame->fullname, frame->file,
+                    frame->address, frame->from, frame->func, frame->line);
+        } else {
+            require_source = true;
+        }
+
+        gdbwire_mi_command_free(mi_command);
+    } else {
+        require_source = true;
+    }
+
+    if (require_source) {
+        commands_issue_command(c, c->client_command_list,
+                        ANNOTATE_INFO_SOURCE, NULL, 1);
     }
 }
 
@@ -238,6 +272,7 @@ static void gdbwire_stream_record_callback(void *context,
 
     switch (c->cur_command_state) {
         case INFO_BREAKPOINTS:
+        case INFO_FRAME:
             /**
              * When using GDB with annotate=2 and also using interpreter-exec,
              * GDB spits out the annotations in the MI output. All of these
@@ -293,6 +328,9 @@ static void gdbwire_result_record_callback(void *context,
             break;
         case INFO_SOURCE:
             commands_process_info_source(c, result_record);
+            break;
+        case INFO_FRAME:
+            commands_process_info_frame(c, result_record);
             break;
     }
     commands_set_state(c, VOID_COMMAND);
@@ -402,11 +440,13 @@ commands_prepare_info_source(struct annotate_two *a2, struct commands *c)
     commands_set_state(c, INFO_SOURCE);
 }
 
-void commands_process(struct commands *c, char a, struct tgdb_list *list)
+void commands_process(struct commands *c, char a,
+    struct tgdb_list *response_list, struct tgdb_list *client_command_list)
 {
     // Wow, this is ugly, but I think by the time I'm done with Michael's
     // patches this whole mess will be unraveled.
-    c->response_list = list;
+    c->response_list = response_list;
+    c->client_command_list = client_command_list;
 
     switch (commands_get_state(c)) {
         case VOID_COMMAND:
@@ -437,6 +477,10 @@ commands_prepare_for_command(struct annotate_two *a2,
             break;
         case ANNOTATE_INFO_SOURCE:
             commands_prepare_info_source(a2, c);
+            break;
+        case ANNOTATE_INFO_FRAME:
+            data_set_state(a2, INTERNAL_COMMAND);
+            commands_set_state(c, INFO_FRAME);
             break;
         case ANNOTATE_INFO_BREAKPOINTS:
             commands_set_state(c, INFO_BREAKPOINTS);
@@ -491,6 +535,9 @@ static char *commands_create_command(struct commands *c,
         case ANNOTATE_INFO_SOURCE:
             /* server info source */
             return strdup("server interpreter-exec mi \"-file-list-exec-source-file\"\n");
+        case ANNOTATE_INFO_FRAME:
+            /* server info frame */
+            return strdup("server interpreter-exec mi \"-stack-info-frame\"\n");
         case ANNOTATE_DISASSEMBLE_FUNC:
             /* disassemble 'driver.cpp'::main
                  /m: source lines included

@@ -153,17 +153,34 @@
 
  /**
   * This structure currently represents a file position.
+  *
+  * Either path or addr will be non-NULL. Never both.
+  *
+  * If the source location is available, path and line number will be valid.
+  * If the source information can not be determined, the addr will be
+  * available. It is possible they are both available.
   */
     struct tgdb_file_position {
 
-    /** The absolute path to the file.  */
-        char *absolute_path;
-
-    /** The relative path to the file.  */
-        char *relative_path;
+    /**
+     * The path to the file.
+     *
+     * This will usually be absolute. If the absolute path is not available
+     * for GDB it will be a relative path.
+     */
+        char *path;
 
     /** The line number in the file.  */
         int line_number;
+
+    /** Line number corresponding to the $pc or NULL if unknown.  */
+        char *addr;
+
+    /** Shared library where this function is defined or NULL if unknown.  */
+        char *from;
+
+    /** Function name or NULL if unknown.  */
+        char *func;
     };
 
  /**
