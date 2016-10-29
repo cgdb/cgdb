@@ -1112,11 +1112,7 @@ toggle_breakpoint(struct sviewer *sview, enum tgdb_breakpoint_action t)
     }
     else
     {
-
-        /* Get filename (strip path off -- GDB is dumb) */
-        path = strrchr(sview->cur->path, '/') + 1;
-        if (path == (char *)NULL + 1)
-            path = sview->cur->path;
+        path = sview->cur->path;
     }
 
     /* delete an existing breakpoint */
