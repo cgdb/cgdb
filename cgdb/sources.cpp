@@ -288,8 +288,6 @@ static int load_file_buf(struct buffer *buf, const char *filename)
             char *line_start = buf->file_data;
             char *line_feed = strchr(line_start, '\n');
 
-            line_start[file_size] = 0;
-
             while (line_feed) {
                 size_t line_len;
                 char *line_end = line_feed;
