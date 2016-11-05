@@ -23,6 +23,9 @@ enum COMMAND_STATE {
     /* Related to the 'server complete' command for tab completion */
     COMMAND_COMPLETE,
 
+    /* Determine the maximum mode value for the -data-disassembly command */
+    DATA_DISASSEMBLE_MODE_QUERY,
+
     /* Related to the 'info source' command */
     INFO_SOURCE,
 };

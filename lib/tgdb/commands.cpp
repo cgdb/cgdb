@@ -70,6 +70,11 @@ struct commands {
      * The gdbwire context to talk to GDB with.
      */
     struct gdbwire *wire;
+
+    /**
+     * True if the disassemble command supports /s, otherwise false.
+     */
+    int disassemble_supports_s_mode;
 };
 
 static void
@@ -338,6 +343,8 @@ static void gdbwire_stream_record_callback(void *context,
                 tgdb_list_append(c->tab_completions, cgdb_strdup(str));
             }
             break;
+        case DATA_DISASSEMBLE_MODE_QUERY:
+            break;
     }
 
 }
@@ -365,6 +372,17 @@ static void gdbwire_result_record_callback(void *context,
             break;
         case COMMAND_COMPLETE:
             send_command_complete_response(c);
+            break;
+        case DATA_DISASSEMBLE_MODE_QUERY:
+            /**
+             * If the mode was to high, than the result record would be
+             * an error, meaning the mode is not supported. Otherwise,
+             * the mode is supported.
+             */
+            if (result_record->result_class == GDBWIRE_MI_DONE) {
+                c->disassemble_supports_s_mode = 1;
+            }
+            
             break;
         case INFO_SOURCE:
             commands_process_info_source(c, result_record);
@@ -408,6 +426,8 @@ struct commands *commands_initialize(void)
     struct gdbwire_callbacks callbacks = wire_callbacks;
     callbacks.context = (void*)c;
     c->wire = gdbwire_create(callbacks);
+
+    c->disassemble_supports_s_mode = 0;
 
     return c;
 }
@@ -525,6 +545,11 @@ commands_prepare_for_command(struct annotate_two *a2,
             commands_set_state(c, COMMAND_COMPLETE);
             io_debug_write_fmt("<%s\n>", com->tgdb_command_data);
             break;
+        case ANNOTATE_DATA_DISASSEMBLE_MODE_QUERY:
+            c->disassemble_supports_s_mode = 0;
+
+            commands_set_state(c, DATA_DISASSEMBLE_MODE_QUERY);
+            break;
         case ANNOTATE_DISASSEMBLE_PC:
             c->disasm = 0;
             c->address_start = 0;
@@ -601,6 +626,8 @@ static char *commands_create_command(struct commands *c,
         case ANNOTATE_COMPLETE:
             /* server complete */
             return sys_aprintf("server interpreter-exec mi \"complete %s\"\n", data);
+        case ANNOTATE_DATA_DISASSEMBLE_MODE_QUERY:
+            return sys_aprintf("server interpreter-exec mi \"-data-disassemble -s 0 -e 0 -- 4\"\n");
         case ANNOTATE_VOID:
         default:
             logger_write_pos(logger, __FILE__, __LINE__, "switch error");

@@ -71,7 +71,33 @@ enum annotate_commands {
     /**
      * Get disassembly for specified function
      */
-    ANNOTATE_DISASSEMBLE_FUNC
+    ANNOTATE_DISASSEMBLE_FUNC,
+
+    /**
+     * Query if the CLI disassemble command supports mixed source+assembly.
+     *
+     * Mixed source+assembly mode was added as the /s flag to the CLI
+     * disassemble command and as mode 4 to the MI -data-disassemble
+     * command.
+     *
+     * We query the MI command to determine if it supports mode 4, and
+     * if it does, we also know that teh cli disassemble command supports
+     * /s.
+     *
+     * The passing case,
+     *   (gdb) interpreter-exec mi "-data-disassemble -s 0 -e 0 -- 4"
+     *   ^done,asm_insns=[]
+     *
+     * The failing case,
+     *   (gdb) interpreter-exec mi "-data-disassemble -s 0 -e 0 -- 4"
+     *   ^error,msg="-data-disassemble: Mode argument must be 0, 1, 2, or 3."
+     *
+     * If the command comes back as an MI error, we assume /s is not
+     * supported.
+     *
+     * This functionality was added in gdb in commit 6ff0ba5f.
+     */
+    ANNOTATE_DATA_DISASSEMBLE_MODE_QUERY
 };
 
 /******************************************************************************/

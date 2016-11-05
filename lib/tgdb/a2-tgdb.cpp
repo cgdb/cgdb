@@ -224,6 +224,14 @@ int a2_initialize(struct annotate_two *a2,
         return -1;
     }
 
+    /**
+     * Query if disassemble supports the /s flag
+     */
+    if (commands_issue_command(a2->c, a2->client_command_list,
+                    ANNOTATE_DATA_DISASSEMBLE_MODE_QUERY, NULL, 1) == -1) {
+        return -1;
+    }
+
     a2->tgdb_initialized = 1;
 
     return 0;
