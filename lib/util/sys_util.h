@@ -91,7 +91,8 @@ char *sys_aprintf(const char *fmt, ...);
 #define sbadd( a, n ) ( stb__sbmaybegrow( a, n ), stb__sbn( a ) += ( n ), &( a )[ stb__sbn( a ) - ( n ) ] )
 #define sblast( a ) ( ( a )[ stb__sbn( a ) - 1 ] )
 #define sbforeach( v, arr ) for ( ( v ) = ( arr ); ( v ) < ( arr ) + sbcount( arr ); ++( v ) )
-#define sbsetcount( a, n ) ( stb__sbgrow( a, n ), stb__sbn( a ) = n )
+#define sbsetcount( a, n ) ( stb__sbmaybegrow( a, n ), stb__sbn( a ) = n )
+
 
 #define stb__sbraw( a ) ( ( int * )( a )-2 )
 #define stb__sbm( a ) stb__sbraw( a )[ 0 ]
