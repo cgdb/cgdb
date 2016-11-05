@@ -418,7 +418,7 @@ struct commands *commands_initialize(void)
             (struct commands *) cgdb_malloc(sizeof (struct commands));
     c->cur_command_state = VOID_COMMAND;
 
-    c->tab_completions = tgdb_list_init();
+    c->tab_completions = 0;
 
     c->disasm = NULL;
 

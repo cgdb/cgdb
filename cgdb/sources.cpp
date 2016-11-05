@@ -120,10 +120,10 @@ static int get_timestamp(const char *path, time_t * timestamp)
 static void init_file_buffer(struct buffer *buf)
 {
     buf->lines = NULL;
-    buf->max_width = 0;
     buf->addrs = NULL;
-    buf->tabstop = cgdbrc_get_int(CGDBRC_TABSTOP);
+    buf->max_width = 0;
     buf->file_data = NULL;
+    buf->tabstop = cgdbrc_get_int(CGDBRC_TABSTOP);
     buf->language = TOKENIZER_LANGUAGE_UNKNOWN;
 }
 
@@ -587,7 +587,7 @@ struct list_node *source_add(struct sviewer *sview, const char *path)
 
 void source_add_disasm_line(struct list_node *node, const char *line)
 {
-    uint64_t addr;
+    uint64_t addr = 0;
     struct source_line sline;
     char *colon = 0, colon_char = 0;
 
