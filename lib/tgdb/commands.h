@@ -198,4 +198,12 @@ struct tgdb_command *tgdb_command_create(const char *tgdb_command_data,
  */
 void tgdb_command_destroy(void *item);
 
+/**
+ * Return if the debugger supports the /s flag for the disassemble command.
+ *
+ * @return
+ * 0 if /s is not supported, 1 if it is supported.
+ */
+int commands_disassemble_supports_s_mode(struct commands *c);
+
 #endif

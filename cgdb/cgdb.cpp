@@ -1016,7 +1016,7 @@ static void process_commands(struct tgdb *tgdb_in)
                     } else if (sview->addr_frame) {
                         /* No disasm found - request it */
                         tgdb_request_disassemble_func(tgdb,
-                            DISASSEMBLE_FUNC_SOURCE_LINES, NULL, NULL);
+                            DISASSEMBLE_FUNC_SOURCE_LINES);
                     }
                 }
 

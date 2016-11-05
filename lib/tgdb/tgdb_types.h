@@ -263,8 +263,6 @@
             struct {
                 int source;
                 int raw;
-                const char *file;
-                const char *function;
             } disassemble_func;
         } choice;
     };

@@ -395,7 +395,7 @@
         DISASSEMBLE_FUNC_RAW_INSTRUCTIONS,
     };
     void tgdb_request_disassemble_func(struct tgdb *tgdb,
-            enum disassemble_func_type type, const char *file, const char *function);
+            enum disassemble_func_type type);
 
   /**
    * Free the tgdb request pointer data.

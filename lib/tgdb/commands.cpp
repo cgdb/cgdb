@@ -703,3 +703,8 @@ commands_issue_command(struct commands *c,
     free(ncom);
     return 0;
 }
+
+int commands_disassemble_supports_s_mode(struct commands *c)
+{
+    return c->disassemble_supports_s_mode;
+}

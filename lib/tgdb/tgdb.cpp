@@ -1113,7 +1113,7 @@ void tgdb_request_disassemble_pc(struct tgdb *tgdb, int lines)
 }
 
 void tgdb_request_disassemble_func(struct tgdb *tgdb,
-        enum disassemble_func_type type, const char *file, const char *function)
+        enum disassemble_func_type type)
 {
     tgdb_request_ptr request_ptr;
 
@@ -1122,8 +1122,6 @@ void tgdb_request_disassemble_func(struct tgdb *tgdb,
 
     request_ptr->choice.disassemble_func.raw = (type == DISASSEMBLE_FUNC_RAW_INSTRUCTIONS);
     request_ptr->choice.disassemble_func.source = (type == DISASSEMBLE_FUNC_SOURCE_LINES);
-    request_ptr->choice.disassemble_func.file = file;
-    request_ptr->choice.disassemble_func.function = function;
 
     handle_request(tgdb, request_ptr);
 }
@@ -1174,9 +1172,7 @@ int tgdb_process_command(struct tgdb *tgdb, tgdb_request_ptr request)
         else if (request->header == TGDB_REQUEST_DISASSEMBLE_FUNC) {
             ret = a2_disassemble_func(tgdb->tcc,
                                       request->choice.disassemble_func.raw,
-                                      request->choice.disassemble_func.source,
-                                      request->choice.disassemble_func.file,
-                                      request->choice.disassemble_func.function);
+                                      request->choice.disassemble_func.source);
         }
 
         if (!ret) {

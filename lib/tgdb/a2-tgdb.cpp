@@ -324,8 +324,7 @@ int a2_disassemble_pc(struct annotate_two *a2, int lines)
     return ret;
 }
 
-int a2_disassemble_func(struct annotate_two *a2, int raw, int source,
-    const char *file, const char *function)
+int a2_disassemble_func(struct annotate_two *a2, int raw, int source)
 {
     /* GDB 7.11 adds /s command to disassemble
 
@@ -349,15 +348,10 @@ int a2_disassemble_func(struct annotate_two *a2, int raw, int source,
     int ret;
     char *data = NULL;
 
-    if (raw || source || function) {
-        const char *raw_flag = raw ? "/r " : " ";
-        //$ TODO mikesart: Add -gdb-version check for 7.11 and the /s command
-        const char *source_flag = source ? "/s " : " ";
-
-        if (file)
-            data = sys_aprintf("%s%s'%s'::%s", raw_flag, source_flag, file, function);
-        else
-            data = sys_aprintf("%s%s%s", raw_flag, source_flag, function ? function : "");
+    if (raw) {
+        data = sys_aprintf("%s", "/r");
+    } else if (source && commands_disassemble_supports_s_mode(a2->c)) {
+        data = sys_aprintf("%s", "/s");
     }
 
     ret = commands_issue_command(a2->c, a2->client_command_list,
