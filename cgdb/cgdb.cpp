@@ -1009,7 +1009,7 @@ static void process_commands(struct tgdb *tgdb_in)
                     int ret;
 
                     /* Try to show the disasm for ths function */
-                    ret = source_set_exec_addr(sview, NULL, 0);
+                    ret = source_set_exec_addr(sview, NULL, sview->addr_frame);
 
                     if (!ret) {
                         if_draw();
@@ -1132,7 +1132,7 @@ static void process_commands(struct tgdb *tgdb_in)
                             source_highlight(node);
                         }
 
-                        source_set_exec_addr(sview, path, 0);
+                        source_set_exec_addr(sview, path, sview->addr_frame);
                         if_draw();
 
                         free(path);
