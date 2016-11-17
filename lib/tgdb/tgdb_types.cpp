@@ -47,8 +47,8 @@ static int tgdb_types_print_item(void *command)
                 struct tgdb_breakpoint *tb = &com->choice.update_breakpoints.breakpoints[i];
 
                 fprintf(fd,
-                        "\tFILE(%s) FULLNAME(%s) LINE(%d) ENABLED(%d)\n",
-                        tb->file, tb->fullname, tb->line, tb->enabled);
+                        "\tPATH(%s) LINE(%d) ENABLED(%d)\n",
+                        tb->path, tb->line, tb->enabled);
 
             }
 
@@ -140,10 +140,8 @@ static int tgdb_types_breakpoint_free(void *data)
     tb = (struct tgdb_breakpoint *) data;
 
     /* Free the structure */
-    free((char *) tb->file);
-    tb->file = NULL;
-    free((char *) tb->fullname);
-    tb->fullname = NULL;
+    free((char *) tb->path);
+    tb->path = NULL;
     free(tb);
     tb = NULL;
     return 0;
@@ -176,8 +174,7 @@ static int tgdb_types_delete_item(void *command)
 
                 struct tgdb_breakpoint *tb = &breakpoints[i];
 
-                free(tb->file);
-                free(tb->fullname);
+                free(tb->path);
             }
 
             sbfree(breakpoints);

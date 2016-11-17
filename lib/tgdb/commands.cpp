@@ -95,8 +95,9 @@ static void commands_process_breakpoint(
 {
     if ((breakpoint->fullname || breakpoint->file) && breakpoint->line != 0) {
         struct tgdb_breakpoint tb;
-        tb.file = cgdb_strdup(breakpoint->file);
-        tb.fullname = cgdb_strdup(breakpoint->fullname);
+        tb.path = (breakpoint->fullname)?
+            cgdb_strdup(breakpoint->fullname):
+            cgdb_strdup(breakpoint->file);
         tb.line = breakpoint->line;
         tb.enabled = breakpoint->enabled;
         sbpush(breakpoints, tb);
@@ -426,26 +427,6 @@ struct commands *commands_initialize(void)
     c->disassemble_supports_s_mode = 0;
 
     return c;
-}
-
-int free_breakpoint(void *item)
-{
-    struct tgdb_breakpoint *bp = (struct tgdb_breakpoint *) item;
-
-    if (bp->file) {
-        free(bp->file);
-        bp->file = NULL;
-    }
-
-    if (bp->fullname) {
-        free(bp->fullname);
-        bp->fullname = NULL;
-    }
-
-    free(bp);
-    bp = NULL;
-
-    return 0;
 }
 
 int free_char_star(void *item)

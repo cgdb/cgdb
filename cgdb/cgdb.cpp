@@ -950,8 +950,7 @@ static void process_commands(struct tgdb *tgdb_in)
 
                 for (i = 0;i < sbcount(breakpoints); i++) {
                     struct tgdb_breakpoint *tb = &breakpoints[i];
-                    source_enable_break(sview, tb->file, tb->fullname,
-                        tb->line, tb->enabled);
+                    source_enable_break(sview, tb->path, tb->line, tb->enabled);
                 }
 
                 if_show_file(NULL, 0, 0);

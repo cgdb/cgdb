@@ -282,13 +282,12 @@ void source_free(struct sviewer *sview);
  * --------------------
  *
  *   sview:    The source viewer object
- *   path:     Full path to the source file
- *   fullname: The absolute path to the source file
+ *   path:     The path to the source file, absolute if available
  *   line:     Line number of breakpoint
  *   enabled:  0 for disabled, otherwise enabled
  */
 void source_enable_break(struct sviewer *sview, const char *path,
-        const char *fullname, int line, int enabled);
+        int line, int enabled);
 
 /* source_clear_breaks:  Clear all breakpoints from all files.
  * --------------------

@@ -1334,17 +1334,11 @@ int source_search_regex(struct sviewer *sview,
 }
 
 void source_enable_break(struct sviewer *sview, const char *path, 
-        const char *fullname, int line, int enabled)
+        int line, int enabled)
 {
     struct list_node *node = 0;
 
-    if (fullname) {
-        node = source_get_node(sview, fullname);
-    }
-
-    if (!node && path) {
-        node = source_get_node(sview, path);
-    }
+    node = source_get_node(sview, path);
 
     if (!load_file(node)) {
         if (line > 0 && line <= sbcount(node->lflags)) {
