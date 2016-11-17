@@ -114,16 +114,18 @@
 
  /** This structure represents a breakpoint. */
     struct tgdb_breakpoint {
-    /**
-     * The path to the file.
-     *
-     * This will usually be absolute. If the absolute path is not available
-     * for GDB it will be a relative path.
-     */
-    char *path;
-    /** The line number where the breakpoint is set. */
+        /**
+         * The path to the file.
+         *
+         * This will usually be absolute. If the absolute path is not available
+         * for GDB it will be a relative path.
+         */
+        char *path;
+        /** The line number where the breakpoint is set. */
         int line;
-    /** 0 if it is not enabled or 1 if it is enabled. */
+        /** Line number corresponding to the $pc or 0 if unknown.  */
+        uint64_t addr;
+        /** 0 if it is not enabled or 1 if it is enabled. */
         int enabled;
     };
 

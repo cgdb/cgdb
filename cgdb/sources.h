@@ -233,7 +233,7 @@ void source_set_sel_line(struct sviewer *sview, int line);
  */
 int source_set_exec_line(struct sviewer *sview, const char *path, int sel_line, int exe_line);
 
-int source_set_exec_addr(struct sviewer *sview, const char *path, uint64_t addr);
+int source_set_exec_addr(struct sviewer *sview, uint64_t addr);
 
 /* source_search_regex_init: Should be called before source_search_regex
  * -------------------------
@@ -289,12 +289,17 @@ void source_free(struct sviewer *sview);
 void source_enable_break(struct sviewer *sview, const char *path,
         int line, int enabled);
 
-/* source_clear_breaks:  Clear all breakpoints from all files.
- * --------------------
+/**
+ * Replace all existing breakpoints with the breakpoints provided.
  *
- *   sview:  The source viewer object
+ * @param sview
+ * The source viewer object
+ * 
+ * @param breakpoints
+ * The new breakpoints to set
  */
-void source_clear_breaks(struct sviewer *sview);
+void source_set_breakpoints(struct sviewer *sview,
+        struct tgdb_breakpoint *breakpoints);
 
 /**
  * Check's to see if the current source file has changed. If it has it loads

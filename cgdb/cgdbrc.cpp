@@ -772,7 +772,7 @@ int command_do_disassemble(int param)
     int ret;
     struct sviewer *sview = if_get_sview();
 
-    ret = source_set_exec_addr(sview, NULL, 0);
+    ret = source_set_exec_addr(sview, 0);
 
     if (!ret) {
         if_draw();

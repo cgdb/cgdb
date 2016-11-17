@@ -940,22 +940,10 @@ static void process_commands(struct tgdb *tgdb_in)
         switch (item->header) {
             /* This updates all the breakpoints */
             case TGDB_UPDATE_BREAKPOINTS:
-            {
-                int i;
-                struct sviewer *sview = if_get_sview();
-                struct tgdb_breakpoint *breakpoints =
-                    item->choice.update_breakpoints.breakpoints;
-
-                source_clear_breaks(if_get_sview());
-
-                for (i = 0;i < sbcount(breakpoints); i++) {
-                    struct tgdb_breakpoint *tb = &breakpoints[i];
-                    source_enable_break(sview, tb->path, tb->line, tb->enabled);
-                }
-
+                source_set_breakpoints(if_get_sview(),
+                    item->choice.update_breakpoints.breakpoints);
                 if_show_file(NULL, 0, 0);
                 break;
-            }
 
             case TGDB_UPDATE_FILE_POSITION:
             {
@@ -1001,7 +989,7 @@ static void process_commands(struct tgdb *tgdb_in)
                     int ret;
 
                     /* Try to show the disasm for ths function */
-                    ret = source_set_exec_addr(sview, NULL, sview->addr_frame);
+                    ret = source_set_exec_addr(sview, sview->addr_frame);
 
                     if (!ret) {
                         if_draw();
@@ -1129,7 +1117,7 @@ static void process_commands(struct tgdb *tgdb_in)
                             source_highlight(node);
                         }
 
-                        source_set_exec_addr(sview, path, sview->addr_frame);
+                        source_set_exec_addr(sview, sview->addr_frame);
                         if_draw();
 
                         free(path);

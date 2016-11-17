@@ -93,12 +93,32 @@ static void commands_process_breakpoint(
         struct tgdb_breakpoint *&breakpoints,
         struct gdbwire_mi_breakpoint *breakpoint)
 {
-    if ((breakpoint->fullname || breakpoint->file) && breakpoint->line != 0) {
+    bool file_location_avialable =
+        (breakpoint->fullname || breakpoint->file) && breakpoint->line != 0;
+    bool assembly_location_available = breakpoint->address && 
+        !breakpoint->pending && !breakpoint->multi;
+
+    if (file_location_avialable || assembly_location_available) {
         struct tgdb_breakpoint tb;
-        tb.path = (breakpoint->fullname)?
-            cgdb_strdup(breakpoint->fullname):
-            cgdb_strdup(breakpoint->file);
-        tb.line = breakpoint->line;
+
+        if (file_location_avialable) {
+            tb.path = (breakpoint->fullname)?
+                cgdb_strdup(breakpoint->fullname):
+                cgdb_strdup(breakpoint->file);
+            tb.line = breakpoint->line;
+        } else {
+            tb.path = 0;
+            tb.line = 0;
+        }
+
+        if (assembly_location_available) {
+            uint64_t address = 0;
+            cgdb_hexstr_to_u64(breakpoint->address, &address);
+            tb.addr = address;
+        } else {
+            tb.addr = 0;
+        }
+
         tb.enabled = breakpoint->enabled;
         sbpush(breakpoints, tb);
     }
