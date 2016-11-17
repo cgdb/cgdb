@@ -20,7 +20,6 @@
 
 /* Local includes */
 #include "tgdb_types.h"
-#include "tgdb_list.h"
 #include "sys_util.h"
 
 static int tgdb_types_source_files_free(void *data)

@@ -7,8 +7,6 @@ libadt_a_SOURCES = \
     ibuf.h \
     queue.cpp \
     queue.h \
-    tgdb_list.cpp \
-    tgdb_list.h \
     std_bbtree.cpp \
     std_bbtree.h \
     std_btree.cpp \
