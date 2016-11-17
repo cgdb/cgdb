@@ -991,12 +991,21 @@ static void update_file_position(struct tgdb_response *response)
 
     /* If we got a pathname and we're not showing disasm... */
     if (tfp->path && !cgdbrc_get_int(CGDBRC_DISASM)) {
+
+        /**
+         * GDB will provide an executing line number even when the program
+         * has not been started yet. Checking the frame address as well
+         * helps cgdb to not show an executing line unless there is a stack,
+         * which tells us the inferior is running.
+         */
+        int exe_line = sview->addr_frame ? tfp->line_number : -1;
+
         /* Update the file */
         source_reload_status = 
             source_reload(if_get_sview(), tfp->path, 0);
 
         /* Show the source file at this line number */
-        if_show_file(tfp->path, tfp->line_number, tfp->line_number);
+        if_show_file(tfp->path, tfp->line_number, exe_line);
     }
 
     /**

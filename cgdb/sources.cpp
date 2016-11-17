@@ -1231,8 +1231,11 @@ int source_set_exec_line(struct sviewer *sview, const char *path, int sel_line, 
         sview->cur->sel_line = clamp_line(sview, sel_line - 1);
 
     /* Set executing line if passed a valid value */
-    if (exe_line > 0)
+    if (exe_line == -1) {
+        sview->cur->exe_line = -1;
+    } else if (exe_line > 0) {
         sview->cur->exe_line = clamp_line(sview, exe_line - 1);
+    }
 
     return 0;
 }
