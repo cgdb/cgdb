@@ -116,6 +116,7 @@ enum cgdbrc_option_kind {
     CGDBRC_CGDB_MODE_KEY,
     CGDBRC_COLOR,
     CGDBRC_DEBUGWINCOLOR,
+    CGDBRC_DISASM,
     CGDBRC_EXECUTING_LINE_DISPLAY,
     CGDBRC_IGNORECASE,
     CGDBRC_SELECTED_LINE_DISPLAY,
@@ -146,6 +147,7 @@ struct cgdbrc_config_option {
         /* option_kind == CGDBRC_CGDB_MODE_KEY */
         /* option_kind == CGDBRC_COLOR */
         /* option_kind == CGDBRC_DEBUGWINCOLOR */
+        /* option_kind == CGDBRC_DISASM */
         /* option_kind == CGDBRC_IGNORECASE */
         /* option_kind == CGDBRC_SHOWDEBUGCOMMANDS */
         /* option_kind == CGDBRC_SHOWMARKS */

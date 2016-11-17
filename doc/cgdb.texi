@@ -619,6 +619,16 @@ display the ANSI escape code in the debug window.
 See @uref{https://en.wikipedia.org/wiki/ANSI_escape_code#Colors} to learn
 more about ANSI escape codes.
 
+@item :set dis
+@item :set disasm
+This option is used to enable or disable showing assembly code in cgdb.
+The default value is off.  When off, CGDB will display the source code
+to the user.  When no source code is available, CGDB will display the
+assembly code.  When this option is enabled, CGDB will display the mixed
+source and assembly when the source code is enabled and assembly code
+when the source code is not available. Please note that when assembly
+mode is displayed, it's displayed per function instead of per file.
+
 @item :set eld=@var{style}
 @itemx :set executinglinedisplay=@var{style}
 Set the executing line display to @var{style}.  Possible values for @var{style}
@@ -825,11 +835,6 @@ Turn the syntax on or off.
 @item :u
 @itemx :until
 Send an until command to GDB.
-
-@item :d
-@itemx :disassemble
-Send a disassemble command to GDB. CGDB will display the current function
-with disassemble.
 
 @item :up
 Send an up command to GDB.

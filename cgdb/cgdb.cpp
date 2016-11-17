@@ -983,7 +983,7 @@ static void update_file_position(struct tgdb_response *response)
 
     sview->addr_frame = tfp->addr;
 
-    if (tfp->path) {
+    if (tfp->path && !cgdbrc_get_int(CGDBRC_DISASM)) {
         /* Update the file */
         source_reload_status = 
             source_reload(if_get_sview(), tfp->path, 0);

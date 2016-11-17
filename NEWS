@@ -1,4 +1,7 @@
-  * Added the 'disassemble' command to CGDB.
+  * Add support to enable/disable showing assembly code in CGDB.
+    The default is disabled. The 'set disasm' enables showing 
+    mixed assembly mode by default. See the documentation for more
+    information.
 
   * Add the :logo command to cgdb. This tells CGDB to display a logo
     in the source window.

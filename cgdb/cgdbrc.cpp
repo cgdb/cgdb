@@ -70,6 +70,7 @@ static struct cgdbrc_config_option cgdbrc_config_options[CGDBRC_WRAPSCAN + 1] = 
     {CGDBRC_CGDB_MODE_KEY, {.int_val = CGDB_KEY_ESC}},
     {CGDBRC_COLOR, {.int_val = 1}},
     {CGDBRC_DEBUGWINCOLOR, {.int_val = 1}},
+    {CGDBRC_DISASM, {.int_val = 0}},
     {CGDBRC_EXECUTING_LINE_DISPLAY,
         {.line_display_style = LINE_DISPLAY_LONG_ARROW}},
     {CGDBRC_IGNORECASE, {.int_val = 0}},
@@ -127,6 +128,10 @@ static struct ConfigVariable {
     {
     "debugwincolor", "dwc", CONFIG_TYPE_BOOL,
                 (void *)&cgdbrc_config_options[CGDBRC_DEBUGWINCOLOR].variant.int_val},
+            /* disassemble */
+    {
+    "disasm", "dis", CONFIG_TYPE_BOOL,
+                (void *)&cgdbrc_config_options[CGDBRC_DISASM].variant.int_val},
             /* executinglinedisplay */
     {
     "executinglinedisplay", "eld", CONFIG_TYPE_FUNC_STRING,
@@ -201,8 +206,6 @@ static int command_parse_highlight(int param);
 static int command_parse_map(int param);
 static int command_parse_unmap(int param);
 
-static int command_do_disassemble(int param);
-
 typedef int (*action_t) (int param);
 typedef struct COMMANDS {
     const char *name;
@@ -234,8 +237,6 @@ COMMANDS commands[] = {
     /* syntax       */ {"syntax", (action_t)command_parse_syntax, 0},
     /* unmap        */ {"unmap", (action_t)command_parse_unmap, 0},
     /* unmap        */ {"unm", (action_t)command_parse_unmap, 0},
-    /* disassemble  */ {"disassemble", (action_t)command_do_disassemble, 0},
-    /* disassemble  */ {"dis", (action_t)command_do_disassemble, 0},
     /* continue     */ {"continue", (action_t)command_do_tgdbcommand, TGDB_CONTINUE},
     /* continue     */ {"c", (action_t)command_do_tgdbcommand, TGDB_CONTINUE},
     /* down         */ {"down", (action_t)command_do_tgdbcommand, TGDB_DOWN},
