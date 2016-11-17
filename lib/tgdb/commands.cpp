@@ -561,8 +561,6 @@ commands_prepare_for_command(struct annotate_two *a2,
             
             commands_set_state(c, INFO_DISASSEMBLE_FUNC);
             break;
-        case ANNOTATE_VOID:
-            break;
         default:
             logger_write_pos(logger, __FILE__, __LINE__,
                     "commands_prepare_for_command error");
@@ -625,7 +623,6 @@ static char *commands_create_command(struct commands *c,
             return sys_aprintf("server interpreter-exec mi \"complete %s\"\n", data);
         case ANNOTATE_DATA_DISASSEMBLE_MODE_QUERY:
             return sys_aprintf("server interpreter-exec mi \"-data-disassemble -s 0 -e 0 -- 4\"\n");
-        case ANNOTATE_VOID:
         default:
             logger_write_pos(logger, __FILE__, __LINE__, "switch error");
             break;

@@ -27,12 +27,6 @@ struct annotate_two;
  * This should probably be moved out of a2-tgdb.h
  */
 enum annotate_commands {
-
-    /**
-	 * Currently not used.
-	 */
-    ANNOTATE_VOID = 0,
-
     /**
 	 * Get a list of breakpoints.
 	 */
