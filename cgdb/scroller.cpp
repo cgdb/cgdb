@@ -78,11 +78,12 @@ static char *parse(struct scroller *scr, struct hl_line_attr **attrs,
     int orig_len = strlen(orig);
     int length = MAX(orig_len, scr->current.pos) + buflen +
         (tab_size - 1) * tabcount + 1;
-    char rv[length] = {};
+    char rv[length];
     int i, j;
     int debugwincolor = cgdbrc_get_int(CGDBRC_DEBUGWINCOLOR);
     int width, height;
 
+    memset(rv, 0, sizeof(rv));
     getmaxyx(scr->win, height, width);
 
     /* Copy over original buffer */
