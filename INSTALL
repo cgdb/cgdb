@@ -34,6 +34,10 @@ The simplest way to compile this package is:
      Running `configure' takes awhile.  While running, it prints some
      messages telling which features it is checking for.
 
+     on Mac Os readline might be installed in /usr/local/Cellar/readline/x.x.x
+     You might run configure with the following parameter
+     ./configure --with-readline=/usr/local/Cellar/readline/x.x.x --prefix=/usr/local
+
   2. Type `make' to compile the package.
 
   3. Optionally, type `make check' to run any self-tests that come with

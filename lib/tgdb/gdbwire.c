@@ -7601,20 +7601,15 @@ gdbwire_push_data(struct gdbwire *wire, const char *data, size_t size)
     return result;
 }
 
+// clean the nested functions.
 
-enum gdbwire_result
-gdbwire_interpreter_exec(
-        const char *interpreter_exec_output,
-        enum gdbwire_mi_command_kind kind,
-        struct gdbwire_mi_command **out_mi_command)
-{
-    struct gdbwire_interpreter_exec_context {
+struct gdbwire_interpreter_exec_context {
         enum gdbwire_result result;
         enum gdbwire_mi_command_kind kind;
         struct gdbwire_mi_command *mi_command;
     };
 
-    void gdbwire_interpreter_exec_stream_record(void *context,
+void gdbwire_interpreter_exec_stream_record(void *context,
         struct gdbwire_mi_stream_record *stream_record)
     {
         struct gdbwire_interpreter_exec_context *ctx =
@@ -7658,6 +7653,15 @@ gdbwire_interpreter_exec(
         ctx->result = GDBWIRE_LOGIC;
     }
 
+
+enum gdbwire_result
+gdbwire_interpreter_exec(
+        const char *interpreter_exec_output,
+        enum gdbwire_mi_command_kind kind,
+        struct gdbwire_mi_command **out_mi_command)
+{
+    
+    
     struct gdbwire_interpreter_exec_context context = {
             GDBWIRE_OK, kind, 0 };
     size_t len;

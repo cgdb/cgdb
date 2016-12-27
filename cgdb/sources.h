@@ -32,6 +32,11 @@
 
 #include "tokenizer.h"
 
+#if __clang__
+#include <stdint.h>
+// #include <_uint64_t.h>
+#endif
+
 /* ----------- */
 /* Definitions */
 /* ----------- */
