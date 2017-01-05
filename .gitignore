@@ -45,3 +45,7 @@ lib/tokenizer/dlexer.cpp
 lib/tokenizer/golexer.cpp
 lib/tokenizer/rustlexer.cpp
 share/
+.vscode/
+TAGS
+doc/htdocs/
+lib/various.tag
