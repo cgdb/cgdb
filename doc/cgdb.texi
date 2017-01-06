@@ -84,12 +84,8 @@ split screen showing the source as it executes.  The UI is modeled on the
 classic Unix text editor, vi.  Those familiar with vi should feel right at 
 home using CGDB.
 
-The library responsible for communicating with GDB is called Trivial GDB 
-(tgdb, or more accurately, libtgdb).  This abstraction allows the UI code to 
-be independent of the debugger, as well as greatly simplifying its 
-implementation.
-
-Those wanting to develop other interfaces to GDB are welcome to use libtgdb 
+The library responsible for communicating with GDB is called gdbwire.
+Those wanting to develop other interfaces to GDB are welcome to use gdbwire 
 as the basis for their program.  Many of the headaches of parsing GDB's output 
 and annotations can be avoided by using it.
 

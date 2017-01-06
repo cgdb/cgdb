@@ -1,3 +1,8 @@
+  * CGDB now supports showing assembly code! By default, CGDB will
+    display source code when it is available and assembly code
+    when no source code is available. The option 'set disasm'
+    allows you to show mixed source/assembly when both are available.
+
   * Add support to enable/disable showing assembly code in CGDB.
     The default is disabled. The 'set disasm' enables showing 
     mixed assembly mode by default. See the documentation for more
