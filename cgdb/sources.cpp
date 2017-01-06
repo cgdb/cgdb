@@ -371,6 +371,8 @@ static enum hl_group_kind hlg_from_tokenizer_type(enum tokenizer_type type, cons
         case TOKENIZER_LOGO: return HLG_LOGO;
         case TOKENIZER_COLOR: return hl_get_color_group(tok_data);
     }
+
+    return HLG_TEXT;
 }
 
 static int highlight_node(struct list_node *node)
@@ -817,10 +819,8 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
     int count;
 
     enum LineDisplayStyle exe_display_style, sel_display_style;
-    int attr = 0;
     int sellineno, exelineno;
     int enabled_bp, disabled_bp;
-    int exe_line_display, sel_line_display;
     int exe_line_display_is_arrow, sel_line_display_is_arrow;
     int exe_arrow_attr, sel_arrow_attr;
     int exe_highlight_attr, sel_highlight_attr;
@@ -830,9 +830,6 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
     char fmt[16];
     int width, height;
     int focus_attr = focus ? SWIN_A_BOLD : 0;
-    int is_sel_line, is_exe_line;
-    int highlight_tabstop = cgdbrc_get_int(CGDBRC_TABSTOP);
-    const char *cur_line;
     int showmarks = cgdbrc_get_int(CGDBRC_SHOWMARKS);
     int hlsearch = cgdbrc_get_int(CGDBRC_HLSEARCH);
     int mark_attr;
@@ -924,7 +921,6 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
     for (i = 0; i < height; i++, line++) {
 
         int column_offset = 0;
-        int line_highlight_attr = 0;
         /* Is this the current selected line? */
         int is_sel_line = (line >= 0 && sview->cur->sel_line == line);
         /* Is this the current executing line */

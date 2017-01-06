@@ -346,6 +346,9 @@ static void gdbwire_stream_record_callback(void *context,
             }
             break;
         case DATA_DISASSEMBLE_MODE_QUERY:
+        case VOID_COMMAND:
+        case INFO_SOURCE:
+        case INFO_SOURCES:
             break;
     }
 }
@@ -391,6 +394,8 @@ static void gdbwire_result_record_callback(void *context,
             break;
         case INFO_FRAME:
             commands_process_info_frame(a2, result_record);
+            break;
+        case VOID_COMMAND:
             break;
     }
     commands_set_state(c, VOID_COMMAND);
