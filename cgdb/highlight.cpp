@@ -31,14 +31,6 @@ struct hl_regex_info {
     char *regex;
 };
 
-const char *hl_regex_get(struct hl_regex_info *info)
-{
-    if (info && info->regex && info->regex[0])
-        return info->regex;
-
-    return NULL;
-}
-
 void hl_regex_free(struct hl_regex_info **info)
 {
     if (info && *info && (*info)->regex) {
@@ -52,7 +44,8 @@ void hl_regex_free(struct hl_regex_info **info)
     }
 }
 
-int hl_regex_search(struct hl_regex_info **info, char *line, const char *regex, int icase, int *start, int *end)
+int hl_regex_search(struct hl_regex_info **info, char *line,
+    const char *regex, int icase, int *start, int *end)
 {
     int result;
     regmatch_t pmatch;
