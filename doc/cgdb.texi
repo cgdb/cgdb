@@ -222,6 +222,9 @@ finishes, they will each be run in order.  There will be no way to stop these
 commands from being run besides from typing @kbd{Ctrl-C}, like you would at any
 normal terminal when working with GDB.
 
+@cindex regular expression search
+CGDB also supports regular expression searching within the GDB window.
+
 @node File Dialog Window
 @section Understanding the file dialog window.
 @cindex file dialog window
@@ -477,6 +480,18 @@ Move up a line.
 @itemx down arrow
 @itemx Ctrl-n
 Move down a line.
+
+@item /
+search from current cursor position.
+
+@item ?
+reverse search from current cursor position.
+
+@item n
+next forward search.
+
+@item N
+next reverse search.
 
 @item q
 @itemx i

@@ -58,7 +58,8 @@
   * Added GDB scroll mode in addition to the existing GDB command mode.
     To enter scroll mode, type 'page up' when in GDB mode and to exit
     type 'q', 'i' or 'Enter'. In scroll mode, you can scroll through
-    the GDB output.
+    the GDB output. You can also search the GDB output with the /, ?, n
+    and N keys.
 
   * Extended support for the G command when in CGDB mode. The new supported
     syntax is [<number>]G, allowing users to jump to a specific line within
