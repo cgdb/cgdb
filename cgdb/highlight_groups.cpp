@@ -580,6 +580,29 @@ hl_groups_get_attr(hl_groups_ptr hl_groups, enum hl_group_kind kind)
             attr = SWIN_A_BOLD | swin_color_pair(
                 hl_get_ansicolor_pair(hl_groups, -1, kind - HLG_BOLD_BLACK));
             return attr;
+        case HLG_TYPE:
+        case HLG_KEYWORD:
+        case HLG_LITERAL:
+        case HLG_COMMENT:
+        case HLG_DIRECTIVE:
+        case HLG_TEXT:
+        case HLG_SEARCH:
+        case HLG_STATUS_BAR:
+        case HLG_EXECUTING_LINE_ARROW:
+        case HLG_SELECTED_LINE_ARROW:
+        case HLG_EXECUTING_LINE_HIGHLIGHT:
+        case HLG_SELECTED_LINE_HIGHLIGHT:
+        case HLG_EXECUTING_LINE_BLOCK:
+        case HLG_SELECTED_LINE_BLOCK:
+        case HLG_ENABLED_BREAKPOINT:
+        case HLG_DISABLED_BREAKPOINT:
+        case HLG_SELECTED_LINE_NUMBER:
+        case HLG_EXECUTING_LINE_NUMBER:
+        case HLG_SCROLL_MODE_STATUS:
+        case HLG_LOGO:
+        case HLG_MARK:
+        case HLG_LAST:
+            break;
     }
 
     if (hl_groups && info) {
