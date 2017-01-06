@@ -670,7 +670,6 @@ int command_parse_syntax(int param)
             /* TODO: Print out syntax info (like vim?) */
         }
             break;
-        case BOOLEAN:
         case IDENTIFIER:{
             const char *value = get_token();
 
