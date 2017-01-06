@@ -52,11 +52,15 @@ void hl_regex_free(struct hl_regex_info **info);
  * @param line
  * A line of text to highlight based on the regular expression.
  *
+ * @param hlattr
+ * The attribute to use for highlighting.
+ *
  * @return
  * A list of line attributes corresponding to the positions in the
  * line that matched the regular expression and should be highlighted.
  * Will return NULL if no matches were found.
  */
-struct hl_line_attr *hl_regex_highlight(struct hl_regex_info **info, char *line);
+struct hl_line_attr *hl_regex_highlight(struct hl_regex_info **info,
+    char *line, int hlattr);
 
 #endif /* _HIGHLIGHT_H_ */

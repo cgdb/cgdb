@@ -517,8 +517,8 @@ struct sviewer *source_new(SWINDOW *win)
 
     rv->addr_frame = 0;
 
-    rv->regex_is_searching = 0;
     rv->hlregex = NULL;
+    rv->last_hlregex = NULL;
 
     return rv;
 }
@@ -825,6 +825,8 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
     int exe_arrow_attr, sel_arrow_attr;
     int exe_highlight_attr, sel_highlight_attr;
     int exe_block_attr, sel_block_attr;
+    int search_attr;
+    int inc_search_attr;
     char fmt[16];
     int width, height;
     int focus_attr = focus ? SWIN_A_BOLD : 0;
@@ -832,12 +834,12 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
     int highlight_tabstop = cgdbrc_get_int(CGDBRC_TABSTOP);
     const char *cur_line;
     int showmarks = cgdbrc_get_int(CGDBRC_SHOWMARKS);
+    int hlsearch = cgdbrc_get_int(CGDBRC_HLSEARCH);
     int mark_attr;
 
     struct hl_line_attr *sel_highlight_attrs = 0;
     struct hl_line_attr *exe_highlight_attrs = 0;
     struct hl_line_attr tmp_attr;
-
 
     /* Check that a file is loaded */
     if (!sview->cur || !sview->cur->file_buf.lines) {
@@ -867,6 +869,9 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
         hl_groups_instance, HLG_EXECUTING_LINE_HIGHLIGHT);
     exe_block_attr = hl_groups_get_attr(
         hl_groups_instance, HLG_EXECUTING_LINE_BLOCK);
+
+    search_attr = hl_groups_get_attr(hl_groups_instance, HLG_SEARCH);
+    inc_search_attr = hl_groups_get_attr(hl_groups_instance, HLG_INCSEARCH);
 
     sel_display_style = cgdbrc_get_displaystyle(CGDBRC_SELECTED_LINE_DISPLAY);
     sel_arrow_attr = hl_groups_get_attr(
@@ -1067,9 +1072,22 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
                 printline_attrs, -1, -1, sview->cur->sel_col + column_offset,
                 width - lwidth - 2);
 
-            if (sview->regex_is_searching) {
+            if (hlsearch && sview->last_hlregex) {
                 struct hl_line_attr *attrs = 
-                    hl_regex_highlight(&sview->hlregex, sline->line);
+                    hl_regex_highlight(&sview->last_hlregex, sline->line,
+                    search_attr);
+                if (sbcount(attrs)) {
+                    hl_printline_highlight(sview->win, sline->line, sline->len,
+                        attrs, x, y, sview->cur->sel_col + column_offset,
+                        width - lwidth - 2);
+                    sbfree(attrs);
+                }
+            }
+
+            if (is_sel_line && sview->hlregex) {
+                struct hl_line_attr *attrs = 
+                    hl_regex_highlight(&sview->hlregex, sline->line,
+                    inc_search_attr);
                 if (sbcount(attrs)) {
                     hl_printline_highlight(sview->win, sline->line, sline->len,
                         attrs, x, y, sview->cur->sel_col + column_offset,
@@ -1246,7 +1264,8 @@ void source_free(struct sviewer *sview)
 
     hl_regex_free(&sview->hlregex);
     sview->hlregex = NULL;
-    sview->regex_is_searching = 0;
+    hl_regex_free(&sview->last_hlregex);
+    sview->last_hlregex = NULL;
 
     swin_delwin(sview->win);
     sview->win = NULL;
@@ -1283,13 +1302,7 @@ int source_search_regex(struct sviewer *sview,
     if (!node)
         return -1;
 
-    /* If we've got a regex, store the opt value:
-     *   1: searching
-     *   2: done searching
-     */
-    sview->regex_is_searching = (regex && regex[0]) ? opt : 0;
-
-    if (sview->regex_is_searching) {
+    if (regex && *regex) {
         int line;
         int line_end;
         int line_inc = direction ? +1 : -1;
@@ -1320,8 +1333,11 @@ int source_search_regex(struct sviewer *sview,
                 node->sel_line = line;
 
                 /* Finalized match - move to this location */
-                if (opt == 2)
+                if (opt == 2) {
                     node->sel_rline = line;
+                    sview->last_hlregex = sview->hlregex;
+                    sview->hlregex = 0;
+                }
                 return 1;
             }
 

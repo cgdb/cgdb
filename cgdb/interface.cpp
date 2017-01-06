@@ -1544,6 +1544,8 @@ int internal_if_input(int key, int *last_key)
             ibuf_free(regex_cur);
             regex_cur = NULL;
 
+            hl_regex_free(&src_viewer->hlregex);
+
             src_viewer->cur->sel_rline = orig_line_regex;
             src_viewer->cur->sel_line = orig_line_regex;
             sbc_kind = SBC_NORMAL;

@@ -73,6 +73,7 @@ static struct cgdbrc_config_option cgdbrc_config_options[CGDBRC_WRAPSCAN + 1] = 
     {CGDBRC_DISASM, {.int_val = 0}},
     {CGDBRC_EXECUTING_LINE_DISPLAY,
         {.line_display_style = LINE_DISPLAY_LONG_ARROW}},
+    {CGDBRC_HLSEARCH, {.int_val = 0}},
     {CGDBRC_IGNORECASE, {.int_val = 0}},
     {CGDBRC_SELECTED_LINE_DISPLAY,
         {.line_display_style = LINE_DISPLAY_BLOCK}},
@@ -136,6 +137,10 @@ static struct ConfigVariable {
     {
     "executinglinedisplay", "eld", CONFIG_TYPE_FUNC_STRING,
                 (void *)command_set_executing_line_display},
+            /* hlsearch */
+    {
+    "hlsearch", "hls", CONFIG_TYPE_BOOL,
+                (void *)&cgdbrc_config_options[CGDBRC_HLSEARCH].variant.int_val},
             /* ignorecase */
     {
     "ignorecase", "ic", CONFIG_TYPE_BOOL,

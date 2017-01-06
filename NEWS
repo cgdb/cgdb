@@ -1,3 +1,12 @@
+  * The hlsearch option has been added to CGDB. This improves the
+    searching and displaying of searching functionality within CGDB.
+    By default the option is off. When enabled, and there exists a
+    previous search, CGDB will display the search results using
+    the Search highlighting group. The IncSearch highlighting group
+    is used to display the active search. The hlsearch option
+    highlights previous searches in the source window, the gdb window
+    when in scroll mode and the file dialog window.
+
   * CGDB now supports showing assembly code! By default, CGDB will
     display source code when it is available and assembly code
     when no source code is available. The option 'set disasm'

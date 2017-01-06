@@ -106,16 +106,14 @@ int hl_regex_search(struct hl_regex_info **info, char *line,
     return 0;
 }
 
-struct hl_line_attr *hl_regex_highlight(struct hl_regex_info **info, char *line)
+struct hl_line_attr *hl_regex_highlight(struct hl_regex_info **info,
+        char *line, int hlattr)
 {
     hl_line_attr *attrs = NULL;
 
     if (*info && (*info)->regex && (*info)->regex[0]) {
         int pos = 0;
-        int search_attr;
         struct hl_line_attr line_attr;
-
-        search_attr = hl_groups_get_attr(hl_groups_instance, HLG_SEARCH);
 
         for (;;) {
             int ret;
@@ -130,7 +128,7 @@ struct hl_line_attr *hl_regex_highlight(struct hl_regex_info **info, char *line)
             pos += start;
 
             /* Push search attribute */
-            line_attr.attr = search_attr;
+            line_attr.attr = hlattr;
             line_attr.col = pos;
             sbpush(attrs, line_attr);
 

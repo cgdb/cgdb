@@ -64,13 +64,10 @@ struct scroller {
 
     /** If in search mode. 1 if searching, 0 otherwise */
     int in_search_mode;
+    /** The last regex searched for */
+    struct hl_regex_info *last_hlregex;
     /** The current regex if in_search_mode is true */
     struct hl_regex_info *hlregex;
-
-    /**
-     * Determine the searching status. 1 searching, 2 is done searching.
-     */
-    int regex_is_searching;
 
     /** 
      * The original row, or last selected row, when searching.

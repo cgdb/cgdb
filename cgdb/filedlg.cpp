@@ -33,6 +33,7 @@ struct file_buffer {
 
 struct filedlg {
     struct file_buffer *buf;    /* All of the widget's data ( files ) */
+    struct hl_regex_info *last_hlregex;
     struct hl_regex_info *hlregex;
     SWINDOW *win;               /* Curses window */
     struct ibuf *G_line_number; /* Line number user wants to 'G' to */
@@ -86,6 +87,7 @@ struct filedlg *filedlg_new(int pos_r, int pos_c, int height, int width)
     fd->buf = (struct file_buffer *)cgdb_malloc(sizeof(struct file_buffer));
 
     fd->G_line_number = ibuf_init();
+    fd->last_hlregex = NULL;
     fd->hlregex = NULL;
     fd->buf->files = NULL;
     fd->buf->max_width = 0;
@@ -101,6 +103,9 @@ void filedlg_free(struct filedlg *fdlg)
     filedlg_clear(fdlg);
 
     ibuf_free(fdlg->G_line_number);
+
+    hl_regex_free(&fdlg->last_hlregex);
+    fdlg->last_hlregex = NULL;
 
     hl_regex_free(&fdlg->hlregex);
     fdlg->hlregex = NULL;
@@ -301,8 +306,11 @@ static int filedlg_search_regex(struct filedlg *fd, const char *regex,
                 fd->buf->sel_line = line;
 
                 /* Finalized match - move to this location */
-                if (opt == 2)
+                if (opt == 2) {
                     fd->buf->sel_rline = line;
+                    fd->last_hlregex = fd->hlregex;
+                    fd->hlregex = 0;
+                }
                 return 1;
             }
 
@@ -327,7 +335,10 @@ int filedlg_display(struct filedlg *fd)
     int statusbar;
     int arrow_attr;
     int count = sbcount(fd->buf->files);
+    int hlsearch = cgdbrc_get_int(CGDBRC_HLSEARCH);
     static const char label[] = "Select a file or press q to cancel.";
+    int inc_search_attr = hl_groups_get_attr(hl_groups_instance, HLG_INCSEARCH);
+    int search_attr = hl_groups_get_attr(hl_groups_instance, HLG_SEARCH);
 
     swin_curs_set(0);
 
@@ -419,10 +430,20 @@ int filedlg_display(struct filedlg *fd)
         hl_printline(fd->win, filename, strlen(filename),
                      NULL, -1, -1, fd->buf->sel_col, width - lwidth - 2);
 
-        if (regex_line[0]) {
-            struct hl_line_attr *attrs;
+        if (hlsearch && fd->last_hlregex) {
+            struct hl_line_attr *attrs = hl_regex_highlight(
+                    &fd->last_hlregex, filename, search_attr);
 
-            attrs = hl_regex_highlight(&fd->hlregex, filename);
+            if (sbcount(attrs)) {
+                hl_printline_highlight(fd->win, filename, strlen(filename),
+                             attrs, x, y, fd->buf->sel_col, width - lwidth - 2);
+                sbfree(attrs);
+            }
+        }
+
+        if (regex_search && file == fd->buf->sel_line) {
+            struct hl_line_attr *attrs = hl_regex_highlight(
+                    &fd->hlregex, filename, inc_search_attr);
 
             if (sbcount(attrs)) {
                 hl_printline_highlight(fd->win, filename, strlen(filename),

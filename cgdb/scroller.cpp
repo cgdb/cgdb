@@ -229,8 +229,8 @@ struct scroller *scr_new(SWINDOW *win)
     rv->win = win;
 
     rv->in_search_mode = 0;
+    rv->last_hlregex = NULL;
     rv->hlregex = NULL;
-    rv->regex_is_searching = 0;
     rv->search_r = 0;
 
     /* Start with a single (blank) line */
@@ -256,9 +256,10 @@ void scr_free(struct scroller *scr)
     sbfree(scr->lines);
     scr->lines = NULL;
 
+    hl_regex_free(&scr->last_hlregex);
+    scr->last_hlregex = NULL;
     hl_regex_free(&scr->hlregex);
     scr->hlregex = NULL;
-    scr->regex_is_searching = 0;
 
     free(scr->last_inferior_line);
     scr->last_inferior_line = NULL;
@@ -465,14 +466,7 @@ static int wrap_line(struct scroller *scr, int line)
 int scr_search_regex(struct scroller *scr, const char *regex, int opt,
     int direction, int icase)
 {
-    /* If we've got a regex, store the opt value:
-     *   1: searching
-     *   2: done searching
-     */
-    scr->regex_is_searching = (regex && regex[0]) ? opt : 0;
-
-    if (scr->regex_is_searching)
-    {
+    if (regex && *regex) {
         int line;
         int line_end;
         int line_inc = direction ? +1 : -1;
@@ -506,8 +500,11 @@ int scr_search_regex(struct scroller *scr, const char *regex, int opt,
                 scr->current.c = get_last_col(scr, line);
 
                 /* Finalized match - move to this location */
-                if (opt == 2)
+                if (opt == 2) {
                     scr->search_r = line;
+                    scr->last_hlregex = scr->hlregex;
+                    scr->hlregex = 0;
+                }
                 return 1;
             }
 
@@ -589,10 +586,16 @@ void scr_refresh(struct scroller *scr, int focus, enum win_refresh dorefresh)
     int c;                      /* Current column in row */
     int width, height;          /* Width and height of window */
     int highlight_attr;
+    int search_attr;
+    int inc_search_attr;
+    int hlsearch = cgdbrc_get_int(CGDBRC_HLSEARCH);
 
     /* Steal line highlight attribute for our scroll mode status */
     highlight_attr = hl_groups_get_attr(hl_groups_instance,
         HLG_SCROLL_MODE_STATUS);
+
+    search_attr = hl_groups_get_attr(hl_groups_instance, HLG_SEARCH);
+    inc_search_attr = hl_groups_get_attr(hl_groups_instance, HLG_INCSEARCH);
 
     /* Sanity check */
     height = swin_getmaxy(scr->win);
@@ -626,7 +629,6 @@ void scr_refresh(struct scroller *scr, int focus, enum win_refresh dorefresh)
      * the viewable space and work our way up.
      */
     for (nlines = 1; nlines <= height; nlines++) {
-
         /* Empty lines below the scroller prompt should be empty.
          * When in scroller mode, there should be no empty lines on the
          * bottom. */
@@ -642,10 +644,20 @@ void scr_refresh(struct scroller *scr, int focus, enum win_refresh dorefresh)
 
             /* If we're searching right now or we finished search
              * and have focus... */
-            if ((scr->regex_is_searching == 1) ||
-                (scr->regex_is_searching == 2 && focus)) {
-                struct hl_line_attr *attrs = 
-                    hl_regex_highlight(&scr->hlregex, sline->line);
+            if (hlsearch && scr->last_hlregex && focus) {
+                struct hl_line_attr *attrs = hl_regex_highlight(
+                    &scr->last_hlregex, sline->line, search_attr);
+
+                if (sbcount(attrs)) {
+                    hl_printline_highlight(scr->win, sline->line,
+                        sline->line_len, attrs, 0, height - nlines, c, width);
+                    sbfree(attrs);
+                }
+            }
+
+            if (scr->hlregex && scr->current.r == r) {
+                struct hl_line_attr *attrs = hl_regex_highlight(
+                    &scr->hlregex, sline->line, inc_search_attr);
 
                 if (sbcount(attrs)) {
                     hl_printline_highlight(scr->win, sline->line,

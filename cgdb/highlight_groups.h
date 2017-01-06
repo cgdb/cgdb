@@ -33,6 +33,7 @@ enum hl_group_kind {
     HLG_COMMENT,
     HLG_DIRECTIVE,
     HLG_TEXT,
+    HLG_INCSEARCH,
     HLG_SEARCH,
     HLG_STATUS_BAR,
     HLG_EXECUTING_LINE_ARROW,

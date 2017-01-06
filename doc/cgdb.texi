@@ -673,6 +673,11 @@ number, but extends the arrow until the source code.  The @samp{highlight}
 option draws the entire line in inverse video and the @samp{block} option
 draws an inverse block (cursor) next to the source code being executed.
 
+@item :set hls
+@itemx :set hlsearch
+When enabled, if there is a previous search pattern, highlight all its matches.
+The default is disabled.
+
 @item :set ic
 @itemx :set ignorecase
 Sets searching case insensitive.  The default is off.
@@ -957,9 +962,13 @@ displaying it's User Interface.
 @item StatusLine
 This represents the @dfn{status bar} in CGDB.  The file dialog's status 
 bar also uses this group.
+@item Search
+This represents the group used when displaying the previous search in
+either the source window, the GDB window in scroll mode, or the @dfn(file
+dialog window}. This is only used when the @var{hlsearch} option is enabled.
 @item IncSearch
 This represents the group used when the user is searching in either the source 
-window, or the @dfn{file dialog window}.
+window, the GDB window in scroll mode, or the @dfn{file dialog window}.
 @item SelectedLineArrow
 This represents the group used when the user has the
 @code{selectedlinedisplay} set to @code{shortarrow} or @code{longarrow}.
