@@ -79,6 +79,10 @@
     The 'arrowstyle' option has been deprecated (but still supported)
     and users should use the 'executinglinedisplay' option instead.
 
+  * CGDB now only supports ncurses. Support for curses was removed.
+    The curses support was previously very out of date and untested.
+    If curses support is needed, please let us know.
+
 cgdb-0.6.8 (11/13/2014)
 
   * Fix issue #40, the map commands were adding additional new lines
