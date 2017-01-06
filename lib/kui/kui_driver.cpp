@@ -47,13 +47,7 @@
 #include <getopt.h>
 #endif
 
-#if HAVE_CURSES_H
-#include <curses.h>
-#elif HAVE_NCURSES_CURSES_H
-#include <ncurses/curses.h>
-#endif /* HAVE_CURSES_H */
-
-//#include "sys_win.h"
+#include "sys_win.h"
 #include "sys_util.h"
 #include "kui.h"
 #include "kui_term.h"
@@ -68,9 +62,8 @@ static void kui_shutdown(int use_endwin)
     kui_ms_destroy(map);
 
     /* Shutdown curses */
-    echo();
     if (use_endwin)
-        endwin();
+        swin_endwin();
     exit(0);
 }
 
@@ -201,7 +194,7 @@ static void parse_long_options(int argc, char **argv)
                 break;
             case '?':
             case 'h':
-                endwin();
+                swin_endwin();
                 usage();
                 kui_shutdown(0);
             default:
@@ -364,13 +357,13 @@ static int create_mappings(struct kui_manager *kuim)
 
 }
 
+/* Original terminal attributes */
+
 int main(int argc, char **argv)
 {
     /* Initialize curses */
-    initscr();
-    noecho();
-    raw();
-    refresh();
+    swin_initscr();
+    swin_refresh();
 
     manager = kui_manager_create(STDIN_FILENO, 40, 1000);
 
