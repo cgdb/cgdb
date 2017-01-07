@@ -291,7 +291,7 @@ const char *const CLOG_LEVEL_NAMES[] = {
 int
 clog_init_path(int id, const char *const path)
 {
-    int fd = open(path, O_CREAT | O_WRONLY | O_APPEND, 0666);
+    int fd = open(path, O_CREAT | O_WRONLY | O_TRUNC, 0666);
     if (fd == -1) {
         _clog_err("Unable to open %s: %s\n", path, strerror(errno));
         return 1;
