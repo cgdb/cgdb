@@ -88,6 +88,12 @@
 #define CLOG_DEFAULT_DATE_FORMAT "%Y-%m-%d"
 #define CLOG_DEFAULT_TIME_FORMAT "%H:%M:%S"
 
+/* GCC defines __va_copy, but does not define va_copy unless in c99 mode
+   or -ansi is not specified, since it was not part of C90. */
+#if !defined(va_copy) && defined(__va_copy)
+#define va_copy(d,s)    __va_copy(d,s)
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
