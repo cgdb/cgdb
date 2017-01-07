@@ -127,7 +127,9 @@ enum annotate_commands {
      *
      * This functionality was added in gdb in commit 6ff0ba5f.
      */
-    ANNOTATE_DATA_DISASSEMBLE_MODE_QUERY
+    ANNOTATE_DATA_DISASSEMBLE_MODE_QUERY,
+
+    ANNOTATE_UNUSED = -1
 };
 
 /******************************************************************************/

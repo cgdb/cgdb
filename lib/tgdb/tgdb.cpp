@@ -634,7 +634,7 @@ tgdb_send(struct tgdb *tgdb, const char *command,
 
     /* Create the client command */
     tc = tgdb_command_create(command, command_choice,
-        (enum annotate_commands)-1);
+        ANNOTATE_UNUSED);
 
     free(temp_command);
     temp_command = NULL;
@@ -661,7 +661,7 @@ tgdb_send(struct tgdb *tgdb, const char *command,
 static void
 tgdb_run_or_queue_command(struct tgdb *tgdb, struct tgdb_command *command)
 {
-    int  can_issue = tgdb_can_issue_command(tgdb);
+    int can_issue = tgdb_can_issue_command(tgdb);
 
     if (can_issue) {
         tgdb_deliver_command(tgdb, command);
