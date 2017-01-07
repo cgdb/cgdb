@@ -62,6 +62,8 @@
 #ifndef __CLOG_H__
 #define __CLOG_H__
 
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <stdarg.h>
@@ -90,8 +92,7 @@
 extern "C" {
 #endif
 
-enum clog_level
-{
+enum clog_level {
     CLOG_DEBUG,
     CLOG_INFO,
     CLOG_WARN,
@@ -113,7 +114,7 @@ struct clog;
  * @return
  * Zero on success, non-zero on failure.
  */
-int clog_init_path( int id, const char *const path );
+int clog_init_path(int id, const char *const path);
 
 /**
  * Create a new logger writing to a file descriptor.
@@ -127,7 +128,7 @@ int clog_init_path( int id, const char *const path );
  * @return
  * Zero on success, non-zero on failure.
  */
-int clog_init_fd( int id, int fd );
+int clog_init_fd(int id, int fd);
 
 /**
  * Destroy (clean up) a logger.  You should do this at the end of execution,
@@ -136,9 +137,9 @@ int clog_init_fd( int id, int fd );
  * @param id
  * The id of the logger to destroy.
  */
-void clog_free( int id );
+void clog_free(int id);
 
-#define CLOG( id ) __FILE__, __LINE__, __FUNCTION__, id
+#define CLOG(id) __FILE__, __LINE__, id
 
 /**
  * Log functions (one per level).  Call these to write messages to the log
@@ -162,10 +163,10 @@ void clog_free( int id );
  * @param ...
  * Any additional format arguments.
  */
-void clog_debug( const char *sfile, int sline, const char *sfunc, int id, const char *fmt, ... ) ATTRIBUTE_PRINTF(5, 6);
-void clog_info( const char *sfile, int sline, const char *sfunc, int id, const char *fmt, ... ) ATTRIBUTE_PRINTF(5, 6);
-void clog_warn( const char *sfile, int sline, const char *sfunc, int id, const char *fmt, ... ) ATTRIBUTE_PRINTF(5, 6);
-void clog_error( const char *sfile, int sline, const char *sfunc, int id, const char *fmt, ... ) ATTRIBUTE_PRINTF(5, 6);
+void clog_debug(const char *sfile, int sline, int id, const char *fmt, ...);
+void clog_info(const char *sfile, int sline, int id, const char *fmt, ...);
+void clog_warn(const char *sfile, int sline, int id, const char *fmt, ...);
+void clog_error(const char *sfile, int sline, int id, const char *fmt, ...);
 
 /**
  * Set the minimum level of messages that should be written to the log.
@@ -181,7 +182,7 @@ void clog_error( const char *sfile, int sline, const char *sfunc, int id, const 
  * @return
  * Zero on success, non-zero on failure.
  */
-int clog_set_level( int id, enum clog_level level );
+int clog_set_level(int id, enum clog_level level);
 
 /**
  * Set the format string used for times.  See strftime(3) for how this string
@@ -193,7 +194,7 @@ int clog_set_level( int id, enum clog_level level );
  * @return
  * Zero on success, non-zero on failure.
  */
-int clog_set_time_fmt( int id, const char *fmt );
+int clog_set_time_fmt(int id, const char *fmt);
 
 /**
  * Set the format string used for dates.  See strftime(3) for how this string
@@ -205,7 +206,7 @@ int clog_set_time_fmt( int id, const char *fmt );
  * @return
  * Zero on success, non-zero on failure.
  */
-int clog_set_date_fmt( int id, const char *fmt );
+int clog_set_date_fmt(int id, const char *fmt);
 
 /**
  * Set the format string for log messages.  Here are the substitutions you may
@@ -228,17 +229,29 @@ int clog_set_date_fmt( int id, const char *fmt );
  * @return
  * Zero on success, non-zero on failure.
  */
-int clog_set_fmt( int id, const char *fmt );
+int clog_set_fmt(int id, const char *fmt);
 
 /*
  * No need to read below this point.
  */
 
+/*
+ * Portability stuff.
+ */
+
+/* This is not portable, but should work on old Visual C++ compilers. Visual
+ * Studio 2013 defines va_copy, but older versions do not. */
+#ifdef _MSC_VER
+#if _MSC_VER < 1800
+#define va_copy(a,b) ((a) = (b))
+#endif
+#endif
+
 /**
  * The C logger structure.
  */
-struct clog
-{
+struct clog {
+
     /* The current level of this logger. Messages below it will be dropped. */
     enum clog_level level;
 
@@ -246,24 +259,24 @@ struct clog
     int fd;
 
     /* The format specifier. */
-    char fmt[ CLOG_FORMAT_LENGTH ];
+    char fmt[CLOG_FORMAT_LENGTH];
 
     /* Date format */
-    char date_fmt[ CLOG_FORMAT_LENGTH ];
+    char date_fmt[CLOG_FORMAT_LENGTH];
 
     /* Time format */
-    char time_fmt[ CLOG_FORMAT_LENGTH ];
+    char time_fmt[CLOG_FORMAT_LENGTH];
 
     /* Tracks whether the fd needs to be closed eventually. */
     int opened;
 };
 
-void _clog_err( const char *fmt, ... ) ATTRIBUTE_PRINTF(1, 2);
+void _clog_err(const char *fmt, ...);
 
 #ifdef CLOG_MAIN
-struct clog *_clog_loggers[ CLOG_MAX_LOGGERS ] = { 0 };
+struct clog *_clog_loggers[CLOG_MAX_LOGGERS] = { 0 };
 #else
-extern struct clog *_clog_loggers[ CLOG_MAX_LOGGERS ];
+extern struct clog *_clog_loggers[CLOG_MAX_LOGGERS];
 #endif
 
 #ifdef CLOG_MAIN
@@ -275,195 +288,179 @@ const char *const CLOG_LEVEL_NAMES[] = {
     "ERROR",
 };
 
-int clog_init_path( int id, const char *const path )
+int
+clog_init_path(int id, const char *const path)
 {
-    int fd = open( path, O_CREAT | O_WRONLY | O_TRUNC, 0666 );
-    if ( fd == -1 )
-    {
-        _clog_err( "Unable to open %s: %s\n", path, strerror( errno ) );
+    int fd = open(path, O_CREAT | O_WRONLY | O_APPEND, 0666);
+    if (fd == -1) {
+        _clog_err("Unable to open %s: %s\n", path, strerror(errno));
         return 1;
     }
-    if ( clog_init_fd( id, fd ) )
-    {
-        close( fd );
+    if (clog_init_fd(id, fd)) {
+        close(fd);
         return 1;
     }
-    _clog_loggers[ id ]->opened = 1;
+    _clog_loggers[id]->opened = 1;
     return 0;
 }
 
-int clog_init_fd( int id, int fd )
+int
+clog_init_fd(int id, int fd)
 {
-    struct clog *clogger;
+    struct clog *logger;
 
-    if ( _clog_loggers[ id ] != NULL )
-    {
-        _clog_err( "Logger %d already initialized.\n", id );
+    if (_clog_loggers[id] != NULL) {
+        _clog_err("Logger %d already initialized.\n", id);
         return 1;
     }
 
-    clogger = ( struct clog * )malloc( sizeof( struct clog ) );
-    if ( clogger == NULL )
-    {
-        _clog_err( "Failed to allocate clogger: %s\n", strerror( errno ) );
+    logger = (struct clog *) malloc(sizeof(struct clog));
+    if (logger == NULL) {
+        _clog_err("Failed to allocate logger: %s\n", strerror(errno));
         return 1;
     }
 
-    clogger->level = CLOG_DEBUG;
-    clogger->fd = fd;
-    clogger->opened = 0;
-    strcpy( clogger->fmt, CLOG_DEFAULT_FORMAT );
-    strcpy( clogger->date_fmt, CLOG_DEFAULT_DATE_FORMAT );
-    strcpy( clogger->time_fmt, CLOG_DEFAULT_TIME_FORMAT );
+    logger->level = CLOG_DEBUG;
+    logger->fd = fd;
+    logger->opened = 0;
+    strcpy(logger->fmt, CLOG_DEFAULT_FORMAT);
+    strcpy(logger->date_fmt, CLOG_DEFAULT_DATE_FORMAT);
+    strcpy(logger->time_fmt, CLOG_DEFAULT_TIME_FORMAT);
 
-    _clog_loggers[ id ] = clogger;
+    _clog_loggers[id] = logger;
     return 0;
 }
 
-void clog_free( int id )
+void
+clog_free(int id)
 {
-    if ( _clog_loggers[ id ] )
-    {
-        if ( _clog_loggers[ id ]->opened )
-        {
-            close( _clog_loggers[ id ]->fd );
+    if (_clog_loggers[id]) {
+        if (_clog_loggers[id]->opened) {
+            close(_clog_loggers[id]->fd);
         }
-        free( _clog_loggers[ id ] );
+        free(_clog_loggers[id]);
         _clog_loggers[ id ] = 0;
     }
 }
 
-int clog_set_level( int id, enum clog_level level )
+int
+clog_set_level(int id, enum clog_level level)
 {
-    if ( _clog_loggers[ id ] == NULL )
-    {
+    if (_clog_loggers[id] == NULL) {
         return 1;
     }
-    if ( ( unsigned )level > CLOG_ERROR )
-    {
+    if ((unsigned) level > CLOG_ERROR) {
         return 1;
     }
-    _clog_loggers[ id ]->level = level;
+    _clog_loggers[id]->level = level;
     return 0;
 }
 
-int clog_set_time_fmt( int id, const char *fmt )
+int
+clog_set_time_fmt(int id, const char *fmt)
 {
-    struct clog *clogger = _clog_loggers[ id ];
-    if ( clogger == NULL )
-    {
-        _clog_err( "clog_set_time_fmt: No such clogger: %d\n", id );
+    struct clog *logger = _clog_loggers[id];
+    if (logger == NULL) {
+        _clog_err("clog_set_time_fmt: No such logger: %d\n", id);
         return 1;
     }
-    if ( strlen( fmt ) >= CLOG_FORMAT_LENGTH )
-    {
-        _clog_err( "clog_set_time_fmt: Format specifier too long.\n" );
+    if (strlen(fmt) >= CLOG_FORMAT_LENGTH) {
+        _clog_err("clog_set_time_fmt: Format specifier too long.\n");
         return 1;
     }
-    strcpy( clogger->time_fmt, fmt );
+    strcpy(logger->time_fmt, fmt);
     return 0;
 }
 
-int clog_set_date_fmt( int id, const char *fmt )
+int
+clog_set_date_fmt(int id, const char *fmt)
 {
-    struct clog *clogger = _clog_loggers[ id ];
-    if ( clogger == NULL )
-    {
-        _clog_err( "clog_set_date_fmt: No such clogger: %d\n", id );
+    struct clog *logger = _clog_loggers[id];
+    if (logger == NULL) {
+        _clog_err("clog_set_date_fmt: No such logger: %d\n", id);
         return 1;
     }
-    if ( strlen( fmt ) >= CLOG_FORMAT_LENGTH )
-    {
-        _clog_err( "clog_set_date_fmt: Format specifier too long.\n" );
+    if (strlen(fmt) >= CLOG_FORMAT_LENGTH) {
+        _clog_err("clog_set_date_fmt: Format specifier too long.\n");
         return 1;
     }
-    strcpy( clogger->date_fmt, fmt );
+    strcpy(logger->date_fmt, fmt);
     return 0;
 }
 
-int clog_set_fmt( int id, const char *fmt )
+int
+clog_set_fmt(int id, const char *fmt)
 {
-    struct clog *clogger = _clog_loggers[ id ];
-    if ( clogger == NULL )
-    {
-        _clog_err( "clog_set_fmt: No such clogger: %d\n", id );
+    struct clog *logger = _clog_loggers[id];
+    if (logger == NULL) {
+        _clog_err("clog_set_fmt: No such logger: %d\n", id);
         return 1;
     }
-    if ( strlen( fmt ) >= CLOG_FORMAT_LENGTH )
-    {
-        _clog_err( "clog_set_fmt: Format specifier too long.\n" );
+    if (strlen(fmt) >= CLOG_FORMAT_LENGTH) {
+        _clog_err("clog_set_fmt: Format specifier too long.\n");
         return 1;
     }
-    strcpy( clogger->fmt, fmt );
+    strcpy(logger->fmt, fmt);
     return 0;
 }
 
 /* Internal functions */
 
 size_t
-_clog_append_str( char **dst, char *orig_buf, const char *src, size_t cur_size )
+_clog_append_str(char **dst, char *orig_buf, const char *src, size_t cur_size)
 {
     size_t new_size = cur_size;
 
-    while ( strlen( *dst ) + strlen( src ) >= new_size )
-    {
+    while (strlen(*dst) + strlen(src) >= new_size) {
         new_size *= 2;
     }
-    if ( new_size != cur_size )
-    {
-        if ( *dst == orig_buf )
-        {
-            *dst = ( char * )malloc( new_size );
-            strcpy( *dst, orig_buf );
-        }
-        else
-        {
-            *dst = ( char * )realloc( *dst, new_size );
+    if (new_size != cur_size) {
+        if (*dst == orig_buf) {
+            *dst = (char *) malloc(new_size);
+            strcpy(*dst, orig_buf);
+        } else {
+            *dst = (char *) realloc(*dst, new_size);
         }
     }
 
-    strcat( *dst, src );
+    strcat(*dst, src);
     return new_size;
 }
 
 size_t
-_clog_append_int( char **dst, char *orig_buf, long int d, size_t cur_size )
+_clog_append_int(char **dst, char *orig_buf, long int d, size_t cur_size)
 {
-    char buf[ 40 ]; /* Enough for 128-bit decimal */
-    if ( snprintf( buf, 40, "%ld", d ) >= 40 )
-    {
+    char buf[40]; /* Enough for 128-bit decimal */
+    if (snprintf(buf, 40, "%ld", d) >= 40) {
         return cur_size;
     }
-    return _clog_append_str( dst, orig_buf, buf, cur_size );
+    return _clog_append_str(dst, orig_buf, buf, cur_size);
 }
 
 size_t
-_clog_append_time( char **dst, char *orig_buf, struct tm *lt,
-                   const char *fmt, size_t cur_size )
+_clog_append_time(char **dst, char *orig_buf, struct tm *lt,
+                  const char *fmt, size_t cur_size)
 {
-    char buf[ CLOG_DATETIME_LENGTH ];
-    size_t result = strftime( buf, CLOG_DATETIME_LENGTH, fmt, lt );
+    char buf[CLOG_DATETIME_LENGTH];
+    size_t result = strftime(buf, CLOG_DATETIME_LENGTH, fmt, lt);
 
-    if ( result > 0 )
-    {
-        return _clog_append_str( dst, orig_buf, buf, cur_size );
+    if (result > 0) {
+        return _clog_append_str(dst, orig_buf, buf, cur_size);
     }
 
     return cur_size;
 }
 
 const char *
-_clog_basename( const char *path )
+_clog_basename(const char *path)
 {
-    const char *slash = strrchr( path, '/' );
-    if ( slash )
-    {
+    const char *slash = strrchr(path, '/');
+    if (slash) {
         path = slash + 1;
     }
 #ifdef _WIN32
-    slash = strrchr( path, '\\' );
-    if ( slash )
-    {
+    slash = strrchr(path, '\\');
+    if (slash) {
         path = slash + 1;
     }
 #endif
@@ -471,70 +468,55 @@ _clog_basename( const char *path )
 }
 
 char *
-_clog_format( const struct clog *clogger, char buf[], size_t buf_size,
-              const char *sfile, int sline, const char *sfunc, const char *level,
-              const char *message )
+_clog_format(const struct clog *logger, char buf[], size_t buf_size,
+             const char *sfile, int sline, const char *level,
+             const char *message)
 {
     size_t cur_size = buf_size;
     char *result = buf;
-    enum
-    {
-        NORMAL,
-        SUBST
-    } state = NORMAL;
-    size_t fmtlen = strlen( clogger->fmt );
+    enum { NORMAL, SUBST } state = NORMAL;
+    size_t fmtlen = strlen(logger->fmt);
     size_t i;
-    time_t t = time( NULL );
-    struct tm *lt = localtime( &t );
+    time_t t = time(NULL);
+    struct tm *lt = localtime(&t);
 
-    sfile = _clog_basename( sfile );
-    result[ 0 ] = 0;
-    for ( i = 0; i < fmtlen; ++i )
-    {
-        if ( state == NORMAL )
-        {
-            if ( clogger->fmt[ i ] == '%' )
-            {
+    sfile = _clog_basename(sfile);
+    result[0] = 0;
+    for (i = 0; i < fmtlen; ++i) {
+        if (state == NORMAL) {
+            if (logger->fmt[i] == '%') {
                 state = SUBST;
+            } else {
+                char str[2] = { 0 };
+                str[0] = logger->fmt[i];
+                cur_size = _clog_append_str(&result, buf, str, cur_size);
             }
-            else
-            {
-                char str[ 2 ] = { 0 };
-                str[ 0 ] = clogger->fmt[ i ];
-                cur_size = _clog_append_str( &result, buf, str, cur_size );
-            }
-        }
-        else
-        {
-            switch ( clogger->fmt[ i ] )
-            {
-            case '%':
-                cur_size = _clog_append_str( &result, buf, "%", cur_size );
-                break;
-            case 't':
-                cur_size = _clog_append_time( &result, buf, lt,
-                                              clogger->time_fmt, cur_size );
-                break;
-            case 'd':
-                cur_size = _clog_append_time( &result, buf, lt,
-                                              clogger->date_fmt, cur_size );
-                break;
-            case 'l':
-                cur_size = _clog_append_str( &result, buf, level, cur_size );
-                break;
-            case 'n':
-                cur_size = _clog_append_int( &result, buf, sline, cur_size );
-                break;
-            case 'f':
-                cur_size = _clog_append_str( &result, buf, sfile, cur_size );
-                break;
-            case 'F':
-                cur_size = _clog_append_str( &result, buf, sfunc, cur_size );
-                break;
-            case 'm':
-                cur_size = _clog_append_str( &result, buf, message,
-                                             cur_size );
-                break;
+        } else {
+            switch (logger->fmt[i]) {
+                case '%':
+                    cur_size = _clog_append_str(&result, buf, "%", cur_size);
+                    break;
+                case 't':
+                    cur_size = _clog_append_time(&result, buf, lt,
+                                                 logger->time_fmt, cur_size);
+                    break;
+                case 'd':
+                    cur_size = _clog_append_time(&result, buf, lt,
+                                                 logger->date_fmt, cur_size);
+                    break;
+                case 'l':
+                    cur_size = _clog_append_str(&result, buf, level, cur_size);
+                    break;
+                case 'n':
+                    cur_size = _clog_append_int(&result, buf, sline, cur_size);
+                    break;
+                case 'f':
+                    cur_size = _clog_append_str(&result, buf, sfile, cur_size);
+                    break;
+                case 'm':
+                    cur_size = _clog_append_str(&result, buf, message,
+                                                cur_size);
+                    break;
             }
             state = NORMAL;
         }
@@ -543,116 +525,119 @@ _clog_format( const struct clog *clogger, char buf[], size_t buf_size,
     return result;
 }
 
-void _clog_log( const char *sfile, int sline, const char *sfunc, enum clog_level level,
-                int id, const char *fmt, va_list ap ) ATTRIBUTE_PRINTF(6,0);
-
-void _clog_log( const char *sfile, int sline, const char *sfunc, enum clog_level level,
-                int id, const char *fmt, va_list ap )
+void
+_clog_log(const char *sfile, int sline, enum clog_level level,
+          int id, const char *fmt, va_list ap)
 {
     /* For speed: Use a stack buffer until message exceeds 4096, then switch
      * to dynamically allocated.  This should greatly reduce the number of
      * memory allocations (and subsequent fragmentation). */
-    char buf[ 4096 ];
+    char buf[4096];
     size_t buf_size = 4096;
     char *dynbuf = buf;
     char *message;
+    va_list ap_copy;
     int result;
-    struct clog *clogger = _clog_loggers[ id ];
+    struct clog *logger = _clog_loggers[id];
 
-    if ( !clogger )
-    {
-        _clog_err( "No such clogger: %d\n", id );
+    if (!logger) {
+        _clog_err("No such logger: %d\n", id);
         return;
     }
 
-    if ( level < clogger->level )
-    {
+    if (level < logger->level) {
         return;
     }
 
     /* Format the message text with the argument list. */
-    result = vsnprintf( dynbuf, buf_size, fmt, ap );
-    if ( ( size_t )result >= buf_size )
-    {
+    va_copy(ap_copy, ap);
+    result = vsnprintf(dynbuf, buf_size, fmt, ap);
+    if ((size_t) result >= buf_size) {
         buf_size = result + 1;
-        dynbuf = ( char * )malloc( buf_size );
-        result = vsnprintf( dynbuf, buf_size, fmt, ap );
-        if ( ( size_t )result >= buf_size )
-        {
+        dynbuf = (char *) malloc(buf_size);
+        result = vsnprintf(dynbuf, buf_size, fmt, ap_copy);
+        if ((size_t) result >= buf_size) {
             /* Formatting failed -- too large */
-            _clog_err( "Formatting failed (1).\n" );
-            free( dynbuf );
+            _clog_err("Formatting failed (1).\n");
+            va_end(ap_copy);
+            free(dynbuf);
             return;
         }
     }
+    va_end(ap_copy);
 
     /* Format according to log format and write to log */
     {
-        char message_buf[ 4096 ];
-        message = _clog_format( clogger, message_buf, 4096, sfile, sline, sfunc,
-                                CLOG_LEVEL_NAMES[ level ], dynbuf );
-        if ( !message )
-        {
-            _clog_err( "Formatting failed (2).\n" );
-            if ( dynbuf != buf )
-            {
-                free( dynbuf );
+        char message_buf[4096];
+        message = _clog_format(logger, message_buf, 4096, sfile, sline,
+                               CLOG_LEVEL_NAMES[level], dynbuf);
+        if (!message) {
+            _clog_err("Formatting failed (2).\n");
+            if (dynbuf != buf) {
+                free(dynbuf);
             }
             return;
         }
-        result = write( clogger->fd, message, strlen( message ) );
-        if ( result == -1 )
-        {
-            _clog_err( "Unable to write to log file: %s\n", strerror( errno ) );
+        result = write(logger->fd, message, strlen(message));
+        if (result == -1) {
+            _clog_err("Unable to write to log file: %s\n", strerror(errno));
         }
-        if ( message != message_buf )
-        {
-            free( message );
+        if (message != message_buf) {
+            free(message);
         }
-        if ( dynbuf != buf )
-        {
-            free( dynbuf );
+        if (dynbuf != buf) {
+            free(dynbuf);
         }
     }
 }
 
-void clog_debug( const char *sfile, int sline, const char *sfunc, int id, const char *fmt, ... )
+void
+clog_debug(const char *sfile, int sline, int id, const char *fmt, ...)
 {
     va_list ap;
-    va_start( ap, fmt );
-    _clog_log( sfile, sline, sfunc, CLOG_DEBUG, id, fmt, ap );
+    va_start(ap, fmt);
+    _clog_log(sfile, sline, CLOG_DEBUG, id, fmt, ap);
+    va_end(ap);
 }
 
-void clog_info( const char *sfile, int sline, const char *sfunc, int id, const char *fmt, ... )
+void
+clog_info(const char *sfile, int sline, int id, const char *fmt, ...)
 {
     va_list ap;
-    va_start( ap, fmt );
-    _clog_log( sfile, sline, sfunc, CLOG_INFO, id, fmt, ap );
+    va_start(ap, fmt);
+    _clog_log(sfile, sline, CLOG_INFO, id, fmt, ap);
+    va_end(ap);
 }
 
-void clog_warn( const char *sfile, int sline, const char *sfunc, int id, const char *fmt, ... )
+void
+clog_warn(const char *sfile, int sline, int id, const char *fmt, ...)
 {
     va_list ap;
-    va_start( ap, fmt );
-    _clog_log( sfile, sline, sfunc, CLOG_WARN, id, fmt, ap );
+    va_start(ap, fmt);
+    _clog_log(sfile, sline, CLOG_WARN, id, fmt, ap);
+    va_end(ap);
 }
 
-void clog_error( const char *sfile, int sline, const char *sfunc, int id, const char *fmt, ... )
+void
+clog_error(const char *sfile, int sline, int id, const char *fmt, ...)
 {
     va_list ap;
-    va_start( ap, fmt );
-    _clog_log( sfile, sline, sfunc, CLOG_ERROR, id, fmt, ap );
+    va_start(ap, fmt);
+    _clog_log(sfile, sline, CLOG_ERROR, id, fmt, ap);
+    va_end(ap);
 }
 
-void _clog_err( const char *fmt, ... )
+void
+_clog_err(const char *fmt, ...)
 {
 #ifdef CLOG_SILENT
-    ( void )fmt;
+    (void) fmt;
 #else
     va_list ap;
 
-    va_start( ap, fmt );
-    vfprintf( stderr, fmt, ap );
+    va_start(ap, fmt);
+    vfprintf(stderr, fmt, ap);
+    va_end(ap);
 #endif
 }
 
