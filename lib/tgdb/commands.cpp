@@ -618,7 +618,7 @@ struct tgdb_command *tgdb_command_create(const char *gdb_command,
 
     tc = (struct tgdb_command *) cgdb_malloc(sizeof (struct tgdb_command));
 
-    tc->gdb_command = gdb_command? strdup(gdb_command) : NULL;
+    tc->gdb_command = gdb_command ? strdup(gdb_command) : NULL;
     tc->command_choice = command_choice;
     tc->command = command;
 
