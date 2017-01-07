@@ -34,3 +34,13 @@ doc/stamp-vti
 doc/version.texi
 
 lib/gdbmi/gdbmi_lexer.cpp
+lib/tokenizer/adalexer.cpp
+lib/tokenizer/asmlexer.cpp
+lib/tokenizer/cgdbhelplexer.cpp
+lib/tokenizer/clexer.cpp
+lib/tokenizer/dlexer.cpp
+lib/tokenizer/golexer.cpp
+lib/tokenizer/rustlexer.cpp
+
+cgdb/command_lexer.cpp
+cgdb_custom_config.h
