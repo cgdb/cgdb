@@ -605,6 +605,7 @@ hl_groups_get_attr(hl_groups_ptr hl_groups, enum hl_group_kind kind)
         case HLG_LOGO:
         case HLG_MARK:
         case HLG_LAST:
+        case HLG_INCSEARCH:
             break;
     }
 
