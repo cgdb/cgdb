@@ -502,6 +502,8 @@ int scr_search_regex(struct scroller *scr, const char *regex, int opt,
                 /* Finalized match - move to this location */
                 if (opt == 2) {
                     scr->search_r = line;
+
+                    hl_regex_free(&scr->hlregex);
                     scr->last_hlregex = scr->hlregex;
                     scr->hlregex = 0;
                 }

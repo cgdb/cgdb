@@ -1331,6 +1331,8 @@ int source_search_regex(struct sviewer *sview,
                 /* Finalized match - move to this location */
                 if (opt == 2) {
                     node->sel_rline = line;
+
+                    hl_regex_free(&sview->last_hlregex);
                     sview->last_hlregex = sview->hlregex;
                     sview->hlregex = 0;
                 }
