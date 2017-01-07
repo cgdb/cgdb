@@ -964,7 +964,7 @@ This represents the @dfn{status bar} in CGDB.  The file dialog's status
 bar also uses this group.
 @item Search
 This represents the group used when displaying the previous search in
-either the source window, the GDB window in scroll mode, or the @dfn(file
+either the source window, the GDB window in scroll mode, or the @dfn{file
 dialog window}. This is only used when the @var{hlsearch} option is enabled.
 @item IncSearch
 This represents the group used when the user is searching in either the source 
