@@ -74,7 +74,7 @@ static char *parse(struct scroller *scr, struct hl_line_attr **attrs,
     int orig_len = strlen(orig);
     int length = MAX(orig_len, scr->current.pos) + buflen +
         (tab_size - 1) * tabcount + 1;
-    char rv[length] = {};
+    char *rv = (char *) cgdb_calloc(length, 1);
     int i, j;
     int debugwincolor = cgdbrc_get_int(CGDBRC_DEBUGWINCOLOR);
     int width, height;
@@ -156,7 +156,7 @@ static char *parse(struct scroller *scr, struct hl_line_attr **attrs,
         rv[width - 1] = 0;
     }
 
-    return strdup(rv);
+    return rv;
 }
 
 static void scroller_set_last_inferior_attr(struct scroller *scr)
