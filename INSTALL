@@ -34,7 +34,8 @@ The simplest way to compile this package is:
      Running `configure' takes awhile.  While running, it prints some
      messages telling which features it is checking for.
 
-     on Mac Os readline might be installed in /usr/local/Cellar/readline/x.x.x
+     NOTE: on Mac Os readline might be installed in /usr/local/Cellar/readline/x.x.x
+     where x.x.x is the version. This is the case if you installed it view brew.
      You might run configure with the following parameter
      ./configure --with-readline=/usr/local/Cellar/readline/x.x.x --prefix=/usr/local
 
