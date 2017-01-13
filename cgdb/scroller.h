@@ -43,8 +43,9 @@ struct scroller {
     int last_inferior_attr;
 
     int in_scroll_mode;         /* Currently in scroll mode? */
+
     /**
-     * The number of lines to display in the cursor.
+     * The number of lines to display in the scroller window.
      *
      * This starts at zero, and only the prompt is displayed in the
      * scroller. Run cgdb -q to see this.
@@ -52,8 +53,14 @@ struct scroller {
      * Every time another line is added to the scroller, this is increased,
      * so that more lines are dispalyed. It will ultimatley hit the height
      * of the scroller and max out.
+     *
+     * This field is used to allow the scroller to be cleared (Ctrl-l).
+     *
+     * The tricky part here is that long lines wrap in the scroller. When
+     * this field is 1, indicating to display a single line, that line may
+     * take up many rows in the scroller. The function number_rows_to_display
+     * helps here.
      */
-
     int lines_to_display;
 
     struct {

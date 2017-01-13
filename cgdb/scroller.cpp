@@ -580,6 +580,71 @@ int scr_goto_mark(struct scroller *scr, int key)
     return 0;
 }
 
+/**
+ * Determine the proper number of scroller rows to display.
+ *
+ * The user is allowed to clear the window with Ctrl-l. After this,
+ * the scroller starts at the top and begins moving down again like
+ * clearing a terminal screen when using gdb.
+ *
+ * The scroller knows how many lines should be displayed to the user.
+ * Some lines are longer than the terminal and wrap.
+ * This function determines how many rows are necessary to display
+ * in the scroller to show the proper lines.
+ *
+ * Note that scr->lines_to_display <= rows_to_display <= height.
+ *
+ * @param scr
+ * The scroller object
+ *
+ * @param height
+ * The height of the scroller window
+ *
+ * @param width
+ * The width of the scroller window
+ *
+ * @return
+ * The number of scroller rows to display
+ */
+static int number_rows_to_display(struct scroller *scr, int height, int width)
+{
+    int rows_to_display = 0;
+    int row, col;
+    int nlines;
+
+    if (scr->lines_to_display > height) {
+        scr->lines_to_display = height;
+    }
+
+    row = scr->current.r;
+    col = scr->current.c;
+
+    /**
+     * For each line to display, determine the number or rows it takes up.
+     */
+    for (nlines = 0; nlines < scr->lines_to_display;) {
+        if (col >= width)
+            col -= width;
+        else {
+            nlines++;
+            row--;
+            if (row >= 0) {
+                int length = scr->lines[row].line_len;
+                if (length > width)
+                    col = ((length - 1) / width) * width;
+            }
+        }
+
+        rows_to_display += 1;
+    }
+
+    if (rows_to_display > height) {
+        rows_to_display = height;
+    }
+
+    return rows_to_display;
+}
+
 void scr_refresh(struct scroller *scr, int focus, enum win_refresh dorefresh)
 {
     int length;                 /* Length of current line */
@@ -591,6 +656,7 @@ void scr_refresh(struct scroller *scr, int focus, enum win_refresh dorefresh)
     int search_attr;
     int inc_search_attr;
     int hlsearch = cgdbrc_get_int(CGDBRC_HLSEARCH);
+    int rows_to_display = 0;
 
     /* Steal line highlight attribute for our scroll mode status */
     highlight_attr = hl_groups_get_attr(hl_groups_instance,
@@ -610,9 +676,8 @@ void scr_refresh(struct scroller *scr, int focus, enum win_refresh dorefresh)
     r = scr->current.r;
     c = scr->current.c;
 
-    if (scr->lines_to_display > height) {
-        scr->lines_to_display = height;
-    }
+
+    rows_to_display = number_rows_to_display(scr, height, width);
 
     /**
      * Printing the scroller to the gdb window.
@@ -634,7 +699,7 @@ void scr_refresh(struct scroller *scr, int focus, enum win_refresh dorefresh)
         /* Empty lines below the scroller prompt should be empty.
          * When in scroller mode, there should be no empty lines on the
          * bottom. */
-        if (!scr->in_scroll_mode && nlines <= height - scr->lines_to_display) {
+        if (!scr->in_scroll_mode && nlines <= height - rows_to_display) {
             swin_wmove(scr->win, height - nlines, 0);
             swin_wclrtoeol(scr->win);
         } 
@@ -714,7 +779,7 @@ void scr_refresh(struct scroller *scr, int focus, enum win_refresh dorefresh)
     if (focus && scr->current.r == sbcount(scr->lines) - 1 &&
         length <= width && !scr->in_scroll_mode) {
         swin_curs_set(1);
-        swin_wmove(scr->win, scr->lines_to_display-1, scr->current.pos % width);
+        swin_wmove(scr->win, rows_to_display-1, scr->current.pos % width);
     } else {
         /* Hide the cursor */
         swin_curs_set(0);
