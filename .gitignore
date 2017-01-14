@@ -34,9 +34,6 @@ doc/stamp-vti
 doc/version.texi
 
 lib/gdbmi/gdbmi_lexer.cpp
-bin/ 
-cgdb/command_lexer.cpp
-cgdb_custom_config.h
 lib/tokenizer/adalexer.cpp
 lib/tokenizer/asmlexer.cpp
 lib/tokenizer/cgdbhelplexer.cpp
@@ -44,8 +41,6 @@ lib/tokenizer/clexer.cpp
 lib/tokenizer/dlexer.cpp
 lib/tokenizer/golexer.cpp
 lib/tokenizer/rustlexer.cpp
-share/
-.vscode/
-TAGS
-doc/htdocs/
-lib/various.tag
+
+cgdb/command_lexer.cpp
+cgdb_custom_config.h

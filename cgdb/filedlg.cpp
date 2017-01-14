@@ -2,12 +2,6 @@
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
-#if HAVE_CURSES_H
-#include <curses.h>
-#elif HAVE_NCURSES_CURSES_H
-#include <ncurses/curses.h>
-#endif /* HAVE_CURSES_H */
-
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif /* HAVE_STDLIB_H */
@@ -17,10 +11,12 @@
 #endif /* HAVE_STRING_H */
 
 #include "fs_util.h"
+
+#include "sys_util.h"
+#include "sys_win.h"
 #include "filedlg.h"
 #include "cgdb.h"
 #include "cgdbrc.h"
-#include "sys_util.h"
 #include "highlight.h"
 #include "sources.h"
 #include "kui_term.h"
@@ -32,14 +28,14 @@ struct file_buffer {
 
     int sel_line;               /* Current line selected in file dialog */
     int sel_col;                /* Current column selected in file dialog */
-
     int sel_rline;              /* Current line used by regex */
 };
 
 struct filedlg {
     struct file_buffer *buf;    /* All of the widget's data ( files ) */
+    struct hl_regex_info *last_hlregex;
     struct hl_regex_info *hlregex;
-    WINDOW *win;                /* Curses window */
+    SWINDOW *win;               /* Curses window */
     struct ibuf *G_line_number; /* Line number user wants to 'G' to */
 };
 
@@ -56,24 +52,25 @@ static int regex_direction;     /* Direction to search */
  *  width:  The width of the window
  *  string: The message to print
  */
-static void print_in_middle(WINDOW * win, int line, int width, const char *string)
+static void print_in_middle(SWINDOW *win, int line, int width, const char *string)
 {
     int x, y;
     int j;
     int length = strlen(string);
 
-    getyx(win, y, x);
+    y = swin_getcury(win);
+    x = swin_getcurx(win);
 
     x = (int) ((width - length) / 2);
 
-    wmove(win, line, 0);
+    swin_wmove(win, line, 0);
     for (j = 0; j < x; j++)
-        waddch(win, ' ');
+        swin_waddch(win, ' ');
 
-    mvwprintw(win, line, x, "%s", string);
+    swin_mvwprintw(win, line, x, "%s", string);
 
     for (j = x + length; j < width; j++)
-        waddch(win, ' ');
+        swin_waddch(win, ' ');
 }
 
 struct filedlg *filedlg_new(int pos_r, int pos_c, int height, int width)
@@ -81,17 +78,16 @@ struct filedlg *filedlg_new(int pos_r, int pos_c, int height, int width)
     struct filedlg *fd;
 
     /* Allocate a new structure */
-    if ((fd = (struct filedlg *)malloc(sizeof (struct filedlg))) == NULL)
-        return NULL;
+    fd = (struct filedlg *)cgdb_malloc(sizeof(struct filedlg));
 
     /* Initialize the structure */
-    fd->win = newwin(height, width, pos_r, pos_c);
+    fd->win = swin_newwin(height, width, pos_r, pos_c);
 
     /* Initialize the buffer */
-    if ((fd->buf = (struct file_buffer *)malloc(sizeof (struct file_buffer))) == NULL)
-        return NULL;
+    fd->buf = (struct file_buffer *)cgdb_malloc(sizeof(struct file_buffer));
 
     fd->G_line_number = ibuf_init();
+    fd->last_hlregex = NULL;
     fd->hlregex = NULL;
     fd->buf->files = NULL;
     fd->buf->max_width = 0;
@@ -108,10 +104,13 @@ void filedlg_free(struct filedlg *fdlg)
 
     ibuf_free(fdlg->G_line_number);
 
+    hl_regex_free(&fdlg->last_hlregex);
+    fdlg->last_hlregex = NULL;
+
     hl_regex_free(&fdlg->hlregex);
     fdlg->hlregex = NULL;
 
-    delwin(fdlg->win);
+    swin_delwin(fdlg->win);
     fdlg->win = NULL;
 
     free(fdlg->buf);
@@ -227,10 +226,10 @@ static void filedlg_hscroll(struct filedlg *fd, int offset)
 {
     int lwidth;
     int max_width;
-    int width, height;
+    int width;
 
     if (fd->buf) {
-        getmaxyx(fd->win, height, width);
+        width = swin_getmaxx(fd->win);
 
         lwidth = log10_uint(sbcount(fd->buf->files)) + 1;
         max_width = fd->buf->max_width - width + lwidth + 6;
@@ -285,9 +284,16 @@ static int filedlg_search_regex(struct filedlg *fd, const char *regex,
         line = wrap_line(fd->buf, line_start + line_inc);
 
         if (cgdbrc_get_int(CGDBRC_WRAPSCAN))
+        {
+            // Wrapping is on so stop at the line we started on.
             line_end = line_start;
+        }
         else
-            line_end = direction ? sbcount(fd->buf->files) : -1;
+        {
+            // No wrapping. Stop at line 0 if searching down and last line
+            // if searching up.
+            line_end = direction ? 0 : sbcount(fd->buf->files) - 1;
+        }
 
         for(;;) {
             int ret;
@@ -300,8 +306,11 @@ static int filedlg_search_regex(struct filedlg *fd, const char *regex,
                 fd->buf->sel_line = line;
 
                 /* Finalized match - move to this location */
-                if (opt == 2)
+                if (opt == 2) {
                     fd->buf->sel_rline = line;
+                    fd->last_hlregex = fd->hlregex;
+                    fd->hlregex = 0;
+                }
                 return 1;
             }
 
@@ -326,21 +335,25 @@ int filedlg_display(struct filedlg *fd)
     int statusbar;
     int arrow_attr;
     int count = sbcount(fd->buf->files);
+    int hlsearch = cgdbrc_get_int(CGDBRC_HLSEARCH);
     static const char label[] = "Select a file or press q to cancel.";
+    int inc_search_attr = hl_groups_get_attr(hl_groups_instance, HLG_INCSEARCH);
+    int search_attr = hl_groups_get_attr(hl_groups_instance, HLG_SEARCH);
 
-    curs_set(0);
+    swin_curs_set(0);
 
     statusbar = hl_groups_get_attr(hl_groups_instance, HLG_STATUS_BAR);
     arrow_attr = hl_groups_get_attr(hl_groups_instance, HLG_SELECTED_LINE_ARROW);
 
     /* Check that a file is loaded */
     if (fd == NULL || fd->buf == NULL || fd->buf->files == NULL) {
-        wrefresh(fd->win);
+        swin_wrefresh(fd->win);
         return 0;
     }
 
     /* Initialize variables */
-    getmaxyx(fd->win, height, width);
+    height = swin_getmaxy(fd->win);
+    width = swin_getmaxx(fd->win);
 
     /* The status bar and display line 
      * Fake the display function to think the height is 2 lines less */
@@ -363,25 +376,25 @@ int filedlg_display(struct filedlg *fd)
 
     print_in_middle(fd->win, 0, width, label);
 
-    wmove(fd->win, 0, 0);
+    swin_wmove(fd->win, 0, 0);
 
     for (i = 1; i < height + 1; i++, file++) {
-        wmove(fd->win, i, 0);
+        swin_wmove(fd->win, i, 0);
 
         /* Outside of filename, just finish drawing the vertical file */
         if (file < 0 || file >= count) {
             int j;
 
             for (j = 1; j < lwidth; j++)
-                waddch(fd->win, ' ');
-            waddch(fd->win, '~');
+                swin_waddch(fd->win, ' ');
+            swin_waddch(fd->win, '~');
 
-            wattron(fd->win, A_BOLD);
-            waddch(fd->win, VERT_LINE);
-            wattroff(fd->win, A_BOLD);
+            swin_wattron(fd->win, SWIN_A_BOLD);
+            swin_waddch(fd->win, SWIN_SYM_VLINE);
+            swin_wattroff(fd->win, SWIN_A_BOLD);
 
             for (j = 2 + lwidth; j < width; j++)
-                waddch(fd->win, ' ');
+                swin_waddch(fd->win, ' ');
             continue;
         }
 
@@ -390,35 +403,47 @@ int filedlg_display(struct filedlg *fd)
 
         /* Mark the current file with an arrow */
         if (file == fd->buf->sel_line) {
-            wattron(fd->win, A_BOLD);
-            wprintw(fd->win, fmt, file + 1);
-            wattroff(fd->win, A_BOLD);
+            swin_wattron(fd->win, SWIN_A_BOLD);
+            swin_wprintw(fd->win, fmt, file + 1);
+            swin_wattroff(fd->win, SWIN_A_BOLD);
 
-            wattron(fd->win, arrow_attr);
-            waddch(fd->win, '-');
-            waddch(fd->win, '>');
-            wattroff(fd->win, arrow_attr);
+            swin_wattron(fd->win, arrow_attr);
+            swin_waddch(fd->win, '-');
+            swin_waddch(fd->win, '>');
+            swin_wattroff(fd->win, arrow_attr);
 
         }
         else {
             /* Ordinary file */
-            wprintw(fd->win, fmt, file + 1);
+            swin_wprintw(fd->win, fmt, file + 1);
 
-            wattron(fd->win, A_BOLD);
-            waddch(fd->win, VERT_LINE);
-            wattroff(fd->win, A_BOLD);
+            swin_wattron(fd->win, SWIN_A_BOLD);
+            swin_waddch(fd->win, SWIN_SYM_VLINE);
+            swin_wattroff(fd->win, SWIN_A_BOLD);
 
-            waddch(fd->win, ' ');
+            swin_waddch(fd->win, ' ');
         }
 
-        getyx(fd->win, y, x);
+        y = swin_getcury(fd->win);
+        x = swin_getcurx(fd->win);
+
         hl_printline(fd->win, filename, strlen(filename),
                      NULL, -1, -1, fd->buf->sel_col, width - lwidth - 2);
 
-        if (regex_line[0]) {
-            struct hl_line_attr *attrs;
+        if (hlsearch && fd->last_hlregex) {
+            struct hl_line_attr *attrs = hl_regex_highlight(
+                    &fd->last_hlregex, filename, search_attr);
 
-            attrs = hl_regex_highlight(&fd->hlregex, filename);
+            if (sbcount(attrs)) {
+                hl_printline_highlight(fd->win, filename, strlen(filename),
+                             attrs, x, y, fd->buf->sel_col, width - lwidth - 2);
+                sbfree(attrs);
+            }
+        }
+
+        if (regex_search && file == fd->buf->sel_line) {
+            struct hl_line_attr *attrs = hl_regex_highlight(
+                    &fd->hlregex, filename, inc_search_attr);
 
             if (sbcount(attrs)) {
                 hl_printline_highlight(fd->win, filename, strlen(filename),
@@ -432,23 +457,23 @@ int filedlg_display(struct filedlg *fd)
     height += 2;
 
     /* Update status bar */
-    wmove(fd->win, height, 0);
+    swin_wmove(fd->win, height, 0);
 
     /* Print white background */
-    wattron(fd->win, statusbar);
+    swin_wattron(fd->win, statusbar);
 
     for (i = 0; i < width; i++)
-        mvwprintw(fd->win, height - 1, i, " ");
+        swin_mvwprintw(fd->win, height - 1, i, " ");
 
     if (regex_search && regex_direction)
-        mvwprintw(fd->win, height - 1, 0, "Search:%s", regex_line);
+        swin_mvwprintw(fd->win, height - 1, 0, "Search:%s", regex_line);
     else if (regex_search)
-        mvwprintw(fd->win, height - 1, 0, "RSearch:%s", regex_line);
+        swin_mvwprintw(fd->win, height - 1, 0, "RSearch:%s", regex_line);
 
-    wattroff(fd->win, statusbar);
+    swin_wattroff(fd->win, statusbar);
 
-    wmove(fd->win, height - (file - fd->buf->sel_line) - 1, lwidth + 2);
-    wrefresh(fd->win);
+    swin_wmove(fd->win, height - (file - fd->buf->sel_line) - 1, lwidth + 2);
+    swin_wrefresh(fd->win);
 
     return 0;
 }
@@ -460,17 +485,18 @@ void filedlg_display_message(struct filedlg *fd, char *message)
 
     attr = hl_groups_get_attr(hl_groups_instance, HLG_STATUS_BAR);
 
-    getmaxyx(fd->win, height, width);
+    height = swin_getmaxy(fd->win);
+    width = swin_getmaxx(fd->win);
 
     /* Print white background */
-    wattron(fd->win, attr);
+    swin_wattron(fd->win, attr);
 
     for (i = 0; i < width; i++)
-        mvwprintw(fd->win, height - 1, i, " ");
+        swin_mvwprintw(fd->win, height - 1, i, " ");
 
-    mvwprintw(fd->win, height - 1, 0, "%s", message);
-    wattroff(fd->win, attr);
-    wrefresh(fd->win);
+    swin_mvwprintw(fd->win, height - 1, 0, "%s", message);
+    swin_wattroff(fd->win, attr);
+    swin_wrefresh(fd->win);
 }
 
 /* capture_regex: Captures a regular expression from the user.
@@ -516,7 +542,7 @@ static int capture_regex(struct filedlg *fd)
         }
 
         /* If the user hit backspace or delete remove a char */
-        if (CGDB_BACKSPACE_KEY(c)) {
+        if (c == 8 || c == 127) {
             if (regex_line_pos > 0)
                 --regex_line_pos;
 
@@ -542,10 +568,8 @@ static int capture_regex(struct filedlg *fd)
 
 int filedlg_recv_char(struct filedlg *fd, int key, char *file, int last_key_pressed)
 {
-    int height, width;
-
     /* Initialize size variables */
-    getmaxyx(fd->win, height, width);
+    int height = swin_getmaxy(fd->win);
 
     filedlg_display(fd);
 

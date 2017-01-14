@@ -5,12 +5,6 @@
 #ifndef _LOGO_H_
 #define _LOGO_H_
 
-#if HAVE_CURSES_H
-#include <curses.h>
-#elif HAVE_NCURSES_CURSES_H
-#include <ncurses/curses.h>
-#endif /* HAVE_CURSES_H */
-
 /* ------------------- */
 /* Function Prototypes */
 /* ------------------- */
@@ -21,7 +15,7 @@
  *   win:  The curses window to use.  If the logo won't fit in the given
  *         window, only the title is shown.
  */
-void logo_display(WINDOW * win);
+void logo_display(SWINDOW *win);
 
 /**
  * This chooses another logo to be displayed on the next call to logo_display.

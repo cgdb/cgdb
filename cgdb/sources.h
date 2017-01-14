@@ -14,23 +14,7 @@
 #ifndef _SOURCES_H_
 #define _SOURCES_H_
 
-#if HAVE_CONFIG_H
-#include "config.h"
-#endif /* HAVE_CONFIG_H */
-
-/* System Includes */
-#if HAVE_CURSES_H
-#include <curses.h>
-#elif HAVE_NCURSES_CURSES_H
-#include <ncurses/curses.h>
-#endif /* HAVE_CURSES_H */
-
-/* System Includes */
-#if HAVE_TIME_H
-#include <time.h>
-#endif /* HAVE_TIME_H */
-
-#include "tokenizer.h"
+#include "sys_win.h"
 
 #if __clang__
 #include <stdint.h>
@@ -63,11 +47,27 @@ struct sviewer {
     struct list_node *cur;                 /* Current node we're displaying */
     sviewer_mark global_marks[MARK_COUNT]; /* Global A-Z marks */
     sviewer_mark jump_back_mark;           /* Location where last jump occurred from */
-    WINDOW *win;                           /* Curses window */
 
+    SWINDOW *win;                          /* Curses window */
     uint64_t addr_frame;                   /* Current frame address 
                                               Zero if unknown. */
-    int regex_is_searching;
+    /**
+     * The last regular expression searched for.
+     *
+     * This is useful with the hlsearch option. In this case,
+     * CGDB will display all of the matches to the last regular
+     * expression searched for.
+     */
+    struct hl_regex_info *last_hlregex;
+
+    /**
+     * The current regular expression being searched for.
+     *
+     * This is the active regular expression being searched for. It is
+     * interactive, as the user updates the regular expression they
+     * would like to use for searching, CGDB highlights the text in
+     * the source that represents the next match.
+     */
     struct hl_regex_info *hlregex;
 };
 
@@ -119,14 +119,9 @@ struct list_node {
 /* source_new:  Create a new source viewer object.
  * -----------
  *
- *   pos_r:   Position of the viewer (row)
- *   pos_c:   Position of the viewer (column)
- *   height:  Height (in lines) of the viewer
- *   width:   Width (in columns) of the viewer
- *
- * Return Value:  A new sviewer object on success, NULL on failure.
+ * Return Value:  A new sviewer object on success.
  */
-struct sviewer *source_new(int pos_r, int pos_c, int height, int width);
+struct sviewer *source_new(SWINDOW *window);
 
 /* source_add:  Add a file to the list of source files.
  * -----------
@@ -186,17 +181,15 @@ char *source_current_file(struct sviewer *sview);
  */
 int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh);
 
-/* source_move:  Relocate the source window.
- * ------------
+/* Relocate the source window.
  *
- *   sview:   Source viewer object
- *   pos_r:   Position of the viewer (row)
- *   pos_c:   Position of the viewer (column)
- *   height:  Height (in lines) of the viewer
- *   width:   Width (in columns) of the viewer
+ * @param sview
+ * Source viewer object
+ *
+ * @param win
+ * The new window
  */
-void source_move(struct sviewer *sview,
-        int pos_r, int pos_c, int height, int width);
+void source_move(struct sviewer *sview, SWINDOW *win);
 
 /* source_vscroll:  Change current position in source file.
  * --------------
@@ -238,34 +231,39 @@ int source_set_exec_line(struct sviewer *sview, const char *path, int sel_line, 
 
 int source_set_exec_addr(struct sviewer *sview, uint64_t addr);
 
-/* source_search_regex_init: Should be called before source_search_regex
- * -------------------------
- *   This function initializes sview before it can search for a regex
- *   It should be called every time a regex will be applied to sview before
- *   source_search_regex is called.
+/**
+ * Initialize a regular expression search in the source viewer.
  *
- *   sview:  Source viewer object
+ * This function should be called during the start of a regular expression
+ * search and before source_search_regex is called. 
+ *
+ * @param sview
+ * The source viewer object
  */
 void source_search_regex_init(struct sviewer *sview);
 
-/* source_search_regex: Searches for regex in current file and displays line.
- * ---------------
+/**
+ * Allows the user to search for a regular expression.
  *
- *   sview:  Source viewer object
- *   regex:  The regular expression to search for
- *           If NULL, then no regex will be tried, but the state can still
- *           be put back to its old self!
- *   opt:    If 1, Then the search is temporary ( User has not hit enter )
- *           If 2, The search is perminant
+ * @param sview
+ * The source viewer object
  *
- *   direction: If 0 then forward, else reverse
- *   icase:     If 0 ignore case.
+ * @param regex
+ * The regular expression to search for. If NULL, then no regex will be
+ * tried, but the state can still put back to its old self!
  *
- * Return Value: Zero on match, 
- *               -1 if sview->cur is NULL
- *               -2 if regex is NULL
- *               -3 if regcomp fails
- *               non-zero on failure.
+ * @param opt
+ * If 1, Then the search is temporary ( User has not hit enter )
+ * If 2, The search is perminant
+ *
+ * @param direction
+ * If 0 then forward, else reverse
+ *
+ * @param icase
+ * If 0 ignore case.
+ *
+ * @return
+ * Zero on match and non-zero on failure.
  */
 int source_search_regex(struct sviewer *sview, const char *regex, int opt,
         int direction, int icase);

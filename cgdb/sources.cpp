@@ -49,16 +49,17 @@
 #endif
 
 /* Local Includes */
+#include "sys_util.h"
+#include "sys_win.h"
 #include "cgdb.h"
 #include "highlight.h"
+#include "tokenizer.h"
 #include "sources.h"
 #include "logo.h"
-#include "sys_util.h"
 #include "fs_util.h"
 #include "cgdbrc.h"
 #include "highlight_groups.h"
 #include "interface.h"
-#include "logger.h"
 #include "tgdb_types.h"
 
 int sources_syntax_on = 1;
@@ -176,29 +177,6 @@ static int release_file_memory(struct list_node *node)
     release_file_buffer(&node->file_buf);
 
     return 0;
-}
-
-/**
- * Get file size from file pointer.
- *
- * \param file
- * file pointer
- *
- * \return
- * file size on success, or -1 on error.
- */
-static long get_file_size(FILE *file)
-{
-    if (fseek(file, 0, SEEK_END) != -1) {
-        long size;
-
-        size = ftell(file);
-        fseek(file, 0, SEEK_SET);
-
-        return size;
-    }
-
-    return -1;
 }
 
 static char *detab_buffer(char *buffer, int tabstop)
@@ -393,6 +371,8 @@ static enum hl_group_kind hlg_from_tokenizer_type(enum tokenizer_type type, cons
         case TOKENIZER_LOGO: return HLG_LOGO;
         case TOKENIZER_COLOR: return hl_get_color_group(tok_data);
     }
+
+    return HLG_TEXT;
 }
 
 static int highlight_node(struct list_node *node)
@@ -461,7 +441,7 @@ static int highlight_node(struct list_node *node)
                 enum hl_group_kind hlg = hlg_from_tokenizer_type(tok_data.e, tok_data.data);
 
                 if (hlg == HLG_LAST) {
-                    logger_write_pos(logger, __FILE__, __LINE__, "Bad hlg_type for '%s', e==%d\n", tok_data.data, tok_data.e);
+                    clog_error(CLOG_CGDB, "Bad hlg_type for '%s', e==%d\n", tok_data.data, tok_data.e);
                     hlg = HLG_TEXT;
                 }
 
@@ -492,7 +472,7 @@ int source_highlight(struct list_node *node)
 {
     int do_color = sources_syntax_on &&
                    (node->language != TOKENIZER_LANGUAGE_UNKNOWN) &&
-                   has_colors();
+                   swin_has_colors();
 
     /* Load the entire file */
     if (!sbcount(node->file_buf.lines))
@@ -520,8 +500,7 @@ int source_highlight(struct list_node *node)
     return -1;
 }
 
-
-struct sviewer *source_new(int pos_r, int pos_c, int height, int width)
+struct sviewer *source_new(SWINDOW *win)
 {
     struct sviewer *rv;
 
@@ -529,7 +508,7 @@ struct sviewer *source_new(int pos_r, int pos_c, int height, int width)
     rv = (struct sviewer *)cgdb_malloc(sizeof (struct sviewer));
 
     /* Initialize the structure */
-    rv->win = newwin(height, width, pos_r, pos_c);
+    rv->win = win;
     rv->cur = NULL;
     rv->list_head = NULL;
 
@@ -540,8 +519,8 @@ struct sviewer *source_new(int pos_r, int pos_c, int height, int width)
 
     rv->addr_frame = 0;
 
-    rv->regex_is_searching = 0;
     rv->hlregex = NULL;
+    rv->last_hlregex = NULL;
 
     return rv;
 }
@@ -682,6 +661,7 @@ char *source_current_file(struct sviewer *sview)
  * --------------------
  *
  *   sview:  The source viewer object
+ *   node: 
  *   line: line to check for mark
  *   return: -1 on error, 0 if no char exists on line, otherwise char
  */
@@ -839,36 +819,33 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
     int count;
 
     enum LineDisplayStyle exe_display_style, sel_display_style;
-    int attr = 0;
     int sellineno, exelineno;
     int enabled_bp, disabled_bp;
-    int exe_line_display, sel_line_display;
     int exe_line_display_is_arrow, sel_line_display_is_arrow;
     int exe_arrow_attr, sel_arrow_attr;
     int exe_highlight_attr, sel_highlight_attr;
     int exe_block_attr, sel_block_attr;
+    int search_attr;
+    int inc_search_attr;
     char fmt[16];
     int width, height;
-    int focus_attr = focus ? A_BOLD : 0;
-    int is_sel_line, is_exe_line;
-    int highlight_tabstop = cgdbrc_get_int(CGDBRC_TABSTOP);
-    const char *cur_line;
+    int focus_attr = focus ? SWIN_A_BOLD : 0;
     int showmarks = cgdbrc_get_int(CGDBRC_SHOWMARKS);
+    int hlsearch = cgdbrc_get_int(CGDBRC_HLSEARCH);
     int mark_attr;
 
     struct hl_line_attr *sel_highlight_attrs = 0;
     struct hl_line_attr *exe_highlight_attrs = 0;
     struct hl_line_attr tmp_attr;
 
-
     /* Check that a file is loaded */
     if (!sview->cur || !sview->cur->file_buf.lines) {
         logo_display(sview->win);
 
         if (dorefresh == WIN_REFRESH)
-            wrefresh(sview->win);
+            swin_wrefresh(sview->win);
         else
-            wnoutrefresh(sview->win);
+            swin_wnoutrefresh(sview->win);
 
         return 0;
     }
@@ -889,6 +866,9 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
         hl_groups_instance, HLG_EXECUTING_LINE_HIGHLIGHT);
     exe_block_attr = hl_groups_get_attr(
         hl_groups_instance, HLG_EXECUTING_LINE_BLOCK);
+
+    search_attr = hl_groups_get_attr(hl_groups_instance, HLG_SEARCH);
+    inc_search_attr = hl_groups_get_attr(hl_groups_instance, HLG_INCSEARCH);
 
     sel_display_style = cgdbrc_get_displaystyle(CGDBRC_SELECTED_LINE_DISPLAY);
     sel_arrow_attr = hl_groups_get_attr(
@@ -916,10 +896,11 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
     sbpush(exe_highlight_attrs, tmp_attr);
     
     /* Make sure cursor is visible */
-    curs_set(!!focus);
+    swin_curs_set(!!focus);
 
     /* Initialize variables */
-    getmaxyx(sview->win, height, width);
+    height = swin_getmaxy(sview->win);
+    width = swin_getmaxx(sview->win);
 
     /* Set starting line number (center source file if it's small enough) */
     count = sbcount(sview->cur->file_buf.lines);
@@ -940,7 +921,6 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
     for (i = 0; i < height; i++, line++) {
 
         int column_offset = 0;
-        int line_highlight_attr = 0;
         /* Is this the current selected line? */
         int is_sel_line = (line >= 0 && sview->cur->sel_line == line);
         /* Is this the current executing line */
@@ -949,13 +929,13 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
             NULL:&sview->cur->file_buf.lines[line];
         struct hl_line_attr *printline_attrs = (sline)?sline->attrs:0;
 
-        wmove(sview->win, i, 0);
+        swin_wmove(sview->win, i, 0);
 
         /* Print the line number */
         if (line < 0 || line >= count) {
             for (int j = 1; j < lwidth; j++)
-                waddch(sview->win, ' ');
-            waddch(sview->win, '~');
+                swin_waddch(sview->win, ' ');
+            swin_waddch(sview->win, '~');
         } else {
             int line_attr = 0;
             int bp_val = sview->cur->lflags[line].breakpt;
@@ -969,21 +949,23 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
                 line_attr = sellineno;
             }
 
-            wattron(sview->win, line_attr);
-            wprintw(sview->win, fmt, line + 1);
-            wattroff(sview->win, line_attr);
+            swin_wattron(sview->win, line_attr);
+            swin_wprintw(sview->win, fmt, line + 1);
+            swin_wattroff(sview->win, line_attr);
         }
 
-        if (!has_colors()) {
-            wprintw(sview->win, "%.*s\n",
+        if (!swin_has_colors()) {
+            /* TODO:
+            swin_wprintw(sview->win, "%.*s\n",
                     sview->cur->file_buf.lines[line].line,
                     sview->cur->file_buf.lines[line].len);
+            */
             continue;
         }
 
         /* Print the vertical bar or mark */
         {
-            chtype vert_bar_char;
+            SWIN_CHTYPE vert_bar_char;
             int vert_bar_attr;
             int mc;
 
@@ -993,18 +975,18 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
                 vert_bar_attr = mark_attr;
             } else if (is_exe_line && exe_line_display_is_arrow) {
                 vert_bar_attr = exe_arrow_attr;
-                vert_bar_char = ACS_LTEE;
+                vert_bar_char = SWIN_SYM_LTEE;
             } else if (is_sel_line && sel_line_display_is_arrow) {
                 vert_bar_attr = sel_arrow_attr;
-                vert_bar_char = ACS_LTEE;
+                vert_bar_char = SWIN_SYM_LTEE;
             } else {
                 vert_bar_attr = focus_attr;
-                vert_bar_char = VERT_LINE;
+                vert_bar_char = SWIN_SYM_VLINE;
             }
 
-            wattron(sview->win, vert_bar_attr);
-            waddch(sview->win, vert_bar_char);
-            wattroff(sview->win, vert_bar_attr);
+            swin_wattron(sview->win, vert_bar_attr);
+            swin_waddch(sview->win, vert_bar_char);
+            swin_wattroff(sview->win, vert_bar_attr);
         }
 
         /* Print the marker */
@@ -1027,12 +1009,12 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
 
             switch (display_style) {
                 case LINE_DISPLAY_SHORT_ARROW:
-                    wattron(sview->win, arrow_attr);
-                    waddch(sview->win, '>');
-                    wattroff(sview->win, arrow_attr);
+                    swin_wattron(sview->win, arrow_attr);
+                    swin_waddch(sview->win, '>');
+                    swin_wattroff(sview->win, arrow_attr);
                     break;
                 case LINE_DISPLAY_LONG_ARROW:
-                    wattron(sview->win, arrow_attr);
+                    swin_wattron(sview->win, arrow_attr);
                     column_offset = get_line_leading_ws_count(
                         sline->line, sline->len);
                     column_offset -= (sview->cur->sel_col + 1);
@@ -1041,14 +1023,14 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
 
                     /* Now actually draw the arrow */
                     for (int j = 0; j < column_offset; j++)
-                        waddch(sview->win, ACS_HLINE);
+                        swin_waddch(sview->win, SWIN_SYM_HLINE);
 
-                    waddch(sview->win, '>');
-                    wattroff(sview->win, arrow_attr);
+                    swin_waddch(sview->win, '>');
+                    swin_wattroff(sview->win, arrow_attr);
 
                     break;
                 case LINE_DISPLAY_HIGHLIGHT:
-                    waddch(sview->win, ' ');
+                    swin_waddch(sview->win, ' ');
                     printline_attrs = highlight_attr;
                     break;
                 case LINE_DISPLAY_BLOCK:
@@ -1060,34 +1042,48 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
 
                     /* Now actually draw the space to the block */
                     for (int j = 0; j < column_offset; j++)
-                        waddch(sview->win, ' ');
+                        swin_waddch(sview->win, ' ');
 
                     /* Draw the block */
-                    wattron(sview->win, block_attr);
-                    waddch(sview->win, ' ');
-                    wattroff(sview->win, block_attr);
+                    swin_wattron(sview->win, block_attr);
+                    swin_waddch(sview->win, ' ');
+                    swin_wattroff(sview->win, block_attr);
                     break;
             }
         } else {
-            waddch(sview->win, ' ');
+            swin_waddch(sview->win, ' ');
         }
 
 
         /* Print the text */
         if (line < 0 || line >= count) {
             for (int j = 2 + lwidth; j < width; j++)
-                waddch(sview->win, ' ');
+                swin_waddch(sview->win, ' ');
         } else {
             int x, y;
-            getyx(sview->win, y, x);
+            y = swin_getcury(sview->win);
+            x = swin_getcurx(sview->win);
 
             hl_printline(sview->win, sline->line, sline->len,
                 printline_attrs, -1, -1, sview->cur->sel_col + column_offset,
                 width - lwidth - 2);
 
-            if (sview->regex_is_searching) {
+            if (hlsearch && sview->last_hlregex) {
                 struct hl_line_attr *attrs = 
-                    hl_regex_highlight(&sview->hlregex, sline->line);
+                    hl_regex_highlight(&sview->last_hlregex, sline->line,
+                    search_attr);
+                if (sbcount(attrs)) {
+                    hl_printline_highlight(sview->win, sline->line, sline->len,
+                        attrs, x, y, sview->cur->sel_col + column_offset,
+                        width - lwidth - 2);
+                    sbfree(attrs);
+                }
+            }
+
+            if (is_sel_line && sview->hlregex) {
+                struct hl_line_attr *attrs = 
+                    hl_regex_highlight(&sview->hlregex, sline->line,
+                    inc_search_attr);
                 if (sbcount(attrs)) {
                     hl_printline_highlight(sview->win, sline->line, sline->len,
                         attrs, x, y, sview->cur->sel_col + column_offset,
@@ -1100,10 +1096,10 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
 
     switch(dorefresh) {
         case WIN_NO_REFRESH:
-            wnoutrefresh(sview->win);
+            swin_wnoutrefresh(sview->win);
             break;
         case WIN_REFRESH:
-            wrefresh(sview->win);
+            swin_wrefresh(sview->win);
             break;
     }
 
@@ -1113,12 +1109,10 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
     return 0;
 }
 
-void source_move(struct sviewer *sview,
-        int pos_r, int pos_c, int height, int width)
+void source_move(struct sviewer *sview, SWINDOW *win)
 {
-    delwin(sview->win);
-    sview->win = newwin(height, width, pos_r, pos_c);
-    wclear(sview->win);
+    swin_delwin(sview->win);
+    sview->win = win;
 }
 
 static int clamp_line(struct sviewer *sview, int line)
@@ -1146,7 +1140,8 @@ void source_hscroll(struct sviewer *sview, int offset)
     int width, height;
 
     if (sview->cur) {
-        getmaxyx(sview->win, height, width);
+        height = swin_getmaxy(sview->win);
+        width = swin_getmaxx(sview->win);
 
         lwidth = log10_uint(sbcount(sview->cur->file_buf.lines)) + 1;
         max_width = sview->cur->file_buf.max_width - width + lwidth + 6;
@@ -1260,14 +1255,15 @@ int source_set_exec_addr(struct sviewer *sview, uint64_t addr)
 void source_free(struct sviewer *sview)
 {
     /* Free all file buffers */
-    while (sview->list_head != NULL)
+    while (sview->list_head)
         source_del(sview, sview->list_head->path);
 
     hl_regex_free(&sview->hlregex);
     sview->hlregex = NULL;
-    sview->regex_is_searching = 0;
+    hl_regex_free(&sview->last_hlregex);
+    sview->last_hlregex = NULL;
 
-    delwin(sview->win);
+    swin_delwin(sview->win);
     sview->win = NULL;
 
     free(sview);
@@ -1302,13 +1298,7 @@ int source_search_regex(struct sviewer *sview,
     if (!node)
         return -1;
 
-    /* If we've got a regex, store the opt value:
-     *   1: searching
-     *   2: done searching
-     */
-    sview->regex_is_searching = (regex && regex[0]) ? opt : 0;
-
-    if (sview->regex_is_searching) {
+    if (regex && *regex) {
         int line;
         int line_end;
         int line_inc = direction ? +1 : -1;
@@ -1317,9 +1307,16 @@ int source_search_regex(struct sviewer *sview,
         line = wrap_line(node, line_start + line_inc);
 
         if (cgdbrc_get_int(CGDBRC_WRAPSCAN))
+        {
+            // Wrapping is on so stop at the line we started on.
             line_end = line_start;
+        }
         else
-            line_end = direction ? sbcount(node->file_buf.lines) : -1;
+        {
+            // No wrapping. Stop at line 0 if searching down and last line
+            // if searching up.
+            line_end = direction ? 0 : sbcount(node->file_buf.lines) - 1;
+        }
 
         for(;;) {
             int ret;
@@ -1332,8 +1329,13 @@ int source_search_regex(struct sviewer *sview,
                 node->sel_line = line;
 
                 /* Finalized match - move to this location */
-                if (opt == 2)
+                if (opt == 2) {
                     node->sel_rline = line;
+
+                    hl_regex_free(&sview->last_hlregex);
+                    sview->last_hlregex = sview->hlregex;
+                    sview->hlregex = 0;
+                }
                 return 1;
             }
 

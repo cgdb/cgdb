@@ -50,27 +50,26 @@
 #include <errno.h>
 #endif /* HAVE_ERRNO_H */
 
-#include "io.h"
-#include "logger.h"
 #include "sys_util.h"
 #include "cgdb_clog.h"
+#include "io.h"
 
 static void process_error(void)
 {
     if (errno == EINTR)
-        logger_write_pos(logger, __FILE__, __LINE__, "ERRNO = EINTR");
+        clog_error(CLOG_CGDB, "ERRNO = EINTR");
     else if (errno == EAGAIN)
-        logger_write_pos(logger, __FILE__, __LINE__, "ERRNO = EAGAIN");
+        clog_error(CLOG_CGDB, "ERRNO = EAGAIN");
     else if (errno == EIO)
-        logger_write_pos(logger, __FILE__, __LINE__, "ERRNO = EIO");
+        clog_error(CLOG_CGDB, "ERRNO = EIO");
     else if (errno == EISDIR)
-        logger_write_pos(logger, __FILE__, __LINE__, "ERRNO = EISDIR");
+        clog_error(CLOG_CGDB, "ERRNO = EISDIR");
     else if (errno == EBADF)
-        logger_write_pos(logger, __FILE__, __LINE__, "ERRNO = EBADF");
+        clog_error(CLOG_CGDB, "ERRNO = EBADF");
     else if (errno == EINVAL)
-        logger_write_pos(logger, __FILE__, __LINE__, "ERRNO = EINVAL");
+        clog_error(CLOG_CGDB, "ERRNO = EINVAL");
     else if (errno == EFAULT)
-        logger_write_pos(logger, __FILE__, __LINE__, "ERRNO = EFAULT");
+        clog_error(CLOG_CGDB, "ERRNO = EFAULT");
 }
 
 int io_read_byte(char *c, int source)
@@ -80,7 +79,7 @@ int io_read_byte(char *c, int source)
     if ((ret_val = read(source, c, 1)) == 0) {
         return -1;
     } else if (ret_val == -1) {
-        logger_write_pos(logger, __FILE__, __LINE__, "I/O error");
+        clog_error(CLOG_CGDB, "I/O error");
         process_error();
         return -1;
     }
@@ -101,13 +100,13 @@ int io_rw_byte(int source, int dest)
     char c;
 
     if (read(source, &c, 1) != 1) {
-        logger_write_pos(logger, __FILE__, __LINE__, "I/O error");
+        clog_error(CLOG_CGDB, "I/O error");
         process_error();
         return -1;
     }
 
     if (write(dest, &c, 1) != 1) {
-        logger_write_pos(logger, __FILE__, __LINE__, "I/O error");
+        clog_error(CLOG_CGDB, "I/O error");
         return -1;
     }
 
@@ -124,8 +123,7 @@ ssize_t io_read(int fd, void *buf, size_t count)
         if (errno == EINTR)
             goto tgdb_read;
         else if (errno != EIO) {
-            logger_write_pos(logger, __FILE__, __LINE__,
-                    "error reading from fd");
+            clog_error(CLOG_CGDB, "error reading from fd");
             return -1;
         } else {
             return 0;           /* Happens on EOF for some reason */
@@ -135,7 +133,7 @@ ssize_t io_read(int fd, void *buf, size_t count)
         return 0;
     } else {
         char *str = sys_quote_nonprintables((char *)buf, amountRead);
-        clog_debug(CLOG(TGDB_LOGGER), "%s", str);
+        clog_debug(CLOG_GDBIO, "%s", str);
         sbfree(str);
     }
 
@@ -201,7 +199,7 @@ int io_data_ready(int fd, int ms)
 
     ret = select(fd + 1, &readfds, (fd_set *) NULL, &exceptfds, timeout_ptr);
     if (ret == -1) {
-        logger_write_pos(logger, __FILE__, __LINE__, "Errno(%d)\n", errno);
+        clog_error(CLOG_CGDB, "Errno(%d)\n", errno);
         return -1;
     }
 
@@ -224,7 +222,7 @@ int io_getchar(int fd, unsigned int ms, int *key)
 
     val = io_data_ready(fd, ms);
     if (val == -1) {
-        logger_write_pos(logger, __FILE__, __LINE__, "Errno(%d)\n", errno);
+        clog_error(CLOG_CGDB, "Errno(%d)\n", errno);
         return -1;
     }
 
@@ -246,11 +244,11 @@ int io_getchar(int fd, unsigned int ms, int *key)
         goto read_again;
     else if (ret == -1) {
         c = 0;
-        logger_write_pos(logger, __FILE__, __LINE__, "Errno(%d)\n", errno);
+        clog_error(CLOG_CGDB, "Errno(%d)\n", errno);
     } else if (ret == 0) {
         c = 0;
         ret = -1;
-        logger_write_pos(logger, __FILE__, __LINE__, "Read returned nothing\n");
+        clog_error(CLOG_CGDB, "Read returned nothing\n");
     }
 
     /* Set to original state */

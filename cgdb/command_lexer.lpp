@@ -41,7 +41,6 @@ const char * get_token( void )
 "bind"                                                     { return BIND; } 
 "macro"                                                    { return MACRO; } 
 
-(yes|YES|Yes|Y|y|no|NO|No|n|N)                             { return BOOLEAN; }
 ((<({L}|{D}|[^>])*>)|({L}({L}|{D})*))+\!?                   { return IDENTIFIER; }
 [+-]?{D}+                                                  { return NUMBER; }
 \"(\\.|[^\\"])*\"                                          { return STRING; }

@@ -1,5 +1,5 @@
-#include "ibuf.h"
 #include "sys_util.h"
+#include "ibuf.h"
 
 #if HAVE_STRING_H
 #include <string.h>

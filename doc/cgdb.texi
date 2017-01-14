@@ -84,12 +84,8 @@ split screen showing the source as it executes.  The UI is modeled on the
 classic Unix text editor, vi.  Those familiar with vi should feel right at 
 home using CGDB.
 
-The library responsible for communicating with GDB is called Trivial GDB 
-(tgdb, or more accurately, libtgdb).  This abstraction allows the UI code to 
-be independent of the debugger, as well as greatly simplifying its 
-implementation.
-
-Those wanting to develop other interfaces to GDB are welcome to use libtgdb 
+The library responsible for communicating with GDB is called gdbwire.
+Those wanting to develop other interfaces to GDB are welcome to use gdbwire 
 as the basis for their program.  Many of the headaches of parsing GDB's output 
 and annotations can be avoided by using it.
 
@@ -226,6 +222,9 @@ finishes, they will each be run in order.  There will be no way to stop these
 commands from being run besides from typing @kbd{Ctrl-C}, like you would at any
 normal terminal when working with GDB.
 
+@cindex regular expression search
+CGDB also supports regular expression searching within the GDB window.
+
 @node File Dialog Window
 @section Understanding the file dialog window.
 @cindex file dialog window
@@ -316,6 +315,9 @@ This is defaulted to the @key{ESC} key.
 
 @item i
 Puts the user into @dfn{GDB mode}.
+
+@item s
+Puts the user into scroll mode in the @dfn{GDB mode}.
 
 @item Ctrl-T
 Opens a new tty for the debugged program.
@@ -462,6 +464,12 @@ Move up a page.
 @item page down
 Move down a page.
 
+@item Ctrl-u
+Move up 1/2 a page.
+
+@item Ctrl-d
+Move down 1/2 a page.
+
 @item F11
 @itemx home key
 @itemx gg
@@ -481,6 +489,30 @@ Move up a line.
 @itemx down arrow
 @itemx Ctrl-n
 Move down a line.
+
+@item /
+search from current cursor position.
+
+@item ?
+reverse search from current cursor position.
+
+@item n
+next forward search.
+
+@item N
+next reverse search.
+
+@item m[a-z]
+Set a mark at the cursor position. 
+
+@item '[a-z]
+Jump to the corresponding mark.
+
+@item ''
+Jump to the last jump location.
+
+@item '.
+Jump to the last line.
 
 @item q
 @itemx i
@@ -640,6 +672,11 @@ The @samp{longarrow} option also draws an arrow next to the source line
 number, but extends the arrow until the source code.  The @samp{highlight}
 option draws the entire line in inverse video and the @samp{block} option
 draws an inverse block (cursor) next to the source code being executed.
+
+@item :set hls
+@itemx :set hlsearch
+When enabled, if there is a previous search pattern, highlight all its matches.
+The default is disabled.
 
 @item :set ic
 @itemx :set ignorecase
@@ -925,9 +962,13 @@ displaying it's User Interface.
 @item StatusLine
 This represents the @dfn{status bar} in CGDB.  The file dialog's status 
 bar also uses this group.
+@item Search
+This represents the group used when displaying the previous search in
+either the source window, the GDB window in scroll mode, or the @dfn{file
+dialog window}. This is only used when the @var{hlsearch} option is enabled.
 @item IncSearch
 This represents the group used when the user is searching in either the source 
-window, or the @dfn{file dialog window}.
+window, the GDB window in scroll mode, or the @dfn{file dialog window}.
 @item SelectedLineArrow
 This represents the group used when the user has the
 @code{selectedlinedisplay} set to @code{shortarrow} or @code{longarrow}.

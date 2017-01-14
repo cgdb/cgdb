@@ -1,7 +1,7 @@
-#include "tokenizer.h"
-#include "sys_util.h"
 #include <stdio.h>
 #include <string.h>
+#include "tokenizer.h"
+#include "sys_util.h"
 
 /* Some default file extensions */
 const char *c_extensions[] = {

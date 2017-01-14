@@ -1,18 +1,20 @@
 noinst_LIBRARIES = libcgdbutil.a
 
 libcgdbutil_a_SOURCES = \
+    cgdb_clog.cpp \
+    cgdb_clog.h \
     fork_util.cpp \
     fork_util.h \
     fs_util.cpp \
     fs_util.h \
     io.cpp \
     io.h \
-    logger.cpp \
-    logger.h \
     pseudo.cpp \
     pseudo.h \
     sys_util.cpp \
     sys_util.h \
+    sys_win.cpp \
+    sys_win.h \
     terminal.cpp \
     terminal.h
 

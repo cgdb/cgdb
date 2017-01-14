@@ -30,15 +30,15 @@
 #include <errno.h>
 #endif /* HAVE_ERRNO_H */
 
+#include "sys_util.h"
 #include "fs_util.h"
-#include "logger.h"
 
 int fs_util_is_valid(const char *dir)
 {
     char actual_dir[FSUTIL_PATH_MAX];
 
     if (dir == NULL) {
-        logger_write_pos(logger, __FILE__, __LINE__, "$HOME is not set");
+        clog_error(CLOG_CGDB, "$HOME is not set");
         return 0;
     }
 
@@ -48,12 +48,12 @@ int fs_util_is_valid(const char *dir)
     /* Check if directory dir is readable and writeable */
     if (access(actual_dir, R_OK | W_OK) == -1) {
         if (errno == ENOENT) {
-            logger_write_pos(logger, __FILE__, __LINE__,
+            clog_error(CLOG_CGDB,
                     "directory '%s' is not set", dir);
             return 0;
         }
 
-        logger_write_pos(logger, __FILE__, __LINE__,
+        clog_error(CLOG_CGDB,
                 "directory '%s' does not have read/write permissions", dir);
         return 0;
     }
@@ -67,7 +67,7 @@ int fs_util_create_dir(const char *dir)
     struct stat st;
 
     if (dir == NULL) {
-        logger_write_pos(logger, __FILE__, __LINE__, "dir is NULL");
+        clog_error(CLOG_CGDB, "dir is NULL");
         return 0;
     }
 
@@ -80,15 +80,14 @@ int fs_util_create_dir(const char *dir)
         if (S_ISDIR(st.st_mode))
             return 1;
         else {
-            logger_write_pos(logger, __FILE__, __LINE__,
-                    "file %s is not a directory", actual_dir);
+            clog_error(CLOG_CGDB, "file %s is not a directory", actual_dir);
             return 0;
         }
     } else {
         /* The file does not exist, create it */
         if (errno == ENOENT) {
             if (mkdir(actual_dir, 0755) == -1) {
-                logger_write_pos(logger, __FILE__, __LINE__,
+                clog_error(CLOG_CGDB,
                         "directory %s could not be made", actual_dir);
                 return 0;
             } else

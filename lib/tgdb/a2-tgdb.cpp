@@ -14,12 +14,11 @@
 #include <stdio.h>
 #endif
 
+#include "sys_util.h"
 #include "a2-tgdb.h"
-#include "logger.h"
 #include "io.h"
 #include "state_machine.h"
 #include "commands.h"
-#include "sys_util.h"
 #include "ibuf.h"
 
 /* Here are the two functions that deal with getting tty information out
@@ -33,7 +32,7 @@ int a2_open_new_tty(struct annotate_two *a2, int *inferior_stdin, int *inferior_
 
     a2->pty_pair = pty_pair_create();
     if (!a2->pty_pair) {
-        logger_write_pos(logger, __FILE__, __LINE__, "pty_pair_create failed");
+        clog_error(CLOG_CGDB, "pty_pair_create failed");
         return -1;
     }
 
@@ -63,7 +62,7 @@ static struct annotate_two *initialize_annotate_two(void)
 
     /* null terminate */
     a2->config_dir[0] = '\0';
-    a2->a2_gdb_init_file[0] = '\0';
+    a2->gdb_init_file[0] = '\0';
 
     a2->request_source_location = 0;
 
@@ -85,14 +84,14 @@ static int tgdb_setup_config_file(struct annotate_two *a2, const char *dir)
 
     strncpy(a2->config_dir, dir, strlen(dir) + 1);
 
-    fs_util_get_path(dir, "a2_gdb_init", a2->a2_gdb_init_file);
+    fs_util_get_path(dir, "gdb_init_commands", a2->gdb_init_file);
 
-    if ((fp = fopen(a2->a2_gdb_init_file, "w"))) {
-        fprintf(fp, "set annotate 2\n" "set height 0\n");
+    if ((fp = fopen(a2->gdb_init_file, "w"))) {
+        fprintf(fp, "set annotate 2\n"
+                    "set height 0\n");
         fclose(fp);
     } else {
-        logger_write_pos(logger, __FILE__, __LINE__, "fopen error '%s'",
-                a2->a2_gdb_init_file);
+        clog_error(CLOG_CGDB, "fopen error '%s'", a2->gdb_init_file);
         return 0;
     }
 
@@ -100,7 +99,7 @@ static int tgdb_setup_config_file(struct annotate_two *a2, const char *dir)
 }
 
 struct annotate_two *a2_create_context(const char *debugger,
-        int argc, char **argv, const char *config_dir, struct logger *logger_in)
+        int argc, char **argv, const char *config_dir)
 {
     struct annotate_two *a2 = (struct annotate_two *)
         cgdb_calloc(1, sizeof(struct annotate_two));
@@ -109,13 +108,12 @@ struct annotate_two *a2_create_context(const char *debugger,
     a2->debugger_out = -1;
 
     if (!tgdb_setup_config_file(a2, config_dir)) {
-        logger_write_pos(logger_in, __FILE__, __LINE__,
-                "tgdb_init_config_file error");
+        clog_error(CLOG_CGDB,  "tgdb_init_config_file error");
         return NULL;
     }
 
     a2->debugger_pid = invoke_debugger(debugger, argc, argv,
-            &a2->debugger_stdin, &a2->debugger_out, 0, a2->a2_gdb_init_file);
+            &a2->debugger_stdin, &a2->debugger_out, 0, a2->gdb_init_file);
 
     /* Couldn't invoke process */
     if (a2->debugger_pid == -1)
@@ -188,7 +186,6 @@ int a2_shutdown(struct annotate_two *a2)
     }
     sbfree(a2->client_commands);
     a2->client_commands = NULL;
-
     return 0;
 }
 

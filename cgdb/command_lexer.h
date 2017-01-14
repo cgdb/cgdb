@@ -7,7 +7,6 @@
  *  UNSET: for future expansion
  *  BIND: for future expansion
  *  MACRO: for future expansion
- *  BOOLEAN: yes or no
  *  NUMBER: a series of digits
  *  IDENTIFIER: a valid identifier (letter followed by letters or numbers)
  *  COMMAND: a recognized command (for future expansion)
@@ -21,7 +20,6 @@ enum TOKENS {
     MACRO,
     SHELL,
     BANG,
-    BOOLEAN,
     NUMBER,
     IDENTIFIER,
     COMMAND,

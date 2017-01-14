@@ -1,3 +1,17 @@
+  * The hlsearch option has been added to CGDB. This improves the
+    searching and displaying of searching functionality within CGDB.
+    By default the option is off. When enabled, and there exists a
+    previous search, CGDB will display the search results using
+    the Search highlighting group. The IncSearch highlighting group
+    is used to display the active search. The hlsearch option
+    highlights previous searches in the source window, the gdb window
+    when in scroll mode and the file dialog window.
+
+  * CGDB now supports showing assembly code! By default, CGDB will
+    display source code when it is available and assembly code
+    when no source code is available. The option 'set disasm'
+    allows you to show mixed source/assembly when both are available.
+
   * Add support to enable/disable showing assembly code in CGDB.
     The default is disabled. The 'set disasm' enables showing 
     mixed assembly mode by default. See the documentation for more
@@ -38,7 +52,8 @@
     windows. Thanks to Daniel Cohen for the original implementation
     of this idea! You can change the window orientation by using the
     command 'set winsplitorientation=horizontal or vertical'.
-    horizontal is the default orientation.
+    horizontal is the default orientation. Type Ctrl-w to switch between
+    vertical and horizontal viewing.
 
   * Remove the TTY mode and TTY window from CGDB. This previously allowed
     you to send input to the program being debugged through the TTY
@@ -53,7 +68,10 @@
   * Added GDB scroll mode in addition to the existing GDB command mode.
     To enter scroll mode, type 'page up' when in GDB mode and to exit
     type 'q', 'i' or 'Enter'. In scroll mode, you can scroll through
-    the GDB output.
+    the GDB output. You can also search the GDB output with the /, ?, n
+    and N keys. Marks are also supported. You can set a mark by typing
+    m[a-z] and you can jump to a mark by typing '[a-z]. See the
+    documentation for more details.
 
   * Extended support for the G command when in CGDB mode. The new supported
     syntax is [<number>]G, allowing users to jump to a specific line within
@@ -69,6 +87,10 @@
 
     The 'arrowstyle' option has been deprecated (but still supported)
     and users should use the 'executinglinedisplay' option instead.
+
+  * CGDB now only supports ncurses. Support for curses was removed.
+    The curses support was previously very out of date and untested.
+    If curses support is needed, please let us know.
 
 cgdb-0.6.8 (11/13/2014)
 

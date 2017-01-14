@@ -11,7 +11,7 @@ struct filedlg;
  *   height:  height (in lines) of the viewer
  *   width:   width (in columns) of the viewer
  *
- * return value:  a new filedlg object on success, null on failure.
+ * return value:  a new filedlg object on success.
  */
 struct filedlg *filedlg_new(int pos_r, int pos_c, int height, int width);
 

@@ -145,8 +145,6 @@ struct rline *rline_initialize(int slavefd, command_cb * command,
 
 static void rline_free_completions()
 {
-    int i;
-
     /* Set and index to 0. */
     sbsetcount(completions_array, 0);
     completions_index = 0;

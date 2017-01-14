@@ -35,7 +35,7 @@ struct annotate_two {
     char config_dir[FSUTIL_PATH_MAX];
 
     /** The init file for the debugger. */
-    char a2_gdb_init_file[FSUTIL_PATH_MAX];
+    char gdb_init_file[FSUTIL_PATH_MAX];
 
     /** 
 	 * This module is used for parsing the output of gdb for annotate 2 
@@ -127,7 +127,9 @@ enum annotate_commands {
      *
      * This functionality was added in gdb in commit 6ff0ba5f.
      */
-    ANNOTATE_DATA_DISASSEMBLE_MODE_QUERY
+    ANNOTATE_DATA_DISASSEMBLE_MODE_QUERY,
+
+    ANNOTATE_UNUSED = -1
 };
 
 /******************************************************************************/
@@ -162,7 +164,7 @@ enum annotate_commands {
  * NULL on error, A valid descriptor upon success
  */
 struct annotate_two *a2_create_context(const char *debugger_path,
-        int argc, char **argv, const char *config_dir, struct logger *logger);
+        int argc, char **argv, const char *config_dir);
 
 /** 
  * This initializes the libannotate_two libarary.

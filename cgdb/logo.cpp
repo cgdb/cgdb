@@ -2,7 +2,7 @@
  * ------
  * Data for ASCII logos.
  *
- * These logos were generated thanks to Jörg Seyfferth and his web-based
+ * These logos were generated thanks to Jorg Seyfferth and his web-based
  * ASCII-text generator:  http://www.network-science.de/ascii/
  */
 
@@ -28,9 +28,10 @@
 #endif /* HAVE_SYS_TIME_H */
 
 /* Local Includes */
+#include "sys_util.h"
+#include "sys_win.h"
 #include "cgdb.h"
 #include "logo.h"
-#include "sys_util.h"
 #include "highlight_groups.h"
 
 /* Logo index */
@@ -46,6 +47,16 @@ struct Logo {
    const char *data[15]; /* Increase the array size as necessary */
 };
 
+/*
+    With vim (note: check 'stty -a' for lnext if Ctrl+V doesn't work)
+
+    :read !figlet -f colossal cgdb | toilet -f term -F metal --export ansi
+    s/\\/\\\\/g     ; replace all \ with \\
+    s/"/\\"/g       ; replace all " with \"
+    s/^[/\\033/g    ; replace ^[ with \033, hit Ctrl+V,Ctrl+[ to get ^[
+    s/^/"/          ; add " at start of lines
+    s/$/",/         ; add ", at end of lines
+*/
 static struct Logo CGDB_LOGO[] =
 {
     { 6, 31,
@@ -77,19 +88,16 @@ static struct Logo CGDB_LOGO[] =
         }
     },
 
-    /* figlet -f reverse cgdb | toilet -f term -F metal --export ansi */
-    { 11, 27,
-        { "\033[0;1;34;40m================\033[0;34;40m============\033[0m",
-          "\033[0;1;34;40m================\033[0;34;40m==\033[0;37;40m  \033[0;34;40m==\033[0;37;40m  \033[0;34;40m====\033[0m",
-          "\033[0;1;34;40m================\033[0;34;40m==\033[0;37;40m  \033[0;34;40m==\033[0;37;40m  \033[0;34;40m====\033[0m",
-          "\033[0;1;34;40m================\033[0;34;40m==\033[0;37;40m  \033[0;34;40m==\033[0;37;40m  \033[0;34;40m====\033[0m",
-          "\033[0;1;34;40m==\033[0;37;40m   \033[0;1;34;40m====\033[0;37;40m   \033[0;1;34;40m====\033[0;34;40m==\033[0;37;40m  \033[0;34;40m==\033[0;37;40m  \033[0;34;40m====\033[0m",
-          "\033[0;1;34;40m=\033[0;37;40m  \033[0;1;34;40m=\033[0;37;40m  \033[0;1;34;40m==\033[0;37;40m  \033[0;1;34;40m=\033[0;37;40m  \033[0;1;34;40m===\033[0;37;40m    \033[0;34;40m==\033[0;37;40m    \033[0;34;40m==\033[0m",
-          "\033[0;1;34;40m=\033[0;37;40m  \033[0;1;34;40m======\033[0;37;40m    \033[0;1;34;40m==\033[0;37;40m  \033[0;34;40m=\033[0;37;40m  \033[0;34;40m==\033[0;37;40m  \033[0;34;40m=\033[0;37;40m  \033[0;34;40m=\033[0m",
-          "\033[0;1;34;40m=\033[0;37;40m  \033[0;1;34;40m========\033[0;37;40m  \033[0;1;34;40m==\033[0;37;40m  \033[0;34;40m=\033[0;37;40m  \033[0;34;40m==\033[0;37;40m  \033[0;34;40m=\033[0;37;40m  \033[0;34;40m=\033[0m",
-          "\033[0;1;34;40m=\033[0;37;40m  \033[0;1;34;40m=\033[0;37;40m  \033[0;1;34;40m==\033[0;37;40m  \033[0;1;34;40m=\033[0;37;40m  \033[0;1;34;40m==\033[0;37;40m  \033[0;34;40m=\033[0;37;40m  \033[0;34;40m==\033[0;37;40m  \033[0;34;40m=\033[0;37;40m  \033[0;34;40m=\033[0m",
-          "\033[0;1;34;40m==\033[0;37;40m   \033[0;1;34;40m====\033[0;37;40m   \033[0;1;34;40m====\033[0;37;40m    \033[0;34;40m==\033[0;37;40m    \033[0;34;40m==\033[0m",
-          "\033[0;1;34;40m================\033[0;34;40m============\033[0m"
+    /* echo cgdb | boxes -d peek -a c -s 20x7 | toilet --gay -f term */
+    { 7, 20,
+        {
+            "\033[0;1;35;95m  \033[0m       \033[0;1;36;96m_\033[0;1;34;94m\\|\033[0;1;35;95m/_\033[0m",
+            "         \033[0;1;36;96m(\033[0;1;34;94mo\033[0m \033[0;1;35;95mo)\033[0m",
+            " \033[0;1;35;95m+\033[0;1;31;91m--\033[0;1;33;93m--\033[0;1;32;92moO\033[0;1;36;96mO-\033[0;1;34;94m{_\033[0;1;35;95m}-\033[0;1;31;91mOO\033[0;1;33;93mo-\033[0;1;32;92m-+\033[0m",
+            " \033[0;1;35;95m|\033[0m                 \033[0;1;32;92m|\033[0m",
+            " \033[0;1;35;95m|\033[0m      \033[0;1;36;96mcg\033[0;1;34;94mdb\033[0m       \033[0;1;32;92m|\033[0m",
+            " \033[0;1;35;95m|\033[0m                 \033[0;1;32;92m|\033[0m",
+            " \033[0;1;35;95m+\033[0;1;31;91m--\033[0;1;33;93m--\033[0;1;32;92m--\033[0;1;36;96m--\033[0;1;34;94m--\033[0;1;35;95m--\033[0;1;31;91m--\033[0;1;33;93m--\033[0;1;32;92m*/\033[0m",
         }
     },
 
@@ -156,7 +164,7 @@ static const char *usage[] = {
 /* Functions */
 /* --------- */
 
-static void center_line(WINDOW *win, int row, int width, const char *data, int datawidth, int attr)
+static void center_line(SWINDOW *win, int row, int width, const char *data, int datawidth, int attr)
 {
     int i;
     char *line = NULL;
@@ -199,7 +207,7 @@ void logo_reset()
     logoindex = (logoindex + 1) % CGDB_NUM_LOGOS;
 }
 
-void logo_display(WINDOW *win)
+void logo_display(SWINDOW *win)
 {
     int height, width;                 /* Dimensions of the window */
     int line;                          /* Starting line */
@@ -216,13 +224,15 @@ void logo_display(WINDOW *win)
     attr = hl_groups_get_attr(hl_groups_instance, HLG_LOGO);
 
     /* Get dimensions */
-    getmaxyx(win, height, width);
+    height = swin_getmaxy(win);
+    width = swin_getmaxx(win);
 
     /* Clear the window */
-    werase(win);
+    swin_werase(win);
 
     /* If the logo fits on the screen, draw it */
-    if ((CGDB_LOGO[logoindex].h <= height - usage_height - 2)) {
+    if ((CGDB_LOGO[logoindex].h <= height - usage_height - 2))
+    {
         line = (height - CGDB_LOGO[logoindex].h - usage_height - 2) / 2;
 
         for(i = 0; i < CGDB_LOGO[logoindex].h; i++) {
@@ -238,5 +248,5 @@ void logo_display(WINDOW *win)
     for (i = 0; i < usage_height; i++)
         center_line(win, line++, width, usage[i], strlen(usage[i]), attr);
 
-    curs_set(0);         /* Hide the cursor */
+    swin_curs_set(0);         /* Hide the cursor */
 }
