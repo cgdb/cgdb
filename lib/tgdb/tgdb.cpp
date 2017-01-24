@@ -23,6 +23,7 @@
 #include <sys/wait.h>
 #endif
 
+#define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 
 #include "a2-tgdb.h"
