@@ -58,6 +58,7 @@
 #include <ctype.h>
 #endif
 
+#define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 
 /* Local Includes */
