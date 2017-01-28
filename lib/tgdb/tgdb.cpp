@@ -45,26 +45,28 @@ struct tgdb_request *last_request = NULL;
  * The TGDB context data structure.
  */
 struct tgdb {
+    /** This module is used for parsing the commands output of gdb */
+    struct commands *c;
 
     /** The GDB annotations parser */
     struct annotations_parser *parser;
 
-  /** Reading from this will read from the debugger's output */
+    /** Reading from this will read from the debugger's output */
     int debugger_stdout;
 
-  /** Writing to this will write to the debugger's stdin */
+    /** Writing to this will write to the debugger's stdin */
     int debugger_stdin;
 
-  /** Reading from this will read the stdout from the program being debugged */
+    /** Reading from this will read the stdout from the debugged program */
     int inferior_stdout;
 
-  /** Writing to this will write to the stdin of the program being debugged */
+    /** Writing to this will write to the stdin of the debugged program */
     int inferior_stdin;
 
     /** The master, slave and slavename of the pty device */
     pty_pair_ptr pty_pair;
 
-    /** pid of child process. */
+    /** The pid of child process */
     pid_t debugger_pid;
 
   /***************************************************************************
@@ -72,52 +74,49 @@ struct tgdb {
    * The different queue's can be slightly confusing.
    **************************************************************************/
 
-  /**
-   * The commands that need to be run through GDB.
-   *
-   * This is a buffered queue that represents all of the commands that TGDB
-   * needs to execute. These commands will be executed one at a time. That is,
-   * 1 command will be issued, and TGDB will wait for the entire response before
-   * issuing any more commands. It is even possible that while this command is
-   * executing, that the client context will add commands to the 
-   * oob_command_queue. If this happens TGDB will execute all of the commands
-   * in the oob_command_queue before executing the next command in this queue. 
-   */
+    /**
+     * The commands that need to be run through GDB.
+     *
+     * This is a buffered queue that represents all of the commands that TGDB
+     * needs to execute. These commands will be executed one at a time.
+     * That is, a command will be issued, and TGDB will wait for the entire
+     * response before issuing any more commands.
+     *
+     * While a command is executing, tgdb can add commands to the 
+     * oob_command_queue. If this happens TGDB will execute all of the
+     * commands in the oob_command_queue before executing the next
+     * command in this queue. 
+     */
     struct tgdb_command **gdb_input_queue;
 
-  /** 
-   * The commands that the client has requested to run.
-   *
-   * TGDB buffers all of the commands that the FE wants to run. That is,
-   * if the FE is sending commands faster than TGDB can pass the command to
-   * GDB and get a response, then the commands are buffered until it is there
-   * turn to run. These commands are run in the order that they are received.
-   *
-   * This is here as a convenience to the FE. TGDB currently does not access 
-   * these commands. It provides the push/pop functionality and it erases the
-   * queue when a control_c is received.
-   */
+    /** 
+     * The priority queue.
+     *
+     * This has commands that tgdb requires to run, in order to provide
+     * the front end with the proper resopnses. When the front end runs
+     * a command, sometimes tgdb will discover that it needs to run other
+     * commands in order to satisfy the functionality requested by the GUI.
+     * 
+     *
+     * These commands should *always* be run first.
+     */
+    struct tgdb_command **priority_queue;
+
+
+    /** 
+     * The commands that the front end has requested to run.
+     *
+     * TGDB buffers all of the commands that the front end wants to run.
+     * That is, if the front end is sending commands faster than TGDB can
+     * pass the command to GDB and get a response, then the commands are
+     * buffered until it is there turn to run. These commands are run
+     * in the order that they are received.
+     *
+     * This is here as a convenience to the front end. TGDB currently does
+     * not access these commands. It provides the push/pop functionality
+     * and it erases the queue when a control_c is received.
+     */
     tgdb_request_ptr *gdb_client_request_queue;
-
-  /** 
-   * The out of band input queue. 
-   *
-   * These commands are used by the client context. When a single client context 
-   * command is run, sometimes it will discover that it needs to run other commands
-   * in order to satisfy the functionality requested by the GUI. For instance, a 
-   * single GUI function request could take N client context commands to generate
-   * a response. Also, to make things worse, sometimes the client context doesn't 
-   * know if it will take 1 or N commands to satisfy the request until after it has 
-   * sent and received the information from the first command. Thus, while the 
-   * client context is processing the first command, it may add more commands to 
-   * this queue to specify that these commands need to be run before any other 
-   * commands are sent to GDB.
-   *
-   * These commands should *always* be run first.
-   */
-    struct tgdb_command **oob_input_queue;
-
-  /** These are 2 very important state variables.  */
 
     /**
      * If set to 1, libtgdb thinks the lower level subsystem is capable of
@@ -130,16 +129,17 @@ struct tgdb {
      * Basically whether gdb is at prompt or not. */
     int is_gdb_ready_for_next_command;
 
-  /** If ^c was hit by user */
+    /** If ^c was hit by user */
     sig_atomic_t control_c;
 
-  /**
-   * When GDB dies (purposely or not), the SIGCHLD is sent to the application controlling TGDB.
-   * This data structure represents the fact that SIGCHLD has been sent.
-   *
-   * This currently does not need to track if more than 1 SIGCHLD has been received. So
-   * no matter how many are receieved, this will only be 1. Otherwise if none have been
-   * received this will be 0.  */
+    /**
+     * When GDB dies (purposely or not), the SIGCHLD is sent to the
+     * application controlling TGDB. This data structure represents the
+     * fact that SIGCHLD has been sent.
+     *
+     * This currently does not need to track if more than 1 SIGCHLD has
+     * been received. So no matter how many are receieved, this will only
+     * be 1. Otherwise if none have been received this will be 0.  */
     int has_sigchld_recv;
 
     /** The config directory that this context can write too. */
@@ -148,15 +148,6 @@ struct tgdb {
     /** The init file for the debugger. */
     char gdb_init_file[FSUTIL_PATH_MAX];
 
-    /**
-	 * This module is used for parsing the commands output of gdb
-	 */
-    struct commands *c;
-
-    /**
-     * Request the source location from gdb.
-     */
-    int request_source_location;
 };
 
 /* }}} */
@@ -199,7 +190,7 @@ static int tgdb_has_command_to_run(struct tgdb *tgdb)
 {
     if (annotations_parser_at_prompt(tgdb->parser) &&
         ((sbcount(tgdb->gdb_input_queue) > 0) ||
-            (sbcount(tgdb->oob_input_queue) > 0)))
+            (sbcount(tgdb->priority_queue) > 0)))
         return 1;
 
     return 0;
@@ -276,6 +267,7 @@ static struct tgdb *initialize_tgdb_context(void)
 {
     struct tgdb *tgdb = (struct tgdb *) cgdb_malloc(sizeof (struct tgdb));
 
+    tgdb->c = 0;
     tgdb->parser = NULL;
     tgdb->control_c = 0;
 
@@ -287,9 +279,9 @@ static struct tgdb *initialize_tgdb_context(void)
 
     tgdb->pty_pair = NULL;
 
-    tgdb->gdb_client_request_queue = NULL;
     tgdb->gdb_input_queue = NULL;
-    tgdb->oob_input_queue = NULL;
+    tgdb->priority_queue = NULL;
+    tgdb->gdb_client_request_queue = NULL;
 
     tgdb->is_gdb_ready_for_next_command = 1;
 
@@ -297,9 +289,6 @@ static struct tgdb *initialize_tgdb_context(void)
 
     tgdb->config_dir[0] = '\0';
     tgdb->gdb_init_file[0] = '\0';
-
-    tgdb->c = 0;
-    tgdb->request_source_location = 0;
 
     return tgdb;
 }
@@ -489,9 +478,9 @@ struct tgdb *tgdb_initialize(const char *debugger,
     if (tgdb->debugger_pid == -1)
         return NULL;
 
-    tgdb->parser = annotations_parser_initialize(callbacks);
-
     tgdb->c = commands_initialize(tgdb);
+
+    tgdb->parser = annotations_parser_initialize(callbacks);
 
     tgdb_open_new_tty(tgdb, &tgdb->inferior_stdin, &tgdb->inferior_stdout);
 
@@ -537,11 +526,11 @@ int tgdb_shutdown(struct tgdb *tgdb)
     }
     sbfree(tgdb->gdb_client_request_queue);
 
-    for (i = 0; i < sbcount(tgdb->oob_input_queue); i++) {
-        struct tgdb_command *tc = tgdb->oob_input_queue[i];
+    for (i = 0; i < sbcount(tgdb->priority_queue); i++) {
+        struct tgdb_command *tc = tgdb->priority_queue[i];
         tgdb_command_destroy(tc);
     }
-    sbfree(tgdb->oob_input_queue);
+    sbfree(tgdb->priority_queue);
 
     annotations_parser_shutdown(tgdb->parser);
 
@@ -789,7 +778,7 @@ void tgdb_run_or_queue_command(struct tgdb *tgdb, struct tgdb_command *command)
                 sbpush(tgdb->gdb_input_queue, command);
                 break;
             case TGDB_COMMAND_TGDB_CLIENT_PRIORITY:
-                sbpush(tgdb->oob_input_queue, command);
+                sbpush(tgdb->priority_queue, command);
                 break;
             case TGDB_COMMAND_CONSOLE:
             default:
@@ -855,14 +844,14 @@ static void tgdb_unqueue_and_deliver_command(struct tgdb *tgdb)
      */
 
     /* The out of band commands should always be run first */
-    if (sbcount(tgdb->oob_input_queue) > 0) {
+    if (sbcount(tgdb->priority_queue) > 0) {
         /* These commands are always run. 
          * However, if an assumption is made that a misc
          * prompt can never be set while in this spot.
          */
         struct tgdb_command *item = NULL;
 
-        item = sbpopfront(tgdb->oob_input_queue);
+        item = sbpopfront(tgdb->priority_queue);
         tgdb_deliver_command(tgdb, item);
         tgdb_command_destroy(item);
     }
