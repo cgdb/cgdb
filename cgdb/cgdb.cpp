@@ -1049,12 +1049,6 @@ static void update_source_files(struct tgdb_response *response)
     kui_input_acceptable = 1;
 }
 
-static void update_quit(struct tgdb_response *response)
-{
-    if_display_message("Program exited with value", WIN_REFRESH, 0, " %d",
-        (int8_t)response->choice.inferior_exited.exit_status);
-}
-
 static void update_completions(struct tgdb_response *response)
 {
     do_tab_completion(response->choice.update_completions.completions);
@@ -1150,9 +1144,6 @@ static void process_commands(struct tgdb *tgdb_in)
             break;
         case TGDB_UPDATE_SOURCE_FILES:
             update_source_files(item);
-            break;
-        case TGDB_INFERIOR_EXITED:
-            update_quit(item);
             break;
         case TGDB_UPDATE_COMPLETIONS:
             update_completions(item);

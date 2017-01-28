@@ -17,7 +17,6 @@
 #include "sys_util.h"
 #include "a2-tgdb.h"
 #include "io.h"
-#include "state_machine.h"
 #include "commands.h"
 #include "ibuf.h"
 
@@ -129,7 +128,6 @@ int a2_initialize(struct annotate_two *a2,
     *debugger_stdin = a2->debugger_stdin;
     *debugger_stdout = a2->debugger_out;
 
-    a2->sm = state_machine_initialize();
     a2->c = commands_initialize(a2);
     a2->client_commands = NULL;
 
@@ -170,7 +168,6 @@ int a2_shutdown(struct annotate_two *a2)
     cgdb_close(a2->debugger_stdin);
     a2->debugger_stdin = -1;
 
-    state_machine_shutdown(a2->sm);
     commands_shutdown(a2->c);
 
     a2_delete_responses(a2);
@@ -200,16 +197,6 @@ void a2_delete_responses(struct annotate_two *a2)
     sbsetcount(a2->responses, 0);
 }
 
-
-int a2_is_client_ready(struct annotate_two *a2)
-{
-    if (!a2->tgdb_initialized)
-        return 0;
-
-    /* Return 1 if the user is at the prompt */
-    return (data_get_state(a2->sm) == USER_AT_PROMPT);
-}
-
 int a2_get_current_location(struct annotate_two *a2)
 {
     return commands_issue_command(a2, ANNOTATE_INFO_FRAME, NULL, 1);
@@ -228,9 +215,4 @@ int a2_user_ran_command(struct annotate_two *a2)
 void a2_prepare_for_command(struct annotate_two *a2, struct tgdb_command *com)
 {
     commands_prepare_for_command(a2, a2->c, com);
-}
-
-int a2_is_misc_prompt(struct annotate_two *a2)
-{
-    return sm_is_misc_prompt(a2->sm);
 }

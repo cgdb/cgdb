@@ -60,13 +60,17 @@ enum COMMAND_STATE commands_get_state(struct commands *c);
 int commands_issue_command(struct annotate_two *a2,
     enum annotate_commands commmand, const char *data, int oob);
 
-/* commands_process: This function receives the output from gdb when gdb
- *                   is running a command on behalf of this package.
+/**
+ * This function receives the output from gdb when gdb
+ * is running a command on behalf of this package.
  *
- *    a     -> the character received from gdb.
- *    com   -> commands to give back to gdb.
+ * @param c
+ * The commands instance
+ *
+ * @param str
+ * The string to process
  */
-void commands_process(struct commands *c, char a);
+void commands_process(struct commands *c, const std::string &str);
 
 
 /* commands_prepare_for_command:
@@ -195,5 +199,7 @@ void commands_issue_command(struct annotate_two *a2,
  */
 int commands_process_cgdb_gdbmi(struct annotate_two *a2, struct ibuf *buf,
     int result_record, char *result_line, int id);
+
+bool commands_is_console_command(struct commands *c);
 
 #endif /* __COMMANDS_H__ */

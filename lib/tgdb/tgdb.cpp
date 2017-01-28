@@ -28,7 +28,7 @@
 #include "a2-tgdb.h"
 #include "tgdb.h"
 #include "commands.h"
-#include "state_machine.h"
+#include "annotations.h"
 #include "ibuf.h"
 #include "io.h"
 #include "pseudo.h" /* SLAVE_SIZE constant */
@@ -48,6 +48,9 @@ struct tgdb {
 
   /** A client context to abstract the debugger.  */
     struct annotate_two *a2;
+
+    /** The GDB annotations parser */
+    struct annotations_parser *parser;
 
   /** Reading from this will read from the debugger's output */
     int debugger_stdout;
@@ -160,7 +163,7 @@ static void tgdb_run_or_queue_command(struct tgdb *tgdb,
 static int tgdb_can_issue_command(struct tgdb *tgdb)
 {
     if (tgdb->is_gdb_ready_for_next_command &&
-        a2_is_client_ready(tgdb->a2) &&
+        annotations_parser_at_prompt(tgdb->parser) &&
         (sbcount(tgdb->gdb_input_queue) == 0))
         return 1;
 
@@ -175,7 +178,7 @@ static int tgdb_can_issue_command(struct tgdb *tgdb)
  */
 static int tgdb_has_command_to_run(struct tgdb *tgdb)
 {
-    if (a2_is_client_ready(tgdb->a2) &&
+    if (annotations_parser_at_prompt(tgdb->parser) &&
         ((sbcount(tgdb->gdb_input_queue) > 0) ||
             (sbcount(tgdb->oob_input_queue) > 0)))
         return 1;
@@ -277,6 +280,7 @@ static struct tgdb *initialize_tgdb_context(void)
     struct tgdb *tgdb = (struct tgdb *) cgdb_malloc(sizeof (struct tgdb));
 
     tgdb->a2 = NULL;
+    tgdb->parser = NULL;
     tgdb->control_c = 0;
 
     tgdb->debugger_stdout = -1;
@@ -370,6 +374,23 @@ static int tgdb_initialize_logger_interface(struct tgdb *tgdb, char *config_dir)
     return 0;
 }
 
+static void tgdb_source_location_changed(void *context)
+{
+    struct tgdb *tgdb = (struct tgdb*)context;
+    a2_get_current_location(tgdb->a2);
+}
+
+static void tgdb_prompt_changed(void *context, const std::string &prompt)
+{
+    struct tgdb *tgdb = (struct tgdb*)context;
+
+    struct tgdb_response *response =
+        tgdb_create_response(TGDB_UPDATE_CONSOLE_PROMPT_VALUE);
+    response->choice.update_console_prompt_value.prompt_value =
+            cgdb_strdup(prompt.c_str());
+    sbpush(tgdb->a2->responses, response);
+}
+
 /* Creating and Destroying a libtgdb context. {{{*/
 
 struct tgdb *tgdb_initialize(const char *debugger,
@@ -377,6 +398,11 @@ struct tgdb *tgdb_initialize(const char *debugger,
 {
     /* Initialize the libtgdb context */
     struct tgdb *tgdb = initialize_tgdb_context();
+    static struct annotations_parser_callbacks callbacks = {
+        tgdb,
+        tgdb_source_location_changed,
+        tgdb_prompt_changed
+    };
     char config_dir[FSUTIL_PATH_MAX];
     char logs_dir[FSUTIL_PATH_MAX];
 
@@ -398,6 +424,8 @@ struct tgdb *tgdb_initialize(const char *debugger,
         clog_error(CLOG_CGDB, "a2_create_context failed");
         return NULL;
     }
+
+    tgdb->parser = annotations_parser_initialize(callbacks);
 
     if (a2_initialize(tgdb->a2,
                     &(tgdb->debugger_stdin),
@@ -434,6 +462,9 @@ int tgdb_shutdown(struct tgdb *tgdb)
         tgdb_command_destroy(tc);
     }
     sbfree(tgdb->oob_input_queue);
+
+    annotations_parser_shutdown(tgdb->parser);
+
     return a2_shutdown(tgdb->a2);
 }
 
@@ -757,10 +788,10 @@ static void tgdb_unqueue_and_deliver_command(struct tgdb *tgdb)
 
         item = sbpopfront(tgdb->gdb_input_queue);
 
-        /* If at the misc prompt, don't run the internal tgdb commands,
-         * In fact throw them out for now, since they are only 
-         * 'info breakpoints' */
-        if (a2_is_misc_prompt(tgdb->a2) == 1) {
+        if (annotations_parser_at_miscellaneous_prompt(tgdb->parser)) {
+            /* If at the misc prompt, don't run the internal tgdb commands,
+             * In fact throw them out for now, since they are only 
+             * 'info breakpoints' */
             if (item->command_choice != TGDB_COMMAND_CONSOLE) {
                 tgdb_command_destroy(item);
                 goto tgdb_unqueue_and_deliver_command_tag;
@@ -891,6 +922,7 @@ size_t tgdb_process(struct tgdb * tgdb, char *buf, size_t n, int *is_finished)
     char local_buf[10 * n];
     ssize_t size;
     size_t buf_size = 0;
+    std::string result;
 
     /* TODO: This is kind of a hack.
      * Since I know that I didn't do a read yet, the next select loop will
@@ -944,16 +976,20 @@ size_t tgdb_process(struct tgdb * tgdb, char *buf, size_t n, int *is_finished)
      * buf and buf_size are the data to be returned from the user.
      */
 
-    /* Reset command_finished var. This will get set to 1
-       when prompt annotation is parsed. */
-    tgdb->a2->command_finished = 0;
     local_buf[size] = '\0';
-    a2_parse_io(tgdb->a2, local_buf, size, buf, &buf_size);
+
+    result = annotations_parser_io(tgdb->parser, local_buf, size);
+
+    if (commands_is_console_command(tgdb->a2->c)) {
+        strncpy(buf, result.c_str(), result.size());
+        buf_size = result.size();
+    } else {
+        commands_process(tgdb->a2->c, result);
+    }
 
     tgdb_process_client_commands(tgdb);
 
-    if (tgdb->a2->command_finished == 1)
-    {
+    if (annotations_parser_at_prompt(tgdb->parser)) {
         /* success, and finished command */
         tgdb->is_gdb_ready_for_next_command = 1;
     }
@@ -1050,8 +1086,6 @@ int tgdb_delete_response(struct tgdb_response *com)
             com->choice.update_source_files.source_files = NULL;
             break;
         }
-        case TGDB_INFERIOR_EXITED:
-            break;
         case TGDB_UPDATE_COMPLETIONS:
         {
             int i;

@@ -28,19 +28,11 @@ struct annotate_two {
     /** pid of child process. */
     pid_t debugger_pid;
 
-    /** Marks whether gdb command has finished. Ie, at gdb prompt or not. */
-    int command_finished;
-
     /** The config directory that this context can write too. */
     char config_dir[FSUTIL_PATH_MAX];
 
     /** The init file for the debugger. */
     char gdb_init_file[FSUTIL_PATH_MAX];
-
-    /** 
-	 * This module is used for parsing the output of gdb for annotate 2 
-     * It is used to determine what is a gdb output and what is annotations */
-    struct state_machine *sm;
 
     /**
 	 * This module is used for parsing the commands output of gdb
@@ -223,18 +215,6 @@ void a2_delete_responses(struct annotate_two *a2);
 
 /*@{*/
 
-/**
- * This determines if the annotate two context is ready to receive
- * another command.
- *
- * \param ctx
- * The annotate two context.
- *
- * @return
- * 1 if it is ready, 0 if it is not.
- */
-int a2_is_client_ready(struct annotate_two *a2);
-
 /** 
  * This lets the annotate_two know that the user ran a command.
  * The client can update itself here if it need to.
@@ -260,18 +240,6 @@ int a2_user_ran_command(struct annotate_two *a2);
  * -1 on error, 0 on success
  */
 void a2_prepare_for_command(struct annotate_two *a2, struct tgdb_command *com);
-
-/**
- * This is a hack. It should be removed eventually.
- * It tells tgdb-base not to send its internal commands when this is true.
- *
- * \param ctx
- * The annotate two context.
- *
- * @return
- * 1 if it is at a misc prompt, 0 if it is not.
- */
-int a2_is_misc_prompt(struct annotate_two *a2);
 
 /*@}*/
 

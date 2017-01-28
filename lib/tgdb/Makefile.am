@@ -7,6 +7,8 @@ AM_CXXFLAGS = \
 noinst_LIBRARIES = libtgdb.a
 
 libtgdb_a_SOURCES = \
+    annotations.cpp \
+    annotations.h \
     tgdb.cpp \
     tgdb.h \
     tgdb_command.h \
@@ -15,8 +17,6 @@ libtgdb_a_SOURCES = \
     a2-tgdb.h \
     commands.cpp \
     commands.h \
-    state_machine.cpp \
-    state_machine.h \
     gdbwire.c \
     gdbwire.h 
 

@@ -26,7 +26,6 @@
 #include "tgdb_types.h"
 #include "ibuf.h"
 #include "gdbwire.h"
-#include "state_machine.h"
 
 /**
  * This structure represents most of the I/O parsing state of the 
@@ -64,6 +63,14 @@ struct commands {
      * True if the disassemble command supports /s, otherwise false.
      */
     int disassemble_supports_s_mode;
+
+    /**
+     * True if this is a console command, False otherwise.
+     *
+     * This member is used to determine if the output of the current
+     * command running should be sent back to the console.
+     */
+    bool is_console_command;
 };
 
 static void
@@ -435,6 +442,7 @@ struct commands *commands_initialize(struct annotate_two *a2)
     c->wire = gdbwire_create(callbacks);
 
     c->disassemble_supports_s_mode = 0;
+    c->is_console_command = true;
 
     return c;
 }
@@ -473,20 +481,13 @@ enum COMMAND_STATE commands_get_state(struct commands *c)
     return c->cur_command_state;
 }
 
-static void
-commands_prepare_info_source(struct annotate_two *a2, struct commands *c)
-{
-    data_set_state(a2, INTERNAL_COMMAND);
-    commands_set_state(c, INFO_SOURCE);
-}
-
-void commands_process(struct commands *c, char a)
+void commands_process(struct commands *c, const std::string &str)
 {
     switch (commands_get_state(c)) {
         case VOID_COMMAND:
             break;
         default:
-            gdbwire_push_data(c->wire, &a, 1);
+            gdbwire_push_data(c->wire, str.data(), str.size());
             break;
     }
 }
@@ -498,22 +499,19 @@ commands_prepare_for_command(struct annotate_two *a2,
     enum annotate_commands a_com = com->command;
 
     /* Set the commands state to nothing */
-    commands_set_state(c, VOID_COMMAND);
-
-    if (a_com == -1) {
-        data_set_state(a2, USER_COMMAND);
-        return;
-    }
+    c->is_console_command = (com->command_choice == TGDB_COMMAND_CONSOLE);
 
     switch (a_com) {
+        case -1:
+            commands_set_state(c, VOID_COMMAND);
+            break;
         case ANNOTATE_INFO_SOURCES:
             commands_set_state(c, INFO_SOURCES);
             break;
         case ANNOTATE_INFO_SOURCE:
-            commands_prepare_info_source(a2, c);
+            commands_set_state(c, INFO_SOURCE);
             break;
         case ANNOTATE_INFO_FRAME:
-            data_set_state(a2, INTERNAL_COMMAND);
             commands_set_state(c, INFO_FRAME);
             break;
         case ANNOTATE_INFO_BREAKPOINTS:
@@ -523,6 +521,7 @@ commands_prepare_for_command(struct annotate_two *a2,
             break;              /* Nothing to do */
         case ANNOTATE_COMPLETE:
             c->completions = 0;
+            
             commands_set_state(c, COMMAND_COMPLETE);
             break;
         case ANNOTATE_DATA_DISASSEMBLE_MODE_QUERY:
@@ -546,10 +545,9 @@ commands_prepare_for_command(struct annotate_two *a2,
             break;
         default:
             clog_error(CLOG_CGDB, "commands_prepare_for_command error");
+            commands_set_state(c, VOID_COMMAND);
             break;
     };
-
-    data_set_state(a2, INTERNAL_COMMAND);
 }
 
 /** 
@@ -673,4 +671,9 @@ int commands_issue_command(struct annotate_two *a2,
 int commands_disassemble_supports_s_mode(struct commands *c)
 {
     return c->disassemble_supports_s_mode;
+}
+
+bool commands_is_console_command(struct commands *c)
+{
+    return c->is_console_command;
 }
