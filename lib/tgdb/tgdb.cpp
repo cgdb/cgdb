@@ -539,7 +539,7 @@ static int tgdb_disassemble_pc(struct annotate_two *a2, int lines)
     char *data = NULL;
 
     data = lines ? sys_aprintf("%d", lines) : NULL;
-    ret = commands_issue_command(a2, ANNOTATE_DISASSEMBLE_PC, data, 0);
+    ret = commands_issue_command(a2, COMMAND_DISASSEMBLE_PC, data, 0);
 
     free(data);
     return ret;
@@ -575,7 +575,7 @@ static int tgdb_disassemble_func(struct annotate_two *a2, int raw, int source)
         data = sys_aprintf("%s", "/s");
     }
 
-    ret = commands_issue_command(a2, ANNOTATE_DISASSEMBLE_FUNC, data, 0);
+    ret = commands_issue_command(a2, COMMAND_DISASSEMBLE_FUNC, data, 0);
 
     free(data);
     return ret;
@@ -664,8 +664,7 @@ tgdb_send(struct tgdb *tgdb, const char *command,
     }
 
     /* Create the client command */
-    tc = tgdb_command_create(command, command_choice,
-        ANNOTATE_UNUSED);
+    tc = tgdb_command_create(command, command_choice, COMMAND_USER_COMMAND);
 
     free(temp_command);
     temp_command = NULL;
@@ -1306,14 +1305,14 @@ int tgdb_process_command(struct tgdb *tgdb, tgdb_request_ptr request)
         }
     } else {
         if (request->header == TGDB_REQUEST_INFO_SOURCES) {
-            commands_issue_command(tgdb->a2, ANNOTATE_INFO_SOURCES, NULL, 0);
+            commands_issue_command(tgdb->a2, COMMAND_INFO_SOURCES, NULL, 0);
         }
         else if (request->header == TGDB_REQUEST_CURRENT_LOCATION) {
-            commands_issue_command(tgdb->a2, ANNOTATE_INFO_FRAME, NULL, 0);
+            commands_issue_command(tgdb->a2, COMMAND_INFO_FRAME, NULL, 0);
         }
         else if (request->header == TGDB_REQUEST_COMPLETE) {
-            commands_issue_command(tgdb->a2,
-                    ANNOTATE_COMPLETE, request->choice.complete.line, 1);
+            commands_issue_command(tgdb->a2, COMMAND_COMPLETE,
+                request->choice.complete.line, 1);
         }
         else if (request->header == TGDB_REQUEST_DISASSEMBLE_PC) {
             tgdb_disassemble_pc(tgdb->a2, request->choice.disassemble.lines);

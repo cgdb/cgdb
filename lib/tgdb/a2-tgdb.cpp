@@ -38,7 +38,7 @@ int a2_open_new_tty(struct annotate_two *a2, int *inferior_stdin, int *inferior_
     *inferior_stdin = pty_pair_get_masterfd(a2->pty_pair);
     *inferior_stdout = pty_pair_get_masterfd(a2->pty_pair);
 
-    commands_issue_command(a2, ANNOTATE_TTY,
+    commands_issue_command(a2, COMMAND_TTY,
         pty_pair_get_slavename(a2->pty_pair), 1);
 
     return 0;
@@ -143,16 +143,15 @@ int a2_initialize(struct annotate_two *a2,
      * if the user puts breakpoints in there .gdbinit.
      * This makes sure that TGDB asks for the breakpoints on start up.
      */
-    if (commands_issue_command(a2,
-                    ANNOTATE_INFO_BREAKPOINTS, NULL, 0) == -1) {
+    if (commands_issue_command(a2, COMMAND_BREAKPOINTS, NULL, 0) == -1) {
         return -1;
     }
 
     /**
      * Query if disassemble supports the /s flag
      */
-    if (commands_issue_command(a2,
-                    ANNOTATE_DATA_DISASSEMBLE_MODE_QUERY, NULL, 1) == -1) {
+    if (commands_issue_command(a2, COMMAND_DATA_DISASSEMBLE_MODE_QUERY, NULL,
+            1) == -1) {
         return -1;
     }
 
@@ -199,7 +198,7 @@ void a2_delete_responses(struct annotate_two *a2)
 
 int a2_get_current_location(struct annotate_two *a2)
 {
-    return commands_issue_command(a2, ANNOTATE_INFO_FRAME, NULL, 1);
+    return commands_issue_command(a2, COMMAND_INFO_FRAME, NULL, 1);
 }
 
 pid_t a2_get_debugger_pid(struct annotate_two *a2)
