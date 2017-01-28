@@ -84,7 +84,7 @@ enum command_kind {
 
 
 /* commands_initialize: Initialize the commands unit */
-struct commands *commands_initialize(struct annotate_two *a2);
+struct commands *commands_initialize(struct tgdb *tgdb);
 void commands_shutdown(struct commands *c);
 
 /* commands_set_field_num: This is used for breakpoint annotations.
@@ -103,7 +103,7 @@ void commands_set_field_num(struct commands *c, int field_num);
  *
  *  Returns -1 on error, 0 on success
  */
-int commands_issue_command(struct annotate_two *a2,
+int commands_issue_command(struct commands *c,
     enum command_kind commmand_kind, const char *data, int oob);
 
 /**
@@ -126,8 +126,7 @@ void commands_process(struct commands *c, const std::string &str);
  *
  *  com:    The command to be run.
  */
-void commands_prepare_for_command(struct annotate_two *a2, struct commands *c,
-        struct tgdb_command *com);
+void commands_prepare_for_command(struct commands *c, struct tgdb_command *com);
 
 /* commands_user_ran_command:
  * --------------------------
@@ -137,7 +136,7 @@ void commands_prepare_for_command(struct annotate_two *a2, struct commands *c,
  *
  * Returns: -1 on error, 0 on success
  */
-int commands_user_ran_command(struct annotate_two *a2);
+int commands_user_ran_command(struct commands *c);
 
 /**
  * The current command type. TGDB is capable of having any commands of this
@@ -228,23 +227,36 @@ void tgdb_command_destroy(struct tgdb_command *tc);
  */
 int commands_disassemble_supports_s_mode(struct commands *c);
 
-/* commands_issue_command:
- * -----------------------
- *
- *  Issue a given command to gdb.
- */
-void commands_issue_command(struct annotate_two *a2,
-    enum command_kind commmand_kind, const char *data, int oob, int *id);
-
-/* commands_process: This function receives the output from gdb when gdb
- *                   is running a command on behalf of this package.
- *
- *    a     -> the character received from gdb.
- *    com   -> commands to give back to gdb.
- */
-int commands_process_cgdb_gdbmi(struct annotate_two *a2, struct ibuf *buf,
-    int result_record, char *result_line, int id);
-
 bool commands_is_console_command(struct commands *c);
+
+/**
+ * Add a tgdb response.
+ *
+ * @param c
+ * The commands instance
+ *
+ * @param response
+ * The response to add
+ */
+void commands_add_response(struct commands *c, struct tgdb_response *response);
+
+/**
+ * Delete all the tgdb responses associated with this commands instance.
+ *
+ * @param c
+ * The commands instance
+ */
+void commands_delete_responses(struct commands *c);
+
+/**
+ * Get the tgdb responses for the given index.
+ *
+ * @param c
+ * The commands instance
+ *
+ * @param index
+ * The response index to get. Start at 0 and move up until NULL is returned.
+ */
+struct tgdb_response *commands_get_response(struct commands *c, int index);
 
 #endif /* __COMMANDS_H__ */

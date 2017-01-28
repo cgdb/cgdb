@@ -13,8 +13,6 @@ libtgdb_a_SOURCES = \
     tgdb.h \
     tgdb_command.h \
     tgdb_types.h \
-    a2-tgdb.cpp \
-    a2-tgdb.h \
     commands.cpp \
     commands.h \
     gdbwire.c \

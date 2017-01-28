@@ -215,8 +215,6 @@
 /**
  * @name Inferior tty commands
  * These functinos are used to alter the tty state of the inferior program.
- * These functions currently are not always supported. If the annotate_two
- * subsytem is being used, the tty commands are supported.
  */
 /******************************************************************************/
 
