@@ -169,7 +169,7 @@ static void scroller_set_last_inferior_attr(struct scroller *scr)
         /* Grab last attribute */
         int attr = sl->attrs[sbcount(sl->attrs) - 1].attr;
 
-        /* Store last attribute for following tty lines */
+        /* Store last attribute for following inferior lines */
         scr->last_inferior_attr = attr ? attr : -1;
     }
 }
