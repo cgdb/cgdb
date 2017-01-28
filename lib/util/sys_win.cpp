@@ -98,7 +98,7 @@ int swin_keypad(SWINDOW *win, int bf)
 
 char *swin_tigetstr(const char *capname)
 {
-    return tigetstr(capname);
+    return tigetstr((char*)capname);
 }
 
 int swin_move(int y, int x)
