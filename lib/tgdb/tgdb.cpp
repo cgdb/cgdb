@@ -538,9 +538,9 @@ int tgdb_shutdown(struct tgdb *tgdb)
     cgdb_close(tgdb->debugger_stdin);
     tgdb->debugger_stdin = -1;
 
-    commands_shutdown(tgdb->c);
-
     commands_delete_responses(tgdb->c);
+
+    commands_shutdown(tgdb->c);
 
     return 0;
 }
