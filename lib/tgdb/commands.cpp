@@ -472,6 +472,7 @@ struct commands *commands_initialize(struct tgdb *tgdb)
 
     c->disassemble_supports_s_mode = 0;
     c->is_console_command = true;
+    c->responses = NULL;
 
     return c;
 }
@@ -494,6 +495,10 @@ void commands_shutdown(struct commands *c)
     /* TODO: free source_files queue */
 
     gdbwire_destroy(c->wire);
+
+    commands_delete_responses(c);
+    sbfree(c->responses);
+    c->responses = NULL;
 
     free(c);
     c = NULL;
