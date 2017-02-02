@@ -350,7 +350,7 @@ std::string annotations_parser_io(
         annotations_parser *parser, char *str, size_t size)
 {
     std::string result;
-    size_t i, counter = 0;
+    size_t i;
 
     for (i = 0; i < size; ++i) {
         /* Ignore all car returns outputted by gdb */

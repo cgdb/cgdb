@@ -424,7 +424,6 @@ static void gdbwire_result_record_callback(void *context,
             if (result_record->result_class == GDBWIRE_MI_DONE) {
                 c->disassemble_supports_s_mode = 1;
             }
-            
             break;
         case COMMAND_INFO_SOURCE:
             commands_process_info_source(c, result_record);
@@ -432,6 +431,7 @@ static void gdbwire_result_record_callback(void *context,
         case COMMAND_INFO_FRAME:
             commands_process_info_frame(c, result_record);
             break;
+        case COMMAND_TTY:
         case COMMAND_USER_COMMAND:
             break;
     }
