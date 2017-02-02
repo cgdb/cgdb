@@ -512,19 +512,36 @@ struct tgdb *tgdb_initialize(const char *debugger,
     return tgdb;
 }
 
-int tgdb_shutdown(struct tgdb *tgdb)
+static void tgdb_clear_input_queue(struct tgdb *tgdb)
 {
     int i;
+
     for (i = 0; i < sbcount(tgdb->gdb_input_queue); i++) {
         struct tgdb_command *tc = tgdb->gdb_input_queue[i];
         tgdb_command_destroy(tc);
     }
-    sbfree(tgdb->gdb_input_queue);
+    sbsetcount(tgdb->gdb_input_queue, 0);
+}
+
+static void tgdb_clear_client_request_queue(struct tgdb *tgdb)
+{
+    int i;
 
     for (i = 0; i < sbcount(tgdb->gdb_client_request_queue); i++) {
         tgdb_request_ptr tr = tgdb->gdb_client_request_queue[i];
         tgdb_request_destroy(tr);
     }
+    sbsetcount(tgdb->gdb_client_request_queue, 0);
+}
+
+int tgdb_shutdown(struct tgdb *tgdb)
+{
+    int i;
+
+    tgdb_clear_input_queue(tgdb);
+    sbfree(tgdb->gdb_input_queue);
+
+    tgdb_clear_client_request_queue(tgdb);
     sbfree(tgdb->gdb_client_request_queue);
 
     for (i = 0; i < sbcount(tgdb->priority_queue); i++) {
@@ -699,8 +716,9 @@ static void tgdb_request_destroy_func(void *item)
 static int tgdb_handle_signals(struct tgdb *tgdb)
 {
     if (tgdb->control_c) {
-        sbsetcount(tgdb->gdb_input_queue, 0);
-        sbsetcount(tgdb->gdb_client_request_queue, 0);
+        tgdb_clear_input_queue(tgdb);
+        tgdb_clear_client_request_queue(tgdb);
+
         tgdb->control_c = 0;
     }
 
