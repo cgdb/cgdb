@@ -238,7 +238,11 @@ static void send_command_complete_response(struct commands *c)
 {
     struct tgdb_response *response =
         tgdb_create_response(TGDB_UPDATE_COMPLETIONS);
+
     response->choice.update_completions.completions = c->completions;
+    /* Clear commands completions since we've just stolen that pointer. */
+    c->completions = NULL;
+
     commands_add_response(c, response);
 }
 
