@@ -222,8 +222,10 @@ commands_process_info_sources(struct commands *c,
 static void send_disassemble_func_complete_response(struct commands *c,
         struct gdbwire_mi_result_record *result_record)
 {
+    tgdb_response_type type = (c->cur_command_kind == COMMAND_DISASSEMBLE_PC) ?
+        TGDB_DISASSEMBLE_PC : TGDB_DISASSEMBLE_FUNC;
     struct tgdb_response *response =
-        tgdb_create_response(TGDB_DISASSEMBLE_FUNC);
+        tgdb_create_response(type);
 
     response->choice.disassemble_function.error = 
         (result_record->result_class == GDBWIRE_MI_ERROR);

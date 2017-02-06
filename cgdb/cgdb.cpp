@@ -1063,14 +1063,14 @@ static void update_disassemble(struct tgdb_response *response)
         //$ TODO mikesart: Need way to make sure we don't recurse here on error.
         //$ TODO mikesart: 100 lines? Way to load more at end?
 
-
-        /* Spew out a warning about disassemble failing
-         * and disasm next 100 instructions. */
-        // TODO:
-        // if_print_message("\nWarning: %s\n",
-        //    item->choice.disassemble_function.disasm[0]);
-
-        tgdb_request_disassemble_pc(tgdb, 100);
+        if (response->header == TGDB_DISASSEMBLE_PC) {
+            /* Spew out a warning about disassemble failing
+             * and disasm next 100 instructions. */
+            if_print_message("\nWarning: dissasemble address 0x%" PRIx64 " failed.\n",
+                response->choice.disassemble_function.addr_start);
+        } else {
+            tgdb_request_disassemble_pc(tgdb, 100);
+        }
     } else {
         uint64_t addr_start = response->choice.disassemble_function.addr_start;
         uint64_t addr_end = response->choice.disassemble_function.addr_end;
