@@ -73,11 +73,10 @@ const char *pty_pair_get_slavename(pty_pair_ptr pty_pair);
  *      in:    Writing to this fd, will write to the STDIN of new program.
  *      out:   Reading from fd, will read from the STDOUT-STDERR of new program.
  *      choice: 0 for annotate 2, 1 for gdbmi
- *      filename: The name of the init file for annotate 2
  *
  *      Return: -1 on error, pid of child on success
  */
 int invoke_debugger(const char *path,
-        int argc, char *argv[], int *in, int *out, int choice, char *filename);
+        int argc, char *argv[], int *in, int *out, int choice);
 
 #endif

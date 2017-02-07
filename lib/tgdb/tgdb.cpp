@@ -142,13 +142,6 @@ struct tgdb {
      * been received. So no matter how many are receieved, this will only
      * be 1. Otherwise if none have been received this will be 0.  */
     int has_sigchld_recv;
-
-    /** The config directory that this context can write too. */
-    char config_dir[FSUTIL_PATH_MAX];
-
-    /** The init file for the debugger. */
-    char gdb_init_file[FSUTIL_PATH_MAX];
-
 };
 
 /* }}} */
@@ -288,9 +281,6 @@ static struct tgdb *initialize_tgdb_context(void)
 
     tgdb->has_sigchld_recv = 0;
 
-    tgdb->config_dir[0] = '\0';
-    tgdb->gdb_init_file[0] = '\0';
-
     return tgdb;
 }
 
@@ -301,61 +291,38 @@ static struct tgdb *initialize_tgdb_context(void)
 /* 
  * Gets the users home dir and creates the config directory.
  *
- * \param tgdb
+ * Also returns the logs directory.
+ *
+ * @param tgdb
  * The tgdb context.
  *
- * \param config_dir 
+ * @param logs_dir 
  * Should be FSUTIL_PATH_MAX in size on way in.
- * On way out, it will be the path to the config dir
+ * On way out, it will be the path to the logs dir
  *
  * \return
  * -1 on error, or 0 on success
  */
-static int tgdb_initialize_config_dir(struct tgdb *tgdb,
-    char *config_dir, char *logs_dir)
+static int tgdb_initialize_config_dir(struct tgdb *tgdb, char *logs_dir)
 {
+    char config_dir[FSUTIL_PATH_MAX];
     char *home_dir = getenv("HOME");
 
     /* Make sure the toplevel .cgdb dir exists */
     snprintf(config_dir, FSUTIL_PATH_MAX, "%s/.cgdb", home_dir);
-    fs_util_create_dir(config_dir);
+    if (!fs_util_create_dir(config_dir)) {
+        clog_error(CLOG_CGDB, "Could not create dir %s", config_dir);
+        return -1;
+    }
 
     /* Try to create full .cgdb/logs directory */
     snprintf(logs_dir, FSUTIL_PATH_MAX, "%s/.cgdb/logs", home_dir);
     if (!fs_util_create_dir(logs_dir)) {
-        clog_error(CLOG_CGDB, "fs_util_create_dir_in_base error");
+        clog_error(CLOG_CGDB, "Could not create dir %s", logs_dir);
         return -1;
     }
 
     return 0;
-}
-
-/**
- * Creates a config file for the user.
- *
- *  Pre: The directory already has read/write permissions. This should have
- *       been checked by tgdb-base.
- *
- *  Return: 1 on success or 0 on error
- */
-static int tgdb_setup_config_file(struct tgdb *tgdb, const char *dir)
-{
-    FILE *fp;
-
-    strncpy(tgdb->config_dir, dir, strlen(dir) + 1);
-
-    fs_util_get_path(dir, "gdb_init_commands", tgdb->gdb_init_file);
-
-    if ((fp = fopen(tgdb->gdb_init_file, "w"))) {
-        fprintf(fp, "set annotate 2\n"
-                    "set height 0\n");
-        fclose(fp);
-    } else {
-        clog_error(CLOG_CGDB, "fopen error '%s'", tgdb->gdb_init_file);
-        return 0;
-    }
-
-    return 1;
 }
 
 /**
@@ -364,17 +331,17 @@ static int tgdb_setup_config_file(struct tgdb *tgdb, const char *dir)
  * \param tgdb
  * The tgdb context.
  *
- * \param config_dir 
- * The path to the user's config directory
+ * \param logs_dir 
+ * The path to the user's logging directory
  *
  * \return
  * -1 on error, or 0 on success
  */
-static int tgdb_initialize_logger_interface(struct tgdb *tgdb, char *config_dir)
+static int tgdb_initialize_logger_interface(struct tgdb *tgdb, char *logs_dir)
 {
     /* Open our cgdb and tgdb io logfiles */
-    clog_open(CLOG_CGDB_ID, "%s/cgdb_log%d.txt", config_dir);
-    clog_open(CLOG_GDBIO_ID, "%s/cgdb_gdb_io_log%d.txt", config_dir);
+    clog_open(CLOG_CGDB_ID, "%s/cgdb_log%d.txt", logs_dir);
+    clog_open(CLOG_GDBIO_ID, "%s/cgdb_gdb_io_log%d.txt", logs_dir);
 
     /* Puts cgdb in a mode where it writes a debug log of everything
      * that is read from gdb. That is basically the entire session.
@@ -452,11 +419,10 @@ struct tgdb *tgdb_initialize(const char *debugger,
         tgdb_source_location_changed,
         tgdb_prompt_changed
     };
-    char config_dir[FSUTIL_PATH_MAX];
     char logs_dir[FSUTIL_PATH_MAX];
 
     /* Create config directory */
-    if (tgdb_initialize_config_dir(tgdb, config_dir, logs_dir) == -1) {
+    if (tgdb_initialize_config_dir(tgdb, logs_dir) == -1) {
         clog_error(CLOG_CGDB, "tgdb_initialize error");
         return NULL;
     }
@@ -466,14 +432,8 @@ struct tgdb *tgdb_initialize(const char *debugger,
         return NULL;
     }
 
-    if (!tgdb_setup_config_file(tgdb, config_dir)) {
-        clog_error(CLOG_CGDB,  "error setting up config file");
-        return NULL;
-    }
-
     tgdb->debugger_pid = invoke_debugger(debugger, argc, argv,
-            &tgdb->debugger_stdin, &tgdb->debugger_stdout,
-            0, tgdb->gdb_init_file);
+            &tgdb->debugger_stdin, &tgdb->debugger_stdout, 0);
 
     /* Couldn't invoke process */
     if (tgdb->debugger_pid == -1)
