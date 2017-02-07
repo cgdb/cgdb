@@ -5,8 +5,6 @@ noinst_LIBRARIES = libadt.a
 libadt_a_SOURCES = \
     ibuf.cpp \
     ibuf.h \
-    queue.cpp \
-    queue.h \
     std_bbtree.cpp \
     std_bbtree.h \
     std_btree.cpp \
