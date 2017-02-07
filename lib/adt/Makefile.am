@@ -9,14 +9,12 @@ libadt_a_SOURCES = \
     std_bbtree.h \
     std_btree.cpp \
     std_btree.h \
-    std_hash.cpp \
-    std_hash.h \
     std_list.cpp \
     std_list.h \
     std_types.h
 
 # Installs the driver programs into progs directory
-noinst_PROGRAMS = ibuf_driver std_hash_driver std_list_driver \
+noinst_PROGRAMS = ibuf_driver std_list_driver \
                   std_btree_driver std_bbtree_driver
 
 # This is the ibuf driver
@@ -26,14 +24,6 @@ libadt.a \
 $(top_builddir)/lib/util/libcgdbutil.a
 ibuf_driver_SOURCES = ibuf_driver.cpp
 ibuf_driver_CXXFLAGS = $(AM_CXXFLAGS)
-
-# This is the hash table driver
-std_hash_driver_LDFLAGS = -L. -L$(top_builddir)/lib/util
-std_hash_driver_LDADD = \
-libadt.a \
-$(top_builddir)/lib/util/libcgdbutil.a
-std_hash_driver_SOURCES = std_hash_driver.cpp
-std_hash_driver_CXXFLAGS = $(AM_CXXFLAGS)
 
 # This is the linked list driver
 std_list_driver_LDFLAGS = -L. -L$(top_builddir)/lib/util
