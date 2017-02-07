@@ -261,3 +261,8 @@ int swin_color_pair(int pair)
 {
     return COLOR_PAIR(pair);
 }
+
+int swin_raw(void)
+{
+    return raw();
+}

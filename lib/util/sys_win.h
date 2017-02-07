@@ -130,4 +130,14 @@ int swin_init_pair(int pair, int f, int b);
 int swin_pair_content(int pair, int *f, int *b);
 int swin_color_pair(int pair); /* COLOR_PAIR(n) */
 
+/**
+ * Put the keyboard into raw mode.
+ *
+ * This is currently only used by the kui_driver.
+ *
+ * @return
+ * 0 on succes or -1 on error
+ */
+int swin_raw(void);
+
 #endif

@@ -363,6 +363,7 @@ int main(int argc, char **argv)
 {
     /* Initialize curses */
     swin_initscr();
+    swin_raw();
     swin_refresh();
 
     manager = kui_manager_create(STDIN_FILENO, 40, 1000);
