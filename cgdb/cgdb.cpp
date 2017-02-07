@@ -1724,10 +1724,10 @@ int init_kui(void)
     /* Combine the cgdbrc config package with libkui. If any of the options
      * below change, update the KUI.  Currently, the handles are not kept around,
      * because CGDB never plans on detaching. */
-    cgdbrc_attach(CGDBRC_TIMEOUT, &update_kui, NULL);
-    cgdbrc_attach(CGDBRC_TIMEOUT_LEN, &update_kui, NULL);
-    cgdbrc_attach(CGDBRC_TTIMEOUT, &update_kui, NULL);
-    cgdbrc_attach(CGDBRC_TTIMEOUT_LEN, &update_kui, NULL);
+    cgdbrc_attach(CGDBRC_TIMEOUT, &update_kui);
+    cgdbrc_attach(CGDBRC_TIMEOUT_LEN, &update_kui);
+    cgdbrc_attach(CGDBRC_TTIMEOUT, &update_kui);
+    cgdbrc_attach(CGDBRC_TTIMEOUT_LEN, &update_kui);
 
     /* It's important that CGDB uses readline's view of 
      * Home and End keys. A few distros I've run into (redhat e3

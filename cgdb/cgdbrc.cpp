@@ -2,6 +2,8 @@
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
+#include <list>
+
 #if HAVE_STRING_H
 #include <string.h>
 #endif /* HAVE_STRING_H */
@@ -22,7 +24,6 @@
 #include "interface.h"
 #include "tokenizer.h"
 #include "highlight_groups.h"
-#include "std_list.h"
 #include "kui_term.h"
 
 extern struct tgdb *tgdb;
@@ -92,13 +93,12 @@ static struct cgdbrc_config_option cgdbrc_config_options[CGDBRC_WRAPSCAN + 1] = 
     {CGDBRC_WRAPSCAN, {.int_val = 1}}
 };
 
-static struct std_list *cgdbrc_attach_list;
-static unsigned long cgdbrc_attach_handle = 1;
 struct cgdbrc_attach_item {
     enum cgdbrc_option_kind option;
-    int handle;
     cgdbrc_notify notify_hook;
 };
+
+static std::list<struct cgdbrc_attach_item> cgdbrc_attach_list;
 
 static struct ConfigVariable {
     const char *name, *s_name;
@@ -1058,22 +1058,15 @@ int command_parse_file(const char *config_file)
  */
 static int cgdbrc_set_val(struct cgdbrc_config_option config_option)
 {
-    std_list_iterator iter;
-    void *data;
-    struct cgdbrc_attach_item *item;
+    std::list<struct cgdbrc_attach_item>::iterator iter;
 
     cgdbrc_config_options[config_option.option_kind] = config_option;
 
     /* Alert anyone that wants to be notified that an option has changed. */
-    for (iter = std_list_begin(cgdbrc_attach_list);
-            iter != std_list_end(cgdbrc_attach_list);
-            iter = std_list_next(iter)) {
-        if (std_list_get_data(iter, &data) == -1)
-            return 1;
-
-        item = (struct cgdbrc_attach_item *) data;
-        if (item->option == config_option.option_kind) {
-            if (item->notify_hook(&config_option))
+    iter = cgdbrc_attach_list.begin();
+    for (; iter != cgdbrc_attach_list.end(); ++iter) {
+        if (iter->option == config_option.option_kind) {
+            if (iter->notify_hook(&config_option))
                 return 1;
         }
     }
@@ -1083,51 +1076,14 @@ static int cgdbrc_set_val(struct cgdbrc_config_option config_option)
 
 /* Attach/Detach options {{{ */
 
-static int destroy_notify(void *data)
-{
-    free(data);
-    return 0;
-}
-
 int
-cgdbrc_attach(enum cgdbrc_option_kind option, cgdbrc_notify notify, int *handle)
+cgdbrc_attach(enum cgdbrc_option_kind option, cgdbrc_notify notify)
 {
-    struct cgdbrc_attach_item *item = (struct cgdbrc_attach_item *)
-            cgdb_malloc(sizeof (struct cgdbrc_attach_item));
+    struct cgdbrc_attach_item item;
+    item.option = option;
+    item.notify_hook = notify;
 
-    item->option = option;
-    item->handle = cgdbrc_attach_handle++;
-    item->notify_hook = notify;
-
-    if (!cgdbrc_attach_list)
-        cgdbrc_attach_list = std_list_create(destroy_notify);
-
-    std_list_append(cgdbrc_attach_list, item);
-
-    if (handle)
-        *handle = item->handle;
-
-    return 0;
-}
-
-int cgdbrc_detach(int handle)
-{
-    std_list_iterator iter;
-    void *data;
-    struct cgdbrc_attach_item *item;
-
-    for (iter = std_list_begin(cgdbrc_attach_list);
-            iter != std_list_end(cgdbrc_attach_list);
-            iter = std_list_next(iter)) {
-        if (std_list_get_data(iter, &data) == -1)
-            return -1;
-
-        item = (struct cgdbrc_attach_item *) data;
-        if (item->handle == handle) {
-            std_list_remove(cgdbrc_attach_list, iter);
-            break;
-        }
-    }
+    cgdbrc_attach_list.push_back(item);
 
     return 0;
 }
