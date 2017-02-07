@@ -233,6 +233,11 @@ static void send_disassemble_func_complete_response(struct commands *c,
     response->choice.disassemble_function.disasm = c->disasm;
     response->choice.disassemble_function.addr_start = c->address_start;
     response->choice.disassemble_function.addr_end = c->address_end;
+    
+    c->disasm = NULL;
+    c->address_start = 0;
+    c->address_end = 0;
+
     commands_add_response(c, response);
 }
 
@@ -471,6 +476,8 @@ struct commands *commands_initialize(struct tgdb *tgdb)
     c->completions = NULL;
 
     c->disasm = NULL;
+    c->address_start = 0;
+    c->address_end = 0;
 
     struct gdbwire_callbacks callbacks = wire_callbacks;
     callbacks.context = (void*)c;
