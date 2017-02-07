@@ -7,15 +7,12 @@ libadt_a_SOURCES = \
     ibuf.h \
     std_bbtree.cpp \
     std_bbtree.h \
-    std_btree.cpp \
-    std_btree.h \
     std_list.cpp \
     std_list.h \
     std_types.h
 
 # Installs the driver programs into progs directory
-noinst_PROGRAMS = ibuf_driver std_list_driver \
-                  std_btree_driver std_bbtree_driver
+noinst_PROGRAMS = ibuf_driver std_list_driver std_bbtree_driver
 
 # This is the ibuf driver
 ibuf_driver_LDFLAGS = -L. -L$(top_builddir)/lib/util
@@ -32,14 +29,6 @@ libadt.a \
 $(top_builddir)/lib/util/libcgdbutil.a
 std_list_driver_SOURCES = std_list_driver.cpp
 std_list_driver_CXXFLAGS = $(AM_CXXFLAGS)
-
-# This is the binary tree driver
-std_btree_driver_LDFLAGS = -L. -L$(top_builddir)/lib/util
-std_btree_driver_LDADD = \
-libadt.a \
-$(top_builddir)/lib/util/libcgdbutil.a
-std_btree_driver_SOURCES = std_btree_driver.cpp
-std_btree_driver_CXXFLAGS = $(AM_CXXFLAGS)
 
 # This is the balanced binary tree driver
 std_bbtree_driver_LDFLAGS = -L. -L$(top_builddir)/lib/util
