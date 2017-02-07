@@ -851,6 +851,12 @@ static int user_input(void)
 {
     static int key, val;
 
+    val = kui_manager_clear_map_set(kui_ctx);
+    if (val == -1) {
+        clog_error(CLOG_CGDB, "Could not clear the map set");
+        return -1;
+    }
+
     if (if_get_focus() == CGDB)
         val = kui_manager_set_map_set(kui_ctx, kui_map);
     else if (if_get_focus() == GDB)

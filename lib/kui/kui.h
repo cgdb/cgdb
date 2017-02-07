@@ -324,13 +324,13 @@ int kui_destroy(struct kuictx *kctx);
 struct kui_map_set *kui_get_map_set(struct kuictx *kctx);
 
 /**
- * Set the map set for this kui context.
+ * Set or clear the map set for this kui context.
  *
  * \param kctx
  * The kui context to add the map set of
  *
  * \param kui_ms
- * The new kui map set to use.
+ * The new kui map set to use or NULL to clear the set.
  *
  * @return
  * 0 on success, or -1 on error.
@@ -455,6 +455,17 @@ int kui_manager_destroy(struct kui_manager *kuim);
 /******************************************************************************/
 
 /*@{*/
+
+/**
+ * Clear the map set, no mappings will be used.
+ *
+ * @param kuim
+ * The kui context to clear the map of
+ *
+ * @return
+ * 0 on success, or -1 on error
+ */
+int kui_manager_clear_map_set(struct kui_manager *kuim);
 
 /**
  * Set the kui map for the kui manager's kui context.
