@@ -1044,15 +1044,6 @@ int tgdb_process(struct tgdb * tgdb, int *is_finished)
         goto tgdb_finish;
     }
 
-    /* 2. At this point buf has everything new from this read.
-     * Basically this function is responsible for separating the annotations
-     * that gdb writes from the data. 
-     *
-     * buf and buf_size are the data to be returned from the user.
-     */
-
-    buf[size] = '\0';
-
     result = annotations_parser_io(tgdb->parser, buf, size);
 
     if (annotations_parser_at_prompt(tgdb->parser)) {
