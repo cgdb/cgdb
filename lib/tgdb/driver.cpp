@@ -177,22 +177,14 @@ static void driver_prompt_change(const char *new_prompt)
 
 static int gdb_input(void)
 {
-    char buf[MAXLINE];
-    size_t size;
+    int result;
     size_t i;
     struct tgdb_response *item;
     int is_finished;
 
-    if ((size = tgdb_process(tgdb, buf, MAXLINE, &is_finished)) == -1) {
+    if ((result = tgdb_process(tgdb, &is_finished)) == -1) {
         clog_error(CLOG_CGDB, "file descriptor closed");
         return -1;
-    }
-    /* end if */
-    for (i = 0; i < size; ++i) {
-        if (write(STDOUT_FILENO, &(buf[i]), 1) != 1) {
-            clog_error(CLOG_CGDB, "could not write byte");
-            return -1;
-        }
     }
 
     int index = 0;
@@ -417,6 +409,20 @@ int main_loop(int gdbfd)
     return 0;
 }
 
+void console_output(void *context, const std::string &str) {
+    std::string::const_iterator iter = str.begin();
+    for (; iter != str.end(); ++iter) {
+        if (write(STDOUT_FILENO, &*iter, 1) != 1) {
+            clog_error(CLOG_CGDB, "could not write byte");
+        }
+    }
+}
+
+tgdb_callbacks callbacks = {
+    NULL,
+    console_output
+};
+
 int main(int argc, char **argv)
 {
     int gdb_fd, slavefd, masterfd;
@@ -454,7 +460,8 @@ int main(int argc, char **argv)
     rline = rline_initialize(slavefd, rlctx_send_user_command, tab_completion,
             getenv("TERM"));
 
-    if ((tgdb = tgdb_initialize(NULL, argc - 1, argv + 1, &gdb_fd)) == NULL) {
+    if ((tgdb = tgdb_initialize(NULL, argc - 1, argv + 1, &gdb_fd,
+            callbacks)) == NULL) {
         clog_error(CLOG_CGDB, "tgdb_start error");
         goto driver_end;
     }

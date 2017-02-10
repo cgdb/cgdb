@@ -28,6 +28,25 @@
    */
     struct tgdb;
 
+
+    struct tgdb_callbacks {
+        /**
+         * An arbitrary pointer to associate with the callbacks.
+         */
+        void *context;
+
+        /**
+         * Output is available for the console.
+         *
+         * @param context
+         * The context pointer
+         *
+         * @param str
+         * The console output
+         */
+        void (*console_output_callback)(void *context, const std::string &str);
+    };
+
   /**
    * This initializes a tgdb library instance. It starts up the debugger and 
    * returns all file descriptors the client must select on.
@@ -48,11 +67,14 @@
    * \param debugger_fd
    * The descriptor to the debugger's I/O
    *
+   * \param callbacks
+   * Callback functions for event driven notifications
+   *
    * @return
    * NULL on error, a valid context on success.
    */
     struct tgdb *tgdb_initialize(const char *debugger,
-            int argc, char **argv, int *debugger_fd);
+            int argc, char **argv, int *debugger_fd, tgdb_callbacks callbacks);
 
   /**
    * This will terminate a libtgdb session. No functions should be called on
@@ -122,13 +144,6 @@
    * \param tgdb
    * An instance of the tgdb library to operate on.
    *
-   * \param buf
-   * The output of the debugger will be returned in this buffer.
-   * The buffer passed back will not exceed N in size.
-   *
-   * \param n
-   * Tells libtgdb how large the buffer BUF is that the client passed in.
-   *
    * \param is_finished
    * If this is passed in as NULL, it is not set.
    *
@@ -137,10 +152,9 @@
    * in order to finish processing the current requested command.
    *
    * @return
-   * The number of valid bytes in BUF on success, or -1 on error.
+   * 0 on sucess, or -1 on error
    */
-    size_t tgdb_process(struct tgdb *tgdb, char *buf, size_t n,
-            int *is_finished);
+    int tgdb_process(struct tgdb *tgdb, int *is_finished);
 
   /**
    * This sends a byte of data to the program being debugged.

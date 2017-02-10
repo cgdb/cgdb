@@ -519,9 +519,12 @@ void commands_shutdown(struct commands *c)
 
 void commands_process(struct commands *c, const std::string &str)
 {
-    if (c->cur_command_kind != COMMAND_USER_COMMAND) {
-        gdbwire_push_data(c->wire, str.data(), str.size());
-    }
+   gdbwire_push_data(c->wire, str.data(), str.size());
+}
+
+void commands_process_error(struct commands *c)
+{
+    c->is_console_command = false;
 }
 
 void

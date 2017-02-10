@@ -814,12 +814,31 @@ static int init_home_dir(void)
     return 0;
 }
 
+/**
+ * Console output has returned from GDB, show it.
+ *
+ * @param context
+ * Unused at the moment
+ *
+ * @param str
+ * The console output to display
+ */
+static void console_output(void *context, const std::string &str) {
+    if_print(str.c_str());
+}
+            
+tgdb_callbacks callbacks = { 
+    NULL,       
+    console_output
+};
+
+
 /* start_gdb: Starts up libtgdb
  *  Returns:  -1 on error, 0 on success
  */
 static int start_gdb(int argc, char *argv[])
 {
-    tgdb = tgdb_initialize(debugger_path, argc, argv, &gdb_fd);
+    tgdb = tgdb_initialize(debugger_path, argc, argv, &gdb_fd, callbacks);
     if (tgdb == NULL)
         return -1;
 
@@ -1179,28 +1198,17 @@ static void process_commands(struct tgdb *tgdb_in)
  */
 static int gdb_input()
 {
-    int size;
+    int result;
     int is_finished;
-    char buf[GDB_MAXBUF + 1];
 
     /* Read from GDB */
-    size = tgdb_process(tgdb, buf, GDB_MAXBUF, &is_finished);
-    if (size == -1) {
-        clog_error(CLOG_CGDB, "tgdb_recv_debugger_data error");
+    result = tgdb_process(tgdb, &is_finished);
+    if (result == -1) {
+        clog_error(CLOG_CGDB, "tgdb_process error");
         return -1;
     }
 
-    buf[size] = 0;
-
     process_commands(tgdb);
-
-    /* Display GDB output 
-     * The strlen check is here so that if_print does not get called
-     * when displaying the filedlg. If it does get called, then the 
-     * gdb window gets displayed when the filedlg is up
-     */
-    if (strlen(buf) > 0)
-        if_print(buf);
 
     /* Check to see if GDB is ready to receive another command. If it is, then
      * readline should redisplay what it currently contains. There are 2 special
@@ -1220,8 +1228,7 @@ static int gdb_input()
      * result in a race condition.
      */
     if (is_finished) {
-
-        size = tgdb_queue_size(tgdb);
+        int size = tgdb_queue_size(tgdb);
 
         /* This is the second case, this command was queued. */
         if (size > 0) {

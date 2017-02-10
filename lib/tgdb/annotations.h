@@ -46,6 +46,28 @@ struct annotations_parser_callbacks {
      * The new prompt
      */
     void (*prompt_changed_callback)(void *context, const std::string &prompt);
+
+    /**
+     * Output is available for the console.
+     *
+     * @param context
+     * The context pointer
+     *
+     * @param str
+     * The console output string
+     */
+    void (*console_output_callback)(void *context, const std::string &str);
+
+    /**
+     * GDB reported an error for the command being executed.
+     *
+     * @param context
+     * The context pointer
+     *
+     * @param msg
+     * The error message
+     */
+    void (*command_error_callback)(void *context, const std::string &msg);
 };
 
 /**
@@ -81,10 +103,9 @@ void annotations_parser_shutdown(annotations_parser *parser);
  * The size of the gdb annotations strings to parse
  *
  * @return
- * The remaining gdb output, less the annotations markup.
+ * 0 on success, otherwise error.
  */
-std::string annotations_parser_io(
-    annotations_parser *parser, char *str, size_t size);
+int annotations_parser_io(annotations_parser *parser, char *str, size_t size);
 
 /**
  * Determine if GDB is at a prompt or not.

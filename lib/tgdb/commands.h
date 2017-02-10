@@ -118,6 +118,10 @@ int commands_issue_command(struct commands *c,
  */
 void commands_process(struct commands *c, const std::string &str);
 
+/**
+ * Called when a command produces an error.
+ */
+void commands_process_error(struct commands *c);
 
 /* commands_prepare_for_command:
  * -----------------------------

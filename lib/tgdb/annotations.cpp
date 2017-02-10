@@ -78,6 +78,12 @@ struct annotations_parser {
     /** The debugger's current prompt and last prompt. */
     std::string gdb_prompt, gdb_prompt_last;
 
+    /** The error message between error-begin and error or quit */
+    std::string error_message;
+
+    /** The console output from GDB */
+    std::string console_output;
+
     /** True if GDB is ready for input and at the prompt, false otherwise */
     bool at_prompt;
 
@@ -106,6 +112,13 @@ struct annotations_parser {
     bool at_misc_prompt;
 
     /**
+     * True if collecting an error message, False otherwise.
+     *
+     * Should only be true between error-begin and error or quit.
+     */
+    bool at_error_message;
+
+    /**
      * True if the source location has changed, false otherwise.
      */
     bool source_location_changed;
@@ -120,6 +133,7 @@ annotations_parser *annotations_parser_initialize(
     a->at_prompt = false;
     a->at_pre_prompt = false;
     a->at_misc_prompt = false;
+    a->at_error_message = false;
     a->source_location_changed = false;
     return a;
 }
@@ -127,6 +141,15 @@ annotations_parser *annotations_parser_initialize(
 void annotations_parser_shutdown(annotations_parser *parser)
 {
     delete parser;
+}
+
+static void send_available_console_output(annotations_parser *parser)
+{
+    if (!parser->console_output.empty()) {
+        parser->callbacks.console_output_callback(
+                parser->callbacks.context, parser->console_output);
+        parser->console_output.clear();
+    }
 }
 
 bool annotations_parser_at_prompt(annotations_parser *parser)
@@ -212,27 +235,48 @@ static void handle_post_prompt(struct annotations_parser *parser)
     parser->at_prompt = false;
 }
 
-static void handle_error(struct annotations_parser *parser)
-{
-    parser->at_prompt = false;
-    parser->at_pre_prompt = false;
-    parser->at_misc_prompt = false;
-}
-
 static void handle_error_begin(struct annotations_parser *parser)
 {
+    send_available_console_output(parser); 
+
     /* After a signal is sent (^c), the debugger will then output 
      * something like "Quit\n", so that should be displayed to the user.
+     *
      * Unfortunately, the debugger ( gdb ) isn't nice enough to return a 
      * post-prompt when a signal is received.
      */
     parser->at_prompt = false;
     parser->at_pre_prompt = false;
     parser->at_misc_prompt = false;
+    parser->at_error_message = true;
+}
+
+static void handle_error(struct annotations_parser *parser)
+{
+    send_available_console_output(parser); 
+
+    parser->at_prompt = false;
+    parser->at_pre_prompt = false;
+    parser->at_misc_prompt = false;
+    parser->at_error_message = false;
+
+    parser->callbacks.command_error_callback(
+            parser->callbacks.context, parser->error_message);
+    parser->error_message.clear();
 }
 
 static void handle_quit(struct annotations_parser *parser)
 {
+    send_available_console_output(parser); 
+
+    parser->at_prompt = false;
+    parser->at_pre_prompt = false;
+    parser->at_misc_prompt = false;
+    parser->at_error_message = false;
+
+    parser->callbacks.command_error_callback(
+            parser->callbacks.context, parser->error_message);
+    parser->error_message.clear();
 }
 
 static void handle_exited(struct annotations_parser *parser)
@@ -277,7 +321,6 @@ static struct annotation {
     "overload-choice", handle_misc_prompt}, {
     "post-overload-choice", handle_misc_post_prompt}, {
 
-
     /** 
      * The instance-choice annotation comes from the GNAT version of GDB.
      * I don't have steps to reproduce it but I believe it comes up when
@@ -315,9 +358,30 @@ static struct annotation {
     "prompt", handle_prompt}, {
     "post-prompt", handle_post_prompt}, {
 
+    /**
+     * The error-begin may appear before an error or quit annotation.
+     *
+     * Any text between the error-begin and the error or quit annotation
+     * is the error message.
+     */
     "error-begin", handle_error_begin}, {
+
+    /**
+     * An error occurred in the command being executed by GDB.
+     *
+     * This has no direct error message. It would be between
+     * the error-begin annotation and this one.
+     */
     "error", handle_error}, {
+
+     /**
+      * This occurs when gdb responds to an interupt (ctrl-c).
+      *
+      * This has no direct error message. It would be between
+      * the error-begin annotation and this one.
+      */
     "quit", handle_quit}, {
+
     "exited", handle_exited}, {
     NULL, NULL}
 };
@@ -336,20 +400,20 @@ static void parse_annotation(struct annotations_parser *parser)
     }
 }
 
-static void process_output(struct annotations_parser *parser,
-    std::string &result, char c)
+static void process_output(struct annotations_parser *parser, char c)
 {
-    if (parser->at_pre_prompt) {
+    if (parser->at_error_message) {
+        parser->error_message.push_back(c);
+    } else if (parser->at_pre_prompt) {
         parser->gdb_prompt.push_back(c);
     } else {
-        result.push_back(c);
+        parser->console_output.push_back(c);
     }
 }
 
-std::string annotations_parser_io(
-        annotations_parser *parser, char *str, size_t size)
+int annotations_parser_io(annotations_parser *parser, char *str, size_t size)
 {
-    std::string result;
+    int result = 0;
     size_t i;
 
     for (i = 0; i < size; ++i) {
@@ -362,18 +426,18 @@ std::string annotations_parser_io(
                 if (str[i] == '\n') {
                     parser->state = ANNOTATION_NEW_LINE;
                 } else {
-                    process_output(parser, result, str[i]);
+                    process_output(parser, str[i]);
                 }
                 break;
             case ANNOTATION_NEW_LINE:
                 if (str[i] == '\032') {
                     parser->state = ANNOTATION_CONTROL_Z;
                 }  else {
-                    process_output(parser, result, '\n');
+                    process_output(parser, '\n');
                     if (str[i] == '\n') {
                         // Transition to ANNOTATION_NEW_LINE; nothing to do
                     } else {
-                        process_output(parser, result, str[i]);
+                        process_output(parser, str[i]);
                         parser->state = ANNOTATION_GDB_DATA;
                     }
                 }
@@ -382,13 +446,13 @@ std::string annotations_parser_io(
                 if (str[i] == '\032') {
                     parser->state = ANNOTATION_TEXT;
                 }  else {
-                    process_output(parser, result, '\n');
-                    process_output(parser, result, '\032');
+                    process_output(parser, '\n');
+                    process_output(parser, '\032');
 
                     if (str[i] == '\n') {
                         parser->state = ANNOTATION_NEW_LINE;
                     } else {
-                        process_output(parser, result, str[i]);
+                        process_output(parser, str[i]);
                         parser->state = ANNOTATION_GDB_DATA;
                     }
                 }
@@ -405,6 +469,8 @@ std::string annotations_parser_io(
                 break;
         }
     }
+
+    send_available_console_output(parser);
 
     return result;
 }

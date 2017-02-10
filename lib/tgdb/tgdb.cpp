@@ -142,6 +142,8 @@ struct tgdb {
      * been received. So no matter how many are receieved, this will only
      * be 1. Otherwise if none have been received this will be 0.  */
     int has_sigchld_recv;
+
+    tgdb_callbacks callbacks;
 };
 
 /* }}} */
@@ -257,7 +259,7 @@ tgdb_does_request_require_console_update(struct tgdb_request *request)
     }
 }
 
-static struct tgdb *initialize_tgdb_context(void)
+static struct tgdb *initialize_tgdb_context(tgdb_callbacks callbacks)
 {
     struct tgdb *tgdb = (struct tgdb *) cgdb_malloc(sizeof (struct tgdb));
 
@@ -280,6 +282,8 @@ static struct tgdb *initialize_tgdb_context(void)
     tgdb->is_gdb_ready_for_next_command = 1;
 
     tgdb->has_sigchld_recv = 0;
+
+    tgdb->callbacks = callbacks;
 
     return tgdb;
 }
@@ -386,6 +390,29 @@ static void tgdb_prompt_changed(void *context, const std::string &prompt)
     commands_add_response(tgdb->c, response);
 }
 
+static void tgdb_console_output(void *context, const std::string &msg)
+{
+    struct tgdb *tgdb = (struct tgdb*)context;
+
+    if (commands_is_console_command(tgdb->c)) {
+        tgdb->callbacks.console_output_callback(tgdb->callbacks.context, msg);
+    } else {
+        commands_process(tgdb->c, msg);
+    }
+
+}
+
+static void tgdb_command_error(void *context, const std::string &msg)
+{
+    struct tgdb *tgdb = (struct tgdb*)context;
+
+    /* Let the command package no that it's command was interupted */
+    commands_process_error(tgdb->c);
+
+    /* Send cgdb the error message */
+    tgdb->callbacks.console_output_callback(tgdb->callbacks.context, msg);
+}
+
 static int tgdb_open_new_tty(struct tgdb *tgdb, int *inferior_stdin,
     int *inferior_stdout)
 {
@@ -410,14 +437,16 @@ static int tgdb_open_new_tty(struct tgdb *tgdb, int *inferior_stdin,
 /* Creating and Destroying a libtgdb context. {{{*/
 
 struct tgdb *tgdb_initialize(const char *debugger,
-        int argc, char **argv, int *debugger_fd)
+        int argc, char **argv, int *debugger_fd, tgdb_callbacks callbacks)
 {
     /* Initialize the libtgdb context */
-    struct tgdb *tgdb = initialize_tgdb_context();
-    static struct annotations_parser_callbacks callbacks = {
+    struct tgdb *tgdb = initialize_tgdb_context(callbacks);
+    static struct annotations_parser_callbacks annotations_callbacks = {
         tgdb,
         tgdb_source_location_changed,
-        tgdb_prompt_changed
+        tgdb_prompt_changed,
+        tgdb_console_output,
+        tgdb_command_error
     };
     char logs_dir[FSUTIL_PATH_MAX];
 
@@ -441,7 +470,7 @@ struct tgdb *tgdb_initialize(const char *debugger,
 
     tgdb->c = commands_initialize(tgdb);
 
-    tgdb->parser = annotations_parser_initialize(callbacks);
+    tgdb->parser = annotations_parser_initialize(annotations_callbacks);
 
     tgdb_open_new_tty(tgdb, &tgdb->inferior_stdin, &tgdb->inferior_stdout);
 
@@ -966,12 +995,12 @@ static int tgdb_get_quit_command(struct tgdb *tgdb, int *tgdb_will_quit)
     return 0;
 }
 
-size_t tgdb_process(struct tgdb * tgdb, char *buf, size_t n, int *is_finished)
+int tgdb_process(struct tgdb * tgdb, int *is_finished)
 {
-    char local_buf[10 * n];
+    const int n = 4096;
+    static char buf[n];
     ssize_t size;
-    size_t buf_size = 0;
-    std::string result;
+    int result = 0;
 
     /* TODO: This is kind of a hack.
      * Since I know that I didn't do a read yet, the next select loop will
@@ -1004,13 +1033,10 @@ size_t tgdb_process(struct tgdb * tgdb, char *buf, size_t n, int *is_finished)
             goto tgdb_finish;
     }
 
-    /* set buf to null for debug reasons */
-    memset(buf, '\0', n);
-
     /* 1. read all the data possible from gdb that is ready. */
-    if ((size = io_read(tgdb->debugger_stdout, local_buf, n)) < 0) {
+    if ((size = io_read(tgdb->debugger_stdout, buf, n)) < 0) {
         clog_error(CLOG_CGDB, "could not read from masterfd");
-        buf_size = -1;
+        result = -1;
         tgdb_add_quit_command(tgdb);
         goto tgdb_finish;
     } else if (size == 0) {     /* EOF */
@@ -1018,23 +1044,16 @@ size_t tgdb_process(struct tgdb * tgdb, char *buf, size_t n, int *is_finished)
         goto tgdb_finish;
     }
 
-    /* 2. At this point local_buf has everything new from this read.
+    /* 2. At this point buf has everything new from this read.
      * Basically this function is responsible for separating the annotations
      * that gdb writes from the data. 
      *
      * buf and buf_size are the data to be returned from the user.
      */
 
-    local_buf[size] = '\0';
+    buf[size] = '\0';
 
-    result = annotations_parser_io(tgdb->parser, local_buf, size);
-
-    if (commands_is_console_command(tgdb->c)) {
-        strncpy(buf, result.c_str(), result.size());
-        buf_size = result.size();
-    } else {
-        commands_process(tgdb->c, result);
-    }
+    result = annotations_parser_io(tgdb->parser, buf, size);
 
     if (annotations_parser_at_prompt(tgdb->parser)) {
         /* success, and finished command */
@@ -1056,7 +1075,7 @@ size_t tgdb_process(struct tgdb * tgdb, char *buf, size_t n, int *is_finished)
 tgdb_finish:
     *is_finished = tgdb_can_issue_command(tgdb);
 
-    return buf_size;
+    return result;
 }
 
 /* Getting Data out of TGDB {{{*/
