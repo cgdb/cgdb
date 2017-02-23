@@ -58,6 +58,7 @@
 #include <ctype.h>
 #endif
 
+#define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 
 /* Local Includes */
@@ -813,12 +814,31 @@ static int init_home_dir(void)
     return 0;
 }
 
+/**
+ * Console output has returned from GDB, show it.
+ *
+ * @param context
+ * Unused at the moment
+ *
+ * @param str
+ * The console output to display
+ */
+static void console_output(void *context, const std::string &str) {
+    if_print(str.c_str());
+}
+            
+tgdb_callbacks callbacks = { 
+    NULL,       
+    console_output
+};
+
+
 /* start_gdb: Starts up libtgdb
  *  Returns:  -1 on error, 0 on success
  */
 static int start_gdb(int argc, char *argv[])
 {
-    tgdb = tgdb_initialize(debugger_path, argc, argv, &gdb_fd);
+    tgdb = tgdb_initialize(debugger_path, argc, argv, &gdb_fd, callbacks);
     if (tgdb == NULL)
         return -1;
 
@@ -849,6 +869,12 @@ static void send_key(int focus, char key)
 static int user_input(void)
 {
     static int key, val;
+
+    val = kui_manager_clear_map_set(kui_ctx);
+    if (val == -1) {
+        clog_error(CLOG_CGDB, "Could not clear the map set");
+        return -1;
+    }
 
     if (if_get_focus() == CGDB)
         val = kui_manager_set_map_set(kui_ctx, kui_map);
@@ -1049,12 +1075,6 @@ static void update_source_files(struct tgdb_response *response)
     kui_input_acceptable = 1;
 }
 
-static void update_quit(struct tgdb_response *response)
-{
-    if_display_message("Program exited with value", WIN_REFRESH, 0, " %d",
-        (int8_t)response->choice.inferior_exited.exit_status);
-}
-
 static void update_completions(struct tgdb_response *response)
 {
     do_tab_completion(response->choice.update_completions.completions);
@@ -1068,14 +1088,14 @@ static void update_disassemble(struct tgdb_response *response)
         //$ TODO mikesart: Need way to make sure we don't recurse here on error.
         //$ TODO mikesart: 100 lines? Way to load more at end?
 
-
-        /* Spew out a warning about disassemble failing
-         * and disasm next 100 instructions. */
-        // TODO:
-        // if_print_message("\nWarning: %s\n",
-        //    item->choice.disassemble_function.disasm[0]);
-
-        tgdb_request_disassemble_pc(tgdb, 100);
+        if (response->header == TGDB_DISASSEMBLE_PC) {
+            /* Spew out a warning about disassemble failing
+             * and disasm next 100 instructions. */
+            if_print_message("\nWarning: dissasemble address 0x%" PRIx64 " failed.\n",
+                response->choice.disassemble_function.addr_start);
+        } else {
+            tgdb_request_disassemble_pc(tgdb, 100);
+        }
     } else {
         uint64_t addr_start = response->choice.disassemble_function.addr_start;
         uint64_t addr_end = response->choice.disassemble_function.addr_end;
@@ -1151,9 +1171,6 @@ static void process_commands(struct tgdb *tgdb_in)
         case TGDB_UPDATE_SOURCE_FILES:
             update_source_files(item);
             break;
-        case TGDB_INFERIOR_EXITED:
-            update_quit(item);
-            break;
         case TGDB_UPDATE_COMPLETIONS:
             update_completions(item);
             break;
@@ -1181,28 +1198,17 @@ static void process_commands(struct tgdb *tgdb_in)
  */
 static int gdb_input()
 {
-    int size;
+    int result;
     int is_finished;
-    char buf[GDB_MAXBUF + 1];
 
     /* Read from GDB */
-    size = tgdb_process(tgdb, buf, GDB_MAXBUF, &is_finished);
-    if (size == -1) {
-        clog_error(CLOG_CGDB, "tgdb_recv_debugger_data error");
+    result = tgdb_process(tgdb, &is_finished);
+    if (result == -1) {
+        clog_error(CLOG_CGDB, "tgdb_process error");
         return -1;
     }
 
-    buf[size] = 0;
-
     process_commands(tgdb);
-
-    /* Display GDB output 
-     * The strlen check is here so that if_print does not get called
-     * when displaying the filedlg. If it does get called, then the 
-     * gdb window gets displayed when the filedlg is up
-     */
-    if (strlen(buf) > 0)
-        if_print(buf);
 
     /* Check to see if GDB is ready to receive another command. If it is, then
      * readline should redisplay what it currently contains. There are 2 special
@@ -1222,8 +1228,7 @@ static int gdb_input()
      * result in a race condition.
      */
     if (is_finished) {
-
-        size = tgdb_queue_size(tgdb);
+        int size = tgdb_queue_size(tgdb);
 
         /* This is the second case, this command was queued. */
         if (size > 0) {
@@ -1732,10 +1737,10 @@ int init_kui(void)
     /* Combine the cgdbrc config package with libkui. If any of the options
      * below change, update the KUI.  Currently, the handles are not kept around,
      * because CGDB never plans on detaching. */
-    cgdbrc_attach(CGDBRC_TIMEOUT, &update_kui, NULL);
-    cgdbrc_attach(CGDBRC_TIMEOUT_LEN, &update_kui, NULL);
-    cgdbrc_attach(CGDBRC_TTIMEOUT, &update_kui, NULL);
-    cgdbrc_attach(CGDBRC_TTIMEOUT_LEN, &update_kui, NULL);
+    cgdbrc_attach(CGDBRC_TIMEOUT, &update_kui);
+    cgdbrc_attach(CGDBRC_TIMEOUT_LEN, &update_kui);
+    cgdbrc_attach(CGDBRC_TTIMEOUT, &update_kui);
+    cgdbrc_attach(CGDBRC_TTIMEOUT_LEN, &update_kui);
 
     /* It's important that CGDB uses readline's view of 
      * Home and End keys. A few distros I've run into (redhat e3

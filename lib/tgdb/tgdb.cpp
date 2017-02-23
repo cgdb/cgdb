@@ -23,12 +23,13 @@
 #include <sys/wait.h>
 #endif
 
+#define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 
-#include "a2-tgdb.h"
 #include "tgdb.h"
+#include "fork_util.h"
 #include "commands.h"
-#include "state_machine.h"
+#include "annotations.h"
 #include "ibuf.h"
 #include "io.h"
 #include "pseudo.h" /* SLAVE_SIZE constant */
@@ -45,73 +46,78 @@ struct tgdb_request *last_request = NULL;
  * The TGDB context data structure.
  */
 struct tgdb {
+    /** This module is used for parsing the commands output of gdb */
+    struct commands *c;
 
-  /** A client context to abstract the debugger.  */
-    struct annotate_two *a2;
+    /** The GDB annotations parser */
+    struct annotations_parser *parser;
 
-  /** Reading from this will read from the debugger's output */
+    /** Reading from this will read from the debugger's output */
     int debugger_stdout;
 
-  /** Writing to this will write to the debugger's stdin */
+    /** Writing to this will write to the debugger's stdin */
     int debugger_stdin;
 
-  /** Reading from this will read the stdout from the program being debugged */
+    /** Reading from this will read the stdout from the debugged program */
     int inferior_stdout;
 
-  /** Writing to this will write to the stdin of the program being debugged */
+    /** Writing to this will write to the stdin of the debugged program */
     int inferior_stdin;
+
+    /** The master, slave and slavename of the pty device */
+    pty_pair_ptr pty_pair;
+
+    /** The pid of child process */
+    pid_t debugger_pid;
 
   /***************************************************************************
    * All the queue's the clients can run commands through
    * The different queue's can be slightly confusing.
    **************************************************************************/
 
-  /**
-   * The commands that need to be run through GDB.
-   *
-   * This is a buffered queue that represents all of the commands that TGDB
-   * needs to execute. These commands will be executed one at a time. That is,
-   * 1 command will be issued, and TGDB will wait for the entire response before
-   * issuing any more commands. It is even possible that while this command is
-   * executing, that the client context will add commands to the 
-   * oob_command_queue. If this happens TGDB will execute all of the commands
-   * in the oob_command_queue before executing the next command in this queue. 
-   */
+    /**
+     * The commands that need to be run through GDB.
+     *
+     * This is a buffered queue that represents all of the commands that TGDB
+     * needs to execute. These commands will be executed one at a time.
+     * That is, a command will be issued, and TGDB will wait for the entire
+     * response before issuing any more commands.
+     *
+     * While a command is executing, tgdb can add commands to the 
+     * oob_command_queue. If this happens TGDB will execute all of the
+     * commands in the oob_command_queue before executing the next
+     * command in this queue. 
+     */
     struct tgdb_command **gdb_input_queue;
 
-  /** 
-   * The commands that the client has requested to run.
-   *
-   * TGDB buffers all of the commands that the FE wants to run. That is,
-   * if the FE is sending commands faster than TGDB can pass the command to
-   * GDB and get a response, then the commands are buffered until it is there
-   * turn to run. These commands are run in the order that they are received.
-   *
-   * This is here as a convenience to the FE. TGDB currently does not access 
-   * these commands. It provides the push/pop functionality and it erases the
-   * queue when a control_c is received.
-   */
+    /** 
+     * The priority queue.
+     *
+     * This has commands that tgdb requires to run, in order to provide
+     * the front end with the proper resopnses. When the front end runs
+     * a command, sometimes tgdb will discover that it needs to run other
+     * commands in order to satisfy the functionality requested by the GUI.
+     * 
+     *
+     * These commands should *always* be run first.
+     */
+    struct tgdb_command **priority_queue;
+
+
+    /** 
+     * The commands that the front end has requested to run.
+     *
+     * TGDB buffers all of the commands that the front end wants to run.
+     * That is, if the front end is sending commands faster than TGDB can
+     * pass the command to GDB and get a response, then the commands are
+     * buffered until it is there turn to run. These commands are run
+     * in the order that they are received.
+     *
+     * This is here as a convenience to the front end. TGDB currently does
+     * not access these commands. It provides the push/pop functionality
+     * and it erases the queue when a control_c is received.
+     */
     tgdb_request_ptr *gdb_client_request_queue;
-
-  /** 
-   * The out of band input queue. 
-   *
-   * These commands are used by the client context. When a single client context 
-   * command is run, sometimes it will discover that it needs to run other commands
-   * in order to satisfy the functionality requested by the GUI. For instance, a 
-   * single GUI function request could take N client context commands to generate
-   * a response. Also, to make things worse, sometimes the client context doesn't 
-   * know if it will take 1 or N commands to satisfy the request until after it has 
-   * sent and received the information from the first command. Thus, while the 
-   * client context is processing the first command, it may add more commands to 
-   * this queue to specify that these commands need to be run before any other 
-   * commands are sent to GDB.
-   *
-   * These commands should *always* be run first.
-   */
-    struct tgdb_command **oob_input_queue;
-
-  /** These are 2 very important state variables.  */
 
     /**
      * If set to 1, libtgdb thinks the lower level subsystem is capable of
@@ -124,17 +130,20 @@ struct tgdb {
      * Basically whether gdb is at prompt or not. */
     int is_gdb_ready_for_next_command;
 
-  /** If ^c was hit by user */
+    /** If ^c was hit by user */
     sig_atomic_t control_c;
 
-  /**
-   * When GDB dies (purposely or not), the SIGCHLD is sent to the application controlling TGDB.
-   * This data structure represents the fact that SIGCHLD has been sent.
-   *
-   * This currently does not need to track if more than 1 SIGCHLD has been received. So
-   * no matter how many are receieved, this will only be 1. Otherwise if none have been
-   * received this will be 0.  */
+    /**
+     * When GDB dies (purposely or not), the SIGCHLD is sent to the
+     * application controlling TGDB. This data structure represents the
+     * fact that SIGCHLD has been sent.
+     *
+     * This currently does not need to track if more than 1 SIGCHLD has
+     * been received. So no matter how many are receieved, this will only
+     * be 1. Otherwise if none have been received this will be 0.  */
     int has_sigchld_recv;
+
+    tgdb_callbacks callbacks;
 };
 
 /* }}} */
@@ -143,7 +152,7 @@ struct tgdb {
 static void tgdb_deliver_command(struct tgdb *tgdb,
         struct tgdb_command *command);
 static void tgdb_unqueue_and_deliver_command(struct tgdb *tgdb);
-static void tgdb_run_or_queue_command(struct tgdb *tgdb,
+void tgdb_run_or_queue_command(struct tgdb *tgdb,
         struct tgdb_command *com);
 
 /* }}} */
@@ -160,7 +169,7 @@ static void tgdb_run_or_queue_command(struct tgdb *tgdb,
 static int tgdb_can_issue_command(struct tgdb *tgdb)
 {
     if (tgdb->is_gdb_ready_for_next_command &&
-        a2_is_client_ready(tgdb->a2) &&
+        annotations_parser_at_prompt(tgdb->parser) &&
         (sbcount(tgdb->gdb_input_queue) == 0))
         return 1;
 
@@ -175,9 +184,9 @@ static int tgdb_can_issue_command(struct tgdb *tgdb)
  */
 static int tgdb_has_command_to_run(struct tgdb *tgdb)
 {
-    if (a2_is_client_ready(tgdb->a2) &&
+    if (annotations_parser_at_prompt(tgdb->parser) &&
         ((sbcount(tgdb->gdb_input_queue) > 0) ||
-            (sbcount(tgdb->oob_input_queue) > 0)))
+            (sbcount(tgdb->priority_queue) > 0)))
         return 1;
 
     return 0;
@@ -250,33 +259,12 @@ tgdb_does_request_require_console_update(struct tgdb_request *request)
     }
 }
 
-/**
- * Process the commands that were created by the client
- *
- * \param tgdb
- * The TGDB context
- *
- * \return
- * -1 on error, 0 on success
- */
-static void tgdb_process_client_commands(struct tgdb *tgdb)
-{
-    int i;
-
-    for (i = 0; i < sbcount(tgdb->a2->client_commands); i++) {
-        struct tgdb_command *command = tgdb->a2->client_commands[i];
-        tgdb_run_or_queue_command(tgdb, command);
-    }
-
-    /* Clear the client command array */
-    sbsetcount(tgdb->a2->client_commands, 0);
-}
-
-static struct tgdb *initialize_tgdb_context(void)
+static struct tgdb *initialize_tgdb_context(tgdb_callbacks callbacks)
 {
     struct tgdb *tgdb = (struct tgdb *) cgdb_malloc(sizeof (struct tgdb));
 
-    tgdb->a2 = NULL;
+    tgdb->c = 0;
+    tgdb->parser = NULL;
     tgdb->control_c = 0;
 
     tgdb->debugger_stdout = -1;
@@ -285,13 +273,17 @@ static struct tgdb *initialize_tgdb_context(void)
     tgdb->inferior_stdout = -1;
     tgdb->inferior_stdin = -1;
 
-    tgdb->gdb_client_request_queue = NULL;
+    tgdb->pty_pair = NULL;
+
     tgdb->gdb_input_queue = NULL;
-    tgdb->oob_input_queue = NULL;
+    tgdb->priority_queue = NULL;
+    tgdb->gdb_client_request_queue = NULL;
 
     tgdb->is_gdb_ready_for_next_command = 1;
 
     tgdb->has_sigchld_recv = 0;
+
+    tgdb->callbacks = callbacks;
 
     return tgdb;
 }
@@ -303,29 +295,34 @@ static struct tgdb *initialize_tgdb_context(void)
 /* 
  * Gets the users home dir and creates the config directory.
  *
- * \param tgdb
+ * Also returns the logs directory.
+ *
+ * @param tgdb
  * The tgdb context.
  *
- * \param config_dir 
+ * @param logs_dir 
  * Should be FSUTIL_PATH_MAX in size on way in.
- * On way out, it will be the path to the config dir
+ * On way out, it will be the path to the logs dir
  *
  * \return
  * -1 on error, or 0 on success
  */
-static int tgdb_initialize_config_dir(struct tgdb *tgdb,
-    char *config_dir, char *logs_dir)
+static int tgdb_initialize_config_dir(struct tgdb *tgdb, char *logs_dir)
 {
+    char config_dir[FSUTIL_PATH_MAX];
     char *home_dir = getenv("HOME");
 
     /* Make sure the toplevel .cgdb dir exists */
     snprintf(config_dir, FSUTIL_PATH_MAX, "%s/.cgdb", home_dir);
-    fs_util_create_dir(config_dir);
+    if (!fs_util_create_dir(config_dir)) {
+        clog_error(CLOG_CGDB, "Could not create dir %s", config_dir);
+        return -1;
+    }
 
     /* Try to create full .cgdb/logs directory */
     snprintf(logs_dir, FSUTIL_PATH_MAX, "%s/.cgdb/logs", home_dir);
     if (!fs_util_create_dir(logs_dir)) {
-        clog_error(CLOG_CGDB, "fs_util_create_dir_in_base error");
+        clog_error(CLOG_CGDB, "Could not create dir %s", logs_dir);
         return -1;
     }
 
@@ -338,17 +335,17 @@ static int tgdb_initialize_config_dir(struct tgdb *tgdb,
  * \param tgdb
  * The tgdb context.
  *
- * \param config_dir 
- * The path to the user's config directory
+ * \param logs_dir 
+ * The path to the user's logging directory
  *
  * \return
  * -1 on error, or 0 on success
  */
-static int tgdb_initialize_logger_interface(struct tgdb *tgdb, char *config_dir)
+static int tgdb_initialize_logger_interface(struct tgdb *tgdb, char *logs_dir)
 {
     /* Open our cgdb and tgdb io logfiles */
-    clog_open(CLOG_CGDB_ID, "%s/cgdb_log%d.txt", config_dir);
-    clog_open(CLOG_GDBIO_ID, "%s/cgdb_gdb_io_log%d.txt", config_dir);
+    clog_open(CLOG_CGDB_ID, "%s/cgdb_log%d.txt", logs_dir);
+    clog_open(CLOG_GDBIO_ID, "%s/cgdb_gdb_io_log%d.txt", logs_dir);
 
     /* Puts cgdb in a mode where it writes a debug log of everything
      * that is read from gdb. That is basically the entire session.
@@ -370,18 +367,91 @@ static int tgdb_initialize_logger_interface(struct tgdb *tgdb, char *config_dir)
     return 0;
 }
 
+static int tgdb_get_current_location(struct tgdb *tgdb)
+{
+    return commands_issue_command(tgdb->c, COMMAND_INFO_FRAME, NULL, 1);
+}
+
+
+static void tgdb_source_location_changed(void *context)
+{
+    struct tgdb *tgdb = (struct tgdb*)context;
+    tgdb_get_current_location(tgdb);
+}
+
+static void tgdb_prompt_changed(void *context, const std::string &prompt)
+{
+    struct tgdb *tgdb = (struct tgdb*)context;
+
+    struct tgdb_response *response =
+        tgdb_create_response(TGDB_UPDATE_CONSOLE_PROMPT_VALUE);
+    response->choice.update_console_prompt_value.prompt_value =
+            cgdb_strdup(prompt.c_str());
+    commands_add_response(tgdb->c, response);
+}
+
+static void tgdb_console_output(void *context, const std::string &msg)
+{
+    struct tgdb *tgdb = (struct tgdb*)context;
+
+    if (commands_is_console_command(tgdb->c)) {
+        tgdb->callbacks.console_output_callback(tgdb->callbacks.context, msg);
+    } else {
+        commands_process(tgdb->c, msg);
+    }
+
+}
+
+static void tgdb_command_error(void *context, const std::string &msg)
+{
+    struct tgdb *tgdb = (struct tgdb*)context;
+
+    /* Let the command package no that it's command was interupted */
+    commands_process_error(tgdb->c);
+
+    /* Send cgdb the error message */
+    tgdb->callbacks.console_output_callback(tgdb->callbacks.context, msg);
+}
+
+static int tgdb_open_new_tty(struct tgdb *tgdb, int *inferior_stdin,
+    int *inferior_stdout)
+{
+    if (tgdb->pty_pair)
+        pty_pair_destroy(tgdb->pty_pair);
+
+    tgdb->pty_pair = pty_pair_create();
+    if (!tgdb->pty_pair) {
+        clog_error(CLOG_CGDB, "pty_pair_create failed");
+        return -1;
+    }
+
+    *inferior_stdin = pty_pair_get_masterfd(tgdb->pty_pair);
+    *inferior_stdout = pty_pair_get_masterfd(tgdb->pty_pair);
+
+    commands_issue_command(tgdb->c, COMMAND_TTY,
+        pty_pair_get_slavename(tgdb->pty_pair), 1);
+
+    return 0;
+}
+
 /* Creating and Destroying a libtgdb context. {{{*/
 
 struct tgdb *tgdb_initialize(const char *debugger,
-        int argc, char **argv, int *debugger_fd)
+        int argc, char **argv, int *debugger_fd, tgdb_callbacks callbacks)
 {
     /* Initialize the libtgdb context */
-    struct tgdb *tgdb = initialize_tgdb_context();
-    char config_dir[FSUTIL_PATH_MAX];
+    struct tgdb *tgdb = initialize_tgdb_context(callbacks);
+    static struct annotations_parser_callbacks annotations_callbacks = {
+        tgdb,
+        tgdb_source_location_changed,
+        tgdb_prompt_changed,
+        tgdb_console_output,
+        tgdb_command_error
+    };
     char logs_dir[FSUTIL_PATH_MAX];
 
     /* Create config directory */
-    if (tgdb_initialize_config_dir(tgdb, config_dir, logs_dir) == -1) {
+    if (tgdb_initialize_config_dir(tgdb, logs_dir) == -1) {
         clog_error(CLOG_CGDB, "tgdb_initialize error");
         return NULL;
     }
@@ -391,50 +461,92 @@ struct tgdb *tgdb_initialize(const char *debugger,
         return NULL;
     }
 
-    tgdb->a2 = a2_create_context(debugger, argc, argv, config_dir);
+    tgdb->debugger_pid = invoke_debugger(debugger, argc, argv,
+            &tgdb->debugger_stdin, &tgdb->debugger_stdout, 0);
 
-    /* create an instance and initialize a tgdb_client_context */
-    if (tgdb->a2 == NULL) {
-        clog_error(CLOG_CGDB, "a2_create_context failed");
+    /* Couldn't invoke process */
+    if (tgdb->debugger_pid == -1)
+        return NULL;
+
+    tgdb->c = commands_initialize(tgdb);
+
+    tgdb->parser = annotations_parser_initialize(annotations_callbacks);
+
+    tgdb_open_new_tty(tgdb, &tgdb->inferior_stdin, &tgdb->inferior_stdout);
+
+    /* Need to get source information before breakpoint information otherwise
+     * the TGDB_UPDATE_BREAKPOINTS event will be ignored in process_commands()
+     * because there are no source files to add the breakpoints to.
+     */
+    tgdb_get_current_location(tgdb);
+
+    /* gdb may already have some breakpoints when it starts. This could happen
+     * if the user puts breakpoints in there .gdbinit.
+     * This makes sure that TGDB asks for the breakpoints on start up.
+     */
+    if (commands_issue_command(tgdb->c, COMMAND_BREAKPOINTS, NULL, 0) == -1) {
         return NULL;
     }
 
-    if (a2_initialize(tgdb->a2,
-                    &(tgdb->debugger_stdin),
-                    &(tgdb->debugger_stdout),
-                    &(tgdb->inferior_stdin), &(tgdb->inferior_stdout)) == -1) {
-        clog_error(CLOG_CGDB, "tgdb_client_initialize failed");
+    /**
+     * Query if disassemble supports the /s flag
+     */
+    if (commands_issue_command(tgdb->c,
+            COMMAND_DATA_DISASSEMBLE_MODE_QUERY, NULL, 1) == -1) {
         return NULL;
     }
-
-    tgdb_process_client_commands(tgdb);
 
     *debugger_fd = tgdb->debugger_stdout;
 
     return tgdb;
 }
 
-int tgdb_shutdown(struct tgdb *tgdb)
+static void tgdb_clear_input_queue(struct tgdb *tgdb)
 {
     int i;
+
     for (i = 0; i < sbcount(tgdb->gdb_input_queue); i++) {
         struct tgdb_command *tc = tgdb->gdb_input_queue[i];
         tgdb_command_destroy(tc);
     }
-    sbfree(tgdb->gdb_input_queue);
+    sbsetcount(tgdb->gdb_input_queue, 0);
+}
+
+static void tgdb_clear_client_request_queue(struct tgdb *tgdb)
+{
+    int i;
 
     for (i = 0; i < sbcount(tgdb->gdb_client_request_queue); i++) {
         tgdb_request_ptr tr = tgdb->gdb_client_request_queue[i];
         tgdb_request_destroy(tr);
     }
+    sbsetcount(tgdb->gdb_client_request_queue, 0);
+}
+
+int tgdb_shutdown(struct tgdb *tgdb)
+{
+    int i;
+
+    tgdb_clear_input_queue(tgdb);
+    sbfree(tgdb->gdb_input_queue);
+
+    tgdb_clear_client_request_queue(tgdb);
     sbfree(tgdb->gdb_client_request_queue);
 
-    for (i = 0; i < sbcount(tgdb->oob_input_queue); i++) {
-        struct tgdb_command *tc = tgdb->oob_input_queue[i];
+    for (i = 0; i < sbcount(tgdb->priority_queue); i++) {
+        struct tgdb_command *tc = tgdb->priority_queue[i];
         tgdb_command_destroy(tc);
     }
-    sbfree(tgdb->oob_input_queue);
-    return a2_shutdown(tgdb->a2);
+    sbfree(tgdb->priority_queue);
+
+    annotations_parser_shutdown(tgdb->parser);
+
+    cgdb_close(tgdb->debugger_stdin);
+    tgdb->debugger_stdin = -1;
+
+    commands_shutdown(tgdb->c);
+
+    return 0;
 }
 
 void tgdb_close_logfiles()
@@ -502,19 +614,19 @@ static char *tgdb_client_modify_breakpoint_call(struct tgdb *tgdb,
     return sys_aprintf("%s *0x%" PRIx64, action, addr);
 }
 
-static int tgdb_disassemble_pc(struct annotate_two *a2, int lines)
+static int tgdb_disassemble_pc(struct commands *c, int lines)
 {
     int ret;
     char *data = NULL;
 
     data = lines ? sys_aprintf("%d", lines) : NULL;
-    ret = commands_issue_command(a2, ANNOTATE_DISASSEMBLE_PC, data, 0);
+    ret = commands_issue_command(c, COMMAND_DISASSEMBLE_PC, data, 0);
 
     free(data);
     return ret;
 }
 
-static int tgdb_disassemble_func(struct annotate_two *a2, int raw, int source)
+static int tgdb_disassemble_func(struct commands *c, int raw, int source)
 {
     /* GDB 7.11 adds /s command to disassemble
 
@@ -540,11 +652,11 @@ static int tgdb_disassemble_func(struct annotate_two *a2, int raw, int source)
 
     if (raw) {
         data = sys_aprintf("%s", "/r");
-    } else if (source && commands_disassemble_supports_s_mode(a2->c)) {
+    } else if (source && commands_disassemble_supports_s_mode(c)) {
         data = sys_aprintf("%s", "/s");
     }
 
-    ret = commands_issue_command(a2, ANNOTATE_DISASSEMBLE_FUNC, data, 0);
+    ret = commands_issue_command(c, COMMAND_DISASSEMBLE_FUNC, data, 0);
 
     free(data);
     return ret;
@@ -593,8 +705,9 @@ static void tgdb_request_destroy_func(void *item)
 static int tgdb_handle_signals(struct tgdb *tgdb)
 {
     if (tgdb->control_c) {
-        sbsetcount(tgdb->gdb_input_queue, 0);
-        sbsetcount(tgdb->gdb_client_request_queue, 0);
+        tgdb_clear_input_queue(tgdb);
+        tgdb_clear_client_request_queue(tgdb);
+
         tgdb->control_c = 0;
     }
 
@@ -633,15 +746,13 @@ tgdb_send(struct tgdb *tgdb, const char *command,
     }
 
     /* Create the client command */
-    tc = tgdb_command_create(command, command_choice,
-        ANNOTATE_UNUSED);
+    tc = tgdb_command_create(command, command_choice, COMMAND_USER_COMMAND);
 
     free(temp_command);
     temp_command = NULL;
 
     tgdb_run_or_queue_command(tgdb, tc);
-    a2_user_ran_command(tgdb->a2);
-    tgdb_process_client_commands(tgdb);
+    commands_user_ran_command(tgdb->c);
 }
 
 /**
@@ -658,8 +769,7 @@ tgdb_send(struct tgdb *tgdb, const char *command,
  * \return
  * 0 on success or -1 on error
  */
-static void
-tgdb_run_or_queue_command(struct tgdb *tgdb, struct tgdb_command *command)
+void tgdb_run_or_queue_command(struct tgdb *tgdb, struct tgdb_command *command)
 {
     int can_issue = tgdb_can_issue_command(tgdb);
 
@@ -674,7 +784,7 @@ tgdb_run_or_queue_command(struct tgdb *tgdb, struct tgdb_command *command)
                 sbpush(tgdb->gdb_input_queue, command);
                 break;
             case TGDB_COMMAND_TGDB_CLIENT_PRIORITY:
-                sbpush(tgdb->oob_input_queue, command);
+                sbpush(tgdb->priority_queue, command);
                 break;
             case TGDB_COMMAND_CONSOLE:
             default:
@@ -707,7 +817,7 @@ static void tgdb_deliver_command(struct tgdb *tgdb, struct tgdb_command *command
     sbfree(str);
 
     /* A command for the debugger */
-    a2_prepare_for_command(tgdb->a2, command);
+    commands_prepare_for_command(tgdb->c, command);
 
     io_writen(tgdb->debugger_stdin, command->gdb_command,
             strlen(command->gdb_command));
@@ -720,7 +830,7 @@ static void tgdb_deliver_command(struct tgdb *tgdb, struct tgdb_command *command
         response->choice.debugger_command_delivered.debugger_command =
             (command->command_choice == TGDB_COMMAND_FRONT_END)?1:0;
         response->choice.debugger_command_delivered.command = cgdb_strdup(s);
-        sbpush(tgdb->a2->responses, response);
+        commands_add_response(tgdb->c, response);
     }
 }
 
@@ -740,14 +850,14 @@ static void tgdb_unqueue_and_deliver_command(struct tgdb *tgdb)
      */
 
     /* The out of band commands should always be run first */
-    if (sbcount(tgdb->oob_input_queue) > 0) {
+    if (sbcount(tgdb->priority_queue) > 0) {
         /* These commands are always run. 
          * However, if an assumption is made that a misc
          * prompt can never be set while in this spot.
          */
         struct tgdb_command *item = NULL;
 
-        item = sbpopfront(tgdb->oob_input_queue);
+        item = sbpopfront(tgdb->priority_queue);
         tgdb_deliver_command(tgdb, item);
         tgdb_command_destroy(item);
     }
@@ -757,10 +867,10 @@ static void tgdb_unqueue_and_deliver_command(struct tgdb *tgdb)
 
         item = sbpopfront(tgdb->gdb_input_queue);
 
-        /* If at the misc prompt, don't run the internal tgdb commands,
-         * In fact throw them out for now, since they are only 
-         * 'info breakpoints' */
-        if (a2_is_misc_prompt(tgdb->a2) == 1) {
+        if (annotations_parser_at_miscellaneous_prompt(tgdb->parser)) {
+            /* If at the misc prompt, don't run the internal tgdb commands,
+             * In fact throw them out for now, since they are only 
+             * 'info breakpoints' */
             if (item->command_choice != TGDB_COMMAND_CONSOLE) {
                 tgdb_command_destroy(item);
                 goto tgdb_unqueue_and_deliver_command_tag;
@@ -832,7 +942,7 @@ static int tgdb_add_quit_command(struct tgdb *tgdb)
     response = tgdb_create_response(TGDB_QUIT);
     response->choice.quit.exit_status = -1;
     response->choice.quit.return_value = 0;
-    sbpush(tgdb->a2->responses, response);
+    commands_add_response(tgdb->c, response);
     return 0;
 }
 
@@ -854,14 +964,13 @@ static int tgdb_get_quit_command(struct tgdb *tgdb, int *tgdb_will_quit)
     int status = 0;
     pid_t ret;
     struct tgdb_response *response = tgdb_create_response(TGDB_QUIT);
-    pid_t pid = a2_get_debugger_pid(tgdb->a2);
 
     if (!tgdb_will_quit)
         return -1;
 
     *tgdb_will_quit = 0;
 
-    ret = waitpid(pid, &status, WNOHANG);
+    ret = waitpid(tgdb->debugger_pid, &status, WNOHANG);
 
     if (ret == -1) {
         clog_error(CLOG_CGDB, "waitpid error");
@@ -886,11 +995,12 @@ static int tgdb_get_quit_command(struct tgdb *tgdb, int *tgdb_will_quit)
     return 0;
 }
 
-size_t tgdb_process(struct tgdb * tgdb, char *buf, size_t n, int *is_finished)
+int tgdb_process(struct tgdb * tgdb, int *is_finished)
 {
-    char local_buf[10 * n];
+    const int n = 4096;
+    static char buf[n];
     ssize_t size;
-    size_t buf_size = 0;
+    int result = 0;
 
     /* TODO: This is kind of a hack.
      * Since I know that I didn't do a read yet, the next select loop will
@@ -923,13 +1033,10 @@ size_t tgdb_process(struct tgdb * tgdb, char *buf, size_t n, int *is_finished)
             goto tgdb_finish;
     }
 
-    /* set buf to null for debug reasons */
-    memset(buf, '\0', n);
-
     /* 1. read all the data possible from gdb that is ready. */
-    if ((size = io_read(tgdb->debugger_stdout, local_buf, n)) < 0) {
+    if ((size = io_read(tgdb->debugger_stdout, buf, n)) < 0) {
         clog_error(CLOG_CGDB, "could not read from masterfd");
-        buf_size = -1;
+        result = -1;
         tgdb_add_quit_command(tgdb);
         goto tgdb_finish;
     } else if (size == 0) {     /* EOF */
@@ -937,23 +1044,9 @@ size_t tgdb_process(struct tgdb * tgdb, char *buf, size_t n, int *is_finished)
         goto tgdb_finish;
     }
 
-    /* 2. At this point local_buf has everything new from this read.
-     * Basically this function is responsible for separating the annotations
-     * that gdb writes from the data. 
-     *
-     * buf and buf_size are the data to be returned from the user.
-     */
+    result = annotations_parser_io(tgdb->parser, buf, size);
 
-    /* Reset command_finished var. This will get set to 1
-       when prompt annotation is parsed. */
-    tgdb->a2->command_finished = 0;
-    local_buf[size] = '\0';
-    a2_parse_io(tgdb->a2, local_buf, size, buf, &buf_size);
-
-    tgdb_process_client_commands(tgdb);
-
-    if (tgdb->a2->command_finished == 1)
-    {
+    if (annotations_parser_at_prompt(tgdb->parser)) {
         /* success, and finished command */
         tgdb->is_gdb_ready_for_next_command = 1;
     }
@@ -973,21 +1066,14 @@ size_t tgdb_process(struct tgdb * tgdb, char *buf, size_t n, int *is_finished)
 tgdb_finish:
     *is_finished = tgdb_can_issue_command(tgdb);
 
-    return buf_size;
+    return result;
 }
 
 /* Getting Data out of TGDB {{{*/
 
 struct tgdb_response *tgdb_get_response(struct tgdb *tgdb, int index)
 {
-    struct tgdb_response *response = NULL;
-    if (index < sbcount(tgdb->a2->responses))
-    {
-        /* Return pointer to this response */
-        response = tgdb->a2->responses[index];
-    }
-
-    return response;
+    return commands_get_response(tgdb->c, index);
 }
 
 struct tgdb_response *tgdb_create_response(enum tgdb_response_type header)
@@ -1050,8 +1136,6 @@ int tgdb_delete_response(struct tgdb_response *com)
             com->choice.update_source_files.source_files = NULL;
             break;
         }
-        case TGDB_INFERIOR_EXITED:
-            break;
         case TGDB_UPDATE_COMPLETIONS:
         {
             int i;
@@ -1102,7 +1186,7 @@ int tgdb_delete_response(struct tgdb_response *com)
 
 void tgdb_delete_responses(struct tgdb *tgdb)
 {
-    a2_delete_responses(tgdb->a2);
+    commands_delete_responses(tgdb->c);
 }
 
 /* }}}*/
@@ -1111,11 +1195,9 @@ void tgdb_delete_responses(struct tgdb *tgdb)
 
 int tgdb_tty_new(struct tgdb *tgdb)
 {
-    int ret = a2_open_new_tty(tgdb->a2,
+    int ret = tgdb_open_new_tty(tgdb,
             &tgdb->inferior_stdin,
             &tgdb->inferior_stdout);
-
-    tgdb_process_client_commands(tgdb);
 
     return ret;
 }
@@ -1127,7 +1209,7 @@ int tgdb_get_inferior_fd(struct tgdb *tgdb)
 
 const char *tgdb_tty_name(struct tgdb *tgdb)
 {
-    return pty_pair_get_slavename(tgdb->a2->pty_pair);
+    return pty_pair_get_slavename(tgdb->pty_pair);
 }
 
 /* }}}*/
@@ -1272,26 +1354,24 @@ int tgdb_process_command(struct tgdb *tgdb, tgdb_request_ptr request)
         }
     } else {
         if (request->header == TGDB_REQUEST_INFO_SOURCES) {
-            commands_issue_command(tgdb->a2, ANNOTATE_INFO_SOURCES, NULL, 0);
+            commands_issue_command(tgdb->c, COMMAND_INFO_SOURCES, NULL, 0);
         }
         else if (request->header == TGDB_REQUEST_CURRENT_LOCATION) {
-            commands_issue_command(tgdb->a2, ANNOTATE_INFO_FRAME, NULL, 0);
+            commands_issue_command(tgdb->c, COMMAND_INFO_FRAME, NULL, 0);
         }
         else if (request->header == TGDB_REQUEST_COMPLETE) {
-            commands_issue_command(tgdb->a2,
-                    ANNOTATE_COMPLETE, request->choice.complete.line, 1);
+            commands_issue_command(tgdb->c, COMMAND_COMPLETE,
+                request->choice.complete.line, 1);
         }
         else if (request->header == TGDB_REQUEST_DISASSEMBLE_PC) {
-            tgdb_disassemble_pc(tgdb->a2, request->choice.disassemble.lines);
+            tgdb_disassemble_pc(tgdb->c, request->choice.disassemble.lines);
         }
         else if (request->header == TGDB_REQUEST_DISASSEMBLE_FUNC) {
-            tgdb_disassemble_func(tgdb->a2,
+            tgdb_disassemble_func(tgdb->c,
                   request->choice.disassemble_func.raw,
                   request->choice.disassemble_func.source);
         }
     }
-
-    tgdb_process_client_commands(tgdb);
 
     return 0;
 }

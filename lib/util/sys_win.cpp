@@ -98,7 +98,7 @@ int swin_keypad(SWINDOW *win, int bf)
 
 char *swin_tigetstr(const char *capname)
 {
-    return tigetstr(capname);
+    return tigetstr((char*)capname);
 }
 
 int swin_move(int y, int x)
@@ -260,4 +260,9 @@ int swin_pair_content(int pair, int *fin, int *bin)
 int swin_color_pair(int pair)
 {
     return COLOR_PAIR(pair);
+}
+
+int swin_raw(void)
+{
+    return raw();
 }

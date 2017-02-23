@@ -3,48 +3,94 @@
 
 struct commands;
 
-/* These are the state that an internal command could lead to */
-enum COMMAND_STATE {
-    /* not a state */
-    VOID_COMMAND,
-    /* Related to the 'info breakpoints' command */
-    INFO_BREAKPOINTS,
-    /* Related to the 'info sources' command */
-    INFO_SOURCES,
-    /* Related to the 'x' command */
-    INFO_DISASSEMBLE_PC,
-    /* Related to the 'disassemble' command */
-    INFO_DISASSEMBLE_FUNC,
-    /* Related to the 'info frame' command */
-    INFO_FRAME,
-    /* Related to the 'server complete' command for tab completion */
+/**  
+ * This should probably be moved out of a2-tgdb.h
+ */
+enum command_kind {
+    /**
+     * A custom command the user or gui requested.
+     *
+     * The commands package does not attempt to interpret the output
+     * of this command for updates to cgdb.
+     */
+    COMMAND_USER_COMMAND,
+
+    /**
+	 * Get a list of breakpoints.
+	 */
+    COMMAND_BREAKPOINTS,
+
+    /**
+     * Tell gdb where to send inferior's output
+	 */
+    COMMAND_TTY,
+
+    /**
+     * Complete the current console line
+	 */
     COMMAND_COMPLETE,
 
-    /* Determine the maximum mode value for the -data-disassembly command */
-    DATA_DISASSEMBLE_MODE_QUERY,
+    /**
+ 	 * Show all the sources inferior is made of
+	 */
+    COMMAND_INFO_SOURCES,
 
-    /* Related to the 'info source' command */
-    INFO_SOURCE,
+    /**
+ 	 * Shows information on the current source file
+	 */
+    COMMAND_INFO_SOURCE,
+
+    /**
+     * Shows information on the current frame
+     */
+    COMMAND_INFO_FRAME,
+
+    /**
+     * Get disassembly for the $pc
+     */
+    COMMAND_DISASSEMBLE_PC,
+
+    /**
+     * Get disassembly for specified function
+     */
+    COMMAND_DISASSEMBLE_FUNC,
+
+    /**
+     * Query if the CLI disassemble command supports mixed source+assembly.
+     *
+     * Mixed source+assembly mode was added as the /s flag to the CLI
+     * disassemble command and as mode 4 to the MI -data-disassemble
+     * command.
+     *
+     * We query the MI command to determine if it supports mode 4, and
+     * if it does, we also know that teh cli disassemble command supports
+     * /s.
+     *
+     * The passing case,
+     *   (gdb) interpreter-exec mi "-data-disassemble -s 0 -e 0 -- 4"
+     *   ^done,asm_insns=[]
+     *
+     * The failing case,
+     *   (gdb) interpreter-exec mi "-data-disassemble -s 0 -e 0 -- 4"
+     *   ^error,msg="-data-disassemble: Mode argument must be 0, 1, 2, or 3."
+     *
+     * If the command comes back as an MI error, we assume /s is not
+     * supported.
+     *
+     * This functionality was added in gdb in commit 6ff0ba5f.
+     */
+    COMMAND_DATA_DISASSEMBLE_MODE_QUERY
 };
 
-/* commands_initialize: Initialize the commands unit */
-struct commands *commands_initialize(struct annotate_two *a2);
-void commands_shutdown(struct commands *c);
 
-/* command_set_state: Sets the state of the command package. This should usually be called
- *                      after an annotation has been read.
- */
-void commands_set_state(struct commands *c, enum COMMAND_STATE state);
+/* commands_initialize: Initialize the commands unit */
+struct commands *commands_initialize(struct tgdb *tgdb);
+void commands_shutdown(struct commands *c);
 
 /* commands_set_field_num: This is used for breakpoint annotations.
  *             field_num is the field that the breakpoint annotation is on.
  */
 void commands_set_field_num(struct commands *c, int field_num);
-
-/* command_get_state:   Gets the state of the command package 
- * Returns:          The current state.
- */
-enum COMMAND_STATE commands_get_state(struct commands *c);
 
 /* runs a simple command, output goes to user  */
 /*int commands_run_command(int fd, struct tgdb_client_command *com);*/
@@ -57,17 +103,25 @@ enum COMMAND_STATE commands_get_state(struct commands *c);
  *
  *  Returns -1 on error, 0 on success
  */
-int commands_issue_command(struct annotate_two *a2,
-    enum annotate_commands commmand, const char *data, int oob);
+int commands_issue_command(struct commands *c,
+    enum command_kind commmand_kind, const char *data, int oob);
 
-/* commands_process: This function receives the output from gdb when gdb
- *                   is running a command on behalf of this package.
+/**
+ * This function receives the output from gdb when gdb
+ * is running a command on behalf of this package.
  *
- *    a     -> the character received from gdb.
- *    com   -> commands to give back to gdb.
+ * @param c
+ * The commands instance
+ *
+ * @param str
+ * The string to process
  */
-void commands_process(struct commands *c, char a);
+void commands_process(struct commands *c, const std::string &str);
 
+/**
+ * Called when a command produces an error.
+ */
+void commands_process_error(struct commands *c);
 
 /* commands_prepare_for_command:
  * -----------------------------
@@ -76,8 +130,7 @@ void commands_process(struct commands *c, char a);
  *
  *  com:    The command to be run.
  */
-void commands_prepare_for_command(struct annotate_two *a2, struct commands *c,
-        struct tgdb_command *com);
+void commands_prepare_for_command(struct commands *c, struct tgdb_command *com);
 
 /* commands_user_ran_command:
  * --------------------------
@@ -87,7 +140,7 @@ void commands_prepare_for_command(struct annotate_two *a2, struct commands *c,
  *
  * Returns: -1 on error, 0 on success
  */
-int commands_user_ran_command(struct annotate_two *a2);
+int commands_user_ran_command(struct commands *c);
 
 /**
  * The current command type. TGDB is capable of having any commands of this
@@ -136,7 +189,7 @@ struct tgdb_command {
     enum tgdb_command_choice command_choice;
 
     /** Private data the client context can use. */
-    enum annotate_commands command;
+    enum command_kind kind;
 };
 
 /**
@@ -158,8 +211,7 @@ struct tgdb_command {
  * Always is successful, will call exit on failed malloc
  */
 struct tgdb_command *tgdb_command_create(const char *tgdb_command_data,
-        enum tgdb_command_choice command_choice,
-        enum annotate_commands command);
+        enum tgdb_command_choice command_choice, enum command_kind kind);
 
 /**
  * This will free a TGDB queue command.
@@ -179,21 +231,36 @@ void tgdb_command_destroy(struct tgdb_command *tc);
  */
 int commands_disassemble_supports_s_mode(struct commands *c);
 
-/* commands_issue_command:
- * -----------------------
- *
- *  Issue a given command to gdb.
- */
-void commands_issue_command(struct annotate_two *a2,
-    enum annotate_commands commmand, const char *data, int oob, int *id);
+bool commands_is_console_command(struct commands *c);
 
-/* commands_process: This function receives the output from gdb when gdb
- *                   is running a command on behalf of this package.
+/**
+ * Add a tgdb response.
  *
- *    a     -> the character received from gdb.
- *    com   -> commands to give back to gdb.
+ * @param c
+ * The commands instance
+ *
+ * @param response
+ * The response to add
  */
-int commands_process_cgdb_gdbmi(struct annotate_two *a2, struct ibuf *buf,
-    int result_record, char *result_line, int id);
+void commands_add_response(struct commands *c, struct tgdb_response *response);
+
+/**
+ * Delete all the tgdb responses associated with this commands instance.
+ *
+ * @param c
+ * The commands instance
+ */
+void commands_delete_responses(struct commands *c);
+
+/**
+ * Get the tgdb responses for the given index.
+ *
+ * @param c
+ * The commands instance
+ *
+ * @param index
+ * The response index to get. Start at 0 and move up until NULL is returned.
+ */
+struct tgdb_response *commands_get_response(struct commands *c, int index);
 
 #endif /* __COMMANDS_H__ */

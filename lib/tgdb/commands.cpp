@@ -20,29 +20,26 @@
 
 /* Local includes */
 #include "sys_util.h"
-#include "a2-tgdb.h"
 #include "commands.h"
 #include "io.h"
 #include "tgdb_types.h"
 #include "ibuf.h"
 #include "gdbwire.h"
-#include "state_machine.h"
 
 /**
- * This structure represents most of the I/O parsing state of the 
- * annotate_two subsytem.
+ * This structure aids in parsing the gdb command output, in annotations or mi.
  */
 struct commands {
     /**
      * The annotate two data structure this command structure corresponds
      * with. Perhaps combine these two at one point.
      */
-    struct annotate_two *a2;
+    struct tgdb *tgdb;
 
     /**
-     * The state of the command context.
+     * The current command kind that is executing
      */
-    enum COMMAND_STATE cur_command_state;
+    enum command_kind cur_command_kind;
 
     /**
      * The current tab completion items.
@@ -64,10 +61,51 @@ struct commands {
      * True if the disassemble command supports /s, otherwise false.
      */
     int disassemble_supports_s_mode;
+
+    /**
+     * True if this is a console command, False otherwise.
+     *
+     * This member is used to determine if the output of the current
+     * command running should be sent back to the console.
+     */
+    bool is_console_command;
+
+    /** This is the queue of responses to tgdb commands for the front end. */
+    struct tgdb_response **responses;
 };
 
+void tgdb_run_or_queue_command(struct tgdb *tgdb, struct tgdb_command *command);
+
+void commands_delete_responses(struct commands *c)
+{
+    int i;
+
+    for (i = 0; i < sbcount(c->responses); i++)
+        tgdb_delete_response(c->responses[i]);
+
+    sbsetcount(c->responses, 0);
+}
+
+void commands_add_response(struct commands *c, struct tgdb_response *response)
+{
+    sbpush(c->responses, response);
+}
+
+struct tgdb_response *commands_get_response(struct commands *c, int index)
+{
+    struct tgdb_response *response = NULL;
+    if (index < sbcount(c->responses))
+    {
+        /* Return pointer to this response */
+        response = c->responses[index];
+    }
+
+    return response;
+}
+
+
 static void
-commands_send_breakpoints(struct annotate_two *a2,
+commands_send_breakpoints(struct commands *c,
     struct tgdb_breakpoint *breakpoints)
 {
     struct tgdb_response *response = (struct tgdb_response *)
@@ -75,7 +113,7 @@ commands_send_breakpoints(struct annotate_two *a2,
 
     response->choice.update_breakpoints.breakpoints = breakpoints;
 
-    sbpush(a2->responses, response);
+    commands_add_response(c, response);
 }
 
 static void commands_process_breakpoint(
@@ -113,7 +151,7 @@ static void commands_process_breakpoint(
     }
 }
 
-static void commands_process_breakpoints(struct annotate_two *a2,
+static void commands_process_breakpoints(struct commands *c,
         struct gdbwire_mi_result_record *result_record)
 {
     enum gdbwire_result result;
@@ -139,26 +177,26 @@ static void commands_process_breakpoints(struct annotate_two *a2,
             breakpoint = breakpoint->next;
         }
 
-        commands_send_breakpoints(a2, breakpoints);
+        commands_send_breakpoints(c, breakpoints);
 
         gdbwire_mi_command_free(mi_command);
     }
 }
 
-static void commands_send_source_files(struct annotate_two *a2,
+static void commands_send_source_files(struct commands *c,
         char **source_files)
 {
     struct tgdb_response *response =
         tgdb_create_response(TGDB_UPDATE_SOURCE_FILES);
     response->choice.update_source_files.source_files = source_files;
-    sbpush(a2->responses, response);
+    commands_add_response(c, response);
 }
 
 /* This function is capable of parsing the output of 'info source'.
  * It can get both the absolute and relative path to the source file.
  */
 static void
-commands_process_info_sources(struct annotate_two *a2,
+commands_process_info_sources(struct commands *c,
         struct gdbwire_mi_result_record *result_record)
 {
     enum gdbwire_result result;
@@ -175,37 +213,48 @@ commands_process_info_sources(struct annotate_two *a2,
             files = files->next;
         }
 
-        commands_send_source_files(a2, source_files);
+        commands_send_source_files(c, source_files);
 
         gdbwire_mi_command_free(mi_command);
     }
 }
 
-static void send_disassemble_func_complete_response(struct annotate_two *a2,
+static void send_disassemble_func_complete_response(struct commands *c,
         struct gdbwire_mi_result_record *result_record)
 {
+    tgdb_response_type type = (c->cur_command_kind == COMMAND_DISASSEMBLE_PC) ?
+        TGDB_DISASSEMBLE_PC : TGDB_DISASSEMBLE_FUNC;
     struct tgdb_response *response =
-        tgdb_create_response(TGDB_DISASSEMBLE_FUNC);
+        tgdb_create_response(type);
 
     response->choice.disassemble_function.error = 
         (result_record->result_class == GDBWIRE_MI_ERROR);
             
-    response->choice.disassemble_function.disasm = a2->c->disasm;
-    response->choice.disassemble_function.addr_start = a2->c->address_start;
-    response->choice.disassemble_function.addr_end = a2->c->address_end;
-    sbpush(a2->responses, response);
+    response->choice.disassemble_function.disasm = c->disasm;
+    response->choice.disassemble_function.addr_start = c->address_start;
+    response->choice.disassemble_function.addr_end = c->address_end;
+    
+    c->disasm = NULL;
+    c->address_start = 0;
+    c->address_end = 0;
+
+    commands_add_response(c, response);
 }
 
-static void send_command_complete_response(struct annotate_two *a2)
+static void send_command_complete_response(struct commands *c)
 {
     struct tgdb_response *response =
         tgdb_create_response(TGDB_UPDATE_COMPLETIONS);
-    response->choice.update_completions.completions = a2->c->completions;
-    sbpush(a2->responses, response);
+
+    response->choice.update_completions.completions = c->completions;
+    /* Clear commands completions since we've just stolen that pointer. */
+    c->completions = NULL;
+
+    commands_add_response(c, response);
 }
 
 static void
-commands_send_source_file(struct annotate_two *a2, char *fullname, char *file,
+commands_send_source_file(struct commands *c, char *fullname, char *file,
         uint64_t address, char *from, char *func, int line)
 {
     /* This section allocates a new structure to add into the queue 
@@ -228,10 +277,10 @@ commands_send_source_file(struct annotate_two *a2, char *fullname, char *file,
 
     response->choice.update_file_position.file_position = tfp;
 
-    sbpush(a2->responses, response);
+    commands_add_response(c, response);
 }
 
-static void commands_process_info_source(struct annotate_two *a2,
+static void commands_process_info_source(struct commands *c,
         struct gdbwire_mi_result_record *result_record)
 {
     enum gdbwire_result result;
@@ -239,7 +288,7 @@ static void commands_process_info_source(struct annotate_two *a2,
     result = gdbwire_get_mi_command(GDBWIRE_MI_FILE_LIST_EXEC_SOURCE_FILE,
         result_record, &mi_command);
     if (result == GDBWIRE_OK) {
-        commands_send_source_file(a2,
+        commands_send_source_file(c,
                 mi_command->variant.file_list_exec_source_file.fullname,
                 mi_command->variant.file_list_exec_source_file.file,
                 0, 0, 0,
@@ -249,7 +298,7 @@ static void commands_process_info_source(struct annotate_two *a2,
     }
 }
 
-static void commands_process_info_frame(struct annotate_two *a2,
+static void commands_process_info_frame(struct commands *c,
         struct gdbwire_mi_result_record *result_record)
 {
     bool require_source = false;
@@ -264,7 +313,7 @@ static void commands_process_info_frame(struct annotate_two *a2,
         cgdb_hexstr_to_u64(frame->address, &address);
 
         if (frame->address || frame->file || frame->fullname) {
-            commands_send_source_file(a2, frame->fullname, frame->file,
+            commands_send_source_file(c, frame->fullname, frame->file,
                     address, frame->from, frame->func, frame->line);
         } else {
             require_source = true;
@@ -276,27 +325,26 @@ static void commands_process_info_frame(struct annotate_two *a2,
     }
 
     if (require_source) {
-        commands_issue_command(a2, ANNOTATE_INFO_SOURCE, NULL, 1);
+        commands_issue_command(c, COMMAND_INFO_SOURCE, NULL, 1);
     }
 }
 
 static void gdbwire_stream_record_callback(void *context,
     struct gdbwire_mi_stream_record *stream_record)
 {
-    struct annotate_two *a2 = (struct annotate_two*)context;
-    struct commands *c = a2->c;
+    struct commands *c = (struct commands*)context;
 
-    switch (c->cur_command_state) {
-        case INFO_BREAKPOINTS:
-        case INFO_FRAME:
+    switch (c->cur_command_kind) {
+        case COMMAND_BREAKPOINTS:
+        case COMMAND_INFO_FRAME:
             /**
              * When using GDB with annotate=2 and also using interpreter-exec,
              * GDB spits out the annotations in the MI output. All of these
              * annotations can be ignored.
              */
             break;
-        case INFO_DISASSEMBLE_PC:
-        case INFO_DISASSEMBLE_FUNC:
+        case COMMAND_DISASSEMBLE_PC:
+        case COMMAND_DISASSEMBLE_FUNC:
             if (stream_record->kind == GDBWIRE_MI_CONSOLE) {
                 uint64_t address;
                 int result;
@@ -345,10 +393,11 @@ static void gdbwire_stream_record_callback(void *context,
                 sbpush(c->completions, cgdb_strdup(str));
             }
             break;
-        case DATA_DISASSEMBLE_MODE_QUERY:
-        case VOID_COMMAND:
-        case INFO_SOURCE:
-        case INFO_SOURCES:
+        case COMMAND_DATA_DISASSEMBLE_MODE_QUERY:
+        case COMMAND_USER_COMMAND:
+        case COMMAND_INFO_SOURCE:
+        case COMMAND_INFO_SOURCES:
+        case COMMAND_TTY:
             break;
     }
 }
@@ -361,24 +410,23 @@ static void gdbwire_async_record_callback(void *context,
 static void gdbwire_result_record_callback(void *context,
         struct gdbwire_mi_result_record *result_record)
 {
-    struct annotate_two *a2 = (struct annotate_two*)context;
-    struct commands *c = a2->c;
+    struct commands *c = (struct commands*)context;
 
-    switch (c->cur_command_state) {
-        case INFO_BREAKPOINTS:
-            commands_process_breakpoints(a2, result_record);
+    switch (c->cur_command_kind) {
+        case COMMAND_BREAKPOINTS:
+            commands_process_breakpoints(c, result_record);
             break;
-        case INFO_SOURCES:
-            commands_process_info_sources(a2, result_record);
+        case COMMAND_INFO_SOURCES:
+            commands_process_info_sources(c, result_record);
             break;
-        case INFO_DISASSEMBLE_PC:
-        case INFO_DISASSEMBLE_FUNC:
-            send_disassemble_func_complete_response(a2, result_record);
+        case COMMAND_DISASSEMBLE_PC:
+        case COMMAND_DISASSEMBLE_FUNC:
+            send_disassemble_func_complete_response(c, result_record);
             break;
         case COMMAND_COMPLETE:
-            send_command_complete_response(a2);
+            send_command_complete_response(c);
             break;
-        case DATA_DISASSEMBLE_MODE_QUERY:
+        case COMMAND_DATA_DISASSEMBLE_MODE_QUERY:
             /**
              * If the mode was to high, than the result record would be
              * an error, meaning the mode is not supported. Otherwise,
@@ -387,18 +435,17 @@ static void gdbwire_result_record_callback(void *context,
             if (result_record->result_class == GDBWIRE_MI_DONE) {
                 c->disassemble_supports_s_mode = 1;
             }
-            
             break;
-        case INFO_SOURCE:
-            commands_process_info_source(a2, result_record);
+        case COMMAND_INFO_SOURCE:
+            commands_process_info_source(c, result_record);
             break;
-        case INFO_FRAME:
-            commands_process_info_frame(a2, result_record);
+        case COMMAND_INFO_FRAME:
+            commands_process_info_frame(c, result_record);
             break;
-        case VOID_COMMAND:
+        case COMMAND_TTY:
+        case COMMAND_USER_COMMAND:
             break;
     }
-    commands_set_state(c, VOID_COMMAND);
 }
 
 static void gdbwire_prompt_callback(void *context, const char *prompt)
@@ -420,21 +467,25 @@ static struct gdbwire_callbacks wire_callbacks =
         gdbwire_parse_error_callback
     };
 
-struct commands *commands_initialize(struct annotate_two *a2)
+struct commands *commands_initialize(struct tgdb *tgdb)
 {
     struct commands *c =
             (struct commands *) cgdb_malloc(sizeof (struct commands));
-    c->a2 = a2;
-    c->cur_command_state = VOID_COMMAND;
+    c->tgdb = tgdb;
+    c->cur_command_kind = COMMAND_USER_COMMAND;
     c->completions = NULL;
 
     c->disasm = NULL;
+    c->address_start = 0;
+    c->address_end = 0;
 
     struct gdbwire_callbacks callbacks = wire_callbacks;
-    callbacks.context = (void*)c->a2;
+    callbacks.context = (void*)c;
     c->wire = gdbwire_create(callbacks);
 
     c->disassemble_supports_s_mode = 0;
+    c->is_console_command = true;
+    c->responses = NULL;
 
     return c;
 }
@@ -458,98 +509,30 @@ void commands_shutdown(struct commands *c)
 
     gdbwire_destroy(c->wire);
 
+    commands_delete_responses(c);
+    sbfree(c->responses);
+    c->responses = NULL;
+
     free(c);
     c = NULL;
 }
 
-void
-commands_set_state(struct commands *c, enum COMMAND_STATE state)
+void commands_process(struct commands *c, const std::string &str)
 {
-    c->cur_command_state = state;
+   gdbwire_push_data(c->wire, str.data(), str.size());
 }
 
-enum COMMAND_STATE commands_get_state(struct commands *c)
+void commands_process_error(struct commands *c)
 {
-    return c->cur_command_state;
-}
-
-static void
-commands_prepare_info_source(struct annotate_two *a2, struct commands *c)
-{
-    data_set_state(a2, INTERNAL_COMMAND);
-    commands_set_state(c, INFO_SOURCE);
-}
-
-void commands_process(struct commands *c, char a)
-{
-    switch (commands_get_state(c)) {
-        case VOID_COMMAND:
-            break;
-        default:
-            gdbwire_push_data(c->wire, &a, 1);
-            break;
-    }
+    c->is_console_command = false;
 }
 
 void
-commands_prepare_for_command(struct annotate_two *a2,
-        struct commands *c, struct tgdb_command *com)
+commands_prepare_for_command(struct commands *c, struct tgdb_command *com)
 {
-    enum annotate_commands a_com = com->command;
-
     /* Set the commands state to nothing */
-    commands_set_state(c, VOID_COMMAND);
-
-    if (a_com == -1) {
-        data_set_state(a2, USER_COMMAND);
-        return;
-    }
-
-    switch (a_com) {
-        case ANNOTATE_INFO_SOURCES:
-            commands_set_state(c, INFO_SOURCES);
-            break;
-        case ANNOTATE_INFO_SOURCE:
-            commands_prepare_info_source(a2, c);
-            break;
-        case ANNOTATE_INFO_FRAME:
-            data_set_state(a2, INTERNAL_COMMAND);
-            commands_set_state(c, INFO_FRAME);
-            break;
-        case ANNOTATE_INFO_BREAKPOINTS:
-            commands_set_state(c, INFO_BREAKPOINTS);
-            break;
-        case ANNOTATE_TTY:
-            break;              /* Nothing to do */
-        case ANNOTATE_COMPLETE:
-            c->completions = 0;
-            commands_set_state(c, COMMAND_COMPLETE);
-            break;
-        case ANNOTATE_DATA_DISASSEMBLE_MODE_QUERY:
-            c->disassemble_supports_s_mode = 0;
-
-            commands_set_state(c, DATA_DISASSEMBLE_MODE_QUERY);
-            break;
-        case ANNOTATE_DISASSEMBLE_PC:
-            c->disasm = 0;
-            c->address_start = 0;
-            c->address_end = 0;
-            
-            commands_set_state(c, INFO_DISASSEMBLE_PC);
-            break;
-        case ANNOTATE_DISASSEMBLE_FUNC:
-            c->disasm = 0;
-            c->address_start = 0;
-            c->address_end = 0;
-            
-            commands_set_state(c, INFO_DISASSEMBLE_FUNC);
-            break;
-        default:
-            clog_error(CLOG_CGDB, "commands_prepare_for_command error");
-            break;
-    };
-
-    data_set_state(a2, INTERNAL_COMMAND);
+    c->is_console_command = (com->command_choice == TGDB_COMMAND_CONSOLE);
+    c->cur_command_kind = com->kind;
 }
 
 /** 
@@ -566,20 +549,20 @@ commands_prepare_for_command(struct annotate_two *a2,
  * The memory is malloc'd, and must be freed.
  */
 static char *create_gdb_command(struct commands *c,
-        enum annotate_commands com, const char *data)
+        enum command_kind kind, const char *data)
 {
-    switch (com) {
-        case ANNOTATE_INFO_SOURCES:
+    switch (kind) {
+        case COMMAND_INFO_SOURCES:
             return strdup("server interpreter-exec mi \"-file-list-exec-source-files\"\n");
-        case ANNOTATE_INFO_SOURCE:
+        case COMMAND_INFO_SOURCE:
             /* server info source */
             return strdup("server interpreter-exec mi \"-file-list-exec-source-file\"\n");
-        case ANNOTATE_INFO_FRAME:
+        case COMMAND_INFO_FRAME:
             /* server info frame */
             return strdup("server interpreter-exec mi \"-stack-info-frame\"\n");
-        case ANNOTATE_DISASSEMBLE_PC:
+        case COMMAND_DISASSEMBLE_PC:
             return sys_aprintf("server interpreter-exec mi \"x/%si $pc\"\n", data);
-        case ANNOTATE_DISASSEMBLE_FUNC:
+        case COMMAND_DISASSEMBLE_FUNC:
             /* disassemble 'driver.cpp'::main
                  /m: source lines included
                  /s: source lines included, output in pc order
@@ -592,15 +575,15 @@ static char *create_gdb_command(struct commands *c,
              */
             return sys_aprintf("server interp mi \"disassemble%s%s\"\n",
                                data ? " " : "", data ? data : "");
-        case ANNOTATE_INFO_BREAKPOINTS:
+        case COMMAND_BREAKPOINTS:
             return strdup("server interpreter-exec mi \"-break-info\"\n");
-        case ANNOTATE_TTY:
+        case COMMAND_TTY:
             /* server tty %s */
             return sys_aprintf("server interpreter-exec mi \"-inferior-tty-set %s\"\n", data);
-        case ANNOTATE_COMPLETE:
+        case COMMAND_COMPLETE:
             /* server complete */
             return sys_aprintf("server interpreter-exec mi \"complete %s\"\n", data);
-        case ANNOTATE_DATA_DISASSEMBLE_MODE_QUERY:
+        case COMMAND_DATA_DISASSEMBLE_MODE_QUERY:
             return sys_aprintf("server interpreter-exec mi \"-data-disassemble -s 0 -e 0 -- 4\"\n");
         default:
             clog_error(CLOG_CGDB, "switch error");
@@ -611,8 +594,7 @@ static char *create_gdb_command(struct commands *c,
 }
 
 struct tgdb_command *tgdb_command_create(const char *gdb_command,
-        enum tgdb_command_choice command_choice,
-        enum annotate_commands command)
+        enum tgdb_command_choice command_choice, enum command_kind kind)
 {
     struct tgdb_command *tc;
 
@@ -620,7 +602,7 @@ struct tgdb_command *tgdb_command_create(const char *gdb_command,
 
     tc->gdb_command = gdb_command ? strdup(gdb_command) : NULL;
     tc->command_choice = command_choice;
-    tc->command = command;
+    tc->kind = kind;
 
     return tc;
 }
@@ -632,8 +614,8 @@ void tgdb_command_destroy(struct tgdb_command *tc)
 }
 
 int
-commands_user_ran_command(struct annotate_two *a2) {
-    return commands_issue_command(a2, ANNOTATE_INFO_BREAKPOINTS, NULL, 0);
+commands_user_ran_command(struct commands *c) {
+    return commands_issue_command(c, COMMAND_BREAKPOINTS, NULL, 0);
 
 #if 0
     /* This was added to allow support for TGDB to tell the FE when the user
@@ -651,26 +633,30 @@ commands_user_ran_command(struct annotate_two *a2) {
 #endif
 }
 
-int commands_issue_command(struct annotate_two *a2,
-    enum annotate_commands command, const char *data, int oob)
+int commands_issue_command(struct commands *c,
+    enum command_kind kind, const char *data, int oob)
 {
-    char *ncom = create_gdb_command(a2->c, command, data);
+    char *ncom = create_gdb_command(c, kind, data);
     struct tgdb_command *client_command = NULL;
 
     enum tgdb_command_choice choice = (oob == 1) ?
            TGDB_COMMAND_TGDB_CLIENT_PRIORITY : TGDB_COMMAND_TGDB_CLIENT;
 
     /* This should send the command to tgdb-base to handle */
-    client_command = tgdb_command_create(ncom, choice, command);
-
-    /* Append to the command_container the commands */
-    sbpush(a2->client_commands, client_command);
+    client_command = tgdb_command_create(ncom, choice, kind);
 
     free(ncom);
+
+    tgdb_run_or_queue_command(c->tgdb, client_command);
     return 0;
 }
 
 int commands_disassemble_supports_s_mode(struct commands *c)
 {
     return c->disassemble_supports_s_mode;
+}
+
+bool commands_is_console_command(struct commands *c)
+{
+    return c->is_console_command;
 }

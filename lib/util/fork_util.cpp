@@ -179,17 +179,18 @@ static int pty_free_memory(char *s, int fd, int argc, char *argv[])
 }
 
 int invoke_debugger(const char *path,
-        int argc, char *argv[], int *in, int *out, int choice, char *filename)
+        int argc, char *argv[], int *in, int *out, int choice)
 {
     pid_t pid;
     const char *const GDB = "gdb";
     const char *const NW = "--nw";
-    const char *const X = "-x";
+    const char *const EX = "-ex";
     const char *const ANNOTATE_TWO = "--annotate=2";
     const char *const GDBMI = "-i=mi2";
-    char *F = filename;
+    const char *const SET_ANNOTATE_TWO = "set annotate 2";
+    const char *const SET_HEIGHT_ZERO = "set height 0";
     char **local_argv;
-    int i, j = 0, extra = 6;
+    int i, j = 0, extra = 8;
     int malloc_size = argc + extra;
     char slavename[64];
     int masterfd;
@@ -208,14 +209,17 @@ int invoke_debugger(const char *path,
      */
     local_argv[j++] = cgdb_strdup(NW);
 
+    local_argv[j++] = cgdb_strdup(EX);
+    local_argv[j++] = cgdb_strdup(SET_ANNOTATE_TWO);
+
+    local_argv[j++] = cgdb_strdup(EX);
+    local_argv[j++] = cgdb_strdup(SET_HEIGHT_ZERO);
+
     /* add the init file that the user did not type */
     if (choice == 0)
         local_argv[j++] = cgdb_strdup(ANNOTATE_TWO);
     else if (choice == 1)
         local_argv[j++] = cgdb_strdup(GDBMI);
-
-    local_argv[j++] = cgdb_strdup(X);
-    local_argv[j++] = cgdb_strdup(F);
 
     /* copy in all the data the user entered */
     for (i = 0; i < argc; i++)
@@ -228,6 +232,13 @@ int invoke_debugger(const char *path,
         pty_free_memory(slavename, masterfd, argc, local_argv);
         return -1;
     }
+
+    /* Log the gdb invocation line */
+    clog_info(CLOG_GDBIO, "Invoking program:");
+    for (i = 0; i < j; i++) {
+        clog_info(CLOG_GDBIO, "  argv[%d]=%s ", i, local_argv[i]);
+    }
+
     /* Fork into two processes with a shared pty pipe */
     pid = pty_fork(&masterfd, slavename, SLAVE_SIZE, NULL, NULL);
 

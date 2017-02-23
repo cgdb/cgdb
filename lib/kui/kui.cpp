@@ -537,9 +537,6 @@ int kui_set_map_set(struct kuictx *kctx, struct kui_map_set *kui_ms)
     if (!kctx)
         return -1;
 
-    if (!kui_ms)
-        return -1;
-
     kctx->map_set = kui_ms;
 
     return 0;
@@ -879,13 +876,19 @@ static int kui_findkey(struct kuictx *kctx, int *was_map_found)
     if (!was_map_found)
         return -1;
 
-    if (!kctx->map_set)
-        return -1;
-
     /* Initialize variables on stack */
     key = -1;
     *was_map_found = 0;
     should_continue = 0;
+
+    if (!kctx->map_set) {
+        retval = kui_findchar(kctx, &key);
+        if (retval == -1) {
+            return -1;
+        } else {
+            return key;
+        }
+    }
 
     if (std_list_remove_all(kctx->volatile_buffer) == -1)
         return -1;
@@ -923,7 +926,8 @@ static int kui_findkey(struct kuictx *kctx, int *was_map_found)
             break;
     }
 
-    key = 0;                    /* This should no longer be used. Enforcing that. */
+    /* This should no longer be used. Enforcing that. */
+    key = 0;
 
     /* All done looking for chars, let lists that matched a mapping
      * be known. ex KUI_MAP_STILL_LOOKING => KUI_MAP_FOUND. This 
@@ -1137,6 +1141,14 @@ int kui_manager_destroy(struct kui_manager *kuim)
     kuim = NULL;
 
     return ret;
+}
+
+int kui_manager_clear_map_set(struct kui_manager *kuim)
+{
+    if (!kuim)
+        return -1;
+
+    return kui_set_map_set(kuim->normal_keys, NULL);
 }
 
 int kui_manager_set_map_set(struct kui_manager *kuim,

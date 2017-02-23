@@ -205,14 +205,6 @@
         TGDB_UPDATE_SOURCE_FILES,
 
     /**
-     * This happens when the program being debugged by GDB exits. 
-     * It can be used be the front end to clear any cache that it might have
-     * obtained by debugging the last program. The data represents the exit
-     * status.
-     */
-        TGDB_INFERIOR_EXITED,
-
-    /**
      * This returns a list of all the completions.
      *
      */
