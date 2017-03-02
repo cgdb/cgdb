@@ -938,61 +938,41 @@ ssize_t tgdb_recv_inferior_data(struct tgdb * tgdb, char *buf, size_t n)
 static int tgdb_add_quit_command(struct tgdb *tgdb)
 {
     struct tgdb_response *response;
-
     response = tgdb_create_response(TGDB_QUIT);
-    response->choice.quit.exit_status = -1;
-    response->choice.quit.return_value = 0;
     commands_add_response(tgdb->c, response);
     return 0;
 }
 
 /**
- * This is called when GDB has finished.
- * Its job is to add the type of QUIT command that is appropriate.
+ * Called to process the sigchld signal, and clean up zombies!
  *
- * \param tgdb
- * The tgdb context
+ * @param tgdb
+ * The tgdb instance
  *
- * \param tgdb_will_quit
- * This will return as 1 if tgdb sent the TGDB_QUIT command. Otherwise 0.
- * 
- * \return
+ * @return
  * 0 on success or -1 on error
  */
-static int tgdb_get_quit_command(struct tgdb *tgdb, int *tgdb_will_quit)
+static int tgdb_handle_sigchld(struct tgdb *tgdb)
 {
-    int status = 0;
-    pid_t ret;
-    struct tgdb_response *response = tgdb_create_response(TGDB_QUIT);
+    int result = 0;
+    int status;
 
-    if (!tgdb_will_quit)
-        return -1;
+    if (tgdb->has_sigchld_recv) {
+        int waitpid_result;
 
-    *tgdb_will_quit = 0;
+        do {
+            waitpid_result = waitpid(tgdb->debugger_pid, &status, WNOHANG);
+            if (waitpid_result == -1) {
+                result = -1;
+                clog_error(CLOG_CGDB, "waitpid error");
+                break;
+            }
+        } while (waitpid_result != 0);
 
-    ret = waitpid(tgdb->debugger_pid, &status, WNOHANG);
-
-    if (ret == -1) {
-        clog_error(CLOG_CGDB, "waitpid error");
-        return -1;
-    } else if (ret == 0) {
-        /* This SIGCHLD wasn't for GDB */
-        return 0;
+        tgdb->has_sigchld_recv = 0;
     }
 
-    if ((WIFEXITED(status)) == 0) {
-        /* Child did not exit normally */
-        response->choice.quit.exit_status = -1;
-        response->choice.quit.return_value = 0;
-
-    } else {
-        response->choice.quit.exit_status = 0;
-        response->choice.quit.return_value = WEXITSTATUS(status);
-
-    }
-
-    *tgdb_will_quit = 1;
-    return 0;
+    return result;
 }
 
 int tgdb_process(struct tgdb * tgdb, int *is_finished)
@@ -1002,69 +982,41 @@ int tgdb_process(struct tgdb * tgdb, int *is_finished)
     ssize_t size;
     int result = 0;
 
-    /* TODO: This is kind of a hack.
-     * Since I know that I didn't do a read yet, the next select loop will
-     * get me back here. This probably shouldn't return, however, I have to
-     * re-write a lot of this function. Also, I think this function should
-     * return a malloc'd string, not a static buffer.
-     *
-     * Currently, I see it as a bigger hack to try to just append this to the
-     * beginning of buf.
-     */
-    if (tgdb->has_sigchld_recv) {
-        int tgdb_will_quit;
+    tgdb_handle_sigchld(tgdb);
 
-        /* tgdb_get_quit_command will return right away, it's asynchrounous.
-         * We call it to determine if it was GDB that died.
-         * If GDB didn't die, things will work like normal. ignore this.
-         * If GDB did die, this get's the quit command and add's it to the list. It's
-         * OK that the rest of this function get's executed, since the read will simply
-         * return EOF.
+    size = io_read(tgdb->debugger_stdout, buf, n);
+    if (size < 0) {
+        // Error reading from GDB
+        clog_error(CLOG_CGDB, "Error reading from gdb's stdout, closing down");
+        result = -1;
+        tgdb_add_quit_command(tgdb);
+    } else if (size == 0) {
+        // Read EOF from GDB
+        clog_info(CLOG_GDBIO, "read EOF from GDB, closing down");
+        tgdb_add_quit_command(tgdb);
+    } else {
+        // Read some GDB console output, process it
+        result = annotations_parser_io(tgdb->parser, buf, size);
+
+        if (annotations_parser_at_prompt(tgdb->parser)) {
+            /* success, and finished command */
+            tgdb->is_gdb_ready_for_next_command = 1;
+        }
+
+        /* 3. if ^c has been sent, clear the buffers.
+         *        If a signal has been received, clear the queue and return
          */
-        int val = tgdb_get_quit_command(tgdb, &tgdb_will_quit);
-
-        if (val == -1) {
-            clog_error(CLOG_CGDB, "tgdb_get_quit_command error");
+        if (tgdb_handle_signals(tgdb) == -1) {
+            clog_error(CLOG_CGDB, "tgdb_handle_signals failed");
             return -1;
         }
 
-        tgdb->has_sigchld_recv = 0;
-        if (tgdb_will_quit)
-            goto tgdb_finish;
+        /* 4. runs the users buffered command if any exists */
+        if (tgdb_has_command_to_run(tgdb))
+            tgdb_unqueue_and_deliver_command(tgdb);
+
+        *is_finished = tgdb_can_issue_command(tgdb);
     }
-
-    /* 1. read all the data possible from gdb that is ready. */
-    if ((size = io_read(tgdb->debugger_stdout, buf, n)) < 0) {
-        clog_error(CLOG_CGDB, "could not read from masterfd");
-        result = -1;
-        tgdb_add_quit_command(tgdb);
-        goto tgdb_finish;
-    } else if (size == 0) {     /* EOF */
-        tgdb_add_quit_command(tgdb);
-        goto tgdb_finish;
-    }
-
-    result = annotations_parser_io(tgdb->parser, buf, size);
-
-    if (annotations_parser_at_prompt(tgdb->parser)) {
-        /* success, and finished command */
-        tgdb->is_gdb_ready_for_next_command = 1;
-    }
-
-    /* 3. if ^c has been sent, clear the buffers.
-     *        If a signal has been received, clear the queue and return
-     */
-    if (tgdb_handle_signals(tgdb) == -1) {
-        clog_error(CLOG_CGDB, "tgdb_handle_signals failed");
-        return -1;
-    }
-
-    /* 4. runs the users buffered command if any exists */
-    if (tgdb_has_command_to_run(tgdb))
-        tgdb_unqueue_and_deliver_command(tgdb);
-
-tgdb_finish:
-    *is_finished = tgdb_can_issue_command(tgdb);
 
     return result;
 }

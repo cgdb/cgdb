@@ -311,18 +311,7 @@
 
             /* header == TGDB_QUIT */
             struct {
-                /**
-                 * This tells the front end how the debugger terminated.
-                 *
-                 * If this is 0, the debugger terminated normally and
-                 * return_value is valid
-                 * If this is -1, the debugger terminated abnormally and
-                 * return_value is invalid
-                 */
-                int exit_status;
-                /** This is the return value of the debugger upon normal
-                 * termination. */
-                int return_value;
+                /* Currently not telling the front end how GDB quit. */
             } quit;
 
         } choice;
