@@ -233,34 +233,4 @@ int commands_disassemble_supports_s_mode(struct commands *c);
 
 bool commands_is_console_command(struct commands *c);
 
-/**
- * Add a tgdb response.
- *
- * @param c
- * The commands instance
- *
- * @param response
- * The response to add
- */
-void commands_add_response(struct commands *c, struct tgdb_response *response);
-
-/**
- * Delete all the tgdb responses associated with this commands instance.
- *
- * @param c
- * The commands instance
- */
-void commands_delete_responses(struct commands *c);
-
-/**
- * Get the tgdb responses for the given index.
- *
- * @param c
- * The commands instance
- *
- * @param index
- * The response index to get. Start at 0 and move up until NULL is returned.
- */
-struct tgdb_response *commands_get_response(struct commands *c, int index);
-
 #endif /* __COMMANDS_H__ */

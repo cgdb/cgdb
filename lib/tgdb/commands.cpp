@@ -69,40 +69,9 @@ struct commands {
      * command running should be sent back to the console.
      */
     bool is_console_command;
-
-    /** This is the queue of responses to tgdb commands for the front end. */
-    struct tgdb_response **responses;
 };
 
 void tgdb_run_or_queue_command(struct tgdb *tgdb, struct tgdb_command *command);
-
-void commands_delete_responses(struct commands *c)
-{
-    int i;
-
-    for (i = 0; i < sbcount(c->responses); i++)
-        tgdb_delete_response(c->responses[i]);
-
-    sbsetcount(c->responses, 0);
-}
-
-void commands_add_response(struct commands *c, struct tgdb_response *response)
-{
-    sbpush(c->responses, response);
-}
-
-struct tgdb_response *commands_get_response(struct commands *c, int index)
-{
-    struct tgdb_response *response = NULL;
-    if (index < sbcount(c->responses))
-    {
-        /* Return pointer to this response */
-        response = c->responses[index];
-    }
-
-    return response;
-}
-
 
 static void
 commands_send_breakpoints(struct commands *c,
@@ -113,7 +82,7 @@ commands_send_breakpoints(struct commands *c,
 
     response->choice.update_breakpoints.breakpoints = breakpoints;
 
-    commands_add_response(c, response);
+    tgdb_send_response(c->tgdb, response);
 }
 
 static void commands_process_breakpoint(
@@ -189,7 +158,7 @@ static void commands_send_source_files(struct commands *c,
     struct tgdb_response *response =
         tgdb_create_response(TGDB_UPDATE_SOURCE_FILES);
     response->choice.update_source_files.source_files = source_files;
-    commands_add_response(c, response);
+    tgdb_send_response(c->tgdb, response);
 }
 
 /* This function is capable of parsing the output of 'info source'.
@@ -238,7 +207,7 @@ static void send_disassemble_func_complete_response(struct commands *c,
     c->address_start = 0;
     c->address_end = 0;
 
-    commands_add_response(c, response);
+    tgdb_send_response(c->tgdb, response);
 }
 
 static void send_command_complete_response(struct commands *c)
@@ -250,7 +219,7 @@ static void send_command_complete_response(struct commands *c)
     /* Clear commands completions since we've just stolen that pointer. */
     c->completions = NULL;
 
-    commands_add_response(c, response);
+    tgdb_send_response(c->tgdb, response);
 }
 
 static void
@@ -277,7 +246,7 @@ commands_send_source_file(struct commands *c, char *fullname, char *file,
 
     response->choice.update_file_position.file_position = tfp;
 
-    commands_add_response(c, response);
+    tgdb_send_response(c->tgdb, response);
 }
 
 static void commands_process_info_source(struct commands *c,
@@ -486,7 +455,6 @@ struct commands *commands_initialize(struct tgdb *tgdb)
 
     c->disassemble_supports_s_mode = 0;
     c->is_console_command = true;
-    c->responses = NULL;
 
     return c;
 }
@@ -509,10 +477,6 @@ void commands_shutdown(struct commands *c)
     /* TODO: free source_files queue */
 
     gdbwire_destroy(c->wire);
-
-    commands_delete_responses(c);
-    sbfree(c->responses);
-    c->responses = NULL;
 
     free(c);
     c = NULL;

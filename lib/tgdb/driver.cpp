@@ -187,26 +187,6 @@ static int gdb_input(void)
         return -1;
     }
 
-    int index = 0;
-    while ((item = tgdb_get_response(tgdb, index++)) != NULL)
-    {
-        if (item->header == TGDB_UPDATE_COMPLETIONS)
-        {
-            char **completions = item->choice.update_completions.completions;
-
-            do_tab_completion(completions);
-        }
-
-        if (item->header == TGDB_UPDATE_CONSOLE_PROMPT_VALUE)
-            driver_prompt_change(item->choice.update_console_prompt_value.
-                    prompt_value);
-
-        if (item->header == TGDB_QUIT) {
-            fprintf(stderr, "%s:%d TGDB_QUIT\n", __FILE__, __LINE__);
-            return -1;
-        }
-    }
-
     if (is_finished) {
         int qsize;
 
@@ -418,9 +398,28 @@ void console_output(void *context, const std::string &str) {
     }
 }
 
+void command_response(void *context, struct tgdb_response *response)
+{
+    if (response->header == TGDB_UPDATE_COMPLETIONS)
+    {
+        char **completions = response->choice.update_completions.completions;
+
+        do_tab_completion(completions);
+    }
+
+    if (response->header == TGDB_UPDATE_CONSOLE_PROMPT_VALUE)
+        driver_prompt_change(response->choice.update_console_prompt_value.
+                prompt_value);
+
+    if (response->header == TGDB_QUIT) {
+        fprintf(stderr, "%s:%d TGDB_QUIT\n", __FILE__, __LINE__);
+    }
+}
+
 tgdb_callbacks callbacks = {
     NULL,
-    console_output
+    console_output,
+    command_response
 };
 
 int main(int argc, char **argv)

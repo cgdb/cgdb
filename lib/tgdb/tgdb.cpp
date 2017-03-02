@@ -387,7 +387,7 @@ static void tgdb_prompt_changed(void *context, const std::string &prompt)
         tgdb_create_response(TGDB_UPDATE_CONSOLE_PROMPT_VALUE);
     response->choice.update_console_prompt_value.prompt_value =
             cgdb_strdup(prompt.c_str());
-    commands_add_response(tgdb->c, response);
+    tgdb_send_response(tgdb, response);
 }
 
 static void tgdb_console_output(void *context, const std::string &msg)
@@ -816,7 +816,7 @@ static void tgdb_deliver_command(struct tgdb *tgdb, struct tgdb_command *command
         response->choice.debugger_command_delivered.debugger_command =
             (command->command_choice == TGDB_COMMAND_FRONT_END)?1:0;
         response->choice.debugger_command_delivered.command = cgdb_strdup(s);
-        commands_add_response(tgdb->c, response);
+        tgdb_send_response(tgdb, response);
     }
 }
 
@@ -925,7 +925,7 @@ static int tgdb_add_quit_command(struct tgdb *tgdb)
 {
     struct tgdb_response *response;
     response = tgdb_create_response(TGDB_QUIT);
-    commands_add_response(tgdb->c, response);
+    tgdb_send_response(tgdb, response);
     return 0;
 }
 
@@ -1021,11 +1021,6 @@ int tgdb_process(struct tgdb * tgdb, int *is_finished)
 
 /* Getting Data out of TGDB {{{*/
 
-struct tgdb_response *tgdb_get_response(struct tgdb *tgdb, int index)
-{
-    return commands_get_response(tgdb->c, index);
-}
-
 struct tgdb_response *tgdb_create_response(enum tgdb_response_type header)
 {
     struct tgdb_response *response;
@@ -1036,7 +1031,7 @@ struct tgdb_response *tgdb_create_response(enum tgdb_response_type header)
     return response;
 }
 
-int tgdb_delete_response(struct tgdb_response *com)
+static int tgdb_delete_response(struct tgdb_response *com)
 {
     if (!com)
         return -1;
@@ -1134,9 +1129,11 @@ int tgdb_delete_response(struct tgdb_response *com)
     return 0;
 }
 
-void tgdb_delete_responses(struct tgdb *tgdb)
+void tgdb_send_response(struct tgdb *tgdb, struct tgdb_response *response)
 {
-    commands_delete_responses(tgdb->c);
+    tgdb->callbacks.command_response_callback(
+            tgdb->callbacks.context, response);
+    tgdb_delete_response(response);
 }
 
 /* }}}*/

@@ -45,6 +45,19 @@
          * The console output
          */
         void (*console_output_callback)(void *context, const std::string &str);
+
+        /**
+         * A command response is available for consumption.
+         *
+         * @param context
+         * The tgdb instance to operate on
+         *
+         * @param response
+         * The response to consume. This response is only valid for use
+         * during this callback function. It is freed by tgdb afterwards.
+         */
+        void (*command_response_callback)(void *context,
+                struct tgdb_response *response);
     };
 
   /**
@@ -186,40 +199,6 @@
    * The number of valid bytes in BUF on success, or 0 on error.
    */
     ssize_t tgdb_recv_inferior_data(struct tgdb *tgdb, char *buf, size_t n);
-
-/*@}*/
-/* }}}*/
-
-/* Getting Data out of TGDB {{{*/
-/******************************************************************************/
-/**
- * @name Getting Data out of TGDB
- * These functions are for dealing with getting back data from TGDB
- */
-/******************************************************************************/
-
-/*@{*/
-
-  /**
-   * Gets a response from TGDB.
-   * This should be called after tgdb_recv_debugger_data
-   *
-   * \param tgdb
-   * An instance of the tgdb library to operate on.
-   *
-   * @return
-   * A valid response if responses still exist.
-   * Null if no more responses exist.
-   */
-    struct tgdb_response *tgdb_get_response(struct tgdb *tgdb, int index);
-
-  /**
-   * This will free all of the memory used by the responses that tgdb returns.
-   *
-   * \param tgdb
-   * An instance of the tgdb library to operate on.
-   */
-    void tgdb_delete_responses(struct tgdb *tgdb);
 
 /*@}*/
 /* }}}*/

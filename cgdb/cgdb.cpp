@@ -826,10 +826,13 @@ static int init_home_dir(void)
 static void console_output(void *context, const std::string &str) {
     if_print(str.c_str());
 }
+
+static void command_response(void *context, struct tgdb_response *response);
             
 tgdb_callbacks callbacks = { 
     NULL,       
-    console_output
+    console_output,
+    command_response
 };
 
 
@@ -1150,46 +1153,38 @@ static void update_prompt(struct tgdb_response *response)
     change_prompt(response->choice.update_console_prompt_value.prompt_value);
 }
 
-static void process_commands(struct tgdb *tgdb_in)
+static void command_response(void *context, struct tgdb_response *response)
 {
-    int index = 0;
-    struct tgdb_response *item;
-
-    while ((item = tgdb_get_response(tgdb_in, index++)) != NULL)
+    switch (response->header)
     {
-        switch (item->header)
-        {
-        case TGDB_DEBUGGER_COMMAND_DELIVERED:
-            update_debugger_command_delivered(item);
-            break;
-        case TGDB_UPDATE_BREAKPOINTS:
-            update_breakpoints(item);
-            break;
-        case TGDB_UPDATE_FILE_POSITION:
-            update_file_position(item);
-            break;
-        case TGDB_UPDATE_SOURCE_FILES:
-            update_source_files(item);
-            break;
-        case TGDB_UPDATE_COMPLETIONS:
-            update_completions(item);
-            break;
-        case TGDB_DISASSEMBLE_PC:
-        case TGDB_DISASSEMBLE_FUNC:
-            update_disassemble(item);
-            break;
-        case TGDB_UPDATE_CONSOLE_PROMPT_VALUE:
-            update_prompt(item);
-            break;
-        case TGDB_QUIT:
-            cgdb_cleanup_and_exit(0);
-            break;
-        default:
-            break;
-        }
+    case TGDB_DEBUGGER_COMMAND_DELIVERED:
+        update_debugger_command_delivered(response);
+        break;
+    case TGDB_UPDATE_BREAKPOINTS:
+        update_breakpoints(response);
+        break;
+    case TGDB_UPDATE_FILE_POSITION:
+        update_file_position(response);
+        break;
+    case TGDB_UPDATE_SOURCE_FILES:
+        update_source_files(response);
+        break;
+    case TGDB_UPDATE_COMPLETIONS:
+        update_completions(response);
+        break;
+    case TGDB_DISASSEMBLE_PC:
+    case TGDB_DISASSEMBLE_FUNC:
+        update_disassemble(response);
+        break;
+    case TGDB_UPDATE_CONSOLE_PROMPT_VALUE:
+        update_prompt(response);
+        break;
+    case TGDB_QUIT:
+        cgdb_cleanup_and_exit(0);
+        break;
+    default:
+        break;
     }
-
-    tgdb_delete_responses(tgdb);
 }
 
 /* gdb_input: Receives data from tgdb:
@@ -1207,8 +1202,6 @@ static int gdb_input()
         clog_error(CLOG_CGDB, "tgdb_process error");
         return -1;
     }
-
-    process_commands(tgdb);
 
     /* Check to see if GDB is ready to receive another command. If it is, then
      * readline should redisplay what it currently contains. There are 2 special

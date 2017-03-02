@@ -318,7 +318,7 @@
     };
 
     struct tgdb_response *tgdb_create_response(enum tgdb_response_type header);
-    int tgdb_delete_response(struct tgdb_response *response);
+    void tgdb_send_response(struct tgdb *tgdb, struct tgdb_response *response);
 
 
 #endif                          /* __TGDB_TYPES_H__ */
