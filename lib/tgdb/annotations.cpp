@@ -198,6 +198,8 @@ static void handle_misc_pre_prompt(struct annotations_parser *parser)
 
 static void handle_misc_prompt(struct annotations_parser *parser)
 {
+    send_available_console_output(parser);
+
     parser->at_prompt = true;
     parser->at_misc_prompt = true;
     parser->at_pre_prompt = false;
@@ -224,6 +226,8 @@ static void handle_pre_prompt(struct annotations_parser *parser)
 
 static void handle_prompt(struct annotations_parser *parser)
 {
+    send_available_console_output(parser);
+
     parser->at_prompt = true;
     parser->at_pre_prompt = false;
 
