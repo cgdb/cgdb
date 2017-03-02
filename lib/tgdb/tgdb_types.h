@@ -1,6 +1,8 @@
 #ifndef __TGDB_TYPES_H__
 #define __TGDB_TYPES_H__
 
+#include <list>
+
 /*! 
  * \file
  * tgdb_types.h
@@ -115,25 +117,105 @@
     };
 
     enum tgdb_request_type {
-    /** Request for TGDB to run a console command through the debugger */
+        /**
+         * A command the user typed at the console.
+         */
         TGDB_REQUEST_CONSOLE_COMMAND,
-    /**
-     * Request for TGDB to get all of the source files that the debugger 
-     * currently knows about the inferior. */
+
+        /**
+         * Get a list of all the source files in the program being debugged.
+         */
         TGDB_REQUEST_INFO_SOURCES,
-    /**
-     * This asks TGDB to determine the current fullname, filename and line 
-     * number that the debugger is currently at, in the inferior. */
+
+        /**
+         * Determine the current location of the debugged program.
+         *
+         * This could be a filename, line number for source code or
+         * an address corresponding to the assembly location.
+         */
         TGDB_REQUEST_CURRENT_LOCATION,
-    /** Run a debugger command (ie next, step, finish) */
+
+        /**
+         * Get the list of existing breakpoints.
+         */
+        TGDB_REQUEST_BREAKPOINTS,
+
+        /**
+         * Set which terminal to use for future runs of program being debugged.
+         *
+         * This allows tgdb to separate the output of gdb from the output
+         * of the program being debugged.
+         */
+        TGDB_REQUEST_TTY,
+
+        /**
+         * Get information about the current frame.
+         *
+         * Generally useful for finding the current location of the program
+         * that is being debugged.
+         */
+        TGDB_REQUEST_INFO_FRAME,
+
+        /**
+         * Query if the CLI disassemble command supports mixed source+assembly.
+         *
+         * Mixed source+assembly mode was added as the /s flag to the CLI
+         * disassemble command and as mode 4 to the MI -data-disassemble
+         * command.
+         *
+         * We query the MI command to determine if it supports mode 4, and
+         * if it does, we also know that the CLI disassemble command supports
+         * /s.
+         *
+         * The passing case,
+         *   (gdb) interpreter-exec mi "-data-disassemble -s 0 -e 0 -- 4"
+         *   ^done,asm_insns=[]
+         *
+         * The failing case,
+         *   (gdb) interpreter-exec mi "-data-disassemble -s 0 -e 0 -- 4"
+         *   ^error,msg="-data-disassemble: Mode argument must be 0, 1, 2, or 3."
+         *
+         * If the command comes back as an MI error, we assume /s is not
+         * supported.
+         *
+         * This functionality was added in gdb in commit 6ff0ba5f.
+         */
+        TGDB_REQUEST_DATA_DISASSEMBLE_MODE_QUERY,
+
+
+        /**
+         * Run a debugger command through gdb.
+         *
+         * This is when the caller wants to run a command through gdb,
+         * next, step, finish, but without the user typing it at the
+         * console. For instance, a cgdb shortcut like F8.
+         */
         TGDB_REQUEST_DEBUGGER_COMMAND,
-    /** Modify a breakpoint (ie delete/create/disable) */
+
+        /**
+         * Request that a breakpoint be modified.
+         *
+         * Useful for creating, deleting and disabling breakpoints.
+         */
         TGDB_REQUEST_MODIFY_BREAKPOINT,
-    /** Ask GDB to give a list of tab completions for a given string */
+
+        /**
+         * Request GDB to give a list of tab completions for a given string
+         *
+         * This request is usually invoked when the user types <tab>
+         * at the gdb console.
+         */
         TGDB_REQUEST_COMPLETE,
-    /** Ask GDB to disassemble a $pc */
+
+        /**
+         * Request GDB to disassemble the function surrounding the pc of the
+         * selected frame.
+         */
         TGDB_REQUEST_DISASSEMBLE_PC,
-    /** Ask GDB to disassemble a function */
+
+        /**
+         * Request GDB to disassemble a function.
+         */
         TGDB_REQUEST_DISASSEMBLE_FUNC
     };
 
@@ -143,9 +225,20 @@
 
         union {
             struct {
-    /** The null terminated console command to pass to GDB */
+                /** The null terminated console command to pass to GDB */
                 const char *command;
+                /**
+                 * Track if the request went into the request queue or not.
+                 *
+                 * True if request went into the queue, false if run
+                 * immediately
+                 */
+                bool queued;
             } console_command;
+
+            struct {
+                const char *slavename;
+            } tty_command;
 
             struct {
     /** This is the command that libtgdb should run through the debugger */
@@ -180,6 +273,7 @@
     };
 
     typedef struct tgdb_request *tgdb_request_ptr;
+    typedef std::list<tgdb_request_ptr> tgdb_request_ptr_list;
 
  /**
   *  This is the commands interface used between the front end and TGDB.
@@ -224,9 +318,6 @@
 
     /** The prompt has changed, here is the new value.  */
         TGDB_UPDATE_CONSOLE_PROMPT_VALUE,
-
-    /** A debugger command was run */
-    TGDB_DEBUGGER_COMMAND_DELIVERED,
 
     /**
      * This happens when gdb quits.
@@ -291,23 +382,6 @@
                 /* The new prompt GDB has reported */
                 const char *prompt_value;
             } update_console_prompt_value;
-
-            /* header == TGDB_DEBUGGER_COMMAND_DELIVERED */
-            struct {
-                /**
-                 * This will be 1 if it is a debugger command. That is a
-                 * command that was issued through 
-                 *   tgdb_request_run_debugger_command
-                 * This will be 0 if it is a tgdb command. That is a command
-                 * that cgdb did not request directly, but tgdb required to
-                 * run it to update the state of cgdb. For instance,
-                 * getting the breakpoints or the currently active line.
-                 */
-                int debugger_command;
-
-                /* The debugger command */
-                const char *command;
-            } debugger_command_delivered;
 
             /* header == TGDB_QUIT */
             struct {

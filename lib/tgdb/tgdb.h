@@ -47,6 +47,48 @@
         void (*console_output_callback)(void *context, const std::string &str);
 
         /**
+         * Called when the console is ready for another active command.
+         *
+         * Only certain requests impact the console. Currently that's
+         * - TGDB_REQUEST_CONSOLE_COMMAND
+         * - TGDB_REQUEST_COMPLETE
+         * - TGDB_REQUEST_DEBUGGER_COMMAND (a newline is put on the console)
+         *
+         * If the above commands are sent to gdb, then this callback will
+         * be issued when tgdb is ready to send another command to gdb.
+         * Otherwise, this callback will not be issued to the caller.
+         *
+         * This will only be issued when the request queue is empty.
+         * The console should not be ready if tgdb is actively working
+         * through commands.
+         *
+         * The request_sent_callback is called before each request is
+         * sent to gdb. This can be useful for displaying which commands
+         * are executing in the console, if those commands were queued.
+         * For instance, if the user types 'next' 5 times in a row, before
+         * gdb had a chance to respond.
+         *
+         * @param context
+         * The context pointer
+         */
+        void (*console_ready_callback)(void *context);
+
+        /**
+         * A request has been sent to gdb.
+         *
+         * @param context
+         * The context pointer
+         *
+         * @param request
+         * The request that was sent to gdb
+         *
+         * @param command
+         * The gdb command sent to gdb to satisfy the request.
+         */ 
+        void (*request_sent_callback)(void *context,
+                tgdb_request *request, const std::string &command);
+
+        /**
          * A command response is available for consumption.
          *
          * @param context
@@ -157,17 +199,10 @@
    * \param tgdb
    * An instance of the tgdb library to operate on.
    *
-   * \param is_finished
-   * If this is passed in as NULL, it is not set.
-   *
-   * If it is non-null, it will be set to 1 if TGDB finished processing the
-   * current request. Otherwise, it will be set to 0 if TGDB needs more input
-   * in order to finish processing the current requested command.
-   *
    * @return
    * 0 on sucess, or -1 on error
    */
-    int tgdb_process(struct tgdb *tgdb, int *is_finished);
+    int tgdb_process(struct tgdb *tgdb);
 
   /**
    * This sends a byte of data to the program being debugged.
@@ -372,18 +407,6 @@
     };
     void tgdb_request_disassemble_func(struct tgdb *tgdb,
             enum disassemble_func_type type);
-
-  /**
-   * Free the tgdb request pointer data.
-   *
-   * \param request_ptr
-   * Request pointer from tgdb_request_* function to destroy.
-   */
-    void tgdb_request_destroy(tgdb_request_ptr request_ptr);
-
-    struct tgdb_request *tgdb_get_last_request();
-    void tgdb_set_last_request(struct tgdb_request *request);
-    int tgdb_does_request_require_console_update(struct tgdb_request *request);
 
 /*@}*/
 /* }}}*/

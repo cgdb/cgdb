@@ -60,6 +60,7 @@ static pty_pair_ptr pty_pair;
 /* Readline interface */
 static struct rline *rline;
 static int is_tab_completing = 0;
+static int gdb_quit = 0;
 
 /* Original terminal attributes */
 static struct termios term_attributes;
@@ -180,32 +181,10 @@ static int gdb_input(void)
     int result;
     size_t i;
     struct tgdb_response *item;
-    int is_finished;
 
-    if ((result = tgdb_process(tgdb, &is_finished)) == -1) {
+    if ((result = tgdb_process(tgdb)) == -1) {
         clog_error(CLOG_CGDB, "file descriptor closed");
         return -1;
-    }
-
-    if (is_finished) {
-        int qsize;
-
-        qsize = tgdb_queue_size(tgdb);
-        if (qsize > 0) {
-            struct tgdb_request *request = tgdb_queue_pop(tgdb);
-            char *prompt;
-
-            rline_get_prompt(rline, &prompt);
-            printf("%s", prompt);
-
-            if (request->header == TGDB_REQUEST_CONSOLE_COMMAND) {
-                printf("%s", request->choice.console_command.command);
-                printf("\n");
-            }
-
-            tgdb_process_command(tgdb, request);
-        } else
-            rline_rl_forced_update_display(rline);
     }
 
     return 0;
@@ -322,7 +301,7 @@ int main_loop(int gdbfd)
 
     /* When TGDB is ready, we read from STDIN, otherwise, leave the data buffered. */
 
-    while (1) {
+    while (!gdb_quit) {
 
         /* get max fd  for select loop */
         childfd = tgdb_get_inferior_fd(tgdb);
@@ -398,6 +377,25 @@ void console_output(void *context, const std::string &str) {
     }
 }
 
+void console_ready(void *context)
+{
+    rline_rl_forced_update_display(rline);
+}
+
+void request_sent(void *context, struct tgdb_request *request,
+        const std::string &command)
+{
+    if (request->header == TGDB_REQUEST_CONSOLE_COMMAND &&
+        request->choice.console_command.queued) {
+        char *prompt;
+        rline_get_prompt(rline, &prompt);
+        if (prompt) {
+            printf("%s", prompt);
+        }
+        printf("%s\n", request->choice.console_command.command);
+    }
+}
+
 void command_response(void *context, struct tgdb_response *response)
 {
     if (response->header == TGDB_UPDATE_COMPLETIONS)
@@ -413,12 +411,15 @@ void command_response(void *context, struct tgdb_response *response)
 
     if (response->header == TGDB_QUIT) {
         fprintf(stderr, "%s:%d TGDB_QUIT\n", __FILE__, __LINE__);
+        gdb_quit = 1;
     }
 }
 
 tgdb_callbacks callbacks = {
     NULL,
     console_output,
+    console_ready,
+    request_sent,
     command_response
 };
 

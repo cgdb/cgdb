@@ -635,7 +635,6 @@ static int handle_tab_completion_request(tab_completion_ptr comptr, int key)
         tab_completion_destroy(completion_ptr);
         completion_ptr = NULL;
         is_tab_completing = 0;
-        rline_rl_forced_update_display(rline);
     }
 
     return 0;
@@ -827,11 +826,43 @@ static void console_output(void *context, const std::string &str) {
     if_print(str.c_str());
 }
 
+/**
+ * The console is ready for another command.
+ */
+static void console_ready(void *context)
+{
+    rline_rl_forced_update_display(rline);
+}
+
+static void request_sent(void *context, struct tgdb_request *request,
+        const std::string &command) 
+{
+    if (request->header == TGDB_REQUEST_CONSOLE_COMMAND &&
+        request->choice.console_command.queued) {
+        char *prompt;
+        rline_get_prompt(rline, &prompt);
+        if (prompt) {
+            if_print(prompt);
+        }
+        if_print(request->choice.console_command.command);
+        if_print("\n");
+    } else if (request->header == TGDB_REQUEST_DEBUGGER_COMMAND) {
+        if_print("\n");
+    }
+    
+    if (cgdbrc_get_int(CGDBRC_SHOWDEBUGCOMMANDS)) {
+        if_sdc_print(command.c_str());
+    }
+}
+
+
 static void command_response(void *context, struct tgdb_response *response);
             
 tgdb_callbacks callbacks = { 
     NULL,       
     console_output,
+    console_ready,
+    request_sent,
     command_response
 };
 
@@ -948,20 +979,6 @@ static int user_input_loop()
     } while (kui_manager_cangetkey(kui_ctx));
 
     return 0;
-}
-
-static void update_debugger_command_delivered(struct tgdb_response *response)
-{
-    int debugger_command =
-        response->choice.debugger_command_delivered.debugger_command;
-    const char *command =
-        response->choice.debugger_command_delivered.command;
-
-    if (debugger_command) {
-        if_print("\n");
-    } else if (cgdbrc_get_int(CGDBRC_SHOWDEBUGCOMMANDS)) {
-        if_sdc_print(command);
-    }
 }
 
 /* This updates all the breakpoints */
@@ -1157,9 +1174,6 @@ static void command_response(void *context, struct tgdb_response *response)
 {
     switch (response->header)
     {
-    case TGDB_DEBUGGER_COMMAND_DELIVERED:
-        update_debugger_command_delivered(response);
-        break;
     case TGDB_UPDATE_BREAKPOINTS:
         update_breakpoints(response);
         break;
@@ -1194,67 +1208,12 @@ static void command_response(void *context, struct tgdb_response *response)
 static int gdb_input()
 {
     int result;
-    int is_finished;
 
     /* Read from GDB */
-    result = tgdb_process(tgdb, &is_finished);
+    result = tgdb_process(tgdb);
     if (result == -1) {
         clog_error(CLOG_CGDB, "tgdb_process error");
         return -1;
-    }
-
-    /* Check to see if GDB is ready to receive another command. If it is, then
-     * readline should redisplay what it currently contains. There are 2 special
-     * case's here.
-     *
-     * If there are no commands in the queue to send to GDB then readline 
-     * should simply redisplay what it has currently in it's buffer.
-     * rl_forced_update_display does this.
-     *
-     * However, if there are commands in the queue to send to GDB, that means
-     * the user already entered these through readline. In that case, simply 
-     * write the command entered through readline directly, instead of having
-     * readline do it (readline already processed the data). This is important
-     * also because rl_forced_update_display doesn't write the data right away.
-     * It writes data to rl_outstream, and then the main_loop handles both the
-     * readline data and the data from the TGDB command being sent. This could
-     * result in a race condition.
-     */
-    if (is_finished) {
-        int size = tgdb_queue_size(tgdb);
-
-        /* This is the second case, this command was queued. */
-        if (size > 0) {
-            struct tgdb_request *request = tgdb_queue_pop(tgdb);
-            char *prompt;
-
-            rline_get_prompt(rline, &prompt);
-            if (prompt) {
-                if_print(prompt);
-            }
-
-            if (request->header == TGDB_REQUEST_CONSOLE_COMMAND) {
-                if_print(request->choice.console_command.command);
-                if_print("\n");
-            }
-
-            tgdb_process_command(tgdb, request);
-
-            /* This is the first case */
-        }
-      /** If the user is currently completing, do not update the prompt */
-        else if (!completion_ptr) {
-            int update = 1;
-            struct tgdb_request *last_request = tgdb_get_last_request();
-
-            if (last_request) {
-                update = tgdb_does_request_require_console_update(last_request);
-                tgdb_set_last_request(NULL);
-            }
-
-            if (update)
-                rline_rl_forced_update_display(rline);
-        }
     }
 
     return 0;

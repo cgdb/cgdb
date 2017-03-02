@@ -37,9 +37,9 @@ struct commands {
     struct tgdb *tgdb;
 
     /**
-     * The current command kind that is executing
+     * The current command request type that is executing. NULL to start.
      */
-    enum command_kind cur_command_kind;
+    enum tgdb_request_type current_request_type;
 
     /**
      * The current tab completion items.
@@ -61,17 +61,10 @@ struct commands {
      * True if the disassemble command supports /s, otherwise false.
      */
     int disassemble_supports_s_mode;
-
-    /**
-     * True if this is a console command, False otherwise.
-     *
-     * This member is used to determine if the output of the current
-     * command running should be sent back to the console.
-     */
-    bool is_console_command;
 };
 
-void tgdb_run_or_queue_command(struct tgdb *tgdb, struct tgdb_command *command);
+void tgdb_run_or_queue_request(struct tgdb *tgdb,
+        struct tgdb_request *request, bool priority);
 
 static void
 commands_send_breakpoints(struct commands *c,
@@ -191,8 +184,9 @@ commands_process_info_sources(struct commands *c,
 static void send_disassemble_func_complete_response(struct commands *c,
         struct gdbwire_mi_result_record *result_record)
 {
-    tgdb_response_type type = (c->cur_command_kind == COMMAND_DISASSEMBLE_PC) ?
-        TGDB_DISASSEMBLE_PC : TGDB_DISASSEMBLE_FUNC;
+    tgdb_response_type type =
+            (c->current_request_type == TGDB_REQUEST_DISASSEMBLE_PC) ?
+                TGDB_DISASSEMBLE_PC : TGDB_DISASSEMBLE_FUNC;
     struct tgdb_response *response =
         tgdb_create_response(type);
 
@@ -294,7 +288,10 @@ static void commands_process_info_frame(struct commands *c,
     }
 
     if (require_source) {
-        commands_issue_command(c, COMMAND_INFO_SOURCE, NULL, 1);
+        tgdb_request_ptr request;
+        request = (tgdb_request_ptr) cgdb_malloc(sizeof (struct tgdb_request));
+        request->header = TGDB_REQUEST_CURRENT_LOCATION;
+        tgdb_run_or_queue_request(c->tgdb, request, true);
     }
 }
 
@@ -303,17 +300,17 @@ static void gdbwire_stream_record_callback(void *context,
 {
     struct commands *c = (struct commands*)context;
 
-    switch (c->cur_command_kind) {
-        case COMMAND_BREAKPOINTS:
-        case COMMAND_INFO_FRAME:
+    switch (c->current_request_type) {
+        case TGDB_REQUEST_BREAKPOINTS:
+        case TGDB_REQUEST_INFO_FRAME:
             /**
              * When using GDB with annotate=2 and also using interpreter-exec,
              * GDB spits out the annotations in the MI output. All of these
              * annotations can be ignored.
              */
             break;
-        case COMMAND_DISASSEMBLE_PC:
-        case COMMAND_DISASSEMBLE_FUNC:
+        case TGDB_REQUEST_DISASSEMBLE_PC:
+        case TGDB_REQUEST_DISASSEMBLE_FUNC:
             if (stream_record->kind == GDBWIRE_MI_CONSOLE) {
                 uint64_t address;
                 int result;
@@ -352,7 +349,7 @@ static void gdbwire_stream_record_callback(void *context,
                 }
             }
             break;
-        case COMMAND_COMPLETE:
+        case TGDB_REQUEST_COMPLETE:
             if (stream_record->kind == GDBWIRE_MI_CONSOLE) {
                 char *str = stream_record->cstring;
                 size_t length = strlen(str);
@@ -362,11 +359,11 @@ static void gdbwire_stream_record_callback(void *context,
                 sbpush(c->completions, cgdb_strdup(str));
             }
             break;
-        case COMMAND_DATA_DISASSEMBLE_MODE_QUERY:
-        case COMMAND_USER_COMMAND:
-        case COMMAND_INFO_SOURCE:
-        case COMMAND_INFO_SOURCES:
-        case COMMAND_TTY:
+        case TGDB_REQUEST_DATA_DISASSEMBLE_MODE_QUERY:
+        case TGDB_REQUEST_CONSOLE_COMMAND:
+        case TGDB_REQUEST_INFO_SOURCES:
+        case TGDB_REQUEST_CURRENT_LOCATION:
+        case TGDB_REQUEST_TTY:
             break;
     }
 }
@@ -381,21 +378,21 @@ static void gdbwire_result_record_callback(void *context,
 {
     struct commands *c = (struct commands*)context;
 
-    switch (c->cur_command_kind) {
-        case COMMAND_BREAKPOINTS:
+    switch (c->current_request_type) {
+        case TGDB_REQUEST_BREAKPOINTS:
             commands_process_breakpoints(c, result_record);
             break;
-        case COMMAND_INFO_SOURCES:
+        case TGDB_REQUEST_INFO_SOURCES:
             commands_process_info_sources(c, result_record);
             break;
-        case COMMAND_DISASSEMBLE_PC:
-        case COMMAND_DISASSEMBLE_FUNC:
+        case TGDB_REQUEST_DISASSEMBLE_PC:
+        case TGDB_REQUEST_DISASSEMBLE_FUNC:
             send_disassemble_func_complete_response(c, result_record);
             break;
-        case COMMAND_COMPLETE:
+        case TGDB_REQUEST_COMPLETE:
             send_command_complete_response(c);
             break;
-        case COMMAND_DATA_DISASSEMBLE_MODE_QUERY:
+        case TGDB_REQUEST_DATA_DISASSEMBLE_MODE_QUERY:
             /**
              * If the mode was to high, than the result record would be
              * an error, meaning the mode is not supported. Otherwise,
@@ -406,14 +403,14 @@ static void gdbwire_result_record_callback(void *context,
                 clog_info(CLOG_GDBIO, "disassemble supports s mode");
             }
             break;
-        case COMMAND_INFO_SOURCE:
+        case TGDB_REQUEST_CURRENT_LOCATION:
             commands_process_info_source(c, result_record);
             break;
-        case COMMAND_INFO_FRAME:
+        case TGDB_REQUEST_INFO_FRAME:
             commands_process_info_frame(c, result_record);
             break;
-        case COMMAND_TTY:
-        case COMMAND_USER_COMMAND:
+        case TGDB_REQUEST_TTY:
+        case TGDB_REQUEST_CONSOLE_COMMAND:
             break;
     }
 }
@@ -442,7 +439,7 @@ struct commands *commands_initialize(struct tgdb *tgdb)
     struct commands *c =
             (struct commands *) cgdb_malloc(sizeof (struct commands));
     c->tgdb = tgdb;
-    c->cur_command_kind = COMMAND_USER_COMMAND;
+    c->current_request_type = TGDB_REQUEST_CONSOLE_COMMAND;
     c->completions = NULL;
 
     c->disasm = NULL;
@@ -454,7 +451,6 @@ struct commands *commands_initialize(struct tgdb *tgdb)
     c->wire = gdbwire_create(callbacks);
 
     c->disassemble_supports_s_mode = 0;
-    c->is_console_command = true;
 
     return c;
 }
@@ -487,121 +483,22 @@ void commands_process(struct commands *c, const std::string &str)
    gdbwire_push_data(c->wire, str.data(), str.size());
 }
 
+void commands_set_current_request_type(struct commands *c,
+        enum tgdb_request_type type)
+{
+    c->current_request_type = type;
+}
+
+enum tgdb_request_type commands_get_current_request_type(struct commands *c)
+{
+    return c->current_request_type;
+}
+
 void commands_process_error(struct commands *c)
 {
-    c->is_console_command = false;
-}
-
-void
-commands_prepare_for_command(struct commands *c, struct tgdb_command *com)
-{
-    /* Set the commands state to nothing */
-    c->is_console_command = (com->command_choice == TGDB_COMMAND_CONSOLE);
-    c->cur_command_kind = com->kind;
-}
-
-/** 
- * This is responsible for creating a command to run through the debugger.
- *
- * \param com 
- * The annotate command to run
- *
- * \param data 
- * Information that may be needed to create the command
- *
- * \return
- * A command ready to be run through the debugger or NULL on error.
- * The memory is malloc'd, and must be freed.
- */
-static char *create_gdb_command(struct commands *c,
-        enum command_kind kind, const char *data)
-{
-    switch (kind) {
-        case COMMAND_INFO_SOURCES:
-            return strdup("server interpreter-exec mi \"-file-list-exec-source-files\"\n");
-        case COMMAND_INFO_SOURCE:
-            /* server info source */
-            return strdup("server interpreter-exec mi \"-file-list-exec-source-file\"\n");
-        case COMMAND_INFO_FRAME:
-            /* server info frame */
-            return strdup("server interpreter-exec mi \"-stack-info-frame\"\n");
-        case COMMAND_DISASSEMBLE_PC:
-            return sys_aprintf("server interpreter-exec mi \"x/%si $pc\"\n", data);
-        case COMMAND_DISASSEMBLE_FUNC:
-            /* disassemble 'driver.cpp'::main
-                 /m: source lines included
-                 /s: source lines included, output in pc order
-                 /r: raw instructions included in hex
-                 single argument: function surrounding is dumped
-                 two arguments: start,end or start,+length
-                 disassemble 'driver.cpp'::main
-                 interp mi "disassemble /s 'driver.cpp'::main,+10"
-                 interp mi "disassemble /r 'driver.cpp'::main,+10"
-             */
-            return sys_aprintf("server interp mi \"disassemble%s%s\"\n",
-                               data ? " " : "", data ? data : "");
-        case COMMAND_BREAKPOINTS:
-            return strdup("server interpreter-exec mi \"-break-info\"\n");
-        case COMMAND_TTY:
-            /* server tty %s */
-            return sys_aprintf("server interpreter-exec mi \"-inferior-tty-set %s\"\n", data);
-        case COMMAND_COMPLETE:
-            /* server complete */
-            return sys_aprintf("server interpreter-exec mi \"complete %s\"\n", data);
-        case COMMAND_DATA_DISASSEMBLE_MODE_QUERY:
-            return sys_aprintf("server interpreter-exec mi \"-data-disassemble -s 0 -e 0 -- 4\"\n");
-        default:
-            clog_error(CLOG_CGDB, "switch error");
-            break;
-    };
-
-    return NULL;
-}
-
-struct tgdb_command *tgdb_command_create(const char *gdb_command,
-        enum tgdb_command_choice command_choice, enum command_kind kind)
-{
-    struct tgdb_command *tc;
-
-    tc = (struct tgdb_command *) cgdb_malloc(sizeof (struct tgdb_command));
-
-    tc->gdb_command = gdb_command ? strdup(gdb_command) : NULL;
-    tc->command_choice = command_choice;
-    tc->kind = kind;
-
-    return tc;
-}
-
-void tgdb_command_destroy(struct tgdb_command *tc)
-{
-    free(tc->gdb_command);
-    free(tc);
-}
-
-int commands_issue_command(struct commands *c,
-    enum command_kind kind, const char *data, int oob)
-{
-    char *ncom = create_gdb_command(c, kind, data);
-    struct tgdb_command *client_command = NULL;
-
-    enum tgdb_command_choice choice = (oob == 1) ?
-           TGDB_COMMAND_TGDB_CLIENT_PRIORITY : TGDB_COMMAND_TGDB_CLIENT;
-
-    /* This should send the command to tgdb-base to handle */
-    client_command = tgdb_command_create(ncom, choice, kind);
-
-    free(ncom);
-
-    tgdb_run_or_queue_command(c->tgdb, client_command);
-    return 0;
 }
 
 int commands_disassemble_supports_s_mode(struct commands *c)
 {
     return c->disassemble_supports_s_mode;
-}
-
-bool commands_is_console_command(struct commands *c)
-{
-    return c->is_console_command;
 }
