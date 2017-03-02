@@ -700,20 +700,6 @@ static void tgdb_request_destroy_func(void *item)
     tgdb_request_destroy((tgdb_request_ptr) item);
 }
 
-/* tgdb_handle_signals
- */
-static int tgdb_handle_signals(struct tgdb *tgdb)
-{
-    if (tgdb->control_c) {
-        tgdb_clear_input_queue(tgdb);
-        tgdb_clear_client_request_queue(tgdb);
-
-        tgdb->control_c = 0;
-    }
-
-    return 0;
-}
-
 /*******************************************************************************
  * This is the main_loop stuff for tgdb-base
  ******************************************************************************/
@@ -975,6 +961,22 @@ static int tgdb_handle_sigchld(struct tgdb *tgdb)
     return result;
 }
 
+/**
+ * If the user typed control_c at the prompt, clear the queues.
+ *
+ * @param tgdb
+ * The tgdb instance to work on
+ */
+static void tgdb_handle_control_c(struct tgdb *tgdb)
+{
+    if (tgdb->control_c) {
+        tgdb_clear_input_queue(tgdb);
+        tgdb_clear_client_request_queue(tgdb);
+
+        tgdb->control_c = 0;
+    }
+}
+
 int tgdb_process(struct tgdb * tgdb, int *is_finished)
 {
     const int n = 4096;
@@ -982,7 +984,11 @@ int tgdb_process(struct tgdb * tgdb, int *is_finished)
     ssize_t size;
     int result = 0;
 
+    // Cleanup those zombies!
     tgdb_handle_sigchld(tgdb);
+
+    // If ^c has been typed at the prompt, clear the queues
+    tgdb_handle_control_c(tgdb);
 
     size = io_read(tgdb->debugger_stdout, buf, n);
     if (size < 0) {
@@ -1003,15 +1009,7 @@ int tgdb_process(struct tgdb * tgdb, int *is_finished)
             tgdb->is_gdb_ready_for_next_command = 1;
         }
 
-        /* 3. if ^c has been sent, clear the buffers.
-         *        If a signal has been received, clear the queue and return
-         */
-        if (tgdb_handle_signals(tgdb) == -1) {
-            clog_error(CLOG_CGDB, "tgdb_handle_signals failed");
-            return -1;
-        }
-
-        /* 4. runs the users buffered command if any exists */
+        /* runs the users buffered command if any exists */
         if (tgdb_has_command_to_run(tgdb))
             tgdb_unqueue_and_deliver_command(tgdb);
 
