@@ -434,6 +434,7 @@ static void gdbwire_result_record_callback(void *context,
              */
             if (result_record->result_class == GDBWIRE_MI_DONE) {
                 c->disassemble_supports_s_mode = 1;
+                clog_info(CLOG_GDBIO, "disassemble supports s mode");
             }
             break;
         case COMMAND_INFO_SOURCE:
