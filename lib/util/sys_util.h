@@ -98,7 +98,7 @@ char *sys_aprintf(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
 
 #define MAX(a, b)  (((a) > (b)) ? (a) : (b))
 #define MIN(a, b)  (((a) < (b)) ? (a) : (b))
-char *sys_quote_nonprintables(char *str, int len);
+char *sys_quote_nonprintables(const char *str, int len);
 
 // ---- stretchy buffers (From Sean's stb.h)
 // https://github.com/nothings/stb/blob/master/stretchy_buffer.h

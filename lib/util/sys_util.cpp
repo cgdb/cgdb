@@ -287,7 +287,7 @@ char *sys_aprintf(const char *fmt, ...)
     return NULL;
 }
 
-char *sys_quote_nonprintables(char *str, int len)
+char *sys_quote_nonprintables(const char *str, int len)
 {
     int i;
     char *ret = NULL;
