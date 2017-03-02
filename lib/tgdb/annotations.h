@@ -26,6 +26,17 @@ struct annotations_parser_callbacks {
     void *context;
 
     /**
+     * The breakpoint informatoin has changed.
+     *
+     * When this callback is triggered, the front end should request
+     * the new breakpoint information from the debugger to display to the user.
+     *
+     * @param context
+     * The context pointer
+     */
+    void (*breakpoints_changed_callback)(void *context);
+
+    /**
      * The source location has changed.
      *
      * When this callback is triggered, the front end should request

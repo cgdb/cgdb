@@ -132,16 +132,6 @@ void commands_process_error(struct commands *c);
  */
 void commands_prepare_for_command(struct commands *c, struct tgdb_command *com);
 
-/* commands_user_ran_command:
- * --------------------------
- *
- * This lets the clients know that the user ran a command.
- * The client can update itself here if it need to.
- *
- * Returns: -1 on error, 0 on success
- */
-int commands_user_ran_command(struct commands *c);
-
 /**
  * The current command type. TGDB is capable of having any commands of this
  * type in it's queue.

@@ -372,6 +372,11 @@ static int tgdb_get_current_location(struct tgdb *tgdb)
     return commands_issue_command(tgdb->c, COMMAND_INFO_FRAME, NULL, 1);
 }
 
+static void tgdb_breakpoints_changed(void *context)
+{
+    struct tgdb *tgdb = (struct tgdb*)context;
+    commands_issue_command(tgdb->c, COMMAND_BREAKPOINTS, NULL, 1);
+}
 
 static void tgdb_source_location_changed(void *context)
 {
@@ -443,6 +448,7 @@ struct tgdb *tgdb_initialize(const char *debugger,
     struct tgdb *tgdb = initialize_tgdb_context(callbacks);
     static struct annotations_parser_callbacks annotations_callbacks = {
         tgdb,
+        tgdb_breakpoints_changed,
         tgdb_source_location_changed,
         tgdb_prompt_changed,
         tgdb_console_output,
@@ -484,7 +490,7 @@ struct tgdb *tgdb_initialize(const char *debugger,
      * if the user puts breakpoints in there .gdbinit.
      * This makes sure that TGDB asks for the breakpoints on start up.
      */
-    if (commands_issue_command(tgdb->c, COMMAND_BREAKPOINTS, NULL, 0) == -1) {
+    if (commands_issue_command(tgdb->c, COMMAND_BREAKPOINTS, NULL, 1) == -1) {
         return NULL;
     }
 
@@ -738,7 +744,6 @@ tgdb_send(struct tgdb *tgdb, const char *command,
     temp_command = NULL;
 
     tgdb_run_or_queue_command(tgdb, tc);
-    commands_user_ran_command(tgdb->c);
 }
 
 /**

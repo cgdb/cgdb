@@ -119,6 +119,11 @@ struct annotations_parser {
     bool at_error_message;
 
     /**
+     * True if the breakpoints have changed, false otherwise.
+     */
+    bool breakpoints_changed;;
+
+    /**
      * True if the source location has changed, false otherwise.
      */
     bool source_location_changed;
@@ -134,6 +139,7 @@ annotations_parser *annotations_parser_initialize(
     a->at_pre_prompt = false;
     a->at_misc_prompt = false;
     a->at_error_message = false;
+    a->breakpoints_changed = false;
     a->source_location_changed = false;
     return a;
 }
@@ -171,6 +177,12 @@ update_prompt(struct annotations_parser *parser)
         parser->gdb_prompt_last = parser->gdb_prompt;
     }
     parser->gdb_prompt.clear();
+}
+
+static void
+handle_breakpoints_invalid(struct annotations_parser *parser)
+{
+    parser->breakpoints_changed = true;
 }
 
 static void
@@ -216,6 +228,12 @@ static void handle_misc_post_prompt(struct annotations_parser *parser)
 static void handle_pre_prompt(struct annotations_parser *parser)
 {
     parser->at_pre_prompt = true;
+
+    if (parser->breakpoints_changed) {
+        parser->callbacks.breakpoints_changed_callback(
+            parser->callbacks.context);
+        parser->breakpoints_changed = false;
+    }
 
     if (parser->source_location_changed) {
         parser->callbacks.source_location_changed_callback(
@@ -304,6 +322,8 @@ static struct annotation {
     void (*f) (struct annotations_parser *parser);
 } annotations[] = {
     {
+    "breakpoints-invalid", handle_breakpoints_invalid}, {
+
     "source", handle_source}, {
     "frame-end", handle_frame_end }, {
     "frames-invalid", handle_frames_invalid }, {
