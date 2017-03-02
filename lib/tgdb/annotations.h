@@ -79,6 +79,14 @@ struct annotations_parser_callbacks {
      * The error message
      */
     void (*command_error_callback)(void *context, const std::string &msg);
+
+    /**
+     * GDB is at a prompt.
+     *
+     * @param context
+     * The context pointer
+     */
+    void (*console_at_prompt_callback)(void *context);
 };
 
 /**

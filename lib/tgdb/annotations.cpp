@@ -180,6 +180,12 @@ update_prompt(struct annotations_parser *parser)
 }
 
 static void
+console_at_prompt(struct annotations_parser *parser)
+{
+    parser->callbacks.console_at_prompt_callback(parser->callbacks.context);
+}
+
+static void
 handle_breakpoints_invalid(struct annotations_parser *parser)
 {
     parser->breakpoints_changed = true;
@@ -217,6 +223,7 @@ static void handle_misc_prompt(struct annotations_parser *parser)
     parser->at_pre_prompt = false;
 
     update_prompt(parser);
+    console_at_prompt(parser);
 }
 
 static void handle_misc_post_prompt(struct annotations_parser *parser)
@@ -250,6 +257,7 @@ static void handle_prompt(struct annotations_parser *parser)
     parser->at_pre_prompt = false;
 
     update_prompt(parser);
+    console_at_prompt(parser);
 }
 
 static void handle_post_prompt(struct annotations_parser *parser)

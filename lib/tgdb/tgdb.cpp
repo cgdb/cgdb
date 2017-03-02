@@ -418,6 +418,13 @@ static void tgdb_command_error(void *context, const std::string &msg)
     tgdb->callbacks.console_output_callback(tgdb->callbacks.context, msg);
 }
 
+static void tgdb_console_at_prompt(void *context)
+{
+    struct tgdb *tgdb = (struct tgdb*)context;
+
+    tgdb->is_gdb_ready_for_next_command = 1;
+}
+
 static int tgdb_open_new_tty(struct tgdb *tgdb, int *inferior_stdin,
     int *inferior_stdout)
 {
@@ -452,7 +459,8 @@ struct tgdb *tgdb_initialize(const char *debugger,
         tgdb_source_location_changed,
         tgdb_prompt_changed,
         tgdb_console_output,
-        tgdb_command_error
+        tgdb_command_error,
+        tgdb_console_at_prompt  
     };
     char logs_dir[FSUTIL_PATH_MAX];
 
@@ -1008,11 +1016,6 @@ int tgdb_process(struct tgdb * tgdb, int *is_finished)
     } else {
         // Read some GDB console output, process it
         result = annotations_parser_io(tgdb->parser, buf, size);
-
-        if (annotations_parser_at_prompt(tgdb->parser)) {
-            /* success, and finished command */
-            tgdb->is_gdb_ready_for_next_command = 1;
-        }
 
         /* runs the users buffered command if any exists */
         if (tgdb_has_command_to_run(tgdb))
