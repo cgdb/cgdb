@@ -242,7 +242,7 @@ static void tgdb_breakpoints_changed(void *context)
 static void tgdb_source_location_changed(void *context)
 {
     struct tgdb *tgdb = (struct tgdb*)context;
-    tgdb_issue_request(tgdb, TGDB_REQUEST_CURRENT_LOCATION, true);
+    tgdb_request_current_location(tgdb);
 }
 
 static void tgdb_prompt_changed(void *context, const std::string &prompt)
@@ -415,7 +415,7 @@ struct tgdb *tgdb_initialize(const char *debugger,
      * the TGDB_UPDATE_BREAKPOINTS event will be ignored in process_commands()
      * because there are no source files to add the breakpoints to.
      */
-    tgdb_issue_request(tgdb, TGDB_REQUEST_CURRENT_LOCATION, true);
+    tgdb_request_current_location(tgdb);
 
     /* gdb may already have some breakpoints when it starts. This could happen
      * if the user puts breakpoints in there .gdbinit.
@@ -946,9 +946,9 @@ void tgdb_request_current_location(struct tgdb * tgdb)
 
     request_ptr = (tgdb_request_ptr)cgdb_malloc(sizeof (struct tgdb_request));
 
-    request_ptr->header = TGDB_REQUEST_CURRENT_LOCATION;
+    request_ptr->header = TGDB_REQUEST_INFO_FRAME;
 
-    tgdb_run_or_queue_request(tgdb, request_ptr, false);
+    tgdb_run_or_queue_request(tgdb, request_ptr, true);
 }
 
 void
@@ -1039,7 +1039,7 @@ int tgdb_get_gdb_command(struct tgdb *tgdb, tgdb_request_ptr request,
             command = "server interpreter-exec mi"
                         " \"-file-list-exec-source-files\"\n";
             break;
-        case TGDB_REQUEST_CURRENT_LOCATION:
+        case TGDB_REQUEST_INFO_SOURCE_FILE:
             command = "server interpreter-exec mi"
                     " \"-file-list-exec-source-file\"\n";
             break;

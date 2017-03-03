@@ -130,10 +130,9 @@
         /**
          * Determine the current location of the debugged program.
          *
-         * This could be a filename, line number for source code or
-         * an address corresponding to the assembly location.
+         * This is a filename and line number for source code.
          */
-        TGDB_REQUEST_CURRENT_LOCATION,
+        TGDB_REQUEST_INFO_SOURCE_FILE,
 
         /**
          * Get the list of existing breakpoints.

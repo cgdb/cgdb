@@ -290,7 +290,7 @@ static void commands_process_info_frame(struct commands *c,
     if (require_source) {
         tgdb_request_ptr request;
         request = (tgdb_request_ptr) cgdb_malloc(sizeof (struct tgdb_request));
-        request->header = TGDB_REQUEST_CURRENT_LOCATION;
+        request->header = TGDB_REQUEST_INFO_SOURCE_FILE;
         tgdb_run_or_queue_request(c->tgdb, request, true);
     }
 }
@@ -362,7 +362,7 @@ static void gdbwire_stream_record_callback(void *context,
         case TGDB_REQUEST_DATA_DISASSEMBLE_MODE_QUERY:
         case TGDB_REQUEST_CONSOLE_COMMAND:
         case TGDB_REQUEST_INFO_SOURCES:
-        case TGDB_REQUEST_CURRENT_LOCATION:
+        case TGDB_REQUEST_INFO_SOURCE_FILE:
         case TGDB_REQUEST_TTY:
             break;
     }
@@ -403,7 +403,7 @@ static void gdbwire_result_record_callback(void *context,
                 clog_info(CLOG_GDBIO, "disassemble supports s mode");
             }
             break;
-        case TGDB_REQUEST_CURRENT_LOCATION:
+        case TGDB_REQUEST_INFO_SOURCE_FILE:
             commands_process_info_source(c, result_record);
             break;
         case TGDB_REQUEST_INFO_FRAME:
