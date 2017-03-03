@@ -109,7 +109,6 @@ AC_TRY_LINK([#ifndef _GNU_SOURCE
 
 dnl program checks
 AC_CHECK_PROG([HAS_MAKEINFO], [makeinfo], [yes], [no])
-AC_CHECK_PROG([HAS_HELP2MAN], [help2man], [yes], [no])
 dnl Default variables
 dnl If ncurses is yes after arguments, than use ncurses. Otherwise, use curses
 opt_with_readline_prefix=no
@@ -153,9 +152,6 @@ fi
 dnl check that the required tools are available to generate documentation
 if test "$HAS_MAKEINFO" != "yes" ; then
 	AC_MSG_ERROR([Please install makeinfo before installing])
-fi
-if test "$HAS_HELP2MAN" != "yes" ; then
-	AC_MSG_ERROR([Please install help2man])
 fi
 
 dnl readline and ncurses/curses configure magic is difficult.

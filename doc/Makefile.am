@@ -1,14 +1,9 @@
 info_TEXINFOS = cgdb.texi
 cgdb_TEXINFOS = gpl.texi
 
-dist_man_MANS = cgdb.1
 EXTRA_DIST = cgdb.txt
 
 dist_pkgdata_DATA = cgdb.txt
-
-# generate the man page using help2man.
-cgdb.1:
-	help2man --output=$(top_srcdir)/doc/cgdb.1 $(top_builddir)/cgdb/cgdb$(EXEEXT)
 
 cgdb.txt: cgdb.texi $(srcdir)/version.texi $(cgdb_TEXINFOS)
 TEXTS = cgdb.txt
