@@ -36,6 +36,11 @@ NOTE if building from a git checkout, `sh autogen.sh` needs to be ran first.
      Running `configure' takes awhile.  While running, it prints some
      messages telling which features it is checking for.
 
+     NOTE: on Mac Os readline might be installed in /usr/local/Cellar/readline/x.x.x
+     where x.x.x is the version. This is the case if you installed it view brew.
+     You might run configure with the following parameter
+     ./configure --with-readline=/usr/local/Cellar/readline/x.x.x --prefix=/usr/local
+
   2. Type `make' to compile the package.
 
   3. Optionally, type `make check' to run any self-tests that come with

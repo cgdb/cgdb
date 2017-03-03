@@ -7602,62 +7602,70 @@ gdbwire_push_data(struct gdbwire *wire, const char *data, size_t size)
 }
 
 
+/********************************************************************************
+ * Remove the nested functions                                                  *
+ * Add static to keep close to the local (al teast to this file) visibility     *
+ ********************************************************************************/
+
+struct gdbwire_interpreter_exec_context {
+    enum gdbwire_result result;
+    enum gdbwire_mi_command_kind kind;
+    struct gdbwire_mi_command *mi_command;
+};
+
+static void gdbwire_interpreter_exec_stream_record(void *context,
+    struct gdbwire_mi_stream_record *stream_record)
+{
+    struct gdbwire_interpreter_exec_context *ctx =
+        (struct gdbwire_interpreter_exec_context*)context;
+    ctx->result = GDBWIRE_LOGIC;
+}
+
+static void gdbwire_interpreter_exec_async_record(void *context,
+    struct gdbwire_mi_async_record *async_record)
+{
+    struct gdbwire_interpreter_exec_context *ctx =
+        (struct gdbwire_interpreter_exec_context*)context;
+    ctx->result = GDBWIRE_LOGIC;
+}
+
+static void gdbwire_interpreter_exec_result_record(void *context,
+    struct gdbwire_mi_result_record *result_record)
+{
+    struct gdbwire_interpreter_exec_context *ctx =
+            (struct gdbwire_interpreter_exec_context*)context;
+    if (ctx->result == GDBWIRE_OK) {
+        ctx->result = gdbwire_get_mi_command(
+            ctx->kind, result_record, &ctx->mi_command);
+    }
+}
+
+static void gdbwire_interpreter_exec_prompt(void *context, const char *prompt)
+{
+    struct gdbwire_interpreter_exec_context *ctx =
+        (struct gdbwire_interpreter_exec_context*)context;
+    ctx->result = GDBWIRE_LOGIC;
+}
+
+static void gdbwire_interpreter_exec_parse_error(void *context,
+            const char *mi, const char *token, struct gdbwire_mi_position
+            position)
+{
+    struct gdbwire_interpreter_exec_context *ctx =
+        (struct gdbwire_interpreter_exec_context*)context;
+    ctx->result = GDBWIRE_LOGIC;
+}
+
+//*************************************************************************************
+
 enum gdbwire_result
 gdbwire_interpreter_exec(
         const char *interpreter_exec_output,
         enum gdbwire_mi_command_kind kind,
         struct gdbwire_mi_command **out_mi_command)
 {
-    struct gdbwire_interpreter_exec_context {
-        enum gdbwire_result result;
-        enum gdbwire_mi_command_kind kind;
-        struct gdbwire_mi_command *mi_command;
-    };
-
-    void gdbwire_interpreter_exec_stream_record(void *context,
-        struct gdbwire_mi_stream_record *stream_record)
-    {
-        struct gdbwire_interpreter_exec_context *ctx =
-            (struct gdbwire_interpreter_exec_context*)context;
-        ctx->result = GDBWIRE_LOGIC;
-    }
-
-    void gdbwire_interpreter_exec_async_record(void *context,
-        struct gdbwire_mi_async_record *async_record)
-    {
-        struct gdbwire_interpreter_exec_context *ctx =
-            (struct gdbwire_interpreter_exec_context*)context;
-        ctx->result = GDBWIRE_LOGIC;
-    }
-
-    void gdbwire_interpreter_exec_result_record(void *context,
-        struct gdbwire_mi_result_record *result_record)
-    {
-        struct gdbwire_interpreter_exec_context *ctx =
-            (struct gdbwire_interpreter_exec_context*)context;
-
-        if (ctx->result == GDBWIRE_OK) {
-            ctx->result = gdbwire_get_mi_command(
-                ctx->kind, result_record, &ctx->mi_command);
-        }
-    }
-
-    void gdbwire_interpreter_exec_prompt(void *context, const char *prompt)
-    {
-        struct gdbwire_interpreter_exec_context *ctx =
-            (struct gdbwire_interpreter_exec_context*)context;
-        ctx->result = GDBWIRE_LOGIC;
-    }
-
-    void gdbwire_interpreter_exec_parse_error(void *context,
-            const char *mi, const char *token, struct gdbwire_mi_position
-            position)
-    {
-        struct gdbwire_interpreter_exec_context *ctx =
-            (struct gdbwire_interpreter_exec_context*)context;
-        ctx->result = GDBWIRE_LOGIC;
-    }
-
+    
+    
     struct gdbwire_interpreter_exec_context context = {
             GDBWIRE_OK, kind, 0 };
     size_t len;
