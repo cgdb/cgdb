@@ -435,8 +435,6 @@ struct tgdb *tgdb_initialize(const char *debugger,
 
 int tgdb_shutdown(struct tgdb *tgdb)
 {
-    int i;
-
     tgdb_request_ptr_list::iterator iter = tgdb->command_requests->begin();
     for (; iter != tgdb->command_requests->end(); ++iter) {
         tgdb_request_destroy(*iter);
@@ -518,14 +516,6 @@ static char *tgdb_client_modify_breakpoint_call(struct tgdb *tgdb,
         return sys_aprintf("%s \"%s\":%d", action, file, line);
 
     return sys_aprintf("%s *0x%" PRIx64, action, addr);
-}
-
-static int tgdb_disassemble_pc(struct commands *c, int lines)
-{
-}
-
-static int tgdb_disassemble_func(struct commands *c, int raw, int source)
-{
 }
 
 /*******************************************************************************

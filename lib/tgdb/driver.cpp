@@ -178,10 +178,9 @@ static void driver_prompt_change(const char *new_prompt)
 
 static int gdb_input(void)
 {
-    int result;
-    struct tgdb_response *item;
+    int result = tgdb_process(tgdb);
 
-    if ((result = tgdb_process(tgdb)) == -1) {
+    if (result == -1) {
         clog_error(CLOG_CGDB, "file descriptor closed");
         return -1;
     }

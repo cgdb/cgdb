@@ -364,6 +364,8 @@ static void gdbwire_stream_record_callback(void *context,
         case TGDB_REQUEST_INFO_SOURCES:
         case TGDB_REQUEST_INFO_SOURCE_FILE:
         case TGDB_REQUEST_TTY:
+        case TGDB_REQUEST_DEBUGGER_COMMAND:
+        case TGDB_REQUEST_MODIFY_BREAKPOINT:
             break;
     }
 }
@@ -411,6 +413,8 @@ static void gdbwire_result_record_callback(void *context,
             break;
         case TGDB_REQUEST_TTY:
         case TGDB_REQUEST_CONSOLE_COMMAND:
+        case TGDB_REQUEST_DEBUGGER_COMMAND:
+        case TGDB_REQUEST_MODIFY_BREAKPOINT:
             break;
     }
 }
