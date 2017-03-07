@@ -45,7 +45,7 @@ make install
 
 I typically enable more error checking with the build tools like so,
 
-> YFLAGS="-Wno-deprecated" CFLAGS="-g -O0 -Wall -Wextra -Wshadow -Wno-unused-parameter" CXXFLAGS="-g -O0 -Wall -Wextra -Wshadow -Werror -Wmissing-include-dirs -Wno-unused-parameter -Wno-sign-compare -Wno-unused-but-set-variable -Wno-unused-function -Wno-variadic-macros -std=c++11" ../cgdb/configure --prefix=$PWD/../prefix
+> YFLAGS="-Wno-deprecated" CFLAGS="-std=c11 -g -O0 -Wall -Wextra -Wshadow -Wno-unused-parameter" CXXFLAGS="-std=c++11 -g -O0 -Wall -Wextra -Wshadow -Werror -Wmissing-include-dirs -Wno-unused-parameter -Wno-sign-compare -Wno-unused-but-set-variable -Wno-unused-function -Wno-variadic-macros" ../cgdb/configure --prefix=$PWD/../prefix
 
 If you like to have a silent build, and the libtool link lines are bothering
 you, you can set this environment variable to suppress libtools printing of
