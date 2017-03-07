@@ -1,9 +1,39 @@
 /**
  * This file is an amalgamation of the header files from gdbwire.
  *
- * It was created using gdbwire 1.0 and git revision 8090521.
+ * It was created using gdbwire 1.0 and git revision 50c590b.
  */
 
+/***** Begin file gdbwire_sys.h **********************************************/
+#ifndef __GDBWIRE_SYS_H__
+#define __GDBWIRE_SYS_H__
+
+/**
+ * Supporting system functions.
+ */
+
+#ifdef __cplusplus 
+extern "C" { 
+#endif 
+
+/**
+ * Duplicate a string.
+ *
+ * @param str
+ * The string to duplicate
+ *
+ * @return
+ * An allocated string that must be freed.
+ * Null if out of memory or str is NULL.
+ */
+char *gdbwire_strdup(const char *str);
+
+#ifdef __cplusplus 
+}
+#endif 
+
+#endif
+/***** End of gdbwire_sys.h **************************************************/
 /***** Begin file gdbwire_string.h *******************************************/
 #ifndef __GDBWIRE_STRING_H__
 #define __GDBWIRE_STRING_H__
@@ -287,7 +317,7 @@ enum gdbwire_logger_level {
 void gdbwire_logger_log(const char *file, int line,
         enum gdbwire_logger_level level, const char *fmt, ...);
 
-// The macros intended to be used for logging
+/* The macros intended to be used for logging */
 #define gdbwire_debug(fmt, ...)(gdbwire_logger_log(__FILE__, __LINE__, \
         GDBWIRE_LOGGER_DEBUG, fmt, ##__VA_ARGS__))
 #define gdbwire_info(fmt, ...)(gdbwire_logger_log(__FILE__, __LINE__, \
@@ -461,7 +491,7 @@ enum gdbwire_logger_level {
 void gdbwire_logger_log(const char *file, int line,
         enum gdbwire_logger_level level, const char *fmt, ...);
 
-// The macros intended to be used for logging
+/* The macros intended to be used for logging */
 #define gdbwire_debug(fmt, ...)(gdbwire_logger_log(__FILE__, __LINE__, \
         GDBWIRE_LOGGER_DEBUG, fmt, ##__VA_ARGS__))
 #define gdbwire_info(fmt, ...)(gdbwire_logger_log(__FILE__, __LINE__, \
@@ -498,9 +528,9 @@ extern "C" {
  * a token of size 1.
  */
 struct gdbwire_mi_position {
-    /// The starting column position of the token
+    /* The starting column position of the token */
     int start_column;
-    /// The ending column position of the token
+    /* The ending column position of the token */
     int end_column;
 };
 
@@ -639,7 +669,7 @@ enum gdbwire_mi_result_class {
      */
     GDBWIRE_MI_EXIT,
 
-    /// An unsupported result class
+    /* An unsupported result class */
     GDBWIRE_MI_UNSUPPORTED
 };
 
@@ -997,7 +1027,7 @@ enum gdbwire_mi_async_class {
      */
     GDBWIRE_MI_ASYNC_MEMORY_CHANGED,
 
-    /// An unsupported async class
+    /* An unsupported async class */
     GDBWIRE_MI_ASYNC_UNSUPPORTED
 };
 
@@ -1219,9 +1249,9 @@ extern "C" {
  * a token of size 1.
  */
 struct gdbwire_mi_position {
-    /// The starting column position of the token
+    /* The starting column position of the token */
     int start_column;
-    /// The ending column position of the token
+    /* The ending column position of the token */
     int end_column;
 };
 
@@ -1360,7 +1390,7 @@ enum gdbwire_mi_result_class {
      */
     GDBWIRE_MI_EXIT,
 
-    /// An unsupported result class
+    /* An unsupported result class */
     GDBWIRE_MI_UNSUPPORTED
 };
 
@@ -1718,7 +1748,7 @@ enum gdbwire_mi_async_class {
      */
     GDBWIRE_MI_ASYNC_MEMORY_CHANGED,
 
-    /// An unsupported async class
+    /* An unsupported async class */
     GDBWIRE_MI_ASYNC_UNSUPPORTED
 };
 
@@ -1869,7 +1899,7 @@ struct gdbwire_mi_result *append_gdbwire_mi_result(
 /***** End of gdbwire_mi_pt.h ************************************************/
 /***** Continuing where we left off in gdbwire_mi_parser.h *******************/
 
-/// The opaque GDB/MI parser context
+/* The opaque GDB/MI parser context */
 struct gdbwire_mi_parser;
 
 /**
@@ -2399,7 +2429,13 @@ extern int gdbwire_mi_debug;
 #endif
 /* "%code requires" blocks.  */
 
-    typedef void *yyscan_t;
+
+/* An opaque pointer. */
+#ifndef YY_TYPEDEF_YY_SCANNER_T
+#define YY_TYPEDEF_YY_SCANNER_T
+typedef void *yyscan_t;
+#endif
+
     struct gdbwire_mi_output;
 
 

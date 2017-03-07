@@ -1,9 +1,61 @@
 /**
  * This file is an amalgamation of C source files from gdbwire.
  *
- * It was created using gdbwire 1.0 and git revision 8090521.
+ * It was created using gdbwire 1.0 and git revision 50c590b.
  */
 
+/***** Begin file gdbwire_sys.c **********************************************/
+#include <stdlib.h>
+#include <string.h>
+
+/***** Include gdbwire_sys.h in the middle of gdbwire_sys.c ******************/
+/***** Begin file gdbwire_sys.h **********************************************/
+#ifndef __GDBWIRE_SYS_H__
+#define __GDBWIRE_SYS_H__
+
+/**
+ * Supporting system functions.
+ */
+
+#ifdef __cplusplus 
+extern "C" { 
+#endif 
+
+/**
+ * Duplicate a string.
+ *
+ * @param str
+ * The string to duplicate
+ *
+ * @return
+ * An allocated string that must be freed.
+ * Null if out of memory or str is NULL.
+ */
+char *gdbwire_strdup(const char *str);
+
+#ifdef __cplusplus 
+}
+#endif 
+
+#endif
+/***** End of gdbwire_sys.h **************************************************/
+/***** Continuing where we left off in gdbwire_sys.c *************************/
+
+char *gdbwire_strdup(const char *str)
+{
+    char *result = NULL;
+
+    if (str) {
+        size_t length_to_allocate = strlen(str) + 1;
+        result = malloc(length_to_allocate * sizeof(char));
+        if (result) {
+            strcpy(result, str);
+        }
+    }
+
+    return result;
+}
+/***** End of gdbwire_sys.c **************************************************/
 /***** Begin file gdbwire_string.c *******************************************/
 #include <string.h>
 #include <stdlib.h>
@@ -265,10 +317,12 @@ gdbwire_string_clear(struct gdbwire_string *string)
 static int
 gdbwire_string_increase_capacity(struct gdbwire_string *string)
 {
-    // The algorithm chosen to increase the capacity is arbitrary.
-    // It starts at 128 bytes. It then doubles it's size in bytes like this,
-    //   128, 256, 512, 1024, 2048, 4096
-    // After it reaches 4096 it then grows by 4096 bytes at a time.
+    /**
+     * The algorithm chosen to increase the capacity is arbitrary.
+     * It starts at 128 bytes. It then doubles it's size in bytes like this,
+     *   128, 256, 512, 1024, 2048, 4096
+     * After it reaches 4096 it then grows by 4096 bytes at a time.
+     */
     if (string->capacity == 0) {
         string->capacity = 128;
     } else if (string->capacity < 4096) {
@@ -277,7 +331,7 @@ gdbwire_string_increase_capacity(struct gdbwire_string *string)
         string->capacity += 4096;
     }
 
-    // At this point string->capacity is set to the new size, so realloc
+    /* At this point string->capacity is set to the new size, so realloc */
     string->data = (char*)realloc(string->data, string->capacity);
 
     return (string->data) ? 0 : -1;
@@ -308,7 +362,7 @@ gdbwire_string_append_data(struct gdbwire_string *string, const char *data,
         size_t size)
 {
     int result = (string && data) ? 0 : -1;
-    int data_index = 0;
+    size_t data_index = 0;
 
     for (; string && data && data_index < size; ++data_index, ++string->size) {
         if (string->size >= string->capacity) {
@@ -382,23 +436,26 @@ gdbwire_string_erase(struct gdbwire_string *string, size_t pos, size_t count)
         size_t data_size = gdbwire_string_size(string);
         char *data = gdbwire_string_data(string);
 
-        // The position index must be smaller than the data size to be valid
+        /* The position index must be smaller than the data size to be valid */
         if (pos < data_size) {
             size_t from_pos = pos + count;
 
-            // Check to see if anything needs to be copied.
-            // If not, just null terminate the position to be erased
-            // Null terminating the string ensures the c string and the data
-            // string approach are both safe. In the data mode, the nul
-            // character is unneeded.
+            /**
+             * Check to see if anything needs to be copied.
+             * If not, just null terminate the position to be erased
+             * Null terminating the string ensures the c string and the data
+             * string approach are both safe. In the data mode, the nul
+             * character is unneeded.
+             */
             if (from_pos >= data_size) {
                 data[pos] = 0;
                 count_erased = data_size - pos;
-            // If so, move characters from the from position to the to position
+            /* If so, move characters from the from position
+               to the to position */
             } else {
                 char *to_cur = &data[pos], *from_cur = &data[from_pos];
 
-                // shift everything after the erase request to the left
+                /* shift everything after the erase request to the left */
                 for (; from_pos < data_size; ++from_pos, ++to_cur, ++from_cur) {
                     *to_cur = *from_cur;
                 }
@@ -499,7 +556,7 @@ enum gdbwire_logger_level {
 void gdbwire_logger_log(const char *file, int line,
         enum gdbwire_logger_level level, const char *fmt, ...);
 
-// The macros intended to be used for logging
+/* The macros intended to be used for logging */
 #define gdbwire_debug(fmt, ...)(gdbwire_logger_log(__FILE__, __LINE__, \
         GDBWIRE_LOGGER_DEBUG, fmt, ##__VA_ARGS__))
 #define gdbwire_info(fmt, ...)(gdbwire_logger_log(__FILE__, __LINE__, \
@@ -561,6 +618,7 @@ gdbwire_logger_log(const char *file, int line, enum gdbwire_logger_level level,
 #include <stdio.h>
 #include <string.h>
 
+/* #include "gdbwire_sys.h" */
 /***** Include gdbwire_assert.h in the middle of gdbwire_mi_parser.c *********/
 /***** Begin file gdbwire_assert.h *******************************************/
 #ifndef GDBWIRE_ERROR_H
@@ -690,7 +748,13 @@ extern int gdbwire_mi_debug;
 #endif
 /* "%code requires" blocks.  */
 
-    typedef void *yyscan_t;
+
+/* An opaque pointer. */
+#ifndef YY_TYPEDEF_YY_SCANNER_T
+#define YY_TYPEDEF_YY_SCANNER_T
+typedef void *yyscan_t;
+#endif
+
     struct gdbwire_mi_output;
 
 
@@ -817,9 +881,9 @@ extern "C" {
  * a token of size 1.
  */
 struct gdbwire_mi_position {
-    /// The starting column position of the token
+    /* The starting column position of the token */
     int start_column;
-    /// The ending column position of the token
+    /* The ending column position of the token */
     int end_column;
 };
 
@@ -958,7 +1022,7 @@ enum gdbwire_mi_result_class {
      */
     GDBWIRE_MI_EXIT,
 
-    /// An unsupported result class
+    /* An unsupported result class */
     GDBWIRE_MI_UNSUPPORTED
 };
 
@@ -1316,7 +1380,7 @@ enum gdbwire_mi_async_class {
      */
     GDBWIRE_MI_ASYNC_MEMORY_CHANGED,
 
-    /// An unsupported async class
+    /* An unsupported async class */
     GDBWIRE_MI_ASYNC_UNSUPPORTED
 };
 
@@ -1467,7 +1531,7 @@ struct gdbwire_mi_result *append_gdbwire_mi_result(
 /***** End of gdbwire_mi_pt.h ************************************************/
 /***** Continuing where we left off in gdbwire_mi_parser.h *******************/
 
-/// The opaque GDB/MI parser context
+/* The opaque GDB/MI parser context */
 struct gdbwire_mi_parser;
 
 /**
@@ -1574,8 +1638,15 @@ enum gdbwire_result gdbwire_mi_parser_push_data(
 /* #include "gdbwire_string.h" */
 
 /* flex prototypes used in this unit */
+#ifndef YY_TYPEDEF_YY_SCANNER_T
+#define YY_TYPEDEF_YY_SCANNER_T
 typedef void *yyscan_t;
+#endif
+
+#ifndef YY_TYPEDEF_YY_BUFFER_STATE
+#define YY_TYPEDEF_YY_BUFFER_STATE
 typedef struct yy_buffer_state *YY_BUFFER_STATE;
+#endif
 
 /* Lexer set/destroy buffer to parse */
 extern YY_BUFFER_STATE gdbwire_mi__scan_string(
@@ -1744,12 +1815,12 @@ gdbwire_mi_parser_parse_line(struct gdbwire_mi_parser *parser,
      * is done.
      */
 
-    // Check mi_status, will be 1 on parse error, and YYPUSH_MORE on success
+    /* Check mi_status, will be 1 on parse error, and YYPUSH_MORE on success */
     GDBWIRE_ASSERT(mi_status == 1 || mi_status == YYPUSH_MORE);
 
     /* Each GDB/MI line should produce an output command */
     GDBWIRE_ASSERT(output);
-    output->line = strdup(line);
+    output->line = gdbwire_strdup(line);
 
     callbacks.gdbwire_mi_output_callback(callbacks.context, output);
 
@@ -1785,8 +1856,10 @@ gdbwire_mi_parser_get_next_line(struct gdbwire_string *buffer,
     size_t size = gdbwire_string_size(buffer);
     size_t pos = gdbwire_string_find_first_of(buffer, "\r\n");
 
-    // Search to see if a newline has been reached in gdb/mi.
-    // If a line of data has been recieved, process it.
+    /**
+     * Search to see if a newline has been reached in gdb/mi.
+     * If a line of data has been recieved, process it.
+     */
     if (pos != size) {
         int status;
 
@@ -2155,6 +2228,7 @@ append_gdbwire_mi_result(struct gdbwire_mi_result *list,
 #include <string.h>
 #include <errno.h>
 
+/* #include "gdbwire_sys.h" */
 /* #include "gdbwire_assert.h" */
 /***** Include gdbwire_mi_command.h in the middle of gdbwire_mi_command.c ****/
 /***** Begin file gdbwire_mi_command.h ***************************************/
@@ -2742,19 +2816,19 @@ break_info_for_breakpoint(struct gdbwire_mi_result *mi_result,
 
     breakpoint->multi = multi;
     breakpoint->from_multi = from_multi;
-    breakpoint->number = strdup(number);
-    breakpoint->type = (type)?strdup(type):0;
-    breakpoint->catch_type = (catch_type)?strdup(catch_type):0;
+    breakpoint->number = gdbwire_strdup(number);
+    breakpoint->type = (type)?gdbwire_strdup(type):0;
+    breakpoint->catch_type = (catch_type)?gdbwire_strdup(catch_type):0;
     breakpoint->disposition = disp_kind;
     breakpoint->enabled = enabled;
-    breakpoint->address = (address)?strdup(address):0;
-    breakpoint->func_name = (func_name)?strdup(func_name):0;
-    breakpoint->file = (file)?strdup(file):0;
-    breakpoint->fullname = (fullname)?strdup(fullname):0;
+    breakpoint->address = (address)?gdbwire_strdup(address):0;
+    breakpoint->func_name = (func_name)?gdbwire_strdup(func_name):0;
+    breakpoint->file = (file)?gdbwire_strdup(file):0;
+    breakpoint->fullname = (fullname)?gdbwire_strdup(fullname):0;
     breakpoint->line = line;
     breakpoint->times = times;
     breakpoint->original_location =
-        (original_location)?strdup(original_location):0;
+        (original_location)?gdbwire_strdup(original_location):0;
     breakpoint->pending = pending;
 
     /* Handle the out of memory situation */
@@ -2973,12 +3047,12 @@ stack_info_frame(
     }
 
     frame->level = atoi(level);
-    frame->address = (address)?strdup(address):0;
-    frame->func = (func)?strdup(func):0;
-    frame->file = (file)?strdup(file):0;
-    frame->fullname = (fullname)?strdup(fullname):0;
+    frame->address = (address)?gdbwire_strdup(address):0;
+    frame->func = (func)?gdbwire_strdup(func):0;
+    frame->file = (file)?gdbwire_strdup(file):0;
+    frame->fullname = (fullname)?gdbwire_strdup(fullname):0;
     frame->line = (line)?atoi(line):0;
-    frame->from = (from)?strdup(from):0;
+    frame->from = (from)?gdbwire_strdup(from):0;
 
     /* Handle the out of memory situation */
     if ((address && !frame->address) ||
@@ -3059,13 +3133,13 @@ file_list_exec_source_file(
 
     mi_command->kind = GDBWIRE_MI_FILE_LIST_EXEC_SOURCE_FILE;
     mi_command->variant.file_list_exec_source_file.line = atoi(line);
-    mi_command->variant.file_list_exec_source_file.file = strdup(file);
+    mi_command->variant.file_list_exec_source_file.file = gdbwire_strdup(file);
     if (!mi_command->variant.file_list_exec_source_file.file) {
         gdbwire_mi_command_free(mi_command);
         return GDBWIRE_NOMEM;
     }
     mi_command->variant.file_list_exec_source_file.fullname =
-        (fullname)?strdup(fullname):0;
+        (fullname)?gdbwire_strdup(fullname):0;
     if (fullname &&
         !mi_command->variant.file_list_exec_source_file.fullname) {
         gdbwire_mi_command_free(mi_command);
@@ -3121,7 +3195,7 @@ file_list_exec_source_files(
         GDBWIRE_ASSERT_GOTO(mi_result->kind == GDBWIRE_MI_TUPLE, result, err);
         tuple = mi_result->variant.result;
 
-        // file field
+        /* file field */
         GDBWIRE_ASSERT_GOTO(tuple->kind == GDBWIRE_MI_CSTRING, result, err);
         GDBWIRE_ASSERT_GOTO(strcmp(tuple->variable, "file") == 0, result, err);
         file = tuple->variant.cstring;
@@ -3129,7 +3203,7 @@ file_list_exec_source_files(
         if (tuple->next) {
             tuple = tuple->next;
 
-            // fullname field
+            /* fullname field */
             GDBWIRE_ASSERT_GOTO(tuple->kind == GDBWIRE_MI_CSTRING, result, err);
             GDBWIRE_ASSERT_GOTO(strcmp(tuple->variable, "fullname") == 0,
                 result, err);
@@ -3138,15 +3212,15 @@ file_list_exec_source_files(
 
         GDBWIRE_ASSERT(!tuple->next);
 
-        // Create the new 
+        /* Create the new */
         new_node = calloc(1, sizeof(struct gdbwire_mi_source_file));
         GDBWIRE_ASSERT_GOTO(new_node, result, err);
 
-        new_node->file = strdup(file);
-        new_node->fullname = (fullname)?strdup(fullname):0;
+        new_node->file = gdbwire_strdup(file);
+        new_node->fullname = (fullname)?gdbwire_strdup(fullname):0;
         new_node->next = 0;
 
-        // Append the node to the list
+        /* Append the node to the list */
         if (files) {
             cur_node->next = new_node;
             cur_node = cur_node->next;
@@ -3694,6 +3768,10 @@ static yyconst flex_int16_t yy_chk[67] =
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 #define YY_NO_INPUT 1
+/* Avoids the use of fileno, which is POSIX and not compatible with c11 */
+
+/* flex 2.6.0 produces a sign-compare warning */
+#pragma GCC diagnostic ignored "-Wsign-compare"
 
 #include <stdio.h>
 /* #include "gdbwire_mi_grammar.h" */
@@ -4007,16 +4085,12 @@ yy_match:
 			yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
 			++yy_cp;
 			}
-		while ( yy_base[yy_current_state] != 43 );
+		while ( yy_current_state != 32 );
+		yy_cp = yyg->yy_last_accepting_cpos;
+		yy_current_state = yyg->yy_last_accepting_state;
 
 yy_find_action:
 		yy_act = yy_accept[yy_current_state];
-		if ( yy_act == 0 )
-			{ /* have to back up */
-			yy_cp = yyg->yy_last_accepting_cpos;
-			yy_current_state = yyg->yy_last_accepting_state;
-			yy_act = yy_accept[yy_current_state];
-			}
 
 		YY_DO_BEFORE_ACTION;
 
@@ -4192,7 +4266,8 @@ case YY_STATE_EOF(INITIAL):
 
 			else
 				{
-				yy_cp = yyg->yy_c_buf_p;
+				yy_cp = yyg->yy_last_accepting_cpos;
+				yy_current_state = yyg->yy_last_accepting_state;
 				goto yy_find_action;
 				}
 			}
@@ -4676,7 +4751,7 @@ static void gdbwire_mi__load_buffer_state  (yyscan_t yyscanner)
         b->yy_bs_column = 0;
     }
 
-        b->yy_is_interactive = file ? (isatty( fileno(file) ) > 0) : 0;
+        b->yy_is_interactive = 0;
     
 	errno = oerrno;
 }
@@ -5338,6 +5413,7 @@ void gdbwire_mi_free (void * ptr , yyscan_t yyscanner)
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+/* #include "gdbwire_sys.h" */
 /* #include "gdbwire_mi_grammar.h" */
 /* #include "gdbwire_mi_pt.h" */
 /* #include "gdbwire_mi_pt_alloc.h" */
@@ -5353,7 +5429,7 @@ void gdbwire_mi_error(yyscan_t yyscanner,
 
     *gdbwire_mi_output = gdbwire_mi_output_alloc();
     (*gdbwire_mi_output)->kind = GDBWIRE_MI_OUTPUT_PARSE_ERROR;
-    (*gdbwire_mi_output)->variant.error.token = strdup(text);
+    (*gdbwire_mi_output)->variant.error.token = gdbwire_strdup(text);
     (*gdbwire_mi_output)->variant.error.pos = pos;
 }
 
@@ -5385,14 +5461,14 @@ static char *gdbwire_mi_unescape_cstring(char *str)
     char *result;
     size_t r, s, length;
 
-    //assert(str);
+    /*assert(str);*/
 
-    result = strdup(str);
+    result = gdbwire_strdup(str);
     length = strlen(str);
 
     /* a CSTRING should start and end with a quote */
-    //assert(result);
-    //assert(length >= 2);
+    /*assert(result);*/
+    /*assert(length >= 2);*/
 
     for (r = 0, s = 1; s < length - 1; ++s) {
         if (str[s] == '\\') {
@@ -5458,7 +5534,13 @@ extern int gdbwire_mi_debug;
 #endif
 /* "%code requires" blocks.  */
 
-    typedef void *yyscan_t;
+
+/* An opaque pointer. */
+#ifndef YY_TYPEDEF_YY_SCANNER_T
+#define YY_TYPEDEF_YY_SCANNER_T
+typedef void *yyscan_t;
+#endif
+
     struct gdbwire_mi_output;
 
 
@@ -5828,10 +5910,10 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   189,   189,   192,   195,   199,   203,   209,   215,   215,
-     227,   234,   240,   246,   254,   258,   262,   266,   283,   336,
-     340,   344,   348,   352,   359,   366,   373,   378,   383,   387,
-     395,   399,   407,   413,   417,   421,   425,   429,   433
+       0,   196,   196,   199,   202,   206,   210,   216,   222,   222,
+     234,   241,   247,   253,   261,   265,   269,   273,   290,   343,
+     347,   351,   355,   359,   366,   373,   380,   385,   390,   394,
+     402,   406,   414,   420,   424,   428,   432,   436,   440
 };
 #endif
 
@@ -6969,7 +7051,7 @@ yyreduce:
   case 26:
     {
   char *text = gdbwire_mi_get_text(yyscanner);
-  (yyval.u_variable) = strdup(text);
+  (yyval.u_variable) = gdbwire_strdup(text);
 }
     break;
 
@@ -7053,7 +7135,7 @@ yyreduce:
   case 38:
     {
   char *text = gdbwire_mi_get_text(yyscanner);
-  (yyval.u_token) = strdup(text);
+  (yyval.u_token) = gdbwire_strdup(text);
 }
     break;
 
@@ -7601,6 +7683,56 @@ gdbwire_push_data(struct gdbwire *wire, const char *data, size_t size)
     return result;
 }
 
+struct gdbwire_interpreter_exec_context {
+    enum gdbwire_result result;
+    enum gdbwire_mi_command_kind kind;
+    struct gdbwire_mi_command *mi_command;
+};
+
+static void gdbwire_interpreter_exec_stream_record(void *context,
+    struct gdbwire_mi_stream_record *stream_record)
+{
+    struct gdbwire_interpreter_exec_context *ctx =
+        (struct gdbwire_interpreter_exec_context*)context;
+    ctx->result = GDBWIRE_LOGIC;
+}
+
+static void gdbwire_interpreter_exec_async_record(void *context,
+    struct gdbwire_mi_async_record *async_record)
+{
+    struct gdbwire_interpreter_exec_context *ctx =
+        (struct gdbwire_interpreter_exec_context*)context;
+    ctx->result = GDBWIRE_LOGIC;
+}
+
+static void gdbwire_interpreter_exec_result_record(void *context,
+    struct gdbwire_mi_result_record *result_record)
+{
+    struct gdbwire_interpreter_exec_context *ctx =
+        (struct gdbwire_interpreter_exec_context*)context;
+
+    if (ctx->result == GDBWIRE_OK) {
+        ctx->result = gdbwire_get_mi_command(
+            ctx->kind, result_record, &ctx->mi_command);
+    }
+}
+
+static void gdbwire_interpreter_exec_prompt(void *context, const char *prompt)
+{
+    struct gdbwire_interpreter_exec_context *ctx =
+        (struct gdbwire_interpreter_exec_context*)context;
+    ctx->result = GDBWIRE_LOGIC;
+}
+
+static void gdbwire_interpreter_exec_parse_error(void *context,
+        const char *mi, const char *token, struct gdbwire_mi_position
+        position)
+{
+    struct gdbwire_interpreter_exec_context *ctx =
+        (struct gdbwire_interpreter_exec_context*)context;
+    ctx->result = GDBWIRE_LOGIC;
+}
+
 
 enum gdbwire_result
 gdbwire_interpreter_exec(
@@ -7608,56 +7740,6 @@ gdbwire_interpreter_exec(
         enum gdbwire_mi_command_kind kind,
         struct gdbwire_mi_command **out_mi_command)
 {
-    struct gdbwire_interpreter_exec_context {
-        enum gdbwire_result result;
-        enum gdbwire_mi_command_kind kind;
-        struct gdbwire_mi_command *mi_command;
-    };
-
-    void gdbwire_interpreter_exec_stream_record(void *context,
-        struct gdbwire_mi_stream_record *stream_record)
-    {
-        struct gdbwire_interpreter_exec_context *ctx =
-            (struct gdbwire_interpreter_exec_context*)context;
-        ctx->result = GDBWIRE_LOGIC;
-    }
-
-    void gdbwire_interpreter_exec_async_record(void *context,
-        struct gdbwire_mi_async_record *async_record)
-    {
-        struct gdbwire_interpreter_exec_context *ctx =
-            (struct gdbwire_interpreter_exec_context*)context;
-        ctx->result = GDBWIRE_LOGIC;
-    }
-
-    void gdbwire_interpreter_exec_result_record(void *context,
-        struct gdbwire_mi_result_record *result_record)
-    {
-        struct gdbwire_interpreter_exec_context *ctx =
-            (struct gdbwire_interpreter_exec_context*)context;
-
-        if (ctx->result == GDBWIRE_OK) {
-            ctx->result = gdbwire_get_mi_command(
-                ctx->kind, result_record, &ctx->mi_command);
-        }
-    }
-
-    void gdbwire_interpreter_exec_prompt(void *context, const char *prompt)
-    {
-        struct gdbwire_interpreter_exec_context *ctx =
-            (struct gdbwire_interpreter_exec_context*)context;
-        ctx->result = GDBWIRE_LOGIC;
-    }
-
-    void gdbwire_interpreter_exec_parse_error(void *context,
-            const char *mi, const char *token, struct gdbwire_mi_position
-            position)
-    {
-        struct gdbwire_interpreter_exec_context *ctx =
-            (struct gdbwire_interpreter_exec_context*)context;
-        ctx->result = GDBWIRE_LOGIC;
-    }
-
     struct gdbwire_interpreter_exec_context context = {
             GDBWIRE_OK, kind, 0 };
     size_t len;
