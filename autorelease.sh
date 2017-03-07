@@ -1,8 +1,6 @@
-#!/bin/bash
+#!/bin/bash -e
 
 # Usage: ./autorelease.sh [optional ./configure arguments]
-
-set -e
 
 CGDB_VERSION=`date +"%Y%m%d"`
 echo "-- Preparing to create a new cgdb release."
@@ -52,7 +50,6 @@ CGDB_RELEASE_STR=`echo "$CGDB_RELEASE" | perl -pi -e 's/\./_/g'`
 CGDB_SOURCE_DIR="$PWD"
 CGDB_RELEASE_DIR="$PWD/release"
 CGDB_BUILD_DIR="$CGDB_RELEASE_DIR/build"
-CGDB_C89_BUILD_DIR="$CGDB_RELEASE_DIR/build.c89"
 CGDB_BUILD_TEST_DIR="$CGDB_RELEASE_DIR/build.test"
 CGDB_OUTPUT_LOG="$CGDB_RELEASE_DIR/release.log"
 CGDB_RELEASE_TAG_SH="$CGDB_RELEASE_DIR/scripts/tag.sh"
@@ -89,13 +86,6 @@ perl -pi -e "s/AC_INIT\(cgdb, (.*)\)/AC_INIT\(cgdb, $CGDB_VERSION\)/g" configure
 echo "-- Regenerate the autoconf files"
 run ./autogen.sh $CGDB_VERSION
 
-# C89 compile test
-echo "-- Verify CGDB works with --std=c89"
-mkdir $CGDB_C89_BUILD_DIR
-cd $CGDB_C89_BUILD_DIR
-run $CGDB_SOURCE_DIR/configure CFLAGS="-g --std=c89 -D_XOPEN_SOURCE=600 -DSIGWINCH=28" "$@"
-run make -s
-
 # Update NEWS
 if [ "$CGDB_UPDATE_NEWS" = "y" ]; then
     cd "$CGDB_SOURCE_DIR"
@@ -130,9 +120,6 @@ run makeinfo --plaintext -I "$CGDB_SOURCE_DIR/doc" \
              "$CGDB_SOURCE_DIR/doc/cgdb.texi"
 echo "-- Generate PDF manual"
 run make pdf
-echo "-- Generate MAN page"
-rm $CGDB_SOURCE_DIR/doc/cgdb.1
-run make cgdb.1
 
 # Test the distribution
 echo "-- Unpacking and testing in $CGDB_BUILD_TEST_DIR"

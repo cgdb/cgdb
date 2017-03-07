@@ -11,7 +11,6 @@ libtgdb_a_SOURCES = \
     annotations.h \
     tgdb.cpp \
     tgdb.h \
-    tgdb_command.h \
     tgdb_types.h \
     commands.cpp \
     commands.h \

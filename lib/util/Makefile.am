@@ -1,6 +1,7 @@
 noinst_LIBRARIES = libcgdbutil.a
 
 libcgdbutil_a_SOURCES = \
+	clog.h \
     cgdb_clog.cpp \
     cgdb_clog.h \
     fork_util.cpp \
