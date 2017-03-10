@@ -121,7 +121,7 @@ struct annotations_parser {
     /**
      * True if the breakpoints have changed, false otherwise.
      */
-    bool breakpoints_changed;;
+    bool breakpoints_changed;
 
     /**
      * True if the source location has changed, false otherwise.

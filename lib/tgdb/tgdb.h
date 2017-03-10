@@ -225,13 +225,13 @@
    * An instance of the tgdb library to operate on.
    *
    * \param buf
-   * The output of the program being debugged will be returned here.
+   * The buffer to write the inferior data to.
    *
    * \param n
-   * Tells libtgdb how large the buffer BUF is.
+   * The number of bytes that buf can contain.
    *
    * @return
-   * The number of valid bytes in BUF on success, or 0 on error.
+   * 0 on EOF, -1 on error, or the number of bytes written to buf.
    */
     ssize_t tgdb_recv_inferior_data(struct tgdb *tgdb, char *buf, size_t n);
 

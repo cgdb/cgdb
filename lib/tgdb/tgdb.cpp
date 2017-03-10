@@ -631,35 +631,16 @@ int tgdb_send_inferior_char(struct tgdb *tgdb, char c)
     return 0;
 }
 
-/* returns to the caller data from the child */
-/**
- * Returns output that the debugged program printed (the inferior).
- *
- * @param tgdb
- * The tgdb instance to act on.
- *
- * @param buf
- * The buffer to write the inferior data to.
- *
- * @param n
- * The number of bytes that buf can contain.
- *
- * @return
- * 0 on EOR, -1 on error, or the number of bytes written to buf.
- */
 ssize_t tgdb_recv_inferior_data(struct tgdb * tgdb, char *buf, size_t n)
 {
-    char local_buf[n + 1];
     ssize_t size;
 
     /* read all the data possible from the child that is ready. */
-    if ((size = io_read(tgdb->inferior_stdin, local_buf, n)) < 0) {
+    size = io_read(tgdb->inferior_stdin, buf, n);
+    if (size < 0) {
         clog_error(CLOG_CGDB, "inferior_fd read failed");
         return -1;
     }
-
-    strncpy(buf, local_buf, size);
-    buf[size] = '\0';
 
     return size;
 }

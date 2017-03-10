@@ -61,137 +61,12 @@ static int command_set_syntax_type(const char *value);
 static int command_set_sdc(int value);
 static int cgdbrc_set_val(struct cgdbrc_config_option config_option);
 
-/**
- * This data structure stores all the values of all the config options.
- * It is initialized with the default values.
- */
-static struct cgdbrc_config_option cgdbrc_config_options[CGDBRC_WRAPSCAN + 1] = {
-    {CGDBRC_ARROWSTYLE, {.line_display_style = LINE_DISPLAY_SHORT_ARROW}},
-    {CGDBRC_AUTOSOURCERELOAD, {.int_val = 1}},
-    {CGDBRC_CGDB_MODE_KEY, {.int_val = CGDB_KEY_ESC}},
-    {CGDBRC_COLOR, {.int_val = 1}},
-    {CGDBRC_DEBUGWINCOLOR, {.int_val = 1}},
-    {CGDBRC_DISASM, {.int_val = 0}},
-    {CGDBRC_EXECUTING_LINE_DISPLAY,
-        {.line_display_style = LINE_DISPLAY_LONG_ARROW}},
-    {CGDBRC_HLSEARCH, {.int_val = 0}},
-    {CGDBRC_IGNORECASE, {.int_val = 0}},
-    {CGDBRC_SELECTED_LINE_DISPLAY,
-        {.line_display_style = LINE_DISPLAY_BLOCK}},
-    {CGDBRC_SHOWDEBUGCOMMANDS, {.int_val = 0}},
-    {CGDBRC_SHOWMARKS, {.int_val = 1}},
-    {CGDBRC_SYNTAX, {.language_support_val = TOKENIZER_LANGUAGE_UNKNOWN}},
-    {CGDBRC_TABSTOP, {.int_val = 8}},
-    {CGDBRC_TIMEOUT, {.int_val = 1}},
-    {CGDBRC_TIMEOUT_LEN, {.int_val = 1000}},
-    {CGDBRC_TTIMEOUT, {.int_val = 1}},
-    {CGDBRC_TTIMEOUT_LEN, {.int_val = 100}},
-    {CGDBRC_WINMINHEIGHT, {.int_val = 0}},
-    {CGDBRC_WINMINWIDTH, {.int_val = 0}},
-    {CGDBRC_WINSPLIT, {.win_split_val = WIN_SPLIT_EVEN}},
-    {CGDBRC_WINSPLITORIENTATION, {.win_split_orientation_val = WSO_HORIZONTAL}},
-    {CGDBRC_WRAPSCAN, {.int_val = 1}}
-};
-
 struct cgdbrc_attach_item {
     enum cgdbrc_option_kind option;
     cgdbrc_notify notify_hook;
 };
 
 static std::list<struct cgdbrc_attach_item> cgdbrc_attach_list;
-
-static struct ConfigVariable {
-    const char *name, *s_name;
-    enum ConfigType type;
-    void *data;
-} VARIABLES[] = {
-
-
-    /* keep this stuff sorted! !sort */
-
-    /* arrowstyle */
-    {
-        "arrowstyle", "as", CONFIG_TYPE_FUNC_STRING, (void *)command_set_arrowstyle},
-            /* autosourcereload */
-    {
-    "autosourcereload", "asr", CONFIG_TYPE_BOOL,
-                (void *)&cgdbrc_config_options[CGDBRC_AUTOSOURCERELOAD].variant.
-                int_val},
-            /* cgdbmodekey */
-    {
-    "cgdbmodekey", "cgdbmodekey", CONFIG_TYPE_FUNC_STRING,
-                (void *)command_set_cgdb_mode_key},
-            /* color */
-    {
-    "color", "color", CONFIG_TYPE_BOOL,
-                (void *)&cgdbrc_config_options[CGDBRC_COLOR].variant.int_val},
-            /* debugwincolor */
-    {
-    "debugwincolor", "dwc", CONFIG_TYPE_BOOL,
-                (void *)&cgdbrc_config_options[CGDBRC_DEBUGWINCOLOR].variant.int_val},
-            /* disassemble */
-    {
-    "disasm", "dis", CONFIG_TYPE_BOOL,
-                (void *)&cgdbrc_config_options[CGDBRC_DISASM].variant.int_val},
-            /* executinglinedisplay */
-    {
-    "executinglinedisplay", "eld", CONFIG_TYPE_FUNC_STRING,
-                (void *)command_set_executing_line_display},
-            /* hlsearch */
-    {
-    "hlsearch", "hls", CONFIG_TYPE_BOOL,
-                (void *)&cgdbrc_config_options[CGDBRC_HLSEARCH].variant.int_val},
-            /* ignorecase */
-    {
-    "ignorecase", "ic", CONFIG_TYPE_BOOL,
-                (void *)&cgdbrc_config_options[CGDBRC_IGNORECASE].variant.int_val},
-            /* selectedlinedisplay */
-    {
-    "selectedlinedisplay", "sld", CONFIG_TYPE_FUNC_STRING,
-                (void *)command_set_selected_line_display},
-            /* showdebugcommands */
-    {
-    "showdebugcommands", "sdc", CONFIG_TYPE_FUNC_BOOL, (void *)&command_set_sdc},
-            /* showmarks */
-    {
-    "showmarks", "showmarks", CONFIG_TYPE_BOOL,
-                (void *)&cgdbrc_config_options[CGDBRC_SHOWMARKS].variant.int_val},
-            /* syntax */
-    {
-    "syntax", "syn", CONFIG_TYPE_FUNC_STRING, (void *)command_set_syntax_type},
-            /* tabstop   */
-    {
-    "tabstop", "ts", CONFIG_TYPE_INT,
-                (void *)&cgdbrc_config_options[CGDBRC_TABSTOP].variant.int_val},
-            /* timeout   */
-    {
-    "timeout", "to", CONFIG_TYPE_FUNC_BOOL, (void *)&command_set_timeout},
-            /* timeoutlen   */
-    {
-    "timeoutlen", "tm", CONFIG_TYPE_FUNC_INT, (void *)&command_set_timeoutlen},
-            /* ttimeout   */
-    {
-    "ttimeout", "ttimeout", CONFIG_TYPE_FUNC_BOOL, (void *)&command_set_ttimeout},
-            /* ttimeoutlen   */
-    {
-    "ttimeoutlen", "ttm", CONFIG_TYPE_FUNC_INT, (void *)&command_set_ttimeoutlen},
-            /* winminheight */
-    {
-    "winminheight", "wmh", CONFIG_TYPE_FUNC_INT, (void *)&command_set_winminheight},
-            /* winminwidth */
-    {
-    "winminwidth", "wmw", CONFIG_TYPE_FUNC_INT, (void *)&command_set_winminwidth},
-            /* winsplit */
-    {
-    "winsplit", "winsplit", CONFIG_TYPE_FUNC_STRING, (void *)command_set_winsplit},
-            /* splitorientation */
-    {
-    "winsplitorientation", "wso", CONFIG_TYPE_FUNC_STRING,
-                (void *)command_set_winsplitorientation},
-            /* wrapscan */
-    {
-    "wrapscan", "ws", CONFIG_TYPE_BOOL,
-                (void *)&cgdbrc_config_options[CGDBRC_WRAPSCAN].variant.int_val},};
 
 static int command_do_tgdbcommand(enum tgdb_command_type param);
 
@@ -272,8 +147,243 @@ int command_sort_find(const void *_left_cmd, const void *_right_cmd)
 #define COMMANDS_SIZE		(sizeof(COMMANDS))
 #define COMMANDS_COUNT		(sizeof(commands) / sizeof(COMMANDS))
 
+/**
+ * This data structure stores all the active values of all the config options.
+ */
+static struct cgdbrc_config_option cgdbrc_config_options[CGDBRC_WRAPSCAN + 1];
+
+/**
+ * Initialize the config options with default values.
+ */
+void cgdbrc_init_config_options(void)
+{
+    int i = 0;
+    struct cgdbrc_config_option option;
+
+    option.option_kind = CGDBRC_ARROWSTYLE;
+    option.variant.line_display_style = LINE_DISPLAY_SHORT_ARROW;
+    cgdbrc_config_options[i++] = option;
+
+    option.option_kind = CGDBRC_AUTOSOURCERELOAD;
+    option.variant.int_val = 1;
+    cgdbrc_config_options[i++] = option;
+
+    option.option_kind = CGDBRC_CGDB_MODE_KEY;
+    option.variant.int_val = CGDB_KEY_ESC;
+    cgdbrc_config_options[i++] = option;
+
+    option.option_kind = CGDBRC_COLOR;
+    option.variant.int_val = 1;
+    cgdbrc_config_options[i++] = option;
+
+    option.option_kind = CGDBRC_DEBUGWINCOLOR;
+    option.variant.int_val = 1;
+    cgdbrc_config_options[i++] = option;
+
+    option.option_kind = CGDBRC_DISASM;
+    option.variant.int_val = 0;
+    cgdbrc_config_options[i++] = option;
+
+    option.option_kind = CGDBRC_EXECUTING_LINE_DISPLAY;
+    option.variant.line_display_style = LINE_DISPLAY_LONG_ARROW;
+    cgdbrc_config_options[i++] = option;
+
+    option.option_kind = CGDBRC_HLSEARCH;
+    option.variant.int_val = 0;
+    cgdbrc_config_options[i++] = option;
+
+    option.option_kind = CGDBRC_IGNORECASE;
+    option.variant.int_val = 0;
+    cgdbrc_config_options[i++] = option;
+
+    option.option_kind = CGDBRC_SELECTED_LINE_DISPLAY;
+    option.variant.line_display_style = LINE_DISPLAY_BLOCK;
+    cgdbrc_config_options[i++] = option;
+
+    option.option_kind = CGDBRC_SHOWDEBUGCOMMANDS;
+    option.variant.int_val = 0;
+    cgdbrc_config_options[i++] = option;
+
+    option.option_kind = CGDBRC_SHOWMARKS;
+    option.variant.int_val = 1;
+    cgdbrc_config_options[i++] = option;
+
+    option.option_kind = CGDBRC_SYNTAX;
+    option.variant.language_support_val = TOKENIZER_LANGUAGE_UNKNOWN;
+    cgdbrc_config_options[i++] = option;
+
+    option.option_kind = CGDBRC_TABSTOP;
+    option.variant.int_val = 8;
+    cgdbrc_config_options[i++] = option;
+
+    option.option_kind = CGDBRC_TIMEOUT;
+    option.variant.int_val = 1;
+    cgdbrc_config_options[i++] = option;
+
+    option.option_kind = CGDBRC_TIMEOUT_LEN;
+    option.variant.int_val = 1000;
+    cgdbrc_config_options[i++] = option;
+
+    option.option_kind = CGDBRC_TTIMEOUT;
+    option.variant.int_val = 1;
+    cgdbrc_config_options[i++] = option;
+
+    option.option_kind = CGDBRC_TTIMEOUT_LEN;
+    option.variant.int_val = 100;
+    cgdbrc_config_options[i++] = option;
+
+    option.option_kind = CGDBRC_WINMINHEIGHT;
+    option.variant.int_val = 0;
+    cgdbrc_config_options[i++] = option;
+
+    option.option_kind = CGDBRC_WINMINWIDTH;
+    option.variant.int_val = 0;
+    cgdbrc_config_options[i++] = option;
+
+    option.option_kind = CGDBRC_WINSPLIT;
+    option.variant.win_split_val = WIN_SPLIT_EVEN;
+    cgdbrc_config_options[i++] = option;
+
+    option.option_kind = CGDBRC_WINSPLITORIENTATION;
+    option.variant.win_split_orientation_val = WSO_HORIZONTAL;
+    cgdbrc_config_options[i++] = option;
+
+    option.option_kind = CGDBRC_WRAPSCAN;
+    option.variant.int_val = 1;
+    cgdbrc_config_options[i++] = option;
+}
+
+/**
+ * A configuration variable.
+ */
+struct ConfigVariable {
+    /**
+     * The name and shortname of the configuration variable.
+     */
+    const char *name, *s_name;
+    
+    /** The type of configuration variable */
+    enum ConfigType type;
+    
+    /** 
+     * The data member or function to set this config variables value.
+     */
+    void *data;
+};
+
+typedef std::list<ConfigVariable> ConfigVariableList;
+
+/** The list of configuration variables */
+static ConfigVariableList cgdbrc_variables;
+
+/**
+ * Initialize the configuration variables.
+ */
+void cgdbrc_init_config_variables(void)
+{
+    /* keep this stuff sorted! !sort */
+
+    /* arrowstyle */
+    cgdbrc_variables.push_back({
+        "arrowstyle", "as", CONFIG_TYPE_FUNC_STRING,
+        (void *)command_set_arrowstyle});
+    /* autosourcereload */
+    cgdbrc_variables.push_back({
+        "autosourcereload", "asr", CONFIG_TYPE_BOOL,
+        (void*)&cgdbrc_config_options[
+            CGDBRC_AUTOSOURCERELOAD].variant.int_val});
+    /* cgdbmodekey */
+    cgdbrc_variables.push_back({
+        "cgdbmodekey", "cgdbmodekey", CONFIG_TYPE_FUNC_STRING,
+        (void *)command_set_cgdb_mode_key});
+    /* color */
+    cgdbrc_variables.push_back({
+        "color", "color", CONFIG_TYPE_BOOL,
+        (void *)&cgdbrc_config_options[CGDBRC_COLOR].variant.int_val});
+    /* debugwincolor */
+    cgdbrc_variables.push_back({
+        "debugwincolor", "dwc", CONFIG_TYPE_BOOL,
+        (void *)&cgdbrc_config_options[CGDBRC_DEBUGWINCOLOR].variant.int_val});
+    /* disassemble */
+    cgdbrc_variables.push_back({
+        "disasm", "dis", CONFIG_TYPE_BOOL,
+        (void *)&cgdbrc_config_options[CGDBRC_DISASM].variant.int_val});
+    /* executinglinedisplay */
+    cgdbrc_variables.push_back({
+        "executinglinedisplay", "eld", CONFIG_TYPE_FUNC_STRING,
+        (void *)command_set_executing_line_display});
+    /* hlsearch */
+    cgdbrc_variables.push_back({
+        "hlsearch", "hls", CONFIG_TYPE_BOOL,
+        (void *)&cgdbrc_config_options[CGDBRC_HLSEARCH].variant.int_val});
+    /* ignorecase */
+    cgdbrc_variables.push_back({
+        "ignorecase", "ic", CONFIG_TYPE_BOOL,
+        (void *)&cgdbrc_config_options[CGDBRC_IGNORECASE].variant.int_val});
+    /* selectedlinedisplay */
+    cgdbrc_variables.push_back({
+        "selectedlinedisplay", "sld", CONFIG_TYPE_FUNC_STRING,
+        (void *)command_set_selected_line_display});
+    /* showdebugcommands */
+    cgdbrc_variables.push_back({
+        "showdebugcommands", "sdc", CONFIG_TYPE_FUNC_BOOL,
+        (void *)&command_set_sdc});
+    /* showmarks */
+    cgdbrc_variables.push_back({
+        "showmarks", "showmarks", CONFIG_TYPE_BOOL,
+        (void *)&cgdbrc_config_options[CGDBRC_SHOWMARKS].variant.int_val});
+    /* syntax */
+    cgdbrc_variables.push_back({
+        "syntax", "syn", CONFIG_TYPE_FUNC_STRING,
+        (void *)command_set_syntax_type});
+    /* tabstop   */
+    cgdbrc_variables.push_back({
+        "tabstop", "ts", CONFIG_TYPE_INT,
+        (void *)&cgdbrc_config_options[CGDBRC_TABSTOP].variant.int_val});
+    /* timeout   */
+    cgdbrc_variables.push_back({
+        "timeout", "to", CONFIG_TYPE_FUNC_BOOL,
+        (void *)&command_set_timeout});
+    /* timeoutlen   */
+    cgdbrc_variables.push_back({
+        "timeoutlen", "tm", CONFIG_TYPE_FUNC_INT,
+        (void *)&command_set_timeoutlen});
+    /* ttimeout   */
+    cgdbrc_variables.push_back({
+        "ttimeout", "ttimeout", CONFIG_TYPE_FUNC_BOOL,
+        (void *)&command_set_ttimeout});
+    /* ttimeoutlen   */
+    cgdbrc_variables.push_back({
+        "ttimeoutlen", "ttm", CONFIG_TYPE_FUNC_INT,
+        (void *)&command_set_ttimeoutlen});
+    /* winminheight */
+    cgdbrc_variables.push_back({
+        "winminheight", "wmh", CONFIG_TYPE_FUNC_INT,
+        (void *)&command_set_winminheight});
+    /* winminwidth */
+    cgdbrc_variables.push_back({
+        "winminwidth", "wmw", CONFIG_TYPE_FUNC_INT,
+        (void *)&command_set_winminwidth});
+    /* winsplit */
+    cgdbrc_variables.push_back({
+        "winsplit", "winsplit", CONFIG_TYPE_FUNC_STRING,
+        (void *)command_set_winsplit});
+    /* splitorientation */
+    cgdbrc_variables.push_back({
+        "winsplitorientation", "wso", CONFIG_TYPE_FUNC_STRING,
+        (void *)command_set_winsplitorientation});
+    /* wrapscan */
+    cgdbrc_variables.push_back({
+        "wrapscan", "ws", CONFIG_TYPE_BOOL,
+        (void *)&cgdbrc_config_options[CGDBRC_WRAPSCAN].variant.int_val});
+}
+
 void cgdbrc_init(void)
 {
+    cgdbrc_init_config_options();
+
+    cgdbrc_init_config_variables();
+
     qsort((void *) commands, COMMANDS_COUNT, COMMANDS_SIZE, command_sort_find);
 }
 
@@ -288,12 +398,11 @@ COMMANDS *get_command(const char *cmd)
 struct ConfigVariable *get_variable(const char *variable)
 {
     /* FIXME: replace with binary search */
-    int i;
-
-    for (i = 0; i < (sizeof (VARIABLES) / sizeof (VARIABLES[0])); ++i) {
-        if (strcmp(variable, VARIABLES[i].name) == 0 ||
-                strcmp(variable, VARIABLES[i].s_name) == 0) {
-            return &VARIABLES[i];
+    ConfigVariableList::iterator iter = cgdbrc_variables.begin();
+    for (; iter != cgdbrc_variables.end(); ++iter) {
+        if (strcmp(variable, iter->name) == 0 ||
+                strcmp(variable, iter->s_name) == 0) {
+            return &*iter;
         }
     }
 

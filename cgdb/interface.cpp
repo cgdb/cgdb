@@ -1850,19 +1850,13 @@ int if_change_winminwidth(int value)
 
 int if_clear_line()
 {
-    int width = get_gdb_width();
-    int i;
-    char line[width + 3];
+    std::string line;
 
-    line[0] = '\r';
+    line.push_back('\r');
+    line.append(get_gdb_width(), ' ');
+    line.push_back('\r');
 
-    for (i = 1; i <= width; ++i)
-        line[i] = ' ';
-
-    line[i] = '\r';
-    line[i + 1] = '\0';
-
-    if_print(line);
+    if_print(line.c_str());
 
     return 0;
 }
