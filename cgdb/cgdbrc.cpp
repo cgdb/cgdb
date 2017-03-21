@@ -284,96 +284,96 @@ void cgdbrc_init_config_variables(void)
     /* keep this stuff sorted! !sort */
 
     /* arrowstyle */
-    cgdbrc_variables.push_back({
+    cgdbrc_variables.push_back((ConfigVariable){
         "arrowstyle", "as", CONFIG_TYPE_FUNC_STRING,
         (void *)command_set_arrowstyle});
     /* autosourcereload */
-    cgdbrc_variables.push_back({
+    cgdbrc_variables.push_back((ConfigVariable){
         "autosourcereload", "asr", CONFIG_TYPE_BOOL,
         (void*)&cgdbrc_config_options[
             CGDBRC_AUTOSOURCERELOAD].variant.int_val});
     /* cgdbmodekey */
-    cgdbrc_variables.push_back({
+    cgdbrc_variables.push_back((ConfigVariable){
         "cgdbmodekey", "cgdbmodekey", CONFIG_TYPE_FUNC_STRING,
         (void *)command_set_cgdb_mode_key});
     /* color */
-    cgdbrc_variables.push_back({
+    cgdbrc_variables.push_back((ConfigVariable){
         "color", "color", CONFIG_TYPE_BOOL,
         (void *)&cgdbrc_config_options[CGDBRC_COLOR].variant.int_val});
     /* debugwincolor */
-    cgdbrc_variables.push_back({
+    cgdbrc_variables.push_back((ConfigVariable){
         "debugwincolor", "dwc", CONFIG_TYPE_BOOL,
         (void *)&cgdbrc_config_options[CGDBRC_DEBUGWINCOLOR].variant.int_val});
     /* disassemble */
-    cgdbrc_variables.push_back({
+    cgdbrc_variables.push_back((ConfigVariable){
         "disasm", "dis", CONFIG_TYPE_BOOL,
         (void *)&cgdbrc_config_options[CGDBRC_DISASM].variant.int_val});
     /* executinglinedisplay */
-    cgdbrc_variables.push_back({
+    cgdbrc_variables.push_back((ConfigVariable){
         "executinglinedisplay", "eld", CONFIG_TYPE_FUNC_STRING,
         (void *)command_set_executing_line_display});
     /* hlsearch */
-    cgdbrc_variables.push_back({
+    cgdbrc_variables.push_back((ConfigVariable){
         "hlsearch", "hls", CONFIG_TYPE_BOOL,
         (void *)&cgdbrc_config_options[CGDBRC_HLSEARCH].variant.int_val});
     /* ignorecase */
-    cgdbrc_variables.push_back({
+    cgdbrc_variables.push_back((ConfigVariable){
         "ignorecase", "ic", CONFIG_TYPE_BOOL,
         (void *)&cgdbrc_config_options[CGDBRC_IGNORECASE].variant.int_val});
     /* selectedlinedisplay */
-    cgdbrc_variables.push_back({
+    cgdbrc_variables.push_back((ConfigVariable){
         "selectedlinedisplay", "sld", CONFIG_TYPE_FUNC_STRING,
         (void *)command_set_selected_line_display});
     /* showdebugcommands */
-    cgdbrc_variables.push_back({
+    cgdbrc_variables.push_back((ConfigVariable){
         "showdebugcommands", "sdc", CONFIG_TYPE_FUNC_BOOL,
         (void *)&command_set_sdc});
     /* showmarks */
-    cgdbrc_variables.push_back({
+    cgdbrc_variables.push_back((ConfigVariable){
         "showmarks", "showmarks", CONFIG_TYPE_BOOL,
         (void *)&cgdbrc_config_options[CGDBRC_SHOWMARKS].variant.int_val});
     /* syntax */
-    cgdbrc_variables.push_back({
+    cgdbrc_variables.push_back((ConfigVariable){
         "syntax", "syn", CONFIG_TYPE_FUNC_STRING,
         (void *)command_set_syntax_type});
     /* tabstop   */
-    cgdbrc_variables.push_back({
+    cgdbrc_variables.push_back((ConfigVariable){
         "tabstop", "ts", CONFIG_TYPE_INT,
         (void *)&cgdbrc_config_options[CGDBRC_TABSTOP].variant.int_val});
     /* timeout   */
-    cgdbrc_variables.push_back({
+    cgdbrc_variables.push_back((ConfigVariable){
         "timeout", "to", CONFIG_TYPE_FUNC_BOOL,
         (void *)&command_set_timeout});
     /* timeoutlen   */
-    cgdbrc_variables.push_back({
+    cgdbrc_variables.push_back((ConfigVariable){
         "timeoutlen", "tm", CONFIG_TYPE_FUNC_INT,
         (void *)&command_set_timeoutlen});
     /* ttimeout   */
-    cgdbrc_variables.push_back({
+    cgdbrc_variables.push_back((ConfigVariable){
         "ttimeout", "ttimeout", CONFIG_TYPE_FUNC_BOOL,
         (void *)&command_set_ttimeout});
     /* ttimeoutlen   */
-    cgdbrc_variables.push_back({
+    cgdbrc_variables.push_back((ConfigVariable){
         "ttimeoutlen", "ttm", CONFIG_TYPE_FUNC_INT,
         (void *)&command_set_ttimeoutlen});
     /* winminheight */
-    cgdbrc_variables.push_back({
+    cgdbrc_variables.push_back((ConfigVariable){
         "winminheight", "wmh", CONFIG_TYPE_FUNC_INT,
         (void *)&command_set_winminheight});
     /* winminwidth */
-    cgdbrc_variables.push_back({
+    cgdbrc_variables.push_back((ConfigVariable){
         "winminwidth", "wmw", CONFIG_TYPE_FUNC_INT,
         (void *)&command_set_winminwidth});
     /* winsplit */
-    cgdbrc_variables.push_back({
+    cgdbrc_variables.push_back((ConfigVariable){
         "winsplit", "winsplit", CONFIG_TYPE_FUNC_STRING,
         (void *)command_set_winsplit});
     /* splitorientation */
-    cgdbrc_variables.push_back({
+    cgdbrc_variables.push_back((ConfigVariable){
         "winsplitorientation", "wso", CONFIG_TYPE_FUNC_STRING,
         (void *)command_set_winsplitorientation});
     /* wrapscan */
-    cgdbrc_variables.push_back({
+    cgdbrc_variables.push_back((ConfigVariable){
         "wrapscan", "ws", CONFIG_TYPE_BOOL,
         (void *)&cgdbrc_config_options[CGDBRC_WRAPSCAN].variant.int_val});
 }
