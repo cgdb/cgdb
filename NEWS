@@ -1,3 +1,5 @@
+cgdb-0.7.0 (03/21/2017)
+
   * Remove help2man dependency. CGDB has a good info page which
     should suffice.
 
