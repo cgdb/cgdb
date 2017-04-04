@@ -1421,6 +1421,14 @@ static int cgdb_input(int key, int *last_key)
                                 !regex_direction_last, regex_icase);
             if_draw();
             break;
+        case 'u':
+            /* Issue GDB up command */
+            tgdb_request_run_debugger_command(tgdb, TGDB_UP);
+            return 0;
+        case 'd':
+            /* Issue GDB down command */
+            tgdb_request_run_debugger_command(tgdb, TGDB_DOWN);
+            return 0;
         case CGDB_KEY_CTRL_T:
             if (tgdb_tty_new(tgdb) == -1) {
                 /* Error */
