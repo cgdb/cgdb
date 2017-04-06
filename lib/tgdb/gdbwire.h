@@ -1,7 +1,7 @@
 /**
  * This file is an amalgamation of the header files from gdbwire.
  *
- * It was created using gdbwire 1.0 and git revision 50c590b.
+ * It was created using gdbwire 1.0 and git revision 549b001.
  */
 
 /***** Begin file gdbwire_sys.h **********************************************/

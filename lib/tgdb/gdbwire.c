@@ -1,7 +1,7 @@
 /**
  * This file is an amalgamation of C source files from gdbwire.
  *
- * It was created using gdbwire 1.0 and git revision 50c590b.
+ * It was created using gdbwire 1.0 and git revision 549b001.
  */
 
 /***** Begin file gdbwire_sys.c **********************************************/
@@ -5486,8 +5486,12 @@ static char *gdbwire_mi_unescape_cstring(char *str)
                     ++s;
                     break;
                 case '"':
+                    result[r++] = '\"';
+                    ++s;
                     break;
                 case '\\':
+                    result[r++] = '\\';
+                    ++s;
                     break;
                 default:
                     result[r++] = str[s];
@@ -5910,10 +5914,10 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   196,   196,   199,   202,   206,   210,   216,   222,   222,
-     234,   241,   247,   253,   261,   265,   269,   273,   290,   343,
-     347,   351,   355,   359,   366,   373,   380,   385,   390,   394,
-     402,   406,   414,   420,   424,   428,   432,   436,   440
+       0,   200,   200,   203,   206,   210,   214,   220,   226,   226,
+     238,   245,   251,   257,   265,   269,   273,   277,   294,   347,
+     351,   355,   359,   363,   370,   377,   384,   389,   394,   398,
+     406,   410,   418,   424,   428,   432,   436,   440,   444
 };
 #endif
 
