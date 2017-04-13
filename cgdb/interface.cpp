@@ -1564,9 +1564,11 @@ int internal_if_input(int key, int *last_key)
         if_set_focus(new_focus);
         return 0;
     }
-    /* If you are already in cgdb mode, the cgdb mode key does nothing */
-    else if (key == cgdb_mode_key)
+    /* If you are already in cgdb mode, return to gdb mode */
+    else if (key == cgdb_mode_key) {
+        if_set_focus(GDB);
         return 0;
+    }
 
     /* Check for global keystrokes */
     switch (focus) {
