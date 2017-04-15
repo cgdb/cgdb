@@ -130,7 +130,9 @@ struct keydata {
             /* Passed through to readline */
     {
     CGDB_KEY_BACKWARD_WORD, "\033b"}, {
-    CGDB_KEY_FORWARD_WORD, "\033f"},
+    CGDB_KEY_FORWARD_WORD, "\033f"}, {
+    CGDB_KEY_BACKWARD_KILL_WORD, "\033\b"}, {
+    CGDB_KEY_FORWARD_KILL_WORD, "\033d"},
             /* Ctrl bindings */
     {
     CGDB_KEY_CTRL_A, "\001"}, {
@@ -232,6 +234,10 @@ struct cgdb_keycode_data {
     CGDB_KEY_F12, "<F12>", "CGDB_KEY_F12"}, {
     CGDB_KEY_BACKWARD_WORD, "<BACKWARD-WORD>", "CGDB_KEY_BACKWARD_WORD"}, {
     CGDB_KEY_FORWARD_WORD, "<FORWARD-WORD>", "CGDB_KEY_FORWARD_WORD"}, {
+    CGDB_KEY_BACKWARD_KILL_WORD,
+        "<BACKWARD-KILL_WORD>", "CGDB_KEY_BACKWARD_KILL_WORD"}, {
+    CGDB_KEY_FORWARD_KILL_WORD,
+        "<FORWARD-KILL_WORD>", "CGDB_KEY_FORWARD_KILL_WORD"}, {
     CGDB_KEY_CTRL_A, "<C-a>", "CGDB_KEY_CTRL_A"}, {
     CGDB_KEY_CTRL_B, "<C-b>", "CGDB_KEY_CTRL_B"}, {
     CGDB_KEY_CTRL_C, "<C-c>", "CGDB_KEY_CTRL_C"}, {

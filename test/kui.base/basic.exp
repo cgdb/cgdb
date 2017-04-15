@@ -656,6 +656,24 @@ expect {
   }
 }
 
+set test "backward-kill-word key"
+send "\033\b"
+expect {
+  -re "CGDB_KEY_BACKWARD_KILL_WORD\\\[27\\\]\\\[8\\\]$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+set test "forward-kill-word key"
+send "\033d"
+expect {
+  -re "CGDB_KEY_FORWARD_KILL_WORD\\\[27\\\]\\\[100\\\]$kui_prompt$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
 # Test previously broken functionality
 set test "key not detected until next key hit"
 send "\033o"

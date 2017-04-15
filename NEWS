@@ -1,3 +1,5 @@
+  * Add support for readline's backward-kill-word and kill-word at gdb prompt
+
 cgdb-0.7.0 (03/21/2017)
 
   * Remove help2man dependency. CGDB has a good info page which

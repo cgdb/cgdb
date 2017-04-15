@@ -1717,6 +1717,12 @@ int init_kui(void)
     add_readline_key_sequence("backward-word", CGDB_KEY_BACKWARD_WORD);
     /* Forward-word */
     add_readline_key_sequence("forward-word", CGDB_KEY_FORWARD_WORD);
+    /* Backword-Kill-Word */
+    add_readline_key_sequence(
+            "backward-kill-word", CGDB_KEY_BACKWARD_KILL_WORD);
+    /* Forward-Kill-word */
+    add_readline_key_sequence(
+            "kill-word", CGDB_KEY_FORWARD_KILL_WORD);
 
     return 0;
 }

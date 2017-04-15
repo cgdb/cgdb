@@ -109,6 +109,8 @@ enum cgdb_key {
      * These keys are not vim compatible. */
     CGDB_KEY_BACKWARD_WORD,
     CGDB_KEY_FORWARD_WORD,
+    CGDB_KEY_BACKWARD_KILL_WORD,
+    CGDB_KEY_FORWARD_KILL_WORD,
 
     CGDB_KEY_ERROR
 };
