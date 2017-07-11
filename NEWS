@@ -1,3 +1,7 @@
+  * Fix issue #135. CGDB would "freeze" when opening the file
+    dialog if the number of files was very large. Updating the
+    gdbwire parser resolved the issue.
+
   * Add support for readline's backward-kill-word and kill-word at gdb prompt
 
 cgdb-0.7.0 (03/21/2017)

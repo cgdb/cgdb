@@ -1,7 +1,22 @@
 /**
- * This file is an amalgamation of the header files from gdbwire.
+ * Copyright (C) 2013 Robert Rossi <bob@brasko.net>
  *
- * It was created using gdbwire 1.0 and git revision 549b001.
+ * This file is an amalgamation of the source files from GDBWIRE.
+ *
+ * It was created using gdbwire 1.0 and git revision b5ae67f.
+ *
+ * GDBWIRE is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * GDBWIRE is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with GDBWIRE.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /***** Begin file gdbwire_sys.h **********************************************/
@@ -2495,6 +2510,7 @@ union YYSTYPE
   struct gdbwire_mi_result_record *u_result_record;
   int u_result_class;
   int u_async_record_kind;
+  struct gdbwire_mi_result_list *u_result_list;
   struct gdbwire_mi_result *u_result;
   char *u_token;
   struct gdbwire_mi_async_record *u_async_record;
@@ -2530,6 +2546,25 @@ void gdbwire_mi_pstate_delete (gdbwire_mi_pstate *ps);
 #endif /* !YY_GDBWIRE_MI_SRC_GDBWIRE_MI_GRAMMAR_H_INCLUDED  */
 /***** End of gdbwire_mi_grammar.h *******************************************/
 /***** Begin file gdbwire.h **************************************************/
+/**
+ * Copyright (C) 2013 Robert Rossi <bob@brasko.net>
+ *
+ * This file is part of GDBWIRE.
+ *
+ * GDBWIRE is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * GDBWIRE is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with GDBWIRE.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef GDBWIRE_H
 #define GDBWIRE_H
 

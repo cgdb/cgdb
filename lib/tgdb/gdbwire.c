@@ -1,7 +1,22 @@
 /**
- * This file is an amalgamation of C source files from gdbwire.
+ * Copyright (C) 2013 Robert Rossi <bob@brasko.net>
  *
- * It was created using gdbwire 1.0 and git revision 549b001.
+ * This file is an amalgamation of the source files from GDBWIRE.
+ *
+ * It was created using gdbwire 1.0 and git revision b5ae67f.
+ *
+ * GDBWIRE is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * GDBWIRE is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with GDBWIRE.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /***** Begin file gdbwire_sys.c **********************************************/
@@ -814,6 +829,7 @@ union YYSTYPE
   struct gdbwire_mi_result_record *u_result_record;
   int u_result_class;
   int u_async_record_kind;
+  struct gdbwire_mi_result_list *u_result_list;
   struct gdbwire_mi_result *u_result;
   char *u_token;
   struct gdbwire_mi_async_record *u_async_record;
@@ -5421,6 +5437,53 @@ void gdbwire_mi_free (void * ptr , yyscan_t yyscanner)
 char *gdbwire_mi_get_text(yyscan_t yyscanner);
 struct gdbwire_mi_position gdbwire_mi_get_extra(yyscan_t yyscanner);
 
+/**
+ * Used only in the parser to build a gdbwire_mi_result list.
+ *
+ * The grammar wants to build a list of gdbwire_mi_result pointers.
+ * However, the gdbwire_mi_result is a traditional linked list and
+ * standard append functionality (using next to get to end of list) is slow.
+ *
+ * This structure allows us to keep around the last result in the list
+ * for fast insertion.
+ */
+struct gdbwire_mi_result_list {
+    /** The gdbwire_mi_result list that is being built */
+    struct gdbwire_mi_result *head;
+    /** The pointer to the last result in the list for fast insertion. */
+    struct gdbwire_mi_result **tail;
+};
+
+/** 
+ * Allocate a gdbwire_mi_result_list data structure.
+ *
+ * @return
+ * The gdbwire_mi_result_list. Use free() to release the memory.
+ */
+struct gdbwire_mi_result_list *gdbwire_mi_result_list_alloc(void)
+{
+    struct gdbwire_mi_result_list *result;
+    result = calloc(1, sizeof(struct gdbwire_mi_result_list));
+    result->tail = &result->head;
+    return result;
+}
+
+/**
+ * Append an item to this list.
+ *
+ * @param list
+ * The list to append to.
+ *
+ * @param result
+ * The result to append to the end of the list.
+ */
+void gdbwire_mi_result_list_push_back(struct gdbwire_mi_result_list *list,
+        struct gdbwire_mi_result *result)
+{
+    *list->tail = result;
+    list->tail = &result->next;
+}
+
 void gdbwire_mi_error(yyscan_t yyscanner,
     struct gdbwire_mi_output **gdbwire_mi_output, const char *s)
 { 
@@ -5604,6 +5667,7 @@ union YYSTYPE
   struct gdbwire_mi_result_record *u_result_record;
   int u_result_class;
   int u_async_record_kind;
+  struct gdbwire_mi_result_list *u_result_list;
   struct gdbwire_mi_result *u_result;
   char *u_token;
   struct gdbwire_mi_async_record *u_async_record;
@@ -5857,16 +5921,16 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  2
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   41
+#define YYLAST   42
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  21
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  22
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  38
+#define YYNRULES  40
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  55
+#define YYNSTATES  56
 
 /* YYTRANSLATE[YYX] -- Symbol number corresponding to YYX as returned
    by yylex, with out-of-bounds checking.  */
@@ -5914,10 +5978,11 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   200,   200,   203,   206,   210,   214,   220,   226,   226,
-     238,   245,   251,   257,   265,   269,   273,   277,   294,   347,
-     351,   355,   359,   363,   370,   377,   384,   389,   394,   398,
-     406,   410,   418,   424,   428,   432,   436,   440,   444
+       0,   248,   248,   251,   254,   258,   262,   268,   274,   274,
+     286,   293,   301,   307,   313,   321,   330,   334,   338,   342,
+     359,   412,   416,   420,   425,   430,   437,   444,   451,   456,
+     461,   465,   470,   474,   479,   485,   489,   493,   497,   501,
+     505
 };
 #endif
 
@@ -5949,12 +6014,12 @@ static const yytype_uint16 yytoknum[] =
 };
 # endif
 
-#define YYPACT_NINF -32
+#define YYPACT_NINF -19
 
 #define yypact_value_is_default(Yystate) \
-  (!!((Yystate) == (-32)))
+  (!!((Yystate) == (-19)))
 
-#define YYTABLE_NINF -37
+#define YYTABLE_NINF -39
 
 #define yytable_value_is_error(Yytable_value) \
   0
@@ -5963,12 +6028,12 @@ static const yytype_uint16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-     -32,     0,   -32,   -11,     4,   -32,   -32,   -32,   -32,   -32,
-      -9,   -32,   -32,   -32,   -32,    11,    17,   -32,   -32,   -32,
-     -32,   -32,   -32,   -32,   -32,   -32,   -32,    14,    19,    28,
-     -32,   -32,   -32,   -32,   -32,    20,    20,     4,    10,   -32,
-      29,    18,    16,   -32,   -32,   -32,   -32,   -32,   -32,   -32,
-     -32,    -1,    13,   -32,   -32
+     -19,     0,   -19,    15,    11,   -19,   -19,   -19,   -19,   -19,
+      16,   -19,   -19,   -19,   -19,    -3,    14,   -19,   -19,   -19,
+     -19,   -19,   -19,   -19,   -19,   -19,   -19,    12,    18,    27,
+     -19,    17,   -19,    19,   -19,    11,    11,     1,    20,   -19,
+      28,    20,     9,   -11,   -19,   -19,   -19,    11,   -19,   -19,
+      -2,   -19,    13,   -19,   -19,   -19
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -5976,27 +6041,27 @@ static const yytype_int8 yypact[] =
      means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       2,     0,     1,     0,     0,    33,    34,    35,    38,     3,
-       0,     7,     6,    11,    12,     0,     0,    37,     5,    26,
-       8,     4,    27,    32,    15,    14,    16,     0,     0,     0,
-      17,    21,    18,    21,     9,    10,    13,    19,     0,    22,
-       0,    19,    19,    23,    24,    25,    20,    28,    21,    30,
-      21,     0,     0,    29,    31
+       2,     0,     1,     0,     0,    35,    36,    37,    40,     3,
+       0,     7,     6,    12,    13,     0,     0,    39,     5,    28,
+       8,     4,    29,    34,    17,    16,    18,     0,     0,     0,
+      19,    10,    20,    14,     9,    21,    21,     0,    11,    23,
+       0,    15,    21,    21,    25,    26,    27,    21,    22,    30,
+       0,    32,     0,    24,    31,    33
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -32,   -32,   -32,   -32,   -32,   -32,   -32,   -32,   -32,   -32,
-     -32,   -32,   -31,   -27,    36,     3,   -32,   -32,   -32,   -32,
-     -32,   -32
+     -19,   -19,   -19,   -19,   -19,   -19,   -19,   -19,   -19,   -19,
+     -19,   -19,   -18,    -7,    37,     5,   -19,   -19,   -19,   -19,
+     -19,   -19
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
       -1,     1,     9,    10,    29,    11,    12,    13,    28,    31,
-      33,    38,    35,    39,    40,    23,    44,    45,    14,    15,
+      33,    37,    38,    39,    40,    23,    45,    46,    14,    15,
       16,    17
 };
 
@@ -6005,20 +6070,20 @@ static const yytype_int8 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
-       2,     3,    36,    53,    18,     4,    21,   -36,   -36,   -36,
-       5,     6,     7,    41,    48,    50,     8,    51,    37,    52,
-     -36,    19,    47,    42,    24,    25,    26,    54,    22,    22,
-      49,    30,    37,    19,    34,    19,    32,    27,    46,    37,
-      20,    43
+       2,     3,    54,    51,    42,     4,    19,   -38,   -38,   -38,
+       5,     6,     7,    49,    43,    22,     8,    47,    41,    22,
+     -38,    24,    25,    26,    50,    52,    19,    55,    19,    30,
+      18,    21,    47,    34,    27,    32,    35,    48,    36,    47,
+      53,    20,    44
 };
 
 static const yytype_uint8 yycheck[] =
 {
-       0,     1,    33,     4,    15,     5,    15,     7,     8,     9,
-      10,    11,    12,     3,    41,    42,    16,    48,    19,    50,
-      20,    17,     4,    13,     7,     8,     9,    14,    18,    18,
-      14,    17,    19,    17,     6,    17,    17,    20,     9,    19,
-       4,    38
+       0,     1,     4,    14,     3,     5,    17,     7,     8,     9,
+      10,    11,    12,     4,    13,    18,    16,    19,    36,    18,
+      20,     7,     8,     9,    42,    43,    17,    14,    17,    17,
+      15,    15,    19,     6,    20,    17,    19,     9,    19,    19,
+      47,     4,    37
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
@@ -6028,27 +6093,29 @@ static const yytype_uint8 yystos[] =
        0,    22,     0,     1,     5,    10,    11,    12,    16,    23,
       24,    26,    27,    28,    39,    40,    41,    42,    15,    17,
       35,    15,    18,    36,     7,     8,     9,    20,    29,    25,
-      17,    30,    17,    31,     6,    33,    33,    19,    32,    34,
-      35,     3,    13,    36,    37,    38,     9,     4,    34,    14,
-      34,    33,    33,     4,    14
+      17,    30,    17,    31,     6,    19,    19,    32,    33,    34,
+      35,    33,     3,    13,    36,    37,    38,    19,     9,     4,
+      33,    14,    33,    34,     4,    14
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
        0,    21,    22,    22,    23,    23,    24,    24,    25,    24,
-      26,    27,    27,    28,    29,    29,    29,    30,    31,    32,
-      32,    33,    33,    34,    34,    34,    35,    36,    37,    37,
-      38,    38,    39,    40,    40,    40,    41,    41,    42
+      26,    26,    27,    27,    28,    28,    29,    29,    29,    30,
+      31,    32,    32,    33,    33,    34,    34,    34,    35,    36,
+      37,    37,    38,    38,    39,    40,    40,    40,    41,    41,
+      42
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
        0,     2,     0,     2,     2,     2,     1,     1,     0,     4,
-       4,     1,     1,     4,     1,     1,     1,     1,     1,     0,
-       2,     0,     3,     2,     2,     2,     1,     1,     2,     4,
-       2,     4,     2,     1,     1,     1,     0,     1,     1
+       3,     5,     1,     1,     3,     5,     1,     1,     1,     1,
+       1,     0,     2,     1,     3,     2,     2,     2,     1,     1,
+       2,     3,     2,     3,     2,     1,     1,     1,     0,     1,
+       1
 };
 
 
@@ -6484,7 +6551,7 @@ yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, yyscan_t yyscanner
         break;
 
     case 33: /* result_list  */
-      { gdbwire_mi_result_free(((*yyvaluep).u_result)); }
+      { gdbwire_mi_result_free(((*yyvaluep).u_result_list)->head); free(((*yyvaluep).u_result_list)); }
         break;
 
     case 34: /* result  */
@@ -6877,13 +6944,23 @@ yyreduce:
   case 10:
     {
   (yyval.u_result_record) = gdbwire_mi_result_record_alloc();
-  (yyval.u_result_record)->token = (yyvsp[-3].u_token);
-  (yyval.u_result_record)->result_class = (yyvsp[-1].u_result_class);
-  (yyval.u_result_record)->result = (yyvsp[0].u_result);
+  (yyval.u_result_record)->token = (yyvsp[-2].u_token);
+  (yyval.u_result_record)->result_class = (yyvsp[0].u_result_class);
+  (yyval.u_result_record)->result = NULL;
 }
     break;
 
   case 11:
+    {
+  (yyval.u_result_record) = gdbwire_mi_result_record_alloc();
+  (yyval.u_result_record)->token = (yyvsp[-4].u_token);
+  (yyval.u_result_record)->result_class = (yyvsp[-2].u_result_class);
+  (yyval.u_result_record)->result = (yyvsp[0].u_result_list)->head;
+  free((yyvsp[0].u_result_list));
+}
+    break;
+
+  case 12:
     {
   (yyval.u_oob_record) = gdbwire_mi_oob_record_alloc();
   (yyval.u_oob_record)->kind = GDBWIRE_MI_ASYNC;
@@ -6891,7 +6968,7 @@ yyreduce:
 }
     break;
 
-  case 12:
+  case 13:
     {
   (yyval.u_oob_record) = gdbwire_mi_oob_record_alloc();
   (yyval.u_oob_record)->kind = GDBWIRE_MI_STREAM;
@@ -6899,35 +6976,46 @@ yyreduce:
 }
     break;
 
-  case 13:
-    {
-  (yyval.u_async_record) = gdbwire_mi_async_record_alloc();
-  (yyval.u_async_record)->token = (yyvsp[-3].u_token);
-  (yyval.u_async_record)->kind = (yyvsp[-2].u_async_record_kind);
-  (yyval.u_async_record)->async_class = (yyvsp[-1].u_async_class);
-  (yyval.u_async_record)->result = (yyvsp[0].u_result);
-}
-    break;
-
   case 14:
     {
-  (yyval.u_async_record_kind) = GDBWIRE_MI_EXEC;
+  (yyval.u_async_record) = gdbwire_mi_async_record_alloc();
+  (yyval.u_async_record)->token = (yyvsp[-2].u_token);
+  (yyval.u_async_record)->kind = (yyvsp[-1].u_async_record_kind);
+  (yyval.u_async_record)->async_class = (yyvsp[0].u_async_class);
+  (yyval.u_async_record)->result = NULL;
 }
     break;
 
   case 15:
     {
-  (yyval.u_async_record_kind) = GDBWIRE_MI_STATUS;
+  (yyval.u_async_record) = gdbwire_mi_async_record_alloc();
+  (yyval.u_async_record)->token = (yyvsp[-4].u_token);
+  (yyval.u_async_record)->kind = (yyvsp[-3].u_async_record_kind);
+  (yyval.u_async_record)->async_class = (yyvsp[-2].u_async_class);
+  (yyval.u_async_record)->result = (yyvsp[0].u_result_list)->head;
+  free((yyvsp[0].u_result_list));
 }
     break;
 
   case 16:
     {
-  (yyval.u_async_record_kind) = GDBWIRE_MI_NOTIFY;	
+  (yyval.u_async_record_kind) = GDBWIRE_MI_EXEC;
 }
     break;
 
   case 17:
+    {
+  (yyval.u_async_record_kind) = GDBWIRE_MI_STATUS;
+}
+    break;
+
+  case 18:
+    {
+  (yyval.u_async_record_kind) = GDBWIRE_MI_NOTIFY;	
+}
+    break;
+
+  case 19:
     {
   char *text = gdbwire_mi_get_text(yyscanner);
   if (strcmp("done", text) == 0) {
@@ -6946,7 +7034,7 @@ yyreduce:
 }
     break;
 
-  case 18:
+  case 20:
     {
   char *text = gdbwire_mi_get_text(yyscanner);
   if (strcmp("download", text) == 0) {
@@ -7001,31 +7089,33 @@ yyreduce:
 }
     break;
 
-  case 19:
+  case 21:
     {
     (yyval.u_variable) = 0;
 }
     break;
 
-  case 20:
+  case 22:
     {
     (yyval.u_variable) = (yyvsp[-1].u_variable);
 }
     break;
 
-  case 21:
-    {
-  (yyval.u_result) = NULL;
-}
-    break;
-
-  case 22:
-    {
-  (yyval.u_result) = append_gdbwire_mi_result ((yyvsp[-2].u_result), (yyvsp[0].u_result));
-}
-    break;
-
   case 23:
+    {
+  (yyval.u_result_list) = gdbwire_mi_result_list_alloc();
+  gdbwire_mi_result_list_push_back((yyval.u_result_list), (yyvsp[0].u_result));
+}
+    break;
+
+  case 24:
+    {
+  gdbwire_mi_result_list_push_back((yyvsp[-2].u_result_list), (yyvsp[0].u_result));
+  (yyval.u_result_list) = (yyvsp[-2].u_result_list);
+}
+    break;
+
+  case 25:
     {
   (yyval.u_result) = gdbwire_mi_result_alloc();
   (yyval.u_result)->variable = (yyvsp[-1].u_variable);
@@ -7034,7 +7124,7 @@ yyreduce:
 }
     break;
 
-  case 24:
+  case 26:
     {
   (yyval.u_result) = gdbwire_mi_result_alloc();
   (yyval.u_result)->variable = (yyvsp[-1].u_variable);
@@ -7043,7 +7133,7 @@ yyreduce:
 }
     break;
 
-  case 25:
+  case 27:
     {
   (yyval.u_result) = gdbwire_mi_result_alloc();
   (yyval.u_result)->variable = (yyvsp[-1].u_variable);
@@ -7052,53 +7142,47 @@ yyreduce:
 }
     break;
 
-  case 26:
+  case 28:
     {
   char *text = gdbwire_mi_get_text(yyscanner);
   (yyval.u_variable) = gdbwire_strdup(text);
 }
     break;
 
-  case 27:
+  case 29:
     {
   char *text = gdbwire_mi_get_text(yyscanner);
   (yyval.u_cstring) = gdbwire_mi_unescape_cstring(text);
 }
     break;
 
-  case 28:
+  case 30:
     {
   (yyval.u_tuple) = NULL;
 }
     break;
 
-  case 29:
+  case 31:
     {
-    if ((yyvsp[-1].u_result)) {
-        (yyval.u_tuple) = append_gdbwire_mi_result((yyvsp[-2].u_result), (yyvsp[-1].u_result));
-    } else {
-        (yyval.u_tuple) = (yyvsp[-2].u_result);
-    }
+  (yyval.u_tuple) = (yyvsp[-1].u_result_list)->head;
+  free((yyvsp[-1].u_result_list));
 }
     break;
 
-  case 30:
+  case 32:
     {
   (yyval.u_list) = NULL;
 }
     break;
 
-  case 31:
+  case 33:
     {
-    if ((yyvsp[-1].u_result)) {
-        (yyval.u_list) = append_gdbwire_mi_result((yyvsp[-2].u_result), (yyvsp[-1].u_result));
-    } else {
-        (yyval.u_list) = (yyvsp[-2].u_result);
-    }
+  (yyval.u_list) = (yyvsp[-1].u_result_list)->head;
+  free((yyvsp[-1].u_result_list));
 }
     break;
 
-  case 32:
+  case 34:
     {
   (yyval.u_stream_record) = gdbwire_mi_stream_record_alloc();
   (yyval.u_stream_record)->kind = (yyvsp[-1].u_stream_record_kind);
@@ -7106,37 +7190,37 @@ yyreduce:
 }
     break;
 
-  case 33:
+  case 35:
     {
   (yyval.u_stream_record_kind) = GDBWIRE_MI_CONSOLE;
 }
     break;
 
-  case 34:
+  case 36:
     {
   (yyval.u_stream_record_kind) = GDBWIRE_MI_TARGET;
 }
     break;
 
-  case 35:
+  case 37:
     {
   (yyval.u_stream_record_kind) = GDBWIRE_MI_LOG;
 }
     break;
 
-  case 36:
+  case 38:
     {
   (yyval.u_token) = NULL;	
 }
     break;
 
-  case 37:
+  case 39:
     {
   (yyval.u_token) = (yyvsp[0].u_token);
 }
     break;
 
-  case 38:
+  case 40:
     {
   char *text = gdbwire_mi_get_text(yyscanner);
   (yyval.u_token) = gdbwire_strdup(text);
@@ -7376,12 +7460,50 @@ yypushreturn:
 }
 /***** End of gdbwire_mi_grammar.c *******************************************/
 /***** Begin file gdbwire.c **************************************************/
+/**
+ * Copyright (C) 2013 Robert Rossi <bob@brasko.net>
+ *
+ * This file is part of GDBWIRE.
+ *
+ * GDBWIRE is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * GDBWIRE is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with GDBWIRE.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <stdlib.h>
 #include <string.h>
 
 /* #include "gdbwire_assert.h" */
 /***** Include gdbwire.h in the middle of gdbwire.c **************************/
 /***** Begin file gdbwire.h **************************************************/
+/**
+ * Copyright (C) 2013 Robert Rossi <bob@brasko.net>
+ *
+ * This file is part of GDBWIRE.
+ *
+ * GDBWIRE is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * GDBWIRE is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with GDBWIRE.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef GDBWIRE_H
 #define GDBWIRE_H
 
