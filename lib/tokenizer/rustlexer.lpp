@@ -1,5 +1,9 @@
 %option prefix="rust_"
-%option outfile="rustlexer.cpp"
+%option outfile="lex.yy.c"
+%option case-insensitive
+%option noyywrap
+%option nounput
+%option noinput
 
 B       [01_]
 O       [0-7_]
@@ -158,14 +162,3 @@ IDENTIFIER {L}+{T}*
 .                             { return(TOKENIZER_TEXT);    }
 
 %%
-
-int rust_wrap ( void ) {
-	{
-		/* Silly impossible function call to stop warning of unused functions */
-		if ( 0 ) {
-            char buf[] = "";
-			yyunput(0, buf);
-		}
-	}
-    return 1;
-}

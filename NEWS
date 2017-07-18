@@ -1,3 +1,6 @@
+  * Fix issue #137. rustlexer.lpp fails to compile with some versions
+    of GNU autotools.
+
   * Fix issue #135. CGDB would "freeze" when opening the file
     dialog if the number of files was very large. Updating the
     gdbwire parser resolved the issue.
