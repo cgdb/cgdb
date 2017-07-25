@@ -149,81 +149,6 @@ static struct tgdb *initialize_tgdb_context(tgdb_callbacks callbacks)
  * This is the basic initialization
  ******************************************************************************/
 
-/* 
- * Gets the users home dir and creates the config directory.
- *
- * Also returns the logs directory.
- *
- * @param tgdb
- * The tgdb context.
- *
- * @param logs_dir 
- * Should be FSUTIL_PATH_MAX in size on way in.
- * On way out, it will be the path to the logs dir
- *
- * \return
- * -1 on error, or 0 on success
- */
-static int tgdb_initialize_config_dir(struct tgdb *tgdb, char *logs_dir)
-{
-    char config_dir[FSUTIL_PATH_MAX];
-    char *home_dir = getenv("HOME");
-
-    /* Make sure the toplevel .cgdb dir exists */
-    snprintf(config_dir, FSUTIL_PATH_MAX, "%s/.cgdb", home_dir);
-    if (!fs_util_create_dir(config_dir)) {
-        clog_error(CLOG_CGDB, "Could not create dir %s", config_dir);
-        return -1;
-    }
-
-    /* Try to create full .cgdb/logs directory */
-    snprintf(logs_dir, FSUTIL_PATH_MAX, "%s/.cgdb/logs", home_dir);
-    if (!fs_util_create_dir(logs_dir)) {
-        clog_error(CLOG_CGDB, "Could not create dir %s", logs_dir);
-        return -1;
-    }
-
-    return 0;
-}
-
-/**
- * Knowing the user's home directory, TGDB can initialize the logger interface
- *
- * \param tgdb
- * The tgdb context.
- *
- * \param logs_dir 
- * The path to the user's logging directory
- *
- * \return
- * -1 on error, or 0 on success
- */
-static int tgdb_initialize_logger_interface(struct tgdb *tgdb, char *logs_dir)
-{
-    /* Open our cgdb and tgdb io logfiles */
-    clog_open(CLOG_CGDB_ID, "%s/cgdb_log%d.txt", logs_dir);
-    clog_open(CLOG_GDBIO_ID, "%s/cgdb_gdb_io_log%d.txt", logs_dir);
-
-    /* Puts cgdb in a mode where it writes a debug log of everything
-     * that is read from gdb. That is basically the entire session.
-     * This info is useful in determining what is going on under tgdb
-     * since the gui is good at hiding that info from the user.
-     *
-     * Change level to CLOG_ERROR to write only error messages.
-     *   clog_set_level(CLOG_GDBIO, CLOG_ERROR);
-     */
-    clog_set_level(CLOG_GDBIO_ID, CLOG_DEBUG);
-    clog_set_fmt(CLOG_GDBIO_ID, CGDB_CLOG_FORMAT);
-
-    /* General cgdb logging. Only logging warnings and debug messages
-       by default. */
-    clog_set_level(CLOG_CGDB_ID, CLOG_WARN);
-    clog_set_fmt(CLOG_CGDB_ID, CGDB_CLOG_FORMAT);
-
-
-    return 0;
-}
-
 static void tgdb_issue_request(struct tgdb *tgdb, enum tgdb_request_type type,
         bool priority)
 {
@@ -385,18 +310,6 @@ struct tgdb *tgdb_initialize(const char *debugger,
         tgdb_command_error,
         tgdb_console_at_prompt  
     };
-    char logs_dir[FSUTIL_PATH_MAX];
-
-    /* Create config directory */
-    if (tgdb_initialize_config_dir(tgdb, logs_dir) == -1) {
-        clog_error(CLOG_CGDB, "tgdb_initialize error");
-        return NULL;
-    }
-
-    if (tgdb_initialize_logger_interface(tgdb, logs_dir) == -1) {
-        printf("Could not initialize logger interface\n");
-        return NULL;
-    }
 
     tgdb->debugger_pid = invoke_debugger(debugger, argc, argv,
             &tgdb->debugger_stdin, &tgdb->debugger_stdout, 0);

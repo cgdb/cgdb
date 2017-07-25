@@ -95,7 +95,8 @@ const char *readline_history_filename = "readline_history.txt";
 
 struct tgdb *tgdb;              /* The main TGDB context */
 
-char cgdb_home_dir[MAXLINE];    /* Path to home directory with trailing slash */
+char cgdb_home_dir[FSUTIL_PATH_MAX]; /* Path to home dir with trailing slash */
+char cgdb_log_dir[FSUTIL_PATH_MAX]; /* Path to log dir with trailing slash */
 char *readline_history_path;    /* After readline init is called, this will 
                                  * contain the path to the readline history 
                                  * file. */
@@ -790,25 +791,33 @@ static void parse_long_options(int *argc, char ***argv)
     }
 }
 
-/* init_home_dir: Attempts to create a config directory in the user's home
- * -------------  directory.
+/**
+ * Attempts to create a config directory in the user's home directory.
  *
- * Return:  0 on success or -1 on error
+ * After being called successfully, both cgdb_home_dir and cgdb_log_dir
+ * are set.
+ *
+ * @return
+ * 0 on success or -1 on error
  */
-
 static int init_home_dir(void)
 {
     /* Get the home directory */
     char *home_dir = getenv("HOME");
-    const char *cgdb_dir = ".cgdb";
 
-    /* Create the config directory */
-    if (!fs_util_create_dir_in_base(home_dir, cgdb_dir)) {
-        clog_error(CLOG_CGDB, "fs_util_create_dir_in_base error");
+    /* Make sure the toplevel .cgdb dir exists */
+    snprintf(cgdb_home_dir, FSUTIL_PATH_MAX, "%s/.cgdb", home_dir);
+    if (!fs_util_create_dir(cgdb_home_dir)) {
+        printf("Could not create dir %s", cgdb_home_dir);
         return -1;
     }
 
-    fs_util_get_path(home_dir, cgdb_dir, cgdb_home_dir);
+    /* Try to create full .cgdb/logs directory */
+    snprintf(cgdb_log_dir, FSUTIL_PATH_MAX, "%s/.cgdb/logs", home_dir);
+    if (!fs_util_create_dir(cgdb_log_dir)) {
+        printf("Could not create dir %s", cgdb_log_dir);
+        return -1;
+    }
 
     return 0;
 }
@@ -1727,6 +1736,32 @@ int init_kui(void)
     return 0;
 }
 
+/**
+ * Create the log files.
+ */
+static void cgdb_start_logging()
+{
+    /* Open our cgdb and tgdb io logfiles */
+    clog_open(CLOG_CGDB_ID, "%s/cgdb_log%d.txt", cgdb_log_dir);
+    clog_open(CLOG_GDBIO_ID, "%s/cgdb_gdb_io_log%d.txt", cgdb_log_dir);
+
+    /* Puts cgdb in a mode where it writes a debug log of everything
+     * that is read from gdb. That is basically the entire session.
+     * This info is useful in determining what is going on under tgdb
+     * since the gui is good at hiding that info from the user.
+     *
+     * Change level to CLOG_ERROR to write only error messages.
+     *   clog_set_level(CLOG_GDBIO, CLOG_ERROR);
+     */
+    clog_set_level(CLOG_GDBIO_ID, CLOG_DEBUG);
+    clog_set_fmt(CLOG_GDBIO_ID, CGDB_CLOG_FORMAT);
+
+    /* General cgdb logging. Only logging warnings and debug messages
+       by default. */
+    clog_set_level(CLOG_CGDB_ID, CLOG_WARN);
+    clog_set_fmt(CLOG_CGDB_ID, CGDB_CLOG_FORMAT);
+}
+
 int main(int argc, char *argv[])
 {
     parse_long_options(&argc, &argv);
@@ -1744,6 +1779,13 @@ int main(int argc, char *argv[])
             read(0, &c, 1);
         }
     }
+
+    // Create the home directory and the log directory
+    if (init_home_dir() == -1) {
+        cgdb_cleanup_and_exit(-1);
+    }
+
+    cgdb_start_logging();
 
     current_line = ibuf_init();
 
@@ -1763,12 +1805,6 @@ int main(int argc, char *argv[])
     }
 
     /* From here on, the logger is initialized */
-
-    /* Create the home directory */
-    if (init_home_dir() == -1) {
-        clog_error(CLOG_CGDB, "Unable to create home dir ~/.cgdb");
-        cgdb_cleanup_and_exit(-1);
-    }
 
     if (init_readline() == -1) {
         clog_error(CLOG_CGDB, "Unable to init readline");
