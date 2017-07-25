@@ -1542,12 +1542,14 @@ void cgdb_cleanup_and_exit(int val)
     /**
      * If the cgdb log file has non-zero size, alert the user.
      */
-    const char *log_filename = clog_filename(CLOG_CGDB_ID);
-    long log_bytes_written = get_file_size_by_name(log_filename);
-    if (log_bytes_written > 0)
+    if (clog_did_error_occur())
     {
-        fprintf(stderr, "CGDB had unexpected results, see %s for details.\n",
-            log_filename);
+        fprintf(stderr,
+            "CGDB had unexpected results."
+            " Search the logs for more details.\n"
+            " CGDB log directory: %s\n"
+            " Lines beginning with ERROR: are an issue.\n",
+            cgdb_log_dir);
     }
 
     exit(val);

@@ -79,17 +79,6 @@ int cgdb_is_debugger_attached();
  */
 long get_file_size(FILE *file);
 
-/**
- * Get file size from file name.
- *
- * \param file
- * The file name.
- *
- * \return
- * file size on success, or -1 on error.
- */
-long get_file_size_by_name(const char *filename);
-
 /* Unsigned integer version of log10
 */
 int log10_uint(unsigned int val);

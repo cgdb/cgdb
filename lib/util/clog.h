@@ -624,6 +624,7 @@ clog_warn(const char *sfile, int sline, int id, const char *fmt, ...)
     va_end(ap);
 }
 
+int cgdb_had_error = 0;
 void
 clog_error(const char *sfile, int sline, int id, const char *fmt, ...)
 {
@@ -631,6 +632,10 @@ clog_error(const char *sfile, int sline, int id, const char *fmt, ...)
     va_start(ap, fmt);
     _clog_log(sfile, sline, CLOG_ERROR, id, fmt, ap);
     va_end(ap);
+
+    // The next 2 lines are CGDB mods
+    extern bool clog_cgdb_error_occurred;
+    clog_cgdb_error_occurred = true;
 }
 
 void

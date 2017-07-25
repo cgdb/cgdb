@@ -1,6 +1,9 @@
 #include "cgdb_clog.h"
 
-std::map<int, std::string> loggerNameMap;
+/**
+ * Modified clog's clog_error function to set this variable.
+ */
+bool clog_cgdb_error_occurred = false;
 
 int clog_open(int id, const char *fmt, const char *config_dir)
 {
@@ -16,7 +19,6 @@ int clog_open(int id, const char *fmt, const char *config_dir)
         snprintf(filename, sizeof(filename), fmt, config_dir, i);
 
         if (clog_init_path(id, filename) == 0) {
-            loggerNameMap[id] = filename;
             return 0;
         }
     }
@@ -24,14 +26,7 @@ int clog_open(int id, const char *fmt, const char *config_dir)
     return -1;
 }
 
-const char *clog_filename(int id) {
-    const char *result = NULL;
-
-    std::map<int, std::string>::iterator iter =
-        loggerNameMap.find(id);
-    if (iter != loggerNameMap.end()) {
-        result = iter->second.c_str();
-    }
-        
-    return result;
+bool clog_did_error_occur()
+{
+    return clog_cgdb_error_occurred;
 }

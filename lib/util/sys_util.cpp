@@ -181,12 +181,6 @@ long get_file_size(FILE *file)
     return -1;
 }
 
-long get_file_size_by_name(const char *filename)
-{
-    FILE *fd = fopen(filename, "r");
-    return get_file_size(fd);
-}
-
 int log10_uint(unsigned int val)
 {
     if (val >= 1000000000u) return 9;

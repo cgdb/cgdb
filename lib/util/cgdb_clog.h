@@ -34,15 +34,11 @@ const int CLOG_GDBIO_ID = 2;
 int clog_open(int id, const char *fmt, const char *config_dir);
 
 /**
- * Get the filename associated with the logger id.
- *
- * @param id
- * The logger id
+ * Determine if an error log message was sent to the logger.
  *
  * @return
- * The absolute path to the filename.
- * Will return NULL on error.
+ * True if an error log message was written to a log file, False otherwise.
  */
-const char *clog_filename(int id);
+bool clog_did_error_occur();
 
 #endif
