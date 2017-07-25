@@ -1760,7 +1760,7 @@ static void cgdb_start_logging()
 
     /* General cgdb logging. Only logging warnings and debug messages
        by default. */
-    clog_set_level(CLOG_CGDB_ID, CLOG_WARN);
+    clog_set_level(CLOG_CGDB_ID, CLOG_DEBUG);
     clog_set_fmt(CLOG_CGDB_ID, CGDB_CLOG_FORMAT);
 }
 
