@@ -508,6 +508,8 @@ int hl_groups_setup(hl_groups_ptr hl_groups)
     int i;
     int val;
     const struct default_hl_group_info *ginfo;
+    int colors = swin_colors();
+    int color_pairs = swin_color_pairs();
 
     if (!hl_groups)
         return -1;
@@ -519,7 +521,14 @@ int hl_groups_setup(hl_groups_ptr hl_groups)
     hl_groups->ansi_esc_parsing = cgdbrc_get_int(CGDBRC_DEBUGWINCOLOR);
 
     hl_groups->ansi_color = hl_groups->in_color &&
-                            (swin_colors() >= 8) && (swin_color_pairs() >= 64);
+                            (colors >= 8) && (color_pairs >= 64);
+
+    clog_info(CLOG_CGDB, "Color support: %s",
+            (hl_groups->in_color) ? "Enabled" : "Disabled");
+    clog_info(CLOG_CGDB, "ANSI color support: %s",
+            (hl_groups->ansi_color) ? "Enabled" : "Disabled");
+    clog_info(CLOG_CGDB, "Number colors: %d", colors);
+    clog_info(CLOG_CGDB, "Number color pairs: %d", color_pairs);
 
     /* Set up the default groups. */
     for (i = 0; ginfo[i].kind != HLG_LAST; ++i) {
