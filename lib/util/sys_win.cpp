@@ -8,6 +8,7 @@
 #include <ncurses/curses.h>
 #endif
 
+#include "cgdb_clog.h"
 #include "sys_util.h"
 #include "sys_win.h"
 
@@ -73,12 +74,20 @@ int swin_has_colors()
 
 int swin_start_color()
 {
-    return start_color();
+    int result = start_color();
+    if (result == ERR) {
+        clog_error(CLOG_CGDB, "start_color failed");
+    }
+    return result;
 }
 
 int swin_use_default_colors()
 {
-    return use_default_colors();
+    int result = use_default_colors();
+    if (result == ERR) {
+        clog_error(CLOG_CGDB, "use_default_colors failed");
+    }
+    return result;
 }
 
 int swin_resizeterm(int lines, int columns)
@@ -242,7 +251,12 @@ int swin_doupdate()
 
 int swin_init_pair(int pair, int f, int b)
 {
-    return init_pair(pair, f, b);
+    int result = init_pair(pair, f, b);
+    if (result == ERR) {
+        clog_error(CLOG_CGDB, "init_pair failed pair=%d f=%d b=%d", pair, f, b);
+    }
+
+    return result;
 }
 
 int swin_pair_content(int pair, int *fin, int *bin)
@@ -251,6 +265,9 @@ int swin_pair_content(int pair, int *fin, int *bin)
     short f, b;
 
     ret = pair_content(pair, &f, &b);
+    if (ret == ERR) {
+        clog_error(CLOG_CGDB, "pair_content failed pair=%d", pair);
+    }
 
     *fin = f;
     *bin = b;
