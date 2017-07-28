@@ -1,3 +1,5 @@
+  * Fix issue #125 - CGDB can cross compile again.
+
   * The rust syntax highlighter is now case sensitive instead of case
     insensitive.
 
