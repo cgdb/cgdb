@@ -1,6 +1,5 @@
 %option prefix="rust_"
 %option outfile="lex.yy.c"
-%option case-insensitive
 %option noyywrap
 %option nounput
 %option noinput
