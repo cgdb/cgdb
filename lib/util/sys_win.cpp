@@ -90,6 +90,12 @@ int swin_use_default_colors()
     return result;
 }
 
+bool swin_supports_default_color_pairs_extension()
+{
+    int result = init_pair(65, -1, COLOR_BLACK);
+    return result != ERR;
+}
+
 int swin_resizeterm(int lines, int columns)
 {
     return resizeterm(lines, columns);

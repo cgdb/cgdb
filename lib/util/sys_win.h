@@ -42,6 +42,22 @@ int swin_has_colors();
 int swin_start_color();
 int swin_use_default_colors();
 
+/**
+ * Determine if ncurses supports the default color pairs extensions.
+ *
+ * Newer versions of ncurses support COLOR_PAIRS (ie. 64) pairs, but also
+ * support ladditional color pairs (ie. 16) for using the default background.
+ * According to the init_pair documentation,
+ *   The value of the first argument must be between 1 and COLOR_PAIRS-1,
+ *   except that if default colors are used (see use_default_colors) the
+ *   upper limit is adjusted to allow for extra pairs which use a default
+ *   color in foreground and/or background. 
+ *
+ * @return
+ * True if init_pair supports the ncurses extension, False otherwise.
+ */
+bool swin_supports_default_color_pairs_extension();
+
 /* Resizes the standard and current windows to the specified dimensions, and
    adjusts other bookkeeping data used by the ncurses library that record the
    window dimensions such as the LINES and COLS variables. */

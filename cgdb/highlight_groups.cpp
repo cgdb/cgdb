@@ -478,6 +478,7 @@ int hl_groups_setup(hl_groups_ptr hl_groups)
     const struct default_hl_group_info *ginfo;
     int colors = swin_colors();
     int color_pairs = swin_color_pairs();
+    bool color_pairs_extension = swin_supports_default_color_pairs_extension();
 
     if (!hl_groups)
         return -1;
@@ -489,7 +490,8 @@ int hl_groups_setup(hl_groups_ptr hl_groups)
     hl_groups->ansi_esc_parsing = cgdbrc_get_int(CGDBRC_DEBUGWINCOLOR);
 
     hl_groups->ansi_color = hl_groups->in_color &&
-                            (colors >= 8) && (color_pairs >= 64);
+                            (colors >= 8) && (color_pairs >= 64) &&
+                            color_pairs_extension;
 
     clog_info(CLOG_CGDB, "Color support: %s",
             (hl_groups->in_color) ? "Enabled" : "Disabled");
@@ -497,6 +499,8 @@ int hl_groups_setup(hl_groups_ptr hl_groups)
             (hl_groups->ansi_color) ? "Enabled" : "Disabled");
     clog_info(CLOG_CGDB, "Number colors: %d", colors);
     clog_info(CLOG_CGDB, "Number color pairs: %d", color_pairs);
+    clog_info(CLOG_CGDB, "Extended color pair support: %s",
+            (color_pairs_extension) ? "Yes" : "No");
 
     /* Set up the default groups. */
     for (i = 0; ginfo[i].kind != HLG_LAST; ++i) {

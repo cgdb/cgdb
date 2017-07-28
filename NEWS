@@ -1,3 +1,7 @@
+  * Fix issue #129. CGDB with old versions of ncurses (5.6 or before)
+    would not display colors. Now it will display colors, but will
+    not support ansi colors in the GDB window.
+
   * Fix issue #137. rustlexer.lpp fails to compile with some versions
     of GNU autotools.
 
