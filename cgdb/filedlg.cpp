@@ -337,8 +337,6 @@ int filedlg_display(struct filedlg *fd)
     int count = sbcount(fd->buf->files);
     int hlsearch = cgdbrc_get_int(CGDBRC_HLSEARCH);
     static const char label[] = "Select a file or press q to cancel.";
-    int inc_search_attr = hl_groups_get_attr(hl_groups_instance, HLG_INCSEARCH);
-    int search_attr = hl_groups_get_attr(hl_groups_instance, HLG_SEARCH);
 
     swin_curs_set(0);
 
@@ -432,7 +430,7 @@ int filedlg_display(struct filedlg *fd)
 
         if (hlsearch && fd->last_hlregex) {
             struct hl_line_attr *attrs = hl_regex_highlight(
-                    &fd->last_hlregex, filename, search_attr);
+                    &fd->last_hlregex, filename, HLG_SEARCH);
 
             if (sbcount(attrs)) {
                 hl_printline_highlight(fd->win, filename, strlen(filename),
@@ -443,7 +441,7 @@ int filedlg_display(struct filedlg *fd)
 
         if (regex_search && file == fd->buf->sel_line) {
             struct hl_line_attr *attrs = hl_regex_highlight(
-                    &fd->hlregex, filename, inc_search_attr);
+                    &fd->hlregex, filename, HLG_INCSEARCH);
 
             if (sbcount(attrs)) {
                 hl_printline_highlight(fd->win, filename, strlen(filename),

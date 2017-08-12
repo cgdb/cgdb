@@ -89,8 +89,6 @@ static char *parse(struct scroller *scr, struct hl_line_attr **attrs,
 
     /* Expand special characters */
     for (j = 0; j < buflen; j++) {
-        int attr;
-
         switch (buf[j]) {
                 /* Backspace/Delete -> Erase last character */
             case 8:
@@ -115,15 +113,12 @@ static char *parse(struct scroller *scr, struct hl_line_attr **attrs,
             case '\033':
                 /* Handle ansi escape characters */
                 if (debugwincolor) {
+                    int attr;
                     int ansi_count = hl_ansi_get_color_attrs(
                             hl_groups_instance, buf + j, &attr);
                     if (ansi_count) {
-                        struct hl_line_attr line_attr;
                         j += ansi_count - 1;
-
-                        line_attr.col = i;
-                        line_attr.attr = attr;
-                        sbpush(*attrs, line_attr);
+                        sbpush(*attrs, hl_line_attr(i, attr));
                     }
                 } else {
                     rv[i++] = buf[j];
@@ -169,7 +164,7 @@ static void scroller_set_last_inferior_attr(struct scroller *scr)
     /* If this is an inferior line and we've got color attributes */
     if (sl && (sl->kind == SCR_INPUT_INFERIOR) && sbcount(sl->attrs)) {
         /* Grab last attribute */
-        int attr = sl->attrs[sbcount(sl->attrs) - 1].attr;
+        int attr = sl->attrs[sbcount(sl->attrs) - 1].as_attr();
 
         /* Store last attribute for following inferior lines */
         scr->last_inferior_attr = attr ? attr : -1;
@@ -184,15 +179,14 @@ static void scroller_addline(struct scroller *scr, char *line,
     /* Add attribute from last inferior line to start of this one */
     if (kind == SCR_INPUT_INFERIOR && (scr->last_inferior_attr != -1)) {
         /* If there isn't already a color attribute for the first column */
-        if (!attrs || (attrs[0].col != 0)) {
+        if (!attrs || (attrs[0].col() != 0)) {
             int count = sbcount(attrs);
 
             /* Bump the count up and scoot the attributes over one */
             sbsetcount(attrs, count + 1);
             memmove(attrs+1, attrs, count * sizeof(struct hl_line_attr));
 
-            attrs[0].col = 0;
-            attrs[0].attr = scr->last_inferior_attr;
+            attrs[0] = hl_line_attr(0, scr->last_inferior_attr);
         }
 
         scr->last_inferior_attr = -1;
@@ -355,19 +349,15 @@ static void scr_add_buf(struct scroller *scr, const char *buf,
 
             if ((scr->last_inferior_attr != -1) &&
                     (kind != scr->lines[index].kind)) {
-                struct hl_line_attr attr;
+                /* Default to 0: Add that color attribute in */
+                int attr = 0;
 
-                attr.col = orig_len;
                 if (kind == SCR_INPUT_INFERIOR) {
-                    attr.attr = scr->last_inferior_attr;
+                    attr = scr->last_inferior_attr;
                     scr->last_inferior_attr = -1;
                 }
-                else {
-                    /* Add that color attribute in */
-                    attr.attr = 0;
-                }
 
-                sbpush(scr->lines[index].attrs, attr);
+                sbpush(scr->lines[index].attrs, hl_line_attr(orig_len, attr));
             }
 
             scr->lines[index].kind = kind;
@@ -655,17 +645,12 @@ void scr_refresh(struct scroller *scr, int focus, enum win_refresh dorefresh)
     int c;                      /* Current column in row */
     int width, height;          /* Width and height of window */
     int highlight_attr;
-    int search_attr;
-    int inc_search_attr;
     int hlsearch = cgdbrc_get_int(CGDBRC_HLSEARCH);
     int rows_to_display = 0;
 
     /* Steal line highlight attribute for our scroll mode status */
     highlight_attr = hl_groups_get_attr(hl_groups_instance,
         HLG_SCROLL_MODE_STATUS);
-
-    search_attr = hl_groups_get_attr(hl_groups_instance, HLG_SEARCH);
-    inc_search_attr = hl_groups_get_attr(hl_groups_instance, HLG_INCSEARCH);
 
     /* Sanity check */
     height = swin_getmaxy(scr->win);
@@ -715,7 +700,7 @@ void scr_refresh(struct scroller *scr, int focus, enum win_refresh dorefresh)
              * and have focus... */
             if (hlsearch && scr->last_hlregex && focus) {
                 struct hl_line_attr *attrs = hl_regex_highlight(
-                    &scr->last_hlregex, sline->line, search_attr);
+                    &scr->last_hlregex, sline->line, HLG_SEARCH);
 
                 if (sbcount(attrs)) {
                     hl_printline_highlight(scr->win, sline->line,
@@ -726,7 +711,7 @@ void scr_refresh(struct scroller *scr, int focus, enum win_refresh dorefresh)
 
             if (scr->hlregex && scr->current.r == r) {
                 struct hl_line_attr *attrs = hl_regex_highlight(
-                    &scr->hlregex, sline->line, inc_search_attr);
+                    &scr->hlregex, sline->line, HLG_INCSEARCH);
 
                 if (sbcount(attrs)) {
                     hl_printline_highlight(scr->win, sline->line,

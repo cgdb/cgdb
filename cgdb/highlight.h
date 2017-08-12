@@ -1,6 +1,8 @@
 #ifndef _HIGHLIGHT_H_
 #define _HIGHLIGHT_H_
 
+#include "highlight_groups.h"
+
 /**
  * Syntax highlighting routines.
  */
@@ -52,8 +54,8 @@ void hl_regex_free(struct hl_regex_info **info);
  * @param line
  * A line of text to highlight based on the regular expression.
  *
- * @param hlattr
- * The attribute to use for highlighting.
+ * @param group_kind
+ * The group_kind to use for highlighting.
  *
  * @return
  * A list of line attributes corresponding to the positions in the
@@ -61,6 +63,6 @@ void hl_regex_free(struct hl_regex_info **info);
  * Will return NULL if no matches were found.
  */
 struct hl_line_attr *hl_regex_highlight(struct hl_regex_info **info,
-    char *line, int hlattr);
+    char *line, enum hl_group_kind group_kind);
 
 #endif /* _HIGHLIGHT_H_ */

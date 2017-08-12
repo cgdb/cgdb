@@ -407,13 +407,7 @@ static int highlight_node(struct list_node *node)
 
                 /* Add attribute if highlight group has changed */
                 if (lasttype != hlg) {
-                    struct hl_line_attr line_attr;
-
-                    line_attr.col = length;
-                    line_attr.attr = hl_groups_get_attr(
-                        hl_groups_instance, hlg);
-
-                    sbpush(buf->lines[line].attrs, line_attr);
+                    sbpush(buf->lines[line].attrs, hl_line_attr(length, hlg));
 
                     lasttype = hlg;
                 }
@@ -447,13 +441,7 @@ static int highlight_node(struct list_node *node)
 
                 /* Add attribute if highlight group has changed */
                 if (lasttype != hlg) {
-                    struct hl_line_attr line_attr;
-
-                    line_attr.col = length;
-                    line_attr.attr = hl_groups_get_attr(
-                        hl_groups_instance, hlg);
-
-                    sbpush(buf->lines[line].attrs, line_attr);
+                    sbpush(buf->lines[line].attrs, hl_line_attr(length, hlg));
 
                     lasttype = hlg;
                 }
@@ -823,10 +811,7 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
     int enabled_bp, disabled_bp;
     int exe_line_display_is_arrow, sel_line_display_is_arrow;
     int exe_arrow_attr, sel_arrow_attr;
-    int exe_highlight_attr, sel_highlight_attr;
     int exe_block_attr, sel_block_attr;
-    int search_attr;
-    int inc_search_attr;
     char fmt[16];
     int width, height;
     int focus_attr = focus ? SWIN_A_BOLD : 0;
@@ -836,7 +821,6 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
 
     struct hl_line_attr *sel_highlight_attrs = 0;
     struct hl_line_attr *exe_highlight_attrs = 0;
-    struct hl_line_attr tmp_attr;
 
     /* Check that a file is loaded */
     if (!sview->cur || !sview->cur->file_buf.lines) {
@@ -862,19 +846,12 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
     exe_display_style = cgdbrc_get_displaystyle(CGDBRC_EXECUTING_LINE_DISPLAY);
     exe_arrow_attr = hl_groups_get_attr(
         hl_groups_instance, HLG_EXECUTING_LINE_ARROW);
-    exe_highlight_attr = hl_groups_get_attr(
-        hl_groups_instance, HLG_EXECUTING_LINE_HIGHLIGHT);
     exe_block_attr = hl_groups_get_attr(
         hl_groups_instance, HLG_EXECUTING_LINE_BLOCK);
-
-    search_attr = hl_groups_get_attr(hl_groups_instance, HLG_SEARCH);
-    inc_search_attr = hl_groups_get_attr(hl_groups_instance, HLG_INCSEARCH);
 
     sel_display_style = cgdbrc_get_displaystyle(CGDBRC_SELECTED_LINE_DISPLAY);
     sel_arrow_attr = hl_groups_get_attr(
         hl_groups_instance, HLG_SELECTED_LINE_ARROW);
-    sel_highlight_attr = hl_groups_get_attr(
-        hl_groups_instance, HLG_SELECTED_LINE_HIGHLIGHT);
     sel_block_attr = hl_groups_get_attr(
         hl_groups_instance, HLG_SELECTED_LINE_BLOCK);
 
@@ -887,13 +864,8 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
 
     mark_attr = hl_groups_get_attr(hl_groups_instance, HLG_MARK);
 
-    tmp_attr.col = 0;
-    tmp_attr.attr = sel_highlight_attr;
-    sbpush(sel_highlight_attrs, tmp_attr);
-
-    tmp_attr.col = 0;
-    tmp_attr.attr = exe_highlight_attr;
-    sbpush(exe_highlight_attrs, tmp_attr);
+    sbpush(sel_highlight_attrs, hl_line_attr(0, HLG_SELECTED_LINE_HIGHLIGHT));
+    sbpush(exe_highlight_attrs, hl_line_attr(0, HLG_EXECUTING_LINE_HIGHLIGHT));
     
     /* Make sure cursor is visible */
     swin_curs_set(!!focus);
@@ -1069,9 +1041,8 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
                 width - lwidth - 2);
 
             if (hlsearch && sview->last_hlregex) {
-                struct hl_line_attr *attrs = 
-                    hl_regex_highlight(&sview->last_hlregex, sline->line,
-                    search_attr);
+                struct hl_line_attr *attrs = hl_regex_highlight(
+                        &sview->last_hlregex, sline->line, HLG_SEARCH);
                 if (sbcount(attrs)) {
                     hl_printline_highlight(sview->win, sline->line, sline->len,
                         attrs, x, y, sview->cur->sel_col + column_offset,
@@ -1081,9 +1052,8 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
             }
 
             if (is_sel_line && sview->hlregex) {
-                struct hl_line_attr *attrs = 
-                    hl_regex_highlight(&sview->hlregex, sline->line,
-                    inc_search_attr);
+                struct hl_line_attr *attrs = hl_regex_highlight(
+                        &sview->hlregex, sline->line, HLG_INCSEARCH);
                 if (sbcount(attrs)) {
                     hl_printline_highlight(sview->win, sline->line, sline->len,
                         attrs, x, y, sview->cur->sel_col + column_offset,

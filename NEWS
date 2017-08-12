@@ -1,3 +1,11 @@
+  * Fixed :highlight regression introduced in 0.7.0.
+    In 0.6.8, if the user entered a :highlight command from the CGDB
+    status bar, for instance:
+        :highlight Comment ctermfg=Blue
+    CGDB would updated the currently displayed source file
+    with the requested highlighting changes. In 0.7.0 this would not occur.
+    Both versions honored :highlight in the .cgdbrc file.
+
   * Fix issue #125 - CGDB can cross compile again.
 
   * The rust syntax highlighter is now case sensitive instead of case

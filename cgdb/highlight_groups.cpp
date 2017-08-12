@@ -1070,6 +1070,28 @@ static void hl_printspan(SWINDOW *win, const char *line, int line_len, int attr)
     swin_wattroff(win, attr);
 }
 
+hl_line_attr::hl_line_attr(int col, int attr) :
+    m_col(col), m_is_group(false), m_attr(attr) {}
+hl_line_attr::hl_line_attr(int col, enum hl_group_kind kind) :
+    m_col(col), m_is_group(true), m_attr((int)kind) {}
+
+int hl_line_attr::col(void) const {
+    return m_col;
+}
+
+int hl_line_attr::as_attr(void) const {
+    int attr;
+
+    if (m_is_group) {
+        attr = hl_groups_get_attr(hl_groups_instance,
+                (enum hl_group_kind)m_attr);
+    } else {
+        attr = m_attr;
+    }
+
+    return attr;
+}
+
 void hl_printline(SWINDOW *win, const char *line, int line_len,
         const hl_line_attr *attrs, int x, int y, int col, int width)
 {
@@ -1098,11 +1120,11 @@ void hl_printline(SWINDOW *win, const char *line, int line_len,
         int i;
 
         for (i = 0; i < sbcount(attrs); i++) {
-            if (attrs[i].col <= col) {
-                attr = attrs[i].attr;
+            if (attrs[i].col() <= col) {
+                attr = attrs[i].as_attr();
             }
-            else if (attrs[i].col < col + count) {
-                int len = attrs[i].col - col;
+            else if (attrs[i].col() < col + count) {
+                int len = attrs[i].col() - col;
 
                 hl_printspan(win, line + col, len, attr);
 
@@ -1110,7 +1132,7 @@ void hl_printline(SWINDOW *win, const char *line, int line_len,
                 count -= len;
                 width -= len;
 
-                attr = attrs[i].attr;
+                attr = attrs[i].as_attr();
             } else {
                 hl_printspan(win, line + col, count, attr);
 
@@ -1155,11 +1177,11 @@ void hl_printline_highlight(SWINDOW *win, const char *line, int line_len,
         int i;
 
         for (i = 0; i < sbcount(attrs); i++) {
-            if (attrs[i].col <= col) {
-                attr = attrs[i].attr;
+            if (attrs[i].col() <= col) {
+                attr = attrs[i].as_attr();
             }
-            else if (attrs[i].col < col + count) {
-                int len = attrs[i].col - col;
+            else if (attrs[i].col() < col + count) {
+                int len = attrs[i].col() - col;
 
                 if (attr)
                     hl_printspan(win, line + col, len, attr);
@@ -1170,7 +1192,7 @@ void hl_printline_highlight(SWINDOW *win, const char *line, int line_len,
                 count -= len;
                 width -= len;
 
-                attr = attrs[i].attr;
+                attr = attrs[i].as_attr();
             } else {
                 if (attr)
                     hl_printspan(win, line + col, count, attr);

@@ -164,18 +164,16 @@ static const char *usage[] = {
 /* Functions */
 /* --------- */
 
-static void center_line(SWINDOW *win, int row, int width, const char *data, int datawidth, int attr)
+static void center_line(SWINDOW *win, int row, int width, const char *data,
+    int datawidth, enum hl_group_kind group_kind)
 {
-    int i;
+    int i, attr;
     char *line = NULL;
     int datalen = strlen(data);
     hl_line_attr *attrs = NULL;
-    struct hl_line_attr line_attr;
 
     /* Set up default attributes at column 0 */
-    line_attr.attr = attr;
-    line_attr.col = 0;
-    sbpush(attrs, line_attr);
+    sbpush(attrs, hl_line_attr(0, group_kind));
 
     /* Parse ansi escape color codes in string */
     for (i = 0; i < datalen; i++) {
@@ -183,9 +181,7 @@ static void center_line(SWINDOW *win, int row, int width, const char *data, int 
             int ansi_count = hl_ansi_get_color_attrs(
                     hl_groups_instance, data + i, &attr);
             if (ansi_count) {
-                line_attr.col = sbcount(line);
-                line_attr.attr = attr;
-                sbpush(attrs, line_attr);
+                sbpush(attrs, hl_line_attr(sbcount(line), attr));
 
                 i += ansi_count - 1;
                 continue;
@@ -212,7 +208,6 @@ void logo_display(SWINDOW *win)
     int height, width;                 /* Dimensions of the window */
     int line;                          /* Starting line */
     int i;                             /* Iterators */
-    int attr;                          /* Default logo attributes */
     int usage_height = CGDB_NUM_USAGE; /* Height of the usage message */
 
     /* Pick a random logoindex */
@@ -220,8 +215,6 @@ void logo_display(SWINDOW *win)
         srand(time(NULL));
         logoindex = rand() % CGDB_NUM_LOGOS;
     }
-
-    attr = hl_groups_get_attr(hl_groups_instance, HLG_LOGO);
 
     /* Get dimensions */
     height = swin_getmaxy(win);
@@ -237,7 +230,7 @@ void logo_display(SWINDOW *win)
 
         for(i = 0; i < CGDB_LOGO[logoindex].h; i++) {
             center_line(win, line++, width,
-                CGDB_LOGO[logoindex].data[i], CGDB_LOGO[logoindex].w, attr);
+                CGDB_LOGO[logoindex].data[i], CGDB_LOGO[logoindex].w, HLG_LOGO);
         }
         line++;
     } else {
@@ -246,7 +239,7 @@ void logo_display(SWINDOW *win)
 
     /* Show simple usage info */
     for (i = 0; i < usage_height; i++)
-        center_line(win, line++, width, usage[i], strlen(usage[i]), attr);
+        center_line(win, line++, width, usage[i], strlen(usage[i]), HLG_LOGO);
 
     swin_curs_set(0);         /* Hide the cursor */
 }
