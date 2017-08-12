@@ -293,13 +293,7 @@ static bool hl_color_support(void)
     return cgdbrc_get_int(CGDBRC_COLOR) && swin_has_colors();
 }
 
-/**
- * Determine if ansi color should be used.
- *
- * @return
- * True if ansi color should be used, false otherwise.
- */
-static bool hl_ansi_color_support(hl_groups *h)
+bool hl_ansi_color_support(hl_groups *h)
 {
     return hl_color_support() && h && h->ansi_color_support;
 }

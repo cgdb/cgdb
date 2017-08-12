@@ -112,7 +112,8 @@ static char *parse(struct scroller *scr, struct hl_line_attr **attrs,
                 break;
             case '\033':
                 /* Handle ansi escape characters */
-                if (debugwincolor) {
+                if (hl_ansi_color_support(hl_groups_instance) &&
+                    debugwincolor) {
                     int attr;
                     int ansi_count = hl_ansi_get_color_attrs(
                             hl_groups_instance, buf + j, &attr);

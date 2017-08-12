@@ -42,6 +42,7 @@ static int logoindex = -1;
 /* --------------- */
 
 struct Logo {
+   bool ansi_escapes;    /* True if contains ansi color escape sequences */
    int h;                /* Height of logo */
    int w;                /* Width of logo */
    const char *data[15]; /* Increase the array size as necessary */
@@ -56,10 +57,14 @@ struct Logo {
     s/^[/\\033/g    ; replace ^[ with \033, hit Ctrl+V,Ctrl+[ to get ^[
     s/^/"/          ; add " at start of lines
     s/$/",/         ; add ", at end of lines
+
+    Please put all the logos with ansi color escape sequences last.
+    Logos with ansi color escape sequences can only be displayed if
+    CGDB supports ansi colors.
 */
 static struct Logo CGDB_LOGO[] =
 {
-    { 6, 31,
+    { false, 6, 31,
         { "                  .______.    ",
           "  ____   ____   __| _/\\_ |__  ",
           "_/ ___\\ / ___\\ / __ |  | __ \\ ",
@@ -68,7 +73,7 @@ static struct Logo CGDB_LOGO[] =
           "     \\/_____/      \\/      \\/ "
         }
     },
-    { 6, 49,
+    { false, 6, 49,
         { "_______________________________/\\/\\__/\\/\\_______",
           "___/\\/\\/\\/\\____/\\/\\/\\/\\________/\\/\\__/\\/\\_______",
           "_/\\/\\________/\\/\\__/\\/\\____/\\/\\/\\/\\__/\\/\\/\\/\\___",
@@ -77,7 +82,7 @@ static struct Logo CGDB_LOGO[] =
           "_____________/\\/\\/\\/\\___________________________"
         }
     },
-    { 7, 38,
+    { false, 7, 38,
         { "                          _|  _|      ",
           "  _|_|_|    _|_|_|    _|_|_|  _|_|_|  ",
           "_|        _|    _|  _|    _|  _|    _|",
@@ -89,7 +94,7 @@ static struct Logo CGDB_LOGO[] =
     },
 
     /* echo cgdb | boxes -d peek -a c -s 20x7 | toilet --gay -f term */
-    { 7, 20,
+    { true, 7, 20,
         {
             "\033[0;1;35;95m  \033[0m       \033[0;1;36;96m_\033[0;1;34;94m\\|\033[0;1;35;95m/_\033[0m",
             "         \033[0;1;36;96m(\033[0;1;34;94mo\033[0m \033[0;1;35;95mo)\033[0m",
@@ -102,7 +107,7 @@ static struct Logo CGDB_LOGO[] =
     },
 
     /* cowsay -f eyes cgdb | toilet --gay -f term --export ansi */
-    { 14, 48,
+    { true, 14, 48,
         {
             "\033[0;37m \033[0;1;35m_\033[0;1;31m__\033[0;1;33m__\033[0;1;32m_\033[0m",
             "\033[0;1;35m<\033[0;37m \033[0;1;31mcg\033[0;1;33mdb\033[0;37m \033[0;1;32m>\033[0m",
@@ -122,7 +127,7 @@ static struct Logo CGDB_LOGO[] =
     },
 
     /* figlet -f colossal cgdb | toilet -f term -F metal --export ansi */
-    { 11, 32,
+    { true, 11, 32,
         { "\033[0;37m                     \033[0;34m888888\033[0;37m      \033[0m",
           "\033[0;37m                     \033[0;34m888888\033[0;37m      \033[0m",
           "\033[0;37m                     \033[0;34m888888\033[0;37m      \033[0m",
@@ -138,7 +143,7 @@ static struct Logo CGDB_LOGO[] =
     },
 
     /* figlet -f standard cgdb | toilet -f term -F gay --export ansi */
-    { 6, 23,
+    { true, 6, 23,
         { "\033[0;37m               \033[0;1;31m_\033[0;37m \033[0;1;33m_\033[0;37m     \033[0m",
           "\033[0;37m  \033[0;1;31m__\033[0;1;33m_\033[0;37m \033[0;1;32m__\033[0;37m \033[0;1;36m_\033[0;37m  \033[0;1;35m__\033[0;1;31m|\033[0;37m \033[0;1;33m|\033[0;37m \033[0;1;32m|_\033[0;1;36m_\033[0;37m  \033[0m",
           "\033[0;37m \033[0;1;35m/\033[0;37m \033[0;1;31m_\033[0;1;33m_/\033[0;37m \033[0;1;32m_\033[0;1;36m`\033[0;37m \033[0;1;34m|/\033[0;37m \033[0;1;35m_\033[0;1;31m`\033[0;37m \033[0;1;33m|\033[0;37m \033[0;1;32m'_\033[0;37m \033[0;1;36m\\\033[0;37m \033[0m",
@@ -148,6 +153,7 @@ static struct Logo CGDB_LOGO[] =
         }
     },
 };
+
 #define CGDB_NUM_LOGOS (sizeof(CGDB_LOGO) / sizeof(CGDB_LOGO[0]))
 
 static const char *usage[] = {
@@ -158,6 +164,7 @@ static const char *usage[] = {
     "type  help<Enter>         for GDB help ",
     "type  <ESC>:help<Enter>   for CGDB help"
 };
+
 #define CGDB_NUM_USAGE (sizeof(usage) / sizeof(usage[0]))
 
 /* --------- */
@@ -198,9 +205,35 @@ static void center_line(SWINDOW *win, int row, int width, const char *data,
     sbfree(line);
 }
 
+/**
+ * Get the number of logos available for display.
+ *
+ * If ansi color escape sequences are supported, than all logos can
+ * be displayed. Otherwise, only logos with out ansi escape color
+ * sequences can be displayed.
+ *
+ * @return
+ * The number of logos available for display.
+ */
+static int logos_available()
+{
+    int num_logos = 0;
+
+    if (hl_ansi_color_support(hl_groups_instance)) {
+        num_logos = CGDB_NUM_LOGOS;
+    } else {
+        for (int cur = 0; cur < CGDB_NUM_LOGOS; ++cur, ++num_logos) {
+            if (CGDB_LOGO[cur].ansi_escapes)
+                break;
+        }
+    }
+
+    return num_logos;
+}
+
 void logo_reset()
 {
-    logoindex = (logoindex + 1) % CGDB_NUM_LOGOS;
+    logoindex = (logoindex + 1) % logos_available();
 }
 
 void logo_display(SWINDOW *win)
@@ -213,7 +246,7 @@ void logo_display(SWINDOW *win)
     /* Pick a random logoindex */
     if (logoindex == -1) {
         srand(time(NULL));
-        logoindex = rand() % CGDB_NUM_LOGOS;
+        logoindex = rand() % logos_available();
     }
 
     /* Get dimensions */

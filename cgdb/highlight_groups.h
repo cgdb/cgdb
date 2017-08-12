@@ -164,6 +164,14 @@ int hl_groups_get_attr(hl_groups_ptr hl_groups, enum hl_group_kind kind);
 int hl_groups_parse_config(hl_groups_ptr hl_groups);
 
 /**
+ * Determine if ansi color mode is currently enabled.
+ *
+ * @return
+ * True if ansi color is enabled, false otherwise.
+ */
+bool hl_ansi_color_support(hl_groups *h);
+
+/**
  * Parse an ansi SGR (Select Graphic Rendition) escape sequence and return the
  * attributes you can use with ncurses.
  *

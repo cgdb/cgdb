@@ -1,3 +1,7 @@
+  * Fix issue #139 - Show appropriate logos when color disabled
+    Previously, if the user had colors disabled, CGDB would still show
+    logos that had ansi escape color sequences in them.
+
   * Fixed :highlight regression introduced in 0.7.0.
     In 0.6.8, if the user entered a :highlight command from the CGDB
     status bar, for instance:
