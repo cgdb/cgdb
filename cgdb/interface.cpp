@@ -1308,19 +1308,6 @@ static int set_up_signal(void)
 /* See interface.h for function descriptions. */
 int if_init(void)
 {
-    hl_groups_instance = hl_groups_initialize();
-    if (!hl_groups_instance)
-    {
-        clog_error(CLOG_CGDB, "Unable to setup highlighting groups");
-        return -1;
-    }
-
-    if (hl_groups_setup(hl_groups_instance) == -1)
-    {
-        clog_error(CLOG_CGDB, "Unable to setup highlighting groups");
-        return -1;
-    }
-
     /* Set up the signal handler to catch SIGWINCH */
     if (set_up_signal() == -1)
     {

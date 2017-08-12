@@ -66,6 +66,7 @@
 #include "sys_win.h"
 #include "cgdb.h"
 #include "tokenizer.h"
+#include "highlight_groups.h"
 #include "interface.h"
 #include "scroller.h"
 #include "sources.h"
@@ -1522,6 +1523,8 @@ void cgdb_cleanup_and_exit(int val)
     /* Shut down interface */
     if_shutdown();
 
+    hl_groups_shutdown(hl_groups_instance);
+
 #if 0
     if (masterfd != -1)
         util_free_tty(&masterfd, &slavefd, tty_name);
@@ -1829,6 +1832,13 @@ int main(int argc, char *argv[])
     /* Initialize curses */
     if (!swin_start()) {
         clog_error(CLOG_CGDB, "Unable to start curses");
+    }
+
+    /* Initialize the highlighting groups */
+    hl_groups_instance = hl_groups_initialize();
+    if (!hl_groups_instance)
+    {
+        clog_error(CLOG_CGDB, "Unable to setup highlighting groups");
         cgdb_cleanup_and_exit(-1);
     }
 

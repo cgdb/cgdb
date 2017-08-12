@@ -133,17 +133,6 @@ int hl_groups_shutdown(hl_groups_ptr hl_groups);
 /*@{*/
 
 /**
- * Setup the highlighting group to have all of the default values.
- *
- * \param hl_groups
- * An instance of hl_groups to operate on.
- *
- * \return
- * 0 on success or -1 on error
- */
-int hl_groups_setup(hl_groups_ptr hl_groups);
-
-/**
  * Get the attributes that may be passed to swin_wattron to tell the curses library
  * how to print this particular group.
  *

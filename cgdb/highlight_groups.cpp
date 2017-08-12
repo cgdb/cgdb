@@ -26,15 +26,6 @@
 
 #define UNSPECIFIED_COLOR (-2)
 
-struct hl_setup_group_info {
-    enum hl_group_kind group_kind;
-    int mono_attrs;
-    int color_attrs;
-    int fg_color;
-    int bg_color;
-};
-static struct hl_setup_group_info *setup_group_infos = NULL;
-
 /** This represents all the data for a particular highlighting group. */
 struct hl_group_info {
   /** The kind of group */
@@ -452,49 +443,7 @@ setup_group(hl_groups_ptr hl_groups, enum hl_group_kind group,
     return 0;
 }
 
-/* }}}*/
-
-/* Creating and Destroying a hl_groups context. {{{*/
-/*@{*/
-
-hl_groups_ptr hl_groups_initialize(void)
-{
-    int i;
-    hl_groups_ptr hl_groups = (hl_groups_ptr) cgdb_malloc(sizeof (struct hl_groups));
-
-    hl_groups->ansi_color_support = false;
-
-    for (i = 0; i < HLG_LAST; ++i) {
-        struct hl_group_info *info;
-
-        info = &hl_groups->groups[i];
-        info->kind = (enum hl_group_kind) (i + 1);
-        info->mono_attrs = 0;
-        info->color_attrs = 0;
-        info->color_pair = 0;
-    }
-
-    return hl_groups;
-}
-
-int hl_groups_shutdown(hl_groups_ptr hl_groups)
-{
-    if (hl_groups) {
-        free(hl_groups);
-        hl_groups = NULL;
-    }
-
-    return 0;
-}
-
-/*@}*/
-/* }}}*/
-
-/* Functional commands {{{*/
-
-/*@{*/
-
-int hl_groups_setup(hl_groups_ptr hl_groups)
+static int hl_groups_setup(hl_groups_ptr hl_groups)
 {
     int i;
     int val;
@@ -533,25 +482,51 @@ int hl_groups_setup(hl_groups_ptr hl_groups)
         }
     }
 
-    if (setup_group_infos) {
-        for (i = 0; i < sbcount(setup_group_infos); i++) {
-            struct hl_setup_group_info *group_info = &setup_group_infos[i];
+    return 0;
+}
 
-            val = setup_group(hl_groups, group_info->group_kind,
-                              group_info->mono_attrs, group_info->color_attrs,
-                              group_info->fg_color, group_info->bg_color);
-            if (val == -1) {
-                clog_error(CLOG_CGDB, "setup group.");
-                return -1;
-            }
-        }
+hl_groups_ptr hl_groups_initialize(void)
+{
+    int i;
+    hl_groups_ptr hl_groups;
+    
+    hl_groups = (hl_groups_ptr) cgdb_malloc(sizeof (struct hl_groups));
+    hl_groups->ansi_color_support = false;
 
-        sbfree(setup_group_infos);
-        setup_group_infos = NULL;
+    for (i = 0; i < HLG_LAST; ++i) {
+        struct hl_group_info *info;
+
+        info = &hl_groups->groups[i];
+        info->kind = (enum hl_group_kind) (i + 1);
+        info->mono_attrs = 0;
+        info->color_attrs = 0;
+        info->color_pair = 0;
+    }
+
+    if (hl_groups_setup(hl_groups) == -1) {
+        hl_groups_shutdown(hl_groups);
+        hl_groups = NULL;
+    }
+
+    return hl_groups;
+}
+
+int hl_groups_shutdown(hl_groups_ptr hl_groups)
+{
+    if (hl_groups) {
+        free(hl_groups);
+        hl_groups = NULL;
     }
 
     return 0;
 }
+
+/*@}*/
+/* }}}*/
+
+/* Functional commands {{{*/
+
+/*@{*/
 
 int
 hl_groups_get_attr(hl_groups_ptr hl_groups, enum hl_group_kind kind)
@@ -811,25 +786,10 @@ int hl_groups_parse_config(hl_groups_ptr hl_groups)
         }
     }
 
-    if (!hl_groups) {
-        /* We haven't had our group initialized yet, so this is coming in when reading
-           the cgdb rc file. Store this information and set it in hl_gruops_setup().
-         */
-        struct hl_setup_group_info group_info;
-
-        group_info.group_kind = group_kind;
-        group_info.mono_attrs = mono_attrs;
-        group_info.color_attrs = color_attrs;
-        group_info.fg_color = fg_color;
-        group_info.bg_color = bg_color;
-
-        sbpush(setup_group_infos, group_info);
-    } else {
-        val = setup_group(hl_groups, group_kind, mono_attrs, color_attrs, fg_color,
-                bg_color);
-        if (val == -1) {
-            return 1;
-        }
+    val = setup_group(hl_groups, group_kind, mono_attrs, color_attrs, fg_color,
+            bg_color);
+    if (val == -1) {
+        return 1;
     }
 
     return 0;
