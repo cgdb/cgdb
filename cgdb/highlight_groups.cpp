@@ -49,13 +49,16 @@ struct hl_group_info {
 
 /** The main context used to represent all of the highlighting groups. */
 struct hl_groups {
-  /** If 0 then the terminal doesn't support colors, otherwise it does. */
-    int in_color;
-  /** If 1 then we parse ansi escape codes */
-    int ansi_esc_parsing;
-  /** 1 if the terminal supports ansi colors (8 colors, 64 color pairs). */
-    int ansi_color;
-  /** This is the data for each highlighting group. */
+    /**
+     * True if the terminal is can display ansi colors, otherwise False.
+     *
+     * Please note, this just determines if CGDB believes the terminal is
+     * capable of displaying ansi colors. CGDB's configuration will
+     * determine if colors should be displayed at all.
+     */
+    bool ansi_color_support;
+
+    /** This is the data for each highlighting group. */
     struct hl_group_info groups[HLG_LAST];
 };
 
@@ -288,6 +291,28 @@ enum hl_group_kind hl_get_color_group(const char *color)
     return color_info ? color_info->hlg_type : HLG_LAST;
 }
 
+/**
+ * Determine if color should be used.
+ *
+ * @return
+ * True if color should be used, false otherwise.
+ */
+static bool hl_color_support(void)
+{
+    return cgdbrc_get_int(CGDBRC_COLOR) && swin_has_colors();
+}
+
+/**
+ * Determine if ansi color should be used.
+ *
+ * @return
+ * True if ansi color should be used, false otherwise.
+ */
+static bool hl_ansi_color_support(hl_groups *h)
+{
+    return hl_color_support() && h && h->ansi_color_support;
+}
+
 /* Given an ncurses COLOR_XX background and foreground color, return an ncurses
  *  color pair index for that color.
  */
@@ -297,7 +322,7 @@ static int hl_get_ansicolor_pair(hl_groups_ptr hl_groups, int bgcolor, int fgcol
     static int color_pair_table[9][9];
 
     /* If ansi colors aren't enabled, return default color pair 0 */
-    if (!hl_groups->ansi_color)
+    if (!hl_ansi_color_support(hl_groups))
         return 0;
 
     if (!color_pairs_inited) {
@@ -378,14 +403,14 @@ setup_group(hl_groups_ptr hl_groups, enum hl_group_kind group,
 
     /* The rest of this function sets up the colors, so we can stop here
      * if color isn't used. */
-    if (!hl_groups->in_color)
+    if (!hl_color_support())
         return 0;
 
     /* If no colors are specified, we're done. */
     if (fore_color == UNSPECIFIED_COLOR && back_color == UNSPECIFIED_COLOR)
         return 0;
 
-    if (hl_groups->ansi_color) {
+    if (hl_ansi_color_support(hl_groups)) {
         /* Ansi mode is enabled so we've got 16 colors and 64 color pairs.
            Set the color_pair index for this bg / fg color combination. */
         info->color_pair = hl_get_ansicolor_pair(hl_groups, back_color, fore_color);
@@ -437,9 +462,7 @@ hl_groups_ptr hl_groups_initialize(void)
     int i;
     hl_groups_ptr hl_groups = (hl_groups_ptr) cgdb_malloc(sizeof (struct hl_groups));
 
-    hl_groups->in_color = 0;
-    hl_groups->ansi_esc_parsing = 0;
-    hl_groups->ansi_color = 0;
+    hl_groups->ansi_color_support = false;
 
     for (i = 0; i < HLG_LAST; ++i) {
         struct hl_group_info *info;
@@ -479,24 +502,20 @@ int hl_groups_setup(hl_groups_ptr hl_groups)
     int colors = swin_colors();
     int color_pairs = swin_color_pairs();
     bool color_pairs_extension = swin_supports_default_color_pairs_extension();
+    bool in_color = hl_color_support();
 
     if (!hl_groups)
         return -1;
 
     ginfo = default_groups_for_background_dark;
 
-    hl_groups->in_color = cgdbrc_get_int(CGDBRC_COLOR) && swin_has_colors();
-
-    hl_groups->ansi_esc_parsing = cgdbrc_get_int(CGDBRC_DEBUGWINCOLOR);
-
-    hl_groups->ansi_color = hl_groups->in_color &&
-                            (colors >= 8) && (color_pairs >= 64) &&
-                            color_pairs_extension;
+    hl_groups->ansi_color_support =
+        (colors >= 8) && (color_pairs >= 64) && color_pairs_extension;
 
     clog_info(CLOG_CGDB, "Color support: %s",
-            (hl_groups->in_color) ? "Enabled" : "Disabled");
+            (in_color) ? "Enabled" : "Disabled");
     clog_info(CLOG_CGDB, "ANSI color support: %s",
-            (hl_groups->ansi_color) ? "Enabled" : "Disabled");
+            (hl_groups->ansi_color_support) ? "Enabled" : "Disabled");
     clog_info(CLOG_CGDB, "Number colors: %d", colors);
     clog_info(CLOG_CGDB, "Number color pairs: %d", color_pairs);
     clog_info(CLOG_CGDB, "Extended color pair support: %s",
@@ -591,7 +610,7 @@ hl_groups_get_attr(hl_groups_ptr hl_groups, enum hl_group_kind kind)
     }
 
     if (hl_groups && info) {
-        if (!hl_groups->in_color)
+        if (!hl_color_support())
             attr = info->mono_attrs;
         else {
             attr = info->color_attrs;
@@ -923,7 +942,7 @@ int hl_ansi_get_color_attrs(hl_groups_ptr hl_groups,
 
     /* If we're not in ansi mode, just return default color pair 0 and
      * don't parse the string. */
-    if (!hl_groups->ansi_color)
+    if (!hl_ansi_color_support(hl_groups))
         return 0;
 
     if ((buf[i++] == '\033') && (buf[i++] == '[')) {
