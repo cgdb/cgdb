@@ -28,6 +28,14 @@ extern SWIN_CHTYPE SWIN_SYM_VLINE; /* vertical line */
 extern SWIN_CHTYPE SWIN_SYM_HLINE; /* horizontal line */
 extern SWIN_CHTYPE SWIN_SYM_LTEE;  /* tee pointing right */
 
+/**
+ * Initialize the system window.
+ *
+ * @return
+ * True if successful, otherwise False. On failure, logging will occur.
+ */
+bool swin_start();
+
 /* Determines the terminal type and initializes all data structures. */
 SWINDOW *swin_initscr();
 /* The program must call endwin for each terminal being used before exiting. */

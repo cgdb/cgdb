@@ -122,7 +122,6 @@ WIN_SPLIT_ORIENTATION_TYPE cur_split_orientation = WSO_HORIZONTAL;
 /* --------------- */
 /* Local Variables */
 /* --------------- */
-static int curses_initialized = 0;  /* Flag: Curses has been initialized */
 static struct scroller *gdb_scroller = NULL;
 static struct sviewer *src_viewer = NULL;  /* The source viewer window */
 static SWINDOW *status_win = NULL;   /* The status line */
@@ -165,33 +164,6 @@ static enum StatusBarCommandKind sbc_kind = SBC_NORMAL;
 /* --------------- */
 /* Local Functions */
 /* --------------- */
-
-/* init_curses: Initializes curses and sets up the terminal properly.
- * ------------
- *
- * Return Value: Zero on success, non-zero on failure.
- */
-static int init_curses()
-{
-    char escdelay[] = "ESCDELAY=0";
-
-    if (putenv(escdelay))
-    {
-        clog_error(CLOG_CGDB, "putenv(\"%s\") failed", escdelay);
-    }
-
-    swin_initscr();                  /* Start curses mode */
-
-    if (swin_has_colors()) {
-        swin_start_color();
-        swin_use_default_colors();
-    }
-
-    swin_refresh();                  /* Refresh the initial window once */
-    curses_initialized = 1;
-
-    return 0;
-}
 
 /* --------------------------------------
  * Theses get the position of each window
@@ -519,9 +491,6 @@ void if_display_message(const char *msg, enum win_refresh dorefresh, int width, 
  */
 void if_draw(void)
 {
-    if (!curses_initialized)
-        return;
-
     /* Only redisplay the filedlg if it is up */
     if (focus == FILE_DLG) {
         filedlg_display(fd);
@@ -595,9 +564,6 @@ static int if_layout()
 {
     SWINDOW *gdb_scroller_win = NULL;
     SWINDOW *src_viewer_win = NULL;
-
-    if (!curses_initialized)
-        return -1;
 
     /* Verify the window size is reasonable */
     validate_window_sizes();
@@ -1342,12 +1308,6 @@ static int set_up_signal(void)
 /* See interface.h for function descriptions. */
 int if_init(void)
 {
-    if (init_curses())
-    {
-        clog_error(CLOG_CGDB, "Unable to initialize the ncurses library");
-        return -1;
-    }
-
     hl_groups_instance = hl_groups_initialize();
     if (!hl_groups_instance)
     {
@@ -1731,10 +1691,6 @@ void if_filedlg_display_message(char *message)
 
 void if_shutdown(void)
 {
-    /* Shut down curses cleanly */
-    if (curses_initialized)
-        swin_endwin();
-
     if (status_win) {
         swin_delwin(status_win);
         status_win = NULL;

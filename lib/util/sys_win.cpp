@@ -26,6 +26,47 @@ SWIN_CHTYPE SWIN_SYM_VLINE;
 SWIN_CHTYPE SWIN_SYM_HLINE;
 SWIN_CHTYPE SWIN_SYM_LTEE;
 
+static bool initscr_intialized = false;
+
+/**
+ * Set the ESCDELAY environment variable.
+ *
+ * This environment variable is necessary for ncurses to not delay
+ * user input when the ESCAPE key is pressed. CGDB does it's own handling
+ * of escape.
+ *
+ * @return
+ * True on success or False on failure
+ */
+static bool swin_set_escdelay(void)
+{
+    static char escdelay[] = "ESCDELAY=0";
+    bool success = putenv(escdelay) == 0;
+                
+    if (!success)
+        clog_error(CLOG_CGDB, "putenv(\"%s\") failed", escdelay);
+
+    return success;
+}
+
+bool swin_start()
+{
+    bool success = swin_set_escdelay();
+    if (success) {
+        success = swin_initscr() != NULL;
+        if (success) {
+            if (swin_has_colors()) {
+                swin_start_color();
+                swin_use_default_colors();
+            }
+
+            swin_refresh();
+        }
+    }
+
+    return success;
+}
+
 /* Determines the terminal type and initializes all data structures. */
 SWINDOW *swin_initscr()
 {
@@ -39,12 +80,20 @@ SWINDOW *swin_initscr()
 
     SWIN_SYM_HLINE = ACS_HLINE;
     SWIN_SYM_LTEE = ACS_LTEE;
+    
+    initscr_intialized = true;
+
     return win;
 }
 
 int swin_endwin()
 {
-    return endwin();
+    int result = 0;
+    
+    if (initscr_intialized)
+        result = endwin();
+
+    return result;
 }
 
 int swin_lines()

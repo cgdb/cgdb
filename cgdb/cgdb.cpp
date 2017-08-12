@@ -1517,6 +1517,8 @@ void cgdb_cleanup_and_exit(int val)
      * started, is the reverse order in which they should be shutdown 
      */
 
+    swin_endwin();
+
     /* Shut down interface */
     if_shutdown();
 
@@ -1791,6 +1793,7 @@ int main(int argc, char *argv[])
 
     current_line = ibuf_init();
 
+    /* Initialize default option values */
     cgdbrc_init();
 
     if (create_and_init_pair() == -1) {
@@ -1820,6 +1823,12 @@ int main(int argc, char *argv[])
 
     if (init_kui() == -1) {
         clog_error(CLOG_CGDB, "init_kui error");
+        cgdb_cleanup_and_exit(-1);
+    }
+
+    /* Initialize curses */
+    if (!swin_start()) {
+        clog_error(CLOG_CGDB, "Unable to start curses");
         cgdb_cleanup_and_exit(-1);
     }
 
