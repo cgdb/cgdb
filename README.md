@@ -6,10 +6,10 @@ source code above.  The interface is modelled after vim's, so vim users should
 feel right at home using it.
 
 Screenshot, downloads, and documentation are available from the home page:
-http://cgdb.github.com/
+https://cgdb.github.io/
 
 Official source releases are available here:
-http://cgdb.me/files
+https://cgdb.me/files
 
 ## Build Instructions
 
