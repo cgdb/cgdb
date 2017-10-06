@@ -82,7 +82,7 @@ int cgdb_close(int fd)
     return 0;
 }
 
-int cgdb_string_to_int(char *str, int *num) {
+int cgdb_string_to_int(const char *str, int *num) {
     int result = -1;
 
     if (str && num) {

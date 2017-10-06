@@ -38,7 +38,7 @@ int cgdb_close(int fd);
  * @return
  * 0 on success or -1 on error.
  */
-int cgdb_string_to_int(char *str, int *num);
+int cgdb_string_to_int(const char *str, int *num);
 
 /**
  * Convert a string to an integer.
