@@ -1453,13 +1453,13 @@ static int cgdb_input(int key, int *last_key)
             /* Issue GDB continue command */
             tgdb_request_run_debugger_command(tgdb, TGDB_CONTINUE);
             return 0;
-        case CGDB_KEY_F7:
-            /* Issue GDB finish command */
-            tgdb_request_run_debugger_command(tgdb, TGDB_FINISH);
-            return 0;
         case CGDB_KEY_F8:
             /* Issue GDB next command */
             tgdb_request_run_debugger_command(tgdb, TGDB_NEXT);
+        case CGDB_KEY_F9:
+            /* Issue GDB finish command */
+            tgdb_request_run_debugger_command(tgdb, TGDB_FINISH);
+            return 0;
         case CGDB_KEY_F10:
             /* Issue GDB step command */
             tgdb_request_run_debugger_command(tgdb, TGDB_STEP);
