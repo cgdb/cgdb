@@ -1,3 +1,6 @@
+  * Fixed issue where typing F8 would do a 'next', 'step' and
+    screen refresh instead of just doing a 'next' command.
+
   * Fix issue #139 - Show appropriate logos when color disabled
     Previously, if the user had colors disabled, CGDB would still show
     logos that had ansi escape color sequences in them.
