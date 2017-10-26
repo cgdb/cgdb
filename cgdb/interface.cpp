@@ -1248,6 +1248,12 @@ static void source_input(struct sviewer *sview, int key)
             toggle_breakpoint(sview, t);
         }
             break;
+        case 'd':
+            tgdb_request_run_debugger_command(tgdb, TGDB_DOWN);
+            break;
+        case 'u':
+            tgdb_request_run_debugger_command(tgdb, TGDB_UP);
+            break;
         default:
             break;
     }
