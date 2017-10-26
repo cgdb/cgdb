@@ -1129,17 +1129,8 @@ void source_vscroll(struct sviewer *sview, int offset)
 
 void source_hscroll(struct sviewer *sview, int offset)
 {
-    int lwidth;
-    int max_width;
-    int width, height;
-
     if (sview->cur) {
-        height = swin_getmaxy(sview->win);
-        width = swin_getmaxx(sview->win);
-
-        lwidth = log10_uint(sbcount(sview->cur->file_buf.lines)) + 1;
-        max_width = sview->cur->file_buf.max_width - width + lwidth + 6;
-
+        const int max_width = sview->cur->file_buf.max_width;
         sview->cur->sel_col += offset;
         if (sview->cur->sel_col > max_width)
             sview->cur->sel_col = max_width;
