@@ -23,7 +23,6 @@
 #include "commands.h"
 #include "io.h"
 #include "tgdb_types.h"
-#include "ibuf.h"
 #include "gdbwire.h"
 
 /**

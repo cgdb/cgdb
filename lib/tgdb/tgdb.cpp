@@ -30,7 +30,6 @@
 #include "fork_util.h"
 #include "commands.h"
 #include "annotations.h"
-#include "ibuf.h"
 #include "io.h"
 #include "pseudo.h" /* SLAVE_SIZE constant */
 #include "sys_util.h"

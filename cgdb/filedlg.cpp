@@ -10,6 +10,8 @@
 #include <string.h>
 #endif /* HAVE_STRING_H */
 
+#include <string>
+
 #include "fs_util.h"
 
 #include "sys_util.h"
@@ -36,7 +38,7 @@ struct filedlg {
     struct hl_regex_info *last_hlregex;
     struct hl_regex_info *hlregex;
     SWINDOW *win;               /* Curses window */
-    struct ibuf *G_line_number; /* Line number user wants to 'G' to */
+    std::string G_line_number;  /* Line number user wants to 'G' to */
 };
 
 static char regex_line[MAX_LINE];   /* The regex the user enters */
@@ -78,7 +80,7 @@ struct filedlg *filedlg_new(int pos_r, int pos_c, int height, int width)
     struct filedlg *fd;
 
     /* Allocate a new structure */
-    fd = (struct filedlg *)cgdb_malloc(sizeof(struct filedlg));
+    fd = new filedlg();
 
     /* Initialize the structure */
     fd->win = swin_newwin(height, width, pos_r, pos_c);
@@ -86,7 +88,6 @@ struct filedlg *filedlg_new(int pos_r, int pos_c, int height, int width)
     /* Initialize the buffer */
     fd->buf = (struct file_buffer *)cgdb_malloc(sizeof(struct file_buffer));
 
-    fd->G_line_number = ibuf_init();
     fd->last_hlregex = NULL;
     fd->hlregex = NULL;
     fd->buf->files = NULL;
@@ -102,8 +103,6 @@ void filedlg_free(struct filedlg *fdlg)
 {
     filedlg_clear(fdlg);
 
-    ibuf_free(fdlg->G_line_number);
-
     hl_regex_free(&fdlg->last_hlregex);
     fdlg->last_hlregex = NULL;
 
@@ -116,7 +115,7 @@ void filedlg_free(struct filedlg *fdlg)
     free(fdlg->buf);
     fdlg->buf = NULL;
 
-    free(fdlg);
+    delete fdlg;
 }
 
 int filedlg_add_file_choice(struct filedlg *fd, const char *file_choice)
@@ -192,7 +191,7 @@ void filedlg_clear(struct filedlg *fd)
 {
     int i;
 
-    ibuf_clear(fd->G_line_number);
+    fd->G_line_number.clear();
 
     for (i = 0; i < sbcount(fd->buf->files); i++)
         free(fd->buf->files[i]);
@@ -633,7 +632,7 @@ int filedlg_recv_char(struct filedlg *fd, int key, char *file, int last_key_pres
             break;
         case 'G': {             /* end of file, or a line number*/
             int lineno = -1, result;
-            result = cgdb_string_to_int(ibuf_get(fd->G_line_number), &lineno);
+            result = cgdb_string_to_int(fd->G_line_number.c_str(), &lineno);
             if (result == 0) {
                 filedlg_set_sel_line(fd, lineno -1);
             }
@@ -645,9 +644,9 @@ int filedlg_recv_char(struct filedlg *fd, int key, char *file, int last_key_pres
 
     /* Store digits into G_line_number for 'G' command. */
     if (key >= '0' && key <= '9') {
-        ibuf_addchar(fd->G_line_number, key);
+        fd->G_line_number.push_back(key);
     } else {
-        ibuf_clear(fd->G_line_number);
+        fd->G_line_number.clear();
     }
 
     filedlg_display(fd);

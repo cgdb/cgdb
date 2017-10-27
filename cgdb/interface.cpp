@@ -69,6 +69,8 @@
 
 #include <assert.h>
 
+#include <string>
+
 /* Local Includes */
 #include "sys_util.h"
 #include "sys_win.h"
@@ -132,10 +134,10 @@ static struct winsize screen_size;  /* Screen size */
 struct filedlg *fd;             /* The file dialog structure */
 
 /* The regex the user is entering */
-static struct ibuf *regex_cur = NULL;
+static std::string regex_cur;
 
 /* The last regex the user searched for */
-static struct ibuf *regex_last = NULL;
+static std::string regex_last;
 
 /* Direction to search */
 static int regex_direction_cur;
@@ -147,10 +149,10 @@ static int orig_line_regex;
 static char last_key_pressed = 0;   /* Last key user entered in cgdb mode */
 
 /* Line number user wants to 'G' to */
-static struct ibuf *G_line_number = NULL;
+static std::string G_line_number;
 
 /* The cgdb status bar command */
-static struct ibuf *cur_sbc = NULL;
+static std::string cur_sbc;
 
 enum StatusBarCommandKind {
     /* This is represented by a : */
@@ -404,21 +406,17 @@ static void update_status_win(enum win_refresh dorefresh)
 
     /* Print the regex that the user is looking for Forward */
     if (sbc_kind == SBC_REGEX && regex_direction_cur) {
-        if_display_message("/", dorefresh, WIDTH - 1, "%s", ibuf_get(regex_cur));
+        if_display_message("/", dorefresh, WIDTH - 1, "%s", regex_cur.c_str());
         swin_curs_set(1);
     }
     /* Regex backwards */
     else if (sbc_kind == SBC_REGEX) {
-        if_display_message("?", dorefresh, WIDTH - 1, "%s", ibuf_get(regex_cur));
+        if_display_message("?", dorefresh, WIDTH - 1, "%s", regex_cur.c_str());
         swin_curs_set(1);
     }
     /* A colon command typed at the status bar */
     else if (focus == CGDB_STATUS_BAR && sbc_kind == SBC_NORMAL) {
-        const char *command = ibuf_get(cur_sbc);
-
-        if (!command)
-            command = "";
-        if_display_message(":", dorefresh, WIDTH - 1, "%s", command);
+        if_display_message(":", dorefresh, WIDTH - 1, "%s", cur_sbc.c_str());
         swin_curs_set(1);
     }
     /* Default: Current Filename */
@@ -740,18 +738,17 @@ static void signal_handler(int signo)
     assert(write(fdpipe, &signo, sizeof(signo)) == sizeof(signo));
 }
 
-static void if_run_command(struct sviewer *sview, struct ibuf *ibuf_command)
+static void if_run_command(struct sviewer *sview, const std::string &command)
 {
-    char *command = ibuf_get(ibuf_command);
-
     /* refresh and return if the user entered no data */
-    if (ibuf_length(ibuf_command) == 0) {
+    if (command.size() == 0) {
         if_draw();
         return;
     }
 
-    if (command_parse_string(command)) {
-        if_display_message("Unknown command: ", WIN_NO_REFRESH, 0, "%s", command);
+    if (command_parse_string(command.c_str())) {
+        if_display_message("Unknown command: ", WIN_NO_REFRESH, 0, "%s",
+            command.c_str());
     } else {
         update_status_win(WIN_NO_REFRESH);
     }
@@ -783,11 +780,10 @@ static int gdb_input_regex_input(struct scroller *scr, int key)
     case '\n':
     case CGDB_KEY_CTRL_M:
         /* Save for future searches via 'n' or 'N' */
-        ibuf_free(regex_last);
-        regex_last = ibuf_dup(regex_cur);
+        regex_last = regex_cur;
 
         regex_direction_last = regex_direction_cur;
-        scr_search_regex(scr, ibuf_get(regex_last), 2,
+        scr_search_regex(scr, regex_last.c_str(), 2,
             regex_direction_last, regex_icase);
         if_draw();
         done = 1;
@@ -795,16 +791,15 @@ static int gdb_input_regex_input(struct scroller *scr, int key)
     case 8:
     case 127:
         /* Backspace or DEL key */
-        if (ibuf_length(regex_cur) == 0)
+        if (regex_cur.size() == 0)
         {
             done = 1;
-            scr_search_regex(scr, "", 2,
-                regex_direction_cur, regex_icase);
+            scr_search_regex(scr, "", 2, regex_direction_cur, regex_icase);
         }
         else
         {
-            ibuf_delchar(regex_cur);
-            scr_search_regex(scr, ibuf_get(regex_cur), 1,
+            regex_cur.erase(regex_cur.size() - 1);
+            scr_search_regex(scr, regex_cur.c_str(), 1,
                 regex_direction_cur, regex_icase);
             if_draw();
             update_status_win(WIN_REFRESH);
@@ -817,13 +812,13 @@ static int gdb_input_regex_input(struct scroller *scr, int key)
             int length = strlen(keycode), i;
 
             for (i = 0; i < length; i++)
-                ibuf_addchar(regex_cur, keycode[i]);
+                regex_cur.push_back(keycode[i]);
         }
         else
         {
-            ibuf_addchar(regex_cur, key);
+            regex_cur.push_back(key);
         }
-        scr_search_regex(scr, ibuf_get(regex_cur), 1,
+        scr_search_regex(scr, regex_cur.c_str(), 1,
             regex_direction_cur, regex_icase);
         if_draw();
         update_status_win(WIN_REFRESH);
@@ -833,8 +828,7 @@ static int gdb_input_regex_input(struct scroller *scr, int key)
     {
         gdb_scroller->in_search_mode = 0;
 
-        ibuf_free(regex_cur);
-        regex_cur = NULL;
+        regex_cur.clear();
 
         sbc_kind = SBC_NORMAL;
         if_set_focus(GDB);
@@ -930,17 +924,17 @@ static int gdb_input(int key, int *last_key)
                 gdb_scroller->in_scroll_mode = 0;
                 break;
             case 'n':
-                scr_search_regex(gdb_scroller, ibuf_get(regex_last), 2,
+                scr_search_regex(gdb_scroller, regex_last.c_str(), 2,
                     regex_direction_last, cgdbrc_get_int(CGDBRC_IGNORECASE));
                 break;
             case 'N':
-                scr_search_regex(gdb_scroller, ibuf_get(regex_last), 2,
+                scr_search_regex(gdb_scroller, regex_last.c_str(), 2,
                     !regex_direction_last, cgdbrc_get_int(CGDBRC_IGNORECASE));
                 break;
             case '/':
             case '?':
                 /* Capturing regular expressions */
-                regex_cur = ibuf_init();
+                regex_cur = "";
                 regex_direction_cur = ('/' == key);
                 orig_line_regex = gdb_scroller->current.r;
 
@@ -998,11 +992,10 @@ static int status_bar_regex_input(struct sviewer *sview, int key)
         case '\n':
         case CGDB_KEY_CTRL_M:
             /* Save for future searches via 'n' or 'N' */
-            ibuf_free(regex_last);
-            regex_last = ibuf_dup(regex_cur);
+            regex_last = regex_cur;
 
             regex_direction_last = regex_direction_cur;
-            source_search_regex(sview, ibuf_get(regex_last), 2,
+            source_search_regex(sview, regex_last.c_str(), 2,
                     regex_direction_last, regex_icase);
             if_draw();
             done = 1;
@@ -1010,13 +1003,13 @@ static int status_bar_regex_input(struct sviewer *sview, int key)
         case 8:
         case 127:
             /* Backspace or DEL key */
-            if (ibuf_length(regex_cur) == 0) {
+            if (regex_cur.size() == 0) {
                 done = 1;
                 source_search_regex(sview, "", 2,
                         regex_direction_cur, regex_icase);
             } else {
-                ibuf_delchar(regex_cur);
-                source_search_regex(sview, ibuf_get(regex_cur), 1,
+                regex_cur.erase(regex_cur.size() - 1);
+                source_search_regex(sview, regex_cur.c_str(), 1,
                         regex_direction_cur, regex_icase);
                 if_draw();
                 update_status_win(WIN_REFRESH);
@@ -1028,19 +1021,18 @@ static int status_bar_regex_input(struct sviewer *sview, int key)
                 int length = strlen(keycode), i;
 
                 for (i = 0; i < length; i++)
-                    ibuf_addchar(regex_cur, keycode[i]);
+                    regex_cur.push_back(keycode[i]);
             } else {
-                ibuf_addchar(regex_cur, key);
+                regex_cur.push_back(key);
             }
-            source_search_regex(sview, ibuf_get(regex_cur), 1,
+            source_search_regex(sview, regex_cur.c_str(), 1,
                     regex_direction_cur, regex_icase);
             if_draw();
             update_status_win(WIN_REFRESH);
     };
 
     if (done) {
-        ibuf_free(regex_cur);
-        regex_cur = NULL;
+        regex_cur.clear();
 
         sbc_kind = SBC_NORMAL;
         if_set_focus(CGDB);
@@ -1066,10 +1058,10 @@ static int status_bar_normal_input(int key)
         case 8:
         case 127:
             /* Backspace or DEL key */
-            if (ibuf_length(cur_sbc) == 0) {
+            if (cur_sbc.size() == 0) {
                 done = 1;
             } else {
-                ibuf_delchar(cur_sbc);
+                cur_sbc.erase(cur_sbc.size() - 1);
                 update_status_win(WIN_REFRESH);
             }
             break;
@@ -1079,17 +1071,16 @@ static int status_bar_normal_input(int key)
                 int length = strlen(keycode), i;
 
                 for (i = 0; i < length; i++)
-                    ibuf_addchar(cur_sbc, keycode[i]);
+                    cur_sbc.push_back(keycode[i]);
             } else {
-                ibuf_addchar(cur_sbc, key);
+                cur_sbc.push_back(key);
             }
             update_status_win(WIN_REFRESH);
             break;
     };
 
     if (done) {
-        ibuf_free(cur_sbc);
-        cur_sbc = NULL;
+        cur_sbc.clear();
         if_set_focus(CGDB);
     }
 
@@ -1167,14 +1158,14 @@ static void source_input(struct sviewer *sview, int key)
         case CGDB_KEY_UP:
         case 'k': {             /* VI-style up-arrow */
             int lineno = 1;
-            cgdb_string_to_int(ibuf_get(G_line_number), &lineno);
+            cgdb_string_to_int(G_line_number.c_str(), &lineno);
             source_vscroll(sview, -lineno);
             break;
         }
         case CGDB_KEY_DOWN:
         case 'j': {             /* VI-style down-arrow */
             int lineno = 1;
-            cgdb_string_to_int(ibuf_get(G_line_number), &lineno);
+            cgdb_string_to_int(G_line_number.c_str(), &lineno);
             source_vscroll(sview, lineno);
             break;
         }
@@ -1206,7 +1197,7 @@ static void source_input(struct sviewer *sview, int key)
             break;
         case 'G': {              /* end of file or a line number */
             int lineno = -1;
-            cgdb_string_to_int(ibuf_get(G_line_number), &lineno);
+            cgdb_string_to_int(G_line_number.c_str(), &lineno);
             source_set_sel_line(sview, lineno);
             break;
         }
@@ -1254,9 +1245,9 @@ static void source_input(struct sviewer *sview, int key)
 
     /* Store digits into G_line_number for 'G' command. */
     if (key >= '0' && key <= '9') {
-        ibuf_addchar(G_line_number, key);
+        G_line_number.push_back(key);
     } else {
-        ibuf_clear(G_line_number);
+        G_line_number.clear();
     }
 
     /* Some extended features that are set by :set sc */
@@ -1330,8 +1321,6 @@ int if_init(void)
             return 4;
     }
 
-    G_line_number = ibuf_init();
-
     return 0;
 }
 
@@ -1390,14 +1379,14 @@ static int cgdb_input(int key, int *last_key)
             /* Set the type of the command the user is typing in the status bar */
             sbc_kind = SBC_NORMAL;
             if_set_focus(CGDB_STATUS_BAR);
-            /* Since the user is about to type in a command, allocate a buffer
-                         * in which this command can be stored. */
-            cur_sbc = ibuf_init();
+            /* Since the user is about to type in a command, clear the buffer
+             * in which this command can be stored. */
+            cur_sbc.clear();
             return 0;
         case '/':
         case '?':
             if (src_viewer->cur) {
-                regex_cur = ibuf_init();
+                regex_cur.clear();
                 regex_direction_cur = ('/' == key);
                 orig_line_regex = src_viewer->cur->sel_line;
 
@@ -1412,12 +1401,12 @@ static int cgdb_input(int key, int *last_key)
             }
             return 0;
         case 'n':
-            source_search_regex(src_viewer, ibuf_get(regex_last), 2,
+            source_search_regex(src_viewer, regex_last.c_str(), 2,
                                 regex_direction_last, regex_icase);
             if_draw();
             break;
         case 'N':
-            source_search_regex(src_viewer, ibuf_get(regex_last), 2,
+            source_search_regex(src_viewer, regex_last.c_str(), 2,
                                 !regex_direction_last, regex_icase);
             if_draw();
             break;
@@ -1486,11 +1475,9 @@ int internal_if_input(int key, int *last_key)
         /* Depending on which cgdb was in, it can free some memory here that
          * it was previously using. */
         if (focus == CGDB_STATUS_BAR && sbc_kind == SBC_NORMAL) {
-            ibuf_free(cur_sbc);
-            cur_sbc = NULL;
+            cur_sbc.clear();
         } else if (focus == CGDB_STATUS_BAR && sbc_kind == SBC_REGEX) {
-            ibuf_free(regex_cur);
-            regex_cur = NULL;
+            regex_cur.clear();
 
             hl_regex_free(&src_viewer->hlregex);
 
@@ -1500,8 +1487,7 @@ int internal_if_input(int key, int *last_key)
         }
         else if (focus == GDB && sbc_kind == SBC_REGEX)
         {
-            ibuf_free(regex_cur);
-            regex_cur = NULL;
+            regex_cur.clear();
 
             gdb_scroller->in_search_mode = 0;
             sbc_kind = SBC_NORMAL;
@@ -1697,11 +1683,6 @@ void if_shutdown(void)
     if (vseparator_win) {
         swin_delwin(vseparator_win);
         vseparator_win = NULL;
-    }
-
-    if (G_line_number) {
-        ibuf_free(G_line_number);
-        G_line_number = 0;
     }
 }
 

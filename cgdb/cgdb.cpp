@@ -58,6 +58,8 @@
 #include <ctype.h>
 #endif
 
+#include <string>
+
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 
@@ -79,7 +81,6 @@
 #include "fork_util.h"
 #include "terminal.h"
 #include "rline.h"
-#include "ibuf.h"
 #include "usage.h"
 
 /* --------- */
@@ -194,7 +195,7 @@ static int is_tab_completing = 0;
  * is typing to this buffer. When a line comes that does not end in a \,
  * then the command is sent to GDB.
  */
-static struct ibuf *current_line = NULL;
+static std::string current_line;
 
 /**
  * When the user is entering a multi-line command in the GDB window
@@ -365,33 +366,31 @@ static void parse_cgdbrc_file()
  */
 void rlctx_send_user_command(char *line)
 {
-    const char *cline;
-    int length;
+    size_t size;
     char *rline_prompt;
 
     if (line == NULL) {
         /* NULL line means rl_callback_read_char received EOF */
-        ibuf_add(current_line, "quit");
+        current_line.append("quit");
     } else {
         /* Add the line passed in to the current line */
-        ibuf_add(current_line, line);
+        current_line.append(line);
     }
 
     /* Get current line, and current line length */
-    cline = ibuf_get(current_line);
-    length = ibuf_length(current_line);
+    size = current_line.size();
 
     /* Check to see if the user is escaping the line, to use a 
      * multi line command. If so, return so that the user can
      * continue the command. This data should not go into the history
      * buffer, or be sent to gdb yet. 
      *
-     * Also, notice the length > 0 condition. (length == 0) can happen 
+     * Also, notice the size > 0 condition. (size == 0) can happen 
      * when the user simply hits Enter on the keyboard. */
-    if (length > 0 && cline[length - 1] == '\\') {
+    if (size > 0 && current_line[size - 1] == '\\') {
         /* The \ char is for continuation only, it is not meant to be sent
          * to GDB as a character. */
-        ibuf_delchar(current_line);
+        current_line.erase(size - 1);
 
         /* Only need to change the prompt the first time the \ char is used.
          * Doing it a second time would erase the real rline_last_prompt,
@@ -417,19 +416,20 @@ void rlctx_send_user_command(char *line)
     }
 
     /* Don't add the enter command to the history */
-    if (length > 0)
-        rline_add_history(rline, cline);
+    if (size > 0)
+        rline_add_history(rline, current_line.c_str());
 
-    if (is_gdb_tui_command(cline)) {
-        if_print_message("\nWARNING: Not executing GDB TUI command: %s", cline);
+    if (is_gdb_tui_command(current_line.c_str())) {
+        if_print_message("\nWARNING: Not executing GDB TUI command: %s",
+            current_line.c_str());
         rline_clear(rline);
         rline_rl_forced_update_display(rline);
     } else {
         /* Send this command to TGDB */
-        tgdb_request_run_console_command(tgdb, cline);
+        tgdb_request_run_console_command(tgdb, current_line.c_str());
     }
 
-    ibuf_clear(current_line);
+    current_line.clear();
 
     free(line);
 }
@@ -1504,7 +1504,7 @@ static int main_loop(void)
  * -------- */
 void cgdb_cleanup_and_exit(int val)
 {
-    ibuf_free(current_line);
+    current_line.clear();
 
     /* Cleanly scroll the screen up for a prompt */
     swin_scrl(1);
@@ -1793,8 +1793,6 @@ int main(int argc, char *argv[])
     }
 
     cgdb_start_logging();
-
-    current_line = ibuf_init();
 
     /* Initialize default option values */
     cgdbrc_init();

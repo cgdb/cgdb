@@ -1,8 +1,6 @@
 #ifndef __TOKENIZER_H__
 #define __TOKENIZER_H__
 
-#include "ibuf.h"
-
 struct tokenizer;
 
 #define TOKENIZER_ENUM_START_POS 255
