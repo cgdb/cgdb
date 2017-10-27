@@ -1070,6 +1070,15 @@ static void update_file_position(struct tgdb_response *response)
     }
 }
 
+/* Returns true if string str starts with string prefix, or if prefix is NULL. */
+static bool starts_with(const char *prefix, const char *str)
+{
+  if (!prefix) {
+    return true;
+  }
+  return strncmp(prefix, str, strlen(prefix)) == 0;
+}
+
 /* This is a list of all the source files */
 static void update_source_files(struct tgdb_response *response)
 {
@@ -1095,9 +1104,11 @@ static void update_source_files(struct tgdb_response *response)
                            " No sources available! Was the program compiled with debug?");
     } else {
         int i;
-
+        const char *src_prefix = getenv("CGDB_SRC_PREFIX");
         for (i = 0; i < sbcount(source_files); i++) {
-            if_add_filedlg_choice(source_files[i]);
+            if (starts_with(src_prefix, source_files[i])) {
+                if_add_filedlg_choice(source_files[i]);
+            }
         }
 
         if_set_focus(FILE_DLG);
