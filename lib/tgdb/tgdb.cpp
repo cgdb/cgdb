@@ -832,6 +832,8 @@ static const char *tgdb_get_client_command(struct tgdb *tgdb,
             return "finish";
         case TGDB_NEXT:
             return "next";
+        case TGDB_NEXTI:
+            return "nexti";
         case TGDB_START:
             return "start";
         case TGDB_RUN:
@@ -840,6 +842,8 @@ static const char *tgdb_get_client_command(struct tgdb *tgdb,
             return "kill";
         case TGDB_STEP:
             return "step";
+        case TGDB_STEPI:
+            return "stepi";
         case TGDB_UNTIL:
             return "until";
         case TGDB_UP:
