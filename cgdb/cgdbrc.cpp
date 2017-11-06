@@ -927,6 +927,7 @@ int command_parse_set(void)
             break;
         case IDENTIFIER:{
             int boolean = 1;
+            int is_inverse = 0;
             const char *value = NULL;
             const char *token = get_token();
             int length = strlen(token);
@@ -935,13 +936,17 @@ int command_parse_set(void)
             if (length > 2 && token[0] == 'n' && token[1] == 'o') {
                 value = token + 2;
                 boolean = 0;
+            } else if (length > 3
+                    && token[0] == 'i' && token[1] == 'n' && token[2] == 'v') {
+                value = token + 3;
+                is_inverse = 1;
             } else {
                 value = token;
             }
 
             if ((variable = get_variable(value)) != NULL) {
                 rv = 0;
-                if (boolean == 0 && variable->type != CONFIG_TYPE_BOOL) {
+                if ((is_inverse || boolean == 0) && variable->type != CONFIG_TYPE_BOOL) {
                     /* this is an error, you cant' do:
                      * set notabstop 
                      */
@@ -950,6 +955,10 @@ int command_parse_set(void)
 
                 switch (variable->type) {
                     case CONFIG_TYPE_BOOL:
+                        if (is_inverse) {
+                            boolean = !(*(int *) (variable->data));
+                        }
+
                         *(int *) (variable->data) = boolean;
                         break;
                     case CONFIG_TYPE_INT:{
