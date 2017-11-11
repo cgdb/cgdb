@@ -1233,12 +1233,10 @@ kui_manager_set_key_mapping_timeout(struct kui_manager *kuim, unsigned int msec)
 
 int
 kui_manager_get_terminal_keys_kui_map(struct kui_manager *kuim,
-        enum cgdb_key key, std_list_ptr kui_map_set)
+        enum cgdb_key key, const std::list<std::string> &keyseq)
 {
     struct kui_map_set *map_set;
     struct kuictx *terminalkeys;
-    std_list_iterator iter;
-    void *data;
     const char *keycode_str;
 
     if (!kuim)
@@ -1252,14 +1250,8 @@ kui_manager_get_terminal_keys_kui_map(struct kui_manager *kuim,
     terminalkeys = kuim->terminal_keys;
     map_set = kui_get_map_set(terminalkeys);
 
-    /* At this point, the kui_map_set is available
-     * Add each kui_map_set into it. */
-    for (iter = std_list_begin(kui_map_set);
-            iter != std_list_end(kui_map_set);
-            iter = std_list_next(iter)) {
-        if (std_list_get_data(iter, &data) == -1)
-            return -1;
-        kui_ms_register_map(map_set, (const char *)data, keycode_str);
+    for (const auto &data : keyseq) {
+        kui_ms_register_map(map_set, data.c_str(), keycode_str);
     }
 
     return 0;

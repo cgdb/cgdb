@@ -439,16 +439,13 @@ int rline_get_rl_completion_query_items(struct rline *rline)
 
 int
 rline_get_keyseq(struct rline *rline, const char *named_function,
-        std_list_ptr keyseq_list)
+        std::list<std::string> &keyseq)
 {
     rl_command_func_t *func;
     char **invoking_keyseqs = NULL;
     char **invoking_keyseqs_cur = NULL;
     char *new_keyseq = NULL;
     int len;
-
-    if (!keyseq_list)
-        return -1;
 
     func = rl_named_function(named_function);
     if (func == 0)
@@ -468,8 +465,8 @@ rline_get_keyseq(struct rline *rline, const char *named_function,
             continue;
         }
 
-        /* If the append function breaks, in serious trouble */
-        std_list_append(keyseq_list, new_keyseq);
+        keyseq.push_back(new_keyseq);
+        free(new_keyseq);
 
         free(*invoking_keyseqs_cur);
         invoking_keyseqs_cur++;

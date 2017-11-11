@@ -2,6 +2,8 @@
 #define __KUI_H__
 
 /* includes {{{ */
+#include <string>
+#include <list>
 #include "std_list.h"
 #include "kui_cgdb_key.h"
 /* }}} */
@@ -581,7 +583,7 @@ int kui_manager_set_key_mapping_timeout(struct kui_manager *kuim,
  * \param key
  * The key to bind the key sequences too.
  *
- * \param keyseq_list
+ * \param keyseq
  * The list of key sequences to bind to the key. Instead of just
  * making this a 'char*', it's a list, so that multiple sequences
  * can be bound in a single function call.
@@ -590,7 +592,7 @@ int kui_manager_set_key_mapping_timeout(struct kui_manager *kuim,
  * 0 on success or -1 on error
  */
 int kui_manager_get_terminal_keys_kui_map(struct kui_manager *kuim,
-        enum cgdb_key key, std_list_ptr kui_map_set);
+        enum cgdb_key key, const std::list<std::string> &keyseq);
 /*@}*/
 
 /* }}} */

@@ -12,7 +12,8 @@
  * instance.
  */
 
-#include "std_list.h"
+#include <string>
+#include <list>
 
 /* Creating and Destroying a librline context. {{{ */
 /******************************************************************************/
@@ -293,21 +294,15 @@ int rline_get_rl_completion_query_items(struct rline *rline);
  * The readline function to get the key sequences for.
  * Examples are "beginning-of-line" and "end-of-line"
  *
- * \param keyseq_list
- * A list of key sequences (char*) that can be used to map to
- * the named_function the user requested. This variable should
- * be allocated before calling this function and must be destroyed
- * by the caller later. Each item put into this list must also 
- * be destroyed. You can use xfree to do this.
- *
- * NOTE: If rline_get_keyseq fails with a -1, it's important for
- * this function to clean up the memory already put into the keyseq_list
+ * \param keyseq
+ * A list of key sequences that can be used to map to
+ * the named_function the user requested. 
  *
  * \return
  * 0 on success or -1 on error
  */
 int rline_get_keyseq(struct rline *rline, const char *named_function,
-        std_list_ptr keyseq_list);
+        std::list<std::string> &keyseq);
 
 /*@}*/
 /* }}}*/

@@ -1646,34 +1646,17 @@ int update_kui(cgdbrc_config_option_ptr option)
     return 0;
 }
 
-static int destroyReadlineKeySeq(void *data)
-{
-    char *keyseq = (char *) data;
-
-    free(keyseq);
-    return 0;
-}
-
 int add_readline_key_sequence(const char *readline_str, enum cgdb_key key)
 {
-    int ret_val;
+    int result;
+    std::list<std::string> keyseq;
 
-    std_list_ptr keyseq_list = std_list_create(destroyReadlineKeySeq);
-
-    ret_val = rline_get_keyseq(rline, readline_str, keyseq_list);
-    if (ret_val == -1) {
-        std_list_destroy(keyseq_list);
-        return -1;
+    result = rline_get_keyseq(rline, readline_str, keyseq);
+    if (result == 0) {
+         result = kui_manager_get_terminal_keys_kui_map(kui_ctx, key, keyseq);
     }
 
-    ret_val = kui_manager_get_terminal_keys_kui_map(kui_ctx, key, keyseq_list);
-    if (ret_val == -1) {
-        std_list_destroy(keyseq_list);
-        return -1;
-    }
-    std_list_destroy(keyseq_list);
-
-    return 0;
+    return result;
 }
 
 int init_kui(void)
