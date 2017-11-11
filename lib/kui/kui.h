@@ -4,7 +4,7 @@
 /* includes {{{ */
 #include <string>
 #include <list>
-#include "std_list.h"
+
 #include "kui_cgdb_key.h"
 /* }}} */
 
@@ -208,19 +208,6 @@ int kui_ms_register_map(struct kui_map_set *kui_ms,
  * or -2 if map did not exist.
  */
 int kui_ms_deregister_map(struct kui_map_set *kui_ms, const char *key);
-
-/**
- * Get's a list of kui_map's. This way, someone can iterate through
- * the list.
- *
- * \param kui_ms
- * A kui map set.
- *
- * @return
- * The list of maps, or NULL on error.
- * If there are no maps, of course the empty list will be returned.
- */
-std_list_ptr kui_ms_get_maps(struct kui_map_set *kui_ms);
 
 /*@}*/
 
