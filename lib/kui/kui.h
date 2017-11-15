@@ -178,6 +178,9 @@ int kui_ms_destroy(struct kui_map_set *kui_ms);
 /**
  * Add a map to the map set.
  *
+ * If a map already exists with this key in the map set,
+ * it will be deleted and replaced by the new requested mapping.
+ *
  * \param kui_ms
  * The kui map set to add to.
  *

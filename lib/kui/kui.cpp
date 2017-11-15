@@ -10,8 +10,8 @@
  *
  * kui_map_set
  *  - A kui map_set is many kui_map items.
- *  - This data structure stores the kui maps in a list and a kui tree.
- *  - The list is used to keep track of what kui maps are in this set.
+ *  - This data structure stores the kui maps in a std::map and a kui tree.
+ *  - The std::map is used to keep track of what kui maps exist
  *  - The kui tree is used to keep track of what mappings are being
  *    matched when recieving input.
  *
@@ -65,6 +65,9 @@
 
 #include <fcntl.h>
 #include <errno.h>
+
+#include <map>
+
 #include "kui.h"
 #include "sys_util.h"
 #include "io.h"
@@ -269,40 +272,20 @@ struct kui_map_set {
      * in doing the work, it looks only at the current key read.  */
     struct kui_tree *ktree;
 
-    /* A linked list of the maps being checked for. */
-    std_list_ptr maps;
+    /**
+     * All of the maps in this kui map set
+     *
+     * The key is what you type to trigger the mapping. The value
+     * is the kui_map representing the mapping.
+     */
+    std::map<std::string, kui_map*> maps;
 };
-
-static int kui_map_destroy_callback(void *data)
-{
-    struct kui_map *map;
-
-    if (!data)
-        return -1;
-
-    map = (struct kui_map *) data;
-
-    return kui_map_destroy(map);
-}
 
 struct kui_map_set *kui_ms_create(void)
 {
-    struct kui_map_set *map;
-
-    map = (struct kui_map_set *) malloc(sizeof (struct kui_map_set));
-
-    if (!map)
-        return NULL;
-
-    map->maps = std_list_create(kui_map_destroy_callback);
-
-    if (!map->maps) {
-        kui_ms_destroy(map);
-        return NULL;
-    }
+    kui_map_set *map = new kui_map_set();
 
     map->ktree = kui_tree_create();
-
     if (!map->ktree) {
         kui_ms_destroy(map);
         return NULL;
@@ -323,32 +306,16 @@ int kui_ms_destroy(struct kui_map_set *kui_ms)
             retval = -1;
     }
 
-    if (kui_ms->maps) {
-        if (std_list_destroy(kui_ms->maps) == -1)
-            retval = -1;
-        kui_ms->maps = NULL;
+    for (auto it = kui_ms->maps.cbegin(); it != kui_ms->maps.cend();)
+    {
+        kui_map_destroy(it->second);
+        kui_ms->maps.erase(it++);
     }
 
-    free(kui_ms);
-    kui_ms = NULL;
+
+    delete kui_ms;
 
     return retval;
-}
-
-static int kui_map_compare_callback(const void *a, const void *b)
-{
-    struct kui_map *one = (struct kui_map *) a;
-    struct kui_map *two = (struct kui_map *) b;
-
-    return strcmp(one->original_key, two->original_key);
-}
-
-static int kui_map_compare_key_callback(const void *a, const void *b)
-{
-    struct kui_map *one = (struct kui_map *) a;
-    char *two = (char *) b;
-
-    return strcmp(one->original_key, two);
 }
 
 int kui_ms_register_map(struct kui_map_set *kui_ms,
@@ -360,13 +327,16 @@ int kui_ms_register_map(struct kui_map_set *kui_ms,
         return -1;
 
     map = kui_map_create(key_data, value_data);
-
     if (!map)
         return -1;
 
-    if (std_list_insert_sorted(kui_ms->maps, map,
-                    kui_map_compare_callback) == -1)
-        return -1;
+    auto iter = kui_ms->maps.find(key_data);
+    if (iter != kui_ms->maps.end()) {
+        kui_map_destroy(iter->second);
+        kui_ms->maps.erase(iter);
+    }
+
+    kui_ms->maps[key_data] = map;
 
     if (kui_tree_insert(kui_ms->ktree, map->literal_key, map) == -1)
         return -1;
@@ -376,32 +346,20 @@ int kui_ms_register_map(struct kui_map_set *kui_ms,
 
 int kui_ms_deregister_map(struct kui_map_set *kui_ms, const char *key)
 {
-    std_list_iterator iter;
-    struct kui_map *map;
-    void *data;
-
     if (!kui_ms)
         return -1;
 
-    iter = std_list_find(kui_ms->maps, key, kui_map_compare_key_callback);
-
-    if (!iter)
+    auto iter = kui_ms->maps.find(key);
+    if (iter == kui_ms->maps.end()) {
         return -1;
-
-    if (std_list_get_data(iter, &data) == -1)
-        return -1;
-
-    /* If the mapping exists, remove it. */
-    if (data) {
-        map = (struct kui_map *) data;
-
-        /* Delete from the tree */
-        if (kui_tree_delete(kui_ms->ktree, map->literal_key) == -1)
-            return -1;
-
-        if (std_list_remove(kui_ms->maps, iter) == NULL)
-            return -1;
     }
+
+    /* Delete from the tree */
+    if (kui_tree_delete(kui_ms->ktree, iter->second->literal_key) == -1)
+        return -1;
+
+    kui_map_destroy(iter->second);
+    kui_ms->maps.erase(iter);
 
     return 0;
 }
