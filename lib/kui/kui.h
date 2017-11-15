@@ -338,9 +338,9 @@ int kui_set_map_set(struct kuictx *kctx, struct kui_map_set *kui_ms);
  * The kui context.
  *
  * @return
- * -1 on error, otherwise 1 if can get a key, or 0 if nothing available.
+ * True if can get a key, or false if nothing available.
  */
-int kui_cangetkey(struct kuictx *kctx);
+bool kui_cangetkey(struct kuictx *kctx);
 
 /**
  * Get's the next key for the application to process.
