@@ -1,5 +1,4 @@
 AM_CXXFLAGS = \
-    -I$(top_srcdir)/lib/adt \
     -I$(top_srcdir)/lib/util
 
 # create the input library
@@ -18,10 +17,8 @@ noinst_PROGRAMS = kui_driver
 
 # This is the kui driver
 kui_driver_LDFLAGS = \
-    -L$(top_builddir)/lib/adt \
     -L$(top_builddir)/lib/util
 kui_driver_LDADD = libkui.a \
-    $(top_builddir)/lib/adt/libadt.a \
     $(top_builddir)/lib/util/libcgdbutil.a
 kui_driver_SOURCES = kui_driver.cpp
 kui_driver_CXXFLAGS = $(AM_CXXFLAGS)

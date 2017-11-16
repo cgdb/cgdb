@@ -243,7 +243,6 @@ AC_OUTPUT(
     cgdb_custom_config.h \
     Makefile \
     lib/Makefile \
-    lib/adt/Makefile \
     lib/kui/Makefile \
     lib/rline/Makefile \
     lib/tgdb/Makefile \

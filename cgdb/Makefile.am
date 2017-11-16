@@ -1,7 +1,6 @@
 DEFS += -DPKGDATADIR=\"$(pkgdatadir)\" -DTOPBUILDDIR=\"$(abs_top_builddir)\"
 
 AM_CXXFLAGS = \
-    -I$(top_srcdir)/lib/adt \
     -I$(top_srcdir)/lib/kui \
     -I$(top_srcdir)/lib/rline \
     -I$(top_srcdir)/lib/util \
@@ -11,7 +10,6 @@ AM_CXXFLAGS = \
 bin_PROGRAMS = cgdb
 
 cgdb_LDFLAGS = \
-    -L$(top_builddir)/lib/adt \
     -L$(top_builddir)/lib/kui \
     -L$(top_builddir)/lib/rline \
     -L$(top_builddir)/lib/tokenizer \
@@ -23,7 +21,6 @@ cgdb_LDADD = \
     $(top_builddir)/lib/tokenizer/libtokenizer.a \
     $(top_builddir)/lib/kui/libkui.a \
     $(top_builddir)/lib/rline/librline.a \
-    $(top_builddir)/lib/adt/libadt.a \
     $(top_builddir)/lib/util/libcgdbutil.a
 
 noinst_HEADERS = \
