@@ -845,6 +845,8 @@ static int command_parse_map(int param)
         return -1;
     }
 
+    free(key_token);
+
     enter_map_id = 0;
 
     return 0;
