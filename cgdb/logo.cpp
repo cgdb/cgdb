@@ -29,6 +29,7 @@
 
 /* Local Includes */
 #include "sys_util.h"
+#include "stretchy.h"
 #include "sys_win.h"
 #include "cgdb.h"
 #include "logo.h"

@@ -33,6 +33,7 @@
 #include "io.h"
 #include "pseudo.h" /* SLAVE_SIZE constant */
 #include "sys_util.h"
+#include "stretchy.h"
 #include "cgdb_clog.h"
 
 /* }}} */

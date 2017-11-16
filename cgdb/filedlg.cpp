@@ -15,6 +15,7 @@
 #include "fs_util.h"
 
 #include "sys_util.h"
+#include "stretchy.h"
 #include "sys_win.h"
 #include "filedlg.h"
 #include "cgdb.h"

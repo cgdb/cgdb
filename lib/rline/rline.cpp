@@ -1,3 +1,4 @@
+#include <stretchy.h>
 #include <sys_util.h>
 #include "rline.h"
 

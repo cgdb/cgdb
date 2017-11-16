@@ -51,6 +51,7 @@
 #endif /* HAVE_ERRNO_H */
 
 #include "sys_util.h"
+#include "stretchy.h"
 #include "cgdb_clog.h"
 #include "io.h"
 

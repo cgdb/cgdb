@@ -12,6 +12,8 @@ libcgdbutil_a_SOURCES = \
     io.h \
     pseudo.cpp \
     pseudo.h \
+    stretchy.h \
+    stretchy.cpp \
     sys_util.cpp \
     sys_util.h \
     sys_win.cpp \

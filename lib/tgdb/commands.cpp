@@ -20,6 +20,7 @@
 
 /* Local includes */
 #include "sys_util.h"
+#include "stretchy.h"
 #include "commands.h"
 #include "io.h"
 #include "tgdb_types.h"
