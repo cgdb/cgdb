@@ -1,12 +1,6 @@
 #ifndef __KUI_TREE_H__
 #define __KUI_TREE_H__
 
-/* Includes {{{*/
-
-#include "std_list.h"
-
-/* }}}*/
-
 /* Doxygen headers {{{ */
 /*! 
  * \file

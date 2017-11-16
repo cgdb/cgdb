@@ -75,6 +75,16 @@ puts $mapping_output "unmap map_to_unmap2"
 puts $mapping_output "map a<Space>b foo"
 puts $mapping_output "unmap a<Space>b"
 
+# Testing maps that are subsets of each other
+puts $mapping_output "map unmap_example1 a"
+puts $mapping_output "map unmap_example2_subset b"
+puts $mapping_output "unmap unmap_example1"
+
+# Testing maps that are subsets of each other
+puts $mapping_output "map unmap_example2 a"
+puts $mapping_output "map unmap_example2_subset b"
+puts $mapping_output "unmap unmap_example2_subset"
+
 close $mapping_output
 
 # Start the KUI
@@ -701,5 +711,33 @@ expect {
   -re "foo${kui_prompt}$" { fail "$test"}
   timeout {
     pass "$test"
+  }
+}
+
+# If 2 maps exist and our subsets of each other,
+#   map unmap_example1 a
+#   map unmap_example1_subset b
+# and then you delete the parent map, the child should still match.
+#   unmap unmap_example1
+set test "parent map deleted, child map still matches"
+send "unmap_example1_subset"
+expect {
+  -re "b${kui_prompt}$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
+  }
+}
+
+# If 2 maps exist and our subsets of each other,
+#   map unmap_example2 a
+#   map unmap_example2_subset b
+# and then you delete the child map, the parent should still match.
+#   unmap unmap_example2_subset
+set test "child map deleted, parent map still matches"
+send "unmap_example2"
+expect {
+  -re "a${kui_prompt}$" { pass "$test"}
+  timeout {
+    fail "timeout $test"
   }
 }
