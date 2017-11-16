@@ -48,6 +48,7 @@
 /* Our array of completion strings and current index */
 static int completions_index = 0;
 static char **completions_array = NULL;
+static int completions_array_size = 0;
 
 struct rline {
     /* The input to readline. Writing to this, writes to readline. */
@@ -146,8 +147,10 @@ struct rline *rline_initialize(int slavefd, command_cb * command,
 static void rline_free_completions()
 {
     /* Set and index to 0. */
-    sbsetcount(completions_array, 0);
+    delete [] completions_array;
+    completions_array = NULL;
     completions_index = 0;
+    completions_array_size = 0;
 }
 
 int rline_shutdown(struct rline *rline)
@@ -156,8 +159,6 @@ int rline_shutdown(struct rline *rline)
         return -1;              /* Should this be OK? */
 
     rline_free_completions();
-    sbfree(completions_array);
-    completions_array = NULL;
 
     if (rline->input)
         fclose(rline->input);
@@ -303,7 +304,7 @@ int rline_rl_callback_read_char(struct rline *rline)
  */
 char *rline_rl_completion_entry_function(const char *text, int matches)
 {
-    if (completions_index < sbcount(completions_array))
+    if (completions_index < completions_array_size)
     {
         /**
          * 'local' is a possible completion. 'text' is the data to be completed.
@@ -354,10 +355,12 @@ int rline_rl_complete(struct rline *rline, char **completions,
         rl_completion_word_break_hook = NULL;
         rl_completion_entry_function = NULL;
     } else {
-        int i;
+        completions_index = 0;
+        completions_array_size = size;
+        completions_array = new char*[size];
 
-        for (i = 0; i < size; i++)
-            sbpush(completions_array, completions[i]);
+        for (int i = 0; i < size; i++)
+            completions_array[i] = completions[i];
 
         rl_completion_word_break_hook = rline_rl_cpvfunc_t;
         rl_completion_entry_function = rline_rl_completion_entry_function;
