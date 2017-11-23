@@ -28,7 +28,6 @@
 
 #define CLOG_MAIN
 #include "sys_util.h"
-#include "stretchy.h"
 
 void *cgdb_calloc(size_t nmemb, size_t size)
 {
@@ -218,16 +217,13 @@ char *sys_aprintf(const char *fmt, ...)
     return NULL;
 }
 
-char *sys_quote_nonprintables(const char *str, int len)
+std::string sys_quote_nonprintables(const char *str, int len)
 {
     int i;
-    char *ret = NULL;
+    std::string ret;
 
     if (len == -1)
         len = strlen(str);
-
-    /* Nil terminate our return string */
-    sbpush(ret, 0);
 
     for (i = 0; i < len; ++i)
     {
@@ -246,10 +242,12 @@ char *sys_quote_nonprintables(const char *str, int len)
         else if (str[i] == '\t')
             ch = "\\t";
 
-        if (ch)
-            sbpushstrf(&ret, "(%s)", ch);
-        else
-            sbpushstr(&ret, &str[i], 1);
+        if (ch) {
+            ret.push_back('(');
+            ret.append(ch);
+            ret.push_back(')');
+        } else
+            ret.push_back(str[i]);
     }
 
     return ret;

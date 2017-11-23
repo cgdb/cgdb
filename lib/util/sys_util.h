@@ -13,6 +13,8 @@
 #include <stdint.h>
 #endif
 
+#include <string>
+
 #include "cgdb_clog.h"
 
 /* These are wrappers for the memory management functions 
@@ -87,6 +89,7 @@ char *sys_aprintf(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
 
 #define MAX(a, b)  (((a) > (b)) ? (a) : (b))
 #define MIN(a, b)  (((a) < (b)) ? (a) : (b))
-char *sys_quote_nonprintables(const char *str, int len);
+
+std::string sys_quote_nonprintables(const char *str, int len);
 
 #endif

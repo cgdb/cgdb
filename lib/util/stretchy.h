@@ -18,9 +18,6 @@
 #define sbsetcount( a, n ) ( stb__sbmaybegrow( a, n ), stb__sbn( a ) = n )
 #define sbpopfront(a) (sbpush(a,*(a)), stb__shl(a), (a)[--stb__sbn(a)])
 
-void sbpushstr(char **arr, const char *str, int len);
-void sbpushstrf(char **arr, const char *fmt, ...) ATTRIBUTE_PRINTF(2, 3);
-
 #define stb__sbraw( a ) ( ( int * )( a )-2 )
 #define stb__sbm( a ) stb__sbraw( a )[ 0 ]
 #define stb__sbn( a ) stb__sbraw( a )[ 1 ]

@@ -500,9 +500,8 @@ static void tgdb_run_request(struct tgdb *tgdb, struct tgdb_request *request)
     }
 
     /* Send what we're doing to log file */
-    char *str = sys_quote_nonprintables(command.c_str(), -1);
-    clog_debug(CLOG_GDBIO, "%s", str);
-    sbfree(str);
+    std::string str = sys_quote_nonprintables(command.c_str(), -1);
+    clog_debug(CLOG_GDBIO, "%s", str.c_str());
 
     /* A command for the debugger */
     commands_set_current_request_type(tgdb->c, request->header);
