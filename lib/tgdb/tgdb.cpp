@@ -186,8 +186,25 @@ static void tgdb_console_output(void *context, const std::string &msg)
     struct tgdb *tgdb = (struct tgdb*)context;
     enum tgdb_request_type type = commands_get_current_request_type(tgdb->c);
 
-    // Send output to the terminal if the current command is a console command
-    if (type == TGDB_REQUEST_CONSOLE_COMMAND) {
+    /**
+     * Send output to the terminal if this is a console command.
+     *
+     * This initially only took the CONSOLE_COMMAND into account, which
+     * is commands the user types in the GDB window.
+     * Now it also takes the DEBUGGER_COMMAND into account, which is
+     * colon commands the user types in the status bar.
+     * 
+     * The decision to add the DEBUGGER_COMMAND is because a user reported
+     * a bug where ':finish' from the status bar would not show console output
+     * but 'finish' from the gdb window would. It seems reasonable to treat
+     * the two the same.
+     *
+     * I've documented this decision as I believe it's possible another
+     * case could be thought of where it's preferable to hide the output
+     * from the debugger commands. We'll see.
+     */
+    if (type == TGDB_REQUEST_CONSOLE_COMMAND ||
+        type == TGDB_REQUEST_DEBUGGER_COMMAND) {
         tgdb->callbacks.console_output_callback(tgdb->callbacks.context, msg);
     } else {
         commands_process(tgdb->c, msg);
