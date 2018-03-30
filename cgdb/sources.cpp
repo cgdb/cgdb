@@ -528,7 +528,7 @@ struct list_node *source_add(struct sviewer *sview, const char *path)
     init_file_buffer(&new_node->file_buf);
 
     new_node->lflags = NULL;
-    new_node->sel_line = -1;
+    new_node->sel_line = 0;
     new_node->sel_col = 0;
     new_node->sel_rline = 0;
     new_node->exe_line = -1;

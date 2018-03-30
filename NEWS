@@ -1,3 +1,8 @@
+  * Fix issue #161 - CGDB would lock up when doing a regex search from
+    the status bar if the file was just opened from the file dialog and
+    the search did not match any text in the file. Now the search fails
+    to match text as expected.
+
   * Status bar commands and gdb console commands now both show gdb
     output in the gdb window (instead of only the gdb console commands).
     This fixed issue #154 on github.
