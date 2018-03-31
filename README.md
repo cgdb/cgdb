@@ -24,7 +24,7 @@ You must have the following packages installed.
 - libtool
 - flex
 - bison
-- gcc/g++
+- gcc/g++ (c11/c++11 support)
 
 ### Preparing the configure
 
@@ -42,6 +42,11 @@ cd ../build
 make -srj4
 make install
 ```
+
+CGDB is a C11/C++11 project, just like GDB.
+Since the standard is relatively new, your gcc/g++ may support it out of
+the box, or may require the -std=c11 and -std=c++11 flags.
+You can see how to set these flag in the below configure invocation.
 
 I typically enable more error checking with the build tools like so,
 
