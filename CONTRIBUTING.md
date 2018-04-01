@@ -24,6 +24,8 @@ When submitting code for inclusion in CGDB, you agree to allow the project
 owners to license your work under the terms of the Modified BSD License and the
 GPL version 2 or later.
 
+To sign-off a commit, use the `-s` or `--signoff` option.
+
 ### Developer's Certificate of Origin
 
 By making a contribution to this project, I certify that:
