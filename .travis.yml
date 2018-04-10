@@ -1,0 +1,12 @@
+language: cpp
+compiler: gcc
+
+before_script:
+  - sudo apt-get install texinfo
+
+script:
+  - ./autogen.sh
+  - mkdir build
+  - cd build
+  - ../configure
+  - make
