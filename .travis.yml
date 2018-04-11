@@ -8,5 +8,5 @@ script:
   - ./autogen.sh
   - mkdir build
   - cd build
-  - ../configure
+  - CXXFLAGS="-std=c++11" ../configure
   - make
