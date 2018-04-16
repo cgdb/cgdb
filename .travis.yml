@@ -1,9 +1,9 @@
+sudo: required
 language: cpp
 compiler: gcc
-
 before_script:
+  - sudo apt-get update -qq
   - sudo apt-get install texinfo
-
 script:
   - ./autogen.sh
   - mkdir build
