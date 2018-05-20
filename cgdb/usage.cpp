@@ -7,7 +7,9 @@
 void usage(std::ostream& os /*=std::cout*/)
 {
     os << "CGDB Usage:\n"
-       << "   cgdb [cgdb options] [--] [gdb options]\n" "\n" "CGDB Options:\n"
+       << "   cgdb [cgdb options] [--] [gdb options]\n"
+       << "\n"
+       << "CGDB Options:\n"
 #ifdef HAVE_GETOPT_H
        << "   --version   Print version information and then exit.\n"
 #else
