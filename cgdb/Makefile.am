@@ -7,6 +7,12 @@ AM_CXXFLAGS = \
     -I$(top_srcdir)/lib/tgdb \
     -I$(top_srcdir)/lib/tokenizer
 
+noinst_LIBRARIES = libcgdb.a
+
+libcgdb_a_SOURCES = \
+    usage.cpp \
+    usage.h
+
 bin_PROGRAMS = cgdb
 
 cgdb_LDFLAGS = \
