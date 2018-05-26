@@ -42,6 +42,8 @@ enum win_refresh {
     WIN_REFRESH
 };
 
+void main_initialize(int argc, char* argv[]);
+
 /* Clean cgdb up (when exiting) */
 void cgdb_cleanup_and_exit(int val);
 

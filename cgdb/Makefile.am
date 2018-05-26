@@ -10,6 +10,25 @@ AM_CXXFLAGS = \
 noinst_LIBRARIES = libcgdb.a
 
 libcgdb_a_SOURCES = \
+    cgdb.cpp \
+    cgdb.h \
+    cgdbrc.cpp \
+    cgdbrc.h \
+    command_lexer.lpp \
+    filedlg.cpp \
+    filedlg.h \
+    highlight.cpp \
+    highlight.h \
+    highlight_groups.cpp \
+    highlight_groups.h \
+    interface.cpp \
+    interface.h \
+    logo.cpp \
+    logo.h \
+    scroller.cpp \
+    scroller.h \
+    sources.cpp \
+    sources.h \
     usage.cpp \
     usage.h
 
@@ -48,6 +67,7 @@ cgdb_SOURCES = \
     interface.h \
     logo.cpp \
     logo.h \
+    main.cpp \
     scroller.cpp \
     scroller.h \
     sources.cpp \

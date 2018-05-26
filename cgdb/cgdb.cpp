@@ -1753,7 +1753,7 @@ static void cgdb_start_logging()
     clog_set_fmt(CLOG_CGDB_ID, CGDB_CLOG_FORMAT);
 }
 
-int main(int argc, char *argv[])
+void main_initialize(int argc, char* argv[])
 {
     parse_long_options(&argc, &argv);
 
