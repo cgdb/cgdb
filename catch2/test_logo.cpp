@@ -8,7 +8,7 @@ class LogoTestFixture
     {
       initializeLogoIndex();
     }
-    int resetLogo()
+    void resetLogo()
     {
       logo_reset();
     }
