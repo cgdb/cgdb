@@ -26,4 +26,5 @@ tests_SOURCES = \
     test_highlight_groups.cpp \
     test_cgdbrc.cpp \
     test_cgdb.cpp \
-    test_scroller.cpp
+    test_scroller.cpp \
+    test_sources.cpp
