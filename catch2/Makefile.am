@@ -1,3 +1,5 @@
+DEFS += -DPKGDATADIR=\"$(pkgdatadir)\" -DTOPBUILDDIR=\"$(abs_top_builddir)\"
+
 AM_CXXFLAGS = \
     -I$(top_srcdir)/cgdb \
     -I$(top_srcdir)/lib/kui \
@@ -19,4 +21,5 @@ tests_LDADD = \
 tests_SOURCES = \
     test_main.cpp \
     test_usage.cpp \
-    test_logo.cpp
+    test_logo.cpp \
+    test_interface.cpp
