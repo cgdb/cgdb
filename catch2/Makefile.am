@@ -22,4 +22,5 @@ tests_SOURCES = \
     test_main.cpp \
     test_usage.cpp \
     test_logo.cpp \
-    test_interface.cpp
+    test_interface.cpp \
+    test_highlight_groups.cpp
