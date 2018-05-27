@@ -24,4 +24,5 @@ tests_SOURCES = \
     test_logo.cpp \
     test_interface.cpp \
     test_highlight_groups.cpp \
-    test_cgdbrc.cpp
+    test_cgdbrc.cpp \
+    test_cgdb.cpp
