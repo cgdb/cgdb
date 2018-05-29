@@ -27,4 +27,5 @@ tests_SOURCES = \
     test_cgdbrc.cpp \
     test_cgdb.cpp \
     test_scroller.cpp \
-    test_sources.cpp
+    test_sources.cpp \
+    test_filedlg.cpp
