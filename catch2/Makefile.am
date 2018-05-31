@@ -29,4 +29,5 @@ tests_SOURCES = \
     test_scroller.cpp \
     test_sources.cpp \
     test_filedlg.cpp \
-    test_highlight.cpp
+    test_highlight.cpp \
+    test_command_lexer.cpp
