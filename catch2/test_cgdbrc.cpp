@@ -289,3 +289,15 @@ TEST_CASE("Set syntax type")
     REQUIRE(command_set_syntax_type("unknown") == 0);
   }
 }
+
+TEST_CASE("Focus on cgdb")
+{
+  int unused_param = 0;
+  REQUIRE(command_focus_cgdb(unused_param) == 0);
+}
+
+TEST_CASE("Focus on gdb")
+{
+  int unused_param = 0;
+  REQUIRE(command_focus_gdb(unused_param) == 0);
+}
