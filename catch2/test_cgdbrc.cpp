@@ -24,3 +24,20 @@ TEST_CASE("Set arrow style")
     REQUIRE(command_set_arrowstyle("other") == 1);
   }
 }
+
+TEST_CASE("Set cgdb mode key")
+{
+  SECTION("Single character")
+  {
+    REQUIRE(command_set_cgdb_mode_key("a") == 0);
+  }
+  SECTION("Keycode")
+  {
+    REQUIRE(command_set_cgdb_mode_key("<Esc>") == 0);
+  }
+  SECTION("No value")
+  {
+    const char* mode_key = 0;
+    REQUIRE(command_set_cgdb_mode_key(mode_key) == -1);
+  }
+}
