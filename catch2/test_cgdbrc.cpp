@@ -257,3 +257,35 @@ TEST_CASE("Set ttimeout length")
     REQUIRE(command_set_ttimeoutlen(-1) == 0);
   }
 }
+
+TEST_CASE("Set syntax type")
+{
+  SECTION("C")
+  {
+    REQUIRE(command_set_syntax_type("c") == 0);
+  }
+  SECTION("ASM")
+  {
+    REQUIRE(command_set_syntax_type("asm") == 0);
+  }
+  SECTION("D")
+  {
+    REQUIRE(command_set_syntax_type("d") == 0);
+  }
+  SECTION("Go")
+  {
+    REQUIRE(command_set_syntax_type("go") == 0);
+  }
+  SECTION("Ada")
+  {
+    REQUIRE(command_set_syntax_type("ada") == 0);
+  }
+  SECTION("Rust")
+  {
+    REQUIRE(command_set_syntax_type("rust") == 0);
+  }
+  SECTION("Unknown")
+  {
+    REQUIRE(command_set_syntax_type("unknown") == 0);
+  }
+}
