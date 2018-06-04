@@ -193,3 +193,67 @@ TEST_CASE("Set window minimum width")
     REQUIRE(command_set_winminwidth(-1) == 1);
   }
 }
+
+TEST_CASE("Set timeout")
+{
+  SECTION("Positive")
+  {
+    REQUIRE(command_set_timeout(1) == 0);
+  }
+  SECTION("Zero")
+  {
+    REQUIRE(command_set_timeout(0) == 0);
+  }
+  SECTION("Negative")
+  {
+    REQUIRE(command_set_timeout(-1) == 0);
+  }
+}
+
+TEST_CASE("Set timeout length")
+{
+  SECTION("Positive")
+  {
+    REQUIRE(command_set_timeoutlen(1) == 0);
+  }
+  SECTION("Zero")
+  {
+    REQUIRE(command_set_ttimeoutlen(0) == 0);
+  }
+  SECTION("Negative")
+  {
+    REQUIRE(command_set_ttimeoutlen(-1) == 0);
+  }
+}
+
+TEST_CASE("Set ttimeout")
+{
+  SECTION("Positive")
+  {
+    REQUIRE(command_set_ttimeout(1) == 0);
+  }
+  SECTION("Zero")
+  {
+    REQUIRE(command_set_ttimeoutlen(0) == 0);
+  }
+  SECTION("Negative")
+  {
+    REQUIRE(command_set_ttimeoutlen(-1) == 0);
+  }
+}
+
+TEST_CASE("Set ttimeout length")
+{
+  SECTION("Positive")
+  {
+    REQUIRE(command_set_ttimeoutlen(1) == 0);
+  }
+  SECTION("Zero")
+  {
+    REQUIRE(command_set_ttimeoutlen(0) == 0);
+  }
+  SECTION("Negative")
+  {
+    REQUIRE(command_set_ttimeoutlen(-1) == 0);
+  }
+}
