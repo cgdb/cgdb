@@ -301,3 +301,44 @@ TEST_CASE("Focus on gdb")
   int unused_param = 0;
   REQUIRE(command_focus_gdb(unused_param) == 0);
 }
+
+TEST_CASE("Do bang")
+{
+  int unused_param = 0;
+  REQUIRE(command_do_bang(unused_param) == 0);
+}
+
+TEST_CASE("Do tgdb command")
+{
+  REQUIRE(command_do_tgdbcommand(TGDB_RUN) == 0);
+}
+
+TEST_CASE("Do focus")
+{
+  int unused_param = 0;
+  REQUIRE(command_do_focus(unused_param) == 0);
+}
+
+TEST_CASE("Do help")
+{
+  int unused_param = 0;
+  REQUIRE(command_do_help(unused_param) == 0);
+}
+
+TEST_CASE("Do logo")
+{
+  int unused_param = 0;
+  REQUIRE(command_do_logo(unused_param) == 0);
+}
+
+TEST_CASE("Do quit")
+{
+  int unused_param = 0;
+  REQUIRE(command_do_quit(unused_param) == 0);
+}
+
+TEST_CASE("Do shell")
+{
+  int unused_param = 0;
+  REQUIRE(command_do_shell(unused_param) == 0);
+}
