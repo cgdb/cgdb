@@ -89,3 +89,107 @@ TEST_CASE("Set selected line display")
     REQUIRE(command_set_selected_line_display("other") == 1);
   }
 }
+
+TEST_CASE("Set show debug commands")
+{
+  SECTION("Show")
+  {
+    REQUIRE(command_set_sdc(1) == 0);
+  }
+  SECTION("Hide")
+  {
+    REQUIRE(command_set_sdc(0) == 0);
+  }
+  SECTION("Other")
+  {
+    REQUIRE(command_set_sdc(2) == 1);
+  }
+}
+
+TEST_CASE("Set window split")
+{
+  SECTION("Top big")
+  {
+    REQUIRE(command_set_winsplit("top_big") == 0);
+  }
+  SECTION("Top full")
+  {
+    REQUIRE(command_set_winsplit("top_full") == 0);
+  }
+  SECTION("Bottom big")
+  {
+    REQUIRE(command_set_winsplit("bottom_big") == 0);
+  }
+  SECTION("Bottom full")
+  {
+    REQUIRE(command_set_winsplit("bottom_full") == 0);
+  }
+  SECTION("Source big")
+  {
+    REQUIRE(command_set_winsplit("src_big") == 0);
+  }
+  SECTION("Source full")
+  {
+    REQUIRE(command_set_winsplit("src_full") == 0);
+  }
+  SECTION("gdb big")
+  {
+    REQUIRE(command_set_winsplit("gdb_big") == 0);
+  }
+  SECTION("gdb full")
+  {
+    REQUIRE(command_set_winsplit("gdb_full") == 0);
+  }
+  SECTION("Even")
+  {
+    REQUIRE(command_set_winsplit("other") == 0);
+  }
+}
+
+TEST_CASE("Set window split orientation")
+{
+  SECTION("Horizontal")
+  {
+    REQUIRE(command_set_winsplitorientation("horizontal") == 0);
+  }
+  SECTION("Vertical")
+  {
+    REQUIRE(command_set_winsplitorientation("vertical") == 0);
+  }
+  SECTION("Other")
+  {
+    REQUIRE(command_set_winsplitorientation("other") == 0);
+  }
+}
+
+TEST_CASE("Set window minimum height")
+{
+  SECTION("Positive")
+  {
+    REQUIRE(command_set_winminheight(1) == 1);
+  }
+  SECTION("Zero")
+  {
+    REQUIRE(command_set_winminheight(0) == 0);
+  }
+  SECTION("Negative")
+  {
+    REQUIRE(command_set_winminheight(-1) == 1);
+  }
+}
+
+TEST_CASE("Set window minimum width")
+{
+  SECTION("Positive")
+  {
+    REQUIRE(command_set_winminwidth(1) == 1);
+  }
+  SECTION("Zero")
+  {
+    REQUIRE(command_set_winminwidth(0) == 0);
+  }
+  SECTION("Negative")
+  {
+    REQUIRE(command_set_winminwidth(-1) == 1);
+  }
+}
