@@ -386,17 +386,17 @@ TEST_CASE("Get keycode timeout length")
 
 TEST_CASE("Get mapped key timeout length")
 {
-  // Set the timeout length.
-  command_set_timeoutlen(5);
+  CgdbrcTestFixture cgdbrcTestFixture;
+  cgdbrcTestFixture.setOption(CGDBRC_TIMEOUT, 0);
+  cgdbrcTestFixture.setOption(CGDBRC_TIMEOUT_LEN, 5);
 
   SECTION("Timeout disabled")
   {
-    command_set_timeout(0);
     REQUIRE(cgdbrc_get_mapped_key_timeoutlen() == 0);
   }
   SECTION("Timeout enabled")
   {
-    command_set_timeout(1);
+    cgdbrcTestFixture.setOption(CGDBRC_TIMEOUT, 1);
     REQUIRE(cgdbrc_get_mapped_key_timeoutlen() == 5);
   }
 }
