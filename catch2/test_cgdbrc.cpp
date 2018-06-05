@@ -13,6 +13,15 @@ class CgdbrcTestFixture
       option.variant.int_val = value;
       cgdbrc_set_val(option);
     }
+    void setNotification(enum cgdbrc_option_kind kind)
+    {
+      cgdbrc_attach(kind, &notify);
+    }
+  private:
+    static int notify(cgdbrc_config_option_ptr option)
+    {
+      return 1;
+    }
 };
 
 TEST_CASE("Set arrow style")
@@ -37,6 +46,12 @@ TEST_CASE("Set arrow style")
   {
     REQUIRE(command_set_arrowstyle("other") == 1);
   }
+  SECTION("Notify")
+  {
+    CgdbrcTestFixture cgdbrcTestFixture;
+    cgdbrcTestFixture.setNotification(CGDBRC_ARROWSTYLE);
+    REQUIRE(command_set_arrowstyle("short") == 0);
+  }
 }
 
 TEST_CASE("Set cgdb mode key")
@@ -53,6 +68,12 @@ TEST_CASE("Set cgdb mode key")
   {
     const char* mode_key = 0;
     REQUIRE(command_set_cgdb_mode_key(mode_key) == -1);
+  }
+  SECTION("Notify")
+  {
+    CgdbrcTestFixture cgdbrcTestFixture;
+    cgdbrcTestFixture.setNotification(CGDBRC_CGDB_MODE_KEY);
+    REQUIRE(command_set_cgdb_mode_key("a") == 1);
   }
 }
 
@@ -78,6 +99,12 @@ TEST_CASE("Set executing line display")
   {
     REQUIRE(command_set_executing_line_display("other") == 1);
   }
+  SECTION("Notify")
+  {
+    CgdbrcTestFixture cgdbrcTestFixture;
+    cgdbrcTestFixture.setNotification(CGDBRC_EXECUTING_LINE_DISPLAY);
+    REQUIRE(command_set_executing_line_display("shortarrow") == 1);
+  }
 }
 
 TEST_CASE("Set selected line display")
@@ -102,6 +129,12 @@ TEST_CASE("Set selected line display")
   {
     REQUIRE(command_set_selected_line_display("other") == 1);
   }
+  SECTION("Notify")
+  {
+    CgdbrcTestFixture cgdbrcTestFixture;
+    cgdbrcTestFixture.setNotification(CGDBRC_SELECTED_LINE_DISPLAY);
+    REQUIRE(command_set_selected_line_display("shortarrow") == 1);
+  }
 }
 
 TEST_CASE("Set show debug commands")
@@ -117,6 +150,12 @@ TEST_CASE("Set show debug commands")
   SECTION("Other")
   {
     REQUIRE(command_set_sdc(2) == 1);
+  }
+  SECTION("Notify")
+  {
+    CgdbrcTestFixture cgdbrcTestFixture;
+    cgdbrcTestFixture.setNotification(CGDBRC_SHOWDEBUGCOMMANDS);
+    REQUIRE(command_set_sdc(1) == 1);
   }
 }
 
@@ -158,6 +197,12 @@ TEST_CASE("Set window split")
   {
     REQUIRE(command_set_winsplit("other") == 0);
   }
+  SECTION("Notify")
+  {
+    CgdbrcTestFixture cgdbrcTestFixture;
+    cgdbrcTestFixture.setNotification(CGDBRC_WINSPLIT);
+    REQUIRE(command_set_winsplit("top_big") == 1);
+  }
 }
 
 TEST_CASE("Set window split orientation")
@@ -173,6 +218,12 @@ TEST_CASE("Set window split orientation")
   SECTION("Other")
   {
     REQUIRE(command_set_winsplitorientation("other") == 0);
+  }
+  SECTION("Notify")
+  {
+    CgdbrcTestFixture cgdbrcTestFixture;
+    cgdbrcTestFixture.setNotification(CGDBRC_WINSPLITORIENTATION);
+    REQUIRE(command_set_winsplitorientation("horizontal") == 1);
   }
 }
 
@@ -190,6 +241,12 @@ TEST_CASE("Set window minimum height")
   {
     REQUIRE(command_set_winminheight(-1) == 1);
   }
+  SECTION("Notify")
+  {
+    CgdbrcTestFixture cgdbrcTestFixture;
+    cgdbrcTestFixture.setNotification(CGDBRC_WINMINHEIGHT);
+    REQUIRE(command_set_winminheight(1) == 1);
+  }
 }
 
 TEST_CASE("Set window minimum width")
@@ -205,6 +262,12 @@ TEST_CASE("Set window minimum width")
   SECTION("Negative")
   {
     REQUIRE(command_set_winminwidth(-1) == 1);
+  }
+  SECTION("Notify")
+  {
+    CgdbrcTestFixture cgdbrcTestFixture;
+    cgdbrcTestFixture.setNotification(CGDBRC_WINMINWIDTH);
+    REQUIRE(command_set_winminwidth(1) == 1);
   }
 }
 
@@ -222,6 +285,12 @@ TEST_CASE("Set timeout")
   {
     REQUIRE(command_set_timeout(-1) == 0);
   }
+  SECTION("Notify")
+  {
+    CgdbrcTestFixture cgdbrcTestFixture;
+    cgdbrcTestFixture.setNotification(CGDBRC_TIMEOUT);
+    REQUIRE(command_set_timeout(1) == 1);
+  }
 }
 
 TEST_CASE("Set timeout length")
@@ -237,6 +306,12 @@ TEST_CASE("Set timeout length")
   SECTION("Negative")
   {
     REQUIRE(command_set_ttimeoutlen(-1) == 0);
+  }
+  SECTION("Notify")
+  {
+    CgdbrcTestFixture cgdbrcTestFixture;
+    cgdbrcTestFixture.setNotification(CGDBRC_TIMEOUT_LEN);
+    REQUIRE(command_set_timeoutlen(1) == 1);
   }
 }
 
@@ -254,6 +329,12 @@ TEST_CASE("Set ttimeout")
   {
     REQUIRE(command_set_ttimeoutlen(-1) == 0);
   }
+  SECTION("Notify")
+  {
+    CgdbrcTestFixture cgdbrcTestFixture;
+    cgdbrcTestFixture.setNotification(CGDBRC_TTIMEOUT);
+    REQUIRE(command_set_ttimeout(1) == 1);
+  }
 }
 
 TEST_CASE("Set ttimeout length")
@@ -269,6 +350,12 @@ TEST_CASE("Set ttimeout length")
   SECTION("Negative")
   {
     REQUIRE(command_set_ttimeoutlen(-1) == 0);
+  }
+  SECTION("Notify")
+  {
+    CgdbrcTestFixture cgdbrcTestFixture;
+    cgdbrcTestFixture.setNotification(CGDBRC_TTIMEOUT_LEN);
+    REQUIRE(command_set_ttimeoutlen(1) == 1);
   }
 }
 
@@ -301,6 +388,12 @@ TEST_CASE("Set syntax type")
   SECTION("Unknown")
   {
     REQUIRE(command_set_syntax_type("unknown") == 0);
+  }
+  SECTION("Notify")
+  {
+    CgdbrcTestFixture cgdbrcTestFixture;
+    cgdbrcTestFixture.setNotification(CGDBRC_SYNTAX);
+    REQUIRE(command_set_syntax_type("c") == 1);
   }
 }
 
