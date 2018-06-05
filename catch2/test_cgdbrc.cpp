@@ -346,3 +346,20 @@ TEST_CASE("Do shell")
   REQUIRE(command_do_shell(unused_param) == 0);
 }
 */
+
+TEST_CASE("Get mapped key timeout length")
+{
+  // Set the timeout length.
+  command_set_timeoutlen(5);
+
+  SECTION("Timeout disabled")
+  {
+    command_set_timeout(0);
+    REQUIRE(cgdbrc_get_mapped_key_timeoutlen() == 0);
+  }
+  SECTION("Timeout enabled")
+  {
+    command_set_timeout(1);
+    REQUIRE(cgdbrc_get_mapped_key_timeoutlen() == 5);
+  }
+}
