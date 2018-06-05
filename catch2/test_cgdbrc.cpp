@@ -17,6 +17,27 @@ class CgdbrcTestFixture
     {
       cgdbrc_attach(kind, &notify);
     }
+    int getIntOption(enum cgdbrc_option_kind kind)
+    {
+      return cgdbrc_get(kind)->variant.int_val;
+    }
+    enum LineDisplayStyle getLineOption(enum cgdbrc_option_kind kind)
+    {
+      return cgdbrc_get(kind)->variant.line_display_style;
+    }
+    enum tokenizer_language_support getLangOption(enum cgdbrc_option_kind kind)
+    {
+      return cgdbrc_get(kind)->variant.language_support_val;
+    }
+    WIN_SPLIT_TYPE getSplitOption(enum cgdbrc_option_kind kind)
+    {
+      return cgdbrc_get(kind)->variant.win_split_val;
+    }
+    WIN_SPLIT_ORIENTATION_TYPE getOrientOption(enum cgdbrc_option_kind kind)
+    {
+      return cgdbrc_get(kind)->variant.win_split_orientation_val;
+    }
+
   private:
     static int notify(cgdbrc_config_option_ptr option)
     {
@@ -48,8 +69,8 @@ TEST_CASE("Set arrow style")
   }
   SECTION("Notify")
   {
-    CgdbrcTestFixture cgdbrcTestFixture;
-    cgdbrcTestFixture.setNotification(CGDBRC_ARROWSTYLE);
+    CgdbrcTestFixture fixture;
+    fixture.setNotification(CGDBRC_ARROWSTYLE);
     REQUIRE(command_set_arrowstyle("short") == 0);
   }
 }
@@ -71,8 +92,8 @@ TEST_CASE("Set cgdb mode key")
   }
   SECTION("Notify")
   {
-    CgdbrcTestFixture cgdbrcTestFixture;
-    cgdbrcTestFixture.setNotification(CGDBRC_CGDB_MODE_KEY);
+    CgdbrcTestFixture fixture;
+    fixture.setNotification(CGDBRC_CGDB_MODE_KEY);
     REQUIRE(command_set_cgdb_mode_key("a") == 1);
   }
 }
@@ -101,8 +122,8 @@ TEST_CASE("Set executing line display")
   }
   SECTION("Notify")
   {
-    CgdbrcTestFixture cgdbrcTestFixture;
-    cgdbrcTestFixture.setNotification(CGDBRC_EXECUTING_LINE_DISPLAY);
+    CgdbrcTestFixture fixture;
+    fixture.setNotification(CGDBRC_EXECUTING_LINE_DISPLAY);
     REQUIRE(command_set_executing_line_display("shortarrow") == 1);
   }
 }
@@ -131,8 +152,8 @@ TEST_CASE("Set selected line display")
   }
   SECTION("Notify")
   {
-    CgdbrcTestFixture cgdbrcTestFixture;
-    cgdbrcTestFixture.setNotification(CGDBRC_SELECTED_LINE_DISPLAY);
+    CgdbrcTestFixture fixture;
+    fixture.setNotification(CGDBRC_SELECTED_LINE_DISPLAY);
     REQUIRE(command_set_selected_line_display("shortarrow") == 1);
   }
 }
@@ -153,8 +174,8 @@ TEST_CASE("Set show debug commands")
   }
   SECTION("Notify")
   {
-    CgdbrcTestFixture cgdbrcTestFixture;
-    cgdbrcTestFixture.setNotification(CGDBRC_SHOWDEBUGCOMMANDS);
+    CgdbrcTestFixture fixture;
+    fixture.setNotification(CGDBRC_SHOWDEBUGCOMMANDS);
     REQUIRE(command_set_sdc(1) == 1);
   }
 }
@@ -199,8 +220,8 @@ TEST_CASE("Set window split")
   }
   SECTION("Notify")
   {
-    CgdbrcTestFixture cgdbrcTestFixture;
-    cgdbrcTestFixture.setNotification(CGDBRC_WINSPLIT);
+    CgdbrcTestFixture fixture;
+    fixture.setNotification(CGDBRC_WINSPLIT);
     REQUIRE(command_set_winsplit("top_big") == 1);
   }
 }
@@ -221,8 +242,8 @@ TEST_CASE("Set window split orientation")
   }
   SECTION("Notify")
   {
-    CgdbrcTestFixture cgdbrcTestFixture;
-    cgdbrcTestFixture.setNotification(CGDBRC_WINSPLITORIENTATION);
+    CgdbrcTestFixture fixture;
+    fixture.setNotification(CGDBRC_WINSPLITORIENTATION);
     REQUIRE(command_set_winsplitorientation("horizontal") == 1);
   }
 }
@@ -243,8 +264,8 @@ TEST_CASE("Set window minimum height")
   }
   SECTION("Notify")
   {
-    CgdbrcTestFixture cgdbrcTestFixture;
-    cgdbrcTestFixture.setNotification(CGDBRC_WINMINHEIGHT);
+    CgdbrcTestFixture fixture;
+    fixture.setNotification(CGDBRC_WINMINHEIGHT);
     REQUIRE(command_set_winminheight(1) == 1);
   }
 }
@@ -265,8 +286,8 @@ TEST_CASE("Set window minimum width")
   }
   SECTION("Notify")
   {
-    CgdbrcTestFixture cgdbrcTestFixture;
-    cgdbrcTestFixture.setNotification(CGDBRC_WINMINWIDTH);
+    CgdbrcTestFixture fixture;
+    fixture.setNotification(CGDBRC_WINMINWIDTH);
     REQUIRE(command_set_winminwidth(1) == 1);
   }
 }
@@ -287,8 +308,8 @@ TEST_CASE("Set timeout")
   }
   SECTION("Notify")
   {
-    CgdbrcTestFixture cgdbrcTestFixture;
-    cgdbrcTestFixture.setNotification(CGDBRC_TIMEOUT);
+    CgdbrcTestFixture fixture;
+    fixture.setNotification(CGDBRC_TIMEOUT);
     REQUIRE(command_set_timeout(1) == 1);
   }
 }
@@ -309,8 +330,8 @@ TEST_CASE("Set timeout length")
   }
   SECTION("Notify")
   {
-    CgdbrcTestFixture cgdbrcTestFixture;
-    cgdbrcTestFixture.setNotification(CGDBRC_TIMEOUT_LEN);
+    CgdbrcTestFixture fixture;
+    fixture.setNotification(CGDBRC_TIMEOUT_LEN);
     REQUIRE(command_set_timeoutlen(1) == 1);
   }
 }
@@ -331,8 +352,8 @@ TEST_CASE("Set ttimeout")
   }
   SECTION("Notify")
   {
-    CgdbrcTestFixture cgdbrcTestFixture;
-    cgdbrcTestFixture.setNotification(CGDBRC_TTIMEOUT);
+    CgdbrcTestFixture fixture;
+    fixture.setNotification(CGDBRC_TTIMEOUT);
     REQUIRE(command_set_ttimeout(1) == 1);
   }
 }
@@ -353,8 +374,8 @@ TEST_CASE("Set ttimeout length")
   }
   SECTION("Notify")
   {
-    CgdbrcTestFixture cgdbrcTestFixture;
-    cgdbrcTestFixture.setNotification(CGDBRC_TTIMEOUT_LEN);
+    CgdbrcTestFixture fixture;
+    fixture.setNotification(CGDBRC_TTIMEOUT_LEN);
     REQUIRE(command_set_ttimeoutlen(1) == 1);
   }
 }
@@ -391,8 +412,8 @@ TEST_CASE("Set syntax type")
   }
   SECTION("Notify")
   {
-    CgdbrcTestFixture cgdbrcTestFixture;
-    cgdbrcTestFixture.setNotification(CGDBRC_SYNTAX);
+    CgdbrcTestFixture fixture;
+    fixture.setNotification(CGDBRC_SYNTAX);
     REQUIRE(command_set_syntax_type("c") == 1);
   }
 }
@@ -455,33 +476,33 @@ TEST_CASE("Do shell")
 
 TEST_CASE("Get keycode timeout length")
 {
-  CgdbrcTestFixture cgdbrcTestFixture;
-  cgdbrcTestFixture.setOption(CGDBRC_TIMEOUT, 1);
-  cgdbrcTestFixture.setOption(CGDBRC_TTIMEOUT, 0);
-  cgdbrcTestFixture.setOption(CGDBRC_TIMEOUT_LEN, 5);
+  CgdbrcTestFixture fixture;
+  fixture.setOption(CGDBRC_TIMEOUT, 1);
+  fixture.setOption(CGDBRC_TTIMEOUT, 0);
+  fixture.setOption(CGDBRC_TIMEOUT_LEN, 5);
 
   SECTION("Neither timeout nor t-timeout enabled")
   {
-    cgdbrcTestFixture.setOption(CGDBRC_TIMEOUT, 0);
+    fixture.setOption(CGDBRC_TIMEOUT, 0);
     REQUIRE(cgdbrc_get_key_code_timeoutlen() == 0);
   }
   SECTION("Length of t-timeout is less than zero")
   {
-    cgdbrcTestFixture.setOption(CGDBRC_TTIMEOUT_LEN, -1);
+    fixture.setOption(CGDBRC_TTIMEOUT_LEN, -1);
     REQUIRE(cgdbrc_get_key_code_timeoutlen() == 5);
   }
   SECTION("Length of t-timeout is greater than zero")
   {
-    cgdbrcTestFixture.setOption(CGDBRC_TTIMEOUT_LEN, 10);
+    fixture.setOption(CGDBRC_TTIMEOUT_LEN, 10);
     REQUIRE(cgdbrc_get_key_code_timeoutlen() == 10);
   }
 }
 
 TEST_CASE("Get mapped key timeout length")
 {
-  CgdbrcTestFixture cgdbrcTestFixture;
-  cgdbrcTestFixture.setOption(CGDBRC_TIMEOUT, 0);
-  cgdbrcTestFixture.setOption(CGDBRC_TIMEOUT_LEN, 5);
+  CgdbrcTestFixture fixture;
+  fixture.setOption(CGDBRC_TIMEOUT, 0);
+  fixture.setOption(CGDBRC_TIMEOUT_LEN, 5);
 
   SECTION("Timeout disabled")
   {
@@ -489,7 +510,115 @@ TEST_CASE("Get mapped key timeout length")
   }
   SECTION("Timeout enabled")
   {
-    cgdbrcTestFixture.setOption(CGDBRC_TIMEOUT, 1);
+    fixture.setOption(CGDBRC_TIMEOUT, 1);
     REQUIRE(cgdbrc_get_mapped_key_timeoutlen() == 5);
+  }
+}
+
+TEST_CASE("Initialize the configuration options with default values")
+{
+  CgdbrcTestFixture fixture;
+  cgdbrc_init_config_options();
+
+  SECTION("Default arrow style")
+  {
+    LineDisplayStyle lds = fixture.getLineOption(CGDBRC_ARROWSTYLE);
+    REQUIRE(lds == LINE_DISPLAY_SHORT_ARROW);
+  }
+  SECTION("Default auto source reload")
+  {
+    REQUIRE(fixture.getIntOption(CGDBRC_AUTOSOURCERELOAD) == 1);
+  }
+  SECTION("Default cgdb mode key")
+  {
+    REQUIRE(fixture.getIntOption(CGDBRC_CGDB_MODE_KEY) == CGDB_KEY_ESC);
+  }
+  SECTION("Default color")
+  {
+    REQUIRE(fixture.getIntOption(CGDBRC_COLOR) == 1);
+  }
+  SECTION("Default debug window color")
+  {
+    REQUIRE(fixture.getIntOption(CGDBRC_DEBUGWINCOLOR) == 1);
+  }
+  SECTION("Default disassemble")
+  {
+    REQUIRE(fixture.getIntOption(CGDBRC_DISASM) == 0);
+  }
+  SECTION("Default executing line display")
+  {
+    LineDisplayStyle lds = fixture.getLineOption(
+        CGDBRC_EXECUTING_LINE_DISPLAY);
+    REQUIRE(lds == LINE_DISPLAY_LONG_ARROW);
+  }
+  SECTION("Default highlight search")
+  {
+    REQUIRE(fixture.getIntOption(CGDBRC_HLSEARCH) == 0);
+  }
+  SECTION("Default ignore case")
+  {
+    REQUIRE(fixture.getIntOption(CGDBRC_IGNORECASE) == 0);
+  }
+  SECTION("Default selected line display")
+  {
+    LineDisplayStyle lds = fixture.getLineOption(
+        CGDBRC_SELECTED_LINE_DISPLAY);
+    REQUIRE(lds == LINE_DISPLAY_BLOCK);
+  }
+  SECTION("Default show debug commands")
+  {
+    REQUIRE(fixture.getIntOption(CGDBRC_SHOWDEBUGCOMMANDS) == 0);
+  }
+  SECTION("Default show marks")
+  {
+    REQUIRE(fixture.getIntOption(CGDBRC_SHOWMARKS) == 1);
+  }
+  SECTION("Default syntax")
+  {
+    tokenizer_language_support tls = fixture.getLangOption(CGDBRC_SYNTAX);
+    REQUIRE(tls == TOKENIZER_LANGUAGE_UNKNOWN);
+  }
+  SECTION("Default tabstop")
+  {
+    REQUIRE(fixture.getIntOption(CGDBRC_TABSTOP) == 8);
+  }
+  SECTION("Default timeout")
+  {
+    REQUIRE(fixture.getIntOption(CGDBRC_TIMEOUT) == 1);
+  }
+  SECTION("Default timeout length")
+  {
+    REQUIRE(fixture.getIntOption(CGDBRC_TIMEOUT_LEN) == 1000);
+  }
+  SECTION("Default t-timeout")
+  {
+    REQUIRE(fixture.getIntOption(CGDBRC_TTIMEOUT) == 1);
+  }
+  SECTION("Default t-timeout length")
+  {
+    REQUIRE(fixture.getIntOption(CGDBRC_TTIMEOUT_LEN) == 100);
+  }
+  SECTION("Default minimum window height")
+  {
+    REQUIRE(fixture.getIntOption(CGDBRC_WINMINHEIGHT) == 0);
+  }
+  SECTION("Default minimum window width")
+  {
+    REQUIRE(fixture.getIntOption(CGDBRC_WINMINWIDTH) == 0);
+  }
+  SECTION("Default window split")
+  {
+    WIN_SPLIT_TYPE ws = fixture.getSplitOption(CGDBRC_WINSPLIT);
+    REQUIRE(ws == WIN_SPLIT_EVEN);
+  }
+  SECTION("Default window split orientation")
+  {
+    WIN_SPLIT_ORIENTATION_TYPE wso = fixture.getOrientOption(
+        CGDBRC_WINSPLITORIENTATION);
+    REQUIRE(wso == WSO_HORIZONTAL);
+  }
+  SECTION("Default wrap scan")
+  {
+    REQUIRE(fixture.getIntOption(CGDBRC_WRAPSCAN) == 1);
   }
 }
