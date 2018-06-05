@@ -2,6 +2,19 @@
 #include "cgdbrc.cpp"
 #include "tgdb_types.h"
 
+
+class CgdbrcTestFixture
+{
+  public:
+    void setOption(enum cgdbrc_option_kind kind, int value)
+    {
+      struct cgdbrc_config_option option;
+      option.option_kind = kind;
+      option.variant.int_val = value;
+      cgdbrc_set_val(option);
+    }
+};
+
 TEST_CASE("Set arrow style")
 {
   SECTION("Set short arrow style")
@@ -346,6 +359,30 @@ TEST_CASE("Do shell")
   REQUIRE(command_do_shell(unused_param) == 0);
 }
 */
+
+TEST_CASE("Get keycode timeout length")
+{
+  CgdbrcTestFixture cgdbrcTestFixture;
+  cgdbrcTestFixture.setOption(CGDBRC_TIMEOUT, 1);
+  cgdbrcTestFixture.setOption(CGDBRC_TTIMEOUT, 0);
+  cgdbrcTestFixture.setOption(CGDBRC_TIMEOUT_LEN, 5);
+
+  SECTION("Neither timeout nor t-timeout enabled")
+  {
+    cgdbrcTestFixture.setOption(CGDBRC_TIMEOUT, 0);
+    REQUIRE(cgdbrc_get_key_code_timeoutlen() == 0);
+  }
+  SECTION("Length of t-timeout is less than zero")
+  {
+    cgdbrcTestFixture.setOption(CGDBRC_TTIMEOUT_LEN, -1);
+    REQUIRE(cgdbrc_get_key_code_timeoutlen() == 5);
+  }
+  SECTION("Length of t-timeout is greater than zero")
+  {
+    cgdbrcTestFixture.setOption(CGDBRC_TTIMEOUT_LEN, 10);
+    REQUIRE(cgdbrc_get_key_code_timeoutlen() == 10);
+  }
+}
 
 TEST_CASE("Get mapped key timeout length")
 {
