@@ -787,3 +787,30 @@ TEST_CASE("Initialize the configuration variables")
     REQUIRE(it->second == "wrapscan");
   }
 }
+
+TEST_CASE("Get configuration variable", "[unit]")
+{
+  char* shortName = "tcv";
+  char* longName = "testconfigvariable";
+  ConfigType configType = CONFIG_TYPE_INT;
+  void* data = NULL;
+  ConfigVariable inConfigVariable(longName, shortName,
+                                  configType, data);
+  cgdbrc_variables.push_back(inConfigVariable);
+
+  SECTION("Short name")
+  {
+    ConfigVariable outConfigVariable = (*get_variable(shortName));
+    REQUIRE(outConfigVariable.name == longName);
+  }
+  SECTION("Long name")
+  {
+    ConfigVariable outConfigVariable = (*get_variable(longName));
+    REQUIRE(outConfigVariable.name == longName);
+  }
+  SECTION("Nonexistent name")
+  {
+    ConfigVariable* outConfigVariable = get_variable("nonexistent");
+    REQUIRE(!outConfigVariable);
+  }
+}
