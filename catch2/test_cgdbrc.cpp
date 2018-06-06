@@ -2,6 +2,8 @@
 #include "cgdbrc.cpp"
 #include "tgdb_types.h"
 
+#include <stdio.h>
+
 
 class CgdbrcTestFixture
 {
@@ -36,6 +38,16 @@ class CgdbrcTestFixture
     WIN_SPLIT_ORIENTATION_TYPE getOrientOption(enum cgdbrc_option_kind kind)
     {
       return cgdbrc_get(kind)->variant.win_split_orientation_val;
+    }
+    std::map<std::string, std::string> getVariableMap()
+    {
+      std::map<std::string, std::string> variables;
+      std::list<ConfigVariable>::iterator it;
+      for (it = cgdbrc_variables.begin(); it != cgdbrc_variables.end(); ++it) {
+        variables[it->s_name] = it->name;
+      }
+
+      return variables;
     }
 
   private:
@@ -620,5 +632,161 @@ TEST_CASE("Initialize the configuration options with default values")
   SECTION("Default wrap scan")
   {
     REQUIRE(fixture.getIntOption(CGDBRC_WRAPSCAN) == 1);
+  }
+}
+
+TEST_CASE("Initialize the configuration variables")
+{
+  CgdbrcTestFixture fixture;
+  cgdbrc_init_config_variables();
+  std::map<std::string, std::string> variables = fixture.getVariableMap();
+  std::map<std::string, std::string>::iterator it;
+
+  SECTION("Number of configuration variables")
+  {
+    // If you are increasing the number of configuration variables, you should
+    // also be adding a section to this test case to verify the new variable.
+    // Additionally, you should add a section to the test case for configuration
+    // variable default values to verify the default assigned value for the new
+    // variable is as expected.
+    REQUIRE(cgdbrc_variables.size() == 23);
+  }
+  SECTION("Arrow style variable")
+  {
+    it = variables.find("as");
+    REQUIRE(it != variables.end());
+    REQUIRE(it->second == "arrowstyle");
+  }
+  SECTION("Auto source reload variable")
+  {
+    it = variables.find("asr");
+    REQUIRE(it != variables.end());
+    REQUIRE(it->second == "autosourcereload");
+  }
+  SECTION("cgdb mode key variable")
+  {
+    it = variables.find("cgdbmodekey");
+    REQUIRE(it != variables.end());
+    REQUIRE(it->second == "cgdbmodekey");
+  }
+  SECTION("Color variable"){}
+  {
+    it = variables.find("color");
+    REQUIRE(it != variables.end());
+    REQUIRE(it->second == "color");
+  }
+  SECTION("Debug window color variable")
+  {
+    it = variables.find("dwc");
+    REQUIRE(it != variables.end());
+    REQUIRE(it->second == "debugwincolor");
+  }
+  SECTION("Disassemble variable")
+  {
+    it = variables.find("dis");
+    REQUIRE(it != variables.end());
+    REQUIRE(it->second == "disasm");
+  }
+  SECTION("Executing line display variable")
+  {
+    it = variables.find("eld");
+    REQUIRE(it != variables.end());
+    REQUIRE(it->second == "executinglinedisplay");
+  }
+  SECTION("Highlight search variable")
+  {
+    it = variables.find("hls");
+    REQUIRE(it != variables.end());
+    REQUIRE(it->second == "hlsearch");
+  }
+  SECTION("Ignore case variable")
+  {
+    it = variables.find("ic");
+    REQUIRE(it != variables.end());
+    REQUIRE(it->second == "ignorecase");
+  }
+  SECTION("Selected line display variable")
+  {
+    it = variables.find("sld");
+    REQUIRE(it != variables.end());
+    REQUIRE(it->second == "selectedlinedisplay");
+  }
+  SECTION("Show debug commands variable")
+  {
+    it = variables.find("sdc");
+    REQUIRE(it != variables.end());
+    REQUIRE(it->second == "showdebugcommands");
+  }
+  SECTION("Show marks variable")
+  {
+    it = variables.find("showmarks");
+    REQUIRE(it != variables.end());
+    REQUIRE(it->second == "showmarks");
+  }
+  SECTION("Syntax variable")
+  {
+    it = variables.find("syn");
+    REQUIRE(it != variables.end());
+    REQUIRE(it->second == "syntax");
+  }
+  SECTION("Tab stop variable")
+  {
+    it = variables.find("ts");
+    REQUIRE(it != variables.end());
+    REQUIRE(it->second == "tabstop");
+  }
+  SECTION("Timeout variable")
+  {
+    it = variables.find("to");
+    REQUIRE(it != variables.end());
+    REQUIRE(it->second == "timeout");
+  }
+  SECTION("Timeout length variable")
+  {
+    it = variables.find("tm");
+    REQUIRE(it != variables.end());
+    REQUIRE(it->second == "timeoutlen");
+  }
+  SECTION("T-timeout variable")
+  {
+    it = variables.find("ttimeout");
+    REQUIRE(it != variables.end());
+    REQUIRE(it->second == "ttimeout");
+  }
+  SECTION("T-timeout length variable")
+  {
+    it = variables.find("ttm");
+    REQUIRE(it != variables.end());
+    REQUIRE(it->second == "ttimeoutlen");
+  }
+  SECTION("Minimum window height variable")
+  {
+    it = variables.find("wmh");
+    REQUIRE(it != variables.end());
+    REQUIRE(it->second == "winminheight");
+  }
+  SECTION("Minimum window width variable")
+  {
+    it = variables.find("wmw");
+    REQUIRE(it != variables.end());
+    REQUIRE(it->second == "winminwidth");
+  }
+  SECTION("Window split variable")
+  {
+    it = variables.find("winsplit");
+    REQUIRE(it != variables.end());
+    REQUIRE(it->second == "winsplit");
+  }
+  SECTION("Window split orientation variable")
+  {
+    it = variables.find("wso");
+    REQUIRE(it != variables.end());
+    REQUIRE(it->second == "winsplitorientation");
+  }
+  SECTION("Wrap scan variable")
+  {
+    it = variables.find("ws");
+    REQUIRE(it != variables.end());
+    REQUIRE(it->second == "wrapscan");
   }
 }
