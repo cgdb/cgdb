@@ -2,8 +2,6 @@
 #include "cgdbrc.cpp"
 #include "tgdb_types.h"
 
-#include <stdio.h>
-
 
 class CgdbrcTestFixture
 {
@@ -46,7 +44,6 @@ class CgdbrcTestFixture
       for (it = cgdbrc_variables.begin(); it != cgdbrc_variables.end(); ++it) {
         variables[it->s_name] = it->name;
       }
-
       return variables;
     }
 
