@@ -11,6 +11,7 @@
 #include "catch.hpp"
 #include "cgdbrc.cpp"
 #include "tgdb_types.h"
+#include <string>
 
 
 class CgdbrcTestFixture
@@ -70,7 +71,6 @@ class CgdbrcTestFixture
       return variables;
     }
 
-  private:
     static int notify(cgdbrc_config_option_ptr option)
     {
       return 1;
@@ -964,4 +964,76 @@ TEST_CASE("Get configuration variable", "[unit]")
     ConfigVariable* outConfigVariable = get_variable("nonexistent");
     REQUIRE(!outConfigVariable);
   }
+}
+
+TEST_CASE("Parse a file", "[integration]")
+{
+  SECTION("Nonexistent file")
+  {
+    std::string nonexistent = "nonexistent";
+    REQUIRE(command_parse_file(nonexistent.c_str()) == 0);
+  }
+}
+
+TEST_CASE("Set a configuration option value", "[unit]")
+{
+  CgdbrcTestFixture cgdbrcFixture;
+  cgdbrcFixture.resetStatics();
+
+  struct cgdbrc_config_option option;
+  option.option_kind = CGDBRC_TABSTOP;
+  option.variant.int_val = 2;
+
+  SECTION("Without notification")
+  {
+    REQUIRE(cgdbrc_set_val(option) == 0);
+  }
+
+  SECTION("With notification")
+  {
+    cgdbrc_attach(CGDBRC_TABSTOP, &cgdbrcFixture.notify);
+    REQUIRE(cgdbrc_set_val(option) == 1);
+  }
+}
+
+TEST_CASE("Attach a configuration item", "[unit]")
+{
+  CgdbrcTestFixture cgdbrcFixture;
+  cgdbrcFixture.resetStatics();
+  CHECK(cgdbrc_attach_list.size() == 0);
+
+  cgdbrc_attach(CGDBRC_TABSTOP, &cgdbrcFixture.notify);
+  REQUIRE(cgdbrc_attach_list.size() == 1);
+}
+
+TEST_CASE("Get a configuration option", "[unit]")
+{
+  struct cgdbrc_config_option option;
+  option.option_kind = CGDBRC_TABSTOP;
+  option.variant.int_val = 2;
+  cgdbrc_config_options[option.option_kind] = option;
+
+  struct cgdbrc_config_option* option_ptr = cgdbrc_get(option.option_kind);
+  REQUIRE(option.variant.int_val == option_ptr->variant.int_val);
+}
+
+TEST_CASE("Get an integer option value", "[integration]")
+{
+  struct cgdbrc_config_option option;
+  option.option_kind = CGDBRC_TABSTOP;
+  option.variant.int_val = 2;
+  cgdbrc_config_options[option.option_kind] = option;
+
+  REQUIRE(cgdbrc_get_int(option.option_kind) == 2);
+}
+
+TEST_CASE("Get a display style configuration option value", "[integration]")
+{
+  struct cgdbrc_config_option option;
+  option.option_kind = CGDBRC_ARROWSTYLE;
+  option.variant.int_val = LINE_DISPLAY_SHORT_ARROW;
+  cgdbrc_config_options[option.option_kind] = option;
+
+  REQUIRE(cgdbrc_get_displaystyle(option.option_kind)
+          == LINE_DISPLAY_SHORT_ARROW);
 }
