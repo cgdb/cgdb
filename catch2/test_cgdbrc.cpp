@@ -542,38 +542,40 @@ TEST_CASE("Do bang", "[unit]")
   REQUIRE(command_do_bang(0) == 0);
 }
 
-/* TODO: resolve run time errors resulting from do-commands
-TEST_CASE("Do tgdb command")
+TEST_CASE("Do logo", "[integration][curses]")
+{
+  CursesTestFixture cursesFixture;
+  // We set the winsplit to access the method  if_layout() which updates the
+  // screen.
+  if_set_winsplit(WIN_SPLIT_SRC_BIG);
+  REQUIRE(command_do_logo(0) == 0);
+}
+
+/* TODO
+TEST_CASE("Do tgdb command", "[integration]")
 {
   tgdb_command_type c = TGDB_RUN;
   REQUIRE(command_do_tgdbcommand(c) == 0);
 }
 
-TEST_CASE("Do focus")
+TEST_CASE("Do focus", "[integration]")
 {
   int unused_param = 0;
   REQUIRE(command_do_focus(unused_param) == 0);
 }
 
-TEST_CASE("Do help")
+TEST_CASE("Do help", "[integration][curses]")
 {
-  int unused_param = 0;
-  REQUIRE(command_do_help(unused_param) == 0);
+  CursesTestFixture cursesFixture;
+  REQUIRE(command_do_help(0) == 0);
 }
 
-TEST_CASE("Do logo")
+TEST_CASE("Do quit", "[integration]")
 {
-  int unused_param = 0;
-  REQUIRE(command_do_logo(unused_param) == 0);
+  REQUIRE(command_do_quit(0) == 0);
 }
 
-TEST_CASE("Do quit")
-{
-  int unused_param = 0;
-  REQUIRE(command_do_quit(unused_param) == 0);
-}
-
-TEST_CASE("Do shell")
+TEST_CASE("Do shell", "[integration]")
 {
   int unused_param = 0;
   REQUIRE(command_do_shell(unused_param) == 0);
