@@ -1,3 +1,13 @@
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
+#if HAVE_CURSES_H
+#include <curses.h>
+#elif HAVE_NCURSES_CURSES_H
+#include <ncurses/curses.h>
+#endif
+
 #include "catch.hpp"
 #include "cgdbrc.cpp"
 #include "tgdb_types.h"
@@ -6,6 +16,14 @@
 class CgdbrcTestFixture
 {
   public:
+    CgdbrcTestFixture()
+    {
+      initscr();
+    }
+    ~CgdbrcTestFixture()
+    {
+      endwin();
+    }
     void setOption(enum cgdbrc_option_kind kind, int value)
     {
       struct cgdbrc_config_option option;
@@ -429,20 +447,32 @@ TEST_CASE("Set syntax type")
 
 TEST_CASE("Focus on cgdb")
 {
-  int unused_param = 0;
-  REQUIRE(command_focus_cgdb(unused_param) == 0);
+  int rv;
+  {
+    CgdbrcTestFixture fixture;
+    rv = command_focus_cgdb(/*unused parameter*/ 0);
+  }
+  REQUIRE(rv == 0);
 }
 
 TEST_CASE("Focus on gdb")
 {
-  int unused_param = 0;
-  REQUIRE(command_focus_gdb(unused_param) == 0);
+  int rv;
+  {
+    CgdbrcTestFixture fixture;
+    rv = command_focus_gdb(/*unused parameter*/ 0);
+  }
+  REQUIRE(rv == 0);
 }
 
 TEST_CASE("Do bang")
 {
-  int unused_param = 0;
-  REQUIRE(command_do_bang(unused_param) == 0);
+  int rv;
+  {
+    CgdbrcTestFixture fixture;
+    rv = command_do_bang(/*unused parameter*/ 0);
+  }
+  REQUIRE(rv == 0);
 }
 
 /* TODO: resolve run time errors resulting from do-commands
