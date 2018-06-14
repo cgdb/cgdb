@@ -16,16 +16,6 @@
 class CgdbrcTestFixture
 {
   public:
-    CgdbrcTestFixture()
-    {
-      initscr();
-    }
-
-    ~CgdbrcTestFixture()
-    {
-      endwin();
-    }
-
     void setOption(enum cgdbrc_option_kind kind, int value)
     {
       struct cgdbrc_config_option option;
@@ -87,12 +77,26 @@ class CgdbrcTestFixture
     }
 };
 
-TEST_CASE("Set arrow style")
+class CursesTestFixture
 {
-  CgdbrcTestFixture fixture;
+  public:
+    CursesTestFixture()
+    {
+      initscr();
+    }
+
+    ~CursesTestFixture()
+    {
+      endwin();
+    }
+};
+
+TEST_CASE("Set arrow style", "[integration]")
+{
+  CgdbrcTestFixture cgdbrcFixture;
   // Clear any possible notification hooks due to the shared option kind
   // CGDBRC_EXECUTING_LINE_DISPLAY.
-  fixture.resetStatics();
+  cgdbrcFixture.resetStatics();
 
   SECTION("Set short arrow style")
   {
@@ -121,12 +125,12 @@ TEST_CASE("Set arrow style")
 
   SECTION("Set and notify")
   {
-    fixture.setNotification(CGDBRC_EXECUTING_LINE_DISPLAY);
+    cgdbrcFixture.setNotification(CGDBRC_EXECUTING_LINE_DISPLAY);
     REQUIRE(command_set_arrowstyle("short") == 1);
   }
 }
 
-TEST_CASE("Set cgdb mode key")
+TEST_CASE("Set cgdb mode key", "[integration]")
 {
   SECTION("Single character")
   {
@@ -151,18 +155,18 @@ TEST_CASE("Set cgdb mode key")
 
   SECTION("Set and notify")
   {
-    CgdbrcTestFixture fixture;
-    fixture.setNotification(CGDBRC_CGDB_MODE_KEY);
+    CgdbrcTestFixture cgdbrcFixture;
+    cgdbrcFixture.setNotification(CGDBRC_CGDB_MODE_KEY);
     REQUIRE(command_set_cgdb_mode_key("a") == 1);
   }
 }
 
-TEST_CASE("Set executing line display")
+TEST_CASE("Set executing line display", "[integration]")
 {
-  CgdbrcTestFixture fixture;
+  CgdbrcTestFixture cgdbrcFixture;
   // Clear any possible notification hooks due to the shared option kind
   // CGDBRC_EXECUTING_LINE_DISPLAY.
-  fixture.resetStatics();
+  cgdbrcFixture.resetStatics();
 
   SECTION("Set short arrow style")
   {
@@ -191,12 +195,12 @@ TEST_CASE("Set executing line display")
 
   SECTION("Set and notify")
   {
-    fixture.setNotification(CGDBRC_EXECUTING_LINE_DISPLAY);
+    cgdbrcFixture.setNotification(CGDBRC_EXECUTING_LINE_DISPLAY);
     REQUIRE(command_set_executing_line_display("shortarrow") == 1);
   }
 }
 
-TEST_CASE("Set selected line display")
+TEST_CASE("Set selected line display", "[integration]")
 {
   SECTION("Set short arrow style")
   {
@@ -225,13 +229,13 @@ TEST_CASE("Set selected line display")
 
   SECTION("Set and notify")
   {
-    CgdbrcTestFixture fixture;
-    fixture.setNotification(CGDBRC_SELECTED_LINE_DISPLAY);
+    CgdbrcTestFixture cgdbrcFixture;
+    cgdbrcFixture.setNotification(CGDBRC_SELECTED_LINE_DISPLAY);
     REQUIRE(command_set_selected_line_display("shortarrow") == 1);
   }
 }
 
-TEST_CASE("Set show debug commands")
+TEST_CASE("Set show debug commands", "[integration]")
 {
   SECTION("Show")
   {
@@ -250,14 +254,16 @@ TEST_CASE("Set show debug commands")
 
   SECTION("Set and notify")
   {
-    CgdbrcTestFixture fixture;
-    fixture.setNotification(CGDBRC_SHOWDEBUGCOMMANDS);
+    CgdbrcTestFixture cgdbrcFixture;
+    cgdbrcFixture.setNotification(CGDBRC_SHOWDEBUGCOMMANDS);
     REQUIRE(command_set_sdc(1) == 1);
   }
 }
 
-TEST_CASE("Set window split")
+TEST_CASE("Set window split", "[integration][curses]")
 {
+  CursesTestFixture cursesFixture;
+
   SECTION("Top big")
   {
     REQUIRE(command_set_winsplit("top_big") == 0);
@@ -305,14 +311,16 @@ TEST_CASE("Set window split")
 
   SECTION("Set and notify")
   {
-    CgdbrcTestFixture fixture;
-    fixture.setNotification(CGDBRC_WINSPLIT);
+    CgdbrcTestFixture cgdbrcFixture;
+    cgdbrcFixture.setNotification(CGDBRC_WINSPLIT);
     REQUIRE(command_set_winsplit("top_big") == 1);
   }
 }
 
-TEST_CASE("Set window split orientation")
+TEST_CASE("Set window split orientation", "[integration][curses]")
 {
+  CursesTestFixture cursesFixture;
+
   SECTION("Horizontal")
   {
     REQUIRE(command_set_winsplitorientation("horizontal") == 0);
@@ -330,14 +338,16 @@ TEST_CASE("Set window split orientation")
 
   SECTION("Set and notify")
   {
-    CgdbrcTestFixture fixture;
-    fixture.setNotification(CGDBRC_WINSPLITORIENTATION);
+    CgdbrcTestFixture cgdbrcFixture;
+    cgdbrcFixture.setNotification(CGDBRC_WINSPLITORIENTATION);
     REQUIRE(command_set_winsplitorientation("horizontal") == 1);
   }
 }
 
-TEST_CASE("Set window minimum height")
+TEST_CASE("Set window minimum height", "[integration][curses]")
 {
+  CursesTestFixture cursesFixture;
+
   SECTION("Positive")
   {
     REQUIRE(command_set_winminheight(1) == 1);
@@ -355,14 +365,16 @@ TEST_CASE("Set window minimum height")
 
   SECTION("Set and notify")
   {
-    CgdbrcTestFixture fixture;
-    fixture.setNotification(CGDBRC_WINMINHEIGHT);
+    CgdbrcTestFixture cgdbrcFixture;
+    cgdbrcFixture.setNotification(CGDBRC_WINMINHEIGHT);
     REQUIRE(command_set_winminheight(1) == 1);
   }
 }
 
-TEST_CASE("Set window minimum width")
+TEST_CASE("Set window minimum width", "[integration][curses]")
 {
+  CursesTestFixture cursesFixture;
+
   SECTION("Positive")
   {
     REQUIRE(command_set_winminwidth(1) == 1);
@@ -380,13 +392,13 @@ TEST_CASE("Set window minimum width")
 
   SECTION("Set and notify")
   {
-    CgdbrcTestFixture fixture;
-    fixture.setNotification(CGDBRC_WINMINWIDTH);
+    CgdbrcTestFixture cgdbrcFixture;
+    cgdbrcFixture.setNotification(CGDBRC_WINMINWIDTH);
     REQUIRE(command_set_winminwidth(1) == 1);
   }
 }
 
-TEST_CASE("Set timeout")
+TEST_CASE("Set timeout", "[integration]")
 {
   SECTION("Any integer")
   {
@@ -395,13 +407,13 @@ TEST_CASE("Set timeout")
 
   SECTION("Set and notify")
   {
-    CgdbrcTestFixture fixture;
-    fixture.setNotification(CGDBRC_TIMEOUT);
+    CgdbrcTestFixture cgdbrcFixture;
+    cgdbrcFixture.setNotification(CGDBRC_TIMEOUT);
     REQUIRE(command_set_timeout(1) == 1);
   }
 }
 
-TEST_CASE("Set timeout length")
+TEST_CASE("Set timeout length", "[integration]")
 {
   SECTION("Lower bound")
   {
@@ -420,13 +432,13 @@ TEST_CASE("Set timeout length")
 
   SECTION("Set and notify")
   {
-    CgdbrcTestFixture fixture;
-    fixture.setNotification(CGDBRC_TIMEOUT_LEN);
+    CgdbrcTestFixture cgdbrcFixture;
+    cgdbrcFixture.setNotification(CGDBRC_TIMEOUT_LEN);
     REQUIRE(command_set_timeoutlen(1) == 1);
   }
 }
 
-TEST_CASE("Set ttimeout")
+TEST_CASE("Set ttimeout", "[integration]")
 {
   SECTION("Any integer")
   {
@@ -435,13 +447,13 @@ TEST_CASE("Set ttimeout")
 
   SECTION("Set and notify")
   {
-    CgdbrcTestFixture fixture;
-    fixture.setNotification(CGDBRC_TTIMEOUT);
+    CgdbrcTestFixture cgdbrcFixture;
+    cgdbrcFixture.setNotification(CGDBRC_TTIMEOUT);
     REQUIRE(command_set_ttimeout(1) == 1);
   }
 }
 
-TEST_CASE("Set ttimeout length")
+TEST_CASE("Set ttimeout length", "[integration]")
 {
   SECTION("Lower bound")
   {
@@ -460,14 +472,16 @@ TEST_CASE("Set ttimeout length")
 
   SECTION("Set and notify")
   {
-    CgdbrcTestFixture fixture;
-    fixture.setNotification(CGDBRC_TTIMEOUT_LEN);
+    CgdbrcTestFixture cgdbrcFixture;
+    cgdbrcFixture.setNotification(CGDBRC_TTIMEOUT_LEN);
     REQUIRE(command_set_ttimeoutlen(1) == 1);
   }
 }
 
-TEST_CASE("Set syntax type")
+TEST_CASE("Set syntax type", "[integration][curses]")
 {
+  CursesTestFixture cursesFixture;
+
   SECTION("C")
   {
     REQUIRE(command_set_syntax_type("c") == 0);
@@ -505,40 +519,27 @@ TEST_CASE("Set syntax type")
 
   SECTION("Set and notify")
   {
-    CgdbrcTestFixture fixture;
-    fixture.setNotification(CGDBRC_SYNTAX);
+    CgdbrcTestFixture cgdbrcFixture;
+    cgdbrcFixture.setNotification(CGDBRC_SYNTAX);
     REQUIRE(command_set_syntax_type("c") == 1);
   }
 }
 
-TEST_CASE("Focus on cgdb")
+TEST_CASE("Focus on cgdb", "[integration][curses]")
 {
-  int rv;
-  {
-    CgdbrcTestFixture fixture;
-    rv = command_focus_cgdb(/*unused parameter*/ 0);
-  }
-  REQUIRE(rv == 0);
+  CursesTestFixture cursesFixture;
+  REQUIRE(command_focus_cgdb(0) == 0);
 }
 
-TEST_CASE("Focus on gdb")
+TEST_CASE("Focus on gdb", "[integration][curses]")
 {
-  int rv;
-  {
-    CgdbrcTestFixture fixture;
-    rv = command_focus_gdb(/*unused parameter*/ 0);
-  }
-  REQUIRE(rv == 0);
+  CursesTestFixture cursesFixture;
+  REQUIRE(command_focus_gdb(0) == 0);
 }
 
-TEST_CASE("Do bang")
+TEST_CASE("Do bang", "[unit]")
 {
-  int rv;
-  {
-    CgdbrcTestFixture fixture;
-    rv = command_do_bang(/*unused parameter*/ 0);
-  }
-  REQUIRE(rv == 0);
+  REQUIRE(command_do_bang(0) == 0);
 }
 
 /* TODO: resolve run time errors resulting from do-commands
@@ -579,37 +580,37 @@ TEST_CASE("Do shell")
 }
 */
 
-TEST_CASE("Get keycode timeout length")
+TEST_CASE("Get keycode timeout length", "[integration]")
 {
-  CgdbrcTestFixture fixture;
-  fixture.setOption(CGDBRC_TIMEOUT, 1);
-  fixture.setOption(CGDBRC_TTIMEOUT, 0);
-  fixture.setOption(CGDBRC_TIMEOUT_LEN, 5);
+  CgdbrcTestFixture cgdbrcFixture;
+  cgdbrcFixture.setOption(CGDBRC_TIMEOUT, 1);
+  cgdbrcFixture.setOption(CGDBRC_TTIMEOUT, 0);
+  cgdbrcFixture.setOption(CGDBRC_TIMEOUT_LEN, 5);
 
   SECTION("Neither timeout nor t-timeout enabled")
   {
-    fixture.setOption(CGDBRC_TIMEOUT, 0);
+    cgdbrcFixture.setOption(CGDBRC_TIMEOUT, 0);
     REQUIRE(cgdbrc_get_key_code_timeoutlen() == 0);
   }
 
   SECTION("Length of t-timeout is less than zero")
   {
-    fixture.setOption(CGDBRC_TTIMEOUT_LEN, -1);
+    cgdbrcFixture.setOption(CGDBRC_TTIMEOUT_LEN, -1);
     REQUIRE(cgdbrc_get_key_code_timeoutlen() == 5);
   }
 
   SECTION("Length of t-timeout is greater than zero")
   {
-    fixture.setOption(CGDBRC_TTIMEOUT_LEN, 10);
+    cgdbrcFixture.setOption(CGDBRC_TTIMEOUT_LEN, 10);
     REQUIRE(cgdbrc_get_key_code_timeoutlen() == 10);
   }
 }
 
-TEST_CASE("Get mapped key timeout length")
+TEST_CASE("Get mapped key timeout length", "[integration]")
 {
-  CgdbrcTestFixture fixture;
-  fixture.setOption(CGDBRC_TIMEOUT, 0);
-  fixture.setOption(CGDBRC_TIMEOUT_LEN, 5);
+  CgdbrcTestFixture cgdbrcFixture;
+  cgdbrcFixture.setOption(CGDBRC_TIMEOUT, 0);
+  cgdbrcFixture.setOption(CGDBRC_TIMEOUT_LEN, 5);
 
   SECTION("Timeout disabled")
   {
@@ -618,148 +619,149 @@ TEST_CASE("Get mapped key timeout length")
 
   SECTION("Timeout enabled")
   {
-    fixture.setOption(CGDBRC_TIMEOUT, 1);
+    cgdbrcFixture.setOption(CGDBRC_TIMEOUT, 1);
     REQUIRE(cgdbrc_get_mapped_key_timeoutlen() == 5);
   }
 }
 
-TEST_CASE("Initialize the configuration options with default values")
+TEST_CASE("Initialize the configuration options with default values",
+          "[integration]")
 {
-  CgdbrcTestFixture fixture;
+  CgdbrcTestFixture cgdbrcFixture;
   cgdbrc_init_config_options();
 
   SECTION("Default arrow style")
   {
-    LineDisplayStyle lds = fixture.getLineOption(CGDBRC_ARROWSTYLE);
+    LineDisplayStyle lds = cgdbrcFixture.getLineOption(CGDBRC_ARROWSTYLE);
     REQUIRE(lds == LINE_DISPLAY_SHORT_ARROW);
   }
 
   SECTION("Default auto source reload")
   {
-    REQUIRE(fixture.getIntOption(CGDBRC_AUTOSOURCERELOAD) == 1);
+    REQUIRE(cgdbrcFixture.getIntOption(CGDBRC_AUTOSOURCERELOAD) == 1);
   }
 
   SECTION("Default cgdb mode key")
   {
-    REQUIRE(fixture.getIntOption(CGDBRC_CGDB_MODE_KEY) == CGDB_KEY_ESC);
+    REQUIRE(cgdbrcFixture.getIntOption(CGDBRC_CGDB_MODE_KEY) == CGDB_KEY_ESC);
   }
 
   SECTION("Default color")
   {
-    REQUIRE(fixture.getIntOption(CGDBRC_COLOR) == 1);
+    REQUIRE(cgdbrcFixture.getIntOption(CGDBRC_COLOR) == 1);
   }
 
   SECTION("Default debug window color")
   {
-    REQUIRE(fixture.getIntOption(CGDBRC_DEBUGWINCOLOR) == 1);
+    REQUIRE(cgdbrcFixture.getIntOption(CGDBRC_DEBUGWINCOLOR) == 1);
   }
 
   SECTION("Default disassemble")
   {
-    REQUIRE(fixture.getIntOption(CGDBRC_DISASM) == 0);
+    REQUIRE(cgdbrcFixture.getIntOption(CGDBRC_DISASM) == 0);
   }
 
   SECTION("Default executing line display")
   {
-    LineDisplayStyle lds = fixture.getLineOption(
+    LineDisplayStyle lds = cgdbrcFixture.getLineOption(
         CGDBRC_EXECUTING_LINE_DISPLAY);
     REQUIRE(lds == LINE_DISPLAY_LONG_ARROW);
   }
 
   SECTION("Default highlight search")
   {
-    REQUIRE(fixture.getIntOption(CGDBRC_HLSEARCH) == 0);
+    REQUIRE(cgdbrcFixture.getIntOption(CGDBRC_HLSEARCH) == 0);
   }
 
   SECTION("Default ignore case")
   {
-    REQUIRE(fixture.getIntOption(CGDBRC_IGNORECASE) == 0);
+    REQUIRE(cgdbrcFixture.getIntOption(CGDBRC_IGNORECASE) == 0);
   }
 
   SECTION("Default selected line display")
   {
-    LineDisplayStyle lds = fixture.getLineOption(
+    LineDisplayStyle lds = cgdbrcFixture.getLineOption(
         CGDBRC_SELECTED_LINE_DISPLAY);
     REQUIRE(lds == LINE_DISPLAY_BLOCK);
   }
 
   SECTION("Default show debug commands")
   {
-    REQUIRE(fixture.getIntOption(CGDBRC_SHOWDEBUGCOMMANDS) == 0);
+    REQUIRE(cgdbrcFixture.getIntOption(CGDBRC_SHOWDEBUGCOMMANDS) == 0);
   }
 
   SECTION("Default show marks")
   {
-    REQUIRE(fixture.getIntOption(CGDBRC_SHOWMARKS) == 1);
+    REQUIRE(cgdbrcFixture.getIntOption(CGDBRC_SHOWMARKS) == 1);
   }
 
   SECTION("Default syntax")
   {
-    tokenizer_language_support tls = fixture.getLangOption(CGDBRC_SYNTAX);
+    tokenizer_language_support tls = cgdbrcFixture.getLangOption(CGDBRC_SYNTAX);
     REQUIRE(tls == TOKENIZER_LANGUAGE_UNKNOWN);
   }
 
   SECTION("Default tabstop")
   {
-    REQUIRE(fixture.getIntOption(CGDBRC_TABSTOP) == 8);
+    REQUIRE(cgdbrcFixture.getIntOption(CGDBRC_TABSTOP) == 8);
   }
 
   SECTION("Default timeout")
   {
-    REQUIRE(fixture.getIntOption(CGDBRC_TIMEOUT) == 1);
+    REQUIRE(cgdbrcFixture.getIntOption(CGDBRC_TIMEOUT) == 1);
   }
 
   SECTION("Default timeout length")
   {
-    REQUIRE(fixture.getIntOption(CGDBRC_TIMEOUT_LEN) == 1000);
+    REQUIRE(cgdbrcFixture.getIntOption(CGDBRC_TIMEOUT_LEN) == 1000);
   }
 
   SECTION("Default t-timeout")
   {
-    REQUIRE(fixture.getIntOption(CGDBRC_TTIMEOUT) == 1);
+    REQUIRE(cgdbrcFixture.getIntOption(CGDBRC_TTIMEOUT) == 1);
   }
 
   SECTION("Default t-timeout length")
   {
-    REQUIRE(fixture.getIntOption(CGDBRC_TTIMEOUT_LEN) == 100);
+    REQUIRE(cgdbrcFixture.getIntOption(CGDBRC_TTIMEOUT_LEN) == 100);
   }
 
   SECTION("Default minimum window height")
   {
-    REQUIRE(fixture.getIntOption(CGDBRC_WINMINHEIGHT) == 0);
+    REQUIRE(cgdbrcFixture.getIntOption(CGDBRC_WINMINHEIGHT) == 0);
   }
 
   SECTION("Default minimum window width")
   {
-    REQUIRE(fixture.getIntOption(CGDBRC_WINMINWIDTH) == 0);
+    REQUIRE(cgdbrcFixture.getIntOption(CGDBRC_WINMINWIDTH) == 0);
   }
 
   SECTION("Default window split")
   {
-    WIN_SPLIT_TYPE ws = fixture.getSplitOption(CGDBRC_WINSPLIT);
+    WIN_SPLIT_TYPE ws = cgdbrcFixture.getSplitOption(CGDBRC_WINSPLIT);
     REQUIRE(ws == WIN_SPLIT_EVEN);
   }
 
   SECTION("Default window split orientation")
   {
-    WIN_SPLIT_ORIENTATION_TYPE wso = fixture.getOrientOption(
+    WIN_SPLIT_ORIENTATION_TYPE wso = cgdbrcFixture.getOrientOption(
         CGDBRC_WINSPLITORIENTATION);
     REQUIRE(wso == WSO_HORIZONTAL);
-
   }
 
   SECTION("Default wrap scan")
   {
-    REQUIRE(fixture.getIntOption(CGDBRC_WRAPSCAN) == 1);
+    REQUIRE(cgdbrcFixture.getIntOption(CGDBRC_WRAPSCAN) == 1);
   }
 }
 
-TEST_CASE("Initialize the configuration variables")
+TEST_CASE("Initialize the configuration variables", "[integration][curses]")
 {
-  CgdbrcTestFixture fixture;
-  fixture.resetStatics();
+  CursesTestFixture cursesFixture;
+  CgdbrcTestFixture cgdbrcFixture;
+  cgdbrcFixture.resetStatics();
   cgdbrc_init_config_variables();
-  std::map<std::string, std::string> variables = fixture.getVariableMap();
+  std::map<std::string, std::string> variables = cgdbrcFixture.getVariableMap();
   std::map<std::string, std::string>::iterator it;
 
   SECTION("Number of configuration variables")
