@@ -126,7 +126,7 @@ TEST_CASE("Set arrow style")
   }
 }
 
-TEST_CASE("Set cgdb mode key", "[!shouldfail]")
+TEST_CASE("Set cgdb mode key")
 {
   SECTION("Single character")
   {

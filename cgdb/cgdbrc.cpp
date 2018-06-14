@@ -446,7 +446,7 @@ int command_set_cgdb_mode_key(const char *value)
              * attempt to translate it. */
             int key = kui_term_get_cgdb_key_from_keycode(value);
 
-            if (key == -1)
+            if (key == CGDB_KEY_ERROR)
                 return -1;
             option.variant.int_val = key;
         }
