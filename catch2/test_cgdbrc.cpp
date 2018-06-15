@@ -797,7 +797,7 @@ TEST_CASE("Initialize the configuration variables", "[integration][curses]")
     REQUIRE(it->second == "cgdbmodekey");
   }
 
-  SECTION("Color variable"){}
+  SECTION("Color variable")
   {
     it = variables.find("color");
     REQUIRE(it != variables.end());
