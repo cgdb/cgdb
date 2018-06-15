@@ -160,7 +160,7 @@ TEST_CASE("Get highlight group for a name", "[unit]")
     CHECK(get_hl_group_kind_from_name("search", &kind) == 0);
     REQUIRE(kind == HLG_SEARCH);
   }
-#
+
   SECTION("Status line")
   {
     CHECK(get_hl_group_kind_from_name("statusline", &kind) == 0);
@@ -322,3 +322,177 @@ TEST_CASE("Get attribute pair for a name", "[unit]")
     REQUIRE(attrPair->value == SWIN_A_DIM);
   }
 }
+
+TEST_CASE("Get color info for a name", "[unit]")
+{
+  const color_info* colorInfo;
+
+  SECTION("Standard colors")
+  {
+    SECTION("Black")
+    {
+      colorInfo = color_spec_for_name("black");
+      REQUIRE(strcmp(colorInfo->name, "Black") == 0);
+    }
+
+    SECTION("Dark blue")
+    {
+      colorInfo = color_spec_for_name("darkblue");
+      REQUIRE(strcmp(colorInfo->name, "DarkBlue") == 0);
+    }
+
+    SECTION("Dark green")
+    {
+      colorInfo = color_spec_for_name("darkgreen");
+      REQUIRE(strcmp(colorInfo->name, "DarkGreen") == 0);
+    }
+
+    SECTION("Dark cyan")
+    {
+      colorInfo = color_spec_for_name("darkcyan");
+      REQUIRE(strcmp(colorInfo->name, "DarkCyan") == 0);
+    }
+
+    SECTION("Dark red")
+    {
+      colorInfo = color_spec_for_name("darkred");
+      REQUIRE(strcmp(colorInfo->name, "DarkRed") == 0);
+    }
+
+    SECTION("Dark magenta")
+    {
+      colorInfo = color_spec_for_name("darkmagenta");
+      REQUIRE(strcmp(colorInfo->name, "DarkMagenta") == 0);
+    }
+
+    SECTION("Brown")
+    {
+      colorInfo = color_spec_for_name("brown");
+      REQUIRE(strcmp(colorInfo->name, "Brown") == 0);
+    }
+
+    SECTION("Dark yellow")
+    {
+      colorInfo = color_spec_for_name("darkyellow");
+      REQUIRE(strcmp(colorInfo->name, "DarkYellow") == 0);
+    }
+
+    SECTION("Light gray")
+    {
+      colorInfo = color_spec_for_name("lightgray");
+      REQUIRE(strcmp(colorInfo->name, "LightGray") == 0);
+    }
+
+    SECTION("Light grey")
+    {
+      colorInfo = color_spec_for_name("lightgrey");
+      REQUIRE(strcmp(colorInfo->name, "LightGrey") == 0);
+    }
+
+    SECTION("Gray")
+    {
+      colorInfo = color_spec_for_name("gray");
+      REQUIRE(strcmp(colorInfo->name, "Gray") == 0);
+    }
+
+    SECTION("Grey")
+    {
+      colorInfo = color_spec_for_name("grey");
+      REQUIRE(strcmp(colorInfo->name, "Grey") == 0);
+    }
+  }
+
+  SECTION("Bold colors")
+  {
+    SECTION("Dark gray")
+    {
+      colorInfo = color_spec_for_name("darkgray");
+      REQUIRE(strcmp(colorInfo->name, "DarkGray") == 0);
+    }
+
+    SECTION("Dark grey")
+    {
+      colorInfo = color_spec_for_name("darkgrey");
+      REQUIRE(strcmp(colorInfo->name, "DarkGrey") == 0);
+    }
+
+    SECTION("Blue")
+    {
+      colorInfo = color_spec_for_name("blue");
+      REQUIRE(strcmp(colorInfo->name, "Blue") == 0);
+    }
+
+    SECTION("Light blue")
+    {
+      colorInfo = color_spec_for_name("lightblue");
+      REQUIRE(strcmp(colorInfo->name, "LightBlue") == 0);
+    }
+
+    SECTION("Green")
+    {
+      colorInfo = color_spec_for_name("green");
+      REQUIRE(strcmp(colorInfo->name, "Green") == 0);
+    }
+
+    SECTION("Light green")
+    {
+      colorInfo = color_spec_for_name("lightgreen");
+      REQUIRE(strcmp(colorInfo->name, "LightGreen") == 0);
+    }
+
+    SECTION("Cyan")
+    {
+      colorInfo = color_spec_for_name("cyan");
+      REQUIRE(strcmp(colorInfo->name, "Cyan") == 0);
+    }
+
+    SECTION("Light cyan")
+    {
+      colorInfo = color_spec_for_name("lightcyan");
+      REQUIRE(strcmp(colorInfo->name, "LightCyan") == 0);
+    }
+
+    SECTION("Red")
+    {
+      colorInfo = color_spec_for_name("red");
+      REQUIRE(strcmp(colorInfo->name, "Red") == 0);
+    }
+
+    SECTION("Light red")
+    {
+      colorInfo = color_spec_for_name("lightred");
+      REQUIRE(strcmp(colorInfo->name, "LightRed") == 0);
+    }
+
+    SECTION("Magenta")
+    {
+      colorInfo = color_spec_for_name("magenta");
+      REQUIRE(strcmp(colorInfo->name, "Magenta") == 0);
+    }
+
+    SECTION("Light magenta")
+    {
+      colorInfo = color_spec_for_name("lightmagenta");
+      REQUIRE(strcmp(colorInfo->name, "LightMagenta") == 0);
+    }
+
+    SECTION("Yellow")
+    {
+      colorInfo = color_spec_for_name("yellow");
+      REQUIRE(strcmp(colorInfo->name, "Yellow") == 0);
+    }
+
+    SECTION("Light yellow")
+    {
+      colorInfo = color_spec_for_name("lightyellow");
+      REQUIRE(strcmp(colorInfo->name, "LightYellow") == 0);
+    }
+
+    SECTION("White")
+    {
+      colorInfo = color_spec_for_name("white");
+      REQUIRE(strcmp(colorInfo->name, "White") == 0);
+    }
+  }
+}
+
