@@ -91,7 +91,7 @@ TEST_CASE("Get the color index for a 24-bit RGB value", "[unit]")
   }
 }
 
-TEST_CASE("Get the highlight group for a name", "[unit]")
+TEST_CASE("Get highlight group for a name", "[unit]")
 {
   hl_group_kind kind = HLG_LAST;
 
@@ -258,3 +258,61 @@ TEST_CASE("Get the highlight group for a name", "[unit]")
   }
 }
 
+TEST_CASE("Get attribute pair for a name", "[unit]")
+{
+  const attr_pair* attrPair;
+
+  SECTION("bold")
+  {
+    attrPair = lookup_attr_pair_by_name("bold");
+    REQUIRE(attrPair->value == SWIN_A_BOLD);
+  }
+
+  SECTION("underline")
+  {
+    attrPair = lookup_attr_pair_by_name("underline");
+    REQUIRE(attrPair->value == SWIN_A_UNDERLINE);
+  }
+
+  SECTION("reverse")
+  {
+    attrPair = lookup_attr_pair_by_name("reverse");
+    REQUIRE(attrPair->value == SWIN_A_REVERSE);
+  }
+
+  SECTION("inverse")
+  {
+    attrPair = lookup_attr_pair_by_name("inverse");
+    REQUIRE(attrPair->value == SWIN_A_REVERSE);
+  }
+
+  SECTION("standout")
+  {
+    attrPair = lookup_attr_pair_by_name("standout");
+    REQUIRE(attrPair->value == SWIN_A_STANDOUT);
+  }
+
+  SECTION("None")
+  {
+    attrPair = lookup_attr_pair_by_name("none");
+    REQUIRE(attrPair->value == SWIN_A_NORMAL);
+  }
+
+  SECTION("normal")
+  {
+    attrPair = lookup_attr_pair_by_name("normal");
+    REQUIRE(attrPair->value == SWIN_A_NORMAL);
+  }
+
+  SECTION("blink")
+  {
+    attrPair = lookup_attr_pair_by_name("blink");
+    REQUIRE(attrPair->value == SWIN_A_BLINK);
+  }
+
+  SECTION("dim")
+  {
+    attrPair = lookup_attr_pair_by_name("dim");
+    REQUIRE(attrPair->value == SWIN_A_DIM);
+  }
+}
