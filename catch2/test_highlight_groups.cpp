@@ -4,14 +4,90 @@
 
 TEST_CASE("Get the color index for a 24-bit RGB value", "[unit]")
 {
-  SECTION("Black RGB to black index")
+  SECTION("Standard colors")
   {
-    REQUIRE(ansi_get_closest_color_value(1, 1, 1) == 0);
+    SECTION("Black RGB")
+    {
+      REQUIRE(ansi_get_closest_color_value(0, 0, 0) == 0);
+    }
+
+    SECTION("Red RGB")
+    {
+      REQUIRE(ansi_get_closest_color_value(224, 0, 0) == 1);
+    }
+
+    SECTION("Green RGB")
+    {
+      REQUIRE(ansi_get_closest_color_value(0, 224, 0) == 2);
+    }
+
+    SECTION("Yellow RGB")
+    {
+      REQUIRE(ansi_get_closest_color_value(224, 224, 0) == 3);
+    }
+
+    SECTION("Blue RGB")
+    {
+      REQUIRE(ansi_get_closest_color_value(0, 0, 224) == 4);
+    }
+
+    SECTION("Magenta RGB")
+    {
+      REQUIRE(ansi_get_closest_color_value(224, 0, 224) == 5);
+    }
+
+    SECTION("Cyan RGB")
+    {
+      REQUIRE(ansi_get_closest_color_value(0, 224, 224) == 6);
+    }
+
+    SECTION("White RGB")
+    {
+      REQUIRE(ansi_get_closest_color_value(224, 224, 224) == 7);
+    }
   }
 
-  SECTION("White RGB to white index")
+  SECTION("Bold colors")
   {
-    REQUIRE(ansi_get_closest_color_value(254, 254, 254) == 15);
+    SECTION("Black RGB")
+    {
+      REQUIRE(ansi_get_closest_color_value(128, 128, 128) == 8);
+    }
+
+    SECTION("Red RGB")
+    {
+      REQUIRE(ansi_get_closest_color_value(255, 64, 64) == 9);
+    }
+
+    SECTION("Green RGB")
+    {
+      REQUIRE(ansi_get_closest_color_value(64, 255, 64) == 10);
+    }
+
+    SECTION("Yellow RGB")
+    {
+      REQUIRE(ansi_get_closest_color_value(255, 255, 64) == 11);
+    }
+
+    SECTION("Blue RGB")
+    {
+      REQUIRE(ansi_get_closest_color_value(64, 64, 255) == 12);
+    }
+
+    SECTION("Magenta RGB")
+    {
+      REQUIRE(ansi_get_closest_color_value(255, 64, 255) == 13);
+    }
+
+    SECTION("Cyan RGB")
+    {
+      REQUIRE(ansi_get_closest_color_value(64, 255, 255) == 14);
+    }
+
+    SECTION("White RGB")
+    {
+      REQUIRE(ansi_get_closest_color_value(255, 255, 255) == 15);
+    }
   }
 }
 
