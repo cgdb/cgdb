@@ -137,7 +137,7 @@ TEST_CASE("Get highlight group for a name", "[unit]")
     REQUIRE(kind == HLG_COMMENT);
   }
 
-  SECTION("PreProc")
+  SECTION("Preprocess directive")
   {
     CHECK(get_hl_group_kind_from_name("preproc", &kind) == 0);
     REQUIRE(kind == HLG_DIRECTIVE);
@@ -149,7 +149,7 @@ TEST_CASE("Get highlight group for a name", "[unit]")
     REQUIRE(kind == HLG_TEXT);
   }
 
-  SECTION("IncSearch")
+  SECTION("Incremental search")
   {
     CHECK(get_hl_group_kind_from_name("incsearch", &kind) == 0);
     REQUIRE(kind == HLG_INCSEARCH);
@@ -161,7 +161,7 @@ TEST_CASE("Get highlight group for a name", "[unit]")
     REQUIRE(kind == HLG_SEARCH);
   }
 #
-  SECTION("StatusLine")
+  SECTION("Status line")
   {
     CHECK(get_hl_group_kind_from_name("statusline", &kind) == 0);
     REQUIRE(kind == HLG_STATUS_BAR);
@@ -173,73 +173,73 @@ TEST_CASE("Get highlight group for a name", "[unit]")
     REQUIRE(kind == HLG_EXECUTING_LINE_ARROW);
   }
 
-  SECTION("ExecutingLineArrow")
+  SECTION("Executing line arrow")
   {
     CHECK(get_hl_group_kind_from_name("executinglinearrow", &kind) == 0);
     REQUIRE(kind == HLG_EXECUTING_LINE_ARROW);
   }
 
-  SECTION("SelectedLineArrow")
+  SECTION("Selected line arrow")
   {
     CHECK(get_hl_group_kind_from_name("selectedlinearrow", &kind) == 0);
     REQUIRE(kind == HLG_SELECTED_LINE_ARROW);
   }
 
-  SECTION("LineHighlight")
+  SECTION("Line highlight")
   {
     CHECK(get_hl_group_kind_from_name("linehighlight", &kind) == 0);
     REQUIRE(kind == HLG_EXECUTING_LINE_HIGHLIGHT);
   }
 
-  SECTION("ExecutingLineHighlight")
+  SECTION("Executing line highlight")
   {
     CHECK(get_hl_group_kind_from_name("executinglinehighlight", &kind) == 0);
     REQUIRE(kind == HLG_EXECUTING_LINE_HIGHLIGHT);
   }
 
-  SECTION("SelectedLineHighlight")
+  SECTION("Selected line highlight")
   {
     CHECK(get_hl_group_kind_from_name("selectedlinehighlight", &kind) == 0);
     REQUIRE(kind == HLG_SELECTED_LINE_HIGHLIGHT);
   }
 
-  SECTION("ExecutingLineBlock")
+  SECTION("Executing line block")
   {
     CHECK(get_hl_group_kind_from_name("executinglineblock", &kind) == 0);
     REQUIRE(kind == HLG_EXECUTING_LINE_BLOCK);
   }
 
-  SECTION("SelectedLineBlock")
+  SECTION("Selected line block")
   {
     CHECK(get_hl_group_kind_from_name("selectedlineblock", &kind) == 0);
     REQUIRE(kind == HLG_SELECTED_LINE_BLOCK);
   }
 
-  SECTION("Breakpoint")
+  SECTION("Enabled breakpoint")
   {
     CHECK(get_hl_group_kind_from_name("breakpoint", &kind) == 0);
     REQUIRE(kind == HLG_ENABLED_BREAKPOINT);
   }
 
-  SECTION("DisabledBreakpoint")
+  SECTION("Disabled breakpoint")
   {
     CHECK(get_hl_group_kind_from_name("disabledbreakpoint", &kind) == 0);
     REQUIRE(kind == HLG_DISABLED_BREAKPOINT);
   }
 
-  SECTION("SelectedLineNr")
+  SECTION("Selected line number")
   {
     CHECK(get_hl_group_kind_from_name("selectedlinenr", &kind) == 0);
     REQUIRE(kind == HLG_SELECTED_LINE_NUMBER);
   }
 
-  SECTION("ExecutingLineNr")
+  SECTION("Executing line number")
   {
     CHECK(get_hl_group_kind_from_name("executinglinenr", &kind) == 0);
     REQUIRE(kind == HLG_EXECUTING_LINE_NUMBER);
   }
 
-  SECTION("ScrollModeStatus")
+  SECTION("Scroll mode status")
   {
     CHECK(get_hl_group_kind_from_name("scrollmodestatus", &kind) == 0);
     REQUIRE(kind == HLG_SCROLL_MODE_STATUS);
@@ -262,31 +262,37 @@ TEST_CASE("Get attribute pair for a name", "[unit]")
 {
   const attr_pair* attrPair;
 
-  SECTION("bold")
+  SECTION("Other name")
+  {
+    attrPair = lookup_attr_pair_by_name("other");
+    REQUIRE(attrPair == NULL);
+  }
+
+  SECTION("Bold")
   {
     attrPair = lookup_attr_pair_by_name("bold");
     REQUIRE(attrPair->value == SWIN_A_BOLD);
   }
 
-  SECTION("underline")
+  SECTION("Underline")
   {
     attrPair = lookup_attr_pair_by_name("underline");
     REQUIRE(attrPair->value == SWIN_A_UNDERLINE);
   }
 
-  SECTION("reverse")
+  SECTION("Reverse")
   {
     attrPair = lookup_attr_pair_by_name("reverse");
     REQUIRE(attrPair->value == SWIN_A_REVERSE);
   }
 
-  SECTION("inverse")
+  SECTION("Inverse")
   {
     attrPair = lookup_attr_pair_by_name("inverse");
     REQUIRE(attrPair->value == SWIN_A_REVERSE);
   }
 
-  SECTION("standout")
+  SECTION("Standout")
   {
     attrPair = lookup_attr_pair_by_name("standout");
     REQUIRE(attrPair->value == SWIN_A_STANDOUT);
@@ -298,19 +304,19 @@ TEST_CASE("Get attribute pair for a name", "[unit]")
     REQUIRE(attrPair->value == SWIN_A_NORMAL);
   }
 
-  SECTION("normal")
+  SECTION("Normal")
   {
     attrPair = lookup_attr_pair_by_name("normal");
     REQUIRE(attrPair->value == SWIN_A_NORMAL);
   }
 
-  SECTION("blink")
+  SECTION("Blink")
   {
     attrPair = lookup_attr_pair_by_name("blink");
     REQUIRE(attrPair->value == SWIN_A_BLINK);
   }
 
-  SECTION("dim")
+  SECTION("Dim")
   {
     attrPair = lookup_attr_pair_by_name("dim");
     REQUIRE(attrPair->value == SWIN_A_DIM);
