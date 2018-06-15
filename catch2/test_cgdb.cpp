@@ -114,3 +114,15 @@ TEST_CASE("Get yes or no", "[unit]")
     REQUIRE(cgdb_get_y_or_n(/*key=*/ CGDB_KEY_CTRL_G, /*for_parger=*/ 0) == 0);
   }
 }
+
+TEST_CASE("Get version info", "[unit]")
+{
+  std::string message =
+      "CGDB " + std::string(VERSION) + "\r\n"
+      "Copyright 2002-2010 Bob Rossi and Mike Mueller.\n"
+      "CGDB is free software, covered by the GNU General Public License, and "
+      "you are\nwelcome to change it and/or distribute copies of it under "
+      "certain conditions.\nThere is absolutely no warranty for CGDB.\n";
+
+  REQUIRE(version_info() == message);
+}
