@@ -14,6 +14,7 @@
 #include "highlight_groups.h"
 #include <fstream>
 #include <algorithm>
+#include <stdio.h>
 
 
 class LogoTestFixture
@@ -26,7 +27,8 @@ class LogoTestFixture
 
     void enableColors()
     {
-      clog_open(CLOG_CGDB_ID, "%s/cgdb_log%d.txt", "/tmp");
+      char buffer[L_tmpnam];
+      clog_open(CLOG_CGDB_ID, tmpnam(buffer), "/tmp");
       cgdbrc_init();
       hl_groups_instance = hl_groups_initialize();
     }
@@ -36,6 +38,7 @@ class LogoTestFixture
       if (hl_groups_instance) {
         free(hl_groups_instance);
         hl_groups_instance = NULL;
+        clog_free(1);
       }
     }
 };
@@ -117,6 +120,7 @@ TEST_CASE("Display cgdb logo", "[integration][curses]")
   }
 
   // Display a logo and dump the virtual screen.
+  clear();
   logo_display((SWINDOW*)win);
   refresh();
   scr_dump("/tmp/virtual.dump");
@@ -132,4 +136,52 @@ TEST_CASE("Display cgdb logo", "[integration][curses]")
     }
   }
   REQUIRE(found == true);
+}
+
+TEST_CASE("Center line in window", "[integration][curses]")
+{
+  int expectedPosition;
+  std::size_t actualPosition;
+  {
+    LogoTestFixture logoTestFixture;
+    CursesTestFixture cursesTestFixture;
+    WINDOW* win = cursesTestFixture.getWindow();
+    int width = 10;
+    std::string text = "";
+    std::string result = "";
+
+    SECTION("Without ANSI color escapes")
+    {
+      logoTestFixture.disableColors();
+      text = "cgdb";
+      result = text;
+    }
+
+    SECTION("With ANSI color escapes")
+    {
+      cursesTestFixture.enableColors();
+      logoTestFixture.enableColors();
+      text = "\033[0;1;34mcgdb\033[0m";
+      result = "E cE gE dE b";
+    }
+
+    // Center the line and dump the virtual screen.
+    clear();
+    center_line((SWINDOW*)win, 0, width, text.c_str(), 4, HLG_LOGO);
+    refresh();
+    scr_dump("/tmp/virtual.dump");
+
+    // Search the virtual screen dump for usage info.
+    expectedPosition = ((width - 4) / 2) + 1;
+    std::ifstream screen("/tmp/virtual.dump");
+    std::string line;
+    std::getline(screen, line);
+    // Remove null characters.
+    line.erase(std::remove(line.begin(), line.end(), NULL), line.end());
+    // Remove all characters before the first space.
+    line = line.substr(line.find(' '));
+    actualPosition = line.find(result);
+  }
+
+  REQUIRE(actualPosition == expectedPosition);
 }
