@@ -8,10 +8,13 @@
 #include <ncurses/curses.h>
 #endif /* HAVE_CURSES_H */
 
-#include "catch.hpp"
 #include "logo.cpp"
+#include "catch.hpp"
 #include "cgdbrc.h"
 #include "highlight_groups.h"
+#include <fstream>
+#include <algorithm>
+
 
 class LogoTestFixture
 {
@@ -63,7 +66,7 @@ class CursesTestFixture
   public:
     CursesTestFixture()
     {
-      initscr();
+      win_ = initscr();
     }
 
     ~CursesTestFixture()
@@ -71,11 +74,19 @@ class CursesTestFixture
       endwin();
     }
 
+    WINDOW* getWindow() const
+    {
+      return win_;
+    }
+
     void enableColors()
     {
       start_color();
       use_default_colors();
     }
+
+  private:
+    WINDOW* win_;
 };
 
 TEST_CASE("Assign a random logo index", "[integration]")
@@ -87,7 +98,7 @@ TEST_CASE("Assign a random logo index", "[integration]")
   REQUIRE(logoTestFixture.getLogoIndex() != 1);
 }
 
-TEST_CASE("Get the number of available logos", "[integration]")
+TEST_CASE("Get the number of available logos", "[integration][curses]")
 {
   CursesTestFixture cursesTestFixture;
 
@@ -103,4 +114,28 @@ TEST_CASE("Get the number of available logos", "[integration]")
     logoTestFixture.enableColors();
     REQUIRE(logos_available() == 7);
   }
+}
+
+TEST_CASE("Display cgdb logo", "[integration][curses]")
+{
+  // Display a logo and dump the virtual screen.
+  {
+    CursesTestFixture cursesTestFixture;
+    WINDOW* win = cursesTestFixture.getWindow();
+    logo_display((SWINDOW*)win);
+    refresh();
+    scr_dump("/tmp/virtual.dump");
+  }
+
+  // Search the virtual screen dump for usage info.
+  bool found = false;
+  std::ifstream screen("/tmp/virtual.dump");
+  std::string line;
+  while (std::getline(screen, line)) {
+    line.erase(std::remove(line.begin(), line.end(), NULL), line.end());
+    if (line.find("version") != std::string::npos) {
+      found = true;
+    }
+  }
+  REQUIRE(found == true);
 }
