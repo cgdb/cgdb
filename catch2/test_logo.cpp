@@ -19,45 +19,24 @@
 class LogoTestFixture
 {
   public:
-    LogoTestFixture()
-    {
-      initializeLogoIndex();
-    }
-
     ~LogoTestFixture()
     {
-      if (hl_groups_instance) {
-        free(hl_groups_instance);
-        hl_groups_instance = NULL;
-      }
-    }
-
-    int getLogoIndex()
-    {
-      return logoindex;
+      disableColors();
     }
 
     void enableColors()
     {
       clog_open(CLOG_CGDB_ID, "%s/cgdb_log%d.txt", "/tmp");
-      initializeCgdbrc();
-      initializeHlGroups();
-    }
-
-  private:
-    void initializeLogoIndex()
-    {
-      logoindex = 1;
-    }
-
-    void initializeCgdbrc()
-    {
       cgdbrc_init();
+      hl_groups_instance = hl_groups_initialize();
     }
 
-    void initializeHlGroups()
+    void disableColors()
     {
-      hl_groups_instance = hl_groups_initialize();
+      if (hl_groups_instance) {
+        free(hl_groups_instance);
+        hl_groups_instance = NULL;
+      }
     }
 };
 
@@ -91,26 +70,25 @@ class CursesTestFixture
 
 TEST_CASE("Assign a random logo index", "[integration]")
 {
-  LogoTestFixture logoTestFixture;
-  CHECK(logoTestFixture.getLogoIndex() == 1);
-
+  logoindex = -1;
   logo_reset();
-  REQUIRE(logoTestFixture.getLogoIndex() != 1);
+  REQUIRE(logoindex != 1);
 }
 
 TEST_CASE("Get the number of available logos", "[integration][curses]")
 {
   CursesTestFixture cursesTestFixture;
+  LogoTestFixture logoTestFixture;
 
   SECTION("ANSI color escape not supported")
   {
+    logoTestFixture.disableColors();
     REQUIRE(logos_available() == 3);
   }
 
   SECTION("ANSI color escape supported")
   {
     cursesTestFixture.enableColors();
-    LogoTestFixture logoTestFixture;
     logoTestFixture.enableColors();
     REQUIRE(logos_available() == 7);
   }
@@ -118,14 +96,30 @@ TEST_CASE("Get the number of available logos", "[integration][curses]")
 
 TEST_CASE("Display cgdb logo", "[integration][curses]")
 {
-  // Display a logo and dump the virtual screen.
+  logoindex = 1;
+  CursesTestFixture cursesTestFixture;
+  WINDOW* win = cursesTestFixture.getWindow();
+  int heightAvailable = getmaxy(win) - CGDB_NUM_USAGE - 2;
+
+  SECTION("Logo fits on screen")
   {
-    CursesTestFixture cursesTestFixture;
-    WINDOW* win = cursesTestFixture.getWindow();
-    logo_display((SWINDOW*)win);
-    refresh();
-    scr_dump("/tmp/virtual.dump");
+    CHECK(CGDB_LOGO[logoindex].h <= heightAvailable);
   }
+
+  SECTION("Logo does not fit on screen")
+  {
+    CGDB_LOGO[logoindex].h = (heightAvailable + 1);
+  }
+
+  SECTION("Uninitialized logo index")
+  {
+    logoindex = -1;
+  }
+
+  // Display a logo and dump the virtual screen.
+  logo_display((SWINDOW*)win);
+  refresh();
+  scr_dump("/tmp/virtual.dump");
 
   // Search the virtual screen dump for usage info.
   bool found = false;
