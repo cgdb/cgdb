@@ -30,4 +30,5 @@ tests_SOURCES = \
     test_sources.cpp \
     test_filedlg.cpp \
     test_highlight.cpp \
-    test_command_lexer.cpp
+    test_command_lexer.cpp \
+    curses_fixture.cpp
