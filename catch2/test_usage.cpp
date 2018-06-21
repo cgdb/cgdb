@@ -8,7 +8,7 @@
 #include <string>
 
 
-TEST_CASE("cgdb command line usage message")
+TEST_CASE("cgdb command line usage message", "[unit]")
 {
   std::ostringstream oss;
   usage(oss);
