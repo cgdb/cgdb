@@ -75,25 +75,41 @@ TEST_CASE("Display cgdb logo", "[integration][curses]")
   SECTION("Logo fits on screen")
   {
     CHECK(CGDB_LOGO[logoindex].h <= heightAvailable);
+
+    curses.clearScreen();
+    logo_display((SWINDOW*)curses.getWindow());
+    curses.refreshScreen();
+    Coordinates coordinates = curses.searchScreen("version");
+    curses.stop();
+
+    REQUIRE(coordinates.size() == 1);
   }
 
   SECTION("Logo does not fit on screen")
   {
     CGDB_LOGO[logoindex].h = (heightAvailable + 1);
+
+    curses.clearScreen();
+    logo_display((SWINDOW*)curses.getWindow());
+    curses.refreshScreen();
+    Coordinates coordinates = curses.searchScreen("version");
+    curses.stop();
+
+    REQUIRE(coordinates.size() == 1);
   }
 
   SECTION("Uninitialized logo index")
   {
     logoindex = -1;
-  }
 
-  curses.clearScreen();
-  logo_display((SWINDOW*)curses.getWindow());
-  curses.refreshScreen();
-  Coordinates coordinates = curses.searchScreen("version");
-  curses.stop();
-  
-  REQUIRE(coordinates.size() == 1);
+    curses.clearScreen();
+    logo_display((SWINDOW*)curses.getWindow());
+    curses.refreshScreen();
+    Coordinates coordinates = curses.searchScreen("version");
+    curses.stop();
+
+    REQUIRE(coordinates.size() == 1);
+  }
 }
 
 TEST_CASE("Center line in window", "[integration][curses]")
@@ -109,6 +125,18 @@ TEST_CASE("Center line in window", "[integration][curses]")
     logoTestFixture.disableColors();
     input = "cgdb";
     output = input;
+
+    curses.clearScreen();
+    center_line((SWINDOW*)curses.getWindow(), /*row=*/ 0, /*width=*/ 10,
+                input.c_str(), /*datawidth=*/ 4, HLG_LOGO);
+    curses.refreshScreen();
+    Coordinates coordinates = curses.searchScreen(output);
+    curses.stop();
+
+    REQUIRE(coordinates.size() == 1);
+    CHECK(coordinates[0].y == 0);
+    // x = ((width - datawidth) / 2) + 1
+    REQUIRE(coordinates[0].x == 4);
   }
 
   SECTION("With ANSI color escapes")
@@ -117,17 +145,17 @@ TEST_CASE("Center line in window", "[integration][curses]")
     logoTestFixture.enableColors();
     input = "\033[0;1;34mcgdb\033[0m";
     output = "E cE gE dE b";
+
+    curses.clearScreen();
+    center_line((SWINDOW*)curses.getWindow(), /*row=*/ 0, /*width=*/ 10,
+                input.c_str(), /*datawidth=*/ 4, HLG_LOGO);
+    curses.refreshScreen();
+    Coordinates coordinates = curses.searchScreen(output);
+    curses.stop();
+
+    REQUIRE(coordinates.size() == 1);
+    CHECK(coordinates[0].y == 0);
+    // x = ((width - datawidth) / 2) + 1
+    REQUIRE(coordinates[0].x == 4);
   }
-
-  curses.clearScreen();
-  center_line((SWINDOW*)curses.getWindow(), /*row=*/ 0, /*width=*/ 10,
-              input.c_str(), /*datawidth=*/ 4, HLG_LOGO);
-  curses.refreshScreen();
-  Coordinates coordinates = curses.searchScreen(output);
-  curses.stop();
-
-  REQUIRE(coordinates.size() == 1);
-  CHECK(coordinates[0].y == 0);
-  // x = ((width - datawidth) / 2) + 1
-  REQUIRE(coordinates[0].x == 4);
 }

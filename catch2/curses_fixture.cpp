@@ -89,6 +89,7 @@ Coordinates CursesFixture::searchScreen(const std::string& pattern)
     // Remove NULL characters dumped by curses and all characters preceeding the
     // first space.
     line.erase(std::remove(line.begin(), line.end(), NULL), line.end());
+    line = line.substr(19, line.size());
     line = line.substr(line.find(' '));
 
     x = line.find(pattern);
