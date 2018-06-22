@@ -1,15 +1,6 @@
-#if HAVE_CONFIG_H
-#include "config.h"
-#endif /* HAVE_CONFIG_H */
-
-#if HAVE_CURSES_H
-#include <curses.h>
-#elif HAVE_NCURSES_CURSES_H
-#include <ncurses/curses.h>
-#endif
-
-#include "catch.hpp"
 #include "cgdbrc.cpp"
+#include "catch.hpp"
+#include "curses_fixture.h"
 #include "tgdb_types.h"
 #include <string>
 
@@ -74,20 +65,6 @@ class CgdbrcTestFixture
     static int notify(cgdbrc_config_option_ptr option)
     {
       return 1;
-    }
-};
-
-class CursesTestFixture
-{
-  public:
-    CursesTestFixture()
-    {
-      initscr();
-    }
-
-    ~CursesTestFixture()
-    {
-      endwin();
     }
 };
 
@@ -262,139 +239,187 @@ TEST_CASE("Set show debug commands", "[integration]")
 
 TEST_CASE("Set window split", "[integration][curses]")
 {
-  CursesTestFixture cursesFixture;
+  CursesFixture cursesFixture;
+  int result;
 
   SECTION("Top big")
   {
-    REQUIRE(command_set_winsplit("top_big") == 0);
+    result = command_set_winsplit("top_big");
+    cursesFixture.stop();
+    REQUIRE(result == 0);
   }
 
   SECTION("Top full")
   {
-    REQUIRE(command_set_winsplit("top_full") == 0);
+    result = command_set_winsplit("top_full");
+    cursesFixture.stop();
+    REQUIRE(result == 0);
   }
 
   SECTION("Bottom big")
   {
-    REQUIRE(command_set_winsplit("bottom_big") == 0);
+    result = command_set_winsplit("bottom_big");
+    cursesFixture.stop();
+    REQUIRE(result == 0);
   }
 
   SECTION("Bottom full")
   {
-    REQUIRE(command_set_winsplit("bottom_full") == 0);
+    result = command_set_winsplit("bottom_full");
+    cursesFixture.stop();
+    REQUIRE(result == 0);
   }
 
   SECTION("Source big")
   {
-    REQUIRE(command_set_winsplit("src_big") == 0);
+    result = command_set_winsplit("src_big");
+    cursesFixture.stop();
+    REQUIRE(result == 0);
   }
 
   SECTION("Source full")
   {
-    REQUIRE(command_set_winsplit("src_full") == 0);
+    result = command_set_winsplit("src_full");
+    cursesFixture.stop();
+    REQUIRE(result == 0);
   }
 
   SECTION("gdb big")
   {
-    REQUIRE(command_set_winsplit("gdb_big") == 0);
+    result = command_set_winsplit("gdb_big");
+    cursesFixture.stop();
+    REQUIRE(result == 0);
   }
 
   SECTION("gdb full")
   {
-    REQUIRE(command_set_winsplit("gdb_full") == 0);
+    result = command_set_winsplit("gdb_full");
+    cursesFixture.stop();
+    REQUIRE(result == 0);
   }
 
   SECTION("Even")
   {
-    REQUIRE(command_set_winsplit("other") == 0);
+    result = command_set_winsplit("other");
+    cursesFixture.stop();
+    REQUIRE(result == 0);
   }
 
   SECTION("Set and notify")
   {
     CgdbrcTestFixture cgdbrcFixture;
     cgdbrcFixture.setNotification(CGDBRC_WINSPLIT);
-    REQUIRE(command_set_winsplit("top_big") == 1);
+    result = command_set_winsplit("top_big");
+    cursesFixture.stop();
+    REQUIRE(result == 1);
   }
 }
 
 TEST_CASE("Set window split orientation", "[integration][curses]")
 {
-  CursesTestFixture cursesFixture;
+  CursesFixture cursesFixture;
+  int result;
 
   SECTION("Horizontal")
   {
-    REQUIRE(command_set_winsplitorientation("horizontal") == 0);
+    result = command_set_winsplitorientation("horizontal");
+    cursesFixture.stop();
+    REQUIRE(result == 0);
   }
 
   SECTION("Vertical")
   {
-    REQUIRE(command_set_winsplitorientation("vertical") == 0);
+    result = command_set_winsplitorientation("vertical");
+    cursesFixture.stop();
+    REQUIRE(result == 0);
   }
 
   SECTION("Other")
   {
-    REQUIRE(command_set_winsplitorientation("other") == 0);
+    result = command_set_winsplitorientation("other");
+    cursesFixture.stop();
+    REQUIRE(result == 0);
   }
 
   SECTION("Set and notify")
   {
     CgdbrcTestFixture cgdbrcFixture;
     cgdbrcFixture.setNotification(CGDBRC_WINSPLITORIENTATION);
-    REQUIRE(command_set_winsplitorientation("horizontal") == 1);
+    result = command_set_winsplitorientation("horizontal");
+    cursesFixture.stop();
+    REQUIRE(result == 1);
   }
 }
 
 TEST_CASE("Set window minimum height", "[integration][curses]")
 {
-  CursesTestFixture cursesFixture;
+  CursesFixture cursesFixture;
+  int result;
 
   SECTION("Positive")
   {
-    REQUIRE(command_set_winminheight(1) == 1);
+    result = command_set_winminheight(1);
+    cursesFixture.stop();
+    REQUIRE(result == 1);
   }
 
   SECTION("Zero")
   {
-    REQUIRE(command_set_winminheight(0) == 0);
+    result = command_set_winminheight(0);
+    cursesFixture.stop();
+    REQUIRE(result == 0);
   }
 
   SECTION("Negative")
   {
-    REQUIRE(command_set_winminheight(-1) == 1);
+    result = command_set_winminheight(-1);
+    cursesFixture.stop();
+    REQUIRE(result == 1);
   }
 
   SECTION("Set and notify")
   {
     CgdbrcTestFixture cgdbrcFixture;
     cgdbrcFixture.setNotification(CGDBRC_WINMINHEIGHT);
-    REQUIRE(command_set_winminheight(1) == 1);
+    result = command_set_winminheight(1);
+    cursesFixture.stop();
+    REQUIRE(result == 1);
   }
 }
 
 TEST_CASE("Set window minimum width", "[integration][curses]")
 {
-  CursesTestFixture cursesFixture;
+  CursesFixture cursesFixture;
+  int result;
 
   SECTION("Positive")
   {
-    REQUIRE(command_set_winminwidth(1) == 1);
+    result = command_set_winminwidth(1);
+    cursesFixture.stop();
+    REQUIRE(result == 1);
   }
 
   SECTION("Zero")
   {
-    REQUIRE(command_set_winminwidth(0) == 0);
+    result = command_set_winminwidth(0);
+    cursesFixture.stop();
+    REQUIRE(result == 0);
   }
 
   SECTION("Negative")
   {
-    REQUIRE(command_set_winminwidth(-1) == 1);
+    result = command_set_winminwidth(-1);
+    cursesFixture.stop();
+    REQUIRE(result == 1);
   }
 
   SECTION("Set and notify")
   {
     CgdbrcTestFixture cgdbrcFixture;
     cgdbrcFixture.setNotification(CGDBRC_WINMINWIDTH);
-    REQUIRE(command_set_winminwidth(1) == 1);
+    result = command_set_winminwidth(1);
+    cursesFixture.stop();
+    REQUIRE(result == 1);
   }
 }
 
@@ -480,61 +505,82 @@ TEST_CASE("Set ttimeout length", "[integration]")
 
 TEST_CASE("Set syntax type", "[integration][curses]")
 {
-  CursesTestFixture cursesFixture;
+  CursesFixture cursesFixture;
+  int result;
 
   SECTION("C")
   {
-    REQUIRE(command_set_syntax_type("c") == 0);
+    result = command_set_syntax_type("c");
+    cursesFixture.stop();
+    REQUIRE(result == 0);
   }
 
   SECTION("ASM")
   {
-    REQUIRE(command_set_syntax_type("asm") == 0);
+    result = command_set_syntax_type("asm");
+    cursesFixture.stop();
+    REQUIRE(result == 0);
   }
 
   SECTION("D")
   {
-    REQUIRE(command_set_syntax_type("d") == 0);
+    result = command_set_syntax_type("d");
+    cursesFixture.stop();
+    REQUIRE(result == 0);
   }
 
   SECTION("Go")
   {
-    REQUIRE(command_set_syntax_type("go") == 0);
+    result = command_set_syntax_type("go");
+    cursesFixture.stop();
+    REQUIRE(result == 0);
   }
 
   SECTION("Ada")
   {
-    REQUIRE(command_set_syntax_type("ada") == 0);
+    result = command_set_syntax_type("ada");
+    cursesFixture.stop();
+    REQUIRE(result == 0);
   }
 
   SECTION("Rust")
   {
-    REQUIRE(command_set_syntax_type("rust") == 0);
+    result = command_set_syntax_type("rust");
+    cursesFixture.stop();
+    REQUIRE(result == 0);
   }
 
   SECTION("Unknown")
   {
-    REQUIRE(command_set_syntax_type("unknown") == 0);
+    result = command_set_syntax_type("unknown");
+    cursesFixture.stop();
+    REQUIRE(result == 0);
   }
 
   SECTION("Set and notify")
   {
     CgdbrcTestFixture cgdbrcFixture;
     cgdbrcFixture.setNotification(CGDBRC_SYNTAX);
-    REQUIRE(command_set_syntax_type("c") == 1);
+    result = command_set_syntax_type("c");
+    cursesFixture.stop();
+    REQUIRE(result == 1);
   }
 }
 
 TEST_CASE("Focus on cgdb", "[integration][curses]")
 {
-  CursesTestFixture cursesFixture;
-  REQUIRE(command_focus_cgdb(0) == 0);
+  CursesFixture cursesFixture;
+  int result = command_focus_cgdb(0);
+  cursesFixture.stop();
+  REQUIRE(result == 0);
 }
 
 TEST_CASE("Focus on gdb", "[integration][curses]")
 {
-  CursesTestFixture cursesFixture;
-  REQUIRE(command_focus_gdb(0) == 0);
+  CursesFixture cursesFixture;
+  int result = command_focus_gdb(0);
+  cursesFixture.stop();
+  REQUIRE(result == 0);
 }
 
 TEST_CASE("Do bang", "[unit]")
@@ -544,11 +590,13 @@ TEST_CASE("Do bang", "[unit]")
 
 TEST_CASE("Do logo", "[integration][curses]")
 {
-  CursesTestFixture cursesFixture;
+  CursesFixture cursesFixture;
   // We set the winsplit to access the method  if_layout() which updates the
   // screen.
   if_set_winsplit(WIN_SPLIT_SRC_BIG);
-  REQUIRE(command_do_logo(0) == 0);
+  int result = command_do_logo(0);
+  cursesFixture.stop();
+  REQUIRE(result == 0);
 }
 
 /* TODO
@@ -566,7 +614,7 @@ TEST_CASE("Do focus", "[integration]")
 
 TEST_CASE("Do help", "[integration][curses]")
 {
-  CursesTestFixture cursesFixture;
+  CursesFixture cursesFixture;
   REQUIRE(command_do_help(0) == 0);
 }
 
@@ -759,10 +807,11 @@ TEST_CASE("Initialize the configuration options with default values",
 
 TEST_CASE("Initialize the configuration variables", "[integration][curses]")
 {
-  CursesTestFixture cursesFixture;
+  CursesFixture cursesFixture;
   CgdbrcTestFixture cgdbrcFixture;
   cgdbrcFixture.resetStatics();
   cgdbrc_init_config_variables();
+  cursesFixture.stop();
   std::map<std::string, std::string> variables = cgdbrcFixture.getVariableMap();
   std::map<std::string, std::string>::iterator it;
 
