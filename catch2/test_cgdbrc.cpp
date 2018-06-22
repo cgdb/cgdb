@@ -989,8 +989,8 @@ TEST_CASE("Initialize the configuration variables", "[integration][curses]")
 
 TEST_CASE("Get configuration variable", "[unit]")
 {
-  char* shortName = "tcv";
-  char* longName = "testconfigvariable";
+  char shortName[4] = "tcv";
+  char longName[19] = "testconfigvariable";
   ConfigType configType = CONFIG_TYPE_INT;
   void* data = NULL;
   ConfigVariable inConfigVariable(longName, shortName, configType, data);
