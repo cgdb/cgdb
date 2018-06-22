@@ -1,33 +1,23 @@
-#if HAVE_CONFIG_H
-#include "config.h"
-#endif /* HAVE_CONFIG_H */
-
-#if HAVE_CURSES_H
-#include <curses.h>
-#elif HAVE_NCURSES_CURSES_H
-#include <ncurses/curses.h>
-#endif
-
 #include "catch.hpp"
+#include "curses_fixture.h"
 #include "filedlg.cpp"
 
 
 class FileDlgFixture
 {
   public:
-    FileDlgFixture()
-    {
-      initscr();
-    }
+    FileDlgFixture() {}
+
     ~FileDlgFixture()
     {
       filedlg_free(fileDlg_);
-      endwin();
     }
+
     void createFileDlg(int r, int c, int h, int w)
     {
       fileDlg_ = filedlg_new(r, c, h, w);
     }
+
     filedlg* getFileDlg()
     {
       return fileDlg_;
@@ -37,13 +27,24 @@ class FileDlgFixture
     filedlg* fileDlg_;
 };
 
-TEST_CASE("Create new file dialog")
+TEST_CASE("Create new file dialog", "[integration]")
 {
-  int h = 0;
-  {
-    FileDlgFixture fixture;
-    fixture.createFileDlg(1, 2, 3, 4);
-    h = swin_getmaxy(fixture.getFileDlg()->win);
-  }
+  CursesFixture curses;
+  // Verify that the starting height and width values are different than what
+  // will be checked in the final assertions.
+  int h = curses.getHeight();
+  int w = curses.getWidth();
+  curses.stop();
+  CHECK(h != 3);
+  CHECK(w != 4);
+
+  curses.start();
+  FileDlgFixture filedlg;
+  filedlg.createFileDlg(1, 2, 3, 4);
+  curses.setWindow((WINDOW *)filedlg.getFileDlg()->win);
+  h = curses.getHeight();
+  w = curses.getWidth();
+  curses.stop();
   REQUIRE(h == 3);
+  REQUIRE(w == 4);
 }

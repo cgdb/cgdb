@@ -31,6 +31,8 @@ void CursesFixture::start()
   if (!initialized_) {
     window_ = initscr();
     initialized_ = true;
+  } else {
+    refreshScreen();
   }
 }
 
@@ -46,9 +48,19 @@ WINDOW* CursesFixture::getWindow()
   return window_;
 }
 
+void CursesFixture::setWindow(WINDOW* window)
+{
+  window_ = window;
+}
+
 int CursesFixture::getHeight()
 {
   return getmaxy(window_);
+}
+
+int CursesFixture::getWidth()
+{
+  return getmaxx(window_);
 }
 
 void CursesFixture::enableColors()
