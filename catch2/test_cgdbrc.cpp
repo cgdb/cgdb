@@ -1,8 +1,10 @@
 #include "cgdbrc.cpp"
 #include "catch.hpp"
 #include "curses_fixture.h"
+#include "interface.h"
 #include "tgdb_types.h"
 #include <string>
+#include <limits.h>
 
 
 class CgdbrcTestFixture
@@ -356,16 +358,20 @@ TEST_CASE("Set window minimum height", "[integration][curses]")
   CursesFixture curses;
   int result;
 
-  SECTION("Positive")
+  SECTION("Larger than current minimum height")
   {
-    result = command_set_winminheight(1);
+    CHECK(if_init() == 0);
+    result = command_set_winminheight(INT_MAX);
+    if_shutdown();
     curses.stop();
     REQUIRE(result == 1);
   }
 
-  SECTION("Zero")
+  SECTION("Smaller than current minimum height")
   {
+    CHECK(if_init() == 0);
     result = command_set_winminheight(0);
+    if_shutdown();
     curses.stop();
     REQUIRE(result == 0);
   }
@@ -381,7 +387,9 @@ TEST_CASE("Set window minimum height", "[integration][curses]")
   {
     CgdbrcTestFixture cgdbrcFixture;
     cgdbrcFixture.setNotification(CGDBRC_WINMINHEIGHT);
-    result = command_set_winminheight(1);
+    CHECK(if_init() == 0);
+    result = command_set_winminheight(0);
+    if_shutdown();
     curses.stop();
     REQUIRE(result == 1);
   }
@@ -392,16 +400,20 @@ TEST_CASE("Set window minimum width", "[integration][curses]")
   CursesFixture curses;
   int result;
 
-  SECTION("Positive")
+  SECTION("Larger than current minimum height")
   {
-    result = command_set_winminwidth(1);
+    CHECK(if_init() == 0);
+    result = command_set_winminwidth(INT_MAX);
+    if_shutdown();
     curses.stop();
     REQUIRE(result == 1);
   }
 
-  SECTION("Zero")
+  SECTION("Smaller than current minimum height")
   {
+    CHECK(if_init() == 0);
     result = command_set_winminwidth(0);
+    if_shutdown();
     curses.stop();
     REQUIRE(result == 0);
   }
@@ -415,9 +427,11 @@ TEST_CASE("Set window minimum width", "[integration][curses]")
 
   SECTION("Set and notify")
   {
+    CHECK(if_init() == 0);
     CgdbrcTestFixture cgdbrcFixture;
     cgdbrcFixture.setNotification(CGDBRC_WINMINWIDTH);
-    result = command_set_winminwidth(1);
+    result = command_set_winminwidth(0);
+    if_shutdown();
     curses.stop();
     REQUIRE(result == 1);
   }
@@ -570,7 +584,9 @@ TEST_CASE("Set syntax type", "[integration][curses]")
 TEST_CASE("Focus on cgdb", "[integration][curses]")
 {
   CursesFixture curses;
+  CHECK(if_init() == 0);
   int result = command_focus_cgdb(0);
+  if_shutdown();
   curses.stop();
   REQUIRE(result == 0);
 }
@@ -578,7 +594,9 @@ TEST_CASE("Focus on cgdb", "[integration][curses]")
 TEST_CASE("Focus on gdb", "[integration][curses]")
 {
   CursesFixture curses;
+  CHECK(if_init() == 0);
   int result = command_focus_gdb(0);
+  if_shutdown();
   curses.stop();
   REQUIRE(result == 0);
 }
