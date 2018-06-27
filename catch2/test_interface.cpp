@@ -1,5 +1,6 @@
 #include "interface.cpp"
 #include "catch.hpp"
+#include "curses_fixture.h"
 
 
 TEST_CASE("Get source file window row", "[unit]")
@@ -209,4 +210,20 @@ TEST_CASE("Get gdb window width", "[unit]")
     window_shift = 1;
     REQUIRE(get_gdb_width() == 8);
   }
+}
+
+TEST_CASE("Create window with specified position and size",
+          "[integration][curses]")
+{
+  CursesFixture curses;
+  int x = curses.getXOrigin();
+  int y = curses.getYOrigin();
+  int h = curses.getHeight();
+  int w = curses.getWidth();
+  SWINDOW* swin = (SWINDOW *)curses.getWindow();
+  create_swindow(&swin, h, w, y, x);
+  REQUIRE(curses.getXOrigin() == x);
+  REQUIRE(curses.getYOrigin() == y);
+  REQUIRE(curses.getHeight() == h);
+  REQUIRE(curses.getWidth() == w);
 }

@@ -63,6 +63,16 @@ int CursesFixture::getWidth()
   return getmaxx(window_);
 }
 
+int CursesFixture::getXOrigin()
+{
+  return getbegx(window_);
+}
+
+int CursesFixture::getYOrigin()
+{
+  return getbegy(window_);
+}
+
 void CursesFixture::enableColors()
 {
   start_color();

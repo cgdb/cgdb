@@ -32,6 +32,8 @@ class CursesFixture { public:
     void setWindow(WINDOW* window);
     int getHeight();
     int getWidth();
+    int getXOrigin();
+    int getYOrigin();
     void enableColors();
     void clearScreen();
     void refreshScreen();
