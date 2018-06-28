@@ -218,12 +218,25 @@ TEST_CASE("Create window with specified position and size",
   CursesFixture curses;
   int x = curses.getXOrigin();
   int y = curses.getYOrigin();
-  int h = curses.getHeight();
   int w = curses.getWidth();
+  int h = curses.getHeight();
   SWINDOW* swin = (SWINDOW *)curses.getWindow();
-  create_swindow(&swin, h, w, y, x);
-  REQUIRE(curses.getXOrigin() == x);
-  REQUIRE(curses.getYOrigin() == y);
-  REQUIRE(curses.getHeight() == h);
-  REQUIRE(curses.getWidth() == w);
+
+  SECTION("No change to position or size")
+  {
+    create_swindow(&swin, h, w, y, x);
+    REQUIRE(curses.getXOrigin() == x);
+    REQUIRE(curses.getYOrigin() == y);
+    REQUIRE(curses.getWidth() == w);
+    REQUIRE(curses.getHeight() == h);
+  }
+
+  SECTION("Change to position and size")
+  {
+    create_swindow(&swin, h+4, w+3, y+2, x+1);
+    REQUIRE(curses.getXOrigin() == x+1);
+    REQUIRE(curses.getYOrigin() == y+2);
+    REQUIRE(curses.getWidth() == w+3);
+    REQUIRE(curses.getHeight() == h+4);
+  }
 }
