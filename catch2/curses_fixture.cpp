@@ -29,7 +29,9 @@ CursesFixture::~CursesFixture()
 void CursesFixture::start()
 {
   if (!initialized_) {
-    window_ = initscr();
+    initscr();
+    window_ = newwin(/*nlines=*/ 20, /*ncols=*/ 80, /*begin_y=*/ 0,
+                     /*begin_x=*/ 0);
     initialized_ = true;
   } else {
     refreshScreen();
@@ -51,6 +53,11 @@ WINDOW* CursesFixture::getWindow()
 void CursesFixture::setWindow(WINDOW* window)
 {
   window_ = window;
+}
+
+void CursesFixture::newWindow(int nlines, int ncols, int begin_y, int begin_x)
+{
+  window_ = newwin(nlines, ncols, begin_y, begin_x);
 }
 
 int CursesFixture::getHeight()

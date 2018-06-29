@@ -30,6 +30,7 @@ class CursesFixture { public:
     void stop();
     WINDOW* getWindow();
     void setWindow(WINDOW* window);
+    void newWindow(int nlines, int ncols, int begin_y, int begin_x);
     int getHeight();
     int getWidth();
     int getXOrigin();

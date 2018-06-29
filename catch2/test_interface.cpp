@@ -225,6 +225,7 @@ TEST_CASE("Create window with specified position and size",
   SECTION("No change to position or size")
   {
     create_swindow(&swin, h, w, y, x);
+    curses.setWindow((WINDOW *)swin);
     REQUIRE(curses.getXOrigin() == x);
     REQUIRE(curses.getYOrigin() == y);
     REQUIRE(curses.getWidth() == w);
@@ -234,6 +235,7 @@ TEST_CASE("Create window with specified position and size",
   SECTION("Change to position and size")
   {
     create_swindow(&swin, h+4, w+3, y+2, x+1);
+    curses.setWindow((WINDOW *)swin);
     REQUIRE(curses.getXOrigin() == x+1);
     REQUIRE(curses.getYOrigin() == y+2);
     REQUIRE(curses.getWidth() == w+3);
