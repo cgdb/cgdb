@@ -23,6 +23,9 @@ CursesFixture::CursesFixture()
 
 CursesFixture::~CursesFixture()
 {
+  if (window_) {
+    delwin(window_);
+  }
   stop();
 }
 
@@ -32,6 +35,7 @@ void CursesFixture::start()
     initscr();
     window_ = newwin(/*nlines=*/ 20, /*ncols=*/ 80, /*begin_y=*/ 0,
                      /*begin_x=*/ 0);
+    wrefresh(window_);
     initialized_ = true;
   } else {
     refreshScreen();
@@ -40,9 +44,7 @@ void CursesFixture::start()
 
 void CursesFixture::stop()
 {
-  if (initialized_) {
-    endwin();
-  }
+  endwin();
 }
 
 WINDOW* CursesFixture::getWindow()
@@ -57,6 +59,7 @@ void CursesFixture::setWindow(WINDOW* window)
 
 void CursesFixture::newWindow(int nlines, int ncols, int begin_y, int begin_x)
 {
+  delwin(window_);
   window_ = newwin(nlines, ncols, begin_y, begin_x);
 }
 
@@ -88,13 +91,12 @@ void CursesFixture::enableColors()
 
 void CursesFixture::clearScreen()
 {
-  clear();
-  refreshScreen();
+  wclear(window_);
 }
 
 void CursesFixture::refreshScreen()
 {
-  refresh();
+  wrefresh(window_);
 }
 
 void CursesFixture::dumpScreen()
