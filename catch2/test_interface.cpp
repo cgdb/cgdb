@@ -326,6 +326,33 @@ TEST_CASE("Validate the inteface window sizes", "[unit]")
   }
 }
 
+TEST_CASE("Set interface focus", "[integration][curses]")
+{
+  SECTION("Focus on gdb")
+  {
+    if_set_focus(GDB);
+    REQUIRE(focus == GDB);
+  }
+
+  SECTION("Focus on cgdb")
+  {
+    if_set_focus(CGDB);
+    REQUIRE(focus == CGDB);
+  }
+
+  SECTION("Focus on file dialog")
+  {
+    if_set_focus(FILE_DLG);
+    REQUIRE(focus == FILE_DLG);
+  }
+
+  SECTION("Focus on cgdb status bar")
+  {
+    if_set_focus(CGDB_STATUS_BAR);
+    REQUIRE(focus == CGDB_STATUS_BAR);
+  }
+}
+
 TEST_CASE("Get interface focus", "[unit]")
 {
   SECTION("Focused on gdb")
