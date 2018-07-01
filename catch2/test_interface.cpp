@@ -241,4 +241,10 @@ TEST_CASE("Create window with specified position and size",
     REQUIRE(curses.getWidth() == w+3);
     REQUIRE(curses.getHeight() == h+4);
   }
+
+  SECTION("Change to invalid position and size")
+  {
+    create_swindow(&swin, 0, 0, 0, 0);
+    REQUIRE(swin == NULL);
+  }
 }
