@@ -87,9 +87,10 @@ TEST_CASE("Display cgdb logo", "[integration][curses]")
 
   SECTION("Logo does not fit on screen")
   {
-    CGDB_LOGO[logoindex].h = (heightAvailable + 1);
-
-    curses.clearScreen();
+    int h = CGDB_LOGO[logoindex].h;
+    int w = CGDB_LOGO[logoindex].w;
+    curses.newWindow(h-1, w-1, /*begin_y=*/ 0, /*begin_y=*/ 0);
+    curses.refreshScreen();
     logo_display((SWINDOW*)curses.getWindow());
     curses.refreshScreen();
     Coordinates coordinates = curses.searchScreen("version");
