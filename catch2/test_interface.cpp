@@ -257,7 +257,6 @@ TEST_CASE("Create a window separator", "[integration][curses]")
   {
     if (vseparator_win != NULL) {
       separator_display(/*draw=*/ 0);
-      CHECK(vseparator_win == NULL);
     }
     short unsigned int ws_row = 5;
     short unsigned int ws_col = 20;
@@ -276,7 +275,6 @@ TEST_CASE("Create a window separator", "[integration][curses]")
   {
     if (vseparator_win == NULL) {
       separator_display(/*draw=*/ 1);
-      CHECK(vseparator_win != NULL);
     }
     separator_display(/*draw=*/ 0);
     REQUIRE(vseparator_win == NULL);
