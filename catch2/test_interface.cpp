@@ -280,3 +280,30 @@ TEST_CASE("Create a window separator", "[integration][curses]")
     REQUIRE(vseparator_win == NULL);
   }
 }
+
+TEST_CASE("Get interface focus", "[unit]")
+{
+  SECTION("Focused on gdb")
+  {
+    focus = GDB;
+    REQUIRE(if_get_focus() == GDB);
+  }
+
+  SECTION("Focused on cgdb")
+  {
+    focus = CGDB;
+    REQUIRE(if_get_focus() == CGDB);
+  }
+
+  SECTION("Focused on file dialog")
+  {
+    focus = FILE_DLG;
+    REQUIRE(if_get_focus() == FILE_DLG);
+  }
+
+  SECTION("Focused on cgdb status bar")
+  {
+    focus = CGDB_STATUS_BAR;
+    REQUIRE(if_get_focus() == CGDB_STATUS_BAR);
+  }
+}
