@@ -281,6 +281,51 @@ TEST_CASE("Create a window separator", "[integration][curses]")
   }
 }
 
+TEST_CASE("Validate the inteface window sizes", "[unit]")
+{
+  SECTION("Horizonal window split orientation")
+  {
+    cur_split_orientation = WSO_HORIZONTAL;
+    int max_window_size_shift = (HEIGHT / 2) - ((HEIGHT + 1) % 2);
+    int min_window_size_shift = -(HEIGHT / 2);
+
+    SECTION("Window shift greater than maximum")
+    {
+      window_shift = max_window_size_shift + interface_winminheight + 1;
+      validate_window_sizes();
+      REQUIRE(window_shift == max_window_size_shift);
+    }
+
+    SECTION("Window shift less than minimum")
+    {
+      window_shift = min_window_size_shift - interface_winminheight - 1;
+      validate_window_sizes();
+      REQUIRE(window_shift == min_window_size_shift);
+    }
+  }
+
+  SECTION("Vertical window split orientation")
+  {
+    cur_split_orientation = WSO_VERTICAL;
+    int max_window_size_shift = (WIDTH / 2) - ((WIDTH + 1) % 2);
+    int min_window_size_shift = -(WIDTH / 2);
+
+    SECTION("Window shift greater than maximum")
+    {
+      window_shift = max_window_size_shift + interface_winminwidth + 1;
+      validate_window_sizes();
+      REQUIRE(window_shift == max_window_size_shift);
+    }
+
+    SECTION("Window shift less than minimum")
+    {
+      window_shift = min_window_size_shift - interface_winminwidth - 1;
+      validate_window_sizes();
+      REQUIRE(window_shift == min_window_size_shift);
+    }
+  }
+}
+
 TEST_CASE("Get interface focus", "[unit]")
 {
   SECTION("Focused on gdb")
