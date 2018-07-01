@@ -353,6 +353,27 @@ TEST_CASE("Get interface focus", "[unit]")
   }
 }
 
+TEST_CASE("Reset the window shift", "[integration][curses]")
+{
+  CursesFixture curses;
+
+  SECTION("Horizonal window split orientation")
+  {
+    cur_split_orientation = WSO_HORIZONTAL;
+    int shift = (int) ((HEIGHT / 2) * (cur_win_split / 2.0));
+    reset_window_shift();
+    REQUIRE(window_shift == shift);
+  }
+
+  SECTION("Vertical window split orientation")
+  {
+    cur_split_orientation = WSO_VERTICAL;
+    int shift = (int) ((WIDTH / 2) * (cur_win_split / 2.0));
+    reset_window_shift();
+    REQUIRE(window_shift == shift);
+  }
+}
+
 TEST_CASE("Change window minimum height", "[integration][curses]")
 {
   SECTION("Negative value")
