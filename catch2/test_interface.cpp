@@ -374,6 +374,24 @@ TEST_CASE("Reset the window shift", "[integration][curses]")
   }
 }
 
+TEST_CASE("Set current window split orientation", "[integration][curses]")
+{
+  CursesFixture curses;
+
+  cur_split_orientation = WSO_VERTICAL;
+  if_set_winsplitorientation(WSO_HORIZONTAL);
+  cur_split_orientation = WSO_HORIZONTAL;
+}
+
+TEST_CASE("Set current window split", "[integration][curses]")
+{
+  CursesFixture curses;
+
+  cur_win_split = WIN_SPLIT_FREE;
+  if_set_winsplit(WIN_SPLIT_GDB_FULL);
+  cur_win_split = WIN_SPLIT_GDB_FULL;
+}
+
 TEST_CASE("Change window minimum height", "[integration][curses]")
 {
   SECTION("Negative value")
