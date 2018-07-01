@@ -307,3 +307,43 @@ TEST_CASE("Get interface focus", "[unit]")
     REQUIRE(if_get_focus() == CGDB_STATUS_BAR);
   }
 }
+
+TEST_CASE("Change window minimum height", "[integration][curses]")
+{
+  SECTION("Negative value")
+  {
+    REQUIRE(if_change_winminheight(-1) == -1);
+  }
+
+  SECTION("Value larger than half the screen height")
+  {
+    int h = (HEIGHT / 2) + 1;
+    REQUIRE(if_change_winminheight(h) == -1);
+  }
+
+  SECTION("Acceptable value")
+  {
+    CursesFixture curses;
+    REQUIRE(if_change_winminheight(0) == 0);
+  }
+}
+
+TEST_CASE("Change window minimum width", "[integration][curses]")
+{
+  SECTION("Negative value")
+  {
+    REQUIRE(if_change_winminwidth(-1) == -1);
+  }
+
+  SECTION("Value larger than half the screen width")
+  {
+    int w = (WIDTH / 2) + 1;
+    REQUIRE(if_change_winminwidth(w) == -1);
+  }
+
+  SECTION("Acceptable value")
+  {
+    CursesFixture curses;
+    REQUIRE(if_change_winminwidth(0) == 0);
+  }
+}
