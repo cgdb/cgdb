@@ -248,3 +248,37 @@ TEST_CASE("Create window with specified position and size",
     REQUIRE(swin == NULL);
   }
 }
+
+TEST_CASE("Create a window separator", "[integration][curses]")
+{
+  CursesFixture curses;
+
+  SECTION("Draw separator")
+  {
+    if (vseparator_win != NULL) {
+      separator_display(/*draw=*/ 0);
+      CHECK(vseparator_win == NULL);
+    }
+    short unsigned int ws_row = 5;
+    short unsigned int ws_col = 20;
+    screen_size = (winsize){ws_row, ws_col, /*ws_xpixel=*/ 2, /*ws_ypixel=*/ 3};
+    cur_split_orientation = WSO_HORIZONTAL;
+    separator_display(/*draw=*/ 1);
+    REQUIRE(vseparator_win != NULL);
+    curses.setWindow((WINDOW *)vseparator_win);
+    REQUIRE(curses.getXOrigin() == ws_col);
+    REQUIRE(curses.getYOrigin() == 0);
+    REQUIRE(curses.getWidth() == 1);
+    REQUIRE(curses.getHeight() == ws_row);
+  }
+
+  SECTION("Destroy separator")
+  {
+    if (vseparator_win == NULL) {
+      separator_display(/*draw=*/ 1);
+      CHECK(vseparator_win != NULL);
+    }
+    separator_display(/*draw=*/ 0);
+    REQUIRE(vseparator_win == NULL);
+  }
+}
