@@ -1,3 +1,6 @@
+#ifndef CURSES_FIXTURE_H
+#define CURSES_FIXTURE_H
+
 #if HAVE_CONFIG_H
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
@@ -47,3 +50,4 @@ class CursesFixture { public:
     WINDOW* window_;
 };
 
+#endif
