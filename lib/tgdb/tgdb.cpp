@@ -964,15 +964,20 @@ int tgdb_get_gdb_command(struct tgdb *tgdb, tgdb_request_ptr request,
                     " \"-data-disassemble -s 0 -e 0 -- 4\"\n";
             break;
         case TGDB_REQUEST_DEBUGGER_COMMAND:
+            // tgdb_get_client_command always returns a string
+            // with static storage duration
             command = tgdb_get_client_command(tgdb,
                     request->choice.debugger_command.c);
             break;
         case TGDB_REQUEST_MODIFY_BREAKPOINT:
-            command = tgdb_client_modify_breakpoint_call(tgdb,
+            str = tgdb_client_modify_breakpoint_call(tgdb,
                     request->choice.modify_breakpoint.file,
                     request->choice.modify_breakpoint.line,
                     request->choice.modify_breakpoint.addr,
                     request->choice.modify_breakpoint.b);
+            command = str;
+            free(str);
+            str = NULL;
             break;
         case TGDB_REQUEST_COMPLETE:
             str = sys_aprintf("server interpreter-exec mi"
