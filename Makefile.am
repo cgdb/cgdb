@@ -2,5 +2,5 @@
 # readline directory simply needs to be copied as is, where as
 # the rest of the directories have a make dist rule run on them
 AUTOMAKE_OPTIONS = -Wportability foreign
-SUBDIRS=lib cgdb doc test catch2
-DIST_SUBDIRS=lib cgdb doc test catch2
+SUBDIRS=lib cgdb doc test tests
+DIST_SUBDIRS=lib cgdb doc test tests

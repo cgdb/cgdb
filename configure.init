@@ -251,5 +251,5 @@ AC_OUTPUT(
     doc/Makefile \
     cgdb/Makefile \
     test/Makefile \
-    catch2/Makefile
+    tests/Makefile
 )
