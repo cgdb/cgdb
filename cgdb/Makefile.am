@@ -1,4 +1,7 @@
 DEFS += -DPKGDATADIR=\"$(pkgdatadir)\" -DTOPBUILDDIR=\"$(abs_top_builddir)\"
+if WANT_TESTS
+    DEFS += -DTESTING
+endif
 
 AM_CXXFLAGS = \
     -I$(top_srcdir)/lib/kui \

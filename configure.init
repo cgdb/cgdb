@@ -239,6 +239,15 @@ fi
 
 AH_BOTTOM([#include <cgdb_custom_config.h>])
 
+dnl Build the test suite if enable tests is true
+AC_ARG_ENABLE([tests],
+  [AS_HELP_STRING([--enable-tests],
+                  [Enable compilation of test suite. Default is disabled.])],
+  [enable_tests="$enableval"],
+  [eanble_tests="no"])
+AS_IF([test "x$enable_tests" = "xyes"], [AC_CONFIG_FILES(tests/Makefile)])
+AM_CONDITIONAL([WANT_TESTS], [test "x$enable_tests" = "xyes"])
+
 AC_OUTPUT(
     cgdb_custom_config.h \
     Makefile \
@@ -250,6 +259,5 @@ AC_OUTPUT(
     lib/util/Makefile \
     doc/Makefile \
     cgdb/Makefile \
-    test/Makefile \
-    tests/Makefile
+    test/Makefile
 )

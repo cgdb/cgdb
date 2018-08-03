@@ -1,4 +1,6 @@
-DEFS += -DPKGDATADIR=\"$(pkgdatadir)\" -DTOPBUILDDIR=\"$(abs_top_builddir)\"
+DEFS += -DPKGDATADIR=\"$(pkgdatadir)\" \
+        -DTOPBUILDDIR=\"$(abs_top_builddir)\" \
+        -DTESTING
 
 AM_CXXFLAGS = \
     -I$(top_srcdir)/cgdb \
