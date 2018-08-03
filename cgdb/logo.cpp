@@ -30,10 +30,8 @@
 /* Local Includes */
 #include "sys_util.h"
 #include "stretchy.h"
-#include "sys_win.h"
 #include "cgdb.h"
 #include "logo.h"
-#include "highlight_groups.h"
 
 /* Logo index */
 static int logoindex = -1;
@@ -277,3 +275,41 @@ void logo_display(SWINDOW *win)
 
     swin_curs_set(0);         /* Hide the cursor */
 }
+
+#ifdef TESTING
+void set_logo_index(int index)
+{
+   logoindex = index;
+}
+
+int get_logo_index()
+{
+   return logoindex;
+}
+
+int get_logo_height()
+{
+   return CGDB_LOGO[logoindex].h;
+}
+
+int get_logo_width()
+{
+   return CGDB_LOGO[logoindex].w;
+}
+
+int get_available_logo_count()
+{
+   return logos_available();
+}
+
+int get_usage_message_height()
+{
+   return CGDB_NUM_USAGE;
+}
+
+void center_line_in_window(SWINDOW* win, int row, int width, const char* data,
+                           int datawidth, enum hl_group_kind group_kind)
+{
+   center_line(win, row, width, data, datawidth, group_kind);
+}
+#endif // TESTING

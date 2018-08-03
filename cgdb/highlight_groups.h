@@ -1,6 +1,9 @@
 #ifndef __HIGHLIGHT_GROUPS_H__
 #define __HIGHLIGHT_GROUPS_H__
 
+/* Local Includes */
+#include "sys_win.h"
+
 /*!
  * \file
  * highlight_group.h
