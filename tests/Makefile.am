@@ -22,16 +22,16 @@ tests_LDADD = \
     $(top_builddir)/lib/util/libcgdbutil.a
 
 tests_SOURCES = \
-    test_main.cpp \
-    test_usage.cpp \
-    test_logo.cpp \
-    test_interface.cpp \
-    test_highlight_groups.cpp \
-    test_cgdbrc.cpp \
-    test_cgdb.cpp \
-    test_scroller.cpp \
-    test_sources.cpp \
-    test_filedlg.cpp \
-    test_highlight.cpp \
-    test_command_lexer.cpp \
+    tests_main.cpp \
+    usage_tests.cpp \
+    logo_tests.cpp \
+    interface_tests.cpp \
+    highlight_groups_tests.cpp \
+    cgdbrc_tests.cpp \
+    cgdb_tests.cpp \
+    scroller_tests.cpp \
+    sources_tests.cpp \
+    filedlg_tests.cpp \
+    highlight_tests.cpp \
+    command_lexer_tests.cpp \
     fixtures/curses_fixture.cpp
