@@ -9,6 +9,8 @@
 #include <stdio.h>
 #endif /* HAVE_STDIO_H */
 
+#include <list>
+
 /* TODO: Remove this include. It is simply used to get 
  * enum tokenizer_language_support.
  */
@@ -171,6 +173,46 @@ struct cgdbrc_config_option {
     } variant;
 };
 
+/**
+ * The general idea is that the configuration will read in the users ~/.cgdbrc
+ * file, or ~/.cgdb/config or whatever, and execute each command.  This will
+ * also be responsible for processing all : commands in the tui.
+ *
+ */
+
+enum ConfigType {
+    CONFIG_TYPE_BOOL,           /* set ic / set noic */
+    CONFIG_TYPE_INT,            /* set tabstop=8 */
+    CONFIG_TYPE_STRING,
+    CONFIG_TYPE_FUNC_VOID,
+    CONFIG_TYPE_FUNC_BOOL,
+    CONFIG_TYPE_FUNC_INT,
+    CONFIG_TYPE_FUNC_STRING
+};
+
+/**
+ * A configuration variable.
+ */
+struct ConfigVariable {
+    ConfigVariable(const char *name_p, const char *s_name_p,
+            enum ConfigType type_p, void *data_p) :
+            name(name_p), s_name(s_name_p), type(type_p), data(data_p) {}
+
+    /**
+     * The name and shortname of the configuration variable.
+     */
+    const char *name, *s_name;
+    
+    /** The type of configuration variable */
+    enum ConfigType type;
+    
+    /** 
+     * The data member or function to set this config variables value.
+     */
+    void *data;
+};
+
+typedef std::list<ConfigVariable> ConfigVariableList;
 /* }}} */
 
 /* Attach/Detach options {{{ */
@@ -243,5 +285,36 @@ int cgdbrc_get_key_code_timeoutlen(void);
 int cgdbrc_get_mapped_key_timeoutlen(void);
 
 /* }}} */
+
+#ifdef TESTING
+int cmd_set_arrowstyle(const char *value);
+int cmd_set_cgdb_mode_key(const char *value);
+int cmd_set_executing_line_display(const char *value);
+int cmd_set_selected_line_display(const char *value);
+int cmd_set_timeout(int value);
+int cmd_set_timeoutlen(int value);
+int cmd_set_ttimeout(int value);
+int cmd_set_ttimeoutlen(int value);
+int cmd_set_winminheight(int value);
+int cmd_set_winminwidth(int value);
+int cmd_set_winsplit(const char *value);
+int cmd_set_winsplitorientation(const char *value);
+int cmd_set_syntax_type(const char *value);
+int cmd_set_sdc(int value);
+int cmd_focus_cgdb(int value);
+int cmd_focus_gdb(int value);
+int cmd_do_bang(int value);
+int cmd_do_logo(int value);
+int cmd_parse_file(const char* config_file);
+int rc_set_val(struct cgdbrc_config_option config_option);
+int rc_attach(enum cgdbrc_option_kind option, cgdbrc_notify notify);
+void rc_init_config_options();
+void rc_init_config_variables();
+ConfigVariableList get_cgdbrc_variables();
+void clear_cgdbrc_attach_list();
+int get_cgdbrc_attach_list_size();
+ConfigVariable* get_config_variable(const char* variable);
+void set_cgdbrc_config_option(struct cgdbrc_config_option config_option);
+#endif // TESTING
 
 #endif /* __CGDBRC_H__ */

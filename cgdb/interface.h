@@ -9,8 +9,9 @@
 #define _INTERFACE_H_
 
 /* Local Includes */
-#include "sources.h"
+#include "cgdb.h"
 #include "cgdbrc.h"
+#include "sources.h"
 
 /* --------- */
 /* Functions */

@@ -2,8 +2,6 @@
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
-#include <list>
-
 #if HAVE_STRING_H
 #include <string.h>
 #endif /* HAVE_STRING_H */
@@ -27,23 +25,6 @@
 #include "kui_term.h"
 
 extern struct tgdb *tgdb;
-
-/**
- * The general idea is that the configuration will read in the users ~/.cgdbrc
- * file, or ~/.cgdb/config or whatever, and execute each command.  This will
- * also be responsible for processing all : commands in the tui.
- *
- */
-
-enum ConfigType {
-    CONFIG_TYPE_BOOL,           /* set ic / set noic */
-    CONFIG_TYPE_INT,            /* set tabstop=8 */
-    CONFIG_TYPE_STRING,
-    CONFIG_TYPE_FUNC_VOID,
-    CONFIG_TYPE_FUNC_BOOL,
-    CONFIG_TYPE_FUNC_INT,
-    CONFIG_TYPE_FUNC_STRING
-};
 
 static int command_set_arrowstyle(const char *value);
 static int command_set_cgdb_mode_key(const char *value);
@@ -252,30 +233,6 @@ void cgdbrc_init_config_options(void)
     option.variant.int_val = 1;
     cgdbrc_config_options[i++] = option;
 }
-
-/**
- * A configuration variable.
- */
-struct ConfigVariable {
-    ConfigVariable(const char *name_p, const char *s_name_p,
-            enum ConfigType type_p, void *data_p) :
-            name(name_p), s_name(s_name_p), type(type_p), data(data_p) {}
-
-    /**
-     * The name and shortname of the configuration variable.
-     */
-    const char *name, *s_name;
-    
-    /** The type of configuration variable */
-    enum ConfigType type;
-    
-    /** 
-     * The data member or function to set this config variables value.
-     */
-    void *data;
-};
-
-typedef std::list<ConfigVariable> ConfigVariableList;
 
 /** The list of configuration variables */
 static ConfigVariableList cgdbrc_variables;
@@ -1245,5 +1202,147 @@ int cgdbrc_get_mapped_key_timeoutlen(void)
 
     return cgdbrc_get_int(CGDBRC_TIMEOUT_LEN);
 }
+
+#ifdef TESTING
+int cmd_set_arrowstyle(const char *value)
+{
+    return command_set_arrowstyle(value);
+}
+
+int cmd_set_cgdb_mode_key(const char *value)
+{
+    return command_set_cgdb_mode_key(value);
+}
+
+int cmd_set_executing_line_display(const char *value)
+{
+    return command_set_executing_line_display(value);
+}
+
+int cmd_set_selected_line_display(const char *value)
+{
+    return command_set_selected_line_display(value);
+}
+
+int cmd_set_timeout(int value)
+{
+    return command_set_timeout(value);
+}
+
+int cmd_set_timeoutlen(int value)
+{
+    return command_set_timeoutlen(value);
+}
+
+int cmd_set_ttimeout(int value)
+{
+    return command_set_ttimeout(value);
+}
+
+int cmd_set_ttimeoutlen(int value)
+{
+    return command_set_ttimeoutlen(value);
+}
+
+int cmd_set_winminheight(int value)
+{
+    return command_set_winminheight(value);
+}
+
+int cmd_set_winminwidth(int value)
+{
+    return command_set_winminwidth(value);
+}
+
+int cmd_set_winsplit(const char *value)
+{
+    return command_set_winsplit(value);
+}
+
+int cmd_set_winsplitorientation(const char *value)
+{
+    return command_set_winsplitorientation(value);
+}
+
+int cmd_set_syntax_type(const char *value)
+{
+    return command_set_syntax_type(value);
+}
+
+int cmd_set_sdc(int value)
+{
+    return command_set_sdc(value);
+}
+
+int cmd_focus_cgdb(int value)
+{
+    return command_focus_cgdb(value);
+}
+
+int cmd_focus_gdb(int value)
+{
+    return command_focus_gdb(value);
+}
+
+int cmd_do_bang(int value)
+{
+    return command_do_bang(value);
+}
+
+int cmd_do_logo(int value)
+{
+    return command_do_logo(value);
+}
+
+int cmd_parse_file(const char* config_file)
+{
+    return command_parse_file(config_file);
+}
+
+int rc_set_val(struct cgdbrc_config_option config_option)
+{
+    return cgdbrc_set_val(config_option);
+}
+
+int rc_attach(enum cgdbrc_option_kind option, cgdbrc_notify notify)
+{
+    return cgdbrc_attach(option, notify);
+}
+
+void rc_init_config_options()
+{
+    cgdbrc_init_config_options();
+}
+
+void rc_init_config_variables()
+{
+    cgdbrc_init_config_variables();
+}
+
+ConfigVariableList get_cgdbrc_variables()
+{
+    return cgdbrc_variables;
+}
+
+void clear_cgdbrc_attach_list()
+{
+    cgdbrc_attach_list.clear();
+}
+
+int get_cgdbrc_attach_list_size()
+{
+    return cgdbrc_attach_list.size();
+}
+
+ConfigVariable* get_config_variable(const char* variable)
+{
+    return get_variable(variable);
+}
+
+void set_cgdbrc_config_option(struct cgdbrc_config_option config_option)
+{
+   cgdbrc_config_options[config_option.option_kind] = config_option;
+}
+#endif // TESTING
 
 /* }}} */

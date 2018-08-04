@@ -49,19 +49,19 @@
 #endif
 
 /* Local Includes */
-#include "sys_util.h"
-#include "stretchy.h"
-#include "sys_win.h"
 #include "cgdb.h"
-#include "highlight.h"
-#include "tokenizer.h"
-#include "sources.h"
-#include "logo.h"
-#include "fs_util.h"
 #include "cgdbrc.h"
+#include "fs_util.h"
+#include "highlight.h"
 #include "highlight_groups.h"
 #include "interface.h"
+#include "logo.h"
+#include "sources.h"
+#include "stretchy.h"
+#include "sys_util.h"
+#include "sys_win.h"
 #include "tgdb_types.h"
+#include "tokenizer.h"
 
 int sources_syntax_on = 1;
 

@@ -74,7 +74,6 @@
 /* Local Includes */
 #include "sys_util.h"
 #include "sys_win.h"
-#include "cgdb.h"
 #include "config.h"
 #include "tokenizer.h"
 #include "interface.h"
