@@ -277,38 +277,38 @@ void logo_display(SWINDOW *win)
 }
 
 #ifdef TESTING
-void set_logo_index(int index)
+void tst_set_logo_index(int index)
 {
    logoindex = index;
 }
 
-int get_logo_index()
+int tst_get_logo_index()
 {
    return logoindex;
 }
 
-int get_logo_height()
+int tst_get_logo_height()
 {
    return CGDB_LOGO[logoindex].h;
 }
 
-int get_logo_width()
+int tst_get_logo_width()
 {
    return CGDB_LOGO[logoindex].w;
 }
 
-int get_available_logo_count()
+int tst_logos_available()
 {
    return logos_available();
 }
 
-int get_usage_message_height()
+int tst_get_cgdb_num_usage()
 {
    return CGDB_NUM_USAGE;
 }
 
-void center_line_in_window(SWINDOW* win, int row, int width, const char* data,
-                           int datawidth, enum hl_group_kind group_kind)
+void tst_center_line(SWINDOW* win, int row, int width, const char* data,
+                     int datawidth, enum hl_group_kind group_kind)
 {
    center_line(win, row, width, data, datawidth, group_kind);
 }

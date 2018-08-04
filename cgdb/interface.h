@@ -286,4 +286,5 @@ void tst_create_swindow(SWINDOW **win, int nlines, int ncols, int begin_y,
 SWINDOW* tst_get_vseparator_win();
 void tst_separator_display(int draw);
 #endif // TESTING
-#endif
+
+#endif // _INTERFACE_H_

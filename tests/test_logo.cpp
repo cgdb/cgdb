@@ -36,9 +36,9 @@ class LogoTestFixture
 
 TEST_CASE("Assign a random logo index", "[integration]")
 {
-  set_logo_index(-1);
+  tst_set_logo_index(-1);
   logo_reset();
-  REQUIRE(get_logo_index() != 1);
+  REQUIRE(tst_get_logo_index() != 1);
 }
 
 TEST_CASE("Get the number of available logos", "[integration][curses]")
@@ -50,7 +50,7 @@ TEST_CASE("Get the number of available logos", "[integration][curses]")
   SECTION("ANSI color escape not supported")
   {
     logoTestFixture.disableColors();
-    actual = get_available_logo_count();
+    actual = tst_logos_available();
     expected = 3;
   }
 
@@ -59,7 +59,7 @@ TEST_CASE("Get the number of available logos", "[integration][curses]")
     CursesFixture curses;
     curses.enableColors();
     logoTestFixture.enableColors();
-    actual = get_available_logo_count();
+    actual = tst_logos_available();
     expected = 7;
     curses.stop();
   }
@@ -70,13 +70,13 @@ TEST_CASE("Get the number of available logos", "[integration][curses]")
 TEST_CASE("Display cgdb logo", "[integration][curses]")
 {
   int index = 1;
-  set_logo_index(index);
+  tst_set_logo_index(index);
   CursesFixture curses;
-  int heightAvailable = curses.getHeight() - get_usage_message_height() - 2;
+  int heightAvailable = curses.getHeight() - tst_get_cgdb_num_usage() - 2;
 
   SECTION("Logo fits on screen")
   {
-    CHECK(get_logo_height() <= heightAvailable);
+    CHECK(tst_get_logo_height() <= heightAvailable);
 
     curses.clearScreen();
     logo_display((SWINDOW*)curses.getWindow());
@@ -89,8 +89,8 @@ TEST_CASE("Display cgdb logo", "[integration][curses]")
 
   SECTION("Logo does not fit on screen")
   {
-    int h = get_logo_height();
-    int w = get_logo_width();
+    int h = tst_get_logo_height();
+    int w = tst_get_logo_width();
     curses.newWindow(h-1, w-1, /*begin_y=*/ 0, /*begin_y=*/ 0);
     curses.refreshScreen();
     logo_display((SWINDOW*)curses.getWindow());
@@ -104,7 +104,7 @@ TEST_CASE("Display cgdb logo", "[integration][curses]")
   SECTION("Uninitialized logo index")
   {
     index = -1;
-    set_logo_index(index);
+    tst_set_logo_index(index);
 
     curses.clearScreen();
     logo_display((SWINDOW*)curses.getWindow());
@@ -131,7 +131,7 @@ TEST_CASE("Center line in window", "[integration][curses]")
     output = input;
 
     curses.clearScreen();
-    center_line_in_window((SWINDOW*)curses.getWindow(), /*row=*/ 0,
+    tst_center_line((SWINDOW*)curses.getWindow(), /*row=*/ 0,
                           /*width=*/ 10, input.c_str(), /*datawidth=*/ 4,
                           HLG_LOGO);
     curses.refreshScreen();
@@ -152,7 +152,7 @@ TEST_CASE("Center line in window", "[integration][curses]")
     output = "E cE gE dE b";
 
     curses.clearScreen();
-    center_line_in_window((SWINDOW*)curses.getWindow(), /*row=*/ 0,
+    tst_center_line((SWINDOW*)curses.getWindow(), /*row=*/ 0,
                           /*width=*/ 10, input.c_str(), /*datawidth=*/ 4,
                           HLG_LOGO);
     curses.refreshScreen();

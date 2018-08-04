@@ -26,13 +26,14 @@ void logo_display(SWINDOW *win);
 void logo_reset();
 
 #ifdef TESTING
-void set_logo_index(int index);
-int get_logo_index();
-int get_logo_height();
-int get_logo_width();
-int get_available_logo_count();
-int get_usage_message_height();
-void center_line_in_window(SWINDOW *win, int row, int width, const char* data,
-                           int datawidth, enum hl_group_kind group_kind);
+void tst_set_logo_index(int index);
+int tst_get_logo_index();
+int tst_get_logo_height();
+int tst_get_logo_width();
+int tst_logos_available();
+int tst_get_cgdb_num_usage();
+void tst_center_line(SWINDOW *win, int row, int width, const char* data,
+                     int datawidth, enum hl_group_kind group_kind);
 #endif // TESTING
+
 #endif // _LOGO_H_

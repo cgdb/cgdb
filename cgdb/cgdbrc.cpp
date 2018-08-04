@@ -1166,6 +1166,7 @@ cgdbrc_attach(enum cgdbrc_option_kind option, cgdbrc_notify notify)
 
 cgdbrc_config_option_ptr cgdbrc_get(enum cgdbrc_option_kind option)
 {
+
     return &cgdbrc_config_options[option];
 }
 
@@ -1203,146 +1204,136 @@ int cgdbrc_get_mapped_key_timeoutlen(void)
     return cgdbrc_get_int(CGDBRC_TIMEOUT_LEN);
 }
 
+/* }}} */
+
 #ifdef TESTING
-int cmd_set_arrowstyle(const char *value)
+int tst_command_set_arrowstyle(const char *value)
 {
     return command_set_arrowstyle(value);
 }
 
-int cmd_set_cgdb_mode_key(const char *value)
+int tst_command_set_cgdb_mode_key(const char *value)
 {
     return command_set_cgdb_mode_key(value);
 }
 
-int cmd_set_executing_line_display(const char *value)
+int tst_command_set_executing_line_display(const char *value)
 {
     return command_set_executing_line_display(value);
 }
 
-int cmd_set_selected_line_display(const char *value)
+int tst_command_set_selected_line_display(const char *value)
 {
     return command_set_selected_line_display(value);
 }
 
-int cmd_set_timeout(int value)
+int tst_command_set_timeout(int value)
 {
     return command_set_timeout(value);
 }
 
-int cmd_set_timeoutlen(int value)
+int tst_command_set_timeoutlen(int value)
 {
     return command_set_timeoutlen(value);
 }
 
-int cmd_set_ttimeout(int value)
+int tst_command_set_ttimeout(int value)
 {
     return command_set_ttimeout(value);
 }
 
-int cmd_set_ttimeoutlen(int value)
+int tst_command_set_ttimeoutlen(int value)
 {
     return command_set_ttimeoutlen(value);
 }
 
-int cmd_set_winminheight(int value)
+int tst_command_set_winminheight(int value)
 {
     return command_set_winminheight(value);
 }
 
-int cmd_set_winminwidth(int value)
+int tst_command_set_winminwidth(int value)
 {
     return command_set_winminwidth(value);
 }
 
-int cmd_set_winsplit(const char *value)
+int tst_command_set_winsplit(const char *value)
 {
     return command_set_winsplit(value);
 }
 
-int cmd_set_winsplitorientation(const char *value)
+int tst_command_set_winsplitorientation(const char *value)
 {
     return command_set_winsplitorientation(value);
 }
 
-int cmd_set_syntax_type(const char *value)
+int tst_command_set_syntax_type(const char *value)
 {
     return command_set_syntax_type(value);
 }
 
-int cmd_set_sdc(int value)
+int tst_command_set_sdc(int value)
 {
     return command_set_sdc(value);
 }
 
-int cmd_focus_cgdb(int value)
+int tst_command_focus_cgdb(int value)
 {
     return command_focus_cgdb(value);
 }
 
-int cmd_focus_gdb(int value)
+int tst_command_focus_gdb(int value)
 {
     return command_focus_gdb(value);
 }
 
-int cmd_do_bang(int value)
+int tst_command_do_bang(int value)
 {
     return command_do_bang(value);
 }
 
-int cmd_do_logo(int value)
+int tst_command_do_logo(int value)
 {
     return command_do_logo(value);
 }
 
-int cmd_parse_file(const char* config_file)
-{
-    return command_parse_file(config_file);
-}
-
-int rc_set_val(struct cgdbrc_config_option config_option)
+int tst_cgdbrc_set_val(struct cgdbrc_config_option config_option)
 {
     return cgdbrc_set_val(config_option);
 }
 
-int rc_attach(enum cgdbrc_option_kind option, cgdbrc_notify notify)
-{
-    return cgdbrc_attach(option, notify);
-}
-
-void rc_init_config_options()
+void tst_cgdbrc_init_config_options()
 {
     cgdbrc_init_config_options();
 }
 
-void rc_init_config_variables()
+void tst_cgdbrc_init_config_variables()
 {
     cgdbrc_init_config_variables();
 }
 
-ConfigVariableList* get_cgdbrc_variables()
+ConfigVariableList* tst_get_cgdbrc_variables()
 {
     return &cgdbrc_variables;
 }
 
-void clear_cgdbrc_attach_list()
+void tst_clear_cgdbrc_attach_list()
 {
     cgdbrc_attach_list.clear();
 }
 
-int get_cgdbrc_attach_list_size()
+int tst_get_cgdbrc_attach_list_size()
 {
     return cgdbrc_attach_list.size();
 }
 
-ConfigVariable* get_config_variable(const char* variable)
+ConfigVariable* tst_get_variable(const char* variable)
 {
     return get_variable(variable);
 }
 
-void set_cgdbrc_config_option(struct cgdbrc_config_option config_option)
+void tst_set_cgdbrc_config_option(struct cgdbrc_config_option config_option)
 {
    cgdbrc_config_options[config_option.option_kind] = config_option;
 }
 #endif // TESTING
-
-/* }}} */

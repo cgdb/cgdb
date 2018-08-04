@@ -287,34 +287,32 @@ int cgdbrc_get_mapped_key_timeoutlen(void);
 /* }}} */
 
 #ifdef TESTING
-int cmd_set_arrowstyle(const char *value);
-int cmd_set_cgdb_mode_key(const char *value);
-int cmd_set_executing_line_display(const char *value);
-int cmd_set_selected_line_display(const char *value);
-int cmd_set_timeout(int value);
-int cmd_set_timeoutlen(int value);
-int cmd_set_ttimeout(int value);
-int cmd_set_ttimeoutlen(int value);
-int cmd_set_winminheight(int value);
-int cmd_set_winminwidth(int value);
-int cmd_set_winsplit(const char *value);
-int cmd_set_winsplitorientation(const char *value);
-int cmd_set_syntax_type(const char *value);
-int cmd_set_sdc(int value);
-int cmd_focus_cgdb(int value);
-int cmd_focus_gdb(int value);
-int cmd_do_bang(int value);
-int cmd_do_logo(int value);
-int cmd_parse_file(const char* config_file);
-int rc_set_val(struct cgdbrc_config_option config_option);
-int rc_attach(enum cgdbrc_option_kind option, cgdbrc_notify notify);
-void rc_init_config_options();
-void rc_init_config_variables();
-ConfigVariableList* get_cgdbrc_variables();
-void clear_cgdbrc_attach_list();
-int get_cgdbrc_attach_list_size();
-ConfigVariable* get_config_variable(const char* variable);
-void set_cgdbrc_config_option(struct cgdbrc_config_option config_option);
+int tst_command_set_arrowstyle(const char *value);
+int tst_command_set_cgdb_mode_key(const char *value);
+int tst_command_set_executing_line_display(const char *value);
+int tst_command_set_selected_line_display(const char *value);
+int tst_command_set_timeout(int value);
+int tst_command_set_timeoutlen(int value);
+int tst_command_set_ttimeout(int value);
+int tst_command_set_ttimeoutlen(int value);
+int tst_command_set_winminheight(int value);
+int tst_command_set_winminwidth(int value);
+int tst_command_set_winsplit(const char *value);
+int tst_command_set_winsplitorientation(const char *value);
+int tst_command_set_syntax_type(const char *value);
+int tst_command_set_sdc(int value);
+int tst_command_focus_cgdb(int value);
+int tst_command_focus_gdb(int value);
+int tst_command_do_bang(int value);
+int tst_command_do_logo(int value);
+int tst_cgdbrc_set_val(struct cgdbrc_config_option config_option);
+void tst_cgdbrc_init_config_options();
+void tst_cgdbrc_init_config_variables();
+ConfigVariableList* tst_get_cgdbrc_variables();
+void tst_clear_cgdbrc_attach_list();
+int tst_get_cgdbrc_attach_list_size();
+ConfigVariable* tst_get_variable(const char* variable);
+void tst_set_cgdbrc_config_option(struct cgdbrc_config_option config_option);
 #endif // TESTING
 
 #endif /* __CGDBRC_H__ */
