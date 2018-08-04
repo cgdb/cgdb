@@ -2,11 +2,11 @@
 #include "cgdbrc.h"
 #include "curses_fixture.h"
 #include "interface.h"
-#include "tgdb_types.h"
 #include "kui_term.h"
+#include "tgdb_types.h"
 #include <limits.h>
-#include <string>
 #include <map>
+#include <string>
 
 
 class CgdbrcTestFixture

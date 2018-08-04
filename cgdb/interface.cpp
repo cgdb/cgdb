@@ -51,10 +51,6 @@
 #include <string.h>
 #endif /* HAVE_STRING_H */
 
-#if HAVE_SYS_IOCTL_H
-#include <sys/ioctl.h>
-#endif /* HAVE_SYS_IOCTL_H */
-
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif /* HAVE_UNISTD_H */
@@ -1784,3 +1780,177 @@ int if_clear_line()
 
     return 0;
 }
+
+#ifdef TESTING
+int tst_get_src_row()
+{
+    return get_src_row();
+}
+
+int tst_get_src_col()
+{
+    return get_src_col();
+}
+
+int tst_get_src_height()
+{
+    return get_src_height();
+}
+
+int tst_get_src_width()
+{
+    return get_src_width();
+}
+
+int tst_get_src_status_row()
+{
+    return get_src_status_row();
+}
+
+int tst_get_src_status_col()
+{
+    return get_src_status_col();
+}
+
+int tst_get_src_status_height()
+{
+    return get_src_status_height();
+}
+
+int tst_get_src_status_width()
+{
+    return get_src_status_width();
+}
+
+int tst_get_sep_row()
+{
+    return get_sep_row();
+}
+
+int tst_get_sep_col()
+{
+    return get_sep_col();
+}
+
+int tst_get_sep_height()
+{
+    return get_sep_height();
+}
+
+int tst_get_sep_width()
+{
+    return get_sep_width();
+}
+
+int tst_get_gdb_row()
+{
+    return get_gdb_row();
+}
+
+int tst_get_gdb_col()
+{
+    return get_gdb_col();
+}
+
+int tst_get_gdb_height()
+{
+    return get_gdb_height();
+}
+
+int tst_get_gdb_width()
+{
+    return get_gdb_width();
+}
+
+int tst_get_height()
+{
+    return HEIGHT;
+}
+
+int tst_get_width()
+{
+    return WIDTH;
+}
+
+int tst_get_interface_winminheight()
+{
+    return interface_winminheight;
+}
+
+int tst_get_interface_winminwidth()
+{
+    return interface_winminwidth;
+}
+
+void tst_set_window_shift(int shift)
+{
+    window_shift = shift;
+}
+
+int tst_get_window_shift()
+{
+    return window_shift;
+}
+
+void tst_reset_window_shift()
+{
+    reset_window_shift();
+}
+
+void tst_set_cur_split_orientation(WIN_SPLIT_ORIENTATION_TYPE orientation)
+{
+    cur_split_orientation = orientation;
+}
+
+WIN_SPLIT_ORIENTATION_TYPE tst_get_cur_split_orientation()
+{
+    return cur_split_orientation;
+}
+
+void tst_set_cur_win_split(WIN_SPLIT_TYPE type)
+{
+    cur_win_split = type;
+}
+
+WIN_SPLIT_TYPE tst_get_cur_win_split()
+{
+    return cur_win_split;
+}
+
+void tst_validate_window_sizes()
+{
+    validate_window_sizes();
+}
+
+Focus tst_get_focus()
+{
+    return focus;
+}
+
+void tst_set_focus(enum Focus f)
+{
+    focus = f;
+}
+
+void tst_set_screen_size(struct winsize scr_size)
+{
+    screen_size = scr_size;
+}
+
+
+void tst_create_swindow(SWINDOW **win, int nlines, int ncols, int begin_y,
+                        int begin_x)
+{
+    create_swindow(win, nlines, ncols, begin_y, begin_x);
+}
+
+SWINDOW* tst_get_vseparator_win()
+{
+    return vseparator_win;
+}
+
+void tst_separator_display(int draw)
+{
+    separator_display(draw);
+}
+#endif // TESTING

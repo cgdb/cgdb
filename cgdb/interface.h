@@ -8,6 +8,14 @@
 #ifndef _INTERFACE_H_
 #define _INTERFACE_H_
 
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
+#if HAVE_SYS_IOCTL_H
+#include <sys/ioctl.h>
+#endif /* HAVE_SYS_IOCTL_H */
+
 /* Local Includes */
 #include "cgdb.h"
 #include "cgdbrc.h"
@@ -241,4 +249,41 @@ int get_gdb_height(void);
  */
 int if_clear_line(void);
 
+#ifdef TESTING
+int tst_get_src_row();
+int tst_get_src_col();
+int tst_get_src_height();
+int tst_get_src_width();
+int tst_get_src_status_row();
+int tst_get_src_status_col();
+int tst_get_src_status_height();
+int tst_get_src_status_width(); 
+int tst_get_sep_row();
+int tst_get_sep_col();
+int tst_get_sep_height();
+int tst_get_sep_width();
+int tst_get_gdb_row();
+int tst_get_gdb_col();
+int tst_get_gdb_height();
+int tst_get_gdb_width();
+int tst_get_height();
+int tst_get_width();
+int tst_get_interface_winminheight();
+int tst_get_interface_winminwidth();
+void tst_set_window_shift(int shift);
+int tst_get_window_shift();
+void tst_reset_window_shift();
+void tst_set_cur_split_orientation(WIN_SPLIT_ORIENTATION_TYPE orientation);
+WIN_SPLIT_ORIENTATION_TYPE tst_get_cur_split_orientation();
+void tst_set_cur_win_split(WIN_SPLIT_TYPE type);
+WIN_SPLIT_TYPE tst_get_cur_win_split();
+void tst_validate_window_sizes();
+Focus tst_get_focus();
+void tst_set_focus(enum Focus f);
+void tst_set_screen_size(struct winsize scr_size);
+void tst_create_swindow(SWINDOW **win, int nlines, int ncols, int begin_y,
+                        int begin_x);
+SWINDOW* tst_get_vseparator_win();
+void tst_separator_display(int draw);
+#endif // TESTING
 #endif

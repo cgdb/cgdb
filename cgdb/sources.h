@@ -15,6 +15,8 @@
 #define _SOURCES_H_
 
 #include "sys_win.h"
+#include <stdint.h>
+#include <time.h>
 
 /* ----------- */
 /* Definitions */
