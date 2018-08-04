@@ -8,7 +8,8 @@ AM_CXXFLAGS = \
     -I$(top_srcdir)/lib/rline \
     -I$(top_srcdir)/lib/util \
     -I$(top_srcdir)/lib/tgdb \
-    -I$(top_srcdir)/lib/tokenizer
+    -I$(top_srcdir)/lib/tokenizer \
+    -I$(top_srcdir)/tests/fixtures
 
 bin_PROGRAMS = tests
 
@@ -33,4 +34,4 @@ tests_SOURCES = \
     test_filedlg.cpp \
     test_highlight.cpp \
     test_command_lexer.cpp \
-    curses_fixture.cpp
+    fixtures/curses_fixture.cpp
