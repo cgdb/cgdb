@@ -27,7 +27,7 @@ class FileDlgFixture
     filedlg* fileDlg_;
 };
 
-TEST_CASE("Create new file dialog", "[integration]")
+TEST_CASE("Create new file dialog", "[integration][curses]")
 {
   CursesFixture curses;
   // Verify that the starting height and width values are different than what

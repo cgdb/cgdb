@@ -44,14 +44,13 @@ TEST_CASE("Assign a random logo index", "[integration]")
 TEST_CASE("Get the number of available logos", "[integration][curses]")
 {
   LogoTestFixture logoTestFixture;
-  int actual;
-  int expected;
 
   SECTION("ANSI color escape not supported")
   {
     logoTestFixture.disableColors();
-    actual = tst_logos_available();
-    expected = 3;
+    int actual = tst_logos_available();
+    int expected = 3;
+    REQUIRE(actual == expected);
   }
 
   SECTION("ANSI color escape supported")
@@ -59,12 +58,11 @@ TEST_CASE("Get the number of available logos", "[integration][curses]")
     CursesFixture curses;
     curses.enableColors();
     logoTestFixture.enableColors();
-    actual = tst_logos_available();
-    expected = 7;
+    int actual = tst_logos_available();
+    int expected = 7;
     curses.stop();
+    REQUIRE(actual == expected);
   }
-
-  REQUIRE(actual == expected);
 }
 
 TEST_CASE("Display cgdb logo", "[integration][curses]")
