@@ -9,7 +9,8 @@ AM_CXXFLAGS = \
     -I$(top_srcdir)/lib/util \
     -I$(top_srcdir)/lib/tgdb \
     -I$(top_srcdir)/lib/tokenizer \
-    -I$(top_srcdir)/tests/fixtures
+    -I$(top_srcdir)/tests/fixtures \
+    -I$(top_srcdir)/tests/catch2
 
 bin_PROGRAMS = tests
 
