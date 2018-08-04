@@ -235,25 +235,32 @@ TEST_CASE("Create window with specified position and size",
   {
     tst_create_swindow(&swin, h, w, y, x);
     curses.setWindow((WINDOW *)swin);
-    REQUIRE(curses.getXOrigin() == x);
-    REQUIRE(curses.getYOrigin() == y);
-    REQUIRE(curses.getWidth() == w);
-    REQUIRE(curses.getHeight() == h);
+    int result[4] = {curses.getXOrigin(), curses.getYOrigin(),
+                     curses.getWidth(), curses.getHeight()};
+    curses.stop();
+    REQUIRE(result[0] == x);
+    REQUIRE(result[1] == y);
+    REQUIRE(result[2] == w);
+    REQUIRE(result[3] == h);
   }
 
   SECTION("Change to position and size")
   {
     tst_create_swindow(&swin, h+4, w+3, y+2, x+1);
     curses.setWindow((WINDOW *)swin);
-    REQUIRE(curses.getXOrigin() == x+1);
-    REQUIRE(curses.getYOrigin() == y+2);
-    REQUIRE(curses.getWidth() == w+3);
-    REQUIRE(curses.getHeight() == h+4);
+    int result[4] = {curses.getXOrigin(), curses.getYOrigin(),
+                     curses.getWidth(), curses.getHeight()};
+    curses.stop();
+    REQUIRE(result[0] == x+1);
+    REQUIRE(result[1] == y+2);
+    REQUIRE(result[2] == w+3);
+    REQUIRE(result[3] == h+4);
   }
 
   SECTION("Change to invalid position and size")
   {
     tst_create_swindow(&swin, 0, 0, 0, 0);
+    curses.stop();
     REQUIRE(swin == NULL);
   }
 }
@@ -273,12 +280,19 @@ TEST_CASE("Create a window separator", "[integration][curses]")
     tst_set_screen_size(sz);
     tst_set_cur_split_orientation(WSO_HORIZONTAL);
     tst_separator_display(/*draw=*/ 1);
-    REQUIRE(tst_get_vseparator_win() != NULL);
-    curses.setWindow((WINDOW *)tst_get_vseparator_win());
-    REQUIRE(curses.getXOrigin() == ws_col);
-    REQUIRE(curses.getYOrigin() == 0);
-    REQUIRE(curses.getWidth() == 1);
-    REQUIRE(curses.getHeight() == ws_row);
+    SWINDOW* vsep_win = tst_get_vseparator_win();
+    curses.stop();
+    REQUIRE(vsep_win != NULL);
+
+    curses.start();
+    curses.setWindow((WINDOW *)vsep_win);
+    int result[4] = {curses.getXOrigin(), curses.getYOrigin(),
+                     curses.getWidth(), curses.getHeight()};
+    curses.stop();
+    REQUIRE(result[0] == ws_col);
+    REQUIRE(result[1] == 0);
+    REQUIRE(result[2] == 1);
+    REQUIRE(result[3] == ws_row);
   }
 
   SECTION("Destroy separator")
@@ -287,7 +301,9 @@ TEST_CASE("Create a window separator", "[integration][curses]")
       tst_separator_display(/*draw=*/ 1);
     }
     tst_separator_display(/*draw=*/ 0);
-    REQUIRE(tst_get_vseparator_win() == NULL);
+    SWINDOW* vsep_win = tst_get_vseparator_win();
+    curses.stop();
+    REQUIRE(vsep_win == NULL);
   }
 }
 
@@ -344,28 +360,44 @@ TEST_CASE("Validate the inteface window sizes", "[unit]")
 
 TEST_CASE("Set interface focus", "[integration][curses]")
 {
+  CursesFixture curses;
+  struct winsize sz {/*ws_row=*/ 5, /*ws_col=*/ 20, /*ws_xpixel=*/ 2,
+                     /*ws_ypixel=*/ 3};
+  tst_set_screen_size(sz);
+  if_init();
+
   SECTION("Focus on gdb")
   {
+    tst_set_focus(CGDB);
+    CHECK(tst_get_focus() != GDB);
     if_set_focus(GDB);
-    REQUIRE(tst_get_focus() == GDB);
+    Focus result = tst_get_focus();
+    curses.stop();
+    REQUIRE(result == GDB);
   }
 
   SECTION("Focus on cgdb")
   {
     if_set_focus(CGDB);
-    REQUIRE(tst_get_focus() == CGDB);
+    Focus result = tst_get_focus();
+    curses.stop();
+    REQUIRE(result == CGDB);
   }
 
   SECTION("Focus on file dialog")
   {
     if_set_focus(FILE_DLG);
-    REQUIRE(tst_get_focus() == FILE_DLG);
+    Focus result = tst_get_focus();
+    curses.stop();
+    REQUIRE(result == FILE_DLG);
   }
 
   SECTION("Focus on cgdb status bar")
   {
     if_set_focus(CGDB_STATUS_BAR);
-    REQUIRE(tst_get_focus() == CGDB_STATUS_BAR);
+    Focus result = tst_get_focus();
+    curses.stop();
+    REQUIRE(result == CGDB_STATUS_BAR);
   }
 }
 
@@ -405,7 +437,9 @@ TEST_CASE("Reset the window shift", "[integration][curses]")
     tst_set_cur_split_orientation(WSO_HORIZONTAL);
     int ws = (int) ((tst_get_height() / 2) * (tst_get_cur_win_split() / 2.0));
     tst_reset_window_shift();
-    REQUIRE(tst_get_window_shift() == ws);
+    int result = tst_get_window_shift();
+    curses.stop();
+    REQUIRE(result == ws);
   }
 
   SECTION("Vertical window split orientation")
@@ -413,7 +447,9 @@ TEST_CASE("Reset the window shift", "[integration][curses]")
     tst_set_cur_split_orientation(WSO_VERTICAL);
     int ws = (int) ((tst_get_width() / 2) * (tst_get_cur_win_split() / 2.0));
     tst_reset_window_shift();
-    REQUIRE(tst_get_window_shift() == ws);
+    int result = tst_get_window_shift();
+    curses.stop();
+    REQUIRE(result == ws);
   }
 }
 
@@ -423,7 +459,9 @@ TEST_CASE("Set current window split orientation", "[integration][curses]")
 
   tst_set_cur_split_orientation(WSO_VERTICAL);
   if_set_winsplitorientation(WSO_HORIZONTAL);
-  REQUIRE(tst_get_cur_split_orientation() == WSO_HORIZONTAL);
+  WIN_SPLIT_ORIENTATION_TYPE result = tst_get_cur_split_orientation();
+  curses.stop();
+  REQUIRE(result == WSO_HORIZONTAL);
 }
 
 TEST_CASE("Set current window split", "[integration][curses]")
@@ -432,45 +470,61 @@ TEST_CASE("Set current window split", "[integration][curses]")
 
   tst_set_cur_win_split(WIN_SPLIT_FREE);
   if_set_winsplit(WIN_SPLIT_GDB_FULL);
-  REQUIRE(tst_get_cur_win_split() == WIN_SPLIT_GDB_FULL);
+  WIN_SPLIT_TYPE result = tst_get_cur_win_split();
+  curses.stop();
+  REQUIRE(result == WIN_SPLIT_GDB_FULL);
 }
 
 TEST_CASE("Change window minimum height", "[integration][curses]")
 {
+  CursesFixture curses;
+
   SECTION("Negative value")
   {
-    REQUIRE(if_change_winminheight(-1) == -1);
+    int result = if_change_winminheight(-1);
+    curses.stop();
+    REQUIRE(result == -1);
   }
 
   SECTION("Value larger than half the screen height")
   {
     int h = (tst_get_height() / 2) + 1;
-    REQUIRE(if_change_winminheight(h) == -1);
+    int result = if_change_winminheight(h);
+    curses.stop();
+    REQUIRE(result == -1);
   }
 
   SECTION("Acceptable value")
   {
-    CursesFixture curses;
-    REQUIRE(if_change_winminheight(0) == 0);
+    int result = if_change_winminheight(0);
+    curses.stop();
+    REQUIRE(result == 0);
   }
 }
 
 TEST_CASE("Change window minimum width", "[integration][curses]")
 {
+  CursesFixture curses;
+
   SECTION("Negative value")
   {
-    REQUIRE(if_change_winminwidth(-1) == -1);
+    int result = if_change_winminwidth(-1);
+    curses.stop();
+    REQUIRE(result == -1);
   }
 
   SECTION("Value larger than half the screen width")
   {
     int w = (tst_get_width() / 2) + 1;
-    REQUIRE(if_change_winminwidth(w) == -1);
+    int result = if_change_winminwidth(w);
+    curses.stop();
+    REQUIRE(result == -1);
   }
 
   SECTION("Acceptable value")
   {
-    CursesFixture curses;
-    REQUIRE(if_change_winminwidth(0) == 0);
+    int result = if_change_winminwidth(0);
+    curses.stop();
+    REQUIRE(result == 0);
   }
 }
