@@ -310,7 +310,7 @@ int rc_set_val(struct cgdbrc_config_option config_option);
 int rc_attach(enum cgdbrc_option_kind option, cgdbrc_notify notify);
 void rc_init_config_options();
 void rc_init_config_variables();
-ConfigVariableList get_cgdbrc_variables();
+ConfigVariableList* get_cgdbrc_variables();
 void clear_cgdbrc_attach_list();
 int get_cgdbrc_attach_list_size();
 ConfigVariable* get_config_variable(const char* variable);

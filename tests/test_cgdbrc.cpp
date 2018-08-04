@@ -52,16 +52,16 @@ class CgdbrcTestFixture
 
     void resetStatics()
     {
-      get_cgdbrc_variables().clear();
+      get_cgdbrc_variables()->clear();
       clear_cgdbrc_attach_list();
     }
 
     std::map<std::string, std::string> getVariableMap()
     {
       std::map<std::string, std::string> variables;
-      std::list<ConfigVariable>::iterator it;
-      for (it = get_cgdbrc_variables().begin();
-           it != get_cgdbrc_variables().end(); ++it) {
+      std::list<ConfigVariable>::const_iterator it;
+      for (it = get_cgdbrc_variables()->begin();
+           it != get_cgdbrc_variables()->end(); ++it) {
         variables[it->s_name] = it->name;
       }
       return variables;
@@ -843,7 +843,7 @@ TEST_CASE("Initialize the configuration variables", "[integration][curses]")
     // Additionally, you should add a section to the test case for configuration
     // variable default values to verify the default assigned value for the new
     // variable is as expected.
-    REQUIRE(get_cgdbrc_variables().size() == 23);
+    REQUIRE(get_cgdbrc_variables()->size() == 23);
   }
 
   SECTION("Arrow style variable")
@@ -1015,7 +1015,7 @@ TEST_CASE("Get configuration variable", "[unit]")
   ConfigType configType = CONFIG_TYPE_INT;
   void* data = NULL;
   ConfigVariable inConfigVariable(longName, shortName, configType, data);
-  get_cgdbrc_variables().push_back(inConfigVariable);
+  get_cgdbrc_variables()->push_back(inConfigVariable);
 
   SECTION("Short name")
   {

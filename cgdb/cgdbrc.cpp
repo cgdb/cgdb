@@ -1319,9 +1319,9 @@ void rc_init_config_variables()
     cgdbrc_init_config_variables();
 }
 
-ConfigVariableList get_cgdbrc_variables()
+ConfigVariableList* get_cgdbrc_variables()
 {
-    return cgdbrc_variables;
+    return &cgdbrc_variables;
 }
 
 void clear_cgdbrc_attach_list()
