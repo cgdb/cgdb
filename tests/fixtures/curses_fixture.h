@@ -50,4 +50,4 @@ class CursesFixture { public:
     WINDOW* window_;
 };
 
-#endif
+#endif // CURSES_FIXTURE_H
