@@ -9,6 +9,14 @@
 #ifndef _SCROLLER_H_
 #define _SCROLLER_H_
 
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
+/* Local Includes */
+#include "cgdb.h"
+#include "sys_win.h"
+
 /* Count of marks */
 #define MARK_COUNT 26
 
@@ -214,4 +222,8 @@ int scr_search_regex(struct scroller *scr, const char *regex, int opt,
 int scr_set_mark(struct scroller *scr, int key);
 int scr_goto_mark(struct scroller *scr, int key);
 
-#endif
+#ifdef TESTING
+int tst_count(const char* s, int slen, char c);
+#endif // TESTING
+
+#endif // _SCROLLER_H_

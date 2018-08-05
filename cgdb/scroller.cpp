@@ -25,14 +25,13 @@
 #endif /* HAVE_STRING_H */
 
 /* Local Includes */
-#include "sys_util.h"
-#include "stretchy.h"
-#include "sys_win.h"
 #include "cgdb.h"
 #include "cgdbrc.h"
+#include "highlight.h"
 #include "highlight_groups.h"
 #include "scroller.h"
-#include "highlight.h"
+#include "stretchy.h"
+#include "sys_util.h"
 
 /* --------------- */
 /* Local Functions */
@@ -783,3 +782,10 @@ void scr_refresh(struct scroller *scr, int focus, enum win_refresh dorefresh)
             break;
     }
 }
+
+#ifdef TESTING
+int tst_count(const char* s, int slen, char c)
+{
+    return count(s, slen, c);
+}
+#endif // TESTING
