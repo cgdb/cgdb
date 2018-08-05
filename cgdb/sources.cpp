@@ -49,7 +49,6 @@
 #endif
 
 /* Local Includes */
-#include "cgdb.h"
 #include "cgdbrc.h"
 #include "fs_util.h"
 #include "highlight.h"
@@ -61,7 +60,6 @@
 #include "sys_util.h"
 #include "sys_win.h"
 #include "tgdb_types.h"
-#include "tokenizer.h"
 
 int sources_syntax_on = 1;
 
@@ -1399,3 +1397,10 @@ int source_reload(struct sviewer *sview, const char *path, int force)
 
     return 0;
 }
+
+#ifdef TESTING
+int tst_get_line_leading_ws_count(const char* otext, int length)
+{
+   return get_line_leading_ws_count(otext, length);
+} 
+#endif // TESTING

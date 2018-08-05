@@ -14,7 +14,14 @@
 #ifndef _SOURCES_H_
 #define _SOURCES_H_
 
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
+/* Local Includes */
+#include "cgdb.h"
 #include "sys_win.h"
+#include "tokenizer.h"
 #include <stdint.h>
 #include <time.h>
 
@@ -339,4 +346,8 @@ int source_set_mark(struct sviewer *sview, int key);
  */
 int source_goto_mark(struct sviewer *sview, int key);
 
-#endif
+#ifdef TESTING
+int tst_get_line_leading_ws_count(const char* otext, int length);
+#endif // TESTING
+
+#endif // _SOURCES_H_
