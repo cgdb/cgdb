@@ -1856,3 +1856,20 @@ void main_initialize(int argc, char* argv[])
     /* Shut down curses and exit */
     cgdb_cleanup_and_exit(0);
 }
+
+#ifdef TESTING
+int tst_is_gdb_tui_command(const char* line)
+{
+    return is_gdb_tui_command(line);
+}
+
+int tst_cgdb_get_y_or_n(int key, int for_pager)
+{
+    return cgdb_get_y_or_n(key, for_pager);
+}
+
+char* tst_version_info()
+{
+    return version_info();
+}
+#endif // TESTING

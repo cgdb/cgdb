@@ -54,4 +54,10 @@ int run_shell_command(const char *command);
 
 void rl_resize(int rows, int cols);
 
-#endif
+#ifdef TESTING
+int tst_is_gdb_tui_command(const char* line);
+int tst_cgdb_get_y_or_n(int key, int for_pager);
+char* tst_version_info();
+#endif // TESTING
+
+#endif // _CGDB_H_
