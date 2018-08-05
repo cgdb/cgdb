@@ -186,14 +186,6 @@ get_hl_group_kind_from_name(const char *name, enum hl_group_kind *kind)
     return -1;
 }
 
-/** This maps a particular attribute to a name. */
-struct attr_pair {
-  /** The name of the attribute. */
-    const char *name;
-  /** The attribute value */
-    int value;
-};
-
 /** The list of terminal attributes that CGDB supports */
 static const struct attr_pair attr_names[] = {
     {"bold", SWIN_A_BOLD},
@@ -218,18 +210,6 @@ const struct attr_pair *lookup_attr_pair_by_name(const char *name)
 
     return NULL;
 }
-
-/** A structure to represent a specific color. */
-struct color_info {
-    /* The name of the color */
-    const char *name;
-    /* The number this color represents if the terminal supports 8 colors. */
-    int nr8Color;
-    /* If the terminal has 8 colors, they could be bold. */
-    int nr8ForegroundBold;
-    /* HLG group id for this color */
-    enum hl_group_kind hlg_type;
-};
 
 /** A list of all the default colors and their values */
 static const struct color_info hl_color_names[] = {
@@ -1165,3 +1145,25 @@ void hl_printline_highlight(SWINDOW *win, const char *line, int line_len,
 }
 /*@}*/
 /* }}}*/
+
+#ifdef TESTING
+int tst_ansi_get_closest_color_value(int r, int g, int b)
+{
+    return ansi_get_closest_color_value(r, g, b);
+}
+
+int tst_get_hl_group_kind_from_name(const char *name, enum hl_group_kind *kind)
+{
+    return get_hl_group_kind_from_name(name, kind);
+}
+
+const struct color_info* tst_color_spec_for_name(const char *name)
+{
+    return color_spec_for_name(name);
+}
+
+const struct attr_pair* tst_lookup_attr_pair_by_name(const char *name)
+{
+    return lookup_attr_pair_by_name(name);
+}
+#endif // TESTING

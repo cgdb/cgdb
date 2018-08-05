@@ -315,7 +315,34 @@ void hl_printline(SWINDOW *win, const char *line, int line_len,
 void hl_printline_highlight(SWINDOW *win, const char *line, int line_len,
         const hl_line_attr *attrs, int x, int y, int col, int width);
 
+/** A structure to represent a specific color. */
+struct color_info {
+    /* The name of the color */
+    const char *name;
+    /* The number this color represents if the terminal supports 8 colors. */
+    int nr8Color;
+    /* If the terminal has 8 colors, they could be bold. */
+    int nr8ForegroundBold;
+    /* HLG group id for this color */
+    enum hl_group_kind hlg_type;
+};
+
+/** This maps a particular attribute to a name. */
+struct attr_pair {
+  /** The name of the attribute. */
+    const char *name;
+  /** The attribute value */
+    int value;
+};
+
 /*@}*/
 /* }}}*/
+
+#ifdef TESTING
+int tst_ansi_get_closest_color_value(int r, int g, int b);
+int tst_get_hl_group_kind_from_name(const char *name, enum hl_group_kind *kind);
+const struct color_info* tst_color_spec_for_name(const char *name);
+const struct attr_pair* tst_lookup_attr_pair_by_name(const char *name);
+#endif // TESTING
 
 #endif /* __HIGHLIGHT_GROUPS_H__ */
