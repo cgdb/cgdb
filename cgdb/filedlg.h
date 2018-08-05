@@ -1,7 +1,16 @@
 #ifndef _FILEDLG_H_
 #define _FILEDLG_H_
 
-struct filedlg;
+#include "sys_win.h"
+
+struct filedlg {
+    struct file_buffer *buf;    /* All of the widget's data ( files ) */
+    struct hl_regex_info *last_hlregex;
+    struct hl_regex_info *hlregex;
+    SWINDOW *win;               /* Curses window */
+    std::string G_line_number;  /* Line number user wants to 'G' to */
+};
+
 
 /* filedlg_new: Create a new file dialog.
  * ____________

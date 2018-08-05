@@ -16,7 +16,6 @@
 
 #include "sys_util.h"
 #include "stretchy.h"
-#include "sys_win.h"
 #include "filedlg.h"
 #include "cgdb.h"
 #include "cgdbrc.h"
@@ -32,14 +31,6 @@ struct file_buffer {
     int sel_line;               /* Current line selected in file dialog */
     int sel_col;                /* Current column selected in file dialog */
     int sel_rline;              /* Current line used by regex */
-};
-
-struct filedlg {
-    struct file_buffer *buf;    /* All of the widget's data ( files ) */
-    struct hl_regex_info *last_hlregex;
-    struct hl_regex_info *hlregex;
-    SWINDOW *win;               /* Curses window */
-    std::string G_line_number;  /* Line number user wants to 'G' to */
 };
 
 static char regex_line[MAX_LINE];   /* The regex the user enters */

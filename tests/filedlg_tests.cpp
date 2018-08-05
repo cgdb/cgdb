@@ -1,6 +1,6 @@
 #include "catch.hpp"
 #include "curses_fixture.h"
-#include "filedlg.cpp"
+#include "filedlg.h"
 
 
 class FileDlgFixture
