@@ -37,4 +37,5 @@ tests_SOURCES = \
     command_lexer_tests.cpp \
     fixtures/curses_fixture.cpp \
     fixtures/logo_fixture.cpp \
-    fixtures/cgdbrc_fixture.cpp
+    fixtures/cgdbrc_fixture.cpp \
+    fixtures/filedlg_fixture.cpp

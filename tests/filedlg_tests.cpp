@@ -1,31 +1,7 @@
 #include "catch.hpp"
 #include "curses_fixture.h"
-#include "filedlg.h"
+#include "filedlg_fixture.h"
 
-
-class FileDlgFixture
-{
-  public:
-    FileDlgFixture() {}
-
-    ~FileDlgFixture()
-    {
-      filedlg_free(fileDlg_);
-    }
-
-    void createFileDlg(int r, int c, int h, int w)
-    {
-      fileDlg_ = filedlg_new(r, c, h, w);
-    }
-
-    filedlg* getFileDlg()
-    {
-      return fileDlg_;
-    }
-
-  private:
-    filedlg* fileDlg_;
-};
 
 TEST_CASE("Create new file dialog", "[integration][curses]")
 {

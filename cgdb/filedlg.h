@@ -1,7 +1,12 @@
 #ifndef _FILEDLG_H_
 #define _FILEDLG_H_
 
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
 #include "sys_win.h"
+#include <string>
 
 struct filedlg {
     struct file_buffer *buf;    /* All of the widget's data ( files ) */

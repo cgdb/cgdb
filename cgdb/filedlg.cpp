@@ -1,7 +1,3 @@
-#if HAVE_CONFIG_H
-#include "config.h"
-#endif /* HAVE_CONFIG_H */
-
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif /* HAVE_STDLIB_H */
@@ -10,19 +6,17 @@
 #include <string.h>
 #endif /* HAVE_STRING_H */
 
-#include <string>
-
-#include "fs_util.h"
-
-#include "sys_util.h"
-#include "stretchy.h"
-#include "filedlg.h"
 #include "cgdb.h"
 #include "cgdbrc.h"
+#include "filedlg.h"
+#include "fs_util.h"
 #include "highlight.h"
-#include "sources.h"
-#include "kui_term.h"
 #include "highlight_groups.h"
+#include "kui_term.h"
+#include "sources.h"
+#include "stretchy.h"
+#include "sys_util.h"
+
 
 struct file_buffer {
     char **files;               /* Array containing file */
