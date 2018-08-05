@@ -1,13 +1,26 @@
 #ifndef _HIGHLIGHT_H_
 #define _HIGHLIGHT_H_
 
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
+#if HAVE_REGEX_H
+#include <regex.h>
+#endif /* HAVE_REGEX_H */
+
 #include "highlight_groups.h"
 
 /**
  * Syntax highlighting routines.
  */
 
-struct hl_regex_info;
+struct hl_regex_info {
+    regex_t t;
+    int icase;
+    char *regex;
+};
+
 
 /**
  * Do a regex search.

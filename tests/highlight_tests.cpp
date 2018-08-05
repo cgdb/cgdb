@@ -1,5 +1,17 @@
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
+#if HAVE_STRING_H
+#include <string.h>
+#endif /* HAVE_STRING_H */
+
+#if HAVE_REGEX_H
+#include <regex.h>
+#endif /* HAVE_REGEX_H */
+
 #include "catch.hpp"
-#include "highlight.cpp"
+#include "highlight.h"
 #include <string>
 #include <stdlib.h>
 
