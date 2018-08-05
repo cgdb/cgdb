@@ -36,4 +36,5 @@ tests_SOURCES = \
     highlight_tests.cpp \
     command_lexer_tests.cpp \
     fixtures/curses_fixture.cpp \
-    fixtures/logo_fixture.cpp
+    fixtures/logo_fixture.cpp \
+    fixtures/cgdbrc_fixture.cpp

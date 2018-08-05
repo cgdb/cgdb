@@ -1,81 +1,14 @@
 #include "catch.hpp"
-#include "cgdbrc.h"
+#include "cgdbrc_fixture.h"
 #include "curses_fixture.h"
 #include "interface.h"
 #include "kui_term.h"
-#include "tgdb_types.h"
 #include <limits.h>
-#include <map>
-#include <string>
 
-
-class CgdbrcTestFixture
-{
-  public:
-    void setOption(enum cgdbrc_option_kind kind, int value)
-    {
-      struct cgdbrc_config_option option;
-      option.option_kind = kind;
-      option.variant.int_val = value;
-      tst_cgdbrc_set_val(option);
-    }
-
-    void setNotification(enum cgdbrc_option_kind kind)
-    {
-      cgdbrc_attach(kind, &notify);
-    }
-
-    int getIntOption(enum cgdbrc_option_kind kind)
-    {
-      return cgdbrc_get(kind)->variant.int_val;
-    }
-
-    enum LineDisplayStyle getLineOption(enum cgdbrc_option_kind kind)
-    {
-      return cgdbrc_get(kind)->variant.line_display_style;
-    }
-
-    enum tokenizer_language_support getLangOption(enum cgdbrc_option_kind kind)
-    {
-      return cgdbrc_get(kind)->variant.language_support_val;
-    }
-
-    WIN_SPLIT_TYPE getSplitOption(enum cgdbrc_option_kind kind)
-    {
-      return cgdbrc_get(kind)->variant.win_split_val;
-    }
-
-    WIN_SPLIT_ORIENTATION_TYPE getOrientOption(enum cgdbrc_option_kind kind)
-    {
-      return cgdbrc_get(kind)->variant.win_split_orientation_val;
-    }
-
-    void resetStatics()
-    {
-      tst_get_cgdbrc_variables()->clear();
-      tst_clear_cgdbrc_attach_list();
-    }
-
-    std::map<std::string, std::string> getVariableMap()
-    {
-      std::map<std::string, std::string> variables;
-      std::list<ConfigVariable>::const_iterator it;
-      for (it = tst_get_cgdbrc_variables()->begin();
-           it != tst_get_cgdbrc_variables()->end(); ++it) {
-        variables[it->s_name] = it->name;
-      }
-      return variables;
-    }
-
-    static int notify(cgdbrc_config_option_ptr option)
-    {
-      return 1;
-    }
-};
 
 TEST_CASE("Set arrow style", "[integration]")
 {
-  CgdbrcTestFixture cgdbrcFixture;
+  CgdbrcFixture cgdbrcFixture;
   // Clear any possible notification hooks due to the shared option kind
   // CGDBRC_EXECUTING_LINE_DISPLAY.
   cgdbrcFixture.resetStatics();
@@ -137,7 +70,7 @@ TEST_CASE("Set cgdb mode key", "[integration]")
 
   SECTION("Set and notify")
   {
-    CgdbrcTestFixture cgdbrcFixture;
+    CgdbrcFixture cgdbrcFixture;
     cgdbrcFixture.setNotification(CGDBRC_CGDB_MODE_KEY);
     REQUIRE(tst_command_set_cgdb_mode_key("a") == 1);
   }
@@ -145,7 +78,7 @@ TEST_CASE("Set cgdb mode key", "[integration]")
 
 TEST_CASE("Set executing line display", "[integration]")
 {
-  CgdbrcTestFixture cgdbrcFixture;
+  CgdbrcFixture cgdbrcFixture;
   // Clear any possible notification hooks due to the shared option kind
   // CGDBRC_EXECUTING_LINE_DISPLAY.
   cgdbrcFixture.resetStatics();
@@ -211,7 +144,7 @@ TEST_CASE("Set selected line display", "[integration]")
 
   SECTION("Set and notify")
   {
-    CgdbrcTestFixture cgdbrcFixture;
+    CgdbrcFixture cgdbrcFixture;
     cgdbrcFixture.setNotification(CGDBRC_SELECTED_LINE_DISPLAY);
     REQUIRE(tst_command_set_selected_line_display("shortarrow") == 1);
   }
@@ -236,7 +169,7 @@ TEST_CASE("Set show debug commands", "[integration]")
 
   SECTION("Set and notify")
   {
-    CgdbrcTestFixture cgdbrcFixture;
+    CgdbrcFixture cgdbrcFixture;
     cgdbrcFixture.setNotification(CGDBRC_SHOWDEBUGCOMMANDS);
     REQUIRE(tst_command_set_sdc(1) == 1);
   }
@@ -312,7 +245,7 @@ TEST_CASE("Set window split", "[integration][curses]")
 
   SECTION("Set and notify")
   {
-    CgdbrcTestFixture cgdbrcFixture;
+    CgdbrcFixture cgdbrcFixture;
     cgdbrcFixture.setNotification(CGDBRC_WINSPLIT);
     result = tst_command_set_winsplit("top_big");
     curses.stop();
@@ -348,7 +281,7 @@ TEST_CASE("Set window split orientation", "[integration][curses]")
 
   SECTION("Set and notify")
   {
-    CgdbrcTestFixture cgdbrcFixture;
+    CgdbrcFixture cgdbrcFixture;
     cgdbrcFixture.setNotification(CGDBRC_WINSPLITORIENTATION);
     result = tst_command_set_winsplitorientation("horizontal");
     curses.stop();
@@ -388,7 +321,7 @@ TEST_CASE("Set window minimum height", "[integration][curses]")
 
   SECTION("Set and notify")
   {
-    CgdbrcTestFixture cgdbrcFixture;
+    CgdbrcFixture cgdbrcFixture;
     cgdbrcFixture.setNotification(CGDBRC_WINMINHEIGHT);
     CHECK(if_init() == 0);
     result = tst_command_set_winminheight(0);
@@ -431,7 +364,7 @@ TEST_CASE("Set window minimum width", "[integration][curses]")
   SECTION("Set and notify")
   {
     CHECK(if_init() == 0);
-    CgdbrcTestFixture cgdbrcFixture;
+    CgdbrcFixture cgdbrcFixture;
     cgdbrcFixture.setNotification(CGDBRC_WINMINWIDTH);
     result = tst_command_set_winminwidth(0);
     if_shutdown();
@@ -449,7 +382,7 @@ TEST_CASE("Set timeout", "[integration]")
 
   SECTION("Set and notify")
   {
-    CgdbrcTestFixture cgdbrcFixture;
+    CgdbrcFixture cgdbrcFixture;
     cgdbrcFixture.setNotification(CGDBRC_TIMEOUT);
     REQUIRE(tst_command_set_timeout(1) == 1);
   }
@@ -474,7 +407,7 @@ TEST_CASE("Set timeout length", "[integration]")
 
   SECTION("Set and notify")
   {
-    CgdbrcTestFixture cgdbrcFixture;
+    CgdbrcFixture cgdbrcFixture;
     cgdbrcFixture.setNotification(CGDBRC_TIMEOUT_LEN);
     REQUIRE(tst_command_set_timeoutlen(1) == 1);
   }
@@ -489,7 +422,7 @@ TEST_CASE("Set ttimeout", "[integration]")
 
   SECTION("Set and notify")
   {
-    CgdbrcTestFixture cgdbrcFixture;
+    CgdbrcFixture cgdbrcFixture;
     cgdbrcFixture.setNotification(CGDBRC_TTIMEOUT);
     REQUIRE(tst_command_set_ttimeout(1) == 1);
   }
@@ -514,7 +447,7 @@ TEST_CASE("Set ttimeout length", "[integration]")
 
   SECTION("Set and notify")
   {
-    CgdbrcTestFixture cgdbrcFixture;
+    CgdbrcFixture cgdbrcFixture;
     cgdbrcFixture.setNotification(CGDBRC_TTIMEOUT_LEN);
     REQUIRE(tst_command_set_ttimeoutlen(1) == 1);
   }
@@ -576,7 +509,7 @@ TEST_CASE("Set syntax type", "[integration][curses]")
 
   SECTION("Set and notify")
   {
-    CgdbrcTestFixture cgdbrcFixture;
+    CgdbrcFixture cgdbrcFixture;
     cgdbrcFixture.setNotification(CGDBRC_SYNTAX);
     result = tst_command_set_syntax_type("c");
     curses.stop();
@@ -653,7 +586,7 @@ TEST_CASE("Do shell", "[integration]")
 
 TEST_CASE("Get keycode timeout length", "[integration]")
 {
-  CgdbrcTestFixture cgdbrcFixture;
+  CgdbrcFixture cgdbrcFixture;
   cgdbrcFixture.setOption(CGDBRC_TIMEOUT, 1);
   cgdbrcFixture.setOption(CGDBRC_TTIMEOUT, 0);
   cgdbrcFixture.setOption(CGDBRC_TIMEOUT_LEN, 5);
@@ -679,7 +612,7 @@ TEST_CASE("Get keycode timeout length", "[integration]")
 
 TEST_CASE("Get mapped key timeout length", "[integration]")
 {
-  CgdbrcTestFixture cgdbrcFixture;
+  CgdbrcFixture cgdbrcFixture;
   cgdbrcFixture.setOption(CGDBRC_TIMEOUT, 0);
   cgdbrcFixture.setOption(CGDBRC_TIMEOUT_LEN, 5);
 
@@ -698,7 +631,7 @@ TEST_CASE("Get mapped key timeout length", "[integration]")
 TEST_CASE("Initialize the configuration options with default values",
           "[integration]")
 {
-  CgdbrcTestFixture cgdbrcFixture;
+  CgdbrcFixture cgdbrcFixture;
   tst_cgdbrc_init_config_options();
 
   SECTION("Default arrow style")
@@ -829,7 +762,7 @@ TEST_CASE("Initialize the configuration options with default values",
 TEST_CASE("Initialize the configuration variables", "[integration][curses]")
 {
   CursesFixture curses;
-  CgdbrcTestFixture cgdbrcFixture;
+  CgdbrcFixture cgdbrcFixture;
   cgdbrcFixture.resetStatics();
   tst_cgdbrc_init_config_variables();
   curses.stop();
@@ -1047,7 +980,7 @@ TEST_CASE("Parse a file", "[integration]")
 
 TEST_CASE("Set a configuration option value", "[unit]")
 {
-  CgdbrcTestFixture cgdbrcFixture;
+  CgdbrcFixture cgdbrcFixture;
   cgdbrcFixture.resetStatics();
 
   struct cgdbrc_config_option option;
@@ -1068,7 +1001,7 @@ TEST_CASE("Set a configuration option value", "[unit]")
 
 TEST_CASE("Attach a configuration item", "[unit]")
 {
-  CgdbrcTestFixture cgdbrcFixture;
+  CgdbrcFixture cgdbrcFixture;
   cgdbrcFixture.resetStatics();
   CHECK(tst_get_cgdbrc_attach_list_size() == 0);
 
