@@ -1,38 +1,8 @@
 #include "catch.hpp"
-#include "cgdb_clog.h"
-#include "cgdbrc.h"
 #include "curses_fixture.h"
-#include "highlight_groups.h"
 #include "logo.h"
+#include "logo_fixture.h"
 
-
-class LogoTestFixture
-{
-  public:
-    LogoTestFixture() {}
-
-    ~LogoTestFixture()
-    {
-      disableColors();
-    }
-
-    void enableColors()
-    {
-      char buffer[L_tmpnam];
-      clog_open(CLOG_CGDB_ID, std::tmpnam(buffer), "/tmp");
-      cgdbrc_init();
-      hl_groups_instance = hl_groups_initialize();
-    }
-
-    void disableColors()
-    {
-      if (hl_groups_instance) {
-        free(hl_groups_instance);
-        hl_groups_instance = NULL;
-        clog_free(1);
-      }
-    }
-};
 
 TEST_CASE("Assign a random logo index", "[integration]")
 {
@@ -43,11 +13,11 @@ TEST_CASE("Assign a random logo index", "[integration]")
 
 TEST_CASE("Get the number of available logos", "[integration][curses]")
 {
-  LogoTestFixture logoTestFixture;
+  LogoFixture logoFixture;
 
   SECTION("ANSI color escape not supported")
   {
-    logoTestFixture.disableColors();
+    logoFixture.disableColors();
     int actual = tst_logos_available();
     int expected = 3;
     REQUIRE(actual == expected);
@@ -57,7 +27,7 @@ TEST_CASE("Get the number of available logos", "[integration][curses]")
   {
     CursesFixture curses;
     curses.enableColors();
-    logoTestFixture.enableColors();
+    logoFixture.enableColors();
     int actual = tst_logos_available();
     int expected = 7;
     curses.stop();
@@ -119,12 +89,12 @@ TEST_CASE("Center line in window", "[integration][curses]")
   std::string input = "";
   std::string output = "";
 
-  LogoTestFixture logoTestFixture;
+  LogoFixture logoFixture;
   CursesFixture curses;
 
   SECTION("Without ANSI color escapes")
   {
-    logoTestFixture.disableColors();
+    logoFixture.disableColors();
     input = "cgdb";
     output = input;
 
@@ -145,7 +115,7 @@ TEST_CASE("Center line in window", "[integration][curses]")
   SECTION("With ANSI color escapes")
   {
     curses.enableColors();
-    logoTestFixture.enableColors();
+    logoFixture.enableColors();
     input = "\033[0;1;34mcgdb\033[0m";
     output = "E cE gE dE b";
 
