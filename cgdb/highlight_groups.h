@@ -1,6 +1,10 @@
 #ifndef __HIGHLIGHT_GROUPS_H__
 #define __HIGHLIGHT_GROUPS_H__
 
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
 /* Local Includes */
 #include "sys_win.h"
 

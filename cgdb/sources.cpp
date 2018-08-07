@@ -1401,11 +1401,26 @@ int source_reload(struct sviewer *sview, const char *path, int force)
 #ifdef TESTING
 int tst_get_line_leading_ws_count(const char* otext, int length)
 {
-   return get_line_leading_ws_count(otext, length);
+    return get_line_leading_ws_count(otext, length);
 } 
 
 int tst_get_timestamp(const char* path, time_t* timestamp)
 {
     return get_timestamp(path, timestamp);
+}
+
+void tst_init_file_buffer(struct buffer* buf)
+{
+    init_file_buffer(buf);
+}
+
+void tst_release_file_buffer(struct buffer* buf)
+{
+    release_file_buffer(buf);
+}
+
+int tst_load_file_buf(struct buffer *buf, const char *filename)
+{
+    return load_file_buf(buf, filename);
 }
 #endif // TESTING
