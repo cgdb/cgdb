@@ -14,3 +14,13 @@ TEST_CASE("Get leading whitespace count", "[unit]")
     REQUIRE(tst_get_line_leading_ws_count("  some", 6) == 2);
   }
 }
+
+TEST_CASE("Get file timestamp", "[unit]")
+{
+  time_t timestamp;
+  SECTION("Invalid path")
+  {
+    REQUIRE(tst_get_timestamp("invalid", &timestamp) == -1);
+    REQUIRE(timestamp == 0);
+  }
+}

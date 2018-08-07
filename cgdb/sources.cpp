@@ -1403,4 +1403,9 @@ int tst_get_line_leading_ws_count(const char* otext, int length)
 {
    return get_line_leading_ws_count(otext, length);
 } 
+
+int tst_get_timestamp(const char* path, time_t* timestamp)
+{
+    return get_timestamp(path, timestamp);
+}
 #endif // TESTING

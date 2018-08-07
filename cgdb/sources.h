@@ -348,6 +348,7 @@ int source_goto_mark(struct sviewer *sview, int key);
 
 #ifdef TESTING
 int tst_get_line_leading_ws_count(const char* otext, int length);
+int tst_get_timestamp(const char* path, time_t* timestamp);
 #endif // TESTING
 
 #endif // _SOURCES_H_
