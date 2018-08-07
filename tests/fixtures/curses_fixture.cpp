@@ -11,6 +11,7 @@
 #include "curses_fixture.h"
 #include <algorithm>
 #include <stdio.h>
+#include <unistd.h>
 
 
 CursesFixture::CursesFixture()
@@ -27,6 +28,9 @@ CursesFixture::~CursesFixture()
     delwin(window_);
   }
   stop();
+
+  if (!screenDumpPath_.empty())
+    unlink(screenDumpPath_.c_str());
 }
 
 void CursesFixture::start()
@@ -101,9 +105,12 @@ void CursesFixture::refreshScreen()
 
 void CursesFixture::dumpScreen()
 {
-  char buffer[L_tmpnam];
-  screenDumpPath_ = std::tmpnam(buffer);
-  scr_dump(screenDumpPath_.c_str());
+  char tmpf[] = "/tmp/fileXXXXXX";
+  int fd = mkstemp(tmpf);
+  if (fd != -1) {
+    screenDumpPath_ = std::string(tmpf);
+    scr_dump(screenDumpPath_.c_str());
+  }
 }
 
 Coordinates CursesFixture::searchScreen(const std::string& pattern)

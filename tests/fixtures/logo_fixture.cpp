@@ -2,17 +2,25 @@
 #include "cgdbrc.h"
 #include "highlight_groups.h"
 #include "logo_fixture.h"
+#include <stdlib.h>
+#include <unistd.h>
 
 
 LogoFixture::~LogoFixture()
 {
   disableColors();
+
+  if (!cLogFile_.empty())
+    unlink(cLogFile_.c_str());
 }
 
 void LogoFixture::enableColors()
 {
-  char buffer[L_tmpnam];
-  clog_open(CLOG_CGDB_ID, std::tmpnam(buffer), "/tmp");
+  char tmpf[] = "/tmp/fileXXXXXX";
+  int fd = mkstemp(tmpf);
+  if (fd != -1)
+    cLogFile_ = std::string(tmpf);
+  clog_open(CLOG_CGDB_ID, cLogFile_.c_str(), "");
   cgdbrc_init();
   hl_groups_instance = hl_groups_initialize();
 }
