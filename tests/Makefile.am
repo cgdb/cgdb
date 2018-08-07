@@ -38,4 +38,5 @@ tests_SOURCES = \
     fixtures/curses_fixture.cpp \
     fixtures/logo_fixture.cpp \
     fixtures/cgdbrc_fixture.cpp \
-    fixtures/filedlg_fixture.cpp
+    fixtures/filedlg_fixture.cpp \
+    fixtures/sources_fixture.cpp
