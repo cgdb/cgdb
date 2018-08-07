@@ -52,7 +52,6 @@
 #include "cgdbrc.h"
 #include "fs_util.h"
 #include "highlight.h"
-#include "highlight_groups.h"
 #include "interface.h"
 #include "logo.h"
 #include "sources.h"
@@ -1422,5 +1421,16 @@ void tst_release_file_buffer(struct buffer* buf)
 int tst_load_file_buf(struct buffer *buf, const char *filename)
 {
     return load_file_buf(buf, filename);
+}
+
+int tst_load_file(struct list_node *node)
+{
+    return load_file(node);
+}
+
+enum hl_group_kind tst_hlg_from_tokenizer_type(enum tokenizer_type type,
+                                               const char *tok_data)
+{
+    return hlg_from_tokenizer_type(type, tok_data);
 }
 #endif // TESTING

@@ -20,6 +20,7 @@
 
 /* Local Includes */
 #include "cgdb.h"
+#include "highlight_groups.h"
 #include "sys_win.h"
 #include "tokenizer.h"
 #include <stdint.h>
@@ -352,6 +353,9 @@ int tst_get_timestamp(const char* path, time_t* timestamp);
 void tst_init_file_buffer(struct buffer* buf);
 void tst_release_file_buffer(struct buffer* buf);
 int tst_load_file_buf(struct buffer *buf, const char *filename);
+int tst_load_file(struct list_node *node);
+enum hl_group_kind tst_hlg_from_tokenizer_type(enum tokenizer_type type,
+                                               const char *tok_data);
 #endif // TESTING
 
 #endif // _SOURCES_H_
