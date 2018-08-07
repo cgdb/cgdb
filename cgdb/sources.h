@@ -356,6 +356,10 @@ int tst_load_file_buf(struct buffer *buf, const char *filename);
 int tst_load_file(struct list_node *node);
 enum hl_group_kind tst_hlg_from_tokenizer_type(enum tokenizer_type type,
                                                const char *tok_data);
+int tst_source_get_mark_char(struct sviewer *sview, struct list_node *node,
+                             int line);
+struct list_node* tst_source_get_asmnode(struct sviewer *sview, uint64_t addr,
+                                         int* line);
 #endif // TESTING
 
 #endif // _SOURCES_H_

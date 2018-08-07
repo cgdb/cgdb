@@ -238,3 +238,126 @@ TEST_CASE("Highlight group kind from tokenizer type", "[integration]")
     REQUIRE(result == HLG_BLACK);
   }
 }
+
+TEST_CASE("Get current file", "[unit]")
+{
+  SECTION("No source viewer")
+  {
+    REQUIRE(source_current_file(NULL) == NULL);
+  }
+}
+
+TEST_CASE("Get the mark character for the line", "[integration]")
+{
+  struct list_node node;
+
+  SECTION("No list node")
+  {
+    REQUIRE(tst_source_get_mark_char(NULL, NULL, 0) == -1);
+  }
+
+  SECTION("Negative line number")
+  {
+    REQUIRE(tst_source_get_mark_char(NULL, &node, -1) == -1);
+  }
+
+  SECTION("Line number should be less than line flag count")
+  {
+    node.lflags = NULL;
+    REQUIRE(tst_source_get_mark_char(NULL, &node, 0) == -1);
+  }
+}
+
+/*
+TEST_CASE("Set source mark", "[integration]")
+{
+  SECTION("Key not in range")
+  {
+    REQUIRE(source_set_mark(NULL, 0) == 0);
+  }
+}
+*/
+
+TEST_CASE("Go to source mark", "[integration]")
+{
+  SECTION("No list node")
+  {
+    REQUIRE(source_goto_mark(NULL, 0) == 0);
+  }
+}
+
+TEST_CASE("Vertical source scroll", "[integration]")
+{
+  SECTION("No current")
+  {
+    struct sviewer sview;
+    sview.cur = NULL;
+    source_vscroll(&sview, 1);
+    REQUIRE(sview.cur == NULL);
+  }
+}
+
+TEST_CASE("Horizontal source scroll", "[integration]")
+{
+  SECTION("No current")
+  {
+    struct sviewer sview;
+    sview.cur = NULL;
+    source_hscroll(&sview, 1);
+    REQUIRE(sview.cur == NULL);
+  }
+}
+
+TEST_CASE("Set selected line", "[integration]")
+{
+  SECTION("No current")
+  {
+    struct sviewer sview;
+    sview.cur = NULL;
+    source_set_sel_line(&sview, 1);
+    REQUIRE(sview.cur == NULL);
+  }
+}
+
+TEST_CASE("Get assembly node", "[integration]")
+{
+  SECTION("No address")
+  {
+    int line = 1;
+    REQUIRE(tst_source_get_asmnode(NULL, 0, &line) == NULL);
+  }
+}
+
+TEST_CASE("Initialize regex search", "[unit]")
+{
+  SECTION("No source viewer")
+  {
+    struct sviewer* sview = NULL;
+    source_search_regex_init(sview);
+    REQUIRE(sview == NULL);
+  }
+
+  SECTION("No current")
+  {
+    struct sviewer sview;
+    sview.cur = NULL;
+    source_search_regex_init(&sview);
+    REQUIRE(sview.cur == NULL);
+  }
+}
+
+TEST_CASE("Execute regex search")
+{
+  SECTION("No list node")
+  {
+    REQUIRE(source_search_regex(NULL, "", 0, 0, 0) == -1);
+  }
+}
+
+TEST_CASE("Reload", "[integration]")
+{
+  SECTION("No path")
+  {
+    REQUIRE(source_reload(NULL, "", 0) == -1);
+  }
+}

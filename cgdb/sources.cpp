@@ -1418,19 +1418,31 @@ void tst_release_file_buffer(struct buffer* buf)
     release_file_buffer(buf);
 }
 
-int tst_load_file_buf(struct buffer *buf, const char *filename)
+int tst_load_file_buf(struct buffer* buf, const char* filename)
 {
     return load_file_buf(buf, filename);
 }
 
-int tst_load_file(struct list_node *node)
+int tst_load_file(struct list_node* node)
 {
     return load_file(node);
 }
 
 enum hl_group_kind tst_hlg_from_tokenizer_type(enum tokenizer_type type,
-                                               const char *tok_data)
+                                               const char* tok_data)
 {
     return hlg_from_tokenizer_type(type, tok_data);
+}
+
+int tst_source_get_mark_char(struct sviewer* sview, struct list_node* node,
+                             int line)
+{
+    return source_get_mark_char(sview, node,line);
+}
+
+struct list_node* tst_source_get_asmnode(struct sviewer *sview, uint64_t addr,
+                                         int* line)
+{
+    return source_get_asmnode(sview, addr, line);
 }
 #endif // TESTING
