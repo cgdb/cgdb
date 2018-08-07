@@ -1440,9 +1440,14 @@ int tst_source_get_mark_char(struct sviewer* sview, struct list_node* node,
     return source_get_mark_char(sview, node,line);
 }
 
-struct list_node* tst_source_get_asmnode(struct sviewer *sview, uint64_t addr,
+struct list_node* tst_source_get_asmnode(struct sviewer* sview, uint64_t addr,
                                          int* line)
 {
     return source_get_asmnode(sview, addr, line);
+}
+
+int tst_wrap_line(struct list_node* node, int line)
+{
+    return wrap_line(node, line);
 }
 #endif // TESTING

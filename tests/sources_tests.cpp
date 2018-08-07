@@ -346,6 +346,23 @@ TEST_CASE("Initialize regex search", "[unit]")
   }
 }
 
+TEST_CASE("Wrap line", "[integration]")
+{
+  SourcesFixture sourcesFixture;
+  struct list_node node;
+  node.file_buf = sourcesFixture.generateFileBuffer();
+
+  SECTION("Negative line number")
+  {
+    REQUIRE(tst_wrap_line(&node, -1) == -1);
+  }
+
+  SECTION("Line number greater than or equal to count")
+  {
+    REQUIRE(tst_wrap_line(&node, 1) == 0);
+  }
+}
+
 TEST_CASE("Execute regex search")
 {
   SECTION("No list node")
