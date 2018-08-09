@@ -378,3 +378,11 @@ TEST_CASE("Reload", "[integration]")
     REQUIRE(source_reload(NULL, "", 0) == -1);
   }
 }
+
+TEST_CASE("Get list node", "[unit]")
+{
+  SECTION("No source viewer")
+  {
+    REQUIRE(source_get_node(NULL, "") == NULL);
+  }
+}
