@@ -3,16 +3,11 @@
 #include "sources_fixture.h"
 
 
-TEST_CASE("Get leading whitespace count", "[unit]")
+TEST_CASE("Get list node", "[unit]")
 {
-  SECTION("No leading whitespace")
+  SECTION("No source viewer")
   {
-    REQUIRE(tst_get_line_leading_ws_count("none", 4) == 0);
-  }
-
-  SECTION("Leading whitespace")
-  {
-    REQUIRE(tst_get_line_leading_ws_count("  some", 6) == 2);
+    REQUIRE(source_get_node(NULL, "") == NULL);
   }
 }
 
@@ -286,6 +281,19 @@ TEST_CASE("Go to source mark", "[integration]")
   }
 }
 
+TEST_CASE("Get line leading whitespace count", "[unit]")
+{
+  SECTION("No leading whitespace")
+  {
+    REQUIRE(tst_get_line_leading_ws_count("none", 4) == 0);
+  }
+
+  SECTION("Leading whitespace")
+  {
+    REQUIRE(tst_get_line_leading_ws_count("  some", 6) == 2);
+  }
+}
+
 TEST_CASE("Vertical source scroll", "[integration]")
 {
   SECTION("No current")
@@ -376,13 +384,5 @@ TEST_CASE("Reload", "[integration]")
   SECTION("No path")
   {
     REQUIRE(source_reload(NULL, "", 0) == -1);
-  }
-}
-
-TEST_CASE("Get list node", "[unit]")
-{
-  SECTION("No source viewer")
-  {
-    REQUIRE(source_get_node(NULL, "") == NULL);
   }
 }
