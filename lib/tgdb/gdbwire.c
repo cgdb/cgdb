@@ -3,7 +3,7 @@
  *
  * This file is an amalgamation of the source files from GDBWIRE.
  *
- * It was created using gdbwire 1.0 and git revision b5ae67f.
+ * It was created using gdbwire 1.0 and git revision 229fae8.
  *
  * GDBWIRE is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -569,7 +569,11 @@ enum gdbwire_logger_level {
  * Any additional format arguments.
  */
 void gdbwire_logger_log(const char *file, int line,
-        enum gdbwire_logger_level level, const char *fmt, ...);
+        enum gdbwire_logger_level level, const char *fmt, ...)
+#ifdef __GNUC__
+        __attribute__((__format__(__printf__, 4, 5)))
+#endif
+        ;
 
 /* The macros intended to be used for logging */
 #define gdbwire_debug(fmt, ...)(gdbwire_logger_log(__FILE__, __LINE__, \
@@ -5540,12 +5544,28 @@ static char *gdbwire_mi_unescape_cstring(char *str)
                     result[r++] = '\n';
                     ++s;
                     break;
-                case 'r':
-                    result[r++] = '\r';
+                case 'b':
+                    result[r++] = '\b';
                     ++s;
                     break;
                 case 't':
                     result[r++] = '\t';
+                    ++s;
+                    break;
+                case 'f':
+                    result[r++] = '\f';
+                    ++s;
+                    break;
+                case 'r':
+                    result[r++] = '\r';
+                    ++s;
+                    break;
+                case 'e':
+                    result[r++] = '\033';
+                    ++s;
+                    break;
+                case 'a':
+                    result[r++] = '\007';
                     ++s;
                     break;
                 case '"':
@@ -5978,11 +5998,11 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   248,   248,   251,   254,   258,   262,   268,   274,   274,
-     286,   293,   301,   307,   313,   321,   330,   334,   338,   342,
-     359,   412,   416,   420,   425,   430,   437,   444,   451,   456,
-     461,   465,   470,   474,   479,   485,   489,   493,   497,   501,
-     505
+       0,   264,   264,   267,   270,   274,   278,   284,   290,   290,
+     302,   309,   317,   323,   329,   337,   346,   350,   354,   358,
+     375,   428,   432,   436,   441,   446,   453,   460,   467,   472,
+     477,   481,   486,   490,   495,   501,   505,   509,   513,   517,
+     521
 };
 #endif
 
