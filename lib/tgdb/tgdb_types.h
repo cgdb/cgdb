@@ -215,7 +215,12 @@
         /**
          * Request GDB to disassemble a function.
          */
-        TGDB_REQUEST_DISASSEMBLE_FUNC
+        TGDB_REQUEST_DISASSEMBLE_FUNC,
+
+        /**
+         * Request stack frame local variables.
+         */
+        TGDB_REQUEST_STACK_LOCALS
     };
 
     struct tgdb_request {
@@ -296,6 +301,11 @@
      * inferior program.
      */
         TGDB_UPDATE_SOURCE_FILES,
+
+    /**
+     * Used to update the local variables list when the context changes.
+     */
+        TGDB_UPDATE_LOCALS,
 
     /**
      * This returns a list of all the completions.
