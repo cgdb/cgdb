@@ -47,5 +47,7 @@ cgdb_SOURCES = \
     scroller.h \
     sources.cpp \
     sources.h \
+	locals.cpp \
+	locals.h \
     usage.cpp \
     usage.h
