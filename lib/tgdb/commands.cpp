@@ -216,6 +216,46 @@ static void send_command_complete_response(struct commands *c)
     tgdb_send_response(c->tgdb, response);
 }
 
+struct gdbwire_mi_stack_list_variables {
+    char *name;
+    char *value;
+    struct gdbwire_mi_stack_list_variables *next;
+};
+
+static void
+commands_send_stack_variables_response(struct commands *c, gdbwire_mi_stack_list_variables *variables)
+{
+    struct tgdb_response *response = tgdb_create_response(TGDB_UPDATE_LOCALS);
+
+    tgdb_stack_variable *vars = NULL;
+    tgdb_stack_variable *current = NULL;
+    tgdb_stack_variable *temp = NULL;
+
+    while (variables != NULL) {
+        temp = (tgdb_stack_variable *) calloc(1, sizeof(tgdb_stack_variable));
+
+        temp->is_arg = 0;
+
+        temp->name = (char *) calloc(strlen(variables->name), sizeof(char));
+        strcpy(temp->name, variables->name);
+
+        temp->value = (char *) calloc(strlen(variables->value), sizeof(char));
+        strcpy(temp->value, variables->value);
+
+        if (vars == NULL) {
+            vars = temp; // set root
+        } else {
+            current->next = temp;
+        }
+        current = temp;
+        variables = variables->next;
+    }
+
+    response->choice.update_stack_variables.variables = vars;
+
+    tgdb_send_response(c->tgdb, response);
+}
+
 static void
 commands_send_source_file(struct commands *c, char *fullname, char *file,
         uint64_t address, char *from, char *func, int line)
@@ -258,6 +298,21 @@ static void commands_process_info_source(struct commands *c,
                 mi_command->variant.file_list_exec_source_file.line);
 
         gdbwire_mi_command_free(mi_command);
+    }
+}
+
+static void commands_process_stack_variables(struct commands *c,
+        struct gdbwire_mi_result_record *result_record)
+{
+    enum gdbwire_result result;
+    struct gdbwire_mi_command *mi_command = 0;
+    result = gdbwire_get_mi_command(GDBWIRE_MI_STACK_LIST_VARIABLES,
+        result_record, &mi_command);
+    if (result == GDBWIRE_OK) {
+        commands_send_stack_variables_response(c, mi_command->variant.stack_list_variables.variables);
+        gdbwire_mi_command_free(mi_command);
+    } else {
+        clog_error(CLOG_CGDB, "%s", "Could not get local variables for frame.");
     }
 }
 
@@ -410,6 +465,9 @@ static void gdbwire_result_record_callback(void *context,
             break;
         case TGDB_REQUEST_INFO_FRAME:
             commands_process_info_frame(c, result_record);
+            break;
+        case TGDB_REQUEST_STACK_LOCALS:
+            commands_process_stack_variables(c, result_record);
             break;
         case TGDB_REQUEST_TTY:
         case TGDB_REQUEST_CONSOLE_COMMAND:
