@@ -73,6 +73,7 @@
 #include "interface.h"
 #include "scroller.h"
 #include "sources.h"
+#include "locals.h"
 #include "tgdb.h"
 #include "kui.h"
 #include "kui_term.h"
@@ -992,6 +993,17 @@ static int user_input_loop()
     return 0;
 }
 
+void set_locals(struct lviewer *l, struct tgdb_stack_variable *variables)
+{
+    l->locals = variables;
+}
+
+static void update_locals(struct tgdb_response *response)
+{
+    clog_info(CLOG_CGDB, "%s", "called update_locals");
+    set_locals(if_get_lviewer(), response->choice.update_stack_variables.variables);
+}
+
 /* This updates all the breakpoints */
 static void update_breakpoints(struct tgdb_response *response)
 {
@@ -1190,6 +1202,9 @@ static void command_response(void *context, struct tgdb_response *response)
         break;
     case TGDB_UPDATE_FILE_POSITION:
         update_file_position(response);
+        break;
+    case TGDB_UPDATE_LOCALS:
+        update_locals(response);
         break;
     case TGDB_UPDATE_SOURCE_FILES:
         update_source_files(response);
