@@ -5,7 +5,8 @@ AM_CXXFLAGS = \
     -I$(top_srcdir)/lib/rline \
     -I$(top_srcdir)/lib/util \
     -I$(top_srcdir)/lib/tgdb \
-    -I$(top_srcdir)/lib/tokenizer
+    -I$(top_srcdir)/lib/tokenizer \
+    -std=c++11
 
 bin_PROGRAMS = cgdb
 

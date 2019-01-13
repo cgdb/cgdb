@@ -1,5 +1,6 @@
 AM_CXXFLAGS = \
-    -I$(top_srcdir)/lib/util
+    -I$(top_srcdir)/lib/util \
+    -std=c++11
 
 #AM_LFLAGS = -Pxx -olex.yy.c
 

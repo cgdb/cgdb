@@ -1,7 +1,8 @@
 AM_CXXFLAGS = \
     -I$(top_srcdir)/lib/rline \
     -I$(top_srcdir)/lib/util \
-    -I$(top_srcdir)/lib/tgdb
+    -I$(top_srcdir)/lib/tgdb \
+    -std=c++11
 
 noinst_LIBRARIES = libtgdb.a
 
