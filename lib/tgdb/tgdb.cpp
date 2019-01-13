@@ -168,6 +168,7 @@ static void tgdb_source_location_changed(void *context)
 {
     struct tgdb *tgdb = (struct tgdb*)context;
     tgdb_request_current_location(tgdb);
+    tgdb_request_stack_locals(tgdb);
 }
 
 static void tgdb_prompt_changed(void *context, const std::string &prompt)
@@ -325,7 +326,7 @@ struct tgdb *tgdb_initialize(const char *debugger,
         tgdb_prompt_changed,
         tgdb_console_output,
         tgdb_command_error,
-        tgdb_console_at_prompt  
+        tgdb_console_at_prompt
     };
 
     tgdb->debugger_pid = invoke_debugger(debugger, argc, argv,
@@ -850,6 +851,18 @@ void tgdb_request_current_location(struct tgdb * tgdb)
     tgdb_run_or_queue_request(tgdb, request_ptr, true);
 }
 
+void tgdb_request_stack_locals(struct tgdb * tgdb) {
+    clog_info(CLOG_CGDB, "%s", "tgdb_request_stack_locals");
+
+    tgdb_request_ptr request_ptr;
+
+    request_ptr = (tgdb_request_ptr)cgdb_malloc(sizeof (struct tgdb_request));
+
+    request_ptr->header = TGDB_REQUEST_STACK_LOCALS;
+
+    tgdb_run_or_queue_request(tgdb, request_ptr, true);
+}
+
 void
 tgdb_request_run_debugger_command(struct tgdb * tgdb, enum tgdb_command_type c)
 {
@@ -961,6 +974,10 @@ int tgdb_get_gdb_command(struct tgdb *tgdb, tgdb_request_ptr request,
         case TGDB_REQUEST_DATA_DISASSEMBLE_MODE_QUERY:
             command = "server interpreter-exec mi"
                     " \"-data-disassemble -s 0 -e 0 -- 4\"\n";
+            break;
+        case TGDB_REQUEST_STACK_LOCALS:
+            command = "server interpreter-exec mi"
+                    " \"-stack-list-variables --skip-unavailable 1\"\n";
             break;
         case TGDB_REQUEST_DEBUGGER_COMMAND:
             // tgdb_get_client_command always returns a string

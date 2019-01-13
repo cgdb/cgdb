@@ -338,6 +338,14 @@
    void tgdb_request_current_location(struct tgdb *tgdb);
 
   /**
+   * Get the current stack frame local variables.
+   *
+   * \param tgdb
+   * An instance of the tgdb library to operate on.
+   */
+   void tgdb_request_stack_locals(struct tgdb *tgdb);
+
+  /**
    * This tells libtgdb to run a command through the debugger.
    *
    * \param tgdb
