@@ -2046,6 +2046,9 @@ enum gdbwire_mi_command_kind {
     /* -stack-info-frame */
     GDBWIRE_MI_STACK_INFO_FRAME,
 
+    /* -stack-list-variables */
+    GDBWIRE_MI_STACK_LIST_VARIABLES,
+
     /* -file-list-exec-source-file */
     GDBWIRE_MI_FILE_LIST_EXEC_SOURCE_FILE,
     /* -file-list-exec-source-files */
@@ -2368,7 +2371,11 @@ struct gdbwire_mi_command {
              */
             struct gdbwire_mi_source_file *files;
         } file_list_exec_source_files;
-        
+
+        /** When kind == GDBWIRE_MI_STACK_LIST_VARIABLES */
+        struct {
+            struct gdbwire_mi_stack_list_variables *variables;
+        } stack_list_variables;
     } variant;
 };
 
