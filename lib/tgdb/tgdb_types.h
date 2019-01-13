@@ -84,6 +84,13 @@
         int enabled;
     };
 
+    struct tgdb_stack_variable {
+        char *name;
+        short int is_arg;
+        char *value;
+        struct tgdb_stack_variable *next;
+    };
+
  /**
   * This structure currently represents a file position.
   *
@@ -365,6 +372,10 @@
                  * filename. The filename may be relative or absolute. */
                 char **source_files;
             } update_source_files;
+
+            struct {
+                struct tgdb_stack_variable *variables;
+            } update_stack_variables;
 
             /* header == TGDB_INFERIOR_EXITED */
             struct {
