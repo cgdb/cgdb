@@ -1813,6 +1813,11 @@ void if_shutdown(void)
         swin_delwin(vseparator_win);
         vseparator_win = NULL;
     }
+
+    if (locals_viewer) {
+        locals_free(locals_viewer);
+        locals_viewer = NULL;
+    }
 }
 
 void if_set_focus(Focus f)
