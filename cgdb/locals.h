@@ -12,6 +12,7 @@ struct lviewer {
 };
 
 struct lviewer *locals_new(SWINDOW *win);
+void local_vars_free(tgdb_stack_variable *variables);
 void locals_free(struct lviewer *viewer);
 void locals_refresh(struct lviewer *viewer, int focus, enum win_refresh dorefresh);
 void locals_move(struct lviewer *viewer, SWINDOW *win);

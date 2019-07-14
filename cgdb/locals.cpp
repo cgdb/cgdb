@@ -11,6 +11,7 @@
 struct lviewer *locals_new(SWINDOW *win) {
     struct lviewer *viewer;
     viewer = (lviewer *)cgdb_malloc(sizeof(lviewer));
+    viewer->locals = NULL;
     viewer->win = win;
     return viewer;
 }
@@ -25,9 +26,11 @@ void locals_refresh(struct lviewer *viewer, int focus, enum win_refresh dorefres
     tgdb_stack_variable *vars = viewer->locals;
 
     while(vars != NULL) {
-        char *str = (char *) calloc(strlen(vars->name) + strlen(vars->value) + 2, sizeof(char));
-        sprintf(str, "%s: %s\n", vars->name, vars->value);
-        hl_printline(viewer->win, str, strlen(str), NULL, -1, -1, 0, strlen(str));
+        size_t line_length = strlen(vars->name) + strlen(vars->value) + 4;
+        char *var_string = (char *) calloc(line_length, sizeof(char));
+        sprintf(var_string, "%s: %s\n", vars->name, vars->value);
+        hl_printline(viewer->win, var_string, line_length, NULL, -1, -1, 0, line_length);
+        free(var_string);
         vars = vars->next;
     }
 
@@ -41,10 +44,10 @@ void locals_refresh(struct lviewer *viewer, int focus, enum win_refresh dorefres
     }
 }
 
-static void free_tgdb_stack_variables(tgdb_stack_variable *variables)
+void local_vars_free(tgdb_stack_variable *variables)
 {
     if (variables == NULL) return;
-    free_tgdb_stack_variables(variables->next);
+    local_vars_free(variables->next);
     free(variables->name);
     free(variables->value);
     free(variables);
@@ -54,7 +57,7 @@ void locals_free(struct lviewer *viewer) {
     swin_delwin(viewer->win);
     viewer->win = NULL;
 
-    free_tgdb_stack_variables(viewer->locals);
+    local_vars_free(viewer->locals);
 
     /* Release the viewer object */
     free(viewer);

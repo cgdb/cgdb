@@ -995,6 +995,7 @@ static int user_input_loop()
 
 void set_locals(struct lviewer *l, struct tgdb_stack_variable *variables)
 {
+    local_vars_free(l->locals);
     l->locals = variables;
 }
 

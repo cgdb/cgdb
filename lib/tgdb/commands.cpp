@@ -236,10 +236,10 @@ commands_send_stack_variables_response(struct commands *c, gdbwire_mi_stack_list
 
         temp->is_arg = 0;
 
-        temp->name = (char *) calloc(strlen(variables->name), sizeof(char));
+        temp->name = (char *) calloc(strlen(variables->name) + 1, sizeof(char));
         strcpy(temp->name, variables->name);
 
-        temp->value = (char *) calloc(strlen(variables->value), sizeof(char));
+        temp->value = (char *) calloc(strlen(variables->value) + 1, sizeof(char));
         strcpy(temp->value, variables->value);
 
         if (vars == NULL) {
@@ -310,10 +310,11 @@ static void commands_process_stack_variables(struct commands *c,
         result_record, &mi_command);
     if (result == GDBWIRE_OK) {
         commands_send_stack_variables_response(c, mi_command->variant.stack_list_variables.variables);
-        gdbwire_mi_command_free(mi_command);
     } else {
         clog_error(CLOG_CGDB, "%s", "Could not get local variables for frame.");
+        commands_send_stack_variables_response(c, NULL);
     }
+    gdbwire_mi_command_free(mi_command);
 }
 
 static void commands_process_info_frame(struct commands *c,
