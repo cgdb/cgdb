@@ -1,3 +1,7 @@
+  * Fix spurious error from CGDB on shutdown. You may have seen,
+       CGDB had unexpected results. Search the logs for more details.
+    In the log there was a waitpid error. CGDB was using the API wrong.
+
   * Fix issue #161 - CGDB would lock up when doing a regex search from
     the status bar if the file was just opened from the file dialog and
     the search did not match any text in the file. Now the search fails

@@ -612,10 +612,9 @@ static int tgdb_handle_sigchld(struct tgdb *tgdb)
             waitpid_result = waitpid(tgdb->debugger_pid, &status, WNOHANG);
             if (waitpid_result == -1) {
                 result = -1;
-                clog_error(CLOG_CGDB, "waitpid error");
-                break;
+                clog_error(CLOG_CGDB, "waitpid error %d %s", errno, strerror(errno));
             }
-        } while (waitpid_result != 0);
+        } while (waitpid_result == 0);
 
         tgdb->has_sigchld_recv = 0;
     }
