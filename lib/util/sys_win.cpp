@@ -251,7 +251,7 @@ int swin_wprintw(SWINDOW *win, const char *fmt, ...)
     va_list ap;
 
     va_start(ap, fmt);
-    ret = vwprintw((WINDOW *)win, fmt, ap);
+    ret = vw_printw((WINDOW *)win, fmt, ap);
     va_end(ap);
 
     return ret;
@@ -277,7 +277,7 @@ int swin_mvwprintw(SWINDOW *win, int y, int x, const char *fmt, ...)
         va_list ap;
 
         va_start(ap, fmt);
-        ret = vwprintw((WINDOW *)win, fmt, ap);
+        ret = vw_printw((WINDOW *)win, fmt, ap);
         va_end(ap);
     }
 
