@@ -99,21 +99,34 @@ void if_show_file(char *path, int sel_line, int exe_line);
  */
 struct sviewer *if_get_sview();
 
-/* if_display_message: Displays a message on the source window status bar.
- * -------------------
+/**
+ * Display a message on the source window status bar.
  *
- * msg:     A message to the user. This will not be truncated unless the width
- *          of the terminal is smaller than this message. 
- *          msg should never be NULL. use "" instead.
- *          
- * width:   The width of the status bar to use up before truncating. 
- *          If width is 0 then if_display_message will assume the whole width
- *          of the terminal.
+ * @param dorefresh
+ * Pass WIN_REFRESH to call wrefresh, otherwise wnoutrefresh is called.
  *
- * fmt:     The message to display
+ * @param header
+ * The header to display before the message.
+ * If "", only the message will be displayed.
+ * Should never be NULL, use "" instead.
+ *
+ * @param msg
+ * A message to display to the user. If the message is longer than the
+ * size of the status bar, the left most part of the string will be truncated.
+ * Should never be NULL, use "" instead.
+ *
+ * Examples
+ *
+ * Header is "/" and message is "for_the_love_of_country".
+ * If the width is 50, the status bar will be /for_the_love_of_country
+ * If the width is 10, the status bar will be />_country
+ *
+ * Header is "" and message is "for_the_love_of_country".
+ * If the width is 50, the status bar will be for_the_love_of_country
+ * If the width is 10, the status bar will be >f_country
  */
-void if_display_message(const char *msg, enum win_refresh dorefresh,
-                        int width, const char *fmt, ...) ATTRIBUTE_PRINTF( 4, 5 );
+void if_display_message(enum win_refresh dorefresh,
+        const char *header, const char *msg);
 
 /* if_clear_filedlg: Clears all the files the file dialog has to show the user.
  * -----------------

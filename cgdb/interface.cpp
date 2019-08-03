@@ -406,17 +406,17 @@ static void update_status_win(enum win_refresh dorefresh)
 
     /* Print the regex that the user is looking for Forward */
     if (sbc_kind == SBC_REGEX && regex_direction_cur) {
-        if_display_message("/", dorefresh, WIDTH - 1, "%s", regex_cur.c_str());
+        if_display_message(dorefresh, "/", regex_cur.c_str());
         swin_curs_set(1);
     }
     /* Regex backwards */
     else if (sbc_kind == SBC_REGEX) {
-        if_display_message("?", dorefresh, WIDTH - 1, "%s", regex_cur.c_str());
+        if_display_message(dorefresh, "?", regex_cur.c_str());
         swin_curs_set(1);
     }
     /* A colon command typed at the status bar */
     else if (focus == CGDB_STATUS_BAR && sbc_kind == SBC_NORMAL) {
-        if_display_message(":", dorefresh, WIDTH - 1, "%s", cur_sbc.c_str());
+        if_display_message(dorefresh, ":", cur_sbc.c_str());
         swin_curs_set(1);
     }
     /* Default: Current Filename */
@@ -425,7 +425,7 @@ static void update_status_win(enum win_refresh dorefresh)
         const char *filename = source_current_file(src_viewer);
 
         if (filename) {
-            if_display_message("", dorefresh, WIDTH - 1, "%s", filename);
+            if_display_message(dorefresh, "", filename);
         }
     }
 
@@ -435,40 +435,30 @@ static void update_status_win(enum win_refresh dorefresh)
         swin_wnoutrefresh(status_win);
 }
 
-void if_display_message(const char *msg, enum win_refresh dorefresh, int width, const char *fmt, ...)
+void if_display_message(enum win_refresh dorefresh,
+        const char *header, const char *msg)
 {
-    va_list ap;
-    char va_buf[MAXLINE];
     char buf_display[MAXLINE];
-    int pos, error_length, length;
+    int pos, header_length, msg_length;
     int attr;
+    int width;
 
     attr = hl_groups_get_attr(hl_groups_instance, HLG_STATUS_BAR);
 
     swin_curs_set(0);
 
-    if (!width)
-        width = WIDTH;
+    width = get_src_status_width();
 
-    /* Get the buffer with format */
-    va_start(ap, fmt);
-#ifdef   HAVE_VSNPRINTF
-    vsnprintf(va_buf, sizeof (va_buf), fmt, ap);    /* this is safe */
-#else
-    vsprintf(va_buf, fmt, ap);  /* this is not safe */
-#endif
-    va_end(ap);
+    header_length = strlen(header);
+    msg_length = strlen(msg);
 
-    error_length = strlen(msg);
-    length = strlen(va_buf);
-
-    if (error_length > width)
-        strcat(strncpy(buf_display, msg, width - 1), ">");
-    else if (error_length + length > width)
-        snprintf(buf_display, sizeof(buf_display), "%s>%s", msg,
-                va_buf + (length - (width - error_length) + 1));
+    if (header_length > width)
+        strcat(strncpy(buf_display, header, width - 1), ">");
+    else if (header_length + msg_length > width)
+        snprintf(buf_display, sizeof(buf_display), "%s>%s", header,
+                msg + (msg_length - (width - header_length) + 1));
     else
-        snprintf(buf_display, sizeof(buf_display), "%s%s", msg, va_buf);
+        snprintf(buf_display, sizeof(buf_display), "%s%s", header, msg);
 
     /* Print white background */
     swin_wattron(status_win, attr);
@@ -747,7 +737,7 @@ static void if_run_command(struct sviewer *sview, const std::string &command)
     }
 
     if (command_parse_string(command.c_str())) {
-        if_display_message("Unknown command: ", WIN_NO_REFRESH, 0, "%s",
+        if_display_message(WIN_NO_REFRESH, "Unknown command: ", 
             command.c_str());
     } else {
         update_status_win(WIN_NO_REFRESH);
@@ -1632,7 +1622,7 @@ void if_display_help(void)
         if_draw();
     }
     else if (ret_val == 5)      /* File does not exist */
-        if_display_message("No such file: ", WIN_REFRESH, 0, "%s", cgdb_help_file);
+        if_display_message(WIN_REFRESH, "No such file: ", cgdb_help_file);
 }
 
 void if_display_logo(int reset)

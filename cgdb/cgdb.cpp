@@ -1092,8 +1092,8 @@ static void update_source_files(struct tgdb_response *response)
 
     if (!sbcount(source_files) && !added_disasm) {
         /* No files returned? */
-        if_display_message("Error:", WIN_REFRESH, 0,
-                           " No sources available! Was the program compiled with debug?");
+        if_display_message(WIN_REFRESH, "Error:",
+            " No sources available! Was the program compiled with debug?");
     } else {
         int i;
 
