@@ -12,7 +12,7 @@ This manual is for @acronym{GNU} CGDB
 (version @value{VERSION}, @value{UPDATED}),
 the @acronym{GNU} ncurses based front end to GDB.
 
-Copyright @copyright{} 2013 CGDB Team
+Copyright @copyright{} 2019 CGDB Team
 
 @quotation
 This document is part of a free software program; you can redistribute it
