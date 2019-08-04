@@ -1,3 +1,5 @@
+cgdb-0.7.1 (08/04/2019)
+
   * Status bar messages are now displayed properly in veritical mode.
     The message is now truncated according to the status bar width instead
     of the width of the terminal.
