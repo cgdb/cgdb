@@ -159,7 +159,10 @@
         TGDB_REQUEST_DISASSEMBLE_PC,
 
         // Request GDB to disassemble a function.
-        TGDB_REQUEST_DISASSEMBLE_FUNC
+        TGDB_REQUEST_DISASSEMBLE_FUNC,
+
+        // Request GDB to skip to the given line.
+        TGDB_REQUEST_UNTIL_LINE
     };
 
     // This is the commands interface used between the front end and TGDB.
@@ -509,6 +512,25 @@
     };
     void tgdb_request_disassemble_func(struct tgdb *tgdb,
             enum disassemble_func_type type);
+
+    /**
+     * Request GDB skip 'until' the given file/line or address. Uses the same
+     * basic functionality as 'break'. Only file/line *OR* addr should be set.
+     *
+     * \param tgdb
+     * An instance of the tgdb library to operate on.
+     *
+     * \param file
+     * The file name of the line to skip to.
+     *
+     * \param line
+     * The line to skip until.
+     *
+     * \param addr
+     * The address ($pc) to skip until.
+     */
+    void tgdb_request_until_line(struct tgdb *tgdb,
+            const char *file, int line, uint64_t addr);
 
 /*@}*/
 /* }}}*/
