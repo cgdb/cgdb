@@ -396,6 +396,9 @@ Sets a breakpoint at the current line number.
 @item t
 Sets a temporary breakpoint at the current line number.
 
+@item u
+Tells GDB to skip execution until the current line number.
+
 @item -
 Shrink source window 1 line or column (depending on split orientation).
 

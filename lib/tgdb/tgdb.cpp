@@ -153,6 +153,15 @@ struct tgdb_request {
             int source;
             int raw;
         } disassemble_func;
+
+        struct {
+            // The filename to set the breakpoint in
+            const char *file;
+            // The corresponding line number
+            int line;
+            // The address to set breakpoint in (if file is null)
+            uint64_t addr;
+        } until_line;
     } choice;
 };
 
@@ -561,6 +570,7 @@ static void gdbwire_result_record_callback(void *context,
         case TGDB_REQUEST_TTY:
         case TGDB_REQUEST_DEBUGGER_COMMAND:
         case TGDB_REQUEST_MODIFY_BREAKPOINT:
+        case TGDB_REQUEST_UNTIL_LINE:
             break;
     }
 }
@@ -719,6 +729,10 @@ static void tgdb_request_destroy(tgdb_request_ptr request_ptr)
             free((char *) request_ptr->choice.modify_breakpoint.file);
             request_ptr->choice.modify_breakpoint.file = NULL;
             break;
+        case TGDB_REQUEST_UNTIL_LINE:
+            free((char *) request_ptr->choice.until_line.file);
+            request_ptr->choice.until_line.file = NULL;
+            break;
         case TGDB_REQUEST_DISASSEMBLE_PC:
         case TGDB_REQUEST_DISASSEMBLE_FUNC:
             break;
@@ -858,6 +872,16 @@ static const char *tgdb_get_client_command(struct tgdb *tgdb,
     return NULL;
 }
 
+static char *tgdb_break_call(const char *action,
+    const char *file, int line, uint64_t addr)
+{
+    if (file)
+        return sys_aprintf("%s \"%s\":%d", action, file, line);
+
+    return sys_aprintf("%s *0x%" PRIx64, action, addr);
+}
+
+
 static char *tgdb_client_modify_breakpoint_call(struct tgdb *tgdb,
     const char *file, int line, uint64_t addr, enum tgdb_breakpoint_action b)
 {
@@ -877,10 +901,7 @@ static char *tgdb_client_modify_breakpoint_call(struct tgdb *tgdb,
         break;
     }
 
-    if (file)
-        return sys_aprintf("%s \"%s\":%d", action, file, line);
-
-    return sys_aprintf("%s *0x%" PRIx64, action, addr);
+    return tgdb_break_call(action, file, line, addr);
 }
 
 /*******************************************************************************
@@ -1347,6 +1368,21 @@ void tgdb_request_disassemble_func(struct tgdb *tgdb,
     tgdb_run_or_queue_request(tgdb, request_ptr, false);
 }
 
+void tgdb_request_until_line(struct tgdb *tgdb,
+        const char *file, int line, uint64_t addr)
+{
+    tgdb_request_ptr request_ptr;
+
+    request_ptr = (tgdb_request_ptr)cgdb_malloc(sizeof (struct tgdb_request));
+    request_ptr->header = TGDB_REQUEST_UNTIL_LINE;
+
+    request_ptr->choice.until_line.file = file ? cgdb_strdup(file) : NULL;
+    request_ptr->choice.until_line.line = line;
+    request_ptr->choice.until_line.addr = addr;
+
+    tgdb_run_or_queue_request(tgdb, request_ptr, false);
+}
+
 /* }}}*/
 
 /* Process {{{*/
@@ -1394,6 +1430,15 @@ int tgdb_get_gdb_command(struct tgdb *tgdb, tgdb_request_ptr request,
                     request->choice.modify_breakpoint.line,
                     request->choice.modify_breakpoint.addr,
                     request->choice.modify_breakpoint.b);
+            command = str;
+            free(str);
+            str = NULL;
+            break;
+        case TGDB_REQUEST_UNTIL_LINE:
+            str = tgdb_break_call("until",
+                request->choice.until_line.file,
+                request->choice.until_line.line,
+                request->choice.until_line.addr);
             command = str;
             free(str);
             str = NULL;
