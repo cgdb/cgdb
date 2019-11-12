@@ -126,7 +126,7 @@ int pty_free_process(int *masterfd, char *sname)
     return 0;
 }
 
-/** 
+/**
  * Utility function that frees up memory.
  *
  * \param argc
@@ -189,8 +189,10 @@ int invoke_debugger(const char *path,
     const char *const GDBMI = "-i=mi2";
     const char *const SET_ANNOTATE_TWO = "set annotate 2";
     const char *const SET_HEIGHT_ZERO = "set height 0";
+    const char *const SET_PAGINATION_DISABLED = "set pagination off";
+
     char **local_argv;
-    int i, j = 0, extra = 8;
+    int i, j = 0, extra = 10;
     int malloc_size = argc + extra;
     char slavename[64];
     int masterfd;
@@ -204,7 +206,7 @@ int invoke_debugger(const char *path,
         local_argv[j++] = cgdb_strdup(GDB);
 
     /* NOTE: These options have to come first, since if the user
-     * typed '--args' to GDB, everything at the end of the 
+     * typed '--args' to GDB, everything at the end of the
      * users options become parameters to the inferior.
      */
     local_argv[j++] = cgdb_strdup(NW);
@@ -214,6 +216,9 @@ int invoke_debugger(const char *path,
 
     local_argv[j++] = cgdb_strdup(EX);
     local_argv[j++] = cgdb_strdup(SET_HEIGHT_ZERO);
+
+    local_argv[j++] = cgdb_strdup(EX);
+    local_argv[j++] = cgdb_strdup(SET_PAGINATION_DISABLED);
 
     /* add the init file that the user did not type */
     if (choice == 0)
@@ -257,8 +262,8 @@ int invoke_debugger(const char *path,
 
         execvp(local_argv[0], local_argv);
 
-        /* Will get here if exec failed. This will happen when the 
-         * - "gdb" is not on the users path, or if 
+        /* Will get here if exec failed. This will happen when the
+         * - "gdb" is not on the users path, or if
          * - user specified a different program via the -d option and it was
          *   not able to be exec'd.
          */
