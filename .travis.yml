@@ -8,5 +8,9 @@ script:
   - ./autogen.sh
   - mkdir build
   - cd build
-  - CXXFLAGS="-std=c++11" ../configure
+  - CFLAGS="-std=c11 -Wall -Wextra -Wshadow -Wno-unused-parameter"
+    CXXFLAGS="-std=c++11 -Wall -Wextra -Wshadow -Wno-unused-parameter -Werror
+    -Wmissing-include-dirs -Wno-unused-parameter -Wno-sign-compare
+    -Wno-unused-but-set-variable -Wno-unused-function -Wno-variadic-macros"
+    ../configure
   - make
