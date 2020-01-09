@@ -79,6 +79,7 @@ static int command_do_logo(int param);
 static int command_do_quit(int param);
 static int command_do_shell(int param);
 static int command_source_reload(int param);
+static int command_do_writebuffer(int param);
 
 static int command_parse_syntax(int param);
 static int command_parse_highlight(int param);
@@ -111,6 +112,8 @@ COMMANDS commands[] = {
     /* map          */ {"map", (action_t)command_parse_map, 0},
     /* quit         */ {"quit", (action_t)command_do_quit, 0},
     /* quit         */ {"q", (action_t)command_do_quit, 0},
+    /* writebuffer  */ {"w", (action_t)command_do_writebuffer, 0},
+    /* writebuffer  */ {"write", (action_t)command_do_writebuffer, 0},
     /* shell        */ {"shell", (action_t)command_do_shell, 0},
     /* shell        */ {"sh", (action_t)command_do_shell, 0},
     /* syntax       */ {"syntax", (action_t)command_parse_syntax, 0},
@@ -739,6 +742,34 @@ int command_do_quit(int param)
 int command_do_shell(int param)
 {
     return run_shell_command(NULL);
+}
+
+int command_do_writebuffer(int param)
+{
+    int ret = -1;
+    int token = yylex();
+    const char *value = get_token();
+
+    if (token != STRING) {
+        if_print_message("\r\nError: writebuffer argument must be a quoted filename.\r\n");
+        return 1;
+    }
+
+    if ((value[0] == '"') && value[1]) {
+        char *filename = cgdb_strdup(value);
+
+        /* get rid of quotes */
+        filename[strlen(filename) - 1] = '\0';
+        ret = if_write_scroller_output(filename + 1);
+        if (!ret)
+            if_print_message("\r\n%s written.\r\n", filename);
+
+        free(filename);
+    }
+
+    if (ret)
+        if_print_message("\r\nError saving buffer to %s: %d.\r\n", value, ret);
+    return ret;
 }
 
 int command_source_reload(int param)
