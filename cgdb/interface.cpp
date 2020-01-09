@@ -1735,3 +1735,31 @@ int if_clear_line()
 
     return 0;
 }
+
+int if_write_scroller_output(const char *filename)
+{
+    int ret = -1;
+
+    if (gdb_scroller) {
+        FILE *file;
+
+        file = fopen(filename, "w");
+        if (!file) {
+            ret = -2;
+        } else {
+            const std::string text = scr_gettext(gdb_scroller);
+            size_t byteswritten = fwrite(text.c_str(), 1, text.size(), file);
+
+            if (byteswritten == text.size()) {
+                fwrite("\n", 1, 1, file);
+                ret = 0;
+            } else {
+                ret = -3;
+            }
+
+            fclose(file);
+        }
+    }
+
+    return ret;
+}

@@ -244,4 +244,11 @@ int get_gdb_height(void);
 // The width of the gdb window
 int get_gdb_width(void);
 
+/* if_write_scroller_output: write scroller output to file
+ * ---------------------
+ *
+ *  filename: filename to write scroller output to
+ */
+int if_write_scroller_output(const char *filename);
+
 #endif
