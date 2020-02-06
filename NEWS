@@ -1,3 +1,8 @@
+  * Fix issue #219 - CGDB users on Gentoo were experiencing segfaults at startup
+    due to mismatched wide-character support between the ncurses and tinfo
+    libraries. The build system has been updated to correctly pair the versions
+    of these libraries.
+
 cgdb-0.7.1 (08/04/2019)
 
   * Status bar messages are now displayed properly in veritical mode.
