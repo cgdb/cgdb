@@ -809,7 +809,7 @@ static int init_home_dir(void)
     fs_util_disable_logging();  
 
     /* Check for a nonstandard cgdb dir location */
-    char *cgdb_home_envvar = getenv("CGDB_HOME"); 
+    char *cgdb_home_envvar = getenv("CGDB_DIR"); 
 
     /* Set the cgdb home directory */
     if (cgdb_home_envvar != NULL) { 
