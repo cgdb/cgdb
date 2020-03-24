@@ -595,11 +595,19 @@ Select the current file.
 @chapter CGDB configuration commands
 @cindex configuring CGDB
 
+By default, CGDB stores its user-specific files (such as command history,
+program logs, and config files) in the @file{~/.cgdb/} directory.  This
+location is configurable; if the environment variable @env{CGDB_DIR} is set
+to a directory name, CGDB will use the specified directory instead of
+@file{~/.cgdb/}. 
+
 There may be several features that you find useful in CGDB.  CGDB is capable
 of automating any of these commands through the use of the config file called
-@file{cgdbrc}.  It looks in @env{$HOME}@file{/.cgdb/} for that file.  If it 
-exists, CGDB executes each line in the file in order.  It is as if the user 
-typed in all the commands into the status bar after the tui was initialized.
+@file{cgdbrc}.  It looks in @env{$CGDB_DIR} for that file, or in
+@env{HOME}@file{/.cgdb/} if the @env{CGDB_DIR} environment variable is not
+set.  If the @file{cgdbrc} file exists, CGDB executes each one of its lines
+in order.  It is as if the user typed in all the commands into the status bar
+after the tui was initialized.
 
 The following variables change the behavior of some aspect of CGDB.  Many
 of these commands may be abbreviated in some way, and all boolean commands

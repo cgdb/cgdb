@@ -804,18 +804,24 @@ static void parse_long_options(int *argc, char ***argv)
  */
 static int init_home_dir(void)
 {
-    /* Get the home directory */
-    char *home_dir = getenv("HOME");
+    /* Check for a nonstandard cgdb dir location */
+    char *cgdb_home_envvar = getenv("CGDB_HOME"); 
 
-    /* Make sure the toplevel .cgdb dir exists */
-    snprintf(cgdb_home_dir, FSUTIL_PATH_MAX, "%s/.cgdb", home_dir);
+    /* Set the cgdb home directory */
+    if (cgdb_home_envvar != NULL) { 
+        snprintf(cgdb_home_dir, FSUTIL_PATH_MAX, cgdb_home_envvar); 
+    } else { 
+        snprintf(cgdb_home_dir, FSUTIL_PATH_MAX, "%s/.cgdb", getenv("HOME"));
+    }
+
+    /* Make sure the toplevel cgdb dir exists */
     if (!fs_util_create_dir(cgdb_home_dir)) {
         printf("Could not create dir %s", cgdb_home_dir);
         return -1;
     }
 
-    /* Try to create full .cgdb/logs directory */
-    snprintf(cgdb_log_dir, FSUTIL_PATH_MAX, "%s/.cgdb/logs", home_dir);
+    /* Try to create log directory */
+    snprintf(cgdb_log_dir, FSUTIL_PATH_MAX, "%s/logs", cgdb_home_dir);
     if (!fs_util_create_dir(cgdb_log_dir)) {
         printf("Could not create dir %s", cgdb_log_dir);
         return -1;
