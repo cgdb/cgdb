@@ -13,9 +13,32 @@
  * Anyways, I think in the long run the static buffer will not be the best
  * option and it should be replaced with a dynamic data structure. However,
  * for the sake of time, it is done this way.
+ *
+ * Functions may log their output using clog; this behavior should change
+ * depending on the most recent call to 'fs_util_enable_logging' or
+ * 'fs_util_disable_logging'. Keep this in mind when adding new functions in
+ * this unit. 
  ******************************************************************************/
 
 #define FSUTIL_PATH_MAX 4096
+
+/* fs_util_enable_logging:
+ * ------------------------
+ *
+ *  Enables error message logging for fs_util functions. 
+ *
+ *  Returns nothing. 
+ */
+void fs_util_enable_logging(); 
+
+/* fs_util_disable_logging:
+ * ------------------------
+ *
+ *  Disables error message logging for fs_util functions. 
+ *
+ *  Returns nothing. 
+ */
+void fs_util_disable_logging(); 
 
 /* fs_util_is_valid:
  * -----------------
@@ -24,7 +47,7 @@
  *
  *  dir - The directory to check.
  *
- *  Returns 1 on succes and 0 on failure
+ *  Returns 1 on success and 0 on failure
  */
 int fs_util_is_valid(const char *dir);
 
@@ -35,8 +58,8 @@ int fs_util_is_valid(const char *dir);
  *
  *  dir - The directory to create.
  *
- *  Returns 
- *      1 on succes or if dir already exists.
+ *  Returns
+ *      1 on success or if dir already exists.
  *      0 on failure.
  */
 int fs_util_create_dir(const char *dir);
@@ -47,12 +70,12 @@ int fs_util_create_dir(const char *dir);
  * Creates the directory dirname in directory base
  * First calls fs_util_is_valid for base before trying to create directory.
  *
- * 
+ *
  *  base    - The directory to put the new directory dirname
  *  dirname - Then name of the directory to create in directory base
  *
- *  Returns 
- *      1 on succes or if dir already exists.
+ *  Returns
+ *      1 on success or if dir already exists.
  *      0 on failure.
  */
 int fs_util_create_dir_in_base(const char *base, const char *dirname);

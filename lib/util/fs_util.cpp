@@ -33,12 +33,27 @@
 #include "sys_util.h"
 #include "fs_util.h"
 
+
+static int logging_enabled = 0; 
+
+
+void fs_util_enable_logging(void)
+{
+    logging_enabled = 1; 
+}
+
+void fs_util_disable_logging(void)
+{
+    logging_enabled = 0; 
+}
+
 int fs_util_is_valid(const char *dir)
 {
     char actual_dir[FSUTIL_PATH_MAX];
 
     if (dir == NULL) {
-        clog_error(CLOG_CGDB, "$HOME is not set");
+        if (logging_enabled) 
+             clog_error(CLOG_CGDB, "$HOME is not set");
         return 0;
     }
 
@@ -48,13 +63,16 @@ int fs_util_is_valid(const char *dir)
     /* Check if directory dir is readable and writeable */
     if (access(actual_dir, R_OK | W_OK) == -1) {
         if (errno == ENOENT) {
-            clog_error(CLOG_CGDB,
-                    "directory '%s' is not set", dir);
+            if (logging_enabled)
+                 clog_error(CLOG_CGDB, "directory '%s' is not set", dir);
             return 0;
         }
 
-        clog_error(CLOG_CGDB,
-                "directory '%s' does not have read/write permissions", dir);
+        if (logging_enabled) {
+             clog_error(CLOG_CGDB,
+                     "directory '%s' does not have read/write permissions",
+                     dir);
+        }
         return 0;
     }
 
@@ -67,7 +85,8 @@ int fs_util_create_dir(const char *dir)
     struct stat st;
 
     if (dir == NULL) {
-        clog_error(CLOG_CGDB, "dir is NULL");
+        if (logging_enabled)
+             clog_error(CLOG_CGDB, "dir is NULL");
         return 0;
     }
 
@@ -82,22 +101,28 @@ int fs_util_create_dir(const char *dir)
             if (!faccessat(AT_FDCWD, actual_dir, R_OK | W_OK, AT_EACCESS)) {
                 return 1;
             } else {
-                clog_error(CLOG_CGDB, 
-                        "file %s cannot be written to or read from",
-                        actual_dir);
+                if (logging_enabled) {
+                    clog_error(CLOG_CGDB, 
+                            "file %s cannot be written to or read from",
+                            actual_dir);
+                }
                 return 0;
             }
         } else {
-            clog_error(CLOG_CGDB, "file %s is not a directory",
-                     actual_dir);
+            if (logging_enabled) {
+                 clog_error(CLOG_CGDB, "file %s is not a directory",
+                         actual_dir);
+            }
             return 0;
         }
     } else {
         /* The file does not exist, create it */
         if (errno == ENOENT) {
             if (mkdir(actual_dir, 0755) == -1) {
-                clog_error(CLOG_CGDB,
-                        "directory %s could not be made", actual_dir);
+                if (logging_enabled) { 
+                    clog_error(CLOG_CGDB, "directory %s could not be made",
+                            actual_dir);
+                }
                 return 0;
             } else
                 return 1;

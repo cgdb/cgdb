@@ -804,6 +804,10 @@ static void parse_long_options(int *argc, char ***argv)
  */
 static int init_home_dir(void)
 {
+    /* fs_utils log their output, which is a problem when our log directory
+     * may not exist yet. Remember to re-enable logging when returning! */
+    fs_util_disable_logging();  
+
     /* Check for a nonstandard cgdb dir location */
     char *cgdb_home_envvar = getenv("CGDB_HOME"); 
 
@@ -816,17 +820,20 @@ static int init_home_dir(void)
 
     /* Make sure the toplevel cgdb dir exists */
     if (!fs_util_create_dir(cgdb_home_dir)) {
-        printf("Could not create dir %s", cgdb_home_dir);
+        printf("Could not open or create '%s' directory\n", cgdb_home_dir);
+        fs_util_enable_logging(); 
         return -1;
     }
 
     /* Try to create log directory */
     snprintf(cgdb_log_dir, FSUTIL_PATH_MAX, "%s/logs", cgdb_home_dir);
     if (!fs_util_create_dir(cgdb_log_dir)) {
-        printf("Could not create dir %s", cgdb_log_dir);
+        printf("Could not open or create '%s' directory\n", cgdb_log_dir);
+        fs_util_enable_logging(); 
         return -1;
     }
 
+    fs_util_enable_logging(); 
     return 0;
 }
 
@@ -1778,9 +1785,8 @@ int main(int argc, char *argv[])
     }
 
     // Create the home directory and the log directory
-    if (init_home_dir() == -1) {
-        cgdb_cleanup_and_exit(-1);
-    }
+    if (init_home_dir() == -1) 
+        exit(-1); 
 
     cgdb_start_logging();
 
