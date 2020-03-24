@@ -77,10 +77,19 @@ int fs_util_create_dir(const char *dir)
     /* Check to see if already exists, if does not exist continue */
     if (!stat(actual_dir, &st)) {
         /* The file exists, see if it is a directory */
-        if (S_ISDIR(st.st_mode))
-            return 1;
-        else {
-            clog_error(CLOG_CGDB, "file %s is not a directory", actual_dir);
+        if (S_ISDIR(st.st_mode)) {
+            /* The directory exists, see if it's readable and writable */
+            if (!faccessat(AT_FDCWD, actual_dir, R_OK | W_OK, AT_EACCESS)) {
+                return 1;
+            } else {
+                clog_error(CLOG_CGDB, 
+                        "file %s cannot be written to or read from",
+                        actual_dir);
+                return 0;
+            }
+        } else {
+            clog_error(CLOG_CGDB, "file %s is not a directory",
+                     actual_dir);
             return 0;
         }
     } else {
