@@ -57,9 +57,6 @@ AC_CHECK_HEADERS([ctype.h],,[AC_MSG_ERROR([CGDB requires ctype.h to build.])])
 AC_CHECK_HEADERS([limits.h],,[AC_MSG_ERROR([CGDB requires limits.h to build.])])
 AC_CHECK_HEADERS([math.h],,[AC_MSG_ERROR([CGDB requires math.h to build.])])
 AC_CHECK_HEADERS([regex.h],,[AC_MSG_ERROR([CGDB requires regex.h to build.])])
-AC_CHECK_HEADERS([curses.h],,[
-   AC_CHECK_HEADERS([ncurses/curses.h],,[
-      AC_MSG_ERROR([CGDB requires curses.h or ncurses/curses.h to build.])])])
 
 dnl Check for getopt.h, If this is here then getopt_long can be used.
 AC_CHECK_HEADERS([getopt.h],
@@ -133,7 +130,7 @@ dnl ncurses-prefix argument
 if test "$opt_with_ncurses_prefix" != "no"; then
   # If set to "yes", it is on the compilers include path.
   if test "$opt_with_curses_prefix" != "yes"; then
-    LDFLAGS="-L$opt_with_ncurses_prefix/lib $LDFLAGS" CFLAGS="-I$opt_with_ncurses_prefix/include -I$opt_with_ncurses_prefix/include/ncurses $CFLAGS" CPPFLAGS="-I$opt_with_ncurses_prefix/include -I$opt_with_ncurses_prefix/include/ncurses $CPPFLAGS"
+    LDFLAGS="-L$opt_with_ncurses_prefix/lib $LDFLAGS" CFLAGS="-I$opt_with_ncurses_prefix/include -I$opt_with_ncurses_prefix/include/ncurses -I$opt_with_ncurses_prefix/include/ncursesw $CFLAGS" CPPFLAGS="-I$opt_with_ncurses_prefix/include -I$opt_with_ncurses_prefix/include/ncurses -I$opt_with_ncurses_prefix/include/ncursesw $CPPFLAGS"
   fi
 fi
 
@@ -143,6 +140,10 @@ if test "$opt_with_curses_prefix" != "no"; then
     LDFLAGS="-L$opt_with_curses_prefix/lib $LDFLAGS" CFLAGS="-I$opt_with_curses_prefix/include $CFLAGS" CPPFLAGS="-I$opt_with_curses_prefix/include $CPPFLAGS"
   fi
 fi
+
+AC_CHECK_HEADERS([curses.h],,[
+   AC_CHECK_HEADERS([ncurses/curses.h],,[
+      AC_MSG_ERROR([CGDB requires curses.h or ncurses/curses.h to build.])])])
 
 dnl make sure that (f)lex is available
 if test "$LEX" != "flex" -a "$LEX" != "lex"; then
