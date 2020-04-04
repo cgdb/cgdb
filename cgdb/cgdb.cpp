@@ -809,21 +809,23 @@ static int init_home_dir(void)
 
     /* Set the cgdb home directory */
     if (cgdb_home_envvar != NULL) { 
-        snprintf(cgdb_home_dir, FSUTIL_PATH_MAX, cgdb_home_envvar); 
+        snprintf(cgdb_home_dir, FSUTIL_PATH_MAX, "%s", cgdb_home_envvar); 
     } else { 
         snprintf(cgdb_home_dir, FSUTIL_PATH_MAX, "%s/.cgdb", getenv("HOME"));
     }
 
     /* Make sure the toplevel cgdb dir exists */
     if (!fs_util_create_dir(cgdb_home_dir)) {
-        printf("Could not create dir %s", cgdb_home_dir);
+        printf("Exiting, could not create home directory:\n  %s\n",
+                cgdb_home_dir);
         return -1;
     }
 
     /* Try to create log directory */
     snprintf(cgdb_log_dir, FSUTIL_PATH_MAX, "%s/logs", cgdb_home_dir);
     if (!fs_util_create_dir(cgdb_log_dir)) {
-        printf("Could not create dir %s", cgdb_log_dir);
+        printf("Exiting, could not create log directory:\n  %s\n",
+                cgdb_log_dir);
         return -1;
     }
 
@@ -1763,6 +1765,11 @@ int main(int argc, char *argv[])
 {
     parse_long_options(&argc, &argv);
 
+    // Create the home directory and the log directory
+    if (init_home_dir() == -1) {
+        exit(-1);
+    }
+
     /* Debugging helper - wait for debugger to attach to us before continuing */
     if (wait_for_debugger_to_attach) {
         if (cgdb_supports_debugger_attach_detection()) {
@@ -1775,11 +1782,6 @@ int main(int argc, char *argv[])
             printf("Press any key to continue execution...\n");
             read(0, &c, 1);
         }
-    }
-
-    // Create the home directory and the log directory
-    if (init_home_dir() == -1) {
-        cgdb_cleanup_and_exit(-1);
     }
 
     cgdb_start_logging();
