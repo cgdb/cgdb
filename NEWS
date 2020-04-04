@@ -1,3 +1,7 @@
+  * CGDB now supports a configurable home directory. If the environment
+    variable 'CGDB_DIR' is set to a directory name, CGDB will use the
+    specified directory instead of '~/.cgdb/'.
+
   * Fix issue #219 - CGDB users on Gentoo were experiencing segfaults at startup
     due to mismatched wide-character support between the ncurses and tinfo
     libraries. The build system has been updated to correctly pair the versions
