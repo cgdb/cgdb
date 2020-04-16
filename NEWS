@@ -1,3 +1,9 @@
+  * CGDB works again with newer versions of GDB (gdb 8.3 and above)
+    CGDB annotation support was broken by the following GDB issue,
+      https://sourceware.org/bugzilla/show_bug.cgi?id=25190
+    Changing CGDB from 'set height 0' to 'set pagination off' works
+    around the issue, even though I thought they were identical commands.
+
   * CGDB now supports a configurable home directory. If the environment
     variable 'CGDB_DIR' is set to a directory name, CGDB will use the
     specified directory instead of '~/.cgdb/'.
