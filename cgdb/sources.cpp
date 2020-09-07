@@ -1351,7 +1351,8 @@ void source_set_breakpoints(struct sviewer *sview,
                     node->lflags[line - 1].breakpt = enabled ? 1 : 2;
                 }
             }
-        } else if (breakpoints[i].addr) {
+        }
+        if (breakpoints[i].addr) {
             int line = 0;
             node = source_get_asmnode(sview, breakpoints[i].addr, &line);
             if (node) {
