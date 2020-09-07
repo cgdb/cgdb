@@ -556,24 +556,34 @@ struct list_node *source_add(struct sviewer *sview, const char *path)
 void source_add_disasm_line(struct list_node *node, const char *line)
 {
     uint64_t addr = 0;
-    struct source_line sline;
+    struct source_line sline = { 0 };
     char *colon = 0, colon_char = 0;
+    int datalen = strlen(line), attr;
 
-    sline.line = NULL;
-    sbsetcount(sline.line, strlen(line) + 1);
-    strcpy(sline.line, line);
+    for (int i = 0; i < datalen; i++) {
+        if (line[i] == '\033') {
+            int ansi_count = hl_ansi_get_color_attrs(
+                    hl_groups_instance, line + i, &attr);
+            if (ansi_count) {
+                sbpush(sline.attrs, hl_line_attr(sbcount(sline.line), attr));
+                i += ansi_count - 1;
+                continue;
+            }
+        }
+        sbpush(sline.line, line[i]);
+        sline.len++;
+    }
+    sbpush(sline.line, 0);
+    sline.len++;
+
     sline.line = detab_buffer(sline.line, node->file_buf.tabstop);
-
-    sline.attrs = NULL;
-    sline.len = sbcount(sline.line);
-
-    colon = strchr((char*)line, ':');
+    colon = strchr(sline.line, ':');
     if (colon) {
         colon_char = *colon;
         *colon = 0;
     }
 
-    cgdb_hexstr_to_u64(line, &addr);
+    cgdb_hexstr_to_u64(sline.line, &addr);
 
     if (colon) {
         *colon = colon_char;
