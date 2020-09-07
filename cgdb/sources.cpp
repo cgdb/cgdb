@@ -580,17 +580,17 @@ void source_add_disasm_line(struct list_node *node, const char *line)
     sline.line = detab_buffer(sline.line, node->file_buf.tabstop);
 
     if (!is_comment) {
-    colon = strchr(sline.line, ':');
-    if (colon) {
-        colon_char = *colon;
-        *colon = 0;
-    }
+        colon = strchr(sline.line, ':');
+        if (colon) {
+            colon_char = *colon;
+            *colon = 0;
+        }
 
-    cgdb_hexstr_to_u64(sline.line, &addr);
+        cgdb_hexstr_to_u64(sline.line, &addr);
 
-    if (colon) {
-        *colon = colon_char;
-    }
+        if (colon) {
+            *colon = colon_char;
+        }
     }
 
     sbpush(node->file_buf.addrs, addr);
