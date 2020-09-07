@@ -558,12 +558,13 @@ void source_add_disasm_line(struct list_node *node, const char *line)
     uint64_t addr = 0;
     struct source_line sline = { 0 };
     char *colon = 0, colon_char = 0;
-    int datalen = strlen(line), attr;
+    int datalen = strlen(line), is_comment = 0, attr;
 
     for (int i = 0; i < datalen; i++) {
         if (line[i] == '\033') {
             int ansi_count = hl_ansi_get_color_attrs(
                     hl_groups_instance, line + i, &attr);
+            is_comment = 1;
             if (ansi_count) {
                 sbpush(sline.attrs, hl_line_attr(sbcount(sline.line), attr));
                 i += ansi_count - 1;
@@ -577,6 +578,8 @@ void source_add_disasm_line(struct list_node *node, const char *line)
     sline.len++;
 
     sline.line = detab_buffer(sline.line, node->file_buf.tabstop);
+
+    if (!is_comment) {
     colon = strchr(sline.line, ':');
     if (colon) {
         colon_char = *colon;
@@ -587,6 +590,7 @@ void source_add_disasm_line(struct list_node *node, const char *line)
 
     if (colon) {
         *colon = colon_char;
+    }
     }
 
     sbpush(node->file_buf.addrs, addr);
