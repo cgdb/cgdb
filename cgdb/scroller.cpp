@@ -109,7 +109,7 @@ static char *parse(struct scroller *scr, struct hl_line_attr **attrs,
                 /* Carriage return -> Move back to the beginning of the line */
             case '\r':
                 i = 0;
-                if (buf[j + 1] != '\n') {
+                if ((buflen - j) >= 1 && buf[j + 1] != '\n') {
                     sbfree(*attrs);
                     *attrs = NULL;
                 }
