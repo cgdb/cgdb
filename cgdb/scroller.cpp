@@ -116,7 +116,15 @@ static char *parse(struct scroller *scr, struct hl_line_attr **attrs,
                 break;
             case '\033':
                 /* Handle ansi escape characters */
-                if (hl_ansi_color_support(hl_groups_instance) &&
+                /* see http://ascii-table.com/ansi-escape-sequences-vt-100.php
+                 */
+                if ((buflen - j) >= 2 && buf[j + 1] == '[' && buf[j + 2] == '?') {
+                    /* simply ignore these escape sequences like e.g. "[?1h" */
+                    j += 4;
+                } else if ((buflen - j) >= 1 && (buf[j + 1] == '=' || buf[j + 1] == '>')) {
+                    /* simply ignore these escape sequences */
+                    j += 1;
+                } else if (hl_ansi_color_support(hl_groups_instance) &&
                     debugwincolor) {
                     int attr;
                     int ansi_count = hl_ansi_get_color_attrs(
