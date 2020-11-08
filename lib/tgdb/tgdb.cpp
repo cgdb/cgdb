@@ -1034,22 +1034,6 @@ int tgdb_get_gdb_command(struct tgdb *tgdb, tgdb_request_ptr request,
 
 /* }}} */
 
-/* TGDB Queue commands {{{*/
-
-tgdb_request_ptr tgdb_queue_pop(struct tgdb * tgdb)
-{
-    tgdb_request_ptr front = tgdb->command_requests->front();
-    tgdb->command_requests->pop_front();
-    return front;
-}
-
-int tgdb_queue_size(struct tgdb *tgdb)
-{
-    return tgdb->command_requests->size();
-}
-
-/* }}}*/
-
 /* Signal Handling Support {{{*/
 
 int tgdb_signal_notification(struct tgdb *tgdb, int signum)

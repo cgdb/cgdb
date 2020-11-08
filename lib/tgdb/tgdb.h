@@ -151,19 +151,6 @@
 /*@}*/
 /* }}}*/
 
-/* Status Commands {{{*/
-/******************************************************************************/
-/**
- * @name Status Commands
- * These functions are for querying the tgdb context.
- */
-/******************************************************************************/
-
-/*@{*/
-
-/*@}*/
-/* }}}*/
-
 /* Input/Output commands {{{*/
 /******************************************************************************/
 /**
@@ -409,41 +396,6 @@
             enum disassemble_func_type type);
 
 /*@}*/
-/* }}}*/
-
-/* TGDB Queue commands {{{*/
-/******************************************************************************/
-/**
- * @name Queuing of TGDB commands
- * These functinos are used to allow clients to queue multiple commands for 
- * TGDB to be able to run.
- */
-/******************************************************************************/
-
-  /**
-   * Get a tgdb_request command back from TGDB.
-   *
-   * \param tgdb
-   * An instance of the tgdb library to operate on.
-   *
-   * \return
-   * The requested command at the top of the stack, or NULL on error.
-   * Popping a command when the queue is empty is also considered an error,
-   * and NULL will be returned.
-   */
-    tgdb_request_ptr tgdb_queue_pop(struct tgdb *tgdb);
-
-  /**
-   * Get's the number of items that are in the queue for TGDB to run.
-   *
-   * \param tgdb
-   * An instance of the tgdb library to operate on.
-   *
-   * \return
-   * The number of items in the list.
-   */
-    int tgdb_queue_size(struct tgdb *tgdb);
-
 /* }}}*/
 
 /* Signal Handling Support {{{*/
