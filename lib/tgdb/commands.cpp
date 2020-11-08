@@ -498,10 +498,6 @@ enum tgdb_request_type commands_get_current_request_type(struct commands *c)
     return c->current_request_type;
 }
 
-void commands_process_error(struct commands *c)
-{
-}
-
 int commands_disassemble_supports_s_mode(struct commands *c)
 {
     return c->disassemble_supports_s_mode;

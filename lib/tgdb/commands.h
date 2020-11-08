@@ -26,11 +26,6 @@ void commands_shutdown(struct commands *c);
 void commands_process(struct commands *c, const std::string &str);
 
 /**
- * Called when a command produces an error.
- */
-void commands_process_error(struct commands *c);
-
-/**
  * Return if the debugger supports the /s flag for the disassemble command.
  *
  * @return

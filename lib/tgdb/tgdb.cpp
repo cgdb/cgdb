@@ -216,9 +216,6 @@ static void tgdb_command_error(void *context, const std::string &msg)
 {
     struct tgdb *tgdb = (struct tgdb*)context;
 
-    /* Let the command package no that it's command was interupted */
-    commands_process_error(tgdb->c);
-
     /* Send cgdb the error message */
     tgdb->callbacks.console_output_callback(tgdb->callbacks.context, msg);
 }
