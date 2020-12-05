@@ -15,39 +15,8 @@ struct annotations_parser {
     /** The debugger's current prompt and last prompt. */
     std::string gdb_prompt, gdb_prompt_last;
 
-    /** True if GDB is ready for input and at the prompt, false otherwise */
-    bool at_prompt;
-
-    /**
-     * True if GDB is at the pre_prompt, false otherwise.
-     *
-     * GDB normally outputs the prompts as follows,
-     *   pre-prompt
-     *   (gdb)      <- This will be saved into the gdb_prompt variable above
-     *   prompt
-     *   b main
-     *   post-prompt
-     *
-     * In this situation, the text between the pre-prompt annotation
-     * and the prompt annotation should be used as the new prompt.
-     */
-    bool at_pre_prompt;
-
-    /**
-     * True if GDB is at a miscellaneous prompt, false otherwise.
-     *
-     * The miscellaneous prompt annotations call the handle_misc_pre_prompt
-     * functions. In general, when a miscellaneous prompt is encountered,
-     * CGDB should only send user console commands to GDB.
-     */
-    bool at_misc_prompt;
-
-    /**
-     * True if collecting an error message, False otherwise.
-     *
-     * Should only be true between error-begin and error or quit.
-     */
-    bool at_error_message;
+    /** The last annotation recieved from gdb. */
+    enum gdbwire_annotation_kind last;
 
     /**
      * True if the breakpoints have changed, false otherwise.
@@ -62,12 +31,23 @@ struct annotations_parser {
 
 bool annotations_parser_at_prompt(annotations_parser *parser)
 {
-    return parser->at_prompt;
+    return
+            parser->last == GDBWIRE_ANNOTATION_PROMPT ||
+            parser->last == GDBWIRE_ANNOTATION_COMMANDS ||
+            parser->last == GDBWIRE_ANNOTATION_OVERLOAD_CHOICE ||
+            parser->last == GDBWIRE_ANNOTATION_INSTANCE_CHOICE ||
+            parser->last == GDBWIRE_ANNOTATION_QUERY ||
+            parser->last == GDBWIRE_ANNOTATION_PROMPT_FOR_CONTINUE;
 }
 
 bool annotations_parser_at_miscellaneous_prompt(annotations_parser *parser)
 {
-    return parser->at_misc_prompt;
+    return
+            parser->last == GDBWIRE_ANNOTATION_COMMANDS ||
+            parser->last == GDBWIRE_ANNOTATION_OVERLOAD_CHOICE ||
+            parser->last == GDBWIRE_ANNOTATION_INSTANCE_CHOICE ||
+            parser->last == GDBWIRE_ANNOTATION_QUERY ||
+            parser->last == GDBWIRE_ANNOTATION_PROMPT_FOR_CONTINUE;
 }
 
 static void
@@ -111,31 +91,14 @@ handle_frames_invalid(struct annotations_parser *parser)
     parser->source_location_changed = true;
 }
 
-static void handle_misc_pre_prompt(struct annotations_parser *parser)
-{
-    parser->at_pre_prompt = true;
-}
-
 static void handle_misc_prompt(struct annotations_parser *parser)
 {
-    parser->at_prompt = true;
-    parser->at_misc_prompt = true;
-    parser->at_pre_prompt = false;
-
     update_prompt(parser);
     console_at_prompt(parser);
 }
 
-static void handle_misc_post_prompt(struct annotations_parser *parser)
-{
-    parser->at_prompt = false;
-    parser->at_misc_prompt = false;
-}
-
 static void handle_pre_prompt(struct annotations_parser *parser)
 {
-    parser->at_pre_prompt = true;
-
     if (parser->breakpoints_changed) {
         parser->callbacks.breakpoints_changed_callback(
             parser->callbacks.context);
@@ -151,50 +114,8 @@ static void handle_pre_prompt(struct annotations_parser *parser)
 
 static void handle_prompt(struct annotations_parser *parser)
 {
-    parser->at_prompt = true;
-    parser->at_pre_prompt = false;
-
     update_prompt(parser);
     console_at_prompt(parser);
-}
-
-static void handle_post_prompt(struct annotations_parser *parser)
-{
-    parser->at_prompt = false;
-}
-
-static void handle_error_begin(struct annotations_parser *parser)
-{
-    /* After a signal is sent (^c), the debugger will then output 
-     * something like "Quit\n", so that should be displayed to the user.
-     *
-     * Unfortunately, the debugger ( gdb ) isn't nice enough to return a 
-     * post-prompt when a signal is received.
-     */
-    parser->at_prompt = false;
-    parser->at_pre_prompt = false;
-    parser->at_misc_prompt = false;
-    parser->at_error_message = true;
-}
-
-static void handle_error(struct annotations_parser *parser)
-{
-    parser->at_prompt = false;
-    parser->at_pre_prompt = false;
-    parser->at_misc_prompt = false;
-    parser->at_error_message = false;
-}
-
-static void handle_quit(struct annotations_parser *parser)
-{
-    parser->at_prompt = false;
-    parser->at_pre_prompt = false;
-    parser->at_misc_prompt = false;
-    parser->at_error_message = false;
-}
-
-static void handle_exited(struct annotations_parser *parser)
-{
 }
 
 int annotations_parser_io(annotations_parser *parser, char *str, size_t size)
@@ -213,16 +134,33 @@ static void annotations_output_callback(void *context,
 
     switch (output->kind) {
         case GDBWIRE_ANNOTATION_OUTPUT_CONSOLE_OUTPUT: {
-            if (parser->at_error_message) {
+            enum gdbwire_annotation_kind last =
+                    output->variant.console_output.last;
+
+            int at_pre_prompt =
+                    last == GDBWIRE_ANNOTATION_PRE_PROMPT ||
+                    last == GDBWIRE_ANNOTATION_PRE_COMMANDS ||
+                    last == GDBWIRE_ANNOTATION_PRE_OVERLOAD_CHOICE ||
+                    last == GDBWIRE_ANNOTATION_PRE_INSTANCE_CHOICE ||
+                    last == GDBWIRE_ANNOTATION_PRE_QUERY ||
+                    last == GDBWIRE_ANNOTATION_PRE_PROMPT_FOR_CONTINUE;
+
+            /**
+             * After a signal is sent (^c), the debugger will then output 
+             * something like "Quit\n", so that should be displayed to the user.
+             */
+            int at_error_message = last == GDBWIRE_ANNOTATION_ERROR_BEGIN;
+
+            if (at_error_message) {
                 parser->callbacks.command_error_callback(
                         parser->callbacks.context,
-                        output->variant.console_output);
-            } else if (parser->at_pre_prompt) {
-                parser->gdb_prompt += output->variant.console_output;
+                        output->variant.console_output.text);
+            } else if (at_pre_prompt) {
+                parser->gdb_prompt += output->variant.console_output.text;
             } else {
                 parser->callbacks.console_output_callback(
                         parser->callbacks.context,
-                        output->variant.console_output);
+                        output->variant.console_output.text);
             }
             break;
         }
@@ -245,7 +183,6 @@ static void annotations_output_callback(void *context,
                 case GDBWIRE_ANNOTATION_PRE_INSTANCE_CHOICE:
                 case GDBWIRE_ANNOTATION_PRE_QUERY:
                 case GDBWIRE_ANNOTATION_PRE_PROMPT_FOR_CONTINUE:
-                    handle_misc_pre_prompt(parser);
                     break;
                 case GDBWIRE_ANNOTATION_COMMANDS:
                 case GDBWIRE_ANNOTATION_OVERLOAD_CHOICE:
@@ -259,7 +196,6 @@ static void annotations_output_callback(void *context,
                 case GDBWIRE_ANNOTATION_POST_INSTANCE_CHOICE:
                 case GDBWIRE_ANNOTATION_POST_QUERY:
                 case GDBWIRE_ANNOTATION_POST_PROMPT_FOR_CONTINUE:
-                    handle_misc_post_prompt(parser);
                     break;
                 case GDBWIRE_ANNOTATION_PRE_PROMPT:
                     handle_pre_prompt(parser);
@@ -268,19 +204,14 @@ static void annotations_output_callback(void *context,
                     handle_prompt(parser);
                     break;
                 case GDBWIRE_ANNOTATION_POST_PROMPT:
-                    handle_post_prompt(parser);
                     break;
                 case GDBWIRE_ANNOTATION_ERROR_BEGIN:
-                    handle_error_begin(parser);
                     break;
                 case GDBWIRE_ANNOTATION_ERROR:
-                    handle_error(parser);
                     break;
                 case GDBWIRE_ANNOTATION_QUIT:
-                    handle_quit(parser);
                     break;
                 case GDBWIRE_ANNOTATION_EXITED:
-                    handle_exited(parser);
                     break;
                 case GDBWIRE_ANNOTATION_UNKNOWN:
                     // Skip unknown annotations for now
@@ -288,6 +219,8 @@ static void annotations_output_callback(void *context,
                             output->variant.annotation.text);
                     break;
             }
+
+            parser->last = output->variant.annotation.kind;
             break;
         }
     }
@@ -303,10 +236,6 @@ annotations_parser *annotations_parser_initialize(
     a->parser_callbacks.gdbwire_annotation_output_callback =
             annotations_output_callback;
     a->parser = gdbwire_annotation_parser_create(a->parser_callbacks);
-    a->at_prompt = false;
-    a->at_pre_prompt = false;
-    a->at_misc_prompt = false;
-    a->at_error_message = false;
     a->breakpoints_changed = false;
     a->source_location_changed = false;
     return a;
