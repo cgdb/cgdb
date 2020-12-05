@@ -237,12 +237,6 @@ static void tgdb_console_at_prompt(void *context)
     }
 }
 
-int tgdb_process_command(struct tgdb *tgdb, tgdb_request_ptr request)
-{
-    tgdb_run_or_queue_request(tgdb, request, false);
-    return 0;
-}
-
 static int tgdb_open_new_tty(struct tgdb *tgdb, int *inferior_stdin,
     int *inferior_stdout)
 {

@@ -162,20 +162,6 @@
 /*@{*/
 
   /**
-   * Have TGDB process a command.
-   * 
-   * \param tgdb
-   * An instance of the tgdb library to operate on.
-   * 
-   * \param request
-   * The requested command to have TGDB process.
-   *
-   * \return
-   * 0 on success or -1 on error
-   */
-    int tgdb_process_command(struct tgdb *tgdb, tgdb_request_ptr request);
-
-  /**
    * This function does most of the dirty work in TGDB. It is capable of 
    * processing the output of the debugger, to either satisfy a previously 
    * made request, or to simply get console output for the caller to have.
