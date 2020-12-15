@@ -40,16 +40,6 @@ bool annotations_parser_at_prompt(annotations_parser *parser)
             parser->last == GDBWIRE_ANNOTATION_PROMPT_FOR_CONTINUE;
 }
 
-bool annotations_parser_at_miscellaneous_prompt(annotations_parser *parser)
-{
-    return
-            parser->last == GDBWIRE_ANNOTATION_COMMANDS ||
-            parser->last == GDBWIRE_ANNOTATION_OVERLOAD_CHOICE ||
-            parser->last == GDBWIRE_ANNOTATION_INSTANCE_CHOICE ||
-            parser->last == GDBWIRE_ANNOTATION_QUERY ||
-            parser->last == GDBWIRE_ANNOTATION_PROMPT_FOR_CONTINUE;
-}
-
 static void
 update_prompt(struct annotations_parser *parser)
 {

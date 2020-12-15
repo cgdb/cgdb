@@ -141,21 +141,4 @@ int annotations_parser_io(annotations_parser *parser, char *str, size_t size);
  */
 bool annotations_parser_at_prompt(annotations_parser *parser);
 
-/**
- * Determine if GDB is at a miscellaneous prompt or not.
- *
- * When at a miscellaneous prompt, CGDB can only send GDB commands
- * that the user has sent, to answer the miscellaneous prompt question.
- *
- * Note, when this function returns true, 
- * annotations_parser_is_ready_for_input will also return true.
- *
- * @param parser
- * The annotations parser instance
- *
- * @return
- * True if ready for input at a miscellaneous prompt, false otherwise.
- */
-bool annotations_parser_at_miscellaneous_prompt(annotations_parser *parser);
-
 #endif
