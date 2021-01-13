@@ -84,6 +84,13 @@
         int enabled;
     };
 
+    struct tgdb_stack_variable {
+        char *name;
+        short int is_arg;
+        char *value;
+        struct tgdb_stack_variable *next;
+    };
+
  /**
   * This structure currently represents a file position.
   *
@@ -215,7 +222,12 @@
         /**
          * Request GDB to disassemble a function.
          */
-        TGDB_REQUEST_DISASSEMBLE_FUNC
+        TGDB_REQUEST_DISASSEMBLE_FUNC,
+
+        /**
+         * Request stack frame local variables.
+         */
+        TGDB_REQUEST_STACK_LOCALS
     };
 
     struct tgdb_request {
@@ -298,6 +310,11 @@
         TGDB_UPDATE_SOURCE_FILES,
 
     /**
+     * Used to update the local variables list when the context changes.
+     */
+        TGDB_UPDATE_LOCALS,
+
+    /**
      * This returns a list of all the completions.
      *
      */
@@ -355,6 +372,10 @@
                  * filename. The filename may be relative or absolute. */
                 char **source_files;
             } update_source_files;
+
+            struct {
+                struct tgdb_stack_variable *variables;
+            } update_stack_variables;
 
             /* header == TGDB_INFERIOR_EXITED */
             struct {

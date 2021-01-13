@@ -99,9 +99,12 @@ void if_show_file(char *path, int sel_line, int exe_line);
  */
 struct sviewer *if_get_sview();
 
-/**
- * Display a message on the source window status bar.
- *
+/* if_get_locals: Return a pointer to the locals viewer object.
+ * -------------
+ */
+struct lviewer *if_get_lviewer();
+
+/* if_display_message: Displays a message on the source window status bar.
  * @param dorefresh
  * Pass WIN_REFRESH to call wrefresh, otherwise wnoutrefresh is called.
  *
