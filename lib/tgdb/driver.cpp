@@ -47,98 +47,50 @@
 #include "tgdb.h"
 #include "io.h"
 #include "terminal.h"
-#include "rline.h"
 #include "fork_util.h"
+#include "cgdb_clog.h"
 
 #define MAXLINE 4096
 
 struct tgdb *tgdb;
 
-/** Master/Slave PTY used to keep readline off of stdin/stdout.  */
-static pty_pair_ptr pty_pair;
-
 /* Readline interface */
-static struct rline *rline;
-static int is_tab_completing = 0;
 static int gdb_quit = 0;
 
 /* Original terminal attributes */
 static struct termios term_attributes;
 
-static void change_prompt(char *prompt)
+static void start_logging()
 {
-    rline_set_prompt(rline, prompt);
-}
+    /* Open our cgdb and tgdb io logfiles */
+    clog_open(CLOG_CGDB_ID, "%s/cgdb_log%d.txt", ".");
+    clog_open(CLOG_GDBIO_ID, "%s/cgdb_gdb_console_io_log%d.txt", ".");
+    clog_open(CLOG_GDBMIIO_ID, "%s/cgdb_gdb_mi_io_log%d.txt", ".");
 
-static void rlctx_send_user_command(char *line)
-{
-    /* This happens when rl_callback_read_char gets EOF */
-    if (line == NULL)
-        return;
+    clog_set_level(CLOG_GDBMIIO_ID, CLOG_DEBUG);
+    clog_set_fmt(CLOG_GDBMIIO_ID, CGDB_CLOG_FORMAT);
 
-    /* Don't add the enter command */
-    if (line && *line != '\0')
-        rline_add_history(rline, line);
+    /* Puts cgdb in a mode where it writes a debug log of everything
+     * that is read from gdb. That is basically the entire session.
+     * This info is useful in determining what is going on under tgdb
+     * since the gui is good at hiding that info from the user.
+     *
+     * Change level to CLOG_ERROR to write only error messages.
+     *   clog_set_level(CLOG_GDBIO, CLOG_ERROR);
+     */
+    clog_set_level(CLOG_GDBIO_ID, CLOG_DEBUG);
+    clog_set_fmt(CLOG_GDBIO_ID, CGDB_CLOG_FORMAT);
 
-    /* Send this command to TGDB */
-    tgdb_request_run_console_command(tgdb, line);
-
-    free(line);
-}
-
-static int tab_completion(int a, int b)
-{
-    char *cur_line;
-    int ret;
-
-    is_tab_completing = 1;
-
-    ret = rline_get_current_line(rline, &cur_line);
-    if (ret == -1)
-        clog_error(CLOG_CGDB, "rline_get_current_line error\n");
-
-    tgdb_request_complete(tgdb, cur_line);
-    return 0;
-}
-
-/**
- * This is the function responsible for display the readline completions when there
- * is more than 1 item to complete. Currently it prints 1 per line.
- */
-static void
-readline_completion_display_func(char **matches, int num_matches,
-        int max_length)
-{
-    int i;
-
-    printf("\n");
-    for (i = 1; i <= num_matches; ++i) {
-        printf("%s", matches[i]);
-        printf("\n");
-    }
-}
-
-int do_tab_completion(char **completions)
-{
-    if (rline_rl_complete(rline, completions, &readline_completion_display_func) == -1)
-    {
-        clog_error(CLOG_CGDB, "rline_rl_complete error\n");
-        return -1;
-    }
-    is_tab_completing = 0;
-
-    return 0;
+    /* General cgdb logging. Only logging warnings and debug messages
+       by default. */
+    clog_set_level(CLOG_CGDB_ID, CLOG_DEBUG);
+    clog_set_fmt(CLOG_CGDB_ID, CGDB_CLOG_FORMAT);
 }
 
 static void signal_handler(int signo)
 {
-    if (signo == SIGINT)
-        rline_clear(rline);
-
     if (signo == SIGINT || signo == SIGTERM || signo == SIGQUIT)
         tgdb_signal_notification(tgdb, signo);
-
-    is_tab_completing = 0;
 }
 
 /* Sets up the signal handler for SIGWINCH
@@ -169,16 +121,9 @@ static int set_up_signal(void)
     return 0;
 }
 
-static void driver_prompt_change(const char *new_prompt)
+static int gdb_input(int fd)
 {
-    char *nprompt = (char *) new_prompt;
-
-    change_prompt(nprompt);
-}
-
-static int gdb_input(void)
-{
-    int result = tgdb_process(tgdb);
+    int result = tgdb_process(tgdb, fd);
 
     if (result == -1) {
         clog_error(CLOG_CGDB, "file descriptor closed");
@@ -188,71 +133,11 @@ static int gdb_input(void)
     return 0;
 }
 
-static void tty_input(void)
-{
-    char buf[MAXLINE];
-    size_t size;
-    size_t i;
-
-    if ((size = tgdb_recv_inferior_data(tgdb, buf, MAXLINE)) == -1) {
-        clog_error(CLOG_CGDB, "file descriptor closed");
-        return;
-    }
-    /* end if */
-    for (i = 0; i < size; ++i)
-        if (write(STDOUT_FILENO, &(buf[i]), 1) != 1) {
-            clog_error(CLOG_CGDB, "could not write byte");
-            return;
-        }
-}
-
-static int readline_input()
-{
-    char buf[MAXLINE];
-    size_t size;
-    size_t i;
-
-    int masterfd = pty_pair_get_masterfd(pty_pair);
-
-    if (masterfd == -1) {
-        clog_error(CLOG_CGDB, "pty_pair_get_masterfd error");
-        return -1;
-    }
-
-    size = read(masterfd, buf, MAXLINE - 1);
-    if (size == -1) {
-        clog_error(CLOG_CGDB, "read error");
-        return -1;
-    }
-
-    buf[size] = 0;
-
-    /* Display GDB output 
-     * The strlen check is here so that if_print does not get called
-     * when displaying the filedlg. If it does get called, then the 
-     * gdb window gets displayed when the filedlg is up
-     */
-    for (i = 0; i < size; ++i)
-        if (write(STDOUT_FILENO, &(buf[i]), 1) != 1) {
-            clog_error(CLOG_CGDB, "could not write byte");
-            return -1;
-        }
-
-    return 0;
-}
-
 static int stdin_input()
 {
     char buf[MAXLINE];
     size_t size;
     size_t i;
-
-    int masterfd = pty_pair_get_masterfd(pty_pair);
-
-    if (masterfd == -1) {
-        clog_error(CLOG_CGDB, "pty_pair_get_masterfd error");
-        return -1;
-    }
 
     size = read(STDIN_FILENO, buf, MAXLINE - 1);
     if (size == -1) {
@@ -267,47 +152,22 @@ static int stdin_input()
      * when displaying the filedlg. If it does get called, then the 
      * gdb window gets displayed when the filedlg is up
      */
-    for (i = 0; i < size; ++i)
-        if (write(masterfd, &(buf[i]), 1) != 1) {
-            clog_error(CLOG_CGDB, "could not write byte");
-            return -1;
-        }
+    for (i = 0; i < size; ++i) {
+        tgdb_send_char(tgdb, buf[i]);
+    }
 
-    return 0;
     return 0;
 }
 
-int main_loop(int gdbfd)
+int main_loop(int gdbfd, int mifd)
 {
     int max;
     fd_set rfds;
     int result;
 
-    int masterfd, slavefd, childfd;
-
-    masterfd = pty_pair_get_masterfd(pty_pair);
-    if (masterfd == -1) {
-        clog_error(CLOG_CGDB, "pty_pair_get_masterfd error");
-        return -1;
-    }
-
-    slavefd = pty_pair_get_slavefd(pty_pair);
-    if (slavefd == -1) {
-        clog_error(CLOG_CGDB, "pty_pair_get_slavefd error");
-        return -1;
-    }
-
-    /* When TGDB is ready, we read from STDIN, otherwise, leave the data buffered. */
-
     while (!gdb_quit) {
-
-        /* get max fd  for select loop */
-        childfd = tgdb_get_inferior_fd(tgdb);
-
         max = (gdbfd > STDIN_FILENO) ? gdbfd : STDIN_FILENO;
-        max = (max > childfd) ? max : childfd;
-        max = (max > slavefd) ? max : slavefd;
-        max = (max > masterfd) ? max : masterfd;
+        max = (max > mifd) ? max : mifd;
 
         /* Clear the set and 
          *
@@ -322,11 +182,7 @@ int main_loop(int gdbfd)
         /* Let the terminal emulate the char's when TGDB is busy */
         FD_SET(STDIN_FILENO, &rfds);
         FD_SET(gdbfd, &rfds);
-        FD_SET(slavefd, &rfds);
-        FD_SET(masterfd, &rfds);
-
-        if (childfd != -1)
-            FD_SET(childfd, &rfds);
+        FD_SET(mifd, &rfds);
 
         result = select(max + 1, &rfds, NULL, NULL, NULL);
 
@@ -336,31 +192,21 @@ int main_loop(int gdbfd)
         else if (result == -1)  /* on error ... must die -> stupid OS */
             clog_error(CLOG_CGDB, "select failed");
 
-        /* Input received through the pty:  Handle it
-         * Readline read from slavefd, and it wrote to the masterfd. 
-         */
-        if (FD_ISSET(masterfd, &rfds))
-            if (readline_input() == -1)
-                return -1;
-
-        if (FD_ISSET(slavefd, &rfds))
-            rline_rl_callback_read_char(rline);
-
         /* stdin -> readline input */
         if (FD_ISSET(STDIN_FILENO, &rfds)) {
             stdin_input();
         }
 
-        /* child's output -> stdout */
-        if (childfd != -1 && FD_ISSET(childfd, &rfds)) {
-            tty_input();
-            continue;
-        }
-
         /* gdb's output -> stdout  */
         if (FD_ISSET(gdbfd, &rfds))
-            if (gdb_input() == -1)
+            if (gdb_input(gdbfd) == -1)
                 return -1;
+
+        /* gdb's mi output -> tgdb  */
+        if (FD_ISSET(mifd, &rfds)) {
+            if (gdb_input(mifd) == -1)
+                return -1;
+        }
     }
 
     return 0;
@@ -375,38 +221,8 @@ void console_output(void *context, const std::string &str) {
     }
 }
 
-void console_ready(void *context)
-{
-    rline_rl_forced_update_display(rline);
-}
-
-void request_sent(void *context, struct tgdb_request *request,
-        const std::string &command)
-{
-    if (request->header == TGDB_REQUEST_CONSOLE_COMMAND &&
-        request->choice.console_command.queued) {
-        char *prompt;
-        rline_get_prompt(rline, &prompt);
-        if (prompt) {
-            printf("%s", prompt);
-        }
-        printf("%s\n", request->choice.console_command.command);
-    }
-}
-
 void command_response(void *context, struct tgdb_response *response)
 {
-    if (response->header == TGDB_UPDATE_COMPLETIONS)
-    {
-        char **completions = response->choice.update_completions.completions;
-
-        do_tab_completion(completions);
-    }
-
-    if (response->header == TGDB_UPDATE_CONSOLE_PROMPT_VALUE)
-        driver_prompt_change(response->choice.update_console_prompt_value.
-                prompt_value);
-
     if (response->header == TGDB_QUIT) {
         fprintf(stderr, "%s:%d TGDB_QUIT\n", __FILE__, __LINE__);
         gdb_quit = 1;
@@ -416,14 +232,12 @@ void command_response(void *context, struct tgdb_response *response)
 tgdb_callbacks callbacks = {
     NULL,
     console_output,
-    console_ready,
-    request_sent,
     command_response
 };
 
 int main(int argc, char **argv)
 {
-    int gdb_fd, slavefd, masterfd;
+    int gdb_console_fd, gdb_mi_fd, slavefd, masterfd;
 
 #if 0
     int c;
@@ -431,46 +245,25 @@ int main(int argc, char **argv)
     read(0, &c, 1);
 #endif
 
-    if (tty_cbreak(STDIN_FILENO, &term_attributes) == -1)
-        clog_error(CLOG_CGDB, "tty_cbreak error");
-
-    pty_pair = pty_pair_create();
-    if (!pty_pair) {
-        fprintf(stderr, "%s:%d Unable to create PTY pair", __FILE__, __LINE__);
-        exit(-1);
-    }
-
-    slavefd = pty_pair_get_slavefd(pty_pair);
-    if (slavefd == -1) {
-        fprintf(stderr, "%s:%d Unable to get slavefd", __FILE__, __LINE__);
-        exit(-1);
-    }
-
-    masterfd = pty_pair_get_masterfd(pty_pair);
-    if (masterfd == -1) {
-        fprintf(stderr, "%s:%d Unable to get masterfd", __FILE__, __LINE__);
-        exit(-1);
-    }
-
-    if (tty_off_xon_xoff(masterfd) == -1)
-        exit(-1);
-
-    rline = rline_initialize(slavefd, rlctx_send_user_command, tab_completion,
-            getenv("TERM"));
-
-    if ((tgdb = tgdb_initialize(NULL, argc - 1, argv + 1, &gdb_fd,
-            callbacks)) == NULL) {
-        clog_error(CLOG_CGDB, "tgdb_start error");
-        goto driver_end;
-    }
+    start_logging();
 
     /* Set all clog levels to debug */
     clog_set_level(CLOG_CGDB_ID, CLOG_DEBUG);
     clog_set_level(CLOG_GDBIO_ID, CLOG_DEBUG);
+    clog_set_level(CLOG_GDBMIIO_ID, CLOG_DEBUG);
+
+    if (tty_cbreak(STDIN_FILENO, &term_attributes) == -1)
+        clog_error(CLOG_CGDB, "tty_cbreak error");
+
+    if ((tgdb = tgdb_initialize(NULL, argc - 1, argv + 1, 0, 0,
+            &gdb_console_fd, &gdb_mi_fd, callbacks)) == NULL) {
+        clog_error(CLOG_CGDB, "tgdb_start error");
+        goto driver_end;
+    }
 
     set_up_signal();
 
-    main_loop(gdb_fd);
+    main_loop(gdb_console_fd, gdb_mi_fd);
 
     if (tgdb_shutdown(tgdb) == -1)
         clog_error(CLOG_CGDB, "could not shutdown");

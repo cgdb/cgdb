@@ -91,6 +91,9 @@ static char *parse(struct scroller *scr, struct hl_line_attr **attrs,
     /* Expand special characters */
     for (j = 0; j < buflen; j++) {
         switch (buf[j]) {
+                /* readline wants to ring the bell, ignore */
+            case 7:
+                break;
                 /* Backspace/Delete -> Erase last character */
             case 8:
             case 127:

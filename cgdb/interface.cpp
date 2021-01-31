@@ -309,7 +309,7 @@ int get_gdb_height(void)
     return result;
 }
 
-static int get_gdb_width(void)
+int get_gdb_width(void)
 {
     int result;
 
@@ -574,6 +574,12 @@ static int if_layout()
         gdb_scroller = scr_new(gdb_scroller_win);
     }
 
+    // On initial startup, the interface is created and displayed
+    // but the tgdb instance is not yet created.
+    if (tgdb) {
+        tgdb_resize(tgdb, get_gdb_height(), get_gdb_width());
+    }
+
     /* Initialize the status bar window */
     create_swindow(&status_win, get_src_status_height(),
         get_src_status_width(), get_src_status_row(), get_src_status_col());
@@ -596,13 +602,9 @@ int if_resize_term(void)
                 screen_size.ws_col != swin_cols()) {
             swin_resizeterm(screen_size.ws_row, screen_size.ws_col);
             swin_refresh();
-            rl_resize(screen_size.ws_row, screen_size.ws_col);
-            return if_layout();
         }
 
-        rl_resize(screen_size.ws_row, screen_size.ws_col);
         return if_layout();
-
     }
 
     return 0;
@@ -1399,14 +1401,6 @@ static int cgdb_input(int key, int *last_key)
             source_search_regex(src_viewer, regex_last.c_str(), 2,
                                 !regex_direction_last, regex_icase);
             if_draw();
-            break;
-        case CGDB_KEY_CTRL_T:
-            if (tgdb_tty_new(tgdb) == -1) {
-                /* Error */
-            } else {
-                if_layout();
-            }
-
             break;
         case CGDB_KEY_CTRL_W:
             switch (cur_split_orientation) {

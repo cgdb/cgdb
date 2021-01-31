@@ -10,6 +10,9 @@ const int CLOG_CGDB_ID = 1;
 const int CLOG_GDBIO_ID = 2;
 #define CLOG_GDBIO CLOG(CLOG_GDBIO_ID)
 
+const int CLOG_GDBMIIO_ID = 3;
+#define CLOG_GDBMIIO CLOG(CLOG_GDBMIIO_ID)
+
 #include "config.h"
 #include "fs_util.h"
 #include "clog.h"

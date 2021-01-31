@@ -237,14 +237,6 @@ int if_change_winminheight(int value);
 int if_change_winminwidth(int value);
 
 /**
- * This get's the height size of the GDB window.
- *
- * \return
- * The size of the window.
- */
-int get_gdb_height(void);
-
-/**
  * Will clear the last line in the GDB window. This function is slightly slow
  * as it writes spaces all the way, if it's necessary or not.
  *
@@ -252,5 +244,8 @@ int get_gdb_height(void);
  * 0 on success or -1 on error
  */
 int if_clear_line(void);
+
+int get_gdb_height(void);
+int get_gdb_width(void);
 
 #endif

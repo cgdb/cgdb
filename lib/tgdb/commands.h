@@ -45,15 +45,4 @@ int commands_disassemble_supports_s_mode(struct commands *c);
 void commands_set_current_request_type(struct commands *c,
         enum tgdb_request_type type);
 
-/**
- * Get the current request type being processed through gdb.
- *
- * @param c
- * The commands instance
- *
- * @return
- * The current request type
- */
-enum tgdb_request_type commands_get_current_request_type(struct commands *c);
-
 #endif /* __COMMANDS_H__ */

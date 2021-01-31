@@ -58,7 +58,6 @@ static int command_set_winminwidth(int value);
 static int command_set_winsplit(const char *value);
 static int command_set_winsplitorientation(const char *value);
 static int command_set_syntax_type(const char *value);
-static int command_set_sdc(int value);
 static int cgdbrc_set_val(struct cgdbrc_config_option config_option);
 
 struct cgdbrc_attach_item {
@@ -200,10 +199,6 @@ void cgdbrc_init_config_options(void)
     option.variant.line_display_style = LINE_DISPLAY_BLOCK;
     cgdbrc_config_options[i++] = option;
 
-    option.option_kind = CGDBRC_SHOWDEBUGCOMMANDS;
-    option.variant.int_val = 0;
-    cgdbrc_config_options[i++] = option;
-
     option.option_kind = CGDBRC_SHOWMARKS;
     option.variant.int_val = 1;
     cgdbrc_config_options[i++] = option;
@@ -328,10 +323,6 @@ void cgdbrc_init_config_variables(void)
     cgdbrc_variables.push_back(ConfigVariable(
         "selectedlinedisplay", "sld", CONFIG_TYPE_FUNC_STRING,
         (void *)command_set_selected_line_display));
-    /* showdebugcommands */
-    cgdbrc_variables.push_back(ConfigVariable(
-        "showdebugcommands", "sdc", CONFIG_TYPE_FUNC_BOOL,
-        (void *)&command_set_sdc));
     /* showmarks */
     cgdbrc_variables.push_back(ConfigVariable(
         "showmarks", "showmarks", CONFIG_TYPE_BOOL,
@@ -475,22 +466,6 @@ int command_set_executing_line_display(const char *value)
         return 1;
 
     return cgdbrc_set_val(option);
-}
-
-static int command_set_sdc(int value)
-{
-    if ((value == 0) || (value == 1)) {
-        struct cgdbrc_config_option option;
-
-        option.option_kind = CGDBRC_SHOWDEBUGCOMMANDS;
-        option.variant.int_val = value;
-
-        if (cgdbrc_set_val(option))
-            return 1;
-    } else
-        return 1;
-
-    return 0;
 }
 
 int command_set_winsplit(const char *value)

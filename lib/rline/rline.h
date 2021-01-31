@@ -61,7 +61,7 @@ typedef int completion_cb(int, int);
  * @return
  * NULL on error, a valid context on success.
  */
-struct rline *rline_initialize(int slavefd, command_cb * command,
+struct rline *rline_initialize(command_cb * command,
         completion_cb * completion, const char *TERM);
 
 /**

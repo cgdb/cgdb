@@ -47,48 +47,6 @@
         void (*console_output_callback)(void *context, const std::string &str);
 
         /**
-         * Called when the console is ready for another active command.
-         *
-         * Only certain requests impact the console. Currently that's
-         * - TGDB_REQUEST_CONSOLE_COMMAND
-         * - TGDB_REQUEST_COMPLETE
-         * - TGDB_REQUEST_DEBUGGER_COMMAND (a newline is put on the console)
-         *
-         * If the above commands are sent to gdb, then this callback will
-         * be issued when tgdb is ready to send another command to gdb.
-         * Otherwise, this callback will not be issued to the caller.
-         *
-         * This will only be issued when the request queue is empty.
-         * The console should not be ready if tgdb is actively working
-         * through commands.
-         *
-         * The request_sent_callback is called before each request is
-         * sent to gdb. This can be useful for displaying which commands
-         * are executing in the console, if those commands were queued.
-         * For instance, if the user types 'next' 5 times in a row, before
-         * gdb had a chance to respond.
-         *
-         * @param context
-         * The context pointer
-         */
-        void (*console_ready_callback)(void *context);
-
-        /**
-         * A request has been sent to gdb.
-         *
-         * @param context
-         * The context pointer
-         *
-         * @param request
-         * The request that was sent to gdb
-         *
-         * @param command
-         * The gdb command sent to gdb to satisfy the request.
-         */ 
-        void (*request_sent_callback)(void *context,
-                tgdb_request *request, const std::string &command);
-
-        /**
          * A command response is available for consumption.
          *
          * @param context
@@ -119,8 +77,17 @@
    * \param argv
    * The arguments to pass to the debugger    
    *
-   * \param debugger_fd
-   * The descriptor to the debugger's I/O
+   * \param gdb_win_rows
+   * The number of rows in the gdb console
+   *
+   * \param gdb_win_cols
+   * The number of columns in the gdb console
+   *
+   * \param gdb_console_fd
+   * The gdb console file descriptor
+   *
+   * \param gdb_mi_fd
+   * The gdb machine interface file descriptor
    *
    * \param callbacks
    * Callback functions for event driven notifications
@@ -129,7 +96,8 @@
    * NULL on error, a valid context on success.
    */
     struct tgdb *tgdb_initialize(const char *debugger,
-            int argc, char **argv, int *debugger_fd, tgdb_callbacks callbacks);
+            int argc, char **argv, int gdb_win_rows, int gdb_win_cols,
+            int *gdb_console_fd, int *gdb_mi_fd, tgdb_callbacks callbacks);
 
   /**
    * This will terminate a libtgdb session. No functions should be called on
@@ -172,102 +140,41 @@
    * \param tgdb
    * An instance of the tgdb library to operate on.
    *
+   * \param fd
+   * The file descriptor that has input (either the console or mi).
+   *
    * @return
    * 0 on sucess, or -1 on error
    */
-    int tgdb_process(struct tgdb *tgdb);
+    int tgdb_process(struct tgdb *tgdb, int fd);
 
-  /**
-   * This sends a byte of data to the program being debugged.
-   *
-   * \param tgdb
-   * An instance of the tgdb library to operate on.
-   *
-   * \param c
-   * The character to pass to the program being debugged.
-   *
-   * @return
-   * 0 on success or -1 on error
-   */
-    int tgdb_send_inferior_char(struct tgdb *tgdb, char c);
+    /**
+     * Send a character to the gdb console.
+     *
+     * \param tgdb
+     * An instance of the tgdb library to operate on.
+     *
+     * \param c
+     * The character to send to the gdb console
+     *
+     * \return
+     * 0 on sucess, or -1 on error
+     */
+    int tgdb_send_char(struct tgdb *tgdb, char c);
 
-  /**
-   * Gets the output from the program being debugged.
-   * 
-   * \param tgdb
-   * An instance of the tgdb library to operate on.
-   *
-   * \param buf
-   * The buffer to write the inferior data to.
-   *
-   * \param n
-   * The number of bytes that buf can contain.
-   *
-   * @return
-   * 0 on EOF, -1 on error, or the number of bytes written to buf.
-   */
-    ssize_t tgdb_recv_inferior_data(struct tgdb *tgdb, char *buf, size_t n);
-
-/*@}*/
-/* }}}*/
-
-/* Inferior tty commands {{{*/
-/******************************************************************************/
-/**
- * @name Inferior tty commands
- * These functinos are used to alter the tty state of the inferior program.
- */
-/******************************************************************************/
-
-/*@{*/
-
-  /**
-   * This allocates a new tty and tells the debugger to use it for I/O
-   * with the program being debugged.
-   *
-   * Whatever was left in the old tty is lost, the debugged program starts
-   * with a new tty.
-   *
-   * \param tgdb
-   * An instance of the tgdb library to operate on.
-   *
-   * NOTE
-   *  The return value only indicates whether the tty was allocated properly,
-   *  not whether the debugger accepted the tty, since this can only be determined 
-   *  when the debugger responds, not when the command is given.
-   *
-   * @return
-   * 0 on success or -1 on error
-   */
-    int tgdb_tty_new(struct tgdb *tgdb);
-
-  /**
-   * Get the file descriptor the debugger is using for the inferior.
-   *
-   * You can see the associated terminal name for the file descriptor
-   * with the following gdb command,
-   *   (gdb) show inferior-tty
-   *   Terminal for future runs of program being debugged is "/dev/pts/34".
-   *
-   * @tgdb
-   * An instance of the tgdb library to operate on.
-   *
-   * @return
-   * The descriptor to the I/O of the program being debugged (-1 on error).
-   */
-   int tgdb_get_inferior_fd(struct tgdb *tgdb);
-
-  /**
-   * Gets the name of file that debugger is using for I/O with the program
-   * being debugged.
-   * 
-   * \param tgdb
-   * An instance of the tgdb library to operate on.
-   *
-   * @return
-   * Name of tty or NULL on error.
-   */
-    const char *tgdb_tty_name(struct tgdb *tgdb);
+    /**
+     * Resize the gdb console.
+     *
+     * \param tgdb
+     * An instance of the tgdb library to operate on.
+     *
+     * \param rows
+     * The number of rows in the new gdb console
+     *
+     * \param cols
+     * The number of columns in the new gdb console
+     */
+    int tgdb_resize(struct tgdb *tgdb, int rows, int cols);
 
 /*@}*/
 /* }}}*/
@@ -281,18 +188,6 @@
 /******************************************************************************/
 
 /*@{*/
-
-  /**
-   * This sends a console command to the debugger (GDB).
-   *
-   * \param tgdb
-   * An instance of the tgdb library to operate on.
-   *
-   * \param command
-   * The null terminated command to pass to GDB as a console command.
-   */
-    void tgdb_request_run_console_command(struct tgdb *tgdb,
-            const char *command);
 
   /**
    * Gets a list of source files that make up the program being debugged.
@@ -343,17 +238,6 @@
     void tgdb_request_modify_breakpoint(struct tgdb *tgdb,
         const char *file, int line, uint64_t addr,
         enum tgdb_breakpoint_action b);
-
-  /**
-   * Used to get all of the possible tab completion options for LINE.
-   *
-   * \param tgdb
-   * An instance of the tgdb library to operate on.
-   *
-   * \param line
-   * The line to tab complete.
-   */
-    void tgdb_request_complete(struct tgdb *tgdb, const char *line);
 
     
     /**

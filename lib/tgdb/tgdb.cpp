@@ -29,8 +29,8 @@
 #include "tgdb.h"
 #include "fork_util.h"
 #include "commands.h"
-#include "annotations.h"
 #include "io.h"
+#include "terminal.h"
 #include "pseudo.h" /* SLAVE_SIZE constant */
 #include "sys_util.h"
 #include "stretchy.h"
@@ -47,23 +47,22 @@ struct tgdb {
     /** This module is used for parsing the commands output of gdb */
     struct commands *c;
 
-    /** The GDB annotations parser */
-    struct annotations_parser *parser;
-
     /** Reading from this will read from the debugger's output */
     int debugger_stdout;
 
     /** Writing to this will write to the debugger's stdin */
     int debugger_stdin;
 
-    /** Reading from this will read the stdout from the debugged program */
-    int inferior_stdout;
+    /**
+     * The gdb new-ui mi console file descriptor.
+     *
+     * Writing to this will write to the gdb/mi interpreter.
+     * Reading from it will read the output of the gdb/mi interpreter.
+     */
+    int gdb_mi_ui_fd;
 
-    /** Writing to this will write to the stdin of the debugged program */
-    int inferior_stdin;
-
-    /** The master, slave and slavename of the pty device */
-    pty_pair_ptr pty_pair;
+    /** The master, slave and slavename of the new-ui pty device */
+    pty_pair_ptr new_ui_pty_pair;
 
     /** The pid of child process */
     pid_t debugger_pid;
@@ -81,15 +80,6 @@ struct tgdb {
      *
      * Basically whether gdb is at prompt or not. */
     int is_gdb_ready_for_next_command;
-
-    /**
-     * Set to true if a console ready callback is required, otherwise false.
-     *
-     * Any command given to GDB, that impacts the console, should set this
-     * to true when the command is run. Then when the next gdb prompt is
-     * available, tgdb will tell cgdb the console is ready.
-     */
-    bool make_console_ready_callback;
 
     /** If ^c was hit by user */
     sig_atomic_t control_c;
@@ -122,21 +112,18 @@ static struct tgdb *initialize_tgdb_context(tgdb_callbacks callbacks)
     struct tgdb *tgdb = (struct tgdb *) cgdb_malloc(sizeof (struct tgdb));
 
     tgdb->c = 0;
-    tgdb->parser = NULL;
     tgdb->control_c = 0;
 
     tgdb->debugger_stdout = -1;
     tgdb->debugger_stdin = -1;
 
-    tgdb->inferior_stdout = -1;
-    tgdb->inferior_stdin = -1;
+    tgdb->gdb_mi_ui_fd = -1;
 
-    tgdb->pty_pair = NULL;
+    tgdb->new_ui_pty_pair = NULL;
 
     tgdb->command_requests = new tgdb_request_ptr_list();
 
-    tgdb->is_gdb_ready_for_next_command = 1;
-    tgdb->make_console_ready_callback = true;
+    tgdb->is_gdb_ready_for_next_command = 0;
 
     tgdb->has_sigchld_recv = 0;
 
@@ -158,7 +145,7 @@ static void tgdb_issue_request(struct tgdb *tgdb, enum tgdb_request_type type,
     tgdb_run_or_queue_request(tgdb, request_ptr, priority);
 }
  
-static void tgdb_breakpoints_changed(void *context)
+void tgdb_breakpoints_changed(void *context)
 {
     struct tgdb *tgdb = (struct tgdb*)context;
     tgdb_issue_request(tgdb, TGDB_REQUEST_BREAKPOINTS, true);
@@ -170,48 +157,6 @@ static void tgdb_source_location_changed(void *context)
     tgdb_request_current_location(tgdb);
 }
 
-static void tgdb_prompt_changed(void *context, const std::string &prompt)
-{
-    struct tgdb *tgdb = (struct tgdb*)context;
-
-    struct tgdb_response *response =
-        tgdb_create_response(TGDB_UPDATE_CONSOLE_PROMPT_VALUE);
-    response->choice.update_console_prompt_value.prompt_value =
-            cgdb_strdup(prompt.c_str());
-    tgdb_send_response(tgdb, response);
-}
-
-static void tgdb_console_output(void *context, const std::string &msg)
-{
-    struct tgdb *tgdb = (struct tgdb*)context;
-    enum tgdb_request_type type = commands_get_current_request_type(tgdb->c);
-
-    /**
-     * Send output to the terminal if this is a console command.
-     *
-     * This initially only took the CONSOLE_COMMAND into account, which
-     * is commands the user types in the GDB window.
-     * Now it also takes the DEBUGGER_COMMAND into account, which is
-     * colon commands the user types in the status bar.
-     * 
-     * The decision to add the DEBUGGER_COMMAND is because a user reported
-     * a bug where ':finish' from the status bar would not show console output
-     * but 'finish' from the gdb window would. It seems reasonable to treat
-     * the two the same.
-     *
-     * I've documented this decision as I believe it's possible another
-     * case could be thought of where it's preferable to hide the output
-     * from the debugger commands. We'll see.
-     */
-    if (type == TGDB_REQUEST_CONSOLE_COMMAND ||
-        type == TGDB_REQUEST_DEBUGGER_COMMAND) {
-        tgdb->callbacks.console_output_callback(tgdb->callbacks.context, msg);
-    } else {
-        commands_process(tgdb->c, msg);
-    }
-
-}
-
 static void tgdb_command_error(void *context, const std::string &msg)
 {
     struct tgdb *tgdb = (struct tgdb*)context;
@@ -220,46 +165,15 @@ static void tgdb_command_error(void *context, const std::string &msg)
     tgdb->callbacks.console_output_callback(tgdb->callbacks.context, msg);
 }
 
-static void tgdb_console_at_prompt(void *context)
+void tgdb_console_at_prompt(void *context)
 {
     struct tgdb *tgdb = (struct tgdb*)context;
 
     tgdb->is_gdb_ready_for_next_command = 1;
 
-    if (tgdb->make_console_ready_callback &&
-            tgdb->command_requests->size() == 0) {
-        tgdb->callbacks.console_ready_callback(tgdb->callbacks.context);
-        tgdb->make_console_ready_callback = false;
-    }
-
     if (tgdb->command_requests->size() > 0) {
         tgdb_unqueue_and_deliver_command(tgdb);
     }
-}
-
-static int tgdb_open_new_tty(struct tgdb *tgdb, int *inferior_stdin,
-    int *inferior_stdout)
-{
-    if (tgdb->pty_pair)
-        pty_pair_destroy(tgdb->pty_pair);
-
-    tgdb->pty_pair = pty_pair_create();
-    if (!tgdb->pty_pair) {
-        clog_error(CLOG_CGDB, "pty_pair_create failed");
-        return -1;
-    }
-
-    *inferior_stdin = pty_pair_get_masterfd(tgdb->pty_pair);
-    *inferior_stdout = pty_pair_get_masterfd(tgdb->pty_pair);
-
-    tgdb_request_ptr request_ptr;
-    request_ptr = (tgdb_request_ptr)cgdb_malloc(sizeof (struct tgdb_request));
-    request_ptr->header = TGDB_REQUEST_TTY;
-    request_ptr->choice.tty_command.slavename = 
-        pty_pair_get_slavename(tgdb->pty_pair);
-    tgdb_run_or_queue_request(tgdb, request_ptr, true);
-
-    return 0;
 }
 
 /**
@@ -274,10 +188,6 @@ static void tgdb_request_destroy(tgdb_request_ptr request_ptr)
         return;
 
     switch (request_ptr->header) {
-        case TGDB_REQUEST_CONSOLE_COMMAND:
-            free((char *) request_ptr->choice.console_command.command);
-            request_ptr->choice.console_command.command = NULL;
-            break;
         case TGDB_REQUEST_INFO_SOURCES:
             break;
         case TGDB_REQUEST_DEBUGGER_COMMAND:
@@ -285,10 +195,6 @@ static void tgdb_request_destroy(tgdb_request_ptr request_ptr)
         case TGDB_REQUEST_MODIFY_BREAKPOINT:
             free((char *) request_ptr->choice.modify_breakpoint.file);
             request_ptr->choice.modify_breakpoint.file = NULL;
-            break;
-        case TGDB_REQUEST_COMPLETE:
-            free((char *) request_ptr->choice.complete.line);
-            request_ptr->choice.complete.line = NULL;
             break;
         case TGDB_REQUEST_DISASSEMBLE_PC:
         case TGDB_REQUEST_DISASSEMBLE_FUNC:
@@ -305,32 +211,33 @@ static void tgdb_request_destroy(tgdb_request_ptr request_ptr)
 /* Creating and Destroying a libtgdb context. {{{*/
 
 struct tgdb *tgdb_initialize(const char *debugger,
-        int argc, char **argv, int *debugger_fd, tgdb_callbacks callbacks)
+        int argc, char **argv, int gdb_win_rows, int gdb_win_cols,
+        int *gdb_console_fd, int *gdb_mi_fd, tgdb_callbacks callbacks)
 {
     /* Initialize the libtgdb context */
     struct tgdb *tgdb = initialize_tgdb_context(callbacks);
-    static struct annotations_parser_callbacks annotations_callbacks = {
-        tgdb,
-        tgdb_breakpoints_changed,
-        tgdb_source_location_changed,
-        tgdb_prompt_changed,
-        tgdb_console_output,
-        tgdb_command_error,
-        tgdb_console_at_prompt  
-    };
+
+    // create the new ui pty pair
+    // initialize the size to the gdb window size
+    tgdb->new_ui_pty_pair = pty_pair_create();
+    if (!tgdb->new_ui_pty_pair) {
+        clog_error(CLOG_CGDB, "pty_pair_create failed");
+        return NULL;
+    }
+
+    tgdb->gdb_mi_ui_fd = pty_pair_get_masterfd(tgdb->new_ui_pty_pair);
+    tty_set_echo(tgdb->gdb_mi_ui_fd, 0);
 
     tgdb->debugger_pid = invoke_debugger(debugger, argc, argv,
-            &tgdb->debugger_stdin, &tgdb->debugger_stdout, 0);
+            gdb_win_rows, gdb_win_cols, 
+            &tgdb->debugger_stdin, &tgdb->debugger_stdout,
+            pty_pair_get_slavename(tgdb->new_ui_pty_pair));
 
     /* Couldn't invoke process */
     if (tgdb->debugger_pid == -1)
         return NULL;
 
     tgdb->c = commands_initialize(tgdb);
-
-    tgdb->parser = annotations_parser_initialize(annotations_callbacks);
-
-    tgdb_open_new_tty(tgdb, &tgdb->inferior_stdin, &tgdb->inferior_stdout);
 
     /* Need to get source information before breakpoint information otherwise
      * the TGDB_UPDATE_BREAKPOINTS event will be ignored in process_commands()
@@ -349,7 +256,8 @@ struct tgdb *tgdb_initialize(const char *debugger,
      */
     tgdb_issue_request(tgdb, TGDB_REQUEST_DATA_DISASSEMBLE_MODE_QUERY, true);
 
-    *debugger_fd = tgdb->debugger_stdout;
+    *gdb_console_fd = tgdb->debugger_stdout;
+    *gdb_mi_fd = tgdb->gdb_mi_ui_fd;
 
     return tgdb;
 }
@@ -363,8 +271,6 @@ int tgdb_shutdown(struct tgdb *tgdb)
 
     delete tgdb->command_requests;
     tgdb->command_requests = 0;
-
-    annotations_parser_shutdown(tgdb->parser);
 
     cgdb_close(tgdb->debugger_stdin);
     tgdb->debugger_stdin = -1;
@@ -381,6 +287,9 @@ void tgdb_close_logfiles()
 
     clog_info(CLOG_GDBIO, "Closing logfile.");
     clog_free(CLOG_GDBIO_ID);
+
+    clog_info(CLOG_GDBMIIO, "Closing logfile.");
+    clog_free(CLOG_GDBMIIO_ID);
 }
 
 /* }}}*/
@@ -458,12 +367,7 @@ static char *tgdb_client_modify_breakpoint_call(struct tgdb *tgdb,
 void tgdb_run_or_queue_request(struct tgdb *tgdb,
         struct tgdb_request *request, bool priority)
 {
-    int can_issue = tgdb->is_gdb_ready_for_next_command &&
-        annotations_parser_at_prompt(tgdb->parser);
-
-    if (request->header == TGDB_REQUEST_CONSOLE_COMMAND) {
-        request->choice.console_command.queued = !can_issue;
-    }
+    int can_issue = tgdb->is_gdb_ready_for_next_command;
 
     if (can_issue) {
         tgdb_run_request(tgdb, request);
@@ -492,12 +396,6 @@ static void tgdb_run_request(struct tgdb *tgdb, struct tgdb_request *request)
 {
     std::string command;
 
-    if (request->header == TGDB_REQUEST_CONSOLE_COMMAND ||
-        request->header == TGDB_REQUEST_COMPLETE ||
-        request->header == TGDB_REQUEST_DEBUGGER_COMMAND) {
-        tgdb->make_console_ready_callback = true;
-    }
-
     tgdb->is_gdb_ready_for_next_command = 0;
 
     tgdb_get_gdb_command(tgdb, request, command);
@@ -509,16 +407,16 @@ static void tgdb_run_request(struct tgdb *tgdb, struct tgdb_request *request)
 
     /* Send what we're doing to log file */
     std::string str = sys_quote_nonprintables(command.c_str(), -1);
-    clog_debug(CLOG_GDBIO, "%s", str.c_str());
+    clog_debug(CLOG_GDBMIIO, "%s", str.c_str());
 
     /* A command for the debugger */
     commands_set_current_request_type(tgdb->c, request->header);
 
-    io_writen(tgdb->debugger_stdin, command.c_str(), command.size());
-
-    // Alert the GUI a command was sent
-    tgdb->callbacks.request_sent_callback(
-            tgdb->callbacks.context, request, command);
+    if (request->header == TGDB_REQUEST_DEBUGGER_COMMAND) {
+        io_writen(tgdb->debugger_stdin, command.c_str(), command.size());
+    } else {
+        io_writen(tgdb->gdb_mi_ui_fd, command.c_str(), command.size());
+    }
 
     tgdb_request_destroy(request);
 }
@@ -540,29 +438,14 @@ static void tgdb_unqueue_and_deliver_command(struct tgdb *tgdb)
     }
 }
 
-/* These functions are used to communicate with the inferior */
-int tgdb_send_inferior_char(struct tgdb *tgdb, char c)
+int tgdb_send_char(struct tgdb *tgdb, char c)
 {
-    if (io_write_byte(tgdb->inferior_stdout, c) == -1) {
+    if (io_write_byte(tgdb->debugger_stdin, c) == -1) {
         clog_error(CLOG_CGDB, "io_write_byte failed");
         return -1;
     }
 
     return 0;
-}
-
-ssize_t tgdb_recv_inferior_data(struct tgdb * tgdb, char *buf, size_t n)
-{
-    ssize_t size;
-
-    /* read all the data possible from the child that is ready. */
-    size = io_read(tgdb->inferior_stdin, buf, n);
-    if (size < 0) {
-        clog_error(CLOG_CGDB, "inferior_fd read failed");
-        return -1;
-    }
-
-    return size;
 }
 
 /**
@@ -629,12 +512,10 @@ static void tgdb_handle_control_c(struct tgdb *tgdb)
         tgdb->command_requests->clear();
 
         tgdb->control_c = 0;
-
-        tgdb->make_console_ready_callback = true;
     }
 }
 
-int tgdb_process(struct tgdb * tgdb)
+int tgdb_process(struct tgdb * tgdb, int fd)
 {
     const int n = 4096;
     static char buf[n];
@@ -647,7 +528,7 @@ int tgdb_process(struct tgdb * tgdb)
     // If ^c has been typed at the prompt, clear the queues
     tgdb_handle_control_c(tgdb);
 
-    size = io_read(tgdb->debugger_stdout, buf, n);
+    size = io_read(fd, buf, n);
     if (size < 0) {
         // Error reading from GDB
         clog_error(CLOG_CGDB, "Error reading from gdb's stdout, closing down");
@@ -658,8 +539,20 @@ int tgdb_process(struct tgdb * tgdb)
         clog_info(CLOG_GDBIO, "read EOF from GDB, closing down");
         tgdb_add_quit_command(tgdb);
     } else {
-        // Read some GDB console output, process it
-        result = annotations_parser_io(tgdb->parser, buf, size);
+        if (fd == tgdb->debugger_stdout) {
+            // Read some GDB console output, process it
+            std::string str = sys_quote_nonprintables(buf, size);
+            clog_debug(CLOG_GDBIO, "%s", str.c_str());
+            std::string msg(buf, size);
+            tgdb->callbacks.console_output_callback(
+                    tgdb->callbacks.context, msg);
+        } else if (fd == tgdb->gdb_mi_ui_fd){
+            // Read some GDB console output, process it
+            std::string msg(buf, size);
+            clog_debug(CLOG_GDBMIIO, "%s", msg.c_str());
+            commands_process(tgdb->c, msg);
+        } else {
+        }
     }
 
     return result;
@@ -727,18 +620,6 @@ static int tgdb_delete_response(struct tgdb_response *com)
             com->choice.update_source_files.source_files = NULL;
             break;
         }
-        case TGDB_UPDATE_COMPLETIONS:
-        {
-            int i;
-            char **completions = com->choice.update_completions.completions;
-
-            for (i = 0; i < sbcount(completions); i++)
-                free(completions[i]);
-            sbfree(completions);
-
-            com->choice.update_completions.completions = NULL;
-            break;
-        }
         case TGDB_DISASSEMBLE_PC:
         case TGDB_DISASSEMBLE_FUNC:
         {
@@ -749,15 +630,6 @@ static int tgdb_delete_response(struct tgdb_response *com)
                 free(disasm[i]);
             }
             sbfree(disasm);
-            break;
-        }
-        case TGDB_UPDATE_CONSOLE_PROMPT_VALUE:
-        {
-            const char *value =
-                    com->choice.update_console_prompt_value.prompt_value;
-
-            free((char *) value);
-            com->choice.update_console_prompt_value.prompt_value = NULL;
             break;
         }
         case TGDB_QUIT:
@@ -776,27 +648,22 @@ void tgdb_send_response(struct tgdb *tgdb, struct tgdb_response *response)
     tgdb_delete_response(response);
 }
 
-/* }}}*/
-
-/* Inferior tty commands {{{*/
-
-int tgdb_tty_new(struct tgdb *tgdb)
+int tgdb_resize(struct tgdb *tgdb, int rows, int cols)
 {
-    int ret = tgdb_open_new_tty(tgdb,
-            &tgdb->inferior_stdin,
-            &tgdb->inferior_stdout);
+    struct winsize size;
+    int result;
+    
+    size.ws_row = rows;
+    size.ws_col = cols;
+    size.ws_xpixel = 0;
+    size.ws_ypixel = 0;
 
-    return ret;
-}
+    result = ioctl(tgdb->debugger_stdin, TIOCSWINSZ, &size);
+    if (result == -1) {
+        clog_error(CLOG_CGDB, "ioctl failed");
+    }
 
-int tgdb_get_inferior_fd(struct tgdb *tgdb)
-{
-    return tgdb->inferior_stdout;
-}
-
-const char *tgdb_tty_name(struct tgdb *tgdb)
-{
-    return pty_pair_get_slavename(tgdb->pty_pair);
+    return 0;
 }
 
 /* }}}*/
@@ -804,20 +671,6 @@ const char *tgdb_tty_name(struct tgdb *tgdb)
 /* Functional commands {{{ */
 
 /* Request {{{*/
-
-void
-tgdb_request_run_console_command(struct tgdb *tgdb, const char *command)
-{
-    tgdb_request_ptr request_ptr;
-
-    request_ptr = (tgdb_request_ptr)cgdb_malloc(sizeof (struct tgdb_request));
-
-    request_ptr->header = TGDB_REQUEST_CONSOLE_COMMAND;
-    request_ptr->choice.console_command.command = (const char *)
-            cgdb_strdup(command);
-
-    tgdb_run_or_queue_request(tgdb, request_ptr, false);
-}
 
 void tgdb_request_inferiors_source_files(struct tgdb * tgdb)
 {
@@ -871,17 +724,6 @@ tgdb_request_modify_breakpoint(struct tgdb *tgdb, const char *file, int line,
     tgdb_run_or_queue_request(tgdb, request_ptr, false);
 }
 
-void tgdb_request_complete(struct tgdb * tgdb, const char *line)
-{
-    tgdb_request_ptr request_ptr;
-
-    request_ptr = (tgdb_request_ptr)cgdb_malloc(sizeof (struct tgdb_request));
-    request_ptr->header = TGDB_REQUEST_COMPLETE;
-    request_ptr->choice.complete.line = (const char *)cgdb_strdup(line);
-
-    tgdb_run_or_queue_request(tgdb, request_ptr, false);
-}
-
 void tgdb_request_disassemble_pc(struct tgdb *tgdb, int lines)
 {
     tgdb_request_ptr request_ptr;
@@ -922,42 +764,32 @@ int tgdb_get_gdb_command(struct tgdb *tgdb, tgdb_request_ptr request,
     }
 
     switch (request->header) {
-        case TGDB_REQUEST_CONSOLE_COMMAND:
-            command = request->choice.console_command.command;
-            break;
         case TGDB_REQUEST_INFO_SOURCES:
-            command = "server interpreter-exec mi"
-                        " \"-file-list-exec-source-files\"\n";
+            command = "-file-list-exec-source-files\n";
             break;
         case TGDB_REQUEST_INFO_SOURCE_FILE:
-            command = "server interpreter-exec mi"
-                    " \"-file-list-exec-source-file\"\n";
+            command = "-file-list-exec-source-file\n";
             break;
         case TGDB_REQUEST_BREAKPOINTS:
-            command = "server interpreter-exec mi"
-                    " \"-break-info\"\n";
+            command = "-break-info\n";
             break;
         case TGDB_REQUEST_TTY:
-            str = sys_aprintf("server interpreter-exec mi"
-                    " \"-inferior-tty-set %s\"\n",
+            str = sys_aprintf("-inferior-tty-set %s\n",
                     request->choice.tty_command.slavename);
             command = str;
             free(str);
             str = NULL;
             break;
         case TGDB_REQUEST_INFO_FRAME:
-            command = "server interpreter-exec mi"
-                    " \"-stack-info-frame\"\n";
+            command = "-stack-info-frame\n";
             break;
         case TGDB_REQUEST_DATA_DISASSEMBLE_MODE_QUERY:
-            command = "server interpreter-exec mi"
-                    " \"-data-disassemble -s 0 -e 0 -- 4\"\n";
+            command = "-data-disassemble -s 0 -e 0 -- 4\n";
             break;
         case TGDB_REQUEST_DEBUGGER_COMMAND:
-            // tgdb_get_client_command always returns a string
-            // with static storage duration
             command = tgdb_get_client_command(tgdb,
                     request->choice.debugger_command.c);
+
             break;
         case TGDB_REQUEST_MODIFY_BREAKPOINT:
             str = tgdb_client_modify_breakpoint_call(tgdb,
@@ -969,16 +801,8 @@ int tgdb_get_gdb_command(struct tgdb *tgdb, tgdb_request_ptr request,
             free(str);
             str = NULL;
             break;
-        case TGDB_REQUEST_COMPLETE:
-            str = sys_aprintf("server interpreter-exec mi"
-                    " \"complete %s\"\n", request->choice.complete.line);
-            command = str;
-            free(str);
-            str = NULL;
-            break;
         case TGDB_REQUEST_DISASSEMBLE_PC:
-            str = sys_aprintf("server interpreter-exec mi"
-                    " \"x/%di $pc\"\n", request->choice.disassemble.lines);
+            str = sys_aprintf("x/%di $pc\n", request->choice.disassemble.lines);
             command = str;
             free(str);
             str = NULL;
@@ -1011,8 +835,7 @@ int tgdb_get_gdb_command(struct tgdb *tgdb, tgdb_request_ptr request,
                     commands_disassemble_supports_s_mode(tgdb->c)) {
                 data = "/s";
             }
-            str = sys_aprintf("server interpreter-exec mi"
-                    " \"disassemble%s%s\"\n",
+            str = sys_aprintf("disassemble%s%s\n",
                     data ? " " : "", data ? data : "");
             command = str;
             free(str);

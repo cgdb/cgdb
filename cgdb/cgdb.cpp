@@ -104,10 +104,8 @@ char *readline_history_path;    /* After readline init is called, this will
                                  * contain the path to the readline history 
                                  * file. */
 
-static int gdb_fd = -1;         /* File descriptor for GDB communication */
-
-/** Master/Slave PTY used to keep readline off of stdin/stdout. */
-static pty_pair_ptr pty_pair;
+static int gdb_console_fd = -1; /* GDB console descriptor */
+static int gdb_mi_fd = -1;      /* GDB Machine Interface descriptor */
 
 static char *debugger_path = NULL;  /* Path to debugger to use */
 
@@ -175,84 +173,6 @@ int signal_pipe[2] = { -1, -1 };
 
 /* Readline interface */
 static struct rline *rline;
-
-/**
- * If this is 1, then CGDB is performing a tab completion in the GDB window.
- * When this is true, there can be no data passed to readline. The completion
- * must be displayed to the user first.
- */
-static int is_tab_completing = 0;
-
-/* Current readline line. If the user enters 'b ma\<NL>in<NL>', where 
- * NL is the same as the user hitting the enter key, then 2 commands are
- * received by readline. The first is 'b ma\' and the second is 'in'.
- *
- * In general, the user can put a \ as the last char on the line and GDB
- * accepts this as meaning, "allow me to enter more data on the next line".
- * The trailing \, does not belong in the command to GDB, it is purely there
- * to tell GDB that the user wants to enter more data on the next line.
- *
- * For this reason, CGDB keeps this buffer. It adds the command the user
- * is typing to this buffer. When a line comes that does not end in a \,
- * then the command is sent to GDB.
- */
-static std::string current_line;
-
-/**
- * When the user is entering a multi-line command in the GDB window
- * via the \ char at the end of line, the prompt get's set to "". This
- * variable is used to remember what the previous prompt was so that it
- * can be set back when the user has finished entering the line.
- */
-static char *rline_last_prompt = NULL;
-
-/** 
- * Represents all the different states that can be reached while displaying
- * the tab completion information to the user.
- */
-enum tab_completion_state {
-  /** Nothing has been done yet */
-    TAB_COMPLETION_START,
-  /** The query possibilities message was issued, and waiting for response */
-    TAB_COMPLETION_QUERY_POSSIBILITIES,
-  /** Displaying the tab completion */
-    TAB_COMPLETION_COMPLETION_DISPLAY,
-  /** Query the user to continue tab completion, and waiting for response */
-    TAB_COMPLETION_QUERY_PAGER,
-  /** All done */
-    TAB_COMPLETION_DONE
-};
-
-/**
- * A context needed to allow the displaying of tab completion to take place. 
- * Readline calls back into CGDB with the tab completion information. CGDB can
- * not simply display all the information to the user because the displaying of
- * the tab completion data can be interactive (and is by default). So, this 
- * context keeps track of what has been displayed to the user, and what needs
- * to be displayed while CGDB get's input from the user.
- */
-typedef struct tab_completion_ctx {
-  /** All of the possible completion matches, valid from [0,num_matches]. */
-    char **matches;
-  /** The number of completion matches in the 'matches' field. */
-    int num_matches;
-  /** The longest line in the 'matches' field */
-    int max_length;
-
-  /** These variables changed based on the state of this object */
-
-  /** Total number of lines printed so far. */
-    int total;
-  /** Total number of lines printed so far since last pager. */
-    int lines;
-  /** The current tab completion state */
-    enum tab_completion_state state;
-} *tab_completion_ptr;
-
-/** 
- * The current tab completion display context. 
- * If non-null, currently doing a display */
-static tab_completion_ptr completion_ptr = NULL;
 
 /* Original terminal attributes */
 static struct termios term_attributes;
@@ -359,345 +279,6 @@ static void parse_cgdbrc_file()
     fs_util_get_path(cgdb_home_dir, "cgdbrc", config_file);
     command_parse_file(config_file);
 }
-
-/* readline code {{{*/
-
-/* Please forgive me for adding all the comment below. This function
- * has some strange bahaviors that I thought should be well explained.
- */
-void rlctx_send_user_command(char *line)
-{
-    size_t size;
-    char *rline_prompt;
-
-    if (line == NULL) {
-        /* NULL line means rl_callback_read_char received EOF */
-        current_line.append("quit");
-    } else {
-        /* Add the line passed in to the current line */
-        current_line.append(line);
-    }
-
-    /* Get current line, and current line length */
-    size = current_line.size();
-
-    /* Check to see if the user is escaping the line, to use a 
-     * multi line command. If so, return so that the user can
-     * continue the command. This data should not go into the history
-     * buffer, or be sent to gdb yet. 
-     *
-     * Also, notice the size > 0 condition. (size == 0) can happen 
-     * when the user simply hits Enter on the keyboard. */
-    if (size > 0 && current_line[size - 1] == '\\') {
-        /* The \ char is for continuation only, it is not meant to be sent
-         * to GDB as a character. */
-        current_line.erase(size - 1);
-
-        /* Only need to change the prompt the first time the \ char is used.
-         * Doing it a second time would erase the real rline_last_prompt,
-         * since the prompt has already been set to "".
-         */
-        if (!rline_last_prompt) {
-            rline_get_prompt(rline, &rline_prompt);
-            rline_last_prompt = strdup(rline_prompt);
-            /* GDB set's the prompt to nothing when doing continuation.
-             * This is here just for compatibility. */
-            rline_set_prompt(rline, "");
-        }
-
-        free(line);
-        return;
-    }
-
-    /* If here, a full command has been sent. Restore the prompt. */
-    if (rline_last_prompt) {
-        rline_set_prompt(rline, rline_last_prompt);
-        free(rline_last_prompt);
-        rline_last_prompt = NULL;
-    }
-
-    /* Don't add the enter command to the history */
-    if (size > 0)
-        rline_add_history(rline, current_line.c_str());
-
-    if (is_gdb_tui_command(current_line.c_str())) {
-        if_print_message("\nWARNING: Not executing GDB TUI command: %s",
-            current_line.c_str());
-        rline_clear(rline);
-        rline_rl_forced_update_display(rline);
-    } else {
-        /* Send this command to TGDB */
-        tgdb_request_run_console_command(tgdb, current_line.c_str());
-    }
-
-    current_line.clear();
-
-    free(line);
-}
-
-static int tab_completion(int a, int b)
-{
-    char *cur_line;
-    int ret;
-
-    is_tab_completing = 1;
-
-    ret = rline_get_current_line(rline, &cur_line);
-    if (ret == -1)
-        clog_error(CLOG_CGDB, "rline_get_current_line error\n");
-
-    tgdb_request_complete(tgdb, cur_line);
-    return 0;
-}
-
-/**
- * Create a tab completion context.
- *
- * \param matches
- * See tab_completion field documentation
- * 
- * \param num_matches
- * See tab_completion field documentation
- *
- * \param max_length
- * See tab_completion field documentation
- *
- * \return
- * The next context, or NULL on error.
- */
-static tab_completion_ptr
-tab_completion_create(char **matches, int num_matches, int max_length)
-{
-    int i;
-    tab_completion_ptr comptr;
-
-    comptr = (tab_completion_ptr) cgdb_malloc(sizeof (struct
-                    tab_completion_ctx));
-
-    comptr->matches = (char **)cgdb_malloc(sizeof (char *) * (num_matches + 1));
-    for (i = 0; i <= num_matches; ++i)
-        comptr->matches[i] = cgdb_strdup(matches[i]);
-
-    comptr->num_matches = num_matches;
-    comptr->max_length = max_length;
-    comptr->total = 1;
-    comptr->lines = 0;
-    comptr->state = TAB_COMPLETION_START;
-
-    return comptr;
-}
-
-/**
- * Destroy the tab completion context.
- *
- * \param comptr
- * This object to destroy.
- */
-static void tab_completion_destroy(tab_completion_ptr comptr)
-{
-    int i;
-
-    if (!comptr)
-        return;
-
-    if (comptr->matches == 0)
-        return;
-
-    for (i = 0; i <= comptr->num_matches; ++i) {
-        free(comptr->matches[i]);
-        comptr->matches[i] = NULL;
-    }
-
-    free(comptr->matches);
-    comptr->matches = NULL;
-
-    free(comptr);
-    comptr = NULL;
-}
-
-/**
- * Get a yes or no from the user.
- *
- * \param key
- * The key that the user pressed
- *
- * \param for_pager
- * Will be non-zero if this is for the pager, otherwise 0.
- *
- * \return
- * 0 for no, 1 for yes, 2 for single line yes, -1 for nothing.
- */
-static int cgdb_get_y_or_n(int key, int for_pager)
-{
-    if (key == 'y' || key == 'Y' || key == ' ')
-        return 1;
-    if (key == 'n' || key == 'N')
-        return 0;
-    if (for_pager && (key == '\r' || key == '\n' || key == CGDB_KEY_CTRL_M))
-        return 2;
-    if (for_pager && (key == 'q' || key == 'Q'))
-        return 0;
-    if (key == CGDB_KEY_CTRL_G)
-        return 0;
-
-    return -1;
-}
-
-/**
- * The goal of this function is to display the tab completion information
- * to the user in an asychronous and potentially interactive manner.
- *
- * It will output to the screen as much as can be until user input is needed. 
- * If user input is needed, then this function must stop, and wait until 
- * that data has been received.
- *
- * If this function is called a second time with the same completion_ptr
- * parameter, it will continue outputting the tab completion data from
- * where it left off.
- *
- * \param completion_ptr
- * The tab completion data to output to the user
- *
- * \param key
- * The key the user wants to pass to the query command that was made.
- * If -1, then this is assummed to be the first time this function has been
- * called.
- *
- * \return
- * 0 on success or -1 on error
- */
-static int handle_tab_completion_request(tab_completion_ptr comptr, int key)
-{
-    int query_items;
-    int gdb_window_size;
-
-    if (!comptr)
-        return -1;
-
-    query_items = rline_get_rl_completion_query_items(rline);
-    gdb_window_size = get_gdb_height();
-
-    if (comptr->state == TAB_COMPLETION_START) {
-        if_print("\n");
-
-        if (query_items > 0 && comptr->num_matches >= query_items) {
-            if_print_message("Display all %d possibilities? (y or n)\n",
-                    comptr->num_matches);
-            comptr->state = TAB_COMPLETION_QUERY_POSSIBILITIES;
-            return 0;
-        }
-
-        comptr->state = TAB_COMPLETION_COMPLETION_DISPLAY;
-    }
-
-    if (comptr->state == TAB_COMPLETION_QUERY_POSSIBILITIES) {
-        int val = cgdb_get_y_or_n(key, 0);
-
-        if (val == 1)
-            comptr->state = TAB_COMPLETION_COMPLETION_DISPLAY;
-        else if (val == 0)
-            comptr->state = TAB_COMPLETION_DONE;
-        else
-            return 0;           /* stay at the same state */
-    }
-
-    if (comptr->state == TAB_COMPLETION_QUERY_PAGER) {
-        int i = cgdb_get_y_or_n(key, 1);
-
-        if_clear_line();        /* Clear the --More-- */
-        if (i == 0)
-            comptr->state = TAB_COMPLETION_DONE;
-        else if (i == 2) {
-            comptr->lines--;
-            comptr->state = TAB_COMPLETION_COMPLETION_DISPLAY;
-        } else {
-            comptr->lines = 0;
-            comptr->state = TAB_COMPLETION_COMPLETION_DISPLAY;
-        }
-    }
-
-    if (comptr->state == TAB_COMPLETION_COMPLETION_DISPLAY) {
-        for (; comptr->total <= comptr->num_matches; comptr->total++) {
-            if_print(comptr->matches[comptr->total]);
-            if_print("\n");
-
-            comptr->lines++;
-            if (comptr->lines >= (gdb_window_size - 1) &&
-                    comptr->total < comptr->num_matches) {
-                if_print("--More--");
-                comptr->state = TAB_COMPLETION_QUERY_PAGER;
-                comptr->total++;
-                return 0;
-            }
-        }
-
-        comptr->state = TAB_COMPLETION_DONE;
-    }
-
-    if (comptr->state == TAB_COMPLETION_DONE) {
-        tab_completion_destroy(completion_ptr);
-        completion_ptr = NULL;
-        is_tab_completing = 0;
-    }
-
-    return 0;
-}
-
-/**
- * This is the function responsible for display the readline completions when there
- * is more than 1 item to complete. Currently it prints 1 per line.
- */
-static void
-readline_completion_display_func(char **matches, int num_matches,
-        int max_length)
-{
-    /* Create the tab completion item, and attempt to display it to the user */
-    completion_ptr = tab_completion_create(matches, num_matches, max_length);
-    if (!completion_ptr)
-        clog_error(CLOG_CGDB, "tab_completion_create error\n");
-
-    if (handle_tab_completion_request(completion_ptr, -1) == -1)
-        clog_error(CLOG_CGDB, "handle_tab_completion_request error\n");
-}
-
-int do_tab_completion(char **completions)
-{
-    int ret;
-
-    ret = rline_rl_complete(rline, completions, &readline_completion_display_func);
-    if (ret == -1)
-    {
-        clog_error(CLOG_CGDB, "rline_rl_complete error\n");
-        return -1;
-    }
-
-    /** 
-     * If completion_ptr is non-null, then this means CGDB still has to display
-     * the completion to the user. is_tab_completing can not be turned off until
-     * the completions are displayed to the user. */
-    if (!completion_ptr)
-        is_tab_completing = 0;
-
-    return 0;
-}
-
-void rl_sigint_recved(void)
-{
-    rline_clear(rline);
-    is_tab_completing = 0;
-}
-
-void rl_resize(int rows, int cols)
-{
-    rline_resize_terminal_and_redisplay(rline, rows, cols);
-}
-
-static void change_prompt(const char *new_prompt)
-{
-    rline_set_prompt(rline, new_prompt);
-}
-
-/* }}}*/
 
 /* ------------------------ */
 /* Initialization functions */
@@ -845,43 +426,11 @@ static void console_output(void *context, const std::string &str) {
     if_print(str.c_str());
 }
 
-/**
- * The console is ready for another command.
- */
-static void console_ready(void *context)
-{
-    rline_rl_forced_update_display(rline);
-}
-
-static void request_sent(void *context, struct tgdb_request *request,
-        const std::string &command) 
-{
-    if (request->header == TGDB_REQUEST_CONSOLE_COMMAND &&
-        request->choice.console_command.queued) {
-        char *prompt;
-        rline_get_prompt(rline, &prompt);
-        if (prompt) {
-            if_print(prompt);
-        }
-        if_print(request->choice.console_command.command);
-        if_print("\n");
-    } else if (request->header == TGDB_REQUEST_DEBUGGER_COMMAND) {
-        if_print("\n");
-    }
-    
-    if (cgdbrc_get_int(CGDBRC_SHOWDEBUGCOMMANDS)) {
-        if_sdc_print(command.c_str());
-    }
-}
-
-
 static void command_response(void *context, struct tgdb_response *response);
             
 tgdb_callbacks callbacks = { 
     NULL,       
     console_output,
-    console_ready,
-    request_sent,
     command_response
 };
 
@@ -891,7 +440,8 @@ tgdb_callbacks callbacks = {
  */
 static int start_gdb(int argc, char *argv[])
 {
-    tgdb = tgdb_initialize(debugger_path, argc, argv, &gdb_fd, callbacks);
+    tgdb = tgdb_initialize(debugger_path, argc, argv, get_gdb_height(),
+            get_gdb_width(), &gdb_console_fd, &gdb_mi_fd, callbacks);
     if (tgdb == NULL)
         return -1;
 
@@ -901,17 +451,7 @@ static int start_gdb(int argc, char *argv[])
 static void send_key(int focus, char key)
 {
     if (focus == 1) {
-        int size;
-        int masterfd;
-
-        masterfd = pty_pair_get_masterfd(pty_pair);
-        if (masterfd == -1)
-            clog_error(CLOG_CGDB, "send_key error");
-        size = write(masterfd, &key, sizeof (char));
-        if (size != 1)
-            clog_error(CLOG_CGDB, "send_key error");
-    } else if (focus == 2) {
-        tgdb_send_inferior_char(tgdb, key);
+        tgdb_send_char(tgdb, key);
     }
 }
 
@@ -947,9 +487,6 @@ static int user_input(void)
         return -1;
     } else if (val != 1 && val != 2)
         return 0;
-
-    if (val == 1 && completion_ptr)
-        return handle_tab_completion_request(completion_ptr, key);
 
     /* Process the key */
     if (kui_term_is_cgdb_key(key)) {
@@ -1114,11 +651,6 @@ static void update_source_files(struct tgdb_response *response)
     kui_input_acceptable = 1;
 }
 
-static void update_completions(struct tgdb_response *response)
-{
-    do_tab_completion(response->choice.update_completions.completions);
-}
-
 static void update_disassemble(struct tgdb_response *response)
 {
     if (response->choice.disassemble_function.error) {
@@ -1184,11 +716,6 @@ static void update_disassemble(struct tgdb_response *response)
     }
 }
 
-static void update_prompt(struct tgdb_response *response)
-{
-    change_prompt(response->choice.update_console_prompt_value.prompt_value);
-}
-
 static void command_response(void *context, struct tgdb_response *response)
 {
     switch (response->header)
@@ -1202,20 +729,12 @@ static void command_response(void *context, struct tgdb_response *response)
     case TGDB_UPDATE_SOURCE_FILES:
         update_source_files(response);
         break;
-    case TGDB_UPDATE_COMPLETIONS:
-        update_completions(response);
-        break;
     case TGDB_DISASSEMBLE_PC:
     case TGDB_DISASSEMBLE_FUNC:
         update_disassemble(response);
         break;
-    case TGDB_UPDATE_CONSOLE_PROMPT_VALUE:
-        update_prompt(response);
-        break;
     case TGDB_QUIT:
         cgdb_cleanup_and_exit(0);
-        break;
-    default:
         break;
     }
 }
@@ -1224,71 +743,18 @@ static void command_response(void *context, struct tgdb_response *response)
  *
  *  Returns:  -1 on error, 0 on success
  */
-static int gdb_input()
+static int gdb_input(int fd)
 {
     int result;
 
     /* Read from GDB */
-    result = tgdb_process(tgdb);
+    result = tgdb_process(tgdb, fd);
     if (result == -1) {
         clog_error(CLOG_CGDB, "tgdb_process error");
         return -1;
     }
 
     return 0;
-}
-
-static int readline_input()
-{
-    char buf[GDB_MAXBUF + 1];
-    int size;
-
-    int masterfd = pty_pair_get_masterfd(pty_pair);
-
-    if (masterfd == -1) {
-        clog_error(CLOG_CGDB, "pty_pair_get_masterfd error");
-        return -1;
-    }
-
-    size = read(masterfd, buf, GDB_MAXBUF);
-    if (size == -1) {
-        clog_error(CLOG_CGDB, "read error");
-        return -1;
-    }
-
-    buf[size] = 0;
-
-    /* Display GDB output 
-     * The strlen check is here so that if_print does not get called
-     * when displaying the filedlg. If it does get called, then the 
-     * gdb window gets displayed when the filedlg is up
-     */
-    if (size > 0)
-        if_rl_print(buf);
-
-    return 0;
-}
-
-/* child_input: Receives data from the child application:
- *
- *  Returns: -1 on error, 0 on EOF or number of bytes handled from child.
- */
-static ssize_t child_input()
-{
-    ssize_t size;
-    char buf[GDB_MAXBUF + 1];
-
-    /* Read from GDB */
-    size = tgdb_recv_inferior_data(tgdb, buf, GDB_MAXBUF);
-    if (size == -1) {
-        clog_error(CLOG_CGDB, "tgdb_recv_inferior_data error ");
-        return -1;
-    }
-    buf[size] = 0;
-
-    /* Display CHILD output */
-    if_tty_print(buf);
-    return size;
 }
 
 static int cgdb_resize_term(int fd)
@@ -1343,10 +809,6 @@ static int cgdb_handle_signal_in_main_loop(int fd)
         return -1;
     }
 
-    if (signo == SIGINT) {
-        rl_sigint_recved();
-    }
-
     tgdb_signal_notification(tgdb, signo);
 
     return 0;
@@ -1356,20 +818,6 @@ static int main_loop(void)
 {
     fd_set rset;
     int max;
-    int masterfd, slavefd;
-
-    masterfd = pty_pair_get_masterfd(pty_pair);
-    if (masterfd == -1) {
-        clog_error(CLOG_CGDB, "pty_pair_get_masterfd error");
-        return -1;
-    }
-
-    slavefd = pty_pair_get_slavefd(pty_pair);
-    if (slavefd == -1) {
-        clog_error(CLOG_CGDB, "pty_pair_get_slavefd error");
-        return -1;
-    }
-
 
     /* Main (infinite) loop:
      *   Sits and waits for input on either stdin (user input) or the
@@ -1378,38 +826,18 @@ static int main_loop(void)
      *   This will result in calls to the curses interface, typically. */
 
     for (;;) {
-        /**
-         * tty_fd can vary during the program. Some GDB variants, or perhaps
-         * OS's allow the inferior to close the terminal descriptor.
-         *
-         * CGDB reallocates a new one in this situation, for the next run of
-         * the inferior to have a place to send it's output.
-         *
-         * This varies the value of tty_fd, and forces us to compute the max
-         * each time in the loop.
-         */
-        int tty_fd = tgdb_get_inferior_fd(tgdb);
-
-        max = (gdb_fd > STDIN_FILENO) ? gdb_fd : STDIN_FILENO;
-        max = (max > tty_fd) ? max : tty_fd;
+        max = (gdb_console_fd > STDIN_FILENO) ? gdb_console_fd : STDIN_FILENO;
         max = (max > resize_pipe[0]) ? max : resize_pipe[0];
         max = (max > signal_pipe[0]) ? max : signal_pipe[0];
-        max = (max > slavefd) ? max : slavefd;
-        max = (max > masterfd) ? max : masterfd;
+        max = (max > gdb_mi_fd) ? max :gdb_mi_fd;
 
         /* Reset the fd_set, and watch for input from GDB or stdin */
         FD_ZERO(&rset);
         FD_SET(STDIN_FILENO, &rset);
-        FD_SET(gdb_fd, &rset);
-        FD_SET(tty_fd, &rset);
+        FD_SET(gdb_console_fd, &rset);
         FD_SET(resize_pipe[0], &rset);
         FD_SET(signal_pipe[0], &rset);
-
-        /* No readline activity allowed while displaying tab completion */
-        if (!is_tab_completing) {
-            FD_SET(slavefd, &rset);
-            FD_SET(masterfd, &rset);
-        }
+        FD_SET(gdb_mi_fd, &rset);
 
         /* Wait for input */
         if (select(max + 1, &rset, NULL, NULL, NULL) == -1) {
@@ -1431,18 +859,6 @@ static int main_loop(void)
             if (cgdb_resize_term(resize_pipe[0]) == -1)
                 return -1;
 
-        /* Input received through the pty:  Handle it 
-         * Wrote to masterfd, now slavefd is ready, tell readline */
-        if (FD_ISSET(slavefd, &rset))
-            rline_rl_callback_read_char(rline);
-
-        /* Input received through the pty:  Handle it
-         * Readline read from slavefd, and it wrote to the masterfd. 
-         */
-        if (FD_ISSET(masterfd, &rset))
-            if (readline_input() == -1)
-                return -1;
-
         /* Input received:  Handle it */
         if (FD_ISSET(STDIN_FILENO, &rset)) {
             int val = user_input_loop();
@@ -1458,36 +874,9 @@ static int main_loop(void)
                 return -1;
         }
 
-        /**
-         * Handle the debugged programs standard output.
-         * (Otherwise known as the inferior)
-         * child's ouptut -> stdout
-         * 
-         * The continue is important. It allows all of the child
-         * output to get written to stdout before tgdb's next command.
-         * This is because sometimes they are both ready.
-         *
-         * In the case that the tty_fd has been closed, do not continue
-         * or an infinite loop will occur (as the select loop is always
-         * activated on EOF). Instead fall through and let the remaining
-         * file descriptors get handled.
-         */
-        if (FD_ISSET(tty_fd, &rset)) {
-            ssize_t result = child_input();
-            if (result == -1) {
-                return -1;
-            } else if (result == 0) {
-                if (tgdb_tty_new(tgdb) == -1) {
-                    return -1;
-                }
-            } else {
-                continue;
-            }
-        }
-
         /* gdb's output -> stdout */
-        if (FD_ISSET(gdb_fd, &rset)) {
-            if (gdb_input() == -1) {
+        if (FD_ISSET(gdb_console_fd, &rset)) {
+            if (gdb_input(gdb_console_fd) == -1) {
                 return -1;
             }
 
@@ -1499,6 +888,12 @@ static int main_loop(void)
              */
             if (kui_manager_cangetkey(kui_ctx)) {
                 user_input_loop();
+            }
+        }
+
+        if (FD_ISSET(gdb_mi_fd, &rset)) {
+            if (gdb_input(gdb_mi_fd) == -1) {
+                return -1;
             }
         }
     }
@@ -1513,8 +908,6 @@ static int main_loop(void)
  * -------- */
 void cgdb_cleanup_and_exit(int val)
 {
-    current_line.clear();
-
     /* Cleanly scroll the screen up for a prompt */
     swin_scrl(1);
     swin_move(swin_lines() - 1, 0);
@@ -1533,11 +926,6 @@ void cgdb_cleanup_and_exit(int val)
     if_shutdown();
 
     hl_groups_shutdown(hl_groups_instance);
-
-#if 0
-    if (masterfd != -1)
-        util_free_tty(&masterfd, &slavefd, tty_name);
-#endif
 
     /* Finally, should display the errors. 
      * TGDB guarantees the logger to be open at this point.
@@ -1590,21 +978,16 @@ int init_signal_pipe(void)
     return result;
 }
 
+static void rlctx_send_user_command(char *line)
+{
+}
+static int tab_completion(int a, int b)
+{
+}
+
 int init_readline(void)
 {
-    int slavefd, masterfd;
     int length;
-
-    slavefd = pty_pair_get_slavefd(pty_pair);
-    if (slavefd == -1)
-        return -1;
-
-    masterfd = pty_pair_get_masterfd(pty_pair);
-    if (masterfd == -1)
-        return -1;
-
-    if (tty_off_xon_xoff(slavefd) == -1)
-        return -1;
 
     /* The 16 is because I don't know how many char's the directory separator 
      * is going to be, I expect it to be 1, but who knows. */
@@ -1612,36 +995,8 @@ int init_readline(void)
     readline_history_path = (char *) cgdb_malloc(sizeof (char) * length);
     fs_util_get_path(cgdb_home_dir, readline_history_filename,
             readline_history_path);
-    rline = rline_initialize(slavefd, rlctx_send_user_command, tab_completion,
-            "dumb");
+    rline = rline_initialize(rlctx_send_user_command, tab_completion, "dumb");
     rline_read_history(rline, readline_history_path);
-    return 0;
-}
-
-int create_and_init_pair()
-{
-    struct winsize size;
-    int slavefd;
-
-    pty_pair = pty_pair_create();
-    if (!pty_pair) {
-        fprintf(stderr, "%s:%d Unable to create PTY pair", __FILE__, __LINE__);
-        return -1;
-    }
-
-    slavefd = pty_pair_get_slavefd(pty_pair);
-    if (slavefd == -1) {
-        clog_error(CLOG_CGDB, "pty_pair_get_slavefd error");
-        return -1;
-    }
-
-    /* Set the pty winsize to the winsize of stdout */
-    if (ioctl(0, TIOCGWINSZ, &size) < 0)
-        return -1;
-
-    if (ioctl(slavefd, TIOCSWINSZ, &size) < 0)
-        return -1;
-
     return 0;
 }
 
@@ -1742,7 +1097,11 @@ static void cgdb_start_logging()
 {
     /* Open our cgdb and tgdb io logfiles */
     clog_open(CLOG_CGDB_ID, "%s/cgdb_log%d.txt", cgdb_log_dir);
-    clog_open(CLOG_GDBIO_ID, "%s/cgdb_gdb_io_log%d.txt", cgdb_log_dir);
+    clog_open(CLOG_GDBIO_ID, "%s/cgdb_gdb_console_io_log%d.txt", cgdb_log_dir);
+    clog_open(CLOG_GDBMIIO_ID, "%s/cgdb_gdb_mi_io_log%d.txt", cgdb_log_dir);
+
+    clog_set_level(CLOG_GDBMIIO_ID, CLOG_DEBUG);
+    clog_set_fmt(CLOG_GDBMIIO_ID, CGDB_CLOG_FORMAT);
 
     /* Puts cgdb in a mode where it writes a debug log of everything
      * that is read from gdb. That is basically the entire session.
@@ -1788,22 +1147,8 @@ int main(int argc, char *argv[])
 
     /* Initialize default option values */
     cgdbrc_init();
-
-    if (create_and_init_pair() == -1) {
-        fprintf(stderr, "%s:%d Unable to create PTY pair\n",
-                __FILE__, __LINE__);
-        exit(-1);
-    }
-
-    /* First create tgdb, because it has the error log */
-    if (start_gdb(argc, argv) == -1) {
-        fprintf(stderr, "%s:%d Unable to invoke debugger: %s\n",
-                __FILE__, __LINE__, debugger_path ? debugger_path : "gdb");
-        exit(-1);
-    }
-
+    
     /* From here on, the logger is initialized */
-
     if (init_readline() == -1) {
         clog_error(CLOG_CGDB, "Unable to init readline");
         cgdb_cleanup_and_exit(-1);
@@ -1856,6 +1201,13 @@ int main(int argc, char *argv[])
     if (init_signal_pipe() == -1) {
         clog_error(CLOG_CGDB, "init_signal_pipe error");
         cgdb_cleanup_and_exit(-1);
+    }
+
+    /* First create tgdb, because it has the error log */
+    if (start_gdb(argc, argv) == -1) {
+        fprintf(stderr, "%s:%d Unable to invoke debugger: %s\n",
+                __FILE__, __LINE__, debugger_path ? debugger_path : "gdb");
+        exit(-1);
     }
 
     /* Enter main loop */

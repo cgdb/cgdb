@@ -131,9 +131,6 @@ ssize_t io_read(int fd, void *buf, size_t count)
 
     } else if (amountRead == 0) {   /* EOF */
         return 0;
-    } else {
-        std::string str = sys_quote_nonprintables((char *)buf, amountRead);
-        clog_debug(CLOG_GDBIO, "%s", str.c_str());
     }
 
     return amountRead;

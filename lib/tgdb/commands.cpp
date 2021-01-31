@@ -42,11 +42,6 @@ struct commands {
     enum tgdb_request_type current_request_type;
 
     /**
-     * The current tab completion items.
-     */
-    char **completions;
-
-    /**
      * The disassemble command output.
      */
     char **disasm;
@@ -204,21 +199,10 @@ static void send_disassemble_func_complete_response(struct commands *c,
     tgdb_send_response(c->tgdb, response);
 }
 
-static void send_command_complete_response(struct commands *c)
-{
-    struct tgdb_response *response =
-        tgdb_create_response(TGDB_UPDATE_COMPLETIONS);
-
-    response->choice.update_completions.completions = c->completions;
-    /* Clear commands completions since we've just stolen that pointer. */
-    c->completions = NULL;
-
-    tgdb_send_response(c->tgdb, response);
-}
-
 static void
-commands_send_source_file(struct commands *c, char *fullname, char *file,
-        uint64_t address, char *from, char *func, int line)
+commands_send_source_file(struct commands *c, const char *fullname,
+        const char *file, uint64_t address, const char *from,
+        const char *func, int line)
 {
     /* This section allocates a new structure to add into the queue 
      * All of its members will need to be freed later.
@@ -349,18 +333,7 @@ static void gdbwire_stream_record_callback(void *context,
                 }
             }
             break;
-        case TGDB_REQUEST_COMPLETE:
-            if (stream_record->kind == GDBWIRE_MI_CONSOLE) {
-                char *str = stream_record->cstring;
-                size_t length = strlen(str);
-                if (str[length-1] == '\n') {
-                    str[length-1] = 0;
-                }
-                sbpush(c->completions, cgdb_strdup(str));
-            }
-            break;
         case TGDB_REQUEST_DATA_DISASSEMBLE_MODE_QUERY:
-        case TGDB_REQUEST_CONSOLE_COMMAND:
         case TGDB_REQUEST_INFO_SOURCES:
         case TGDB_REQUEST_INFO_SOURCE_FILE:
         case TGDB_REQUEST_TTY:
@@ -370,9 +343,71 @@ static void gdbwire_stream_record_callback(void *context,
     }
 }
 
+static void
+source_position_changed(struct commands *c, gdbwire_mi_result *result)
+{
+    std::string frame("frame");
+    std::string addr("addr");
+    std::string fullname("fullname");
+    std::string line("line");
+
+    while (result) {
+        if (frame == result->variable &&
+            result->kind == GDBWIRE_MI_TUPLE) {
+
+            uint64_t addr_value;
+            bool addr_value_set = false;
+
+            std::string fullname_value;
+            bool fullname_value_set = false;
+
+            int line_value;
+            bool line_value_set = false;
+
+            struct gdbwire_mi_result *fresult = result->variant.result;
+
+            while (fresult) {
+                if (addr == fresult->variable) {
+                    addr_value = std::stoull(
+                            fresult->variant.cstring, 0, 16);
+                    addr_value_set = true;
+                } else if (fullname == fresult->variable) {
+                    fullname_value = fresult->variant.cstring;
+                    fullname_value_set = true;
+                } else if (line == fresult->variable) {
+                    line_value = std::stoi(fresult->variant.cstring);
+                    line_value_set = true;
+                }
+                fresult = fresult->next;
+            }
+
+            if(addr_value_set && fullname_value_set && line_value_set) {
+                commands_send_source_file(c, fullname_value.c_str(),
+                        NULL, addr_value, NULL, NULL, line_value);
+            }
+        }
+
+        result = result->next;
+    }
+}
+
+void tgdb_breakpoints_changed(void *context);
 static void gdbwire_async_record_callback(void *context,
         struct gdbwire_mi_async_record *async_record)
 {
+    struct commands *c = (struct commands*)context;
+
+    switch (async_record->async_class) {
+        case GDBWIRE_MI_ASYNC_STOPPED:
+        case GDBWIRE_MI_ASYNC_THREAD_SELECTED:
+            source_position_changed(c, async_record->result);
+            break;
+        case GDBWIRE_MI_ASYNC_BREAKPOINT_CREATED:
+        case GDBWIRE_MI_ASYNC_BREAKPOINT_MODIFIED:
+        case GDBWIRE_MI_ASYNC_BREAKPOINT_DELETED:
+            tgdb_breakpoints_changed(c->tgdb);
+            break;
+    }
 }
 
 static void gdbwire_result_record_callback(void *context,
@@ -391,9 +426,6 @@ static void gdbwire_result_record_callback(void *context,
         case TGDB_REQUEST_DISASSEMBLE_FUNC:
             send_disassemble_func_complete_response(c, result_record);
             break;
-        case TGDB_REQUEST_COMPLETE:
-            send_command_complete_response(c);
-            break;
         case TGDB_REQUEST_DATA_DISASSEMBLE_MODE_QUERY:
             /**
              * If the mode was to high, than the result record would be
@@ -402,7 +434,7 @@ static void gdbwire_result_record_callback(void *context,
              */
             if (result_record->result_class == GDBWIRE_MI_DONE) {
                 c->disassemble_supports_s_mode = 1;
-                clog_info(CLOG_GDBIO, "disassemble supports s mode");
+                clog_info(CLOG_CGDB, "disassemble supports s mode");
             }
             break;
         case TGDB_REQUEST_INFO_SOURCE_FILE:
@@ -412,20 +444,29 @@ static void gdbwire_result_record_callback(void *context,
             commands_process_info_frame(c, result_record);
             break;
         case TGDB_REQUEST_TTY:
-        case TGDB_REQUEST_CONSOLE_COMMAND:
         case TGDB_REQUEST_DEBUGGER_COMMAND:
         case TGDB_REQUEST_MODIFY_BREAKPOINT:
             break;
     }
 }
 
+void tgdb_console_at_prompt(void *context);
 static void gdbwire_prompt_callback(void *context, const char *prompt)
 {
+    struct commands *c = (struct commands*)context;
+    tgdb_console_at_prompt(c->tgdb);
 }
 
 static void gdbwire_parse_error_callback(void *context, const char *mi,
             const char *token, struct gdbwire_mi_position position)
 {
+    clog_error(CLOG_CGDB,
+        "gdbwire parse error\n"
+        "  mi text=[%s]\n"
+        "  token=[%s]\n"
+        "  start col=[%d]\n"
+        "  end col=[%d]\n",
+        mi, token, position.start_column, position.end_column);
 }
 
 static struct gdbwire_callbacks wire_callbacks =
@@ -443,8 +484,6 @@ struct commands *commands_initialize(struct tgdb *tgdb)
     struct commands *c =
             (struct commands *) cgdb_malloc(sizeof (struct commands));
     c->tgdb = tgdb;
-    c->current_request_type = TGDB_REQUEST_CONSOLE_COMMAND;
-    c->completions = NULL;
 
     c->disasm = NULL;
     c->address_start = 0;
@@ -491,11 +530,6 @@ void commands_set_current_request_type(struct commands *c,
         enum tgdb_request_type type)
 {
     c->current_request_type = type;
-}
-
-enum tgdb_request_type commands_get_current_request_type(struct commands *c)
-{
-    return c->current_request_type;
 }
 
 int commands_disassemble_supports_s_mode(struct commands *c)

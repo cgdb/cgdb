@@ -179,21 +179,32 @@ static int pty_free_memory(char *s, int fd, int argc, char *argv[])
 }
 
 int invoke_debugger(const char *path,
-        int argc, char *argv[], int *in, int *out, int choice)
+        int argc, char *argv[], int gdb_win_rows, int gdb_win_cols,
+        int *in, int *out, const char *new_ui_tty)
 {
     pid_t pid;
     const char *const GDB = "gdb";
     const char *const NW = "--nw";
+    const char *const Q = "-q";
     const char *const EX = "-ex";
-    const char *const ANNOTATE_TWO = "--annotate=2";
-    const char *const GDBMI = "-i=mi2";
-    const char *const SET_ANNOTATE_TWO = "set annotate 2";
-    const char *const SET_PAGINATION_OFF = "set pagination off";
     char **local_argv;
-    int i, j = 0, extra = 8;
+    int i, j = 0, extra = 7;
     int malloc_size = argc + extra;
     char slavename[64];
     int masterfd;
+
+    struct winsize size, *winsize;
+    size.ws_row = gdb_win_rows;
+    size.ws_col = gdb_win_cols;
+    size.ws_xpixel = 0;
+    size.ws_ypixel = 0;
+
+    if (gdb_win_rows == 0 && gdb_win_cols == 0) {
+        winsize = 0;
+    } else {
+        winsize = &size;
+    }
+
 
     /* Copy the argv into the local_argv, and NULL terminate it.
      * sneak in the path name, the user did not type that */
@@ -210,16 +221,11 @@ int invoke_debugger(const char *path,
     local_argv[j++] = cgdb_strdup(NW);
 
     local_argv[j++] = cgdb_strdup(EX);
-    local_argv[j++] = cgdb_strdup(SET_ANNOTATE_TWO);
+    local_argv[j++] = cgdb_strdup("set pagination off");
 
     local_argv[j++] = cgdb_strdup(EX);
-    local_argv[j++] = cgdb_strdup(SET_PAGINATION_OFF);
-
-    /* add the init file that the user did not type */
-    if (choice == 0)
-        local_argv[j++] = cgdb_strdup(ANNOTATE_TWO);
-    else if (choice == 1)
-        local_argv[j++] = cgdb_strdup(GDBMI);
+    local_argv[j++] = cgdb_strdup(std::string("new-ui mi ").
+            append(new_ui_tty).c_str());
 
     /* copy in all the data the user entered */
     for (i = 0; i < argc; i++)
@@ -240,17 +246,15 @@ int invoke_debugger(const char *path,
     }
 
     /* Fork into two processes with a shared pty pipe */
-    pid = pty_fork(&masterfd, slavename, SLAVE_SIZE, NULL, NULL);
+    pid = pty_fork(&masterfd, slavename, SLAVE_SIZE, NULL, winsize);
 
     if (pid == -1) {            /* error, free memory and return  */
         pty_free_memory(slavename, masterfd, argc, local_argv);
         clog_error(CLOG_CGDB, "fork failed");
         return -1;
     } else if (pid == 0) {      /* child */
-        FILE *fd = fopen(slavename, "r");
-
-        if (fd)
-            tty_set_echo(fileno(fd), 0);
+        // This configures gdb's readline to be in TERM=dumb mode
+        setenv("TERM", "dumb", 1);
 
         /* If this is not called, when user types ^c SIGINT gets sent to gdb */
         setsid();

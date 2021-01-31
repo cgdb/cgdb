@@ -72,11 +72,12 @@ const char *pty_pair_get_slavename(pty_pair_ptr pty_pair);
  *             pointers must be terminated by a NULL pointer.
  *      in:    Writing to this fd, will write to the STDIN of new program.
  *      out:   Reading from fd, will read from the STDOUT-STDERR of new program.
- *      choice: 0 for annotate 2, 1 for gdbmi
+ *      new_ui_tty: The path to the new ui tty device
  *
  *      Return: -1 on error, pid of child on success
  */
 int invoke_debugger(const char *path,
-        int argc, char *argv[], int *in, int *out, int choice);
+        int argc, char *argv[], int gdb_win_rows, int gdb_win_cols,
+        int *in, int *out, const char *new_ui_tty);
 
 #endif

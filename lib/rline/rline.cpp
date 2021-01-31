@@ -1,6 +1,7 @@
 #include <stretchy.h>
 #include <sys_util.h>
 #include "rline.h"
+#include "fork_util.h"
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -59,6 +60,9 @@ struct rline {
      * descritpor. Thus, reading from this, get's readline's output. */
     FILE *output;
 
+    /** Master/Slave PTY used to keep readline off of stdin/stdout. */
+    pty_pair_ptr pty_pair;
+
     /* The user defined tab completion function */
     completion_cb *tab_completion;
 
@@ -78,7 +82,7 @@ static void custom_deprep_term_function()
 }
 
 /* Createing and Destroying a librline context. {{{*/
-struct rline *rline_initialize(int slavefd, command_cb * command,
+struct rline *rline_initialize(command_cb * command,
         completion_cb * completion, const char *TERM)
 {
     struct rline *rline = (struct rline *) malloc(sizeof (struct rline));
@@ -90,6 +94,13 @@ struct rline *rline_initialize(int slavefd, command_cb * command,
     /* Initialize each member variable */
     rline->input = NULL;
     rline->output = NULL;
+
+    rline->pty_pair = pty_pair_create();
+    if (!rline->pty_pair) {
+        return NULL;
+    }
+
+    int slavefd = pty_pair_get_masterfd(rline->pty_pair);
 
     rline->input = fdopen(slavefd, "r");
     if (!rline->input) {
@@ -166,6 +177,8 @@ int rline_shutdown(struct rline *rline)
 
     if (rline->output)
         fclose(rline->output);
+
+    pty_pair_destroy(rline->pty_pair);
 
     free(rline);
     rline = NULL;
@@ -346,8 +359,8 @@ int rline_rl_complete(struct rline *rline, char **completions,
     if (!rline)
         return -1;
 
-    /* Currently, if readline output's the tab completion to rl_outstream, it will fill
-     * the pty between it and CGDB and will cause CGDB to hang. */
+    /* Currently, if readline output's the tab completion to rl_outstream,
+     * it will fill the pty between it and CGDB and will cause CGDB to hang. */
     if (!display_cb)
         return -1;
 

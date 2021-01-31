@@ -118,11 +118,6 @@
 
     enum tgdb_request_type {
         /**
-         * A command the user typed at the console.
-         */
-        TGDB_REQUEST_CONSOLE_COMMAND,
-
-        /**
          * Get a list of all the source files in the program being debugged.
          */
         TGDB_REQUEST_INFO_SOURCES,
@@ -199,14 +194,6 @@
         TGDB_REQUEST_MODIFY_BREAKPOINT,
 
         /**
-         * Request GDB to give a list of tab completions for a given string
-         *
-         * This request is usually invoked when the user types <tab>
-         * at the gdb console.
-         */
-        TGDB_REQUEST_COMPLETE,
-
-        /**
          * Request GDB to disassemble the function surrounding the pc of the
          * selected frame.
          */
@@ -226,13 +213,6 @@
             struct {
                 /** The null terminated console command to pass to GDB */
                 const char *command;
-                /**
-                 * Track if the request went into the request queue or not.
-                 *
-                 * True if request went into the queue, false if run
-                 * immediately
-                 */
-                bool queued;
             } console_command;
 
             struct {
@@ -254,11 +234,6 @@
                 /* The action to take */
                 enum tgdb_breakpoint_action b;
             } modify_breakpoint;
-
-            struct {
-                /* The line to ask GDB for completions for */
-                const char *line;
-            } complete;
 
             struct {
                 int lines;
@@ -298,12 +273,6 @@
         TGDB_UPDATE_SOURCE_FILES,
 
     /**
-     * This returns a list of all the completions.
-     *
-     */
-        TGDB_UPDATE_COMPLETIONS,
-
-    /**
      * Disassemble $pc output
      *
      */
@@ -314,9 +283,6 @@
      *
      */
         TGDB_DISASSEMBLE_FUNC,
-
-    /** The prompt has changed, here is the new value.  */
-        TGDB_UPDATE_CONSOLE_PROMPT_VALUE,
 
     /**
      * This happens when gdb quits.
@@ -361,13 +327,6 @@
                 int exit_status;
             } inferior_exited;
 
-            /* header == TGDB_UPDATE_COMPLETIONS */
-            struct {
-                /* This sb array has elements of 'const char *'
-                 * representing each possible completion. */
-                char **completions;
-            } update_completions;
-
             /* header == TGDB_DISASSEMBLE_FUNC */
             struct {
                 uint64_t addr_start;
@@ -375,12 +334,6 @@
                 int error;
                 char **disasm;
             } disassemble_function;
-
-            /* header == TGDB_UPDATE_CONSOLE_PROMPT_VALUE */
-            struct {
-                /* The new prompt GDB has reported */
-                const char *prompt_value;
-            } update_console_prompt_value;
 
             /* header == TGDB_QUIT */
             struct {
