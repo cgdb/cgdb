@@ -61,7 +61,7 @@
 #include "cgdbrc.h"
 #include "highlight_groups.h"
 #include "interface.h"
-#include "tgdb_types.h"
+#include "tgdb.h"
 
 int sources_syntax_on = 1;
 

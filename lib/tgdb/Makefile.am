@@ -8,9 +8,6 @@ noinst_LIBRARIES = libtgdb.a
 libtgdb_a_SOURCES = \
     tgdb.cpp \
     tgdb.h \
-    tgdb_types.h \
-    commands.cpp \
-    commands.h \
     gdbwire.c \
     gdbwire.h 
 
