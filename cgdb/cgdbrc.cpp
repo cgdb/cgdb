@@ -869,23 +869,6 @@ static void variable_changed_cb(struct ConfigVariable *variable)
         tgdb_request_current_location(tgdb);
 }
 
-int command_do_disassemble(int param)
-{
-    int ret;
-    struct sviewer *sview = if_get_sview();
-
-    ret = source_set_exec_addr(sview, 0);
-
-    if (!ret) {
-        if_draw();
-    } else if (sview->addr_frame) {
-        /* No disasm found - request it */
-        tgdb_request_disassemble_func(tgdb, DISASSEMBLE_FUNC_SOURCE_LINES);
-    }
-
-    return 0;
-}
-
 int command_parse_set(void)
 {
     /* commands could look like the following:
