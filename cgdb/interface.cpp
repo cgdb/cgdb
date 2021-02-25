@@ -543,12 +543,7 @@ static void validate_window_sizes(void)
         window_shift = min_window_size_shift;
 }
 
-/* if_layout: Update the layout of the screen based on current terminal size.
- * ----------
- *
- * Return Value: Zero on success, -1 on failure.
- */
-static int if_layout()
+int if_layout()
 {
     SWINDOW *gdb_scroller_win = NULL;
     SWINDOW *src_viewer_win = NULL;
@@ -1308,10 +1303,6 @@ int if_init(void)
 
     /* Set up window layout */
     window_shift = (int) ((HEIGHT / 2) * (cur_win_split / 2.0));
-    switch (if_layout()) {
-        case 2:
-            return 4;
-    }
 
     return 0;
 }

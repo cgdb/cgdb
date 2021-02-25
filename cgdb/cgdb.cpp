@@ -1147,6 +1147,20 @@ int main(int argc, char *argv[])
 
     /* Initialize default option values */
     cgdbrc_init();
+
+    /* Initialize the display */
+    if (if_init() == -1)
+    {
+        clog_error(CLOG_CGDB, "if_init() failed.");
+        cgdb_cleanup_and_exit(-1);
+    }
+
+    /* First create tgdb, because it has the error log */
+    if (start_gdb(argc, argv) == -1) {
+        fprintf(stderr, "%s:%d Unable to invoke debugger: %s\n",
+                __FILE__, __LINE__, debugger_path ? debugger_path : "gdb");
+        exit(-1);
+    }
     
     /* From here on, the logger is initialized */
     if (init_readline() == -1) {
@@ -1184,12 +1198,7 @@ int main(int argc, char *argv[])
     */
     parse_cgdbrc_file();
 
-    /* Initialize the display */
-    if (if_init() == -1)
-    {
-        clog_error(CLOG_CGDB, "if_init() failed.");
-        cgdb_cleanup_and_exit(-1);
-    }
+    if_layout();
 
     /* Initialize the pipe that is used for resize */
     if (init_resize_pipe() == -1) {
@@ -1201,13 +1210,6 @@ int main(int argc, char *argv[])
     if (init_signal_pipe() == -1) {
         clog_error(CLOG_CGDB, "init_signal_pipe error");
         cgdb_cleanup_and_exit(-1);
-    }
-
-    /* First create tgdb, because it has the error log */
-    if (start_gdb(argc, argv) == -1) {
-        fprintf(stderr, "%s:%d Unable to invoke debugger: %s\n",
-                __FILE__, __LINE__, debugger_path ? debugger_path : "gdb");
-        exit(-1);
     }
 
     /* Enter main loop */

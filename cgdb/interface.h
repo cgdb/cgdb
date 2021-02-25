@@ -19,12 +19,7 @@
 /* if_init: Initializes the interface.
  * --------
  *
- * Return Value: Zero on success, or...
- *               1: Initializing curses failed
- *               2: Signal handler install failed
- *               3: hl groups couldn't be setup
- *               4: Can't create new GDB scroller
- *               5: Can not init the file dialog
+ * Return Value: Zero on success, or -1 on error
  */
 int if_init(void);
 
@@ -244,6 +239,13 @@ int if_change_winminwidth(int value);
  * 0 on success or -1 on error
  */
 int if_clear_line(void);
+
+/* if_layout: Update the layout of the screen based on current terminal size.
+ * ----------
+ *
+ * Return Value: Zero on success, -1 on failure.
+ */
+int if_layout();
 
 int get_gdb_height(void);
 int get_gdb_width(void);
