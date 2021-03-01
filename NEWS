@@ -1,3 +1,25 @@
+  * Major CGDB update (requires GDB 7.12 or newer)
+    - CGDB now communicates with GDB using MI only (instead of Annotations)
+      using the new-ui GDB command (GDB 7.12+)
+    - CGDB now fully supports the GDB console, including readline and
+      communicating with the inferior (the program being debugged)
+    - CGDB no longer uses the inferior tty option to talk to the inferior
+    
+    Fix the following github issues
+    - Messed up input with latest gdb #247 
+    - press T, it cannot open I/O window #244  (no longer necessary)
+    - Support disabling the inferior pty #241 
+    - Any plan to add tty window back? #209 
+    - Debugging a forking program fails on first run #204 
+    - Ctrl - T doesn't seem to work (cgdb 0.7.0) #193 
+    - inputrc enable-keypad messing with readline #190 
+    - GDB command-line options not working #160 
+    - Logging output uses machine interface? #158 
+    - Pagination of long output is not properly handled #145 
+    - cgdb stucks on fgets #130 
+    - Autocompletion on directories failes to append '/' #96 
+    - GDB Prompt Hangs after Pressing Tab in a "Command List" #67 
+
   * CGDB works again with newer versions of GDB (gdb 8.3 and above)
     CGDB annotation support was broken by the following GDB issue,
       https://sourceware.org/bugzilla/show_bug.cgi?id=25190
