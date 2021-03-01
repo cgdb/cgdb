@@ -27,6 +27,7 @@
 #include <inttypes.h>
 
 #include <list>
+#include <sstream>
 
 #include "tgdb.h"
 #include "fork_util.h"
@@ -111,6 +112,17 @@ struct tgdb {
 
     // True if the disassemble command supports /s, otherwise false.
     int disassemble_supports_s_mode;
+
+    // True if GDB supports the 'new-ui' command, otherwise false.
+    // If gdb prints out,
+    //   Undefined command: "new-ui".  Try "help".
+    // on the console output, then it does not support the new-ui command.
+    // Otherwise it is assumed that it does support the command.
+    bool gdb_supports_new_ui_command;
+
+    // Temporary buffer used to store the line by line console output
+    // in order to search for the unsupported new ui string above.
+    std::string *undefined_new_ui_command;
 };
 
 // This is the type of request
@@ -642,6 +654,8 @@ static struct tgdb *initialize_tgdb_context(tgdb_callbacks callbacks)
     tgdb->wire = gdbwire_create(wire_callbacks);
 
     tgdb->disassemble_supports_s_mode = 0;
+    tgdb->gdb_supports_new_ui_command = true;
+    tgdb->undefined_new_ui_command = new std::string();
 
     return tgdb;
 }
@@ -776,6 +790,8 @@ struct tgdb *tgdb_initialize(const char *debugger,
 
 int tgdb_shutdown(struct tgdb *tgdb)
 {
+    delete tgdb->undefined_new_ui_command;
+
     tgdb_request_ptr_list::iterator iter = tgdb->command_requests->begin();
     for (; iter != tgdb->command_requests->end(); ++iter) {
         tgdb_request_destroy(*iter);
@@ -969,10 +985,11 @@ int tgdb_send_char(struct tgdb *tgdb, char c)
  * \return
  * 0 on success or -1 on error
  */
-static int tgdb_add_quit_command(struct tgdb *tgdb)
+static int tgdb_add_quit_command(struct tgdb *tgdb, bool new_ui_unsupported)
 {
     struct tgdb_response *response;
     response = tgdb_create_response(TGDB_QUIT);
+    response->choice.quit.new_ui_unsupported = new_ui_unsupported;
     tgdb_send_response(tgdb, response);
     return 0;
 }
@@ -1027,6 +1044,35 @@ static void tgdb_handle_control_c(struct tgdb *tgdb)
     }
 }
 
+// Search for the string
+//   Undefined command: "new-ui"
+// to determine if this gdb supports the new-ui command or not.
+// If the string is found, set tgdb->gdb_supports_new_ui_command to false
+static void tgdb_search_for_unsupported_new_ui_message(
+        struct tgdb *tgdb, const std::string &console_output)
+{
+    static const char *new_ui_text = "Undefined command: \"new-ui\".";
+    
+    (*tgdb->undefined_new_ui_command) += console_output;
+
+    std::istringstream ss(*tgdb->undefined_new_ui_command);
+    std::string line;
+    while (getline(ss, line)) {
+        if (line.find(new_ui_text) == 0) {
+            tgdb->gdb_supports_new_ui_command = false;
+            break;
+        }
+    }
+
+    // Remove everything up to the last newline character so that
+    // only newly added new lines are searched
+    size_t pos = tgdb->undefined_new_ui_command->find_last_of("\n");
+    if (pos != std::string::npos) {
+        *tgdb->undefined_new_ui_command = 
+                tgdb->undefined_new_ui_command->substr(pos);
+    }
+}
+
 int tgdb_process(struct tgdb * tgdb, int fd)
 {
     const int n = 4096;
@@ -1045,17 +1091,26 @@ int tgdb_process(struct tgdb * tgdb, int fd)
         // Error reading from GDB
         clog_error(CLOG_CGDB, "Error reading from gdb's stdout, closing down");
         result = -1;
-        tgdb_add_quit_command(tgdb);
+        tgdb_add_quit_command(tgdb, false);
     } else if (size == 0) {
         // Read EOF from GDB
         clog_info(CLOG_GDBIO, "read EOF from GDB, closing down");
-        tgdb_add_quit_command(tgdb);
+        tgdb_add_quit_command(tgdb, false);
     } else {
         if (fd == tgdb->debugger_stdout) {
             // Read some GDB console output, process it
             std::string str = sys_quote_nonprintables(buf, size);
             clog_debug(CLOG_GDBIO, "%s", str.c_str());
             std::string msg(buf, size);
+
+            // Determine if this gdb supports the new-ui command.
+            // If it does not, send the quit command to alert the user
+            // that they need a newer gdb.
+            tgdb_search_for_unsupported_new_ui_message(tgdb, msg);
+            if (!tgdb->gdb_supports_new_ui_command) {
+                tgdb_add_quit_command(tgdb, true);
+            }
+
             tgdb->callbacks.console_output_callback(
                     tgdb->callbacks.context, msg);
         } else if (fd == tgdb->gdb_mi_ui_fd){

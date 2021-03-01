@@ -106,6 +106,7 @@ char *readline_history_path;    /* After readline init is called, this will
 
 static int gdb_console_fd = -1; /* GDB console descriptor */
 static int gdb_mi_fd = -1;      /* GDB Machine Interface descriptor */
+static bool new_ui_unsupported = false;
 
 static char *debugger_path = NULL;  /* Path to debugger to use */
 
@@ -734,6 +735,7 @@ static void command_response(void *context, struct tgdb_response *response)
         update_disassemble(response);
         break;
     case TGDB_QUIT:
+        new_ui_unsupported = response->choice.quit.new_ui_unsupported;
         cgdb_cleanup_and_exit(0);
         break;
     }
@@ -952,6 +954,10 @@ void cgdb_cleanup_and_exit(int val)
             " CGDB log directory: %s\n"
             " Lines beginning with ERROR: are an issue.\n",
             cgdb_log_dir);
+    }
+
+    if (new_ui_unsupported) {
+        fprintf(stderr, "cgdb requires gdb 7.12 or later\n");
     }
 
     exit(val);

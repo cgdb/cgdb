@@ -227,7 +227,10 @@
 
             // header == TGDB_QUIT
             struct {
-                // Currently not telling the front end how GDB quit
+                // If the GDB being used is pre new-ui, before GDB 7.12
+                // then it is unsupported, and this will be set to true.
+                // Otherwise, this will be set to false.
+                bool new_ui_unsupported;
             } quit;
 
         } choice;
