@@ -247,7 +247,4 @@ int if_clear_line(void);
  */
 int if_layout();
 
-int get_gdb_height(void);
-int get_gdb_width(void);
-
 #endif

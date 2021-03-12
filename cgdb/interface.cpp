@@ -289,7 +289,7 @@ static int get_gdb_col(void)
     return result;
 }
 
-int get_gdb_height(void)
+static int get_gdb_height(void)
 {
     int result;
 
@@ -309,7 +309,7 @@ int get_gdb_height(void)
     return result;
 }
 
-int get_gdb_width(void)
+static int get_gdb_width(void)
 {
     int result;
 

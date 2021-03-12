@@ -441,8 +441,11 @@ tgdb_callbacks callbacks = {
  */
 static int start_gdb(int argc, char *argv[])
 {
-    tgdb = tgdb_initialize(debugger_path, argc, argv, get_gdb_height(),
-            get_gdb_width(), &gdb_console_fd, &gdb_mi_fd, callbacks);
+    // Note, the 40 height by 80 width size here will be overriden
+    // once cgdb determines the actual size. This is done in main() in
+    // the call to if_layout just after if_init.
+    tgdb = tgdb_initialize(debugger_path, argc, argv, 40,
+            80, &gdb_console_fd, &gdb_mi_fd, callbacks);
     if (tgdb == NULL)
         return -1;
 
@@ -1154,13 +1157,6 @@ int main(int argc, char *argv[])
     /* Initialize default option values */
     cgdbrc_init();
 
-    /* Initialize the display */
-    if (if_init() == -1)
-    {
-        clog_error(CLOG_CGDB, "if_init() failed.");
-        cgdb_cleanup_and_exit(-1);
-    }
-
     /* First create tgdb, because it has the error log */
     if (start_gdb(argc, argv) == -1) {
         fprintf(stderr, "%s:%d Unable to invoke debugger: %s\n",
@@ -1203,6 +1199,13 @@ int main(int argc, char *argv[])
        can disable color, ansi escape parsing, or set Logo color.
     */
     parse_cgdbrc_file();
+
+    /* Initialize the display */
+    if (if_init() == -1)
+    {
+        clog_error(CLOG_CGDB, "if_init() failed.");
+        cgdb_cleanup_and_exit(-1);
+    }
 
     if_layout();
 
