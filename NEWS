@@ -20,6 +20,10 @@
     - Autocompletion on directories failes to append '/' #96 
     - GDB Prompt Hangs after Pressing Tab in a "Command List" #67 
 
+  * Fix auto source reload issue, issue #235 and #221
+    Occasionally, CGDB would not properly reload source files when they
+    had changed. Now CGDB will reload them on change.
+
   * CGDB works again with newer versions of GDB (gdb 8.3 and above)
     CGDB annotation support was broken by the following GDB issue,
       https://sourceware.org/bugzilla/show_bug.cgi?id=25190
