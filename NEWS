@@ -20,6 +20,11 @@
     - Autocompletion on directories failes to append '/' #96 
     - GDB Prompt Hangs after Pressing Tab in a "Command List" #67 
 
+  * Fix issue #239, ANSI escape issues with GDB-9
+    Color sequences like, [?1l,[?1h,=,>" are now ignored by CGDB rather
+    than producing garbage looking text in the gdb terminal.
+    
+
   * Fix auto source reload issue, issue #235 and #221
     Occasionally, CGDB would not properly reload source files when they
     had changed. Now CGDB will reload them on change.
