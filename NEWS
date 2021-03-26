@@ -20,6 +20,14 @@
     - Autocompletion on directories failes to append '/' #96 
     - GDB Prompt Hangs after Pressing Tab in a "Command List" #67 
 
+    Note that CGDB used to set TERM=dumb, but now sets TERM=vanilla
+     - When TERM=dumb, GDB will not enable cli styling, so no color is printed
+     - CGDB only set TERM=dumb to ensure readline would not print terminal
+       escape characters to modify the current line
+     - CGDB now sets TERM=vanilla, which GDB ignores and readline seems
+       to properly treat as a dumb terminal
+     - This change fixes issue #251: GDB console does not display color
+
   * Fix issue #239, ANSI escape issues with GDB-9
     Color sequences like, [?1l,[?1h,=,>" are now ignored by CGDB rather
     than producing garbage looking text in the gdb terminal.

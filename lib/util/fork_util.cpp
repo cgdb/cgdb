@@ -253,8 +253,8 @@ int invoke_debugger(const char *path,
         clog_error(CLOG_CGDB, "fork failed");
         return -1;
     } else if (pid == 0) {      /* child */
-        // This configures gdb's readline to be in TERM=dumb mode
-        setenv("TERM", "dumb", 1);
+        // This configures gdb's readline to be in TERM=vanilla mode
+        setenv("TERM", "vanilla", 1);
 
         /* If this is not called, when user types ^c SIGINT gets sent to gdb */
         setsid();
