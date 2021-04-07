@@ -899,7 +899,17 @@ static char *tgdb_client_modify_breakpoint_call(struct tgdb *tgdb,
 void tgdb_run_or_queue_request(struct tgdb *tgdb,
         struct tgdb_request *request, bool priority)
 {
-    int can_issue = tgdb->is_gdb_ready_for_next_command;
+    int can_issue;
+    
+    // Debugger commands currently get executed in the gdb console
+    // rather than the gdb mi channel. The gdb console is no longer
+    // queued by CGDB, rather CGDB passes everything along to it that the
+    // user types. So always issue debugger commands for now.
+    if (request->header == TGDB_REQUEST_DEBUGGER_COMMAND) {
+        can_issue = 1;
+    } else {
+        can_issue = tgdb->is_gdb_ready_for_next_command;
+    }
 
     if (can_issue) {
         tgdb_run_request(tgdb, request);
