@@ -28,6 +28,8 @@
        to properly treat as a dumb terminal
      - This change fixes issue #251: GDB console does not display color
 
+  * Add the nexti and stepi configuration commands
+
   * Fix issue #239, ANSI escape issues with GDB-9
     Color sequences like, [?1l,[?1h,=,>" are now ignored by CGDB rather
     than producing garbage looking text in the gdb terminal.
