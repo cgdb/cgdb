@@ -65,14 +65,6 @@ void if_print_message(const char *fmt, ...) ATTRIBUTE_PRINTF( 1, 2 );
 void if_tty_print(const char *buf);
 
 /**
- * Print a readline prompt change.
- *
- * @param buf
- * The buffer that readline has put out to edit the prompt.
- */
-void if_rl_print(const char *buf);
-
-/**
  * Print a debugger command run by CGDB when showdebugcommands is enabled.
  *
  * @param command

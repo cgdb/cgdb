@@ -1553,11 +1553,6 @@ void if_print(const char *buf)
     if_print_internal(buf, SCR_INPUT_DEBUGGER);
 }
 
-void if_rl_print(const char *buf)
-{
-    if_print_internal(buf, SCR_INPUT_READLINE);
-}
-
 void if_sdc_print(const char *buf)
 {
     if_print_message("cgdb sdc:%s", buf);
