@@ -1520,7 +1520,7 @@ int if_input(int key)
     return result;
 }
 
-static void if_print_internal(const char *buf, enum ScrInputKind kind)
+static void if_print_internal(const char *buf)
 {
     if (!gdb_scroller) {
         clog_error(CLOG_CGDB, "%s", buf);
@@ -1528,7 +1528,7 @@ static void if_print_internal(const char *buf, enum ScrInputKind kind)
     }
 
     /* Print it to the scroller */
-    scr_add(gdb_scroller, buf, kind);
+    scr_add(gdb_scroller, buf);
 
     if (get_gdb_height() > 0) {
         scr_refresh(gdb_scroller, focus == GDB, WIN_NO_REFRESH);
@@ -1544,7 +1544,7 @@ static void if_print_internal(const char *buf, enum ScrInputKind kind)
 
 void if_print(const char *buf)
 {
-    if_print_internal(buf, SCR_INPUT_DEBUGGER);
+    if_print_internal(buf);
 }
 
 void if_sdc_print(const char *buf)

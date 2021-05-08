@@ -66,7 +66,7 @@ static int count(const char *s, int slen, char c)
  * Return Value:  A newly allocated copy of buf, with modifications made.
  */
 static char *parse(struct scroller *scr, struct hl_line_attr **attrs,
-    const char *orig, const char *buf, int buflen, enum ScrInputKind kind)
+    const char *orig, const char *buf, int buflen)
 {
     // Read in tabstop settings, but don't change them on the fly as we'd have to
     //  store each previous line and recalculate every one of them.
@@ -162,58 +162,24 @@ static char *parse(struct scroller *scr, struct hl_line_attr **attrs,
      * is solving that problem.
      */
     size_t rvlength = strlen(rv);
-    if (kind == SCR_INPUT_READLINE && rvlength >= width) {
+    if (rvlength >= width) {
         rv[width - 1] = 0;
     }
 
     return rv;
 }
 
-static void scroller_set_last_inferior_attr(struct scroller *scr)
-{
-    int index = sbcount(scr->lines) - 1;
-    struct scroller_line *sl = index >= 0 ? &scr->lines[index] : 0;
-
-    /* If this is an inferior line and we've got color attributes */
-    if (sl && (sl->kind == SCR_INPUT_INFERIOR) && sbcount(sl->attrs)) {
-        /* Grab last attribute */
-        int attr = sl->attrs[sbcount(sl->attrs) - 1].as_attr();
-
-        /* Store last attribute for following inferior lines */
-        scr->last_inferior_attr = attr ? attr : -1;
-    }
-}
-
 static void scroller_addline(struct scroller *scr, char *line,
-    struct hl_line_attr *attrs, enum ScrInputKind kind)
+    struct hl_line_attr *attrs)
 {
     struct scroller_line sl;
 
-    /* Add attribute from last inferior line to start of this one */
-    if (kind == SCR_INPUT_INFERIOR && (scr->last_inferior_attr != -1)) {
-        /* If there isn't already a color attribute for the first column */
-        if (!attrs || (attrs[0].col() != 0)) {
-            int count = sbcount(attrs);
-
-            /* Bump the count up and scoot the attributes over one */
-            sbsetcount(attrs, count + 1);
-            memmove(attrs+1, attrs, count * sizeof(struct hl_line_attr));
-
-            attrs[0] = hl_line_attr(0, scr->last_inferior_attr);
-        }
-
-        scr->last_inferior_attr = -1;
-    }
-
     sl.line = line;
     sl.line_len = strlen(line);
-    sl.kind = kind;
     sl.attrs = attrs;
     sbpush(scr->lines, sl);
 
     scr->lines_to_display++;
-
-    scroller_set_last_inferior_attr(scr);
 }
 
 /* ----------------- */
@@ -232,8 +198,6 @@ struct scroller *scr_new(SWINDOW *win)
     rv->current.c = 0;
     rv->current.pos = 0;
     rv->in_scroll_mode = 0;
-    rv->last_inferior_line = NULL;
-    rv->last_inferior_attr = -1;
     rv->lines_to_display = 0;
     rv->win = win;
 
@@ -244,7 +208,7 @@ struct scroller *scr_new(SWINDOW *win)
 
     /* Start with a single (blank) line */
     rv->lines = NULL;
-    scroller_addline(rv, strdup(""), NULL, SCR_INPUT_DEBUGGER);
+    scroller_addline(rv, strdup(""), NULL);
 
     rv->jump_back_mark.r = -1;
     rv->jump_back_mark.c = -1;
@@ -269,9 +233,6 @@ void scr_free(struct scroller *scr)
     scr->last_hlregex = NULL;
     hl_regex_free(&scr->hlregex);
     scr->hlregex = NULL;
-
-    free(scr->last_inferior_line);
-    scr->last_inferior_line = NULL;
 
     swin_delwin(scr->win);
     scr->win = NULL;
@@ -342,8 +303,7 @@ void scr_end(struct scroller *scr)
     scr->current.c = get_last_col(scr, scr->current.r);
 }
 
-static void scr_add_buf(struct scroller *scr, const char *buf,
-    enum ScrInputKind kind)
+static void scr_add_buf(struct scroller *scr, const char *buf)
 {
     char *x;
     int distance;
@@ -360,25 +320,9 @@ static void scr_add_buf(struct scroller *scr, const char *buf,
             char *orig = scr->lines[index].line;
             int orig_len = scr->lines[index].line_len;
 
-            if ((scr->last_inferior_attr != -1) &&
-                    (kind != scr->lines[index].kind)) {
-                /* Default to 0: Add that color attribute in */
-                int attr = 0;
-
-                if (kind == SCR_INPUT_INFERIOR) {
-                    attr = scr->last_inferior_attr;
-                    scr->last_inferior_attr = -1;
-                }
-
-                sbpush(scr->lines[index].attrs, hl_line_attr(orig_len, attr));
-            }
-
-            scr->lines[index].kind = kind;
             scr->lines[index].line = parse(
-                scr, &scr->lines[index].attrs, orig, buf, distance, kind);
+                scr, &scr->lines[index].attrs, orig, buf, distance);
             scr->lines[index].line_len = strlen(scr->lines[index].line);
-
-            scroller_set_last_inferior_attr(scr);
 
             free(orig);
         }
@@ -393,22 +337,12 @@ static void scr_add_buf(struct scroller *scr, const char *buf,
         x = strchr((char *)buf, '\n');
         distance = x ? x - buf : strlen(buf);
 
-        /* inferior input with no lf. */
-        if (!x && (kind == SCR_INPUT_INFERIOR) && distance && (distance < 4096)) {
-            /* Store away and parse when the rest of the line shows up */
-            scr->last_inferior_line = strdup(buf);
-            /* Add line since we did have a lf */
-            scr->current.pos = 0;
-            scroller_addline(scr, strdup(""), NULL, kind);
-            break;
-        }
-
         /* Expand the buffer */
         scr->current.pos = 0;
 
         /* Add the new line */
-        line = parse(scr, &attrs, "", buf, distance, kind);
-        scroller_addline(scr, line, attrs, kind);
+        line = parse(scr, &attrs, "", buf, distance);
+        scroller_addline(scr, line, attrs);
     }
 
     /* Don't want to exit scroll mode simply because new data received */
@@ -417,29 +351,11 @@ static void scr_add_buf(struct scroller *scr, const char *buf,
     }
 }
 
-void scr_add(struct scroller *scr, const char *buf, enum ScrInputKind kind)
+void scr_add(struct scroller *scr, const char *buf)
 {
     char *tempbuf = NULL;
 
-    if (scr->last_inferior_line) {
-        if (kind != SCR_INPUT_INFERIOR) {
-            /* New line coming in isn't from inferior so spew out
-             * last inferior line and carry on */
-            scr_add_buf(scr, scr->last_inferior_line, SCR_INPUT_INFERIOR);
-            free(scr->last_inferior_line);
-        }
-        else {
-            /* Combine this inferior line with previous inferior line */
-            tempbuf = (char *)cgdb_realloc(scr->last_inferior_line,
-                strlen(scr->last_inferior_line) + strlen(buf) + 1);
-            strcat(tempbuf, buf);
-            buf = tempbuf;
-        }
-
-        scr->last_inferior_line = NULL;
-    }
-
-    scr_add_buf(scr, buf, kind);
+    scr_add_buf(scr, buf);
 
     scr_end(scr);
 

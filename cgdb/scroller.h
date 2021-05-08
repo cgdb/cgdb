@@ -16,17 +16,9 @@
 /* Data Structures */
 /* --------------- */
 
-/** The possible sources of input for the scroller */
-enum ScrInputKind {
-    SCR_INPUT_DEBUGGER,   /* Input from the debugger (GDB) */
-    SCR_INPUT_INFERIOR,   /* Input from the program being debugged */
-    SCR_INPUT_READLINE    /* Input from readline (the prompt) */
-};
-
 struct scroller_line {
     char *line;
     int line_len;
-    enum ScrInputKind kind;
     struct hl_line_attr *attrs;
 };
 
@@ -38,9 +30,6 @@ struct scroller_mark
 
 struct scroller {
     struct scroller_line *lines;
-
-    char *last_inferior_line;
-    int last_inferior_attr;
 
     int in_scroll_mode;         /* Currently in scroll mode? */
 
@@ -140,7 +129,7 @@ void scr_end(struct scroller *scr);
  *   scr:  Pointer to the scroller object
  *   buf:  Buffer to append -- \b characters will be treated as backspace!
  */
-void scr_add(struct scroller *scr, const char *buf, enum ScrInputKind kind);
+void scr_add(struct scroller *scr, const char *buf);
 
 /* Reposition the buffer on the screen
  *
