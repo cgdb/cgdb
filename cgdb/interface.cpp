@@ -1542,12 +1542,6 @@ static void if_print_internal(const char *buf, enum ScrInputKind kind)
 
 }
 
-void if_tty_print(const char *buf)
-{
-    /* Send output to the gdb buffer */
-    if_print_internal(buf, SCR_INPUT_INFERIOR);
-}
-
 void if_print(const char *buf)
 {
     if_print_internal(buf, SCR_INPUT_DEBUGGER);

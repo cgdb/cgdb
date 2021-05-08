@@ -57,13 +57,6 @@ void if_print(const char *buf);
  */
 void if_print_message(const char *fmt, ...) ATTRIBUTE_PRINTF( 1, 2 );
 
-/* if_tty_print: Prints data to the tty input/output window.
- * -------------
- *
- *   buf:  NULL-terminated buffer to display.
- */
-void if_tty_print(const char *buf);
-
 /**
  * Print a debugger command run by CGDB when showdebugcommands is enabled.
  *
