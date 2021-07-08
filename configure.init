@@ -145,7 +145,7 @@ if test "$opt_with_curses_prefix" != "no"; then
 fi
 
 dnl make sure that (f)lex is available
-if test "$LEX" != "flex" -a "$LEX" != "lex"; then
+if test "$(basename $LEX)" != "flex" -a "$(basename $LEX)" != "lex"; then
 	AC_MSG_ERROR([Please install flex before installing])
 fi
 
