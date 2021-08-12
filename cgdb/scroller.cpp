@@ -144,28 +144,6 @@ static char *parse(struct scroller *scr, struct hl_line_attr **attrs,
     }
 
     scr->current.pos = i;
-
-    /**
-     * The prompt should never be longer than the width of the terminal.
-     *
-     * The below should only be done for the readline prompt interaction,
-     * not for text coming from gdb/inferior. Otherwise you'll truncate
-     * their text in the scroller!
-     *
-     * When readline is working with the prompt (at least in "dumb" mode)
-     * it assumes that the terminal will only display as many characters as
-     * the terminal is wide. If the terminal is reduced in size (resized to a
-     * smaller width) readline will only clear the number of characters
-     * that will fit into the new terminal width. Our prompt may still
-     * have a lot more characters than that (the characters that existed
-     * in the prompt before the resize). This truncation of the prompt
-     * is solving that problem.
-     */
-    size_t rvlength = strlen(rv);
-    if (rvlength >= width) {
-        rv[width - 1] = 0;
-    }
-
     return rv;
 }
 
