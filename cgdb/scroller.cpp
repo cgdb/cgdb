@@ -144,6 +144,7 @@ static char *parse(struct scroller *scr, struct hl_line_attr **attrs,
     }
 
     scr->current.pos = i;
+
     return rv;
 }
 
