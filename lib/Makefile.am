@@ -1,1 +1,1 @@
-SUBDIRS = util rline tgdb kui tokenizer
+SUBDIRS = util rline tgdb kui tokenizer vterm

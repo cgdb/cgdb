@@ -6,6 +6,7 @@ AM_CXXFLAGS = \
     -I$(top_srcdir)/lib/util \
     -I$(top_srcdir)/lib/tgdb \
     -I$(top_srcdir)/lib/tokenizer \
+    -I$(top_srcdir)/lib/vterm \
     -std=c++11
 
 bin_PROGRAMS = cgdb
@@ -15,6 +16,7 @@ cgdb_LDFLAGS = \
     -L$(top_builddir)/lib/rline \
     -L$(top_builddir)/lib/tokenizer \
     -L$(top_builddir)/lib/util \
+    -L$(top_builddir)/lib/vterm \
     -L$(top_builddir)/lib/tgdb
 
 cgdb_LDADD = \
@@ -22,6 +24,7 @@ cgdb_LDADD = \
     $(top_builddir)/lib/tokenizer/libtokenizer.a \
     $(top_builddir)/lib/kui/libkui.a \
     $(top_builddir)/lib/rline/librline.a \
+    $(top_builddir)/lib/vterm/libcgdbvterm.a \
     $(top_builddir)/lib/util/libcgdbutil.a
 
 noinst_HEADERS = \
