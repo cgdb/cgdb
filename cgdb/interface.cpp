@@ -813,7 +813,7 @@ static int gdb_input_regex_input(struct scroller *scr, int key)
 
     if (done)
     {
-        gdb_scroller->in_search_mode = 0;
+        gdb_scroller->in_search_mode = false;
 
         regex_cur.clear();
 
@@ -897,6 +897,20 @@ static int gdb_input(int key, int *last_key)
             case CGDB_KEY_CTRL_N:
                 scr_down(gdb_scroller, 1);
                 break;
+            case CGDB_KEY_LEFT:
+            case 'h':
+                scr_left(gdb_scroller);
+                break;
+            case CGDB_KEY_RIGHT:
+            case 'l':
+                scr_right(gdb_scroller);
+                break;
+            case '0':
+                scr_beginning_of_row(gdb_scroller);
+                break;
+            case '$':
+                scr_end_of_row(gdb_scroller);
+                break;
             case 'g':
                 if (last_key_pressed == 'g') {
                     scr_home(gdb_scroller);
@@ -908,25 +922,26 @@ static int gdb_input(int key, int *last_key)
             case '\n':
             case CGDB_KEY_CTRL_M:
                 scr_end(gdb_scroller);
-                gdb_scroller->in_scroll_mode = 0;
+                scr_set_scroll_mode(gdb_scroller, false);
                 break;
             case 'n':
+                scr_search_regex_init(gdb_scroller);
                 scr_search_regex(gdb_scroller, regex_last.c_str(), 2,
                     regex_direction_last, cgdbrc_get_int(CGDBRC_IGNORECASE));
+                gdb_scroller->in_search_mode = false;
                 break;
             case 'N':
+                scr_search_regex_init(gdb_scroller);
                 scr_search_regex(gdb_scroller, regex_last.c_str(), 2,
                     !regex_direction_last, cgdbrc_get_int(CGDBRC_IGNORECASE));
+                gdb_scroller->in_search_mode = false;
                 break;
             case '/':
             case '?':
                 /* Capturing regular expressions */
                 regex_cur = "";
                 regex_direction_cur = ('/' == key);
-                orig_line_regex = gdb_scroller->current.r;
-
                 sbc_kind = SBC_REGEX;
-
                 scr_search_regex_init(gdb_scroller);
                 break;
         }
@@ -934,10 +949,16 @@ static int gdb_input(int key, int *last_key)
     } else {
         switch (key) {
             case CGDB_KEY_PPAGE:
+                scr_set_scroll_mode(gdb_scroller, true);
                 scr_up(gdb_scroller, get_gdb_height() - 1);
                 break;
             case CGDB_KEY_CTRL_L:
-                scr_clear(gdb_scroller);
+                // When readline clears the screen with ctrl-l, it clears by
+                // going home and sending EL.
+                // However, it would be nice to save the gdb output in the
+                // scrollback buffer before the line is cleared.
+                // TODO: Implement
+                scr_push_screen_to_scrollback(gdb_scroller);
 
                 /* The return 1 tells readline that gdb did not handle the
                  * Ctrl-l. That way readline will handle it. Because
@@ -945,9 +966,11 @@ static int gdb_input(int key, int *last_key)
                  * a single line and put out the prompt. */
                 result = 1;
                 break;
+
             default:
                 /* This tells the input to go to active GDB command */
                 result = 1;
+                break;
         }
     }
 
@@ -1352,7 +1375,7 @@ static int cgdb_input(int key, int *last_key)
 
     switch (key) {
         case 's':
-            gdb_scroller->in_scroll_mode = 1;
+            scr_set_scroll_mode(gdb_scroller, true);
             if_set_focus(GDB);
             return 0;
         case 'i':
@@ -1462,11 +1485,9 @@ int internal_if_input(int key, int *last_key)
         }
         else if (focus == GDB && sbc_kind == SBC_REGEX)
         {
+            scr_search_regex_final(gdb_scroller);
             regex_cur.clear();
-
-            gdb_scroller->in_search_mode = 0;
             sbc_kind = SBC_NORMAL;
-
             new_focus = GDB;
         }
 

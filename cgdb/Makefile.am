@@ -48,6 +48,8 @@ cgdb_SOURCES = \
     logo.h \
     scroller.cpp \
     scroller.h \
+    vterminal.cpp \
+    vterminal.h \
     sources.cpp \
     sources.h \
     usage.cpp \

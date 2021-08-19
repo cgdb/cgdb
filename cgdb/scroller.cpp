@@ -33,153 +33,27 @@
 #include "highlight_groups.h"
 #include "scroller.h"
 #include "highlight.h"
+#include "vterminal.h"
 
-/* --------------- */
-/* Local Functions */
-/* --------------- */
-
-/* count: Count the occurrences of a character c in a string s.
- * ------
- *
- *   s:  String to search
- *   c:  Character to search for
- *
- * Return Value:  Number of occurrences of c in s.
- */
-static int count(const char *s, int slen, char c)
+static void
+terminal_write_cb(char *buffer, size_t size, void *data)
 {
-    int i;
-    int rv = 0;
-
-    for (i = 0; i < slen; i++) {
-        rv += (s[i] == c);
-    }
-
-    return rv;
+    struct scroller *scroller = (struct scroller*)data;
+    // TODO: ?
 }
 
-/* parse: Translates special characters in a string.  (i.e. backspace, tab...)
- * ------
- *
- *   buf:  The string to parse
- *
- * Return Value:  A newly allocated copy of buf, with modifications made.
- */
-static char *parse(struct scroller *scr, struct hl_line_attr **attrs,
-    const char *orig, const char *buf, int buflen)
+static void
+terminal_resize_cb(int width, int height, void *data)
 {
-    // Read in tabstop settings, but don't change them on the fly as we'd have to
-    //  store each previous line and recalculate every one of them.
-    static const int tab_size = cgdbrc_get_int(CGDBRC_TABSTOP);
-    int tabcount = count(buf, buflen, '\t');
-    int orig_len = strlen(orig);
-    int length = MAX(orig_len, scr->current.pos) + buflen +
-        (tab_size - 1) * tabcount + 1;
-    char *rv = (char *) cgdb_calloc(length, 1);
-    int i, j;
-    int debugwincolor = cgdbrc_get_int(CGDBRC_DEBUGWINCOLOR);
-    int width, height;
-
-    height = swin_getmaxy(scr->win);
-    width = swin_getmaxx(scr->win);
-
-    /* Copy over original buffer */
-    strcpy(rv, orig);
-
-    i = scr->current.pos;
-
-    /* Expand special characters */
-    for (j = 0; j < buflen; j++) {
-        switch (buf[j]) {
-                /* readline wants to ring the bell, ignore */
-            case 7:
-                break;
-                /* Backspace/Delete -> Erase last character */
-            case 8:
-            case 127:
-                if (i > 0)
-                    i--;
-                break;
-                /* Tab -> Translating to spaces */
-            case '\t':
-                do {
-                    rv[i++] = ' ';
-                } while (i % tab_size != 0);
-                break;
-                /* Carriage return -> Move back to the beginning of the line */
-            case '\r':
-                i = 0;
-                if ((buflen - j) >= 1 && buf[j + 1] != '\n') {
-                    sbfree(*attrs);
-                    *attrs = NULL;
-                }
-                break;
-            case '\033':
-                /* Handle ansi escape characters */
-                /* see http://ascii-table.com/ansi-escape-sequences-vt-100.php
-                 */
-                if ((buflen - j) >= 2 && buf[j + 1] == '[' && buf[j + 2] == '?') {
-                    /* simply ignore these escape sequences like e.g. "[?1h" */
-                    j += 4;
-                } else if ((buflen - j) >= 1 && (buf[j + 1] == '=' || buf[j + 1] == '>')) {
-                    /* simply ignore these escape sequences */
-                    j += 1;
-                } else if (hl_ansi_color_support(hl_groups_instance) &&
-                    debugwincolor) {
-                    int attr;
-                    int ansi_count = hl_ansi_get_color_attrs(
-                            hl_groups_instance, buf + j, &attr);
-                    if (ansi_count) {
-                        j += ansi_count - 1;
-                        sbpush(*attrs, hl_line_attr(i, attr));
-                    }
-                } else {
-                    rv[i++] = buf[j];
-                }
-                break;
-            default:
-                rv[i++] = buf[j];
-                break;
-        }
-    }
-
-    scr->current.pos = i;
-
-    /**
-     * The prompt should never be longer than the width of the terminal.
-     *
-     * The below should only be done for the readline prompt interaction,
-     * not for text coming from gdb/inferior. Otherwise you'll truncate
-     * their text in the scroller!
-     *
-     * When readline is working with the prompt (at least in "dumb" mode)
-     * it assumes that the terminal will only display as many characters as
-     * the terminal is wide. If the terminal is reduced in size (resized to a
-     * smaller width) readline will only clear the number of characters
-     * that will fit into the new terminal width. Our prompt may still
-     * have a lot more characters than that (the characters that existed
-     * in the prompt before the resize). This truncation of the prompt
-     * is solving that problem.
-     */
-    size_t rvlength = strlen(rv);
-    if (rvlength >= width) {
-        rv[width - 1] = 0;
-    }
-
-    return rv;
+    struct scroller *scroller = (struct scroller*)data;
+    // TODO: ?
 }
 
-static void scroller_addline(struct scroller *scr, char *line,
-    struct hl_line_attr *attrs)
+static void
+terminal_close_cb(void *data)
 {
-    struct scroller_line sl;
-
-    sl.line = line;
-    sl.line_len = strlen(line);
-    sl.attrs = attrs;
-    sbpush(scr->lines, sl);
-
-    scr->lines_to_display++;
+    struct scroller *scroller = (struct scroller*)data;
+    // TODO: ?
 }
 
 /* ----------------- */
@@ -194,25 +68,28 @@ struct scroller *scr_new(SWINDOW *win)
 
     rv = (struct scroller *)cgdb_malloc(sizeof(struct scroller));
 
-    rv->current.r = 0;
-    rv->current.c = 0;
-    rv->current.pos = 0;
-    rv->in_scroll_mode = 0;
-    rv->lines_to_display = 0;
+    rv->in_scroll_mode = false;
+    rv->scroll_cursor_row = rv->scroll_cursor_col = 0;
     rv->win = win;
 
-    rv->in_search_mode = 0;
+    rv->in_search_mode = false;
     rv->last_hlregex = NULL;
     rv->hlregex = NULL;
-    rv->search_r = 0;
-
-    /* Start with a single (blank) line */
-    rv->lines = NULL;
-    scroller_addline(rv, strdup(""), NULL);
+    rv->search_row = rv->search_col_start = rv->search_col_end = 0;
 
     rv->jump_back_mark.r = -1;
     rv->jump_back_mark.c = -1;
     memset(rv->marks, 0xff, sizeof(rv->marks));
+
+    VTerminalOptions options;
+    options.data = (void*)rv;
+    options.width = swin_getmaxx(rv->win);
+    options.height = swin_getmaxy(rv->win);
+    options.terminal_write_cb = terminal_write_cb;
+    options.terminal_resize_cb = terminal_resize_cb;
+    options.terminal_close_cb = terminal_close_cb;
+
+    rv->vt = vterminal_new(options);
 
     return rv;
 }
@@ -221,13 +98,7 @@ void scr_free(struct scroller *scr)
 {
     int i;
 
-    /* Release the buffer */
-    for (i = 0; i < sbcount(scr->lines); i++) {
-        free(scr->lines[i].line);
-        sbfree(scr->lines[i].attrs);
-    }
-    sbfree(scr->lines);
-    scr->lines = NULL;
+    vterminal_free(scr->vt);
 
     hl_regex_free(&scr->last_hlregex);
     scr->last_hlregex = NULL;
@@ -241,223 +112,462 @@ void scr_free(struct scroller *scr)
     free(scr);
 }
 
-static int get_last_col(struct scroller *scr, int row) {
-    int width = swin_getmaxx(scr->win);
-    return (MAX(scr->lines[row].line_len - 1, 0) / width) * width;
-}
-
-static void scr_scroll_lines(struct scroller *scr,
-    int *r, int *c, int nlines)
+void scr_set_scroll_mode(struct scroller *scr, bool mode)
 {
-    int i;
-    int width = swin_getmaxx(scr->win);
-    int row = *r;
-    int col = (*c / width) * width;
-    int amt = (nlines < 0) ? -width : width;
-
-    if (nlines < 0)
-        nlines = -nlines;
-
-    for (i = 0; i < nlines; i++) {
-        col += amt;
-        if (col < 0) {
-            if (row <= 0)
-                break;
-            row--;
-            col = get_last_col(scr, row);
-        } else if (col >= scr->lines[row].line_len)  {
-            if (row >= sbcount(scr->lines) - 1)
-                break;
-
-            row++;
-            col = 0;
-        }
-        *r = row;
-        *c = col;
+    // If the request is to enable the scroll mode and it's not already 
+    // enabled, then enable it
+    if (mode && !scr->in_scroll_mode) {
+        scr->in_scroll_mode = true;
+        // Start the scroll mode cursor at the same location as the 
+        // cursor on the screen
+        vterminal_get_cursor_pos(
+                scr->vt, scr->scroll_cursor_row, scr->scroll_cursor_col);
+    // If the request is to disable the scroll mode and it's currently
+    // enabled, then disable it
+    } else if (!mode && scr->in_scroll_mode) {
+        scr->in_scroll_mode = false;
     }
 }
 
 void scr_up(struct scroller *scr, int nlines)
 {
-    scr->in_scroll_mode = 1;
-
-    scr_scroll_lines(scr, &scr->current.r, &scr->current.c, -nlines);
+    // When moving 1 line up
+    //   Move the cursor towards the top of the screen
+    //   If it hits the top, then start scrolling back
+    // Otherwise whem moving many lines up, simply scroll
+    if (scr->scroll_cursor_row > 0 && nlines == 1) {
+        scr->scroll_cursor_row = scr->scroll_cursor_row - 1;
+    } else {
+        vterminal_scroll_delta(scr->vt, nlines);
+    }
 }
 
 void scr_down(struct scroller *scr, int nlines)
 {
-    scr_scroll_lines(scr, &scr->current.r, &scr->current.c, nlines);
+    int height;
+    int width;
+    vterminal_get_height_width(scr->vt, height, width);
+
+    // When moving 1 line down
+    //   Move the cursor towards the botttom of the screen
+    //   If it hits the botttom, then start scrolling forward
+    // Otherwise whem moving many lines down, simply scroll
+    if (scr->scroll_cursor_row < height - 1 && nlines == 1) {
+        scr->scroll_cursor_row = scr->scroll_cursor_row + 1;
+    } else {
+        vterminal_scroll_delta(scr->vt, -nlines);
+    }
 }
 
 void scr_home(struct scroller *scr)
 {
-    scr->current.r = 0;
-    scr->current.c = 0;
-
-    scr->in_scroll_mode = 1;
+    int sb_num_rows;
+    vterminal_get_sb_num_rows(scr->vt, sb_num_rows);
+    vterminal_scroll_delta(scr->vt, sb_num_rows);
 }
 
 void scr_end(struct scroller *scr)
 {
-    scr->current.r = sbcount(scr->lines) - 1;
-    scr->current.c = get_last_col(scr, scr->current.r);
+    int sb_num_rows;
+    vterminal_get_sb_num_rows(scr->vt, sb_num_rows);
+    vterminal_scroll_delta(scr->vt, -sb_num_rows);
 }
 
-static void scr_add_buf(struct scroller *scr, const char *buf)
+void scr_left(struct scroller *scr)
 {
-    char *x;
-    int distance;
-
-    /* Find next newline in the string */
-    x = strchr((char *)buf, '\n');
-    distance = x ? x - buf : strlen(buf);
-
-    /* Append to the last line in the buffer */
-    if (distance > 0) {
-        int is_crlf = (distance == 1) && (buf[0] == '\r');
-        if (!is_crlf) {
-            int index = sbcount(scr->lines) - 1;
-            char *orig = scr->lines[index].line;
-            int orig_len = scr->lines[index].line_len;
-
-            scr->lines[index].line = parse(
-                scr, &scr->lines[index].attrs, orig, buf, distance);
-            scr->lines[index].line_len = strlen(scr->lines[index].line);
-
-            free(orig);
-        }
+    if (scr->scroll_cursor_col > 0) {
+        scr->scroll_cursor_col--;
     }
+}
 
-    /* Create additional lines if buf contains newlines */
-    while (x != NULL) {
-        char *line;
-        struct hl_line_attr *attrs = NULL;
+void scr_right(struct scroller *scr)
+{
+    int height;
+    int width;
+    vterminal_get_height_width(scr->vt, height, width);
 
-        buf = x + 1;
-        x = strchr((char *)buf, '\n');
-        distance = x ? x - buf : strlen(buf);
-
-        /* Expand the buffer */
-        scr->current.pos = 0;
-
-        /* Add the new line */
-        line = parse(scr, &attrs, "", buf, distance);
-        scroller_addline(scr, line, attrs);
+    if (scr->scroll_cursor_col < width - 1) {
+        scr->scroll_cursor_col++;
     }
+}
 
-    /* Don't want to exit scroll mode simply because new data received */
-    if (!scr->in_scroll_mode) {
-        scr_end(scr);
-    }
+void scr_beginning_of_row(struct scroller *scr)
+{
+    scr->scroll_cursor_col = 0;
+}
+
+void scr_end_of_row(struct scroller *scr)
+{
+    int height;
+    int width;
+    vterminal_get_height_width(scr->vt, height, width);
+
+    scr->scroll_cursor_col = width - 1;
+}
+
+void scr_push_screen_to_scrollback(struct scroller *scr)
+{
+    vterminal_push_screen_to_scrollback(scr->vt);
 }
 
 void scr_add(struct scroller *scr, const char *buf)
 {
-    char *tempbuf = NULL;
+    // Keep a copy of all text sent to vterm
+    // Vterm doesn't yet support resizing, so we would create a new vterm
+    // instance and feed it the same data
+    scr->text.append(buf);
 
-    scr_add_buf(scr, buf);
-
-    scr_end(scr);
-
-    free(tempbuf);
+    vterminal_push_bytes(scr->vt, buf, strlen(buf));
 }
 
 void scr_move(struct scroller *scr, SWINDOW *win)
 {
     swin_delwin(scr->win);
     scr->win = win;
+
+    // recreate the vterm session with the new size
+    vterminal_free(scr->vt);
+
+    VTerminalOptions options;
+    options.data = (void*)scr;
+    options.width = swin_getmaxx(scr->win);
+    options.height = swin_getmaxy(scr->win);
+    options.terminal_write_cb = terminal_write_cb;
+    options.terminal_resize_cb = terminal_resize_cb;
+    options.terminal_close_cb = terminal_close_cb;
+
+    scr->vt = vterminal_new(options);
+    vterminal_push_bytes(scr->vt, scr->text.data(), scr->text.size());
 }
 
-void scr_clear(struct scroller *scr) {
-    scr->lines_to_display = 0;
-}
-
-static int wrap_line(struct scroller *scr, int line)
+static int scr_search_regex_forward(struct scroller *scr, const char *regex,
+    int opt, int icase)
 {
-    int count = sbcount(scr->lines);
+    int sb_num_rows;
+    vterminal_get_sb_num_rows(scr->vt, sb_num_rows);
 
-    if (line < 0)
-        line = count - 1;
-    else if (line >= count)
-        line = 0;
+    int height;
+    int width;
+    vterminal_get_height_width(scr->vt, height, width);
 
-    return line;
+    int delta;
+    vterminal_scroll_get_delta(scr->vt, delta);
+
+    int wrapscan_enabled = cgdbrc_get_int(CGDBRC_WRAPSCAN);
+
+    int count = sb_num_rows + height;
+    int regex_matched;
+
+    if (!scr || !regex) {
+        // TODO: LOG ERROR
+        return 0;
+    }
+
+    // The starting search row and column
+    int search_row = scr->search_sid_init;
+    int search_col = scr->search_col_init;
+
+    // Increment the column by 1 to get the starting row/column
+    if (search_col < width - 1) {
+        search_col++;
+    } else {
+        search_row++;
+        if (search_row >= count) {
+            search_row = 0;
+        }
+        search_col = 0;
+    }
+
+    for (;;)
+    {
+        int start, end;
+        // convert from sid to cursor position taking into account delta
+        int vfr = search_row - sb_num_rows + delta;
+        char *utf8buf;
+        int attr;
+        vterminal_fetch_row(scr->vt, vfr, search_col, width, utf8buf, attr);
+        regex_matched = hl_regex_search(&scr->hlregex, utf8buf, regex,
+                icase, &start, &end);
+        if (regex_matched > 0) {
+            // Need to scroll the terminal if the search is not in view
+            if (count - delta - height <= search_row &&
+                search_row < count - delta) {
+            } else {
+                delta = search_row - sb_num_rows;
+                if (delta > 0) {
+                    delta = 0;
+                }
+                delta = -delta;
+                vterminal_scroll_set_delta(scr->vt, delta);
+            }
+
+            // convert from sid to cursor position taking into account delta
+            scr->search_row = search_row - sb_num_rows + delta;
+            scr->search_col_start = start + search_col;
+            scr->search_col_end = end + search_col;
+            break;
+        }
+
+        // Stop searching when made it back to original position
+        if (wrapscan_enabled &&
+            search_row == scr->search_sid_init && search_col == 0) {
+            break;
+        // Or if wrapscan is disabled and searching hit the end
+        } else if (!wrapscan_enabled && search_row == count - 1) {
+            break;
+        }
+
+        search_row++;
+        if (search_row >= count) {
+            search_row = 0;
+        }
+        search_col = 0;
+    }
+
+    /* Finalized match - move to this location or roll back to previous */
+    if (opt == 2) {
+        if (regex_matched) {
+            scr->scroll_cursor_row = scr->search_row;
+            scr->scroll_cursor_col = scr->search_col_start;
+
+            // TODO: Can we move delta location moving above down here?
+
+            hl_regex_free(&scr->hlregex);
+            scr->last_hlregex = scr->hlregex;
+            scr->hlregex = 0;
+        } else {
+            vterminal_scroll_set_delta(scr->vt, scr->delta_init);
+        }
+
+        scr->search_row = 0;
+        scr->search_col_start = 0;
+        scr->search_col_end = 0;
+    }
+
+    return regex_matched;
+}
+
+static int scr_search_regex_backwards(struct scroller *scr, const char *regex,
+    int opt, int icase)
+{
+    int sb_num_rows;
+    vterminal_get_sb_num_rows(scr->vt, sb_num_rows);
+
+    int height;
+    int width;
+    vterminal_get_height_width(scr->vt, height, width);
+
+    int delta;
+    vterminal_scroll_get_delta(scr->vt, delta);
+
+    int wrapscan_enabled = cgdbrc_get_int(CGDBRC_WRAPSCAN);
+
+    int count = sb_num_rows + height;
+    int regex_matched = 0;
+
+    if (!scr || !regex) {
+        // TODO: LOG ERROR
+        return 0;
+    }
+
+    // The starting search row and column
+    int search_row = scr->search_sid_init;
+    int search_col = scr->search_col_init;
+
+    // Decrement the column by 1 to get the starting row/column
+    if (search_col > 0) {
+        search_col--;
+    } else {
+        search_row--;
+        if (search_row < 0) {
+            search_row = count - 1;
+        }
+        search_col = width - 1;
+    }
+
+    for (;;)
+    {
+        int start = 0, end = 0;
+        int vfr = search_row - sb_num_rows + delta;
+
+        // Searching in reverse is more difficult
+        // The idea is to search right to left, however the regex api
+        // doesn't support that. Need to mimic this by searching left
+        // to right to find all the matches on the line, and then 
+        // take the right most match.
+        for (int c = 0;;) {
+            char *utf8buf;
+            int attr;
+            vterminal_fetch_row(scr->vt, vfr, c, width, utf8buf, attr);
+
+            int _start, _end, result;
+            result = hl_regex_search(&scr->hlregex, utf8buf, regex, icase,
+                    &_start, &_end);
+            if ((result == 1) && (c + _start <= search_col)) {
+                regex_matched = 1;
+                start = c + _start;
+                end = c + _end;
+                c = start + 1;
+            } else {
+                break;
+            }
+        }
+
+        if (regex_matched > 0) {
+            // Need to scroll the terminal if the search is not in view
+            if (count - delta - height <= search_row &&
+                search_row < count - delta) {
+            } else {
+                delta = search_row - sb_num_rows;
+                if (delta > 0) {
+                    delta = 0;
+                }
+                delta = -delta;
+                vterminal_scroll_set_delta(scr->vt, delta);
+            }
+
+            scr->search_row = search_row - sb_num_rows + delta;
+            scr->search_col_start = start;
+            scr->search_col_end = end;
+            break;
+        }
+
+        // Stop searching when made it back to original position
+        if (wrapscan_enabled &&
+            search_row == scr->search_sid_init &&
+            search_col == width - 1) {
+            int silly;
+            silly = 1;
+            break;
+        // Or if wrapscan is disabled and searching hit the top
+        } else if (!wrapscan_enabled && search_row == 0) {
+            int silly;
+            silly = 1;
+            break;
+        }
+
+        search_row--;
+        if (search_row < 0) {
+            search_row = count - 1;
+        }
+        search_col = width - 1;
+    }
+
+    /* Finalized match - move to this location */
+    if (opt == 2) {
+        if (regex_matched) {
+            scr->scroll_cursor_row = scr->search_row;
+            scr->scroll_cursor_col = scr->search_col_start;
+
+            hl_regex_free(&scr->hlregex);
+            scr->last_hlregex = scr->hlregex;
+            scr->hlregex = 0;
+        } else {
+            vterminal_scroll_set_delta(scr->vt, scr->delta_init);
+        }
+
+        scr->search_row = 0;
+        scr->search_col_start = 0;
+        scr->search_col_end = 0;
+    }
+
+    return regex_matched;
 }
 
 int scr_search_regex(struct scroller *scr, const char *regex, int opt,
     int direction, int icase)
 {
-    if (regex && *regex) {
-        int line;
-        int line_end;
-        int line_inc = direction ? +1 : -1;
-        int line_start = scr->search_r;
+    // Some help understanding how searching in the scroller works
+    //
+    // - Vterm deals only with what's on the screen
+    //   It represents rows 0 through vterm height-1, which is 2 below
+    // - vterminal introduces a scrollback buffer
+    //   It represents rows -1 through -scrollback height, which is -6 below
+    // - vterminal also introduces a scrollback delta
+    //   Allows iterating from 0:height-1 but displaying the scrolled to text
+    //   The default is 0, which is represented by d0
+    //   Scrolling back all the way to -6 is represented by d-6
+    //   Scrolling back partiall to -2 is represented by d-2
+    // - The scroller has introduced the concept of a search id (sid)
+    //   The purpose is to iterate easily over all the text (vterm+scrollback)
+    //
+    // Example inputs and labels
+    //   Screen Height: 3
+    //   Scrollback (sb) size: 6
+    //   vid: VTerm ID (screen only)
+    //   tid: Terminal ID (screen + scrollback + scrollback delta)
+    //   sid: A search ID (for iterating eaisly over all)
+    //   sb start - scrollback buffer start
+    //   sb end - scrollback buffer end
+    //   vt start - vterm buffer start
+    //   vt end - vterm buffer end
+    // 
+    //          sid vid tid d0 d-6 d-2
+    // sb start  0      -6       0      abc     0
+    //           1      -5       1         def  1
+    //           2      -4       2      ghi     2
+    //           3      -3                 def   
+    //           4      -2           0  jkl
+    // sb end    5      -1           1     def
+    // vt start  6   0  0    0       2  mno
+    //           7   1  1    1             def
+    // vt end    8   2  2    2          pqr
+    //
+    // Your search will start at the row the scroll cursor is at.
+    //
+    // You can loop from 0 to scrollback size + vterm size.
+    //
+    // You can convert your cursor position to the sid by doing:
+    //   sid = cursor_pos + scrollback size + vterminal_scroll_get_delta
+    // You can convert your sid to a cursor position by doing the following:
+    //   cursor_pos = sid - scrollback size - vterminal_scroll_get_delta
+    //
+    // If your delta is -6, and your cursor is on sid 1, and you find a
+    // match on sid 7, you'll have to move the display by moving the delta.
+    // You can move the display to sid by doing the following:
+    //   delta_offset = sid - scrollback size
+    // Then, if delta_offset > 0, delta_offset = 0.
+    int result;
 
-        line = wrap_line(scr, line_start + line_inc);
-
-        if (cgdbrc_get_int(CGDBRC_WRAPSCAN))
-        {
-            // Wrapping is on so stop at the line we started on.
-            line_end = line_start;
-        }
-        else
-        {
-            // No wrapping. Stop at line 0 if searching down and last line
-            // if searching up.
-            line_end = direction ? 0 : sbcount(scr->lines) - 1;
-        }
-
-        for (;;)
-        {
-            int ret;
-            int start, end;
-            char *line_str = scr->lines[line].line;
-
-            ret = hl_regex_search(&scr->hlregex, line_str, regex, icase, &start, &end);
-            if (ret > 0)
-            {
-                /* Got a match */
-                scr->current.r = line;
-                scr->current.c = get_last_col(scr, line);
-
-                /* Finalized match - move to this location */
-                if (opt == 2) {
-                    scr->search_r = line;
-
-                    hl_regex_free(&scr->hlregex);
-                    scr->last_hlregex = scr->hlregex;
-                    scr->hlregex = 0;
-                }
-                return 1;
-            }
-
-            line = wrap_line(scr, line + line_inc);
-            if (line == line_end)
-                break;
-        }
+    if (direction) {
+        result = scr_search_regex_forward(scr, regex, opt, icase);
+    } else {
+        result = scr_search_regex_backwards(scr, regex, opt, icase);
     }
 
-    /* Nothing found - go back to original line */
-    scr->current.r = scr->search_r;
-    scr->current.c = get_last_col(scr, scr->search_r);
-    return 0;
+    return result;
 }
 
 void scr_search_regex_init(struct scroller *scr)
 {
-    scr->in_search_mode = 1;
+    int delta;
+    vterminal_scroll_get_delta(scr->vt, delta);
 
-    /* Start searching at the beginning of the selected line */
-    scr->search_r = scr->current.r;
+    int sb_num_rows;
+    vterminal_get_sb_num_rows(scr->vt, sb_num_rows);
+
+    scr->in_search_mode = true;
+    scr->delta_init = delta;
+    scr->search_sid_init = scr->scroll_cursor_row - delta + sb_num_rows;
+    scr->search_col_init = scr->scroll_cursor_col;
+}
+
+void scr_search_regex_final(struct scroller *scr)
+{
+    scr->in_search_mode = false;
+    vterminal_scroll_set_delta(scr->vt, scr->delta_init);
 }
 
 int scr_set_mark(struct scroller *scr, int key)
 {
+    int cursor_row, cursor_col;
+    vterminal_get_cursor_pos(scr->vt, cursor_row, cursor_col);
+
     if (key >= 'a' && key <= 'z')
     {
         /* Local buffer mark */
-        scr->marks[key - 'a'].r = scr->current.r;
-        scr->marks[key - 'a'].c = scr->current.c;
+        scr->marks[key - 'a'].r = cursor_row;
+        scr->marks[key - 'a'].c = cursor_col;
         return 1;
     }
 
@@ -466,6 +576,7 @@ int scr_set_mark(struct scroller *scr, int key)
 
 int scr_goto_mark(struct scroller *scr, int key)
 {
+#if 0
     scroller_mark mark_temp;
     scroller_mark *mark = NULL;
 
@@ -490,6 +601,9 @@ int scr_goto_mark(struct scroller *scr, int key)
 
     if (mark && (mark->r >= 0))
     {
+        int cursor_row, cursor_col;
+        vterminal_get_cursor_pos(scr->vt, cursor_row, cursor_col);
+
         scr->jump_back_mark.r = scr->current.r;
         scr->jump_back_mark.c = scr->current.c;
 
@@ -498,204 +612,87 @@ int scr_goto_mark(struct scroller *scr, int key)
         return 1;
     }
 
+#endif
     return 0;
-}
-
-/**
- * Determine the proper number of scroller rows to display.
- *
- * The user is allowed to clear the window with Ctrl-l. After this,
- * the scroller starts at the top and begins moving down again like
- * clearing a terminal screen when using gdb.
- *
- * The scroller knows how many lines should be displayed to the user.
- * Some lines are longer than the terminal and wrap.
- * This function determines how many rows are necessary to display
- * in the scroller to show the proper lines.
- *
- * Note that scr->lines_to_display <= rows_to_display <= height.
- *
- * @param scr
- * The scroller object
- *
- * @param height
- * The height of the scroller window
- *
- * @param width
- * The width of the scroller window
- *
- * @return
- * The number of scroller rows to display
- */
-static int number_rows_to_display(struct scroller *scr, int height, int width)
-{
-    int rows_to_display = 0;
-    int row, col;
-    int nlines;
-
-    if (scr->lines_to_display > height) {
-        scr->lines_to_display = height;
-    }
-
-    row = scr->current.r;
-    col = scr->current.c;
-
-    /**
-     * For each line to display, determine the number or rows it takes up.
-     */
-    for (nlines = 0; nlines < scr->lines_to_display;) {
-        if (col >= width)
-            col -= width;
-        else {
-            nlines++;
-            row--;
-            if (row >= 0) {
-                int length = scr->lines[row].line_len;
-                if (length > width)
-                    col = ((length - 1) / width) * width;
-            }
-        }
-
-        rows_to_display += 1;
-    }
-
-    if (rows_to_display > height) {
-        rows_to_display = height;
-    }
-
-    return rows_to_display;
 }
 
 void scr_refresh(struct scroller *scr, int focus, enum win_refresh dorefresh)
 {
-    int length;                 /* Length of current line */
-    int nlines;                 /* Number of lines written so far */
-    int r;                      /* Current row in scroller */
-    int c;                      /* Current column in row */
-    int width, height;          /* Width and height of window */
-    int highlight_attr;
+    int height;
+    int width;
+    vterminal_get_height_width(scr->vt, height, width);
+
+    int vterm_cursor_row, vterm_cursor_col;
+    vterminal_get_cursor_pos(scr->vt, vterm_cursor_row, vterm_cursor_col);
+
+    int sb_num_rows;
+    vterminal_get_sb_num_rows(scr->vt, sb_num_rows);
+
+    int delta;
+    vterminal_scroll_get_delta(scr->vt, delta);
+
+    // TODO: Need to highlight searching if option is set
     int hlsearch = cgdbrc_get_int(CGDBRC_HLSEARCH);
-    int rows_to_display = 0;
+    
+    int highlight_attr, search_attr;
+
+    int cursor_row, cursor_col;
+
+    if (scr->in_scroll_mode) {
+        cursor_row = scr->scroll_cursor_row;
+        cursor_col = scr->scroll_cursor_col;
+    } else {
+        cursor_row = vterm_cursor_row;
+        cursor_col = vterm_cursor_col;
+    }
 
     /* Steal line highlight attribute for our scroll mode status */
     highlight_attr = hl_groups_get_attr(hl_groups_instance,
         HLG_SCROLL_MODE_STATUS);
 
-    /* Sanity check */
-    height = swin_getmaxy(scr->win);
-    width = swin_getmaxx(scr->win);
+    search_attr = hl_groups_get_attr(hl_groups_instance, HLG_INCSEARCH);
 
-    if (scr->current.c > 0) {
-        if (scr->current.c % width != 0)
-            scr->current.c = (scr->current.c / width) * width;
-    }
-    r = scr->current.r;
-    c = scr->current.c;
+    for (int r = 0; r < height; ++r) {
+        for (int c = 0; c < width; ++c) {
+            char *utf8buf;
+            int attr = 0;
 
+            int in_search = scr->in_search_mode && scr->search_row == r &&
+                    c >= scr->search_col_start && c < scr->search_col_end;
 
-    rows_to_display = number_rows_to_display(scr, height, width);
-
-    /**
-     * Printing the scroller to the gdb window.
-     *
-     * The gdb window has a certain dimension (height and width).
-     * The scroller has a certain number of rows to print.
-     *
-     * When starting cgdb, or when the user clears the screen with Ctrl-L,
-     * the entire scroller buffer is not displayed in the gdb window.
-     *
-     * The gdb readline input will be displayed just below the last
-     * line of output in the scroller.
-     *
-     * In order to display the scroller buffer, first determine how many
-     * lines should be displayed. Then start drawing from the bottom of
-     * the viewable space and work our way up.
-     */
-    for (nlines = 1; nlines <= height; nlines++) {
-        /* Empty lines below the scroller prompt should be empty.
-         * When in scroller mode, there should be no empty lines on the
-         * bottom. */
-        if (!scr->in_scroll_mode && nlines <= height - rows_to_display) {
-            swin_wmove(scr->win, height - nlines, 0);
-            swin_wclrtoeol(scr->win);
-        } 
-        /* Print the current line [segment] */
-        else if (r >= 0) {
-            struct scroller_line *sline = &scr->lines[r];
-
-            hl_printline(scr->win, sline->line, sline->line_len, sline->attrs, 0, height - nlines, c, width);
-
-            /* If we're searching right now or we finished search
-             * and have focus... */
-            if (hlsearch && scr->last_hlregex && focus) {
-                struct hl_line_attr *attrs = hl_regex_highlight(
-                    &scr->last_hlregex, sline->line, HLG_SEARCH);
-
-                if (sbcount(attrs)) {
-                    hl_printline_highlight(scr->win, sline->line,
-                        sline->line_len, attrs, 0, height - nlines, c, width);
-                    sbfree(attrs);
-                }
-            }
-
-            if (scr->hlregex && scr->current.r == r) {
-                struct hl_line_attr *attrs = hl_regex_highlight(
-                    &scr->hlregex, sline->line, HLG_INCSEARCH);
-
-                if (sbcount(attrs)) {
-                    hl_printline_highlight(scr->win, sline->line,
-                        sline->line_len, attrs, 0, height - nlines, c, width);
-                    sbfree(attrs);
-                }
-            }
-
-            /* Update our position */
-            if (c >= width)
-                c -= width;
-            else {
-                r--;
-                if (r >= 0) {
-                    length = scr->lines[r].line_len;
-                    if (length > width)
-                        c = ((length - 1) / width) * width;
-                }
-            }
-        /* Empty lines above the first line in the scroller should be empty.
-         * Since the scroller starts at the top, this should only occur when
-         * in the scroll mode. */
-        } else {
-            swin_wmove(scr->win, height - nlines, 0);
+            vterminal_fetch_row(scr->vt, r, c, c + 1, utf8buf, attr);
+            swin_wmove(scr->win, r,  c);
+            swin_wattron(scr->win, attr);
+            if (in_search)
+                swin_wattron(scr->win, search_attr);
+            swin_waddnstr(scr->win, utf8buf, strlen(utf8buf));
+            if (in_search)
+                swin_wattroff(scr->win, search_attr);
+            swin_wattroff(scr->win, attr);
             swin_wclrtoeol(scr->win);
         }
 
-        /* If we're in scroll mode and this is the top line, spew status on right */
-        if (scr->in_scroll_mode && (nlines == height)) {
+        // If in scroll mode, overlay the percent the scroller is scrolled
+        // back on the top right of the scroller display.
+        if (scr->in_scroll_mode && r == 0) {
             char status[ 64 ];
             size_t status_len;
 
-            snprintf(status, sizeof(status), "[%d/%d]", scr->current.r + 1, sbcount(scr->lines));
+            snprintf(status, sizeof(status), "[%d/%d]", delta, sb_num_rows);
 
             status_len = strlen(status);
             if ( status_len < width ) {
                 swin_wattron(scr->win, highlight_attr);
-                swin_mvwprintw(scr->win, height - nlines, width - status_len, "%s", status);
+                swin_mvwprintw(scr->win, r, width - status_len, "%s", status);
                 swin_wattroff(scr->win, highlight_attr);
             }
         }
     }
 
-    length = scr->lines[scr->current.r].line_len - scr->current.c;
-
-    /* Only show the cursor when
-     * - the scroller is in focus
-     * - on the last line
-     * - when it is within the width of the screen
-     * - when not in scroller mode
-     */ 
-    if (focus && scr->current.r == sbcount(scr->lines) - 1 &&
-        length <= width && !scr->in_scroll_mode) {
+    // Show the cursor when the scroller is in focus
+    if (focus) {
+        swin_wmove(scr->win, cursor_row, cursor_col);
         swin_curs_set(1);
-        swin_wmove(scr->win, rows_to_display-1, scr->current.pos % width);
     } else {
         /* Hide the cursor */
         swin_curs_set(0);

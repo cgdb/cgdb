@@ -308,7 +308,7 @@ static int hl_get_ansicolor_pair(hl_groups_ptr hl_groups, int bgcolor, int fgcol
     static int color_pair_table[9][9];
 
     /* If ansi colors aren't enabled, return default color pair 0 */
-    if (!hl_ansi_color_support(hl_groups))
+    if (hl_groups && !hl_ansi_color_support(hl_groups))
         return 0;
 
     if (!color_pairs_inited) {
@@ -1163,5 +1163,12 @@ void hl_printline_highlight(SWINDOW *win, const char *line, int line_len,
     if (count && attr)
         hl_printspan(win, line + col, count, attr);
 }
+
+void hl_get_color_attr_from_index(int fg_index, int bg_index, int &attr)
+{
+    int color_pair = hl_get_ansicolor_pair(NULL, bg_index, fg_index);
+    attr = swin_color_pair(color_pair);
+}
+
 /*@}*/
 /* }}}*/

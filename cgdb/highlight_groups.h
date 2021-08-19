@@ -312,6 +312,19 @@ void hl_printline(SWINDOW *win, const char *line, int line_len,
 void hl_printline_highlight(SWINDOW *win, const char *line, int line_len,
         const hl_line_attr *attrs, int x, int y, int col, int width);
 
+/**
+ * Given a fg and bg index, get the corresponding color pair attribute.
+ *
+ * @param fg_index
+ * The foreground index color
+ *
+ * @param bg_index
+ * The background index color
+ *
+ * @param attr
+ * The attribute associated with the color pair
+ */
+void hl_get_color_attr_from_index(int fg_index, int bg_index, int &attr);
 /*@}*/
 /* }}}*/
 
