@@ -96,6 +96,8 @@ static VTermScreenCallbacks vterm_screen_callbacks = {
 VTerminal::VTerminal(VTerminalOptions options) : vt(nullptr)
 {
     this->options = options;
+    cursorpos.row = 0;
+    cursorpos.col = 0;
     cursor_visible = true;
 
     // neovim has a buffer assignment here, can i use our scroller or
@@ -129,6 +131,7 @@ VTerminal::VTerminal(VTerminalOptions options) : vt(nullptr)
     scroll_offset = 0;
     sb_current = 0;
     sb_size = 10000; // TODO: Make a cgdb option
+    sb_pending = 0;
     sb_buffer = (ScrollbackLine**)malloc(sizeof(ScrollbackLine *) * sb_size);
 }
 
