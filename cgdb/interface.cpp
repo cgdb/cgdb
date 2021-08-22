@@ -759,6 +759,7 @@ static int gdb_input_regex_input(struct scroller *scr, int key)
 
     /* Flag to indicate we're done with regex mode, need to switch back */
     int done = 0;
+    int matched = 0;
 
     /* Receive a regex from the user. */
     switch (key)
@@ -767,11 +768,8 @@ static int gdb_input_regex_input(struct scroller *scr, int key)
     case '\n':
     case CGDB_KEY_CTRL_M:
         /* Save for future searches via 'n' or 'N' */
-        regex_last = regex_cur;
-
         regex_direction_last = regex_direction_cur;
-        scr_search_regex(scr, regex_last.c_str(), 2,
-            regex_direction_last, regex_icase);
+        matched = scr_search_regex(scr, regex_cur.c_str());
         if_draw();
         done = 1;
         break;
@@ -781,13 +779,12 @@ static int gdb_input_regex_input(struct scroller *scr, int key)
         if (regex_cur.size() == 0)
         {
             done = 1;
-            scr_search_regex(scr, "", 2, regex_direction_cur, regex_icase);
+            matched = 0;
         }
         else
         {
             regex_cur.erase(regex_cur.size() - 1);
-            scr_search_regex(scr, regex_cur.c_str(), 1,
-                regex_direction_cur, regex_icase);
+            matched = scr_search_regex(scr, regex_cur.c_str());
             if_draw();
             update_status_win(WIN_REFRESH);
         }
@@ -805,16 +802,14 @@ static int gdb_input_regex_input(struct scroller *scr, int key)
         {
             regex_cur.push_back(key);
         }
-        scr_search_regex(scr, regex_cur.c_str(), 1,
-            regex_direction_cur, regex_icase);
+        matched = scr_search_regex(scr, regex_cur.c_str());
         if_draw();
         update_status_win(WIN_REFRESH);
     };
 
     if (done)
     {
-        gdb_scroller->in_search_mode = false;
-
+        scr_disable_search(scr, matched == 1);
         regex_cur.clear();
 
         sbc_kind = SBC_NORMAL;
@@ -837,10 +832,10 @@ static int gdb_input(int key, int *last_key)
 {
     int result = 0;
 
-    if (gdb_scroller->in_search_mode)
+    if (scr_search_mode(gdb_scroller))
         return gdb_input_regex_input(gdb_scroller, key);
 
-    if (gdb_scroller->in_scroll_mode) {
+    if (scr_scroll_mode(gdb_scroller)) {
 
         /* Handle setting (mX) and going ('X) to gdb buffer marks */
         if (last_key_pressed == 'm' || last_key_pressed == '\'') {
@@ -925,16 +920,12 @@ static int gdb_input(int key, int *last_key)
                 scr_set_scroll_mode(gdb_scroller, false);
                 break;
             case 'n':
-                scr_search_regex_init(gdb_scroller);
-                scr_search_regex(gdb_scroller, regex_last.c_str(), 2,
+                scr_search_next(gdb_scroller,
                     regex_direction_last, cgdbrc_get_int(CGDBRC_IGNORECASE));
-                gdb_scroller->in_search_mode = false;
                 break;
             case 'N':
-                scr_search_regex_init(gdb_scroller);
-                scr_search_regex(gdb_scroller, regex_last.c_str(), 2,
+                scr_search_next(gdb_scroller,
                     !regex_direction_last, cgdbrc_get_int(CGDBRC_IGNORECASE));
-                gdb_scroller->in_search_mode = false;
                 break;
             case '/':
             case '?':
@@ -942,7 +933,8 @@ static int gdb_input(int key, int *last_key)
                 regex_cur = "";
                 regex_direction_cur = ('/' == key);
                 sbc_kind = SBC_REGEX;
-                scr_search_regex_init(gdb_scroller);
+                scr_enable_search(gdb_scroller, regex_direction_cur,
+                    cgdbrc_get_int(CGDBRC_IGNORECASE));
                 break;
         }
 
@@ -1485,7 +1477,7 @@ int internal_if_input(int key, int *last_key)
         }
         else if (focus == GDB && sbc_kind == SBC_REGEX)
         {
-            scr_search_regex_final(gdb_scroller);
+            scr_disable_search(gdb_scroller, false);
             regex_cur.clear();
             sbc_kind = SBC_NORMAL;
             new_focus = GDB;

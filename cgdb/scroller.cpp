@@ -35,6 +35,53 @@
 #include "highlight.h"
 #include "vterminal.h"
 
+struct scroller_mark
+{
+    int r;
+    int c;
+};
+
+/* Count of marks */
+#define MARK_COUNT 26
+
+struct scroller {
+    // The virtual terminal
+    VTerminal *vt;
+
+    // All text sent to the virtual terminal so far
+    std::string text;
+
+    SWINDOW *win; /* The scoller's own window */
+
+    // True if in scroll mode, otherwise false
+    bool in_scroll_mode;
+    // The position of the cursor when in scroll mode
+    int scroll_cursor_row, scroll_cursor_col;
+
+    // True if in search mode, otherwise false
+    // Can only search when in_scroll_mode is true
+    bool in_search_mode;
+    // The original delta, cursor row and col. Also the initial search id.
+    int delta_init, search_row_init, search_col_init, search_sid_init;
+    // True when searching forward, otherwise searching backwards
+    bool forward;
+    // True when searching case insensitve, false otherwise
+    bool icase;
+
+    // The current regex if in_search_mode is true
+    // TODO: May not be necessary
+    struct hl_regex_info *hlregex;
+    // The current row, col start and end matching position
+    int search_row, search_col_start, search_col_end;
+    // The last string regex to be searched for
+    std::string last_regex;
+
+    scroller_mark marks[MARK_COUNT]; /* Local a-z marks */
+    scroller_mark jump_back_mark;    /* Location where last jump occurred from */
+
+};
+
+
 static void
 terminal_write_cb(char *buffer, size_t size, void *data)
 {
@@ -64,16 +111,13 @@ terminal_close_cb(void *data)
 
 struct scroller *scr_new(SWINDOW *win)
 {
-    struct scroller *rv;
-
-    rv = (struct scroller *)cgdb_malloc(sizeof(struct scroller));
+    struct scroller *rv = new scroller();
 
     rv->in_scroll_mode = false;
     rv->scroll_cursor_row = rv->scroll_cursor_col = 0;
     rv->win = win;
 
     rv->in_search_mode = false;
-    rv->last_hlregex = NULL;
     rv->hlregex = NULL;
     rv->search_row = rv->search_col_start = rv->search_col_end = 0;
 
@@ -100,8 +144,6 @@ void scr_free(struct scroller *scr)
 
     vterminal_free(scr->vt);
 
-    hl_regex_free(&scr->last_hlregex);
-    scr->last_hlregex = NULL;
     hl_regex_free(&scr->hlregex);
     scr->hlregex = NULL;
 
@@ -109,7 +151,7 @@ void scr_free(struct scroller *scr)
     scr->win = NULL;
 
     /* Release the scroller object */
-    free(scr);
+    delete scr;
 }
 
 void scr_set_scroll_mode(struct scroller *scr, bool mode)
@@ -127,6 +169,11 @@ void scr_set_scroll_mode(struct scroller *scr, bool mode)
     } else if (!mode && scr->in_scroll_mode) {
         scr->in_scroll_mode = false;
     }
+}
+
+bool scr_scroll_mode(struct scroller *scr)
+{
+    return scr->in_scroll_mode;
 }
 
 void scr_up(struct scroller *scr, int nlines)
@@ -240,8 +287,55 @@ void scr_move(struct scroller *scr, SWINDOW *win)
     vterminal_push_bytes(scr->vt, scr->text.data(), scr->text.size());
 }
 
-static int scr_search_regex_forward(struct scroller *scr, const char *regex,
-    int opt, int icase)
+void scr_enable_search(struct scroller *scr, bool forward, bool icase)
+{
+    if (scr->in_scroll_mode) {
+        int delta;
+        vterminal_scroll_get_delta(scr->vt, delta);
+
+        int sb_num_rows;
+        vterminal_get_sb_num_rows(scr->vt, sb_num_rows);
+
+        scr->in_search_mode = true;
+        scr->forward = forward;
+        scr->icase = icase;
+        scr->delta_init = delta;
+        scr->search_sid_init = scr->scroll_cursor_row - delta + sb_num_rows;
+        scr->search_row_init = scr->scroll_cursor_row;
+        scr->search_col_init = scr->scroll_cursor_col;
+    }
+}
+
+void scr_disable_search(struct scroller *scr, bool accept)
+{
+    if (scr->in_search_mode) {
+        scr->in_search_mode = false;
+
+        if (accept) {
+            scr->scroll_cursor_row = scr->search_row;
+            scr->scroll_cursor_col = scr->search_col_start;
+
+            hl_regex_free(&scr->hlregex);
+            scr->hlregex = 0;
+        } else {
+            scr->scroll_cursor_row = scr->search_row_init;
+            scr->scroll_cursor_col = scr->search_col_init;
+            vterminal_scroll_set_delta(scr->vt, scr->delta_init);
+            scr->last_regex.clear();
+        }
+
+        scr->search_row = 0;
+        scr->search_col_start = 0;
+        scr->search_col_end = 0;
+    }
+}
+
+bool scr_search_mode(struct scroller *scr)
+{
+    return scr->in_search_mode;
+}
+
+static int scr_search_regex_forward(struct scroller *scr, const char *regex)
 {
     int sb_num_rows;
     vterminal_get_sb_num_rows(scr->vt, sb_num_rows);
@@ -256,12 +350,14 @@ static int scr_search_regex_forward(struct scroller *scr, const char *regex,
     int wrapscan_enabled = cgdbrc_get_int(CGDBRC_WRAPSCAN);
 
     int count = sb_num_rows + height;
-    int regex_matched;
+    int regex_matched = 0;
 
     if (!scr || !regex) {
         // TODO: LOG ERROR
-        return 0;
+        return -1;
     }
+
+    scr->last_regex = regex;
 
     // The starting search row and column
     int search_row = scr->search_sid_init;
@@ -287,7 +383,7 @@ static int scr_search_regex_forward(struct scroller *scr, const char *regex,
         int attr;
         vterminal_fetch_row(scr->vt, vfr, search_col, width, utf8buf, attr);
         regex_matched = hl_regex_search(&scr->hlregex, utf8buf, regex,
-                icase, &start, &end);
+                scr->icase, &start, &end);
         if (regex_matched > 0) {
             // Need to scroll the terminal if the search is not in view
             if (count - delta - height <= search_row &&
@@ -324,31 +420,10 @@ static int scr_search_regex_forward(struct scroller *scr, const char *regex,
         search_col = 0;
     }
 
-    /* Finalized match - move to this location or roll back to previous */
-    if (opt == 2) {
-        if (regex_matched) {
-            scr->scroll_cursor_row = scr->search_row;
-            scr->scroll_cursor_col = scr->search_col_start;
-
-            // TODO: Can we move delta location moving above down here?
-
-            hl_regex_free(&scr->hlregex);
-            scr->last_hlregex = scr->hlregex;
-            scr->hlregex = 0;
-        } else {
-            vterminal_scroll_set_delta(scr->vt, scr->delta_init);
-        }
-
-        scr->search_row = 0;
-        scr->search_col_start = 0;
-        scr->search_col_end = 0;
-    }
-
     return regex_matched;
 }
 
-static int scr_search_regex_backwards(struct scroller *scr, const char *regex,
-    int opt, int icase)
+static int scr_search_regex_backwards(struct scroller *scr, const char *regex)
 {
     int sb_num_rows;
     vterminal_get_sb_num_rows(scr->vt, sb_num_rows);
@@ -367,8 +442,10 @@ static int scr_search_regex_backwards(struct scroller *scr, const char *regex,
 
     if (!scr || !regex) {
         // TODO: LOG ERROR
-        return 0;
+        return -1;
     }
+
+    scr->last_regex = regex;
 
     // The starting search row and column
     int search_row = scr->search_sid_init;
@@ -401,8 +478,8 @@ static int scr_search_regex_backwards(struct scroller *scr, const char *regex,
             vterminal_fetch_row(scr->vt, vfr, c, width, utf8buf, attr);
 
             int _start, _end, result;
-            result = hl_regex_search(&scr->hlregex, utf8buf, regex, icase,
-                    &_start, &_end);
+            result = hl_regex_search(&scr->hlregex, utf8buf, regex,
+                    scr->icase, &_start, &_end);
             if ((result == 1) && (c + _start <= search_col)) {
                 regex_matched = 1;
                 start = c + _start;
@@ -436,13 +513,9 @@ static int scr_search_regex_backwards(struct scroller *scr, const char *regex,
         if (wrapscan_enabled &&
             search_row == scr->search_sid_init &&
             search_col == width - 1) {
-            int silly;
-            silly = 1;
             break;
         // Or if wrapscan is disabled and searching hit the top
         } else if (!wrapscan_enabled && search_row == 0) {
-            int silly;
-            silly = 1;
             break;
         }
 
@@ -453,29 +526,10 @@ static int scr_search_regex_backwards(struct scroller *scr, const char *regex,
         search_col = width - 1;
     }
 
-    /* Finalized match - move to this location */
-    if (opt == 2) {
-        if (regex_matched) {
-            scr->scroll_cursor_row = scr->search_row;
-            scr->scroll_cursor_col = scr->search_col_start;
-
-            hl_regex_free(&scr->hlregex);
-            scr->last_hlregex = scr->hlregex;
-            scr->hlregex = 0;
-        } else {
-            vterminal_scroll_set_delta(scr->vt, scr->delta_init);
-        }
-
-        scr->search_row = 0;
-        scr->search_col_start = 0;
-        scr->search_col_end = 0;
-    }
-
     return regex_matched;
 }
 
-int scr_search_regex(struct scroller *scr, const char *regex, int opt,
-    int direction, int icase)
+int scr_search_regex(struct scroller *scr, const char *regex)
 {
     // Some help understanding how searching in the scroller works
     //
@@ -529,33 +583,22 @@ int scr_search_regex(struct scroller *scr, const char *regex, int opt,
     // Then, if delta_offset > 0, delta_offset = 0.
     int result;
 
-    if (direction) {
-        result = scr_search_regex_forward(scr, regex, opt, icase);
+    if (scr->forward) {
+        result = scr_search_regex_forward(scr, regex);
     } else {
-        result = scr_search_regex_backwards(scr, regex, opt, icase);
+        result = scr_search_regex_backwards(scr, regex);
     }
 
     return result;
 }
 
-void scr_search_regex_init(struct scroller *scr)
+int scr_search_next(struct scroller *scr, bool forward, bool icase)
 {
-    int delta;
-    vterminal_scroll_get_delta(scr->vt, delta);
-
-    int sb_num_rows;
-    vterminal_get_sb_num_rows(scr->vt, sb_num_rows);
-
-    scr->in_search_mode = true;
-    scr->delta_init = delta;
-    scr->search_sid_init = scr->scroll_cursor_row - delta + sb_num_rows;
-    scr->search_col_init = scr->scroll_cursor_col;
-}
-
-void scr_search_regex_final(struct scroller *scr)
-{
-    scr->in_search_mode = false;
-    vterminal_scroll_set_delta(scr->vt, scr->delta_init);
+    if (scr->last_regex.size() > 0) {
+        scr_enable_search(scr, forward, icase);
+        scr_search_regex(scr, scr->last_regex.c_str());
+        scr_disable_search(scr, true);
+    }
 }
 
 int scr_set_mark(struct scroller *scr, int key)
