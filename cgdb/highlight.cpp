@@ -45,7 +45,7 @@ void hl_regex_free(struct hl_regex_info **info)
     }
 }
 
-int hl_regex_search(struct hl_regex_info **info, char *line,
+int hl_regex_search(struct hl_regex_info **info, const char *line,
     const char *regex, int icase, int *start, int *end)
 {
     int result;
@@ -89,14 +89,7 @@ int hl_regex_search(struct hl_regex_info **info, char *line,
         (*info)->icase = icase;
     }
 
-    char *lf = strchr(line, '\n');
-    if (lf)
-        *lf = '\0';
-
     result = regexec(&(*info)->t, line, 1, &pmatch, 0);
-
-    if (lf)
-        *lf = '\n';
 
     if ((result == 0) && (pmatch.rm_eo > pmatch.rm_so)) {
         *start = pmatch.rm_so;

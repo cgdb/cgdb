@@ -588,11 +588,26 @@ void vterminal_get_height_width(VTerminal *terminal, int &height, int &width)
 }
 
 void vterminal_fetch_row(VTerminal *terminal, int row,
-    int start_col, int end_col,
-    char *&utf8text, int &attr)
+    int start_col, int end_col, std::string &utf8text)
 {
+    int attr;
     terminal->fetch_row(row, start_col, end_col, attr);
-    utf8text = terminal->textbuf;
+    if (terminal->textbuf) {
+        utf8text = terminal->textbuf;
+    } else {
+        utf8text = "";
+    }
+}
+
+void vterminal_fetch_row_col(VTerminal *terminal, int row,
+        int col, std::string &utf8text, int &attr)
+{
+    terminal->fetch_row(row, col, col+1, attr);
+    if (terminal->textbuf) {
+        utf8text = terminal->textbuf;
+    } else {
+        utf8text = "";
+    }
 }
 
 void vterminal_get_cursor_pos(VTerminal *terminal, int &row, int &col)

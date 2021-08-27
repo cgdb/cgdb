@@ -379,11 +379,10 @@ static int scr_search_regex_forward(struct scroller *scr, const char *regex)
         int start, end;
         // convert from sid to cursor position taking into account delta
         int vfr = search_row - sb_num_rows + delta;
-        char *utf8buf;
-        int attr;
-        vterminal_fetch_row(scr->vt, vfr, search_col, width, utf8buf, attr);
-        regex_matched = hl_regex_search(&scr->hlregex, utf8buf, regex,
-                scr->icase, &start, &end);
+        std::string utf8buf;
+        vterminal_fetch_row(scr->vt, vfr, search_col, width, utf8buf);
+        regex_matched = hl_regex_search(&scr->hlregex, utf8buf.c_str(),
+                regex, scr->icase, &start, &end);
         if (regex_matched > 0) {
             // Need to scroll the terminal if the search is not in view
             if (count - delta - height <= search_row &&
@@ -473,13 +472,12 @@ static int scr_search_regex_backwards(struct scroller *scr, const char *regex)
         // to right to find all the matches on the line, and then 
         // take the right most match.
         for (int c = 0;;) {
-            char *utf8buf;
-            int attr;
-            vterminal_fetch_row(scr->vt, vfr, c, width, utf8buf, attr);
+            std::string utf8buf;
+            vterminal_fetch_row(scr->vt, vfr, c, width, utf8buf);
 
             int _start, _end, result;
-            result = hl_regex_search(&scr->hlregex, utf8buf, regex,
-                    scr->icase, &_start, &_end);
+            result = hl_regex_search(&scr->hlregex, utf8buf.c_str(),
+                    regex, scr->icase, &_start, &_end);
             if ((result == 1) && (c + _start <= search_col)) {
                 regex_matched = 1;
                 start = c + _start;
@@ -697,18 +695,17 @@ void scr_refresh(struct scroller *scr, int focus, enum win_refresh dorefresh)
 
     for (int r = 0; r < height; ++r) {
         for (int c = 0; c < width; ++c) {
-            char *utf8buf;
+            std::string utf8buf;
             int attr = 0;
-
             int in_search = scr->in_search_mode && scr->search_row == r &&
                     c >= scr->search_col_start && c < scr->search_col_end;
 
-            vterminal_fetch_row(scr->vt, r, c, c + 1, utf8buf, attr);
+            vterminal_fetch_row_col(scr->vt, r, c, utf8buf, attr);
             swin_wmove(scr->win, r,  c);
             swin_wattron(scr->win, attr);
             if (in_search)
                 swin_wattron(scr->win, search_attr);
-            swin_waddnstr(scr->win, utf8buf, strlen(utf8buf));
+            swin_waddnstr(scr->win, utf8buf.data(), utf8buf.size());
             if (in_search)
                 swin_wattroff(scr->win, search_attr);
             swin_wattroff(scr->win, attr);

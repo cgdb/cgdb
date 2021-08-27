@@ -34,8 +34,8 @@ struct hl_regex_info;
  * If a match is found (this function returns non-zero), the ending
  * character for the match. Otherwise, if no match found, -1.
  */
-int hl_regex_search(struct hl_regex_info **info, char *line, const char *regex,
-    int icase, int *start, int *end);
+int hl_regex_search(struct hl_regex_info **info, const char *line,
+    const char *regex, int icase, int *start, int *end);
 
 /**
  * Free the regular expression context.
