@@ -544,6 +544,23 @@ VTerminal::scroll_set_delta(int delta)
 void
 VTerminal::push_screen_to_scrollback()
 {
+    int attr;
+    int height, width;
+    vterm_get_size(vt, &height, &width);
+
+    // Take each row that has some content and push to scrollback buffer
+    VTermPos pos;
+    for (pos.row = 0; pos.row < height; ++pos.row) {
+        VTermScreenCell cells[width];
+        for (pos.col = 0; pos.col < width; ++pos.col) {
+            fetch_cell(pos.row, pos.col, &cells[pos.col]);
+        }
+        sb_pushline(width, cells);
+
+        if (pos.row == cursorpos.row) {
+            break;
+        }
+    }
 }
 
 
