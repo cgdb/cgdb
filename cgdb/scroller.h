@@ -163,7 +163,7 @@ int scr_search_regex(struct scroller *scr, const char *regex);
 //
 // @param icase
 // If true then ignore case, else consider case
-int scr_search_next(struct scroller *scr, bool forward, bool icase);
+void scr_search_next(struct scroller *scr, bool forward, bool icase);
 
 int scr_set_mark(struct scroller *scr, int key);
 int scr_goto_mark(struct scroller *scr, int key);

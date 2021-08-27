@@ -590,7 +590,7 @@ int scr_search_regex(struct scroller *scr, const char *regex)
     return result;
 }
 
-int scr_search_next(struct scroller *scr, bool forward, bool icase)
+void scr_search_next(struct scroller *scr, bool forward, bool icase)
 {
     if (scr->last_regex.size() > 0) {
         scr_enable_search(scr, forward, icase);
