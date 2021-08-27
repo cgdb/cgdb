@@ -992,6 +992,7 @@ static void rlctx_send_user_command(char *line)
 }
 static int tab_completion(int a, int b)
 {
+    return 0;
 }
 
 int init_readline(void)
