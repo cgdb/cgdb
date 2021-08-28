@@ -328,48 +328,42 @@ VTerminal::sb_pushline(int cols, const VTermScreenCell *cells)
     return 1;
 }
 
-/// Convert Unicode character to UTF-8 string
-///
-/// @param c character to convert to \p buf
-/// @param[out] buf UTF-8 string generated from \p c, does not add \0
-/// @return Number of bytes (1-6).
-int utf_char2bytes(const int c, unsigned char *const buf)
+static inline unsigned int utf8_seqlen(long codepoint)
 {
-  if (c < 0x80) {  // 7 bits
-    buf[0] = c;
-    return 1;
-  } else if (c < 0x800) {  // 11 bits
-    buf[0] = 0xc0 + ((unsigned)c >> 6);
-    buf[1] = 0x80 + (c & 0x3f);
-    return 2;
-  } else if (c < 0x10000) {  // 16 bits
-    buf[0] = 0xe0 + ((unsigned)c >> 12);
-    buf[1] = 0x80 + (((unsigned)c >> 6) & 0x3f);
-    buf[2] = 0x80 + (c & 0x3f);
-    return 3;
-  } else if (c < 0x200000) {  // 21 bits
-    buf[0] = 0xf0 + ((unsigned)c >> 18);
-    buf[1] = 0x80 + (((unsigned)c >> 12) & 0x3f);
-    buf[2] = 0x80 + (((unsigned)c >> 6) & 0x3f);
-    buf[3] = 0x80 + (c & 0x3f);
-    return 4;
-  } else if (c < 0x4000000) {  // 26 bits
-    buf[0] = 0xf8 + ((unsigned)c >> 24);
-    buf[1] = 0x80 + (((unsigned)c >> 18) & 0x3f);
-    buf[2] = 0x80 + (((unsigned)c >> 12) & 0x3f);
-    buf[3] = 0x80 + (((unsigned)c >> 6) & 0x3f);
-    buf[4] = 0x80 + (c & 0x3f);
-    return 5;
-  } else {  // 31 bits
-    buf[0] = 0xfc + ((unsigned)c >> 30);
-    buf[1] = 0x80 + (((unsigned)c >> 24) & 0x3f);
-    buf[2] = 0x80 + (((unsigned)c >> 18) & 0x3f);
-    buf[3] = 0x80 + (((unsigned)c >> 12) & 0x3f);
-    buf[4] = 0x80 + (((unsigned)c >> 6) & 0x3f);
-    buf[5] = 0x80 + (c & 0x3f);
-    return 6;
+  if(codepoint < 0x0000080) return 1;
+  if(codepoint < 0x0000800) return 2;
+  if(codepoint < 0x0010000) return 3;
+  if(codepoint < 0x0200000) return 4;
+  if(codepoint < 0x4000000) return 5;
+  return 6;
+}   
+    
+/* Does NOT NUL-terminate the buffer */
+static int fill_utf8(long codepoint, char *str)
+{
+  int nbytes = utf8_seqlen(codepoint);
+
+  // This is easier done backwards
+  int b = nbytes;
+  while(b > 1) { 
+    b--;
+    str[b] = 0x80 | (codepoint & 0x3f);
+    codepoint >>= 6;
+  }   
+
+  switch(nbytes) {
+    case 1: str[0] =        (codepoint & 0x7f); break;
+    case 2: str[0] = 0xc0 | (codepoint & 0x1f); break;
+    case 3: str[0] = 0xe0 | (codepoint & 0x0f); break;
+    case 4: str[0] = 0xf0 | (codepoint & 0x07); break;
+    case 5: str[0] = 0xf8 | (codepoint & 0x03); break;
+    case 6: str[0] = 0xfc | (codepoint & 0x01); break;
   }
-}
+
+  return nbytes;
+} 
+
+
 
 int
 VTerminal::sb_popline(int cols, VTermScreenCell *cells)
@@ -464,8 +458,7 @@ VTerminal::fetch_row(int row, int start_col, int end_col, int &attr)
     int cell_len = 0;
     if (cell.chars[0]) {
       for (int i = 0; cell.chars[i]; i++) {
-        cell_len += utf_char2bytes((int)cell.chars[i],
-            (uint8_t *)ptr + cell_len);
+        cell_len += fill_utf8(cell.chars[i], ptr);
       }
     } else {
       *ptr = ' ';
