@@ -21,8 +21,32 @@ void vterminal_free(VTerminal *vterminal);
 
 void vterminal_push_bytes(VTerminal *terminal, const char *bytes, size_t len);
 void vterminal_get_height_width(VTerminal *terminal, int &height, int &width);
+
+// Fetch the text and attributes for a row and column
+// 
+// @param terminal
+// The terminal to fetch the row text from
+//
+// @param row
+// The row to fetch at
+//
+// @param col
+// The column to fetch at
+//
+// @param utf8text
+// Will return the text set at the row/col
+//
+// @param attr
+// Will return the attributes set at the row/col
+//
+// @param width
+// The width of the row/col.
+// An ascii character is size 1, width == 1
+// A wide unicode character is size 2, width == 2
+// The next column you access should be col + width
 void vterminal_fetch_row_col(VTerminal *terminal, int row,
-        int col, std::string &utf8text, int &attr);
+        int col, std::string &utf8text, int &attr, int &width);
+
 void vterminal_fetch_row(VTerminal *terminal, int row,
         int start_col, int end_col, std::string &utf8text);
 void vterminal_get_cursor_pos(VTerminal *terminal, int &row, int &col);

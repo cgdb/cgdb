@@ -694,13 +694,14 @@ void scr_refresh(struct scroller *scr, int focus, enum win_refresh dorefresh)
     search_attr = hl_groups_get_attr(hl_groups_instance, HLG_INCSEARCH);
 
     for (int r = 0; r < height; ++r) {
-        for (int c = 0; c < width; ++c) {
+        for (int c = 0; c < width; ) {
             std::string utf8buf;
             int attr = 0;
+            int cellwidth;
             int in_search = scr->in_search_mode && scr->search_row == r &&
                     c >= scr->search_col_start && c < scr->search_col_end;
 
-            vterminal_fetch_row_col(scr->vt, r, c, utf8buf, attr);
+            vterminal_fetch_row_col(scr->vt, r, c, utf8buf, attr, cellwidth);
             swin_wmove(scr->win, r,  c);
             swin_wattron(scr->win, attr);
             if (in_search)
@@ -710,6 +711,7 @@ void scr_refresh(struct scroller *scr, int focus, enum win_refresh dorefresh)
                 swin_wattroff(scr->win, search_attr);
             swin_wattroff(scr->win, attr);
             swin_wclrtoeol(scr->win);
+            c += cellwidth;
         }
 
         // If in scroll mode, overlay the percent the scroller is scrolled

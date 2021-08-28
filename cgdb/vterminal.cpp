@@ -30,7 +30,7 @@ struct VTerminal
     // Currently it stores the string in textbuf, however, I suggest it may
     // be better to return a std::string
     // Also: Error handling?
-    void fetch_row(int row, int start_col, int end_col, int &attr);
+    void fetch_row(int row, int start_col, int end_col, int &attr, int &width);
     // Fetch a single cell
     bool fetch_cell(int row, int col, VTermScreenCell *cell);
 
@@ -420,7 +420,7 @@ static int get_ncurses_color_index(VTermColor &color)
 }
 
 void
-VTerminal::fetch_row(int row, int start_col, int end_col, int &attr)
+VTerminal::fetch_row(int row, int start_col, int end_col, int &attr, int &width)
 {
   int fg_index, bg_index;
   int col = start_col;
@@ -475,6 +475,7 @@ VTerminal::fetch_row(int row, int start_col, int end_col, int &attr)
 
   // trim trailing whitespace
   textbuf[line_len] = 0;
+  width = col - start_col;
 }
 
 bool
@@ -584,7 +585,8 @@ void vterminal_fetch_row(VTerminal *terminal, int row,
     int start_col, int end_col, std::string &utf8text)
 {
     int attr;
-    terminal->fetch_row(row, start_col, end_col, attr);
+    int width;
+    terminal->fetch_row(row, start_col, end_col, attr, width);
     if (terminal->textbuf) {
         utf8text = terminal->textbuf;
     } else {
@@ -593,9 +595,9 @@ void vterminal_fetch_row(VTerminal *terminal, int row,
 }
 
 void vterminal_fetch_row_col(VTerminal *terminal, int row,
-        int col, std::string &utf8text, int &attr)
+        int col, std::string &utf8text, int &attr, int &width)
 {
-    terminal->fetch_row(row, col, col+1, attr);
+    terminal->fetch_row(row, col, col+1, attr, width);
     if (terminal->textbuf) {
         utf8text = terminal->textbuf;
     } else {
