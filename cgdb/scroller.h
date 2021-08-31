@@ -168,7 +168,11 @@ void scr_search_next(struct scroller *scr, bool forward, bool icase);
 int scr_set_mark(struct scroller *scr, int key);
 int scr_goto_mark(struct scroller *scr, int key);
 
-// TODO: Verify this works
+// Push the contents of the screen into the scrollback buffer
+// This is used when the user types control-l
+//
+// @param scr
+// Pointer to the scroller object
 void scr_push_screen_to_scrollback(struct scroller *scr);
 
 // Add output from gdb to the scroller buffer
