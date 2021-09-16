@@ -560,6 +560,12 @@ int if_layout()
         src_viewer = source_new(src_viewer_win);
     }
 
+    // On initial startup, the interface is created and displayed
+    // but the tgdb instance is not yet created.
+    if (tgdb) {
+        tgdb_resize(tgdb, get_gdb_height(), get_gdb_width());
+    }
+
     /* Resize the GDB I/O window */
     create_swindow(&gdb_scroller_win, get_gdb_height(), get_gdb_width(),
         get_gdb_row(), get_gdb_col());
@@ -567,12 +573,6 @@ int if_layout()
         scr_move(gdb_scroller, gdb_scroller_win);
     } else {
         gdb_scroller = scr_new(gdb_scroller_win);
-    }
-
-    // On initial startup, the interface is created and displayed
-    // but the tgdb instance is not yet created.
-    if (tgdb) {
-        tgdb_resize(tgdb, get_gdb_height(), get_gdb_width());
     }
 
     /* Initialize the status bar window */
