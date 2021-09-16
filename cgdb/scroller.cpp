@@ -1,10 +1,53 @@
-/* scroller.c:
- * -----------
- *
- * A scrolling buffer utility.  Able to add and subtract to the buffer.
- * All routines that would require a screen update will automatically refresh
- * the scroller.
- */
+// Some help understanding how searching in the scroller works
+//
+// - Vterm deals only with what's on the screen
+//   It represents rows 0 through vterm height-1, which is 2 below
+// - vterminal introduces a scrollback buffer
+//   It represents rows -1 through -scrollback height, which is -6 below
+// - vterminal also introduces a scrollback delta
+//   Allows iterating from 0:height-1 but displaying the scrolled to text
+//   The default is 0, which is represented by d0
+//   Scrolling back all the way to -6 is represented by d-6
+//   Scrolling back partiall to -2 is represented by d-2
+// - The scroller has introduced the concept of a search id (sid)
+//   The purpose is to iterate easily over all the text (vterm+scrollback)
+//
+// Example inputs and labels
+//   Screen Height: 3
+//   Scrollback (sb) size: 6
+//   vid: VTerm ID (screen only)
+//   tid: Terminal ID (screen + scrollback + scrollback delta)
+//   sid: A search ID (for iterating eaisly over all)
+//   sb start - scrollback buffer start
+//   sb end - scrollback buffer end
+//   vt start - vterm buffer start
+//   vt end - vterm buffer end
+// 
+//          sid vid tid d0 d-6 d-2
+// sb start  0      -6       0      abc     0
+//           1      -5       1         def  1
+//           2      -4       2      ghi     2
+//           3      -3                 def   
+//           4      -2           0  jkl
+// sb end    5      -1           1     def
+// vt start  6   0  0    0       2  mno
+//           7   1  1    1             def
+// vt end    8   2  2    2          pqr
+//
+// Your search will start at the row the scroll cursor is at.
+//
+// You can loop from 0 to scrollback size + vterm size.
+//
+// You can convert your cursor position to the sid by doing:
+//   sid = cursor_pos + scrollback size + vterminal_scroll_get_delta
+// You can convert your sid to a cursor position by doing the following:
+//   cursor_pos = sid - scrollback size - vterminal_scroll_get_delta
+//
+// If your delta is -6, and your cursor is on sid 1, and you find a
+// match on sid 7, you'll have to move the display by moving the delta.
+// You can move the display to sid by doing the following:
+//   delta_offset = sid - scrollback size
+// Then, if delta_offset > 0, delta_offset = 0.
 
 /* Local Includes */
 #if HAVE_CONFIG_H
@@ -39,10 +82,16 @@ struct scroller {
     // The virtual terminal
     VTerminal *vt;
 
-    // All text sent to the virtual terminal so far
+    // All text sent to the scroller to date.
+    // Vterm does not yet support reflow, so when the terminal is resized,
+    // or when the cgdb window orientation is changed, vterm can't update
+    // the text that well in the scroller. Currently, to work around that,
+    // CGDB creates a new vterm on resize and feeds it all the text found
+    // to date. When vterm supports reflow, this could go away.
     std::string text;
 
-    SWINDOW *win; /* The scoller's own window */
+    // The window the scroller will be displayed on
+    SWINDOW *win;
 
     // True if in scroll mode, otherwise false
     bool in_scroll_mode;
@@ -60,7 +109,6 @@ struct scroller {
     bool icase;
 
     // The current regex if in_search_mode is true
-    // TODO: May not be necessary
     struct hl_regex_info *hlregex;
     // The current row, col start and end matching position
     int search_row, search_col_start, search_col_end;
@@ -93,8 +141,6 @@ terminal_close_cb(void *data)
 /* ----------------- */
 /* Exposed Functions */
 /* ----------------- */
-
-/* See scroller.h for function descriptions. */
 
 struct scroller *scr_new(SWINDOW *win)
 {
@@ -512,56 +558,6 @@ static int scr_search_regex_backwards(struct scroller *scr, const char *regex)
 
 int scr_search_regex(struct scroller *scr, const char *regex)
 {
-    // Some help understanding how searching in the scroller works
-    //
-    // - Vterm deals only with what's on the screen
-    //   It represents rows 0 through vterm height-1, which is 2 below
-    // - vterminal introduces a scrollback buffer
-    //   It represents rows -1 through -scrollback height, which is -6 below
-    // - vterminal also introduces a scrollback delta
-    //   Allows iterating from 0:height-1 but displaying the scrolled to text
-    //   The default is 0, which is represented by d0
-    //   Scrolling back all the way to -6 is represented by d-6
-    //   Scrolling back partiall to -2 is represented by d-2
-    // - The scroller has introduced the concept of a search id (sid)
-    //   The purpose is to iterate easily over all the text (vterm+scrollback)
-    //
-    // Example inputs and labels
-    //   Screen Height: 3
-    //   Scrollback (sb) size: 6
-    //   vid: VTerm ID (screen only)
-    //   tid: Terminal ID (screen + scrollback + scrollback delta)
-    //   sid: A search ID (for iterating eaisly over all)
-    //   sb start - scrollback buffer start
-    //   sb end - scrollback buffer end
-    //   vt start - vterm buffer start
-    //   vt end - vterm buffer end
-    // 
-    //          sid vid tid d0 d-6 d-2
-    // sb start  0      -6       0      abc     0
-    //           1      -5       1         def  1
-    //           2      -4       2      ghi     2
-    //           3      -3                 def   
-    //           4      -2           0  jkl
-    // sb end    5      -1           1     def
-    // vt start  6   0  0    0       2  mno
-    //           7   1  1    1             def
-    // vt end    8   2  2    2          pqr
-    //
-    // Your search will start at the row the scroll cursor is at.
-    //
-    // You can loop from 0 to scrollback size + vterm size.
-    //
-    // You can convert your cursor position to the sid by doing:
-    //   sid = cursor_pos + scrollback size + vterminal_scroll_get_delta
-    // You can convert your sid to a cursor position by doing the following:
-    //   cursor_pos = sid - scrollback size - vterminal_scroll_get_delta
-    //
-    // If your delta is -6, and your cursor is on sid 1, and you find a
-    // match on sid 7, you'll have to move the display by moving the delta.
-    // You can move the display to sid by doing the following:
-    //   delta_offset = sid - scrollback size
-    // Then, if delta_offset > 0, delta_offset = 0.
     int result;
 
     if (scr->forward) {

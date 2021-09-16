@@ -1,10 +1,4 @@
-/* scroller.h:
- * -----------
- *
- * A scrolling buffer utility.  Able to add and subtract to the buffer.
- * All routines that would require a screen update will automatically redraw
- * the scroller.  There is no "draw" function.
- */
+// A GDB scroller
 
 #ifndef _SCROLLER_H_
 #define _SCROLLER_H_
