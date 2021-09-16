@@ -178,55 +178,6 @@ static struct rline *rline;
 /* Original terminal attributes */
 static struct termios term_attributes;
 
-static int is_gdb_tui_command(const char* line)
-{
-    size_t i;
-    static const char *tui_commands[] =
-    {
-        "wh",
-        "wi",
-        "win",
-        "winh",
-        "winhe",
-        "winhei",
-        "winheig",
-        "winheigh",
-        "winheight",
-        "foc",
-        "focu",
-        "focus",
-        "la",
-        "lay",
-        "layo",
-        "layou",
-        "layout",
-        "tui" /* tui enable */
-    };
-
-    /* Skip leading white space */
-    while (isspace(*line))
-        line++;
-    if (*line) {
-        size_t cmd_len;
-        const char *cmd_end = line + 1;
-
-        /* Find end of command */
-        while (*cmd_end && !isspace(*cmd_end))
-            cmd_end++;
-
-        cmd_len = cmd_end - line;
-        for (i = 0; i < sizeof(tui_commands) / sizeof(tui_commands[0]); i++)
-        {
-            size_t len = strlen(tui_commands[i]);
-
-            if ((len == cmd_len) && !strncasecmp(line, tui_commands[i], len))
-                return 1;
-        }
-    }
-
-    return 0;
-}
-
 /**
  * Runs a command in the shell.  The shell may be interactive, and CGDB
  * will be paused for the duration of the shell.  Any leading stuff, like
