@@ -837,30 +837,9 @@ static int gdb_input(int key, int *last_key)
 
     if (scr_scroll_mode(gdb_scroller)) {
 
-        /* Handle setting (mX) and going ('X) to gdb buffer marks */
-        if (last_key_pressed == 'm' || last_key_pressed == '\'') {
-            int ret = 0;
-
-            if (last_key_pressed == 'm')
-                ret = scr_set_mark(gdb_scroller, key);
-            else if(last_key_pressed == '\'')
-                ret = scr_goto_mark(gdb_scroller, key);
-
-            if (ret) {
-                *last_key = 0;
-                if_draw();
-            }
-            return 0;
-        }
-
         /* In scroll mode, all extra characters are not passed to
          * the active GDB command. result = 0 above ensures that. */
         switch (key) {
-            
-            case 'm':
-            case '\'':
-                /* Mark keys - ignore them */
-                break;
             case CGDB_KEY_CTRL_U:
                 scr_up(gdb_scroller, get_gdb_height() / 2);
                 break;

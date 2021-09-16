@@ -502,15 +502,6 @@ next forward search.
 @item N
 next reverse search.
 
-@item m[a-z]
-Set a mark at the cursor position. 
-
-@item '[a-z]
-Jump to the corresponding mark.
-
-@item ''
-Jump to the last jump location.
-
 @item '.
 Jump to the last line.
 

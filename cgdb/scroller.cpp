@@ -35,15 +35,6 @@
 #include "highlight.h"
 #include "vterminal.h"
 
-struct scroller_mark
-{
-    int r;
-    int c;
-};
-
-/* Count of marks */
-#define MARK_COUNT 26
-
 struct scroller {
     // The virtual terminal
     VTerminal *vt;
@@ -75,10 +66,6 @@ struct scroller {
     int search_row, search_col_start, search_col_end;
     // The last string regex to be searched for
     std::string last_regex;
-
-    scroller_mark marks[MARK_COUNT]; /* Local a-z marks */
-    scroller_mark jump_back_mark;    /* Location where last jump occurred from */
-
 };
 
 
@@ -120,10 +107,6 @@ struct scroller *scr_new(SWINDOW *win)
     rv->in_search_mode = false;
     rv->hlregex = NULL;
     rv->search_row = rv->search_col_start = rv->search_col_end = 0;
-
-    rv->jump_back_mark.r = -1;
-    rv->jump_back_mark.c = -1;
-    memset(rv->marks, 0xff, sizeof(rv->marks));
 
     VTerminalOptions options;
     options.data = (void*)rv;
@@ -597,64 +580,6 @@ void scr_search_next(struct scroller *scr, bool forward, bool icase)
         scr_search_regex(scr, scr->last_regex.c_str());
         scr_disable_search(scr, true);
     }
-}
-
-int scr_set_mark(struct scroller *scr, int key)
-{
-    int cursor_row, cursor_col;
-    vterminal_get_cursor_pos(scr->vt, cursor_row, cursor_col);
-
-    if (key >= 'a' && key <= 'z')
-    {
-        /* Local buffer mark */
-        scr->marks[key - 'a'].r = cursor_row;
-        scr->marks[key - 'a'].c = cursor_col;
-        return 1;
-    }
-
-    return 0;
-}
-
-int scr_goto_mark(struct scroller *scr, int key)
-{
-#if 0
-    scroller_mark mark_temp;
-    scroller_mark *mark = NULL;
-
-    if (key >= 'a' && key <= 'z')
-    {
-        /* Local buffer mark */
-        mark = &scr->marks[key - 'a'];
-    }
-    else if (key == '\'')
-    {
-        /* Jump back to where we last jumped from */
-        mark_temp = scr->jump_back_mark;
-        mark = &mark_temp;
-    }
-    else if (key == '.')
-    {
-        /* Jump to last line */
-        mark_temp.r = sbcount(scr->lines) - 1;
-        mark_temp.c = get_last_col(scr, scr->current.r);
-        mark = &mark_temp;
-    }
-
-    if (mark && (mark->r >= 0))
-    {
-        int cursor_row, cursor_col;
-        vterminal_get_cursor_pos(scr->vt, cursor_row, cursor_col);
-
-        scr->jump_back_mark.r = scr->current.r;
-        scr->jump_back_mark.c = scr->current.c;
-
-        scr->current.r = mark->r;
-        scr->current.c = mark->c;
-        return 1;
-    }
-
-#endif
-    return 0;
 }
 
 void scr_refresh(struct scroller *scr, int focus, enum win_refresh dorefresh)

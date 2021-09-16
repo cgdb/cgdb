@@ -165,9 +165,6 @@ int scr_search_regex(struct scroller *scr, const char *regex);
 // If true then ignore case, else consider case
 void scr_search_next(struct scroller *scr, bool forward, bool icase);
 
-int scr_set_mark(struct scroller *scr, int key);
-int scr_goto_mark(struct scroller *scr, int key);
-
 // Push the contents of the screen into the scrollback buffer
 // This is used when the user types control-l
 //
