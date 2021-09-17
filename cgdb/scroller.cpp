@@ -117,27 +117,6 @@ struct scroller {
 };
 
 
-static void
-terminal_write_cb(char *buffer, size_t size, void *data)
-{
-    struct scroller *scroller = (struct scroller*)data;
-    // TODO: ?
-}
-
-static void
-terminal_resize_cb(int width, int height, void *data)
-{
-    struct scroller *scroller = (struct scroller*)data;
-    // TODO: ?
-}
-
-static void
-terminal_close_cb(void *data)
-{
-    struct scroller *scroller = (struct scroller*)data;
-    // TODO: ?
-}
-
 /* ----------------- */
 /* Exposed Functions */
 /* ----------------- */
@@ -158,9 +137,6 @@ struct scroller *scr_new(SWINDOW *win)
     options.data = (void*)rv;
     options.width = swin_getmaxx(rv->win);
     options.height = swin_getmaxy(rv->win);
-    options.terminal_write_cb = terminal_write_cb;
-    options.terminal_resize_cb = terminal_resize_cb;
-    options.terminal_close_cb = terminal_close_cb;
 
     rv->vt = vterminal_new(options);
 
@@ -238,14 +214,14 @@ void scr_down(struct scroller *scr, int nlines)
 void scr_home(struct scroller *scr)
 {
     int sb_num_rows;
-    vterminal_get_sb_num_rows(scr->vt, sb_num_rows);
+    vterminal_scrollback_num_rows(scr->vt, sb_num_rows);
     vterminal_scroll_delta(scr->vt, sb_num_rows);
 }
 
 void scr_end(struct scroller *scr)
 {
     int sb_num_rows;
-    vterminal_get_sb_num_rows(scr->vt, sb_num_rows);
+    vterminal_scrollback_num_rows(scr->vt, sb_num_rows);
     vterminal_scroll_delta(scr->vt, -sb_num_rows);
 }
 
@@ -293,7 +269,7 @@ void scr_add(struct scroller *scr, const char *buf)
     // instance and feed it the same data
     scr->text.append(buf);
 
-    vterminal_push_bytes(scr->vt, buf, strlen(buf));
+    vterminal_write(scr->vt, buf, strlen(buf));
 }
 
 void scr_move(struct scroller *scr, SWINDOW *win)
@@ -308,12 +284,9 @@ void scr_move(struct scroller *scr, SWINDOW *win)
     options.data = (void*)scr;
     options.width = swin_getmaxx(scr->win);
     options.height = swin_getmaxy(scr->win);
-    options.terminal_write_cb = terminal_write_cb;
-    options.terminal_resize_cb = terminal_resize_cb;
-    options.terminal_close_cb = terminal_close_cb;
 
     scr->vt = vterminal_new(options);
-    vterminal_push_bytes(scr->vt, scr->text.data(), scr->text.size());
+    vterminal_write(scr->vt, scr->text.data(), scr->text.size());
 }
 
 void scr_enable_search(struct scroller *scr, bool forward, bool icase)
@@ -323,7 +296,7 @@ void scr_enable_search(struct scroller *scr, bool forward, bool icase)
         vterminal_scroll_get_delta(scr->vt, delta);
 
         int sb_num_rows;
-        vterminal_get_sb_num_rows(scr->vt, sb_num_rows);
+        vterminal_scrollback_num_rows(scr->vt, sb_num_rows);
 
         scr->in_search_mode = true;
         scr->forward = forward;
@@ -367,7 +340,7 @@ bool scr_search_mode(struct scroller *scr)
 static int scr_search_regex_forward(struct scroller *scr, const char *regex)
 {
     int sb_num_rows;
-    vterminal_get_sb_num_rows(scr->vt, sb_num_rows);
+    vterminal_scrollback_num_rows(scr->vt, sb_num_rows);
 
     int height;
     int width;
@@ -454,7 +427,7 @@ static int scr_search_regex_forward(struct scroller *scr, const char *regex)
 static int scr_search_regex_backwards(struct scroller *scr, const char *regex)
 {
     int sb_num_rows;
-    vterminal_get_sb_num_rows(scr->vt, sb_num_rows);
+    vterminal_scrollback_num_rows(scr->vt, sb_num_rows);
 
     int height;
     int width;
@@ -588,7 +561,7 @@ void scr_refresh(struct scroller *scr, int focus, enum win_refresh dorefresh)
     vterminal_get_cursor_pos(scr->vt, vterm_cursor_row, vterm_cursor_col);
 
     int sb_num_rows;
-    vterminal_get_sb_num_rows(scr->vt, sb_num_rows);
+    vterminal_scrollback_num_rows(scr->vt, sb_num_rows);
 
     int delta;
     vterminal_scroll_get_delta(scr->vt, delta);

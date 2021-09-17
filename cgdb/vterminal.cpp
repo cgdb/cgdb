@@ -16,7 +16,7 @@ struct VTerminal
     VTerminal(VTerminalOptions options);
     ~VTerminal();
 
-    void push_bytes(const char *bytes, size_t len);
+    void write(const char *data, size_t len);
 
     int damage(VTermRect rect);
     int moverect(VTermRect dest, VTermRect src);
@@ -145,13 +145,12 @@ VTerminal::~VTerminal()
 }
 
 void
-VTerminal::push_bytes(const char *bytes, size_t len)
+VTerminal::write(const char *data, size_t len)
 {
-    vterm_input_write(vt, bytes, len);
+    vterm_input_write(vt, data, len);
     vterm_screen_flush_damage(vts);
 }
 
-void scr_add_buf(struct scroller *scr, const char *buf);
 int
 VTerminal::damage(VTermRect rect)
 {
@@ -566,14 +565,14 @@ vterminal_new(VTerminalOptions options)
 }
 
 void
-vterminal_free(VTerminal *vterminal)
+vterminal_free(VTerminal *terminal)
 {
-    delete vterminal;
+    delete terminal;
 }
 
-void vterminal_push_bytes(VTerminal *terminal, const char *bytes, size_t len)
+void vterminal_write(VTerminal *terminal, const char *data, size_t len)
 {
-    terminal->push_bytes(bytes, len);
+    terminal->write(data, len);
 }
 
 void vterminal_get_height_width(VTerminal *terminal, int &height, int &width)
@@ -611,7 +610,7 @@ void vterminal_get_cursor_pos(VTerminal *terminal, int &row, int &col)
     col = terminal->cursorpos.col;
 }
 
-void vterminal_get_sb_num_rows(VTerminal *terminal, int &num)
+void vterminal_scrollback_num_rows(VTerminal *terminal, int &num)
 {
     num = terminal->sb_current;
 }
