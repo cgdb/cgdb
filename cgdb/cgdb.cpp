@@ -666,7 +666,7 @@ static void update_disassemble(struct tgdb_response *response)
         if (response->header == TGDB_DISASSEMBLE_PC) {
             /* Spew out a warning about disassemble failing
              * and disasm next 100 instructions. */
-            if_print_message("\nWarning: dissasemble address 0x%" PRIx64 " failed.\n",
+            if_print_message("\nWarning: disassemble address 0x%" PRIx64 " failed.\n",
                 response->choice.disassemble_function.addr_start);
         } else {
             tgdb_request_disassemble_pc(tgdb, 100);
