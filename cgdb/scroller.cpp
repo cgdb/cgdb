@@ -121,9 +121,17 @@ struct scroller {
 /* Exposed Functions */
 /* ----------------- */
 
+static void scr_ring_bell(void *data)
+{
+    struct scroller *scr = (struct scroller *)data;
+
+    // TODO: Ring the bell
+}
+
 struct scroller *scr_new(SWINDOW *win)
 {
     struct scroller *rv = new scroller();
+    int scrollback_buffer_size = cgdbrc_get_int(CGDBRC_SCROLLBACK_BUFFER_SIZE);
 
     rv->in_scroll_mode = false;
     rv->scroll_cursor_row = rv->scroll_cursor_col = 0;
@@ -137,6 +145,8 @@ struct scroller *scr_new(SWINDOW *win)
     options.data = (void*)rv;
     options.width = swin_getmaxx(rv->win);
     options.height = swin_getmaxy(rv->win);
+    options.scrollback_buffer_size = scrollback_buffer_size;
+    options.ring_bell = scr_ring_bell;
 
     rv->vt = vterminal_new(options);
 
@@ -272,15 +282,10 @@ void scr_add(struct scroller *scr, const char *buf)
     vterminal_write(scr->vt, buf, strlen(buf));
 }
 
-static void scr_ring_bell(void *data)
-{
-    struct scroller *scr = (struct scroller *)data;
-
-    // TODO: Ring the bell
-}
-
 void scr_move(struct scroller *scr, SWINDOW *win)
 {
+    int scrollback_buffer_size = cgdbrc_get_int(CGDBRC_SCROLLBACK_BUFFER_SIZE);
+
     swin_delwin(scr->win);
     scr->win = win;
 
@@ -291,8 +296,7 @@ void scr_move(struct scroller *scr, SWINDOW *win)
     options.data = (void*)scr;
     options.width = swin_getmaxx(scr->win);
     options.height = swin_getmaxy(scr->win);
-    // TODO: Make this a cgdb option
-    options.scrollback_buffer_size = 10000;
+    options.scrollback_buffer_size = scrollback_buffer_size;
     options.ring_bell = scr_ring_bell;
 
     scr->vt = vterminal_new(options);

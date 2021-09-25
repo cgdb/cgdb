@@ -197,6 +197,10 @@ void cgdbrc_init_config_options(void)
     option.variant.int_val = 0;
     cgdbrc_config_options[i++] = option;
 
+    option.option_kind = CGDBRC_SCROLLBACK_BUFFER_SIZE;
+    option.variant.int_val = 10000;
+    cgdbrc_config_options[i++] = option;
+
     option.option_kind = CGDBRC_SELECTED_LINE_DISPLAY;
     option.variant.line_display_style = LINE_DISPLAY_BLOCK;
     cgdbrc_config_options[i++] = option;
@@ -321,6 +325,10 @@ void cgdbrc_init_config_variables(void)
     cgdbrc_variables.push_back(ConfigVariable(
         "ignorecase", "ic", CONFIG_TYPE_BOOL,
         (void *)&cgdbrc_config_options[CGDBRC_IGNORECASE].variant.int_val));
+    /* scrollbackbuffersize */
+    cgdbrc_variables.push_back(ConfigVariable(
+        "scrollbackbuffersize", "sbbs", CONFIG_TYPE_INT,
+        (void *)&cgdbrc_config_options[CGDBRC_SCROLLBACK_BUFFER_SIZE].variant.int_val));
     /* selectedlinedisplay */
     cgdbrc_variables.push_back(ConfigVariable(
         "selectedlinedisplay", "sld", CONFIG_TYPE_FUNC_STRING,

@@ -681,6 +681,11 @@ The default is disabled.
 @itemx :set ignorecase
 Sets searching case insensitive.  The default is off.
 
+@item :set sbbs
+@itemx :set scrollbackbuffersize
+Set the size of the scrollback buffer for the gdb window to num lines.
+The default scrollback is 10000 lines. 
+
 @item :set sld=@var{style}
 @itemx :set selectedlinedisplay=@var{style}
 Set the selected line display to @var{style}.  Possible values for @var{style}

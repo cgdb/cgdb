@@ -120,6 +120,7 @@ enum cgdbrc_option_kind {
     CGDBRC_EXECUTING_LINE_DISPLAY,
     CGDBRC_HLSEARCH,
     CGDBRC_IGNORECASE,
+    CGDBRC_SCROLLBACK_BUFFER_SIZE,
     CGDBRC_SELECTED_LINE_DISPLAY,
     CGDBRC_SHOWMARKS,
     CGDBRC_SYNTAX,
@@ -150,6 +151,7 @@ struct cgdbrc_config_option {
         /* option_kind == CGDBRC_DISASM */
         /* option_kind == CGDBRC_HLSEARCH */
         /* option_kind == CGDBRC_IGNORECASE */
+        /* option_kind == CGDBRC_SCROLLBACK_BUFFER_SIZE */
         /* option_kind == CGDBRC_SHOWMARKS */
         /* option_kind == CGDBRC_TABSTOP */
         /* option_kind == CGDBRC_TIMEOUT */
