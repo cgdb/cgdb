@@ -17,6 +17,12 @@ struct VTerminalOptions
 
     // The width of the virtual terminal
     int width;
+
+    // The size (number of rows) of the scrollback buffer
+    int scrollback_buffer_size;
+
+    // A function to ring the bell
+    void (*ring_bell)(void *data);
 };
 
 // Create a new virtual terminal

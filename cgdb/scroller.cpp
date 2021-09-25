@@ -272,6 +272,13 @@ void scr_add(struct scroller *scr, const char *buf)
     vterminal_write(scr->vt, buf, strlen(buf));
 }
 
+static void scr_ring_bell(void *data)
+{
+    struct scroller *scr = (struct scroller *)data;
+
+    // TODO: Ring the bell
+}
+
 void scr_move(struct scroller *scr, SWINDOW *win)
 {
     swin_delwin(scr->win);
@@ -284,6 +291,9 @@ void scr_move(struct scroller *scr, SWINDOW *win)
     options.data = (void*)scr;
     options.width = swin_getmaxx(scr->win);
     options.height = swin_getmaxy(scr->win);
+    // TODO: Make this a cgdb option
+    options.scrollback_buffer_size = 10000;
+    options.ring_bell = scr_ring_bell;
 
     scr->vt = vterminal_new(options);
     vterminal_write(scr->vt, scr->text.data(), scr->text.size());
