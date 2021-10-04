@@ -614,7 +614,15 @@ void scr_refresh(struct scroller *scr, int focus, enum win_refresh dorefresh)
             swin_wattron(scr->win, attr);
             if (in_search)
                 swin_wattron(scr->win, search_attr);
-            swin_waddnstr(scr->win, utf8buf.data(), utf8buf.size());
+
+            // print the cell utf8 data or an empty char
+            // If nothing is written at all, then the cell will not be colored
+            if (utf8buf.size()) {
+                swin_waddnstr(scr->win, utf8buf.data(), utf8buf.size());
+            } else {
+                swin_waddnstr(scr->win, " ", 1);
+            }
+
             if (in_search)
                 swin_wattroff(scr->win, search_attr);
             swin_wattroff(scr->win, attr);

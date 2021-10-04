@@ -791,7 +791,7 @@ int hl_groups_parse_config(hl_groups_ptr hl_groups)
 }
 
 /* Given 24-bit rgb value, calculate closest color in our 16 entry color table */
-static int ansi_get_closest_color_value(int r, int g, int b)
+int ansi_get_closest_color_value(int r, int g, int b)
 {
     static const struct
     {

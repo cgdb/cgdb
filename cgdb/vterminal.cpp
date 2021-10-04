@@ -318,9 +318,13 @@ VTerminal::sb_popline(int cols, VTermScreenCell *cells)
     return 1;
 }
 
-static int get_ncurses_color_index(VTermColor &color)
+int ansi_get_closest_color_value(int r, int g, int b);
+
+static int get_ncurses_color_index(VTermColor &color, bool &bold)
 {
     int index = -1;
+    bold = false;
+
     if (VTERM_COLOR_IS_DEFAULT_FG(&color)) {
         index = -1;
     } else if (VTERM_COLOR_IS_DEFAULT_BG(&color)) {
@@ -328,9 +332,29 @@ static int get_ncurses_color_index(VTermColor &color)
     } else if (VTERM_COLOR_IS_INDEXED(&color)) {
         if (color.indexed.idx >= 0 && color.indexed.idx < 16) {
             index = color.indexed.idx;
+        } else if (color.indexed.idx >=232) {
+            int num = color.indexed.idx;
+            int gray = 255 * (MIN(num, 255) - 232) / (255 - 232);
+            index = ansi_get_closest_color_value( gray, gray, gray );
+        } else if (color.indexed.idx >= 16) {
+            int num = color.indexed.idx;
+            int red = ((num - 16) / 36);
+            int green = (((num - 16) - red * 36) / 6);
+            int blue = ((num - 16) % 6);
+            index = ansi_get_closest_color_value( red * 255 / 6,
+                    green * 255 / 6, blue * 255 / 6 );
+        }
+
+        // Colors 8 through 15 are high intensity colors
+        // To my knowledge, the only way to handle this with ncurses is
+        // to bold the corresponding low intensity numbers.
+        // https://en.wikipedia.org/wiki/ANSI_escape_code
+        if (index >=8 && index < 16) {
+            index = index - 8;
+            bold = true;
         }
     } else if (VTERM_COLOR_IS_RGB(&color)) {
-        // TODO: How to handle rgb colors
+        // TODO: RGB is currently unsupported
     }
     return index;
 }
@@ -350,12 +374,13 @@ VTerminal::fetch_row(int row, int start_col, int end_col, int &attr, int &width)
     fetch_cell(row, col, &cell);
 
     // TODO: What about rgb colors?
-    int fg_index = get_ncurses_color_index(cell.fg);
-    int bg_index = get_ncurses_color_index(cell.bg);
+    bool fg_bold = false, bg_bold = false;
+    int fg_index = get_ncurses_color_index(cell.fg, fg_bold);
+    int bg_index = get_ncurses_color_index(cell.bg, bg_bold);
     hl_get_color_attr_from_index(fg_index, bg_index, attr);
 
     // set attributes
-    if (cell.attrs.bold) {
+    if (cell.attrs.bold || fg_bold || bg_bold) {
         attr |= SWIN_A_BOLD;
     } else if (cell.attrs.underline) {
         attr |= SWIN_A_UNDERLINE;
