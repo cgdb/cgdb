@@ -580,9 +580,6 @@ void scr_refresh(struct scroller *scr, int focus, enum win_refresh dorefresh)
     int delta;
     vterminal_scroll_get_delta(scr->vt, delta);
 
-    // TODO: Need to highlight searching if option is set
-    int hlsearch = cgdbrc_get_int(CGDBRC_HLSEARCH);
-    
     int highlight_attr, search_attr;
 
     int cursor_row, cursor_col;
