@@ -1,6 +1,37 @@
-  * Major CGDB update (requires GDB 7.12 or newer)
+  * CGDB implements a virtual terminal in the GDB window
+    - The GDB scroller is now a virtual terminal (using libvterm)
+    - The scrollback buffer has been reimplemented using libvterm
+      The cursor row/col position is now known, rather than just the row
+    - Searching in the scrollback buffer is improved
+    - The scrollback buffer size is configurable with a new option,
+      scrollbackbuffersize (sbbs) and is defaulted to 10000.
+    - Mark commands in the GDB scroller have been removed
+    - Unicode is now fully supported in the gdb window
+    - libvterm does not support reflow yet, so resizing the terminal or
+      switching the window orientation (winsplitorientation) after startup
+      may cause the text in the GDB window to not be as expected
+    - Colors in the GDB window are not fully supported yet.
+      Ncurses is difficult to work with, considering switching.
+      RGB vterm colors are unsupported at the moment.
+
+    Fix the following github issues
+    - When I use set wso=vertical, I use the GDB window to print the
+      variable value, which will overflow the rightboundary #274
+    - Long lines from GDB output are not wrapped #265 
+    - Some characters in the editor are incorrect #261 
+    - Setting prompt to unicode character doesn't work as expected #257 
+    - cgdb prints '[?2004h' in xfce4 terminal #256 
+    - [regression] prefixing "04h" characters in the gdb prompt since
+      fixing #255 
+    - GDB console does not display color #251 
+    - gdb ANSI escape codes only in cgdb #189 
+    - Cursor offset gets lost when typing UTF-8 characters in the
+      gdb window #121 
+
+  * CGDB implements GDB/MI in favor of GDB/Annotations
     - CGDB now communicates with GDB using MI only (instead of Annotations)
-      using the new-ui GDB command (GDB 7.12+)
+      using the new-ui GDB command
+    - CGDB now requires GDB 7.12 or newer
     - CGDB now fully supports the GDB console, including readline and
       communicating with the inferior (the program being debugged)
     - CGDB no longer uses the inferior tty option to talk to the inferior
