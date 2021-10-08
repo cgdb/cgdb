@@ -955,6 +955,11 @@ static void tgdb_run_request(struct tgdb *tgdb, struct tgdb_request *request)
     tgdb_commands_set_current_request_type(tgdb, request->header);
 
     if (request->header == TGDB_REQUEST_DEBUGGER_COMMAND) {
+        // since debugger commands are sent to the debugger's stdin
+        // and not to the new-ui mi window, then we don't have to wait
+        // for gdb to respond with an mi prompt. CGDB can send as many
+        // commands as it likes, just as if the user typed it at the console
+        tgdb->is_gdb_ready_for_next_command = 1;
         io_writen(tgdb->debugger_stdin, command.c_str(), command.size());
     } else {
         io_writen(tgdb->gdb_mi_ui_fd, command.c_str(), command.size());
