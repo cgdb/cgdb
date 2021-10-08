@@ -1,3 +1,7 @@
+  * Fix issue #260, CGDB would not process commands after F5, F6, etc
+    If F5, F6, F7, F8, F10 were hit, CGDB would no longer process GDB
+    commands, like setting breakpoints, etc. Now CGDB works as expected.
+
   * CGDB implements a virtual terminal in the GDB window
     - The GDB scroller is now a virtual terminal (using libvterm)
     - The scrollback buffer has been reimplemented using libvterm
