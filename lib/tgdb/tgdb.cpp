@@ -525,6 +525,8 @@ static void gdbwire_async_record_callback(void *context,
         case GDBWIRE_MI_ASYNC_BREAKPOINT_DELETED:
             tgdb_breakpoints_changed(tgdb);
             break;
+        default:
+            break;
     }
 }
 
