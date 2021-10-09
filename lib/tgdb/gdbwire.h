@@ -3,7 +3,7 @@
  *
  * This file is an amalgamation of the source files from GDBWIRE.
  *
- * It was created using gdbwire 1.0 and git revision 31a8a33.
+ * It was created using gdbwire 1.0 and git revision 6cbdacc.
  *
  * GDBWIRE is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -2066,12 +2066,26 @@ enum gdbwire_mi_command_kind {
     GDBWIRE_MI_FILE_LIST_EXEC_SOURCE_FILES
 };
 
+/**
+ * An enumeration representing if debug symbols are fully loaded for a source.
+ */
+enum gdbwire_mi_debug_fully_read_kind {
+    /** It is unknown if the debug symbols are fully loaded */
+    GDBWIRE_MI_DEBUG_FULLY_READ_UNKNOWN,
+    /** The debug symbols are fully loaded */
+    GDBWIRE_MI_DEBUG_FULLY_READ_TRUE,
+    /** The debug symbols are not fully loaded */
+    GDBWIRE_MI_DEBUG_FULLY_READ_FALSE
+};
+
 /** A linked list of source files. */
 struct gdbwire_mi_source_file {
     /** A relative path to a file, never NULL */
     char *file;
     /**An absolute path to a file, NULL if unavailable */
     char *fullname;
+    /** If the source file has it's debug fully read, or not, or unknown */
+    enum gdbwire_mi_debug_fully_read_kind debug_fully_read;
     /** The next file name or NULL if no more. */
     struct gdbwire_mi_source_file *next;
 };
@@ -2625,12 +2639,26 @@ enum gdbwire_mi_command_kind {
     GDBWIRE_MI_FILE_LIST_EXEC_SOURCE_FILES
 };
 
+/**
+ * An enumeration representing if debug symbols are fully loaded for a source.
+ */
+enum gdbwire_mi_debug_fully_read_kind {
+    /** It is unknown if the debug symbols are fully loaded */
+    GDBWIRE_MI_DEBUG_FULLY_READ_UNKNOWN,
+    /** The debug symbols are fully loaded */
+    GDBWIRE_MI_DEBUG_FULLY_READ_TRUE,
+    /** The debug symbols are not fully loaded */
+    GDBWIRE_MI_DEBUG_FULLY_READ_FALSE
+};
+
 /** A linked list of source files. */
 struct gdbwire_mi_source_file {
     /** A relative path to a file, never NULL */
     char *file;
     /**An absolute path to a file, NULL if unavailable */
     char *fullname;
+    /** If the source file has it's debug fully read, or not, or unknown */
+    enum gdbwire_mi_debug_fully_read_kind debug_fully_read;
     /** The next file name or NULL if no more. */
     struct gdbwire_mi_source_file *next;
 };

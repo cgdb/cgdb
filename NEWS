@@ -1,3 +1,8 @@
+  * Fix issue #135 CGDB freezes when pressing "o" to open the file dialog
+    Previously, if you attempted to open the file dialog, cgdb would 
+    sometimes hang, due to a gdbwire parsing bug from the gdb response.
+    This has been resolved.
+
   * Fix issue #152, breakpoint handling is broken in disasembly view
     Previously, if you set a breakpoint in the source view, it would not
     be reflected in the disassembly view, and vice versa. Now if you set
