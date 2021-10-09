@@ -432,6 +432,14 @@
    */
    void tgdb_request_current_location(struct tgdb *tgdb);
 
+   /**
+    * Request an update of the breakpoints to the front end.
+    *
+    * @param tgdb
+    * An instance of the tgdb library to operate on.
+    */
+   void tgdb_request_breakpoints(struct tgdb *tgdb);
+
   /**
    * This tells libtgdb to run a command through the debugger.
    *

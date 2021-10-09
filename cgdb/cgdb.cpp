@@ -567,6 +567,10 @@ static void update_file_position(struct tgdb_response *response)
             /* No disasm found - request it */
             tgdb_request_disassemble_func(tgdb,
                 DISASSEMBLE_FUNC_SOURCE_LINES);
+            // If the disassembly view was not available and is attempting
+            // to be loaded, then reload the breakpoints afterwards, so they
+            // can be associated with the disassembly view as well
+            tgdb_request_breakpoints(tgdb);
         }
     }
 }

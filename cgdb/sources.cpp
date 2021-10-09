@@ -1341,6 +1341,10 @@ void source_set_breakpoints(struct sviewer *sview,
 
     source_clear_breaks(sview);
 
+    // Loop over each breakpoint and let the source view and the 
+    // disassembly view know about them. This way if you set a breakpoint
+    // in one mode, then switch modes, the other mode will know about
+    // it as well.
     for (i = 0; i < sbcount(breakpoints); i++) {
         if (breakpoints[i].path) {
             node = source_get_node(sview, breakpoints[i].path);

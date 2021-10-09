@@ -1280,6 +1280,17 @@ void tgdb_request_current_location(struct tgdb * tgdb)
     tgdb_run_or_queue_request(tgdb, request_ptr, true);
 }
 
+void tgdb_request_breakpoints(struct tgdb * tgdb)
+{
+    tgdb_request_ptr request_ptr;
+
+    request_ptr = (tgdb_request_ptr)cgdb_malloc(sizeof (struct tgdb_request));
+
+    request_ptr->header = TGDB_REQUEST_BREAKPOINTS;
+
+    tgdb_run_or_queue_request(tgdb, request_ptr, false);
+}
+
 void
 tgdb_request_run_debugger_command(struct tgdb * tgdb, enum tgdb_command_type c)
 {

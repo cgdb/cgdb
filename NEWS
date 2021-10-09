@@ -1,3 +1,8 @@
+  * Fix issue #152, breakpoint handling is broken in disasembly view
+    Previously, if you set a breakpoint in the source view, it would not
+    be reflected in the disassembly view, and vice versa. Now if you set
+    a breakpoint in either view, it should be reflected in the other.
+
   * Fix issue #260, CGDB would not process commands after F5, F6, etc
     If F5, F6, F7, F8, F10 were hit, CGDB would no longer process GDB
     commands, like setting breakpoints, etc. Now CGDB works as expected.
