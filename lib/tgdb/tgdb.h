@@ -76,9 +76,11 @@
          //
          // This will usually be absolute. If the absolute path is not
          // available for GDB it will be a relative path.
+         //
+         // Will be NULL if the source information is not available
         char *path;
 
-        // The line number in the file
+        // The line number in the file or 0 if unknown
         int line_number;
 
         // Line number corresponding to the $pc or 0 if unknown

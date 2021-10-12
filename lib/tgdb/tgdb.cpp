@@ -473,13 +473,13 @@ source_position_changed(struct tgdb *tgdb, gdbwire_mi_result *result)
         if (frame == result->variable &&
             result->kind == GDBWIRE_MI_TUPLE) {
 
-            uint64_t addr_value;
+            uint64_t addr_value = 0;
             bool addr_value_set = false;
 
             std::string fullname_value;
             bool fullname_value_set = false;
 
-            int line_value;
+            int line_value = 0;
             bool line_value_set = false;
 
             struct gdbwire_mi_result *fresult = result->variant.result;
@@ -499,7 +499,7 @@ source_position_changed(struct tgdb *tgdb, gdbwire_mi_result *result)
                 fresult = fresult->next;
             }
 
-            if(addr_value_set && fullname_value_set && line_value_set) {
+            if(addr_value_set || (fullname_value_set && line_value_set)) {
                 tgdb_commands_send_source_file(tgdb, fullname_value.c_str(),
                         NULL, addr_value, NULL, NULL, line_value);
             }
