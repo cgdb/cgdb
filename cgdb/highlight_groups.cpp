@@ -304,49 +304,79 @@ bool hl_ansi_color_support(hl_groups *h)
  */
 static int hl_get_ansicolor_pair(hl_groups_ptr hl_groups, int bgcolor, int fgcolor)
 {
-    static int color_pairs_inited = 0;
-    static int color_pair_table[9][9];
+    static short *color_pair_table = NULL;
+    /* Limit colors to 256 plus the default color to avoid a large array */
+    static int max_color = swin_colors() >= 256 ? 255 : swin_colors() - 1;
+    static int min_color = (swin_use_default_colors() != -1 ? -1 : 0);
+    static int stride = max_color + 2;
+    static int nr_color_pairs = 0;
 
     /* If ansi colors aren't enabled, return default color pair 0 */
     if (hl_groups && !hl_ansi_color_support(hl_groups))
         return 0;
 
-    if (!color_pairs_inited) {
-        int fg, bg;
-        int color_pair = 1;
-
-        /* Initialize 64 [1..8][1..8] color entries */
-        for (fg = COLOR_BLACK; fg <= COLOR_WHITE; fg++) {
-            for (bg = COLOR_BLACK; bg <= COLOR_WHITE; bg++) {
-                swin_init_pair(color_pair, fg, bg);
-                color_pair_table[bg + 1][fg + 1] = color_pair++;
-            }
-        }
-
-        /* swin_init_pair:
-         *  The value of the first argument must be between 1 and COLOR_PAIRS-1,
-         * except that if default colors are used (see use_default_colors) the
-         * upper limit is adjusted to allow for extra pairs which use a default
-         * color in foreground and/or background.
-         */
-
-        /* Initialize colors with default bg: [0][1..8] */
-        for (fg = COLOR_BLACK; fg <= COLOR_WHITE; fg++) {
-            swin_init_pair(color_pair, fg, -1);
-            color_pair_table[0][fg + 1] = color_pair++;
-        }
-        /* Initialize colors with default fg: [1..8][0] */
-        for (bg = COLOR_BLACK; bg <= COLOR_WHITE; bg++) {
-            swin_init_pair(color_pair, -1, bg);
-            color_pair_table[bg + 1][0] = color_pair++;
-        }
-
-        color_pairs_inited = 1;
+    if (color_pair_table == NULL) {
+        /* Allocate color pair table */
+        int color_pair_table_size = sizeof(short) * stride * stride;
+        color_pair_table = (short *)malloc(color_pair_table_size);
+        clog_info(CLOG_CGDB, "Allocated %d bytes for color pair table.", color_pair_table_size);
+        /* Initialize first color pair for -1,-1 */
+        color_pair_table[0] = 0;
+        /* Unset all other color combinations */
+        for (int i = 1; i < stride * stride; i++)
+            color_pair_table[i] = -1;
     }
 
-    fgcolor = MAX(0, fgcolor + 1);
-    bgcolor = MAX(0, bgcolor + 1);
-    return color_pair_table[bgcolor][fgcolor];
+    /* Assume indices are valid if hl_groups is null to reduce
+     * overhead when called by hl_get_color_attr_from_index()
+     */
+    if (hl_groups) {
+        /* Change unspecified colors to default color or black */
+        if (fgcolor == UNSPECIFIED_COLOR)
+            fgcolor = min_color;
+        if (bgcolor == UNSPECIFIED_COLOR)
+            bgcolor = min_color;
+
+        /* Clamp foreground and background colors */
+        if (fgcolor > max_color) {
+            clog_error(CLOG_CGDB,
+                    "Foreground color clamped from %d to maxmimum value %d.",
+                    fgcolor, max_color);
+            fgcolor = max_color;
+        } else if (fgcolor < min_color) {
+            clog_error(CLOG_CGDB,
+                    "Foreground color clamped from %d to minmimum value %d.",
+                    fgcolor, min_color);
+            fgcolor = min_color;
+        }
+        if (bgcolor > max_color) {
+            clog_error(CLOG_CGDB,
+                    "Background color clamped from %d to maxmimum value %d.",
+                    bgcolor, max_color);
+            bgcolor = max_color;
+        } else if (bgcolor < min_color) {
+            clog_error(CLOG_CGDB,
+                    "Background color clamped from %d to minmimum value %d.",
+                    bgcolor, min_color);
+            bgcolor = min_color;
+        }
+    }
+
+    /* Query existing color pair */
+    int index = stride * (bgcolor + 1) + (fgcolor + 1);
+    int color_pair = color_pair_table[index];
+    if (color_pair > -1)
+        return color_pair;
+
+    /* Initialize new color pair */
+    /* Limit color pairs to 32768 so they fit in a signed short */
+    if (nr_color_pairs >= 32767 || swin_init_pair(++nr_color_pairs, fgcolor, bgcolor) != 0) {
+        /* Use default color pair 0 on failure */
+        color_pair_table[index] = 0;
+        return 0;
+    }
+    color_pair_table[index] = nr_color_pairs;
+    return nr_color_pairs;
 }
 
 /**
@@ -397,8 +427,8 @@ setup_group(hl_groups_ptr hl_groups, enum hl_group_kind group,
         return 0;
 
     if (hl_ansi_color_support(hl_groups)) {
-        /* Ansi mode is enabled so we've got 16 colors and 64 color pairs.
-           Set the color_pair index for this bg / fg color combination. */
+        /* Ansi mode is enabled so we've got swin_colors() colors and swin_color_pairs()
+           color pairs. Set the color_pair index for this bg / fg color combination. */
         info->color_pair = hl_get_ansicolor_pair(hl_groups, back_color, fore_color);
         return 0;
     }
