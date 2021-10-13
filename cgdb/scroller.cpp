@@ -91,6 +91,10 @@ struct scroller {
     std::string text;
 
     // The window the scroller will be displayed on
+    //
+    // NULL when the height of the scroller is zero
+    // This occurs when the terminal has a height of 1 or if the user
+    // minimized the height of the scroller manually to zero
     SWINDOW *win;
 
     // True if in scroll mode, otherwise false
@@ -279,7 +283,9 @@ void scr_add(struct scroller *scr, const char *buf)
     // instance and feed it the same data
     scr->text.append(buf);
 
-    vterminal_write(scr->vt, buf, strlen(buf));
+    if (scr->win) {
+        vterminal_write(scr->vt, buf, strlen(buf));
+    }
 }
 
 void scr_move(struct scroller *scr, SWINDOW *win)
@@ -300,7 +306,10 @@ void scr_move(struct scroller *scr, SWINDOW *win)
     options.ring_bell = scr_ring_bell;
 
     scr->vt = vterminal_new(options);
-    vterminal_write(scr->vt, scr->text.data(), scr->text.size());
+
+    if (win) {
+        vterminal_write(scr->vt, scr->text.data(), scr->text.size());
+    }
 }
 
 void scr_enable_search(struct scroller *scr, bool forward, bool icase)
