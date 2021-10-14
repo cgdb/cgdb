@@ -1,6 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.5)
-AC_INIT(cgdb, 0.6.8)
+#AC_INIT(cgdb, [m4_esyscmd_s([git rev-parse --short HEAD])])
+AC_INIT(cgdb, [m4_esyscmd_s([cat VERSION])])
 AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_HEADERS(config.h)
 AM_INIT_AUTOMAKE

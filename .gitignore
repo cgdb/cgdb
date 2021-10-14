@@ -12,7 +12,6 @@ aclocal.m4
 autom4te.cache/
 stamp-h1
 configure
-configure.ac
 config.h
 config.h.in
 config.log
