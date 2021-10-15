@@ -250,9 +250,6 @@ int invoke_debugger(const char *path,
         clog_error(CLOG_CGDB, "fork failed");
         return -1;
     } else if (pid == 0) {      /* child */
-        /* If this is not called, when user types ^c SIGINT gets sent to gdb */
-        setsid();
-
         execvp(local_argv[0], local_argv);
 
         /* Will get here if exec failed. This will happen when the 
