@@ -188,7 +188,7 @@ int invoke_debugger(const char *path,
     const char *const Q = "-q";
     const char *const EX = "-ex";
     char **local_argv;
-    int i, j = 0, extra = 7;
+    int i, j = 0, extra = 5;
     int malloc_size = argc + extra;
     char slavename[64];
     int masterfd;
@@ -219,9 +219,6 @@ int invoke_debugger(const char *path,
      * users options become parameters to the inferior.
      */
     local_argv[j++] = cgdb_strdup(NW);
-
-    local_argv[j++] = cgdb_strdup(EX);
-    local_argv[j++] = cgdb_strdup("set pagination off");
 
     local_argv[j++] = cgdb_strdup(EX);
     local_argv[j++] = cgdb_strdup(std::string("new-ui mi ").
