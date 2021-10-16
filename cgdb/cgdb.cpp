@@ -90,8 +90,6 @@
 
 #define GDB_MAXBUF 4096         /* GDB input buffer size */
 
-const char *readline_history_filename = "readline_history.txt";
-
 /* --------------- */
 /* Local Variables */
 /* --------------- */
@@ -100,9 +98,6 @@ struct tgdb *tgdb;              /* The main TGDB context */
 
 char cgdb_home_dir[FSUTIL_PATH_MAX]; /* Path to home dir with trailing slash */
 char cgdb_log_dir[FSUTIL_PATH_MAX]; /* Path to log dir with trailing slash */
-char *readline_history_path;    /* After readline init is called, this will 
-                                 * contain the path to the readline history 
-                                 * file. */
 
 static int gdb_console_fd = -1; /* GDB console descriptor */
 static int gdb_mi_fd = -1;      /* GDB Machine Interface descriptor */
@@ -869,8 +864,6 @@ void cgdb_cleanup_and_exit(int val)
     swin_move(swin_lines() - 1, 0);
     printf("\n");
 
-    rline_write_history(rline, readline_history_path);
-
     /* The order of these is important. They each must restore the terminal
      * the way they found it. Thus, the order in which curses/readline is 
      * started, is the reverse order in which they should be shutdown 
@@ -948,16 +941,7 @@ static int tab_completion(int a, int b)
 
 int init_readline(void)
 {
-    int length;
-
-    /* The 16 is because I don't know how many char's the directory separator 
-     * is going to be, I expect it to be 1, but who knows. */
-    length = strlen(cgdb_home_dir) + strlen(readline_history_filename) + 16;
-    readline_history_path = (char *) cgdb_malloc(sizeof (char) * length);
-    fs_util_get_path(cgdb_home_dir, readline_history_filename,
-            readline_history_path);
     rline = rline_initialize(rlctx_send_user_command, tab_completion, "dumb");
-    rline_read_history(rline, readline_history_path);
     return 0;
 }
 
