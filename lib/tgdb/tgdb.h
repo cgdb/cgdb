@@ -290,33 +290,7 @@
     };
 
   /**
-   * This initializes a tgdb library instance. It starts up the debugger and 
-   * returns all file descriptors the client must select on.
-   *
-   * The client must call this function before any other function in the 
-   * tgdb library.
-   *
-   * \param debugger
-   * The path to the desired debugger to use. If this is NULL, then just
-   * "gdb" is used.
-   *
-   * \param argc
-   * The number of arguments to pass to the debugger
-   *
-   * \param argv
-   * The arguments to pass to the debugger    
-   *
-   * \param gdb_win_rows
-   * The number of rows in the gdb console
-   *
-   * \param gdb_win_cols
-   * The number of columns in the gdb console
-   *
-   * \param gdb_console_fd
-   * The gdb console file descriptor
-   *
-   * \param gdb_mi_fd
-   * The gdb machine interface file descriptor
+   * This initializes a tgdb library instance.
    *
    * \param callbacks
    * Callback functions for event driven notifications
@@ -324,9 +298,7 @@
    * @return
    * NULL on error, a valid context on success.
    */
-    struct tgdb *tgdb_initialize(const char *debugger,
-            int argc, char **argv, int gdb_win_rows, int gdb_win_cols,
-            int *gdb_console_fd, int *gdb_mi_fd, tgdb_callbacks callbacks);
+    struct tgdb *tgdb_initialize(tgdb_callbacks callbacks);
 
   /**
    * This will terminate a libtgdb session. No functions should be called on
@@ -357,6 +329,39 @@
 /******************************************************************************/
 
 /*@{*/
+
+    // Start the debugger
+    // 
+    // Returns all file descriptors the client must select on.
+    //
+    // @param tgdb
+    // An instance of the tgdb library to operate on.
+    //
+    // @param debugger
+    // The path to the desired debugger to use.
+    // If this is NULL, then just "gdb" is used.
+    //
+    // @param argc
+    // The number of arguments to pass to the debugger
+    //
+    // @param argv
+    // The arguments to pass to the debugger    
+    //
+    // @param gdb_win_rows
+    // The number of rows in the gdb console
+    //
+    // @param gdb_win_cols
+    // The number of columns in the gdb console
+    //
+    // @param gdb_console_fd
+    // The gdb console file descriptor
+    //
+    // @param gdb_mi_fd
+    // The gdb machine interface file descriptor
+    int tgdb_start_gdb(struct tgdb *tgdb,
+            const char *debugger, int argc, char **argv,
+            int gdb_win_rows, int gdb_win_cols, int *gdb_console_fd,
+            int *gdb_mi_fd);
 
   /**
    * This function does most of the dirty work in TGDB. It is capable of 
@@ -394,6 +399,9 @@
     /**
      * Resize the gdb console.
      *
+     * If tgdb_start_gdb has not been called yet, this function will be a
+     * no-op.
+     *
      * \param tgdb
      * An instance of the tgdb library to operate on.
      *
@@ -403,7 +411,7 @@
      * \param cols
      * The number of columns in the new gdb console
      */
-    int tgdb_resize(struct tgdb *tgdb, int rows, int cols);
+    int tgdb_resize_console(struct tgdb *tgdb, int rows, int cols);
 
 /*@}*/
 /* }}}*/

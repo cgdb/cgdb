@@ -395,12 +395,8 @@ static int start_gdb(int argc, char *argv[])
     // Note, the 40 height by 80 width size here will be overriden
     // once cgdb determines the actual size. This is done in main() in
     // the call to if_layout just after if_init.
-    tgdb = tgdb_initialize(debugger_path, argc, argv, 40,
-            80, &gdb_console_fd, &gdb_mi_fd, callbacks);
-    if (tgdb == NULL)
-        return -1;
-
-    return 0;
+    return tgdb_start_gdb(tgdb, debugger_path, argc, argv, get_gdb_height(),
+            get_gdb_width(), &gdb_console_fd, &gdb_mi_fd);
 }
 
 static void send_key(int focus, char key)
@@ -1113,13 +1109,13 @@ int main(int argc, char *argv[])
     /* Initialize default option values */
     cgdbrc_init();
 
-    /* First create tgdb, because it has the error log */
-    if (start_gdb(argc, argv) == -1) {
-        fprintf(stderr, "%s:%d Unable to invoke debugger: %s\n",
-                __FILE__, __LINE__, debugger_path ? debugger_path : "gdb");
+    tgdb = tgdb_initialize(callbacks);
+    if (!tgdb) {
+        fprintf(stderr, "%s:%d Unable to initialize tgdb\n",
+                __FILE__, __LINE__);
         exit(-1);
     }
-    
+
     /* From here on, the logger is initialized */
     if (init_readline() == -1) {
         clog_error(CLOG_CGDB, "Unable to init readline");
@@ -1164,6 +1160,11 @@ int main(int argc, char *argv[])
     }
 
     if_layout();
+
+    // Starting gdb after the height/width of the gdb window has been decided 
+    if (start_gdb(argc, argv) == -1) {
+        cgdb_cleanup_and_exit(-1);
+    }
 
     /* Initialize the pipe that is used for resize */
     if (init_resize_pipe() == -1) {

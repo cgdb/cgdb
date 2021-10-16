@@ -740,9 +740,7 @@ static void tgdb_request_destroy(tgdb_request_ptr request_ptr)
 
 /* Creating and Destroying a libtgdb context. {{{*/
 
-struct tgdb *tgdb_initialize(const char *debugger,
-        int argc, char **argv, int gdb_win_rows, int gdb_win_cols,
-        int *gdb_console_fd, int *gdb_mi_fd, tgdb_callbacks callbacks)
+struct tgdb *tgdb_initialize(tgdb_callbacks callbacks)
 {
     /* Initialize the libtgdb context */
     struct tgdb *tgdb = initialize_tgdb_context(callbacks);
@@ -757,15 +755,6 @@ struct tgdb *tgdb_initialize(const char *debugger,
 
     tgdb->gdb_mi_ui_fd = pty_pair_get_masterfd(tgdb->new_ui_pty_pair);
     tty_set_echo(tgdb->gdb_mi_ui_fd, 0);
-
-    tgdb->debugger_pid = invoke_debugger(debugger, argc, argv,
-            gdb_win_rows, gdb_win_cols, 
-            &tgdb->debugger_stdin, &tgdb->debugger_stdout,
-            pty_pair_get_slavename(tgdb->new_ui_pty_pair));
-
-    /* Couldn't invoke process */
-    if (tgdb->debugger_pid == -1)
-        return NULL;
 
     /* Need to get source information before breakpoint information otherwise
      * the TGDB_UPDATE_BREAKPOINTS event will be ignored in process_commands()
@@ -784,10 +773,27 @@ struct tgdb *tgdb_initialize(const char *debugger,
      */
     tgdb_issue_request(tgdb, TGDB_REQUEST_DATA_DISASSEMBLE_MODE_QUERY, true);
 
+    return tgdb;
+}
+
+int tgdb_start_gdb(struct tgdb *tgdb,
+        const char *debugger, int argc, char **argv,
+        int gdb_win_rows, int gdb_win_cols, int *gdb_console_fd,
+        int *gdb_mi_fd)
+{
+    tgdb->debugger_pid = invoke_debugger(debugger, argc, argv,
+            gdb_win_rows, gdb_win_cols, 
+            &tgdb->debugger_stdin, &tgdb->debugger_stdout,
+            pty_pair_get_slavename(tgdb->new_ui_pty_pair));
+
+    /* Couldn't invoke process */
+    if (tgdb->debugger_pid == -1)
+        return -1;
+
     *gdb_console_fd = tgdb->debugger_stdout;
     *gdb_mi_fd = tgdb->gdb_mi_ui_fd;
 
-    return tgdb;
+    return 0;
 }
 
 int tgdb_shutdown(struct tgdb *tgdb)
@@ -802,8 +808,10 @@ int tgdb_shutdown(struct tgdb *tgdb)
     delete tgdb->command_requests;
     tgdb->command_requests = 0;
 
-    cgdb_close(tgdb->debugger_stdin);
-    tgdb->debugger_stdin = -1;
+    if (tgdb->debugger_stdin != -1) {
+        cgdb_close(tgdb->debugger_stdin);
+        tgdb->debugger_stdin = -1;
+    }
 
     gdbwire_destroy(tgdb->wire);
 
@@ -1236,10 +1244,14 @@ void tgdb_send_response(struct tgdb *tgdb, struct tgdb_response *response)
     tgdb_delete_response(response);
 }
 
-int tgdb_resize(struct tgdb *tgdb, int rows, int cols)
+int tgdb_resize_console(struct tgdb *tgdb, int rows, int cols)
 {
     struct winsize size;
     int result;
+
+    if (tgdb->debugger_stdin == -1) {
+        return 0;
+    }
     
     size.ws_row = rows;
     size.ws_col = cols;

@@ -232,4 +232,16 @@ int if_clear_line(void);
  */
 int if_layout();
 
+// Get the gdb window height
+//
+// @return
+// The height of the gdb window
+int get_gdb_height(void);
+
+// Get the gdb window width
+//
+// @return
+// The width of the gdb window
+int get_gdb_width(void);
+
 #endif

@@ -289,7 +289,7 @@ static int get_gdb_col(void)
     return result;
 }
 
-static int get_gdb_height(void)
+int get_gdb_height(void)
 {
     int result;
 
@@ -309,7 +309,7 @@ static int get_gdb_height(void)
     return result;
 }
 
-static int get_gdb_width(void)
+int get_gdb_width(void)
 {
     int result;
 
@@ -560,11 +560,7 @@ int if_layout()
         src_viewer = source_new(src_viewer_win);
     }
 
-    // On initial startup, the interface is created and displayed
-    // but the tgdb instance is not yet created.
-    if (tgdb) {
-        tgdb_resize(tgdb, get_gdb_height(), get_gdb_width());
-    }
+    tgdb_resize_console(tgdb, get_gdb_height(), get_gdb_width());
 
     /* Resize the GDB I/O window */
     create_swindow(&gdb_scroller_win, get_gdb_height(), get_gdb_width(),

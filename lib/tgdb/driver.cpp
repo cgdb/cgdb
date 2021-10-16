@@ -255,8 +255,13 @@ int main(int argc, char **argv)
     if (tty_cbreak(STDIN_FILENO, &term_attributes) == -1)
         clog_error(CLOG_CGDB, "tty_cbreak error");
 
-    if ((tgdb = tgdb_initialize(NULL, argc - 1, argv + 1, 0, 0,
-            &gdb_console_fd, &gdb_mi_fd, callbacks)) == NULL) {
+    if ((tgdb = tgdb_initialize(callbacks)) == NULL) {
+        clog_error(CLOG_CGDB, "tgdb_start error");
+        goto driver_end;
+    }
+
+    if (tgdb_start_gdb(tgdb, NULL, argc - 1, argv + 1, 0, 0,
+            &gdb_console_fd, &gdb_mi_fd ) == -1) {
         clog_error(CLOG_CGDB, "tgdb_start error");
         goto driver_end;
     }
