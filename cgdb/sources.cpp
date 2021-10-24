@@ -139,10 +139,8 @@ static void release_file_buffer(struct buffer *buf)
             sbfree(buf->lines[i].attrs);
             buf->lines[i].attrs = NULL;
 
-            if (!buf->file_data) {
-                sbfree(buf->lines[i].line);
-                buf->lines[i].line = NULL;
-            }
+            free(buf->lines[i].line);
+            buf->lines[i].line = NULL;
         }
 
         /* Free entire file buffer */
@@ -283,7 +281,7 @@ static int load_file_buf(struct buffer *buf, const char *filename)
                     buf->max_width = line_len;
 
                 struct source_line sline;
-                sline.line = line_start;
+                sline.line = strndup(line_start, line_len);
                 sline.len = line_len;
                 sline.attrs = NULL;
 
@@ -296,7 +294,7 @@ static int load_file_buf(struct buffer *buf, const char *filename)
 
             if (*line_start) {
                 struct source_line sline;
-                sline.line = line_start;
+                sline.line = strdup(line_start);
                 sline.len = strlen(line_start);
                 sline.attrs = NULL;
 
@@ -559,9 +557,7 @@ void source_add_disasm_line(struct list_node *node, const char *line)
     struct source_line sline;
     char *colon = 0, colon_char = 0;
 
-    sline.line = NULL;
-    sbsetcount(sline.line, strlen(line) + 1);
-    strcpy(sline.line, line);
+    sline.line = strdup(line);
     sline.line = detab_buffer(sline.line, node->file_buf.tabstop);
 
     sline.attrs = NULL;
