@@ -1,5 +1,4 @@
 %option prefix="ada_"
-%option outfile="lex.yy.c"
 %option case-insensitive
 %option noyywrap
 %option nounput
