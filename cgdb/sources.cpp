@@ -139,10 +139,8 @@ static void release_file_buffer(struct buffer *buf)
             sbfree(buf->lines[i].attrs);
             buf->lines[i].attrs = NULL;
 
-            if (!buf->file_data) {
-                sbfree(buf->lines[i].line);
-                buf->lines[i].line = NULL;
-            }
+            sbfree(buf->lines[i].line);
+            buf->lines[i].line = NULL;
         }
 
         /* Free entire file buffer */
@@ -283,7 +281,9 @@ static int load_file_buf(struct buffer *buf, const char *filename)
                     buf->max_width = line_len;
 
                 struct source_line sline;
-                sline.line = line_start;
+                sline.line = NULL;
+                sbsetcount(sline.line, line_len + 1);
+                strncpy(sline.line, line_start, line_len);
                 sline.len = line_len;
                 sline.attrs = NULL;
 
@@ -296,8 +296,11 @@ static int load_file_buf(struct buffer *buf, const char *filename)
 
             if (*line_start) {
                 struct source_line sline;
-                sline.line = line_start;
-                sline.len = strlen(line_start);
+                int len = strlen(line_start);
+                sline.line = NULL;
+                sbsetcount(sline.line, len + 1);
+                strncpy(sline.line, line_start, len);
+                sline.len = len;
                 sline.attrs = NULL;
 
                 sbpush(buf->lines, sline);
