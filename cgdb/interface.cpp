@@ -35,39 +35,21 @@
 #endif /* HAVE_CONFIG_H */
 
 /* System Includes */
-#if HAVE_SIGNAL_H
 #include <signal.h>
-#endif
 
-#if HAVE_STDARG_H
 #include <stdarg.h>
-#endif /* HAVE_STDARG_H */
 
-#if HAVE_STDLIB_H
 #include <stdlib.h>
-#endif /* HAVE_STDLIB_H */
-
-#if HAVE_STRING_H
 #include <string.h>
-#endif /* HAVE_STRING_H */
+#include <ctype.h>
+#include <assert.h>
 
 #if HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif /* HAVE_SYS_IOCTL_H */
 
-#if HAVE_UNISTD_H
 #include <unistd.h>
-#endif /* HAVE_UNISTD_H */
-
-#if HAVE_TERMIOS_H
 #include <termios.h>
-#endif /* HAVE_TERMIOS_H */
-
-#if HAVE_CTYPE_H
-#include <ctype.h>
-#endif
-
-#include <assert.h>
 
 #include <string>
 

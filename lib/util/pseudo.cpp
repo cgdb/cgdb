@@ -41,10 +41,9 @@
 #include <pwd.h>
 
 /* With out this, cgdb will crash on gentoo when built with a 64 bit machine */
-#ifdef HAVE_STDINT_H
 #include <stdint.h>
-#endif
 #ifdef HAVE_PTY_H
+//not standard in POSIX
 #include <pty.h>
 #endif
 #ifdef HAVE_UTIL_H
@@ -71,9 +70,6 @@
 #undef HAVE_DEV_PTMX
 #endif
 
-#ifdef HAVE_PTY_H
-#include <pty.h>
-#endif
 #if defined(HAVE_DEV_PTMX) && defined(HAVE_SYS_STROPTS_H)
 #include <sys/stropts.h>
 #endif

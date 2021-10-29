@@ -2,29 +2,13 @@
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
-#if HAVE_STDIO_H
 #include <stdio.h>
-#endif /* HAVE_STDIO_H */
-
-#if HAVE_STDARG_H
 #include <stdarg.h>
-#endif /* HAVE_STDARG_H */
-
-#if HAVE_STRING_H
 #include <string.h>
-#endif /* HAVE_STRING_H */
-
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif /* HAVE_UNISTD_H */
-
-#if HAVE_CTYPE_H
 #include <ctype.h>
-#endif
-
-#if HAVE_ERRNO_H
 #include <errno.h>
-#endif /* HAVE_ERRNO_H */
+
+#include <unistd.h>
 
 #define CLOG_MAIN
 #include "sys_util.h"

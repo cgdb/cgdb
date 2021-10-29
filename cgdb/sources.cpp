@@ -16,37 +16,18 @@
 #endif /* HAVE_CONFIG_H */
 
 /* System Includes */
-#if HAVE_STDIO_H
 #include <stdio.h>
-#endif /* HAVE_STDIO_H */
-
-#if HAVE_STDLIB_H
 #include <stdlib.h>
-#endif /* HAVE_STDLIB_H */
-
-#if HAVE_STRING_H
 #include <string.h>
-#endif /* HAVE_STRING_H */
+#include <ctype.h>
+#include <stdint.h>
 
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
 
-#if HAVE_SYS_STAT_H
-#include <sys/stat.h>
-#endif
-
-#if HAVE_UNISTD_H
 #include <unistd.h>
-#endif /* HAVE_UNISTD_H */
-
-#if HAVE_CTYPE_H
-#include <ctype.h>
-#endif
-
-#ifdef HAVE_STDINT_H
-#include <stdint.h>
-#endif
+#include <sys/stat.h>
 
 /* Local Includes */
 #include "sys_util.h"

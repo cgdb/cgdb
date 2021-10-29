@@ -5,13 +5,8 @@
 #include "config.h"
 #endif                          /* HAVE_CONFIG_H */
 
-#if HAVE_TERMIOS_H
 #include <termios.h>
-#endif                          /* HAVE_TERMIOS_H */
-
-#if HAVE_UNISTD_H
 #include <unistd.h>
-#endif                          /* HAVE_UNISTD_H */
 
 /** 
  * Sets terminal to cbreak mode. Also known as noncanonical mode.

@@ -1,8 +1,6 @@
 #include "terminal.h"
 
-#if HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
-#endif /* HAVE_SYS_IOCTL_H */
 
 int tty_cbreak(int fd, struct termios *orig)
 {

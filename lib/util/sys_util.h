@@ -5,14 +5,8 @@
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
-#if HAVE_STDLIB_H
 #include <stdlib.h>
-#endif /* HAVE_STDLIB_H */
-
-#ifdef HAVE_STDINT_H
 #include <stdint.h>
-#endif
-
 #include <string>
 
 #include "cgdb_clog.h"

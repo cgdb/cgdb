@@ -4,17 +4,12 @@
 
 #include <list>
 
-#if HAVE_STRING_H
 #include <string.h>
-#endif /* HAVE_STRING_H */
+#include <stdlib.h>
 
 #if HAVE_STRINGS_H
 #include <strings.h>
 #endif /* HAVE_STRINGS_H */
-
-#if HAVE_STDLIB_H
-#include <stdlib.h>
-#endif /* HAVE_STDLIB_H */
 
 #include "cgdbrc.h"
 #include "command_lexer.h"

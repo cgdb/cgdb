@@ -1,6 +1,4 @@
-#if HAVE_STDLIB_H
 #include <stdlib.h>
-#endif /* HAVE_STDLIB_H */
 
 #include "sys_util.h"
 #include "stretchy.h"

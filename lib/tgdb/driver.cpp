@@ -2,46 +2,20 @@
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
-#if HAVE_STDIO_H
 #include <stdio.h>
-#endif /* HAVE_STDIO_H */
-
-#if HAVE_STDARG_H
+#include <stdlib.h>
 #include <stdarg.h>
-#endif /* HAVE_STDARG_H */
+#include <string.h>
+#include <errno.h>
+
+#include <unistd.h>
+#include <signal.h>
+#include <sys/select.h>
+#include <sys/types.h>
 
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
-
-/* Library includes */
-#ifdef HAVE_SYS_SELECT_H
-#include <sys/select.h>
-#endif
-
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-
-#if HAVE_STRING_H
-#include <string.h>
-#endif /* HAVE_STRING_H */
-
-#if HAVE_ERRNO_H
-#include <errno.h>
-#endif /* HAVE_ERRNO_H */
-
-#if HAVE_SIGNAL_H
-#include <signal.h>
-#endif
-
-#if HAVE_STDLIB_H
-#include <stdlib.h>
-#endif /* HAVE_STDLIB_H */
 
 /* Local includes */
 #include "tgdb.h"
