@@ -654,6 +654,8 @@ int command_set_syntax_type(const char *value)
         lang = TOKENIZER_LANGUAGE_ASM;
     else if (strcasecmp(value, "d") == 0)
         lang = TOKENIZER_LANGUAGE_D;
+    else if (strcasecmp(value, "for") == 0)
+        lang = TOKENIZER_LANGUAGE_FOR;
     else if (strcasecmp(value, "go") == 0)
         lang = TOKENIZER_LANGUAGE_GO;
     else if (strcasecmp(value, "ada") == 0)
