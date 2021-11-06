@@ -67,6 +67,8 @@
 #include <string.h>
 #endif /* HAVE_STRING_H */
 
+#include <algorithm>
+
 /* Local Includes */
 #include "sys_util.h"
 #include "stretchy.h"
@@ -132,10 +134,39 @@ static void scr_ring_bell(void *data)
     // TODO: Ring the bell
 }
 
+// Create a new VTerminal instance
+//
+// Please note that when the height or width of the scroller is zero,
+// than the window (scr->win) will be NULL, as noted in the fields comment.
+//
+// In this scenario, we allow the height/width of the virtual terminal
+// to remain as 1. The virtual terminal requires this. This provides a
+// benefit that the user can continue typing into the virtual terminal
+// even when it's not visible.
+//
+// @param scr
+// The scroller to operate on
+//
+// @return
+// The new virtual terminal instance
+static VTerminal *scr_new_vterminal(struct scroller *scr)
+{
+    int scrollback_buffer_size = cgdbrc_get_int(CGDBRC_SCROLLBACK_BUFFER_SIZE);
+
+    VTerminalOptions options;
+    options.data = (void*)scr;
+    // See note in function comments about std::max usage here
+    options.width = std::max(swin_getmaxx(scr->win), 1);
+    options.height = std::max(swin_getmaxy(scr->win), 1);
+    options.scrollback_buffer_size = scrollback_buffer_size;
+    options.ring_bell = scr_ring_bell;
+
+    return vterminal_new(options);
+}
+
 struct scroller *scr_new(SWINDOW *win)
 {
     struct scroller *rv = new scroller();
-    int scrollback_buffer_size = cgdbrc_get_int(CGDBRC_SCROLLBACK_BUFFER_SIZE);
 
     rv->in_scroll_mode = false;
     rv->scroll_cursor_row = rv->scroll_cursor_col = 0;
@@ -145,14 +176,7 @@ struct scroller *scr_new(SWINDOW *win)
     rv->hlregex = NULL;
     rv->search_row = rv->search_col_start = rv->search_col_end = 0;
 
-    VTerminalOptions options;
-    options.data = (void*)rv;
-    options.width = swin_getmaxx(rv->win);
-    options.height = swin_getmaxy(rv->win);
-    options.scrollback_buffer_size = scrollback_buffer_size;
-    options.ring_bell = scr_ring_bell;
-
-    rv->vt = vterminal_new(options);
+    rv->vt = scr_new_vterminal(rv);
 
     return rv;
 }
@@ -283,33 +307,20 @@ void scr_add(struct scroller *scr, const char *buf)
     // instance and feed it the same data
     scr->text.append(buf);
 
-    if (scr->win) {
-        vterminal_write(scr->vt, buf, strlen(buf));
-    }
+    vterminal_write(scr->vt, buf, strlen(buf));
 }
 
 void scr_move(struct scroller *scr, SWINDOW *win)
 {
-    int scrollback_buffer_size = cgdbrc_get_int(CGDBRC_SCROLLBACK_BUFFER_SIZE);
-
     swin_delwin(scr->win);
     scr->win = win;
 
     // recreate the vterm session with the new size
     vterminal_free(scr->vt);
 
-    VTerminalOptions options;
-    options.data = (void*)scr;
-    options.width = swin_getmaxx(scr->win);
-    options.height = swin_getmaxy(scr->win);
-    options.scrollback_buffer_size = scrollback_buffer_size;
-    options.ring_bell = scr_ring_bell;
+    scr->vt = scr_new_vterminal(scr);
 
-    scr->vt = vterminal_new(options);
-
-    if (win) {
-        vterminal_write(scr->vt, scr->text.data(), scr->text.size());
-    }
+    vterminal_write(scr->vt, scr->text.data(), scr->text.size());
 }
 
 void scr_enable_search(struct scroller *scr, bool forward, bool icase)
