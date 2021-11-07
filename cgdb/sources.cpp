@@ -225,7 +225,7 @@ static char *detab_buffer(char *buffer, int tabstop)
  * name of file to load
  *
  * \return
- * 0 on sucess, -1 on error
+ * 0 on success, -1 on error
  */
 static int load_file_buf(struct buffer *buf, const char *filename)
 {

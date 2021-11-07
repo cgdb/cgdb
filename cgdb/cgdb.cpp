@@ -128,7 +128,7 @@ std::shared_ptr<kui_map_set> kui_imap;
  *
  * For example, when the user types 'o' at the CGDB source window, the
  * user is requesting the file dialog to open. CGDB must first ask GDB for 
- * the list of files. While it is retreiving these files, CGDB shouldn't 
+ * the list of files. While it is retrieving these files, CGDB shouldn't 
  * shoot through the rest of the kui keys available. If the user had
  * typed 'o /main' they would want to open the file dialog and start 
  * searching for a file that had the substring 'main' in it. So, CGDB must
