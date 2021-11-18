@@ -183,8 +183,6 @@ struct scroller *scr_new(SWINDOW *win)
 
 void scr_free(struct scroller *scr)
 {
-    int i;
-
     vterminal_free(scr->vt);
 
     hl_regex_free(&scr->hlregex);
