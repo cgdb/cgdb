@@ -423,7 +423,7 @@ static int highlight_node(struct list_node *node)
 
     } else {
         if (tokenizer_set_buffer(t, buf->file_data, buf->language) == -1) {
-            if_print_message("%s:%d tokenizer_set_buffer error", __FILE__, __LINE__);
+            if_print_message("\r\n%s:%d tokenizer_set_buffer error\r\n", __FILE__, __LINE__);
             return -1;
         }
 

@@ -131,6 +131,8 @@ static SWINDOW *vseparator_win = NULL;   /* Separator gets own window */
 static enum Focus focus = GDB;  /* Which pane is currently focused */
 static struct winsize screen_size;  /* Screen size */
 
+static char status_win_warning_buf[MAXLINE]; /* Warning message buffer */
+
 struct filedlg *fd;             /* The file dialog structure */
 
 /* The regex the user is entering */
@@ -419,7 +421,10 @@ static void update_status_win(enum win_refresh dorefresh)
         if_display_message(dorefresh, ":", cur_sbc.c_str());
         swin_curs_set(1);
     }
-    /* Default: Current Filename */
+    else if (status_win_warning_buf[0]) {
+        /* Display warning buffer message if set */
+        if_display_message(dorefresh, "", status_win_warning_buf);
+    }
     else {
         /* Print filename */
         const char *filename = source_current_file(src_viewer);
@@ -435,13 +440,23 @@ static void update_status_win(enum win_refresh dorefresh)
         swin_wnoutrefresh(status_win);
 }
 
-void if_display_message(enum win_refresh dorefresh,
-        const char *header, const char *msg)
+static void internal_if_display_message(enum win_refresh dorefresh,
+        bool is_warning, const char *header, const char *msgfmt, va_list ap) ATTRIBUTE_PRINTF(4, 0);
+
+static void internal_if_display_message(enum win_refresh dorefresh,
+        bool is_warning, const char *header, const char *msgfmt, va_list ap)
 {
-    char buf_display[MAXLINE];
     int pos, header_length, msg_length;
     int attr;
     int width;
+    char msg[MAXLINE];
+    char buf_display[MAXLINE];
+
+#ifdef HAVE_VSNPRINTF
+    vsnprintf(msg, sizeof (msg), msgfmt, ap);    /* this is safe */
+#else
+    vsprintf(msg, msgfmt, ap);  /* this is not safe */
+#endif
 
     attr = hl_groups_get_attr(hl_groups_instance, HLG_STATUS_BAR);
 
@@ -460,6 +475,11 @@ void if_display_message(enum win_refresh dorefresh,
     else
         snprintf(buf_display, sizeof(buf_display), "%s%s", header, msg);
 
+    if (is_warning) {
+        /* Set warning buffer message */
+        strncpy(status_win_warning_buf, buf_display, sizeof(status_win_warning_buf));
+    }
+
     /* Print white background */
     swin_wattron(status_win, attr);
     for (pos = 0; pos < WIDTH; pos++)
@@ -467,11 +487,31 @@ void if_display_message(enum win_refresh dorefresh,
 
     swin_mvwprintw(status_win, 0, 0, "%s", buf_display);
     swin_wattroff(status_win, attr);
-    
+
     if (dorefresh == WIN_REFRESH)
         swin_wrefresh(status_win);
     else
         swin_wnoutrefresh(status_win);
+}
+
+void if_display_warning(enum win_refresh dorefresh,
+        const char *header, const char *msgfmt, ...)
+{
+    va_list ap;
+
+    va_start(ap, msgfmt);
+    internal_if_display_message(dorefresh, true, header, msgfmt, ap);
+    va_end(ap);
+}
+
+void if_display_message(enum win_refresh dorefresh,
+        const char *header, const char *msgfmt, ...)
+{
+    va_list ap;
+
+    va_start(ap, msgfmt);
+    internal_if_display_message(dorefresh, false, header, msgfmt, ap);
+    va_end(ap);
 }
 
 /* if_draw: Draws the interface on the screen.
@@ -1502,11 +1542,20 @@ int if_input(int key)
     int last_key = key;
     int result = internal_if_input(key, &last_key);
 
+    /* Clear warning buffer on any keyboard input */
+    if (status_win_warning_buf[0]) {
+        /* We get a CR right after executing commands, so don't clear on these */
+        if (key != kui_term_get_cgdb_key_from_keycode("<CR>")) {
+            status_win_warning_buf[0] = 0;
+            update_status_win(WIN_REFRESH);
+        }
+    }
+
     last_key_pressed = last_key;
     return result;
 }
 
-static void if_print_internal(const char *buf)
+void if_print(const char *buf)
 {
     if (!gdb_scroller) {
         clog_error(CLOG_CGDB, "%s", buf);
@@ -1526,16 +1575,6 @@ static void if_print_internal(const char *buf)
         swin_doupdate();
     }
 
-}
-
-void if_print(const char *buf)
-{
-    if_print_internal(buf);
-}
-
-void if_sdc_print(const char *buf)
-{
-    if_print_message("cgdb sdc:%s", buf);
 }
 
 void if_print_message(const char *fmt, ...)
