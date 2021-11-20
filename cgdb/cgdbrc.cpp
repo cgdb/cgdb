@@ -751,7 +751,7 @@ int command_do_writebuffer(int param)
     const char *value = get_token();
 
     if (token != STRING) {
-        if_print_message("\r\nError: writebuffer argument must be a quoted filename.\r\n");
+        if_display_warning(WIN_REFRESH, "Error: ", "write argument must be a quoted filename.");
         return 1;
     }
 
@@ -762,13 +762,14 @@ int command_do_writebuffer(int param)
         filename[strlen(filename) - 1] = '\0';
         ret = if_write_scroller_output(filename + 1);
         if (!ret)
-            if_print_message("\r\n%s written.\r\n", filename);
+            if_display_warning(WIN_REFRESH, "", "%s written.", filename + 1);
 
         free(filename);
     }
 
     if (ret)
-        if_print_message("\r\nError saving buffer to %s: %d.\r\n", value, ret);
+        if_display_warning(WIN_REFRESH, "Error: ", "writing %s: %d", value, ret);
+
     return ret;
 }
 
@@ -1146,7 +1147,7 @@ int command_parse_file(const char *config_file)
 
             if (command_parse_string(buffer)) {
                 /* buffer already has an \n */
-                if_print_message("Error parsing line %d: %s", linenumber, buffer);
+                if_print_message("\r\nError parsing line %d: %s\r\n", linenumber, buffer);
                 /* return -1; don't return, lets keep parsing the file. */
             }
 
