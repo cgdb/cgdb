@@ -158,9 +158,9 @@ static VTermScreenCallbacks vterm_screen_callbacks = {
   .sb_popline  = vterminal_sb_popline,
 };
 
-VTerminal::VTerminal(VTerminalOptions options) : vt(nullptr)
+VTerminal::VTerminal(VTerminalOptions options_in) : vt(nullptr)
 {
-    this->options = options;
+    this->options = options_in;
     cursorpos.row = 0;
     cursorpos.col = 0;
     cursor_visible = true;
@@ -172,9 +172,10 @@ VTerminal::VTerminal(VTerminalOptions options) : vt(nullptr)
     vt = vterm_new(this->options.height, this->options.width);
     vterm_set_utf8(vt, 1);
 
+#if 0
     // Setup state
     VTermState *state = vterm_obtain_state(vt);
-#if 0
+
     // TODO: Determine if the colors are set by vterm automatically
     for (int index = 0; index < 16; ++index) {
         VTermColor color;
@@ -369,7 +370,7 @@ VTerminal::fetch_row(int row, int start_col, int end_col, int &attr, int &width)
  row = row - scroll_offset;
 
   while (col < end_col) {
-    VTermScreenCell cell;
+    VTermScreenCell cell = {0};
     fetch_cell(row, col, &cell);
 
     // TODO: What about rgb colors?

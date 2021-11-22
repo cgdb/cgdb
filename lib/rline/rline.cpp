@@ -97,6 +97,7 @@ struct rline *rline_initialize(command_cb * command,
 
     rline->pty_pair = pty_pair_create();
     if (!rline->pty_pair) {
+        free(rline);
         return NULL;
     }
 
@@ -478,6 +479,7 @@ rline_get_keyseq(struct rline *rline, const char *named_function,
         if (rl_translate_keyseq(*invoking_keyseqs_cur, new_keyseq, &len)) {
             free(new_keyseq);
             free(*invoking_keyseqs_cur);
+            invoking_keyseqs_cur++;
             /* Can't do much about readline failing, just continue on. */
             continue;
         }

@@ -57,12 +57,12 @@ static int regex_direction;     /* Direction to search */
  */
 static void print_in_middle(SWINDOW *win, int line, int width, const char *string)
 {
-    int x, y;
+    int x;
     int j;
     int length = strlen(string);
 
-    y = swin_getcury(win);
-    x = swin_getcurx(win);
+    swin_getcury(win);
+    swin_getcurx(win);
 
     x = (int) ((width - length) / 2);
 

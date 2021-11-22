@@ -1396,7 +1396,7 @@ static int cgdb_input(int key, int *last_key)
             return 0;
         case '/':
         case '?':
-            if (src_viewer->cur) {
+            if (src_viewer && src_viewer->cur) {
                 regex_cur.clear();
                 regex_direction_cur = ('/' == key);
                 orig_line_regex = src_viewer->cur->sel_line;

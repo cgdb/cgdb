@@ -567,7 +567,11 @@ int kui_term_string_to_key_array(const char *string, int **cgdb_key_array)
                     cgdb_key = kui_term_get_cgdb_key_from_keycode(macro);
 
                     if (cgdb_key == -1)
+                    {
+                        free(macro);
+                        free(local_cgdb_key_array);
                         return -1;
+                    }
 
                     /* The key doesn't exist, write the data into the 
                      * buffer. */

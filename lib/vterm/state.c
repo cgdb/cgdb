@@ -1055,8 +1055,8 @@ static int on_csi(const char *leader, const long args[], int argcount, const cha
 
       rect.start_row = state->pos.row + 1; rect.end_row = state->rows;
       rect.start_col = 0;
-      for(int row = rect.start_row; row < rect.end_row; row++)
-        set_lineinfo(state, row, FORCE, DWL_OFF, DHL_OFF);
+      for(int row2 = rect.start_row; row2 < rect.end_row; row2++)
+        set_lineinfo(state, row2, FORCE, DWL_OFF, DHL_OFF);
       if(rect.end_row > rect.start_row)
         erase(state, rect, selective);
       break;
@@ -1064,8 +1064,8 @@ static int on_csi(const char *leader, const long args[], int argcount, const cha
     case 1:
       rect.start_row = 0; rect.end_row = state->pos.row;
       rect.start_col = 0; rect.end_col = state->cols;
-      for(int row = rect.start_row; row < rect.end_row; row++)
-        set_lineinfo(state, row, FORCE, DWL_OFF, DHL_OFF);
+      for(int row2 = rect.start_row; row2 < rect.end_row; row2++)
+        set_lineinfo(state, row2, FORCE, DWL_OFF, DHL_OFF);
       if(rect.end_col > rect.start_col)
         erase(state, rect, selective);
 
@@ -1078,8 +1078,8 @@ static int on_csi(const char *leader, const long args[], int argcount, const cha
     case 2:
       rect.start_row = 0; rect.end_row = state->rows;
       rect.start_col = 0; rect.end_col = state->cols;
-      for(int row = rect.start_row; row < rect.end_row; row++)
-        set_lineinfo(state, row, FORCE, DWL_OFF, DHL_OFF);
+      for(int row2 = rect.start_row; row2 < rect.end_row; row2++)
+        set_lineinfo(state, row2, FORCE, DWL_OFF, DHL_OFF);
       erase(state, rect, selective);
       break;
     }
@@ -1799,6 +1799,7 @@ static void request_status_string(VTermState *state, VTermStringFragment frag)
       // Query DECSCUSR
       int reply;
       switch(state->mode.cursor_shape) {
+        default:
         case VTERM_PROP_CURSORSHAPE_BLOCK:     reply = 2; break;
         case VTERM_PROP_CURSORSHAPE_UNDERLINE: reply = 4; break;
         case VTERM_PROP_CURSORSHAPE_BAR_LEFT:  reply = 6; break;
