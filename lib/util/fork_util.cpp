@@ -190,7 +190,7 @@ int invoke_debugger(const char *path,
     int i, j = 0, extra = 5;
     int malloc_size = argc + extra;
     char slavename[64];
-    int masterfd;
+    int masterfd = -1;
 
     struct winsize size, *winsize;
     size.ws_row = gdb_win_rows;

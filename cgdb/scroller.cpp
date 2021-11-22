@@ -129,8 +129,7 @@ struct scroller {
 
 static void scr_ring_bell(void *data)
 {
-    struct scroller *scr = (struct scroller *)data;
-
+    // struct scroller *scr = (struct scroller *)data;
     // TODO: Ring the bell
 }
 
@@ -391,7 +390,9 @@ static int scr_search_regex_forward(struct scroller *scr, const char *regex)
         return -1;
     }
 
+    /* Our regex string pointer could have been from scr->last_regex */
     scr->last_regex = regex;
+    regex = scr->last_regex.c_str();
 
     // The starting search row and column
     int search_row = scr->search_sid_init;
@@ -478,7 +479,9 @@ static int scr_search_regex_backwards(struct scroller *scr, const char *regex)
         return -1;
     }
 
+    /* Our regex string pointer could have been from scr->last_regex */
     scr->last_regex = regex;
+    regex = scr->last_regex.c_str();
 
     // The starting search row and column
     int search_row = scr->search_sid_init;
