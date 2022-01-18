@@ -24,6 +24,9 @@
 #define CSI_ARGS_MAX 16
 #define CSI_LEADER_MAX 16
 
+#define BUFIDX_PRIMARY   0
+#define BUFIDX_ALTSCREEN 1
+
 typedef struct VTermEncoding VTermEncoding;
 
 typedef struct {
@@ -42,6 +45,7 @@ struct VTermPen
   unsigned int italic:1;
   unsigned int blink:1;
   unsigned int reverse:1;
+  unsigned int conceal:1;
   unsigned int strike:1;
   unsigned int font:4; /* To store 0-9 */
 };
@@ -53,7 +57,7 @@ struct VTermState
   const VTermStateCallbacks *callbacks;
   void *cbdata;
 
-  const VTermParserCallbacks *fallbacks;
+  const VTermStateFallbacks *fallbacks;
   void *fbdata;
 
   int rows;
@@ -75,6 +79,10 @@ struct VTermState
   /* Bitvector of tab stops */
   unsigned char *tabstops;
 
+  /* Primary and Altscreen; lineinfos[1] is lazily allocated as needed */
+  VTermLineInfo *lineinfos[2];
+
+  /* lineinfo will == lineinfos[0] or lineinfos[1], depending on altscreen */
   VTermLineInfo *lineinfo;
 #define ROWWIDTH(state,row) ((state)->lineinfo[(row)].doublewidth ? ((state)->cols / 2) : (state)->cols)
 #define THISROWWIDTH(state) ROWWIDTH(state, (state)->pos.row)
@@ -136,14 +144,31 @@ struct VTermState
       unsigned int cursor_shape:2;
     } mode;
   } saved;
+
+  /* Temporary state for DECRQSS parsing */
+  union {
+    char decrqss[4];
+    struct {
+      uint16_t mask;
+      enum {
+        SELECTION_INITIAL,
+        SELECTION_SELECTED,
+        SELECTION_QUERY,
+        SELECTION_SET_INITIAL,
+        SELECTION_SET,
+      } state : 8;
+      uint32_t recvpartial;
+      uint32_t sendpartial;
+    } selection;
+  } tmp;
+
+  struct {
+    const VTermSelectionCallbacks *callbacks;
+    void *user;
+    char *buffer;
+    size_t buflen;
+  } selection;
 };
-
-typedef enum {
-  VTERM_PARSER_OSC,
-  VTERM_PARSER_DCS,
-
-  VTERM_N_PARSER_TYPES
-} VTermParserStringType;
 
 struct VTerm
 {
@@ -164,28 +189,42 @@ struct VTerm
       CSI_LEADER,
       CSI_ARGS,
       CSI_INTERMED,
-      ESC,
+      DCS_COMMAND,
       /* below here are the "string states" */
-      STRING,
-      ESC_IN_STRING,
+      OSC_COMMAND,
+      OSC,
+      DCS,
+      APC,
+      PM,
+      SOS,
     } state;
+
+    bool in_esc : 1;
 
     int intermedlen;
     char intermed[INTERMED_MAX];
 
-    int csi_leaderlen;
-    char csi_leader[CSI_LEADER_MAX];
+    union {
+      struct {
+        int leaderlen;
+        char leader[CSI_LEADER_MAX];
 
-    int csi_argi;
-    long csi_args[CSI_ARGS_MAX];
+        int argi;
+        long args[CSI_ARGS_MAX];
+      } csi;
+      struct {
+        int command;
+      } osc;
+      struct {
+        int commandlen;
+        char command[CSI_LEADER_MAX];
+      } dcs;
+    } v;
 
     const VTermParserCallbacks *callbacks;
     void *cbdata;
 
-    VTermParserStringType stringtype;
-    char  *strbuffer;
-    size_t strbuffer_len;
-    size_t strbuffer_cur;
+    bool string_initial;
   } parser;
 
   /* len == malloc()ed size; cur == number of valid bytes */
@@ -223,7 +262,7 @@ void vterm_push_output_bytes(VTerm *vt, const char *bytes, size_t len);
 void vterm_push_output_vsprintf(VTerm *vt, const char *format, va_list args);
 void vterm_push_output_sprintf(VTerm *vt, const char *format, ...);
 void vterm_push_output_sprintf_ctrl(VTerm *vt, unsigned char ctrl, const char *fmt, ...);
-void vterm_push_output_sprintf_dcs(VTerm *vt, const char *fmt, ...);
+void vterm_push_output_sprintf_str(VTerm *vt, unsigned char ctrl, bool term, const char *fmt, ...);
 
 void vterm_state_free(VTermState *state);
 
@@ -238,6 +277,7 @@ enum {
   C1_DCS = 0x90,
   C1_CSI = 0x9b,
   C1_ST  = 0x9c,
+  C1_OSC = 0x9d,
 };
 
 void vterm_state_push_output_sprintf_CSI(VTermState *vts, const char *format, ...);

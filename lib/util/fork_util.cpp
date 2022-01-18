@@ -185,7 +185,6 @@ int invoke_debugger(const char *path,
     pid_t pid;
     const char *const GDB = "gdb";
     const char *const NW = "--nw";
-    const char *const Q = "-q";
     const char *const EX = "-ex";
     char **local_argv;
     int i, j = 0, extra = 5;

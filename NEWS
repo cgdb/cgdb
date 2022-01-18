@@ -1,3 +1,10 @@
+cgdb-0.8.0 (01/16/2022)
+
+  * Fix issue #298 - CGDB now exits when gdb exits
+    Previously if gdb exited but the inferior, or child of the inferior
+    was still running, cgdb would possibly continue running in a
+    non responsive state. Now cgdb exits when gdb does.
+
   * Fix issue #278, Single stepping through disassembly without debug
     symbols does not move arrow in source window. Now the arrow moves in
     the source window as expected.

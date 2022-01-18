@@ -62,7 +62,6 @@ Place, Suite 330, Boston MA 02111-1307 USA
 * Configuring CGDB::            CGDB configuration commands
 * Highlighting Groups::         CGDB highlighting groups
 * Key User Interface::          CGDB key user interface
-* Sending I/O to Inferior::     Sending I/O to the program being debugged
 * Terminal Control Flow::       Allowing terminal control flow in CGDB
 
 * Building CGDB::               Building CGDB from source
@@ -1320,15 +1319,6 @@ used in any mapping command.
 @item <S-...>
 @tab shift keys
 @end multitable
-
-@node Sending I/O to Inferior
-@chapter Sending I/O to the program being debugged
-@cindex sending I/O to inferior
-
-If the program being debugged takes input on the terminal it is recommended
-that the user start the program on one terminal, and attach to it with CGDB
-from another terminal.  This is the easiest way to pass input to the 
-debugged program.
 
 @node Terminal Control Flow
 @chapter Allowing terminal control flow in CGDB

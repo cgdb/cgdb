@@ -362,7 +362,6 @@ static int get_ncurses_color_index(VTermColor &color, bool &bold)
 void
 VTerminal::fetch_row(int row, int start_col, int end_col, int &attr, int &width)
 {
-  int fg_index, bg_index;
   int col = start_col;
   size_t line_len = 0;
   char *ptr = textbuf;
@@ -473,7 +472,6 @@ VTerminal::scroll_set_delta(int delta)
 void
 VTerminal::push_screen_to_scrollback()
 {
-    int attr;
     int height, width;
     vterm_get_size(vt, &height, &width);
 
