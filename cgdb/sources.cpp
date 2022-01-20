@@ -284,6 +284,7 @@ static int load_file_buf(struct buffer *buf, const char *filename)
                 sline.line = NULL;
                 sbsetcount(sline.line, line_len + 1);
                 strncpy(sline.line, line_start, line_len);
+                sline.line[line_len] = 0;
                 sline.len = line_len;
                 sline.attrs = NULL;
 
