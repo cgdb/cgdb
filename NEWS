@@ -1,3 +1,7 @@
+  * Fix issue #303 - CGDB crashes while resizing window
+    Previously if a lot of text existed in the gdb window, then a resize
+    could trigger a crash. Now no crash will occur.
+
 cgdb-0.8.0 (01/16/2022)
 
   * Fix issue #298 - CGDB now exits when gdb exits

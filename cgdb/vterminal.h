@@ -37,6 +37,18 @@ VTerminal *vterminal_new(VTerminalOptions options);
 // The terminal to operate on
 void vterminal_free(VTerminal *terminal);
 
+// Resize a virtual terminal
+//
+// @param terminal
+// The terminal to operate on
+//
+// @param height
+// The new height of the virtual terminal
+//
+// @param width
+// The new width of the virtual terminal
+void vterminal_resize(VTerminal *terminal, int height, int width);
+
 // Write data to the virtual terminal
 //
 // @param terminal
