@@ -84,14 +84,6 @@ struct scroller {
     // The virtual terminal
     VTerminal *vt;
 
-    // All text sent to the scroller to date.
-    // Vterm does not yet support reflow, so when the terminal is resized,
-    // or when the cgdb window orientation is changed, vterm can't update
-    // the text that well in the scroller. Currently, to work around that,
-    // CGDB creates a new vterm on resize and feeds it all the text found
-    // to date. When vterm supports reflow, this could go away.
-    std::string text;
-
     // The window the scroller will be displayed on
     //
     // NULL when the height of the scroller is zero
@@ -183,8 +175,6 @@ struct scroller *scr_new(SWINDOW *win)
 
 void scr_free(struct scroller *scr)
 {
-    int i;
-
     vterminal_free(scr->vt);
 
     hl_regex_free(&scr->hlregex);
@@ -302,25 +292,17 @@ void scr_push_screen_to_scrollback(struct scroller *scr)
 
 void scr_add(struct scroller *scr, const char *buf)
 {
-    // Keep a copy of all text sent to vterm
-    // Vterm doesn't yet support resizing, so we would create a new vterm
-    // instance and feed it the same data
-    scr->text.append(buf);
-
     vterminal_write(scr->vt, buf, strlen(buf));
 }
 
 void scr_move(struct scroller *scr, SWINDOW *win)
 {
+    int height = std::max(swin_getmaxy(win), 1);
+    int width = std::max(swin_getmaxx(win), 1);
+
     swin_delwin(scr->win);
     scr->win = win;
-
-    // recreate the vterm session with the new size
-    vterminal_free(scr->vt);
-
-    scr->vt = scr_new_vterminal(scr);
-
-    vterminal_write(scr->vt, scr->text.data(), scr->text.size());
+    vterminal_resize(scr->vt, height, width);
 }
 
 void scr_enable_search(struct scroller *scr, bool forward, bool icase)

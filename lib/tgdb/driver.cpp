@@ -237,7 +237,7 @@ tgdb_callbacks callbacks = {
 
 int main(int argc, char **argv)
 {
-    int gdb_console_fd, gdb_mi_fd, slavefd, masterfd;
+    int gdb_console_fd, gdb_mi_fd;
 
 #if 0
     int c;

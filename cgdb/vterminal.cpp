@@ -21,6 +21,15 @@ struct VTerminal
     VTerminal(VTerminalOptions options);
     ~VTerminal();
 
+    // Resize the vterm
+    //
+    // @param height
+    // The new height of the virtual terminal
+    //
+    // @param width
+    // The new width of the virtual terminal
+    void resize(int height, int width);
+
     // Write data to vterm
     //
     // @param data
@@ -209,6 +218,13 @@ VTerminal::~VTerminal()
 }
 
 void
+VTerminal::resize(int height, int width)
+{
+    vterm_set_size(vt, height, width);
+    vterm_screen_flush_damage(vts);
+}
+
+void
 VTerminal::write(const char *data, size_t len)
 {
     vterm_input_write(vt, data, len);
@@ -362,7 +378,6 @@ static int get_ncurses_color_index(VTermColor &color, bool &bold)
 void
 VTerminal::fetch_row(int row, int start_col, int end_col, int &attr, int &width)
 {
-  int fg_index, bg_index;
   int col = start_col;
   size_t line_len = 0;
   char *ptr = textbuf;
@@ -473,7 +488,6 @@ VTerminal::scroll_set_delta(int delta)
 void
 VTerminal::push_screen_to_scrollback()
 {
-    int attr;
     int height, width;
     vterm_get_size(vt, &height, &width);
 
@@ -504,6 +518,12 @@ void
 vterminal_free(VTerminal *terminal)
 {
     delete terminal;
+}
+
+void
+vterminal_resize(VTerminal *terminal, int height, int width)
+{
+    terminal->resize(height, width);
 }
 
 void vterminal_write(VTerminal *terminal, const char *data, size_t len)

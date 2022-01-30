@@ -169,10 +169,10 @@ void clog_free(int id);
  * @param ...
  * Any additional format arguments.
  */
-void clog_debug(const char *sfile, int sline, int id, const char *fmt, ...);
-void clog_info(const char *sfile, int sline, int id, const char *fmt, ...);
-void clog_warn(const char *sfile, int sline, int id, const char *fmt, ...);
-void clog_error(const char *sfile, int sline, int id, const char *fmt, ...);
+void clog_debug(const char *sfile, int sline, int id, const char *fmt, ...) ATTRIBUTE_PRINTF(4, 5);
+void clog_info(const char *sfile, int sline, int id, const char *fmt, ...) ATTRIBUTE_PRINTF(4, 5);
+void clog_warn(const char *sfile, int sline, int id, const char *fmt, ...) ATTRIBUTE_PRINTF(4, 5);
+void clog_error(const char *sfile, int sline, int id, const char *fmt, ...) ATTRIBUTE_PRINTF(4, 5);
 
 /**
  * Set the minimum level of messages that should be written to the log.
@@ -277,7 +277,7 @@ struct clog {
     int opened;
 };
 
-void _clog_err(const char *fmt, ...);
+void _clog_err(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
 
 #ifdef CLOG_MAIN
 struct clog *_clog_loggers[CLOG_MAX_LOGGERS] = { 0 };
@@ -531,6 +531,9 @@ _clog_format(const struct clog *logger, char buf[], size_t buf_size,
     return result;
 }
 
+void
+_clog_log(const char *sfile, int sline, enum clog_level level,
+          int id, const char *fmt, va_list ap) ATTRIBUTE_PRINTF(5, 0);
 void
 _clog_log(const char *sfile, int sline, enum clog_level level,
           int id, const char *fmt, va_list ap)

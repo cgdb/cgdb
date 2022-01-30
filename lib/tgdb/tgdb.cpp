@@ -87,16 +87,6 @@ struct tgdb {
     /** If ^c was hit by user */
     sig_atomic_t control_c;
 
-    /**
-     * When GDB dies (purposely or not), the SIGCHLD is sent to the
-     * application controlling TGDB. This data structure represents the
-     * fact that SIGCHLD has been sent.
-     *
-     * This currently does not need to track if more than 1 SIGCHLD has
-     * been received. So no matter how many are receieved, this will only
-     * be 1. Otherwise if none have been received this will be 0.  */
-    int has_sigchld_recv;
-
     tgdb_callbacks callbacks;
 
     // commands structure
@@ -644,8 +634,6 @@ static struct tgdb *initialize_tgdb_context(tgdb_callbacks callbacks)
 
     tgdb->is_gdb_ready_for_next_command = 0;
 
-    tgdb->has_sigchld_recv = 0;
-
     tgdb->callbacks = callbacks;
 
     tgdb->disasm = NULL;
@@ -1036,20 +1024,16 @@ static int tgdb_handle_sigchld(struct tgdb *tgdb)
 {
     int result = 0;
     int status;
+    int waitpid_result;
 
-    if (tgdb->has_sigchld_recv) {
-        int waitpid_result;
-
-        do {
-            waitpid_result = waitpid(tgdb->debugger_pid, &status, WNOHANG);
-            if (waitpid_result == -1) {
-                result = -1;
-                clog_error(CLOG_CGDB, "waitpid error %d %s", errno, strerror(errno));
-            }
-        } while (waitpid_result == 0);
-
-        tgdb->has_sigchld_recv = 0;
-    }
+    do {
+        waitpid_result = waitpid(tgdb->debugger_pid, &status, WNOHANG);
+        if (waitpid_result == -1) {
+            result = -1;
+            clog_error(CLOG_CGDB, "waitpid error %d %s",
+                    errno, strerror(errno));
+        }
+    } while (waitpid_result == 0);
 
     return result;
 }
@@ -1108,9 +1092,6 @@ int tgdb_process(struct tgdb * tgdb, int fd)
     static char buf[n];
     ssize_t size;
     int result = 0;
-
-    // Cleanup those zombies!
-    tgdb_handle_sigchld(tgdb);
 
     // If ^c has been typed at the prompt, clear the queues
     tgdb_handle_control_c(tgdb);
@@ -1481,7 +1462,9 @@ int tgdb_signal_notification(struct tgdb *tgdb, int signum)
         if (write(tgdb->debugger_stdin, sig_char, 1) < 1)
             return -1;
     } else if (signum == SIGCHLD) {
-        tgdb->has_sigchld_recv = 1;
+        // GDB has died, clean up the zombie and send the quit command
+        tgdb_handle_sigchld(tgdb);
+        tgdb_add_quit_command(tgdb, false);
     }
 
     return 0;
