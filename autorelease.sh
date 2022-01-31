@@ -77,14 +77,9 @@ touch "$CGDB_SOURCE_DIR/doc/cgdb.texi"
 echo "-- All release files will be written to $CGDB_RELEASE_DIR"
 echo "-- Output will be logged to $CGDB_OUTPUT_LOG"
 
-# Update configure.ac
-echo "-- Update configure.ac to reflect the new version number"
-cp configure.init configure.ac
-perl -pi -e "s/AC_INIT\(cgdb, (.*)\)/AC_INIT\(cgdb, $CGDB_VERSION\)/g" configure.ac
-
 # Autogen
 echo "-- Regenerate the autoconf files"
-run ./autogen.sh $CGDB_VERSION
+CGDB_VERSION=$CGDB_VERSION run ./autogen.sh $CGDB_VERSION
 
 # Update NEWS
 if [ "$CGDB_UPDATE_NEWS" = "y" ]; then

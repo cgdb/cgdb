@@ -751,8 +751,6 @@ static void if_run_command(struct sviewer *sview, const std::string &command)
  */
 static int gdb_input_regex_input(struct scroller *scr, int key)
 {
-    int regex_icase = cgdbrc_get_int(CGDBRC_IGNORECASE);
-
     /* Flag to indicate we're done with regex mode, need to switch back */
     int done = 0;
     int matched = 0;
