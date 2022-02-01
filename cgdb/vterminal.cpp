@@ -21,6 +21,15 @@ struct VTerminal
     VTerminal(VTerminalOptions options);
     ~VTerminal();
 
+    // Resize the vterm
+    //
+    // @param height
+    // The new height of the virtual terminal
+    //
+    // @param width
+    // The new width of the virtual terminal
+    void resize(int height, int width);
+
     // Write data to vterm
     //
     // @param data
@@ -206,6 +215,13 @@ VTerminal::~VTerminal()
     }
     free(sb_buffer);
     vterm_free(vt);
+}
+
+void
+VTerminal::resize(int height, int width)
+{
+    vterm_set_size(vt, height, width);
+    vterm_screen_flush_damage(vts);
 }
 
 void
@@ -502,6 +518,12 @@ void
 vterminal_free(VTerminal *terminal)
 {
     delete terminal;
+}
+
+void
+vterminal_resize(VTerminal *terminal, int height, int width)
+{
+    terminal->resize(height, width);
 }
 
 void vterminal_write(VTerminal *terminal, const char *data, size_t len)
