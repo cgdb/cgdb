@@ -175,6 +175,10 @@ static int release_file_memory(struct list_node *node)
     /* Release file buffers */
     release_file_buffer(&node->file_buf);
 
+    // Free the flags associated with the file buffer
+    sbfree(node->lflags);
+    node->lflags = NULL;
+
     return 0;
 }
 

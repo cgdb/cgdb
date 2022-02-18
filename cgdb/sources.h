@@ -274,17 +274,6 @@ void source_free(struct sviewer *sview);
 /* Breakpoints */
 /* ----------- */
 
-/* source_enable_break:  Enable a given breakpoint.
- * --------------------
- *
- *   sview:    The source viewer object
- *   path:     The path to the source file, absolute if available
- *   line:     Line number of breakpoint
- *   enabled:  0 for disabled, otherwise enabled
- */
-void source_enable_break(struct sviewer *sview, const char *path,
-        int line, int enabled);
-
 /**
  * Replace all existing breakpoints with the breakpoints provided.
  *

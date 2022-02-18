@@ -1,3 +1,9 @@
+  * Fix issue #293 - Random breakpoints are no displayed on file reload
+    Previously, when running cgdb, if you change a file you are debugging,
+    recompile the exe, and 'run' again in the gdb window in cgdb, cgdb would
+    reload the changed file and sometimes display garbage breakpoints.
+    Now only the correct breakpoints are displayed on reload.
+
   * Fix issue #303 - CGDB crashes while resizing window
     Previously if a lot of text existed in the gdb window, then a resize
     could trigger a crash. Now no crash will occur.
