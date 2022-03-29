@@ -184,7 +184,7 @@ int kui_tree_reset_state(struct kui_tree *ktree)
     ktree->cur = ktree->root;
     ktree->state = KUI_TREE_MATCHING;
     ktree->found = 0;
-    ktree->found_node = NULL;
+    ktree->found_node = nullptr;
 
     return 0;
 }
@@ -236,7 +236,7 @@ int kui_tree_push_key(struct kui_tree *ktree, int key, int *map_found)
     /* Not found */
     if (iter == ktree->cur->children.end()) {
         ktree->state = KUI_TREE_NOT_FOUND;
-        ktree->cur = NULL;
+        ktree->cur = nullptr;
     } else {
         ktree->cur = iter->second;
 
