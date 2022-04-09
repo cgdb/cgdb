@@ -271,7 +271,7 @@ struct kui_map_set {
     /* The ktree used in determining if a map has been reached or is being
      * reached. Of course, nothing could match also. This structure is efficient
      * in doing the work, it looks only at the current key read.  */
-    struct kui_tree *ktree;
+    kui_tree ktree;
 
     /**
      * All of the maps in this kui map set
@@ -284,13 +284,7 @@ struct kui_map_set {
 
 struct kui_map_set *kui_ms_create(void)
 {
-    kui_map_set *map = new kui_map_set();
-
-    map->ktree = kui_tree_create();
-    if (!map->ktree) {
-        kui_ms_destroy(map);
-        return NULL;
-    }
+    kui_map_set *map = new kui_map_set;
 
     return map;
 }
@@ -301,11 +295,6 @@ int kui_ms_destroy(struct kui_map_set *kui_ms)
 
     if (!kui_ms)
         return -1;
-
-    if (kui_ms->ktree) {
-        if (kui_tree_destroy(kui_ms->ktree) == -1)
-            retval = -1;
-    }
 
     for (auto it = kui_ms->maps.cbegin(); it != kui_ms->maps.cend();)
     {
@@ -339,8 +328,7 @@ int kui_ms_register_map(struct kui_map_set *kui_ms,
 
     kui_ms->maps[key_data] = map;
 
-    if (kui_tree_insert(kui_ms->ktree, map->literal_key, map) == -1)
-        return -1;
+    kui_ms->ktree.insert(map->literal_key, map);
 
     return 0;
 }
@@ -356,8 +344,7 @@ int kui_ms_deregister_map(struct kui_map_set *kui_ms, const char *key)
     }
 
     /* Delete from the tree */
-    if (kui_tree_delete(kui_ms->ktree, iter->second->literal_key) == -1)
-        return -1;
+    kui_ms->ktree.erase(iter->second->literal_key);
 
     kui_map_destroy(iter->second);
     kui_ms->maps.erase(iter);
@@ -496,7 +483,7 @@ static int kui_findchar(struct kuictx *kctx, int *key)
  */
 static int kui_update_map_set(struct kuictx *kctx, int key, int *map_found)
 {
-    if (!kctx)
+    if (!kctx || !kctx->map_set)
         return -1;
 
     *map_found = 0;
@@ -506,7 +493,7 @@ static int kui_update_map_set(struct kuictx *kctx, int key, int *map_found)
      * there is no need to keep looking
      */
 
-    if (kui_tree_push_key(kctx->map_set->ktree, key, map_found) == -1)
+    if (!kctx->map_set->ktree.push_key(key, map_found))
         return -1;
 
     if (*map_found) {
@@ -534,9 +521,7 @@ static int kui_update_map_set(struct kuictx *kctx, int key, int *map_found)
 static int kui_should_continue_looking(struct kuictx *kctx,
         int *should_continue)
 {
-    enum kui_tree_state map_state;
-
-    if (!kctx)
+    if (!kctx || !kctx->map_set)
         return -1;
 
     if (!should_continue)
@@ -544,15 +529,12 @@ static int kui_should_continue_looking(struct kuictx *kctx,
 
     *should_continue = 0;
 
-    /* Continue if at least 1 of the lists still says 
+    /* Continue if at least 1 of the lists still says
      * KUI_MAP_STILL_LOOKING. If none of the lists is at this state, then
      * there is no need to keep looking
      */
 
-    if (kui_tree_get_state(kctx->map_set->ktree, &map_state) == -1)
-        return -1;
-
-    if (map_state == KUI_TREE_MATCHING)
+    if (kctx->map_set->ktree.get_state() == kui_tree::kui_tree_state::MATCHING)
         *should_continue = 1;
 
     return 0;
@@ -576,8 +558,6 @@ static int kui_should_continue_looking(struct kuictx *kctx,
 static int kui_was_map_found(struct kuictx *kctx,
         int *was_map_found, struct kui_map **the_map_found)
 {
-    enum kui_tree_state map_state;
-
     if (!was_map_found)
         return -1;
 
@@ -586,23 +566,21 @@ static int kui_was_map_found(struct kuictx *kctx,
 
     *was_map_found = 0;
 
-    /* If the kui context's map set has the value KUI_TREE_FOUND,
+    /* If the kui context's map set has the value FOUND,
      * than a map was found, and it should be the value used.
      *
      * Otherwise, no map is found.
      */
 
-    if (kui_tree_get_state(kctx->map_set->ktree, &map_state) == -1)
+    if (!kctx->map_set)
         return -1;
 
-    if (map_state == KUI_TREE_FOUND) {
-        void *data;
-
-        if (kui_tree_get_data(kctx->map_set->ktree, &data) == -1)
+    if (kctx->map_set->ktree.get_state() == kui_tree::kui_tree_state::FOUND) {
+        *the_map_found = kctx->map_set->ktree.get_data();
+        if (*the_map_found == nullptr)
             return -1;
 
         *was_map_found = 1;
-        *the_map_found = (struct kui_map *) data;
     }
 
     return 0;
@@ -729,8 +707,7 @@ static int kui_findkey(struct kuictx *kctx, int *was_map_found)
 
     kctx->volatile_buffer.clear();
 
-    if (kui_tree_reset_state(kctx->map_set->ktree) == -1)
-        return -1;
+    kctx->map_set->ktree.reset_state();
 
     /* Start the main loop */
     while (1) {
@@ -768,8 +745,7 @@ static int kui_findkey(struct kuictx *kctx, int *was_map_found)
      * If the user types abcd, the list will still be looking,
      * even though it already found a mapping.
      */
-    if (kui_tree_finalize_state(kctx->map_set->ktree) == -1)
-        return -1;
+    kctx->map_set->ktree.finalize_state();
 
     /* Check to see if a map was found.
      * If it was, get the map also.
