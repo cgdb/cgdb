@@ -1,16 +1,41 @@
-#include <stdlib.h>
-#include <string.h>
+#include <string>
+#include <map>
 
 #include "kui_tree.h"
 
-kui_tree::node::ptr_type kui_tree::node::create()
+class kui_tree_node
 {
-    struct expose_ctor : public node {};
-    return std::make_shared<expose_ctor>();
-}
+public:
+    static node_ptr_type create()
+    {
+        struct expose_ctor : public kui_tree_node {};
+        return std::make_shared<expose_ctor>();
+    }
+
+    /* The keyboard key this node represents. */
+    int key;
+
+    /* If non-null, this node represents the macro value reached.
+     * Otherwise, this node is not the end of the macro.
+     */
+    kui_map *macro_value;
+
+    /**
+     * The children macros from this nodes perspective.
+     */
+    std::map<int, node_ptr_type> children;
+
+protected:
+    kui_tree_node() : key(0), macro_value(NULL) {}
+
+private:
+    kui_tree_node(const kui_tree_node &) = delete;
+    kui_tree_node(kui_tree_node &&) = delete;
+    kui_tree_node &operator=(const kui_tree_node &) = delete;
+};
 
 kui_tree::kui_tree()
-    : root(node::create())
+    : root(kui_tree_node::create())
 {}
 
 void kui_tree::insert(int *klist, kui_map *data)
@@ -31,17 +56,17 @@ void kui_tree::insert(int *klist, kui_map *data)
  * @param data
  * The substitution that should take place when the key mapping is reached.
  */
-void kui_tree::insert(node::ptr_type node, int *klist, kui_map *data)
+void kui_tree::insert(node_ptr_type node, int *klist, kui_map *data)
 {
     // If at the end of the list, done
     if (klist[0] == 0) {
         node->macro_value = data;
     } else {
-        node::ptr_type new_node;
+        node_ptr_type new_node;
         auto iter = node->children.find(klist[0]);
 
         if (iter == node->children.end()) {
-            new_node = node::create();
+            new_node = kui_tree_node::create();
             new_node->key = klist[0];
 
             node->children.emplace(klist[0], new_node);
@@ -68,7 +93,7 @@ void kui_tree::erase(int *klist)
  * The key sequence to delete.
  * The last item in the list will have a 0 value
  */
-void kui_tree::erase(node::ptr_type node, int *klist)
+void kui_tree::erase(node_ptr_type node, int *klist)
 {
     auto iter = node->children.find(klist[0]);
     if (iter != node->children.end()) {
