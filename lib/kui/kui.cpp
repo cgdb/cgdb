@@ -269,8 +269,8 @@ int kui_map_print_cgdb_key_array(struct kui_map *map)
  */
 struct kui_map_set {
     /* The ktree used in determining if a map has been reached or is being
-     * reached. Of course, nothing could match also. This structure is efficient
-     * in doing the work, it looks only at the current key read.  */
+     * reached. Of course, nothing could match also. This structure is
+     * efficient in doing the work, it looks only at the current key read.  */
     kui_tree ktree;
 
     /**
@@ -813,8 +813,8 @@ struct kui_manager {
     struct kuictx *terminal_keys;
     /* The user defined mappings */
     struct kuictx *normal_keys;
-    /* Need a reference to the terminal escape sequence mappings when destroying
-     * this context. (a list is populated in the create function)  */
+    /* Need a reference to the terminal escape sequence mappings when
+     * destroying this context. (a list is populated in the create function) */
     struct kui_map_set *terminal_key_set;
 };
 
@@ -967,8 +967,8 @@ int kui_manager_cangetkey(struct kui_manager *kuim)
      * the terminal keys processing up to the normal keys buffer after a 
      * mapping is found.
      *
-     * For now this seems to work. Essentially, the next read get's the buffered 
-     * terminal keys first which is what should happen anyways.
+     * For now this seems to work. Essentially, the next read get's the
+     * buffered terminal keys first which is what should happen anyways.
      */
     return kui_cangetkey(kuim->terminal_keys) ||
             kui_cangetkey(kuim->normal_keys);
