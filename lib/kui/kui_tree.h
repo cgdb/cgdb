@@ -10,10 +10,11 @@
  * kui_tree.h
  *
  * \brief
- * This interface is the algorithm behind libkui's fast macro finding abilities.
- * It is a statefull data structure, which can be told to start matching, to
- * receive input, and then to stop matching. When it is told to stop, it knows
- * exactly which macro's have been completed, and how much data is extra.
+ * This interface is the algorithm behind libkui's fast macro finding
+ * abilities.  It is a statefull data structure, which can be told to start
+ * matching, to receive input, and then to stop matching. When it is told to
+ * stop, it knows exactly which macro's have been completed, and how much data
+ * is extra.
  */
 /* }}} */
 
@@ -35,8 +36,8 @@ class kui_tree
 public:
 
     /**
-     * Create a kui tree. This data structure is designed specifically for
-     * the Key User Interface. It should be optimized for speed, since determining
+     * Create a kui tree. This data structure is designed specifically for the
+     * Key User Interface. It should be optimized for speed, since determining
      * what key the user wants to be processed next should be fast.
      *
      * @return
@@ -49,12 +50,12 @@ public:
      */
     ~kui_tree() = default;
 
-    /******************************************************************************/
+    /*************************************************************************/
     /**
      * @name Inserting and Deleteing from a kui_tree
      * These are the basic functions of adding to and removing from a kui_tree
      */
-    /******************************************************************************/
+    /*************************************************************************/
 
     /*@{*/
 
@@ -81,13 +82,13 @@ public:
 
     /*@}*/
 
-    /******************************************************************************/
+    /*************************************************************************/
     /**
      * @name Setting and Querying the state of a kui_tree
      * A kui_tree is a stateful ADT. This interface documents how to set/get
      * the state of a particular kui tree.
      */
-    /******************************************************************************/
+    /*************************************************************************/
 
     /*@{*/
 
@@ -130,12 +131,12 @@ public:
 
     /*@}*/
 
-    /******************************************************************************/
+    /*************************************************************************/
     /**
      * @name General operations on a kui tree.
      * These function's are the basic functions used to operate on a kui tree
      */
-    /******************************************************************************/
+    /*************************************************************************/
 
     /*@{*/
 
@@ -201,10 +202,10 @@ private:
     /* This happens because maps can be subsets of other maps. */
     node::ptr_type found_node;
 
-    /* The internal state of the tree ( still looking, map found, not found ) */
+    /* The internal state of the tree (still looking, map found, not found) */
     kui_tree_state state;
 
-    /* If a map was found at all, this is set to 1 while looking, otherwise 0. */
+    /* If a map was found, this is set to 1 while looking, otherwise 0. */
     int found;
 };
 
