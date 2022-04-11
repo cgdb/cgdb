@@ -2,7 +2,6 @@
 #define __KUI_TREE_H__
 
 #include <memory>
-#include <map>
 
 /* Doxygen headers {{{ */
 /*!
@@ -18,9 +17,9 @@
  */
 /* }}} */
 
-/*@{*/
-
 struct kui_map;
+class kui_tree_node;
+using node_ptr_type = std::shared_ptr<kui_tree_node>;
 
 /* struct kui_tree {{{ */
 
@@ -157,50 +156,18 @@ public:
     /*@}*/
 
 private:
-    /**
-     * A node in a kui tree.
-     */
-    class node
-    {
-    public:
-        using ptr_type = std::shared_ptr<node>;
-
-        static ptr_type create();
-
-        /* The keyboard key this node represents. */
-        int key;
-
-        /* If non-null, this node represents the macro value reached.
-         * Otherwise, this node is not the end of the macro.
-         */
-        kui_map *macro_value;
-
-        /**
-         * The children macros from this nodes perspective.
-         */
-        std::map<int, ptr_type> children;
-
-    protected:
-        node() : key(0), macro_value(NULL) {}
-
-    private:
-        node(const node &) = delete;
-        node(node &&) = delete;
-        node &operator=(const node &) = delete;
-    };
-
-    void insert(node::ptr_type node, int *klist, kui_map *data);
-    void erase (node::ptr_type node, int *klist);
+    void insert(node_ptr_type node, int *klist, kui_map *data);
+    void erase (node_ptr_type node, int *klist);
 
     /* The root of the tree */
-    node::ptr_type root;
+    node_ptr_type root;
 
     /* The current position pointing into the tree (while looking for a map) */
-    node::ptr_type cur;
+    node_ptr_type cur;
 
     /* The last node found while looking for a map. */
     /* This happens because maps can be subsets of other maps. */
-    node::ptr_type found_node;
+    node_ptr_type found_node;
 
     /* The internal state of the tree (still looking, map found, not found) */
     kui_tree_state state;
