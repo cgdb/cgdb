@@ -61,9 +61,6 @@ public:
     /**
      * Adding a key to the kui tree.
      *
-     * \param ktree
-     * The tree to add a new key too.
-     *
      * \param klist
      * The data to add into the tree.
      * It is a null terminated list.
@@ -75,9 +72,6 @@ public:
 
     /**
      * Removing a key from the kui tree.
-     *
-     * \param ktree
-     * The tree to delete a key from.
      *
      * \param klist
      * The key to remove from the tree
@@ -128,9 +122,6 @@ public:
 
     /**
      * Get's the data if the state is FOUND.
-     *
-     * \param ktree
-     * The tree to get the data from
      *
      * \return
      * The data put in this macro on success, or nullptr on error.
