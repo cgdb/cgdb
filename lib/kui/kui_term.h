@@ -3,7 +3,7 @@
 
 /* includes {{{*/
 
-#include "kui.h"
+#include "kui_map_set.h"
 #include "kui_cgdb_key.h"
 
 /* }}}*/
@@ -22,15 +22,17 @@
 /* }}} */
 
 /**
- * A new kui_map_set get's created each time this function is returned.
+ * Fill a kui_map_set with the terminal mappings.
  *
  * This basically abstracts away the keyboard. A map will be created for
  * each abstract key the user has on there keyboard (HOME,END,PGUP,ESC).
  *
+ * \param ms The map set to fill 
+ *
  * @return
- * The new kui_map, or NULL on error.
+ * True on succes, or false on error.
  */
-struct kui_map_set *kui_term_get_terminal_mappings(void);
+bool kui_term_get_terminal_mappings(kui_map_set& ms);
 
 /**
  * Determine if a key is a cgdb_key. This is true if the key passed in is in
@@ -40,10 +42,10 @@ struct kui_map_set *kui_term_get_terminal_mappings(void);
  * The key to check
  *
  * @return
- * 1 if the key is a cgdb_key, otherwise 0
+ * true if the key is a cgdb_key, otherwise false
  *
  */
-int kui_term_is_cgdb_key(int key);
+bool kui_term_is_cgdb_key(int key);
 
 /**
  * This get's the ascii character representation of the key.
@@ -65,7 +67,6 @@ const char *kui_term_get_ascii_char_sequence_from_key(int key);
  *
  * @return
  * The new key, or -1 on error.
- * CGDB_KEY_ERROR is returned if no key matches the keycode.
  */
 int kui_term_get_cgdb_key_from_keycode(const char *keycode);
 
@@ -77,7 +78,6 @@ int kui_term_get_cgdb_key_from_keycode(const char *keycode);
  *
  * @return
  * The string form. or NULL on error.
- * if CGDB_KEY_ERROR is passed in, "CGDB_KEY_ERROR" will be returned.
  */
 const char *kui_term_get_string_from_key(int key);
 
@@ -89,7 +89,6 @@ const char *kui_term_get_string_from_key(int key);
  *
  * @return
  * The keycode. or NULL on error.
- * if CGDB_KEY_ERROR is passed in, "CGDB_KEY_ERROR" will be returned.
  */
 const char *kui_term_get_keycode_from_cgdb_key(int key);
 
@@ -132,6 +131,6 @@ int kui_term_string_to_key_array(const char *string, int **key_array);
  * @return
  * 0 on success, or -1 on error.
  */
-int kui_term_print_key_array(int *key_array);
+int kui_term_print_key_array(const int *key_array);
 
 #endif /* __INPUT_H__ */

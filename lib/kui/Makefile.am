@@ -5,9 +5,15 @@ AM_CXXFLAGS = \
 # create the input library
 noinst_LIBRARIES = libkui.a
 libkui_a_SOURCES = \
-    kui.cpp \
-    kui.h \
     kui_cgdb_key.h \
+    kui_ctx.cpp \
+    kui_ctx.h \
+    kui_manager.cpp \
+    kui_manager.h \
+    kui_map_set.cpp \
+    kui_map_set.h \
+    kui_map.cpp \
+    kui_map.h \
     kui_term.cpp \
     kui_term.h \
     kui_tree.cpp \

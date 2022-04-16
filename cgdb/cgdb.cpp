@@ -74,8 +74,10 @@
 #include "scroller.h"
 #include "sources.h"
 #include "tgdb.h"
-#include "kui.h"
+#include "kui_ctx.h"
+#include "kui_map_set.h"
 #include "kui_term.h"
+#include "kui_manager.h"
 #include "fs_util.h"
 #include "cgdbrc.h"
 #include "io.h"
@@ -108,10 +110,10 @@ static char *debugger_path = NULL;  /* Path to debugger to use */
 /* Set to 1 if the user requested cgdb to wait for the debugger to attach. */
 static int wait_for_debugger_to_attach = 0;
 
-struct kui_manager *kui_ctx = NULL; /* The key input package */
+std::unique_ptr<kui_manager> kui_ctx; /* The key input package */
 
-struct kui_map_set *kui_map = NULL;
-struct kui_map_set *kui_imap = NULL;
+std::shared_ptr<kui_map_set> kui_map;
+std::shared_ptr<kui_map_set> kui_imap;
 
 /**
  * This allows CGDB to know if it is acceptable to read more input from
@@ -409,18 +411,14 @@ static int user_input(void)
 {
     static int key, val;
 
-    val = kui_manager_clear_map_set(kui_ctx);
-    if (val == -1) {
-        clog_error(CLOG_CGDB, "Could not clear the map set");
-        return -1;
-    }
-
     if (if_get_focus() == CGDB)
-        val = kui_manager_set_map_set(kui_ctx, kui_map);
+        kui_ctx->set_map_set(kui_map);
     else if (if_get_focus() == GDB)
-        val = kui_manager_set_map_set(kui_ctx, kui_imap);
+        kui_ctx->set_map_set(kui_imap);
+    else
+        kui_ctx->clear_map_set();
 
-    key = kui_manager_getkey(kui_ctx);
+    key = kui_ctx->getkey();
     if (key == -1) {
         clog_error(CLOG_CGDB, "kui_manager_getkey error");
         return -1;
@@ -478,7 +476,7 @@ static int user_input_loop()
             clog_error(CLOG_CGDB, "user_input_loop failed");
             return -1;
         }
-    } while (kui_manager_cangetkey(kui_ctx));
+    } while (kui_ctx->cangetkey());
 
     return 0;
 }
@@ -837,7 +835,7 @@ static int main_loop(void)
              * input. So, if we are in the file dialog, and are no longer
              * waiting for the gdb command, then read the input.
              */
-            if (kui_manager_cangetkey(kui_ctx)) {
+            if (kui_ctx->cangetkey()) {
                 user_input_loop();
             }
         }
@@ -947,9 +945,9 @@ int init_readline(void)
 
 int update_kui(cgdbrc_config_option_ptr option)
 {
-    kui_manager_set_terminal_escape_sequence_timeout(kui_ctx,
+    kui_ctx->set_terminal_escape_sequence_timeout(
             cgdbrc_get_key_code_timeoutlen());
-    kui_manager_set_key_mapping_timeout(kui_ctx,
+    kui_ctx->set_key_mapping_timeout(
             cgdbrc_get_mapped_key_timeoutlen());
 
     return 0;
@@ -962,7 +960,7 @@ int add_readline_key_sequence(const char *readline_str, enum cgdb_key key)
 
     result = rline_get_keyseq(rline, readline_str, keyseq);
     if (result == 0) {
-         result = kui_manager_get_terminal_keys_kui_map(kui_ctx, key, keyseq);
+         result = kui_ctx->get_terminal_keys_kui_map(key, keyseq);
     }
 
     return result;
@@ -970,29 +968,18 @@ int add_readline_key_sequence(const char *readline_str, enum cgdb_key key)
 
 int init_kui(void)
 {
-    kui_ctx = kui_manager_create(STDIN_FILENO, cgdbrc_get_key_code_timeoutlen(),
-            cgdbrc_get_mapped_key_timeoutlen());
+    kui_ctx = kui_manager::create(STDIN_FILENO,
+                                  cgdbrc_get_key_code_timeoutlen(),
+                                  cgdbrc_get_mapped_key_timeoutlen());
     if (!kui_ctx) {
         clog_error(CLOG_CGDB, "Unable to initialize input library");
         cgdb_cleanup_and_exit(-1);
     }
 
-    kui_map = kui_ms_create();
-    if (!kui_map) {
-        clog_error(CLOG_CGDB, "Unable to initialize input library");
-        cgdb_cleanup_and_exit(-1);
-    }
+    kui_map = std::make_shared<kui_map_set>();
+    kui_imap = std::make_shared<kui_map_set>();
 
-    kui_imap = kui_ms_create();
-    if (!kui_imap) {
-        clog_error(CLOG_CGDB, "Unable to initialize input library");
-        cgdb_cleanup_and_exit(-1);
-    }
-
-    if (kui_manager_set_map_set(kui_ctx, kui_map) == -1) {
-        clog_error(CLOG_CGDB, "Unable to initialize input library");
-        cgdb_cleanup_and_exit(-1);
-    }
+    kui_ctx->set_map_set(kui_map);
 
     /* Combine the cgdbrc config package with libkui. If any of the options
      * below change, update the KUI.  Currently, the handles are not kept around,
