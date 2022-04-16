@@ -37,7 +37,7 @@ kui_tree::kui_tree()
     : root(kui_tree_node::create())
 {}
 
-void kui_tree::insert(int *klist, kui_map *data)
+void kui_tree::insert(const int *klist, kui_map *data)
 {
     insert(root, klist, data);
 }
@@ -55,7 +55,7 @@ void kui_tree::insert(int *klist, kui_map *data)
  * @param data
  * The substitution that should take place when the key mapping is reached.
  */
-void kui_tree::insert(node_ptr_type node, int *klist, kui_map *data)
+void kui_tree::insert(node_ptr_type node, const int *klist, kui_map *data)
 {
     // If at the end of the list, done
     if (klist[0] == 0) {
@@ -77,7 +77,7 @@ void kui_tree::insert(node_ptr_type node, int *klist, kui_map *data)
     }
 }
 
-void kui_tree::erase(int *klist)
+void kui_tree::erase(const int *klist)
 {
     erase(root, klist);
 }
@@ -92,7 +92,7 @@ void kui_tree::erase(int *klist)
  * The key sequence to delete.
  * The last item in the list will have a 0 value
  */
-void kui_tree::erase(node_ptr_type node, int *klist)
+void kui_tree::erase(node_ptr_type node, const int *klist)
 {
     auto iter = node->children.find(klist[0]);
     if (iter != node->children.end()) {

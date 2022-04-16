@@ -793,11 +793,11 @@ static int command_parse_highlight(int param)
     return hl_groups_parse_config(hl_groups_instance);
 }
 
-extern struct kui_map_set *kui_map, *kui_imap;
+extern std::shared_ptr<kui_map_set> kui_map, kui_imap;
 
 static int command_parse_map(int param)
 {
-    struct kui_map_set *kui_map_choice;
+    std::shared_ptr<kui_map_set> kui_map_choice;
     int key, value, val;
     char *key_token;
     extern int enter_map_id;
@@ -823,8 +823,7 @@ static int command_parse_map(int param)
         return -1;
     }
 
-    val = kui_ms_register_map(kui_map_choice, key_token, get_token());
-    if (val == -1) {
+    if (!kui_map_choice->register_map(key_token, get_token())) {
         free(key_token);
         enter_map_id = 0;
         return -1;
@@ -839,9 +838,8 @@ static int command_parse_map(int param)
 
 static int command_parse_unmap(int param)
 {
-    struct kui_map_set *kui_map_choice;
+    std::shared_ptr<kui_map_set> kui_map_choice;
     int key, val;
-    char *key_token;
     extern int enter_map_id;
 
     enter_map_id = 1;
@@ -857,11 +855,8 @@ static int command_parse_unmap(int param)
         enter_map_id = 0;
         return -1;
     }
-    key_token = cgdb_strdup(get_token());
 
-    val = kui_ms_deregister_map(kui_map_choice, key_token);
-    if (val == -1) {
-        free(key_token);
+    if (!kui_map_choice->deregister_map(get_token())) {
         enter_map_id = 0;
         return -1;
     }

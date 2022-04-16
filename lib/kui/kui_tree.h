@@ -68,7 +68,7 @@ public:
      * \param data
      * If this is the "value" part of the map being inserted.
      */
-    void insert(int *klist, kui_map *data);
+    void insert(const int *klist, kui_map *data);
 
     /**
      * Removing a key from the kui tree.
@@ -77,7 +77,7 @@ public:
      * The key to remove from the tree
      * It is a null terminated list.
      */
-    void erase(int *klist);
+    void erase(const int *klist);
 
     /*@}*/
 
@@ -156,8 +156,8 @@ public:
     /*@}*/
 
 private:
-    void insert(node_ptr_type node, int *klist, kui_map *data);
-    void erase (node_ptr_type node, int *klist);
+    void insert(node_ptr_type node, const int *klist, kui_map *data);
+    void erase (node_ptr_type node, const int *klist);
 
     /* The root of the tree */
     node_ptr_type root;
