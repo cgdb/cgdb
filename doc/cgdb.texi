@@ -373,7 +373,7 @@ Jump to the corresponding local or global mark.
 Jump to the last jump location.
 
 @item '.
-Jump to the currently executing line.
+Jump to the currently executing file and line.
 
 @item /
 search from current cursor position.

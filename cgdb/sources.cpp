@@ -506,6 +506,7 @@ struct sviewer *source_new(SWINDOW *win)
     /* Initialize the structure */
     rv->win = win;
     rv->cur = NULL;
+    rv->cur_exe = NULL;
     rv->list_head = NULL;
 
     /* Initialize global marks */
@@ -736,9 +737,9 @@ int source_goto_mark(struct sviewer *sview, int key)
         line = sview->jump_back_mark.line;
         node = sview->jump_back_mark.node;
     } else if (key == '.') {
-        /* Jump to currently executing line if it's set */
-        line = sview->cur->exe_line;
-        node = (line >= 0) ? sview->cur : NULL;
+        /* Jump to currently executing file and line, if it's set */
+        line = sview->cur_exe ? sview->cur_exe->exe_line : -1;
+        node = (line >= 0) ? sview->cur_exe : NULL;
     }
 
     if (node) {
@@ -1207,6 +1208,7 @@ int source_set_exec_line(struct sviewer *sview, const char *path, int sel_line, 
     if (exe_line == -1) {
         sview->cur->exe_line = -1;
     } else if (exe_line > 0) {
+        sview->cur_exe = sview->cur;
         sview->cur->exe_line = clamp_line(sview, exe_line - 1);
     }
 
