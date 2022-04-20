@@ -736,9 +736,13 @@ int source_goto_mark(struct sviewer *sview, int key)
         line = sview->jump_back_mark.line;
         node = sview->jump_back_mark.node;
     } else if (key == '.') {
-        /* Jump to currently executing line if it's set */
+        /* Jump to currently executing line in the current file, if it's set */
         line = sview->cur->exe_line;
         node = (line >= 0) ? sview->cur : NULL;
+    } else if (key == ',') {
+        /* Jump to currently executing file and line, if it's set */
+        line = sview->cur_exe ? sview->cur_exe->exe_line : -1;
+        node = (line >= 0) ? sview->cur_exe : NULL;
     }
 
     if (node) {
@@ -1193,6 +1197,11 @@ int source_set_exec_line(struct sviewer *sview, const char *path, int sel_line, 
             /* Add a new node for this file */
             sview->cur = source_add(sview, path);
         }
+    }
+
+    if (exe_line)
+    {
+        sview->cur_exe = sview->cur;
     }
 
     /* Buffer the file if it's not already */
