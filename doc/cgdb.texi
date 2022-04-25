@@ -334,11 +334,11 @@ Move down a line or down @samp{<number>} lines.
 
 @item h
 @itemx left arrow
-Move left a line.
+Move left a column.
 
 @item l
 @itemx right arrow
-Move right a line.
+Move right a column.
 
 @item Ctrl-b
 @itemx page up
@@ -538,11 +538,11 @@ Move down a line.
 
 @item h
 @itemx left arrow
-Move left a line.
+Move left a column.
 
 @item l
 @itemx right arrow
-Move right a line.
+Move right a column.
 
 @item Ctrl-b
 @itemx page up
@@ -633,7 +633,7 @@ The default is on.  When enabled, CGDB can display color when appropriate.
 This typically occurs when syntax highlighting source files in the source
 viewer.  When disabled, CGDB will not display colors.  It may instead use
 other terminal attributes for syntax highlighting, including bold and
-reverse attributes.  See the @code{highlight} commamnd and look for the
+reverse attributes.  See the @code{highlight} command and look for the
 @samp{cterm} option.
 
 It should be noted that even when color is enabled in CGDB, if ncurses
