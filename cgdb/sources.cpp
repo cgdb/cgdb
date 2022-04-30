@@ -1199,11 +1199,6 @@ int source_set_exec_line(struct sviewer *sview, const char *path, int sel_line, 
         }
     }
 
-    if (exe_line)
-    {
-        sview->cur_exe = sview->cur;
-    }
-
     /* Buffer the file if it's not already */
     if (load_file(sview->cur))
         return 4;
@@ -1216,6 +1211,7 @@ int source_set_exec_line(struct sviewer *sview, const char *path, int sel_line, 
     if (exe_line == -1) {
         sview->cur->exe_line = -1;
     } else if (exe_line > 0) {
+        sview->cur_exe = sview->cur;
         sview->cur->exe_line = clamp_line(sview, exe_line - 1);
     }
 
