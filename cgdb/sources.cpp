@@ -288,6 +288,7 @@ static int load_file_buf(struct buffer *buf, const char *filename)
                 sline.line = NULL;
                 sbsetcount(sline.line, line_len + 1);
                 strncpy(sline.line, line_start, line_len);
+                sline.line[line_len] = 0;
                 sline.len = line_len;
                 sline.attrs = NULL;
 
@@ -386,7 +387,6 @@ static enum hl_group_kind hlg_from_tokenizer_type(enum tokenizer_type type, cons
 static int highlight_node(struct list_node *node)
 {
     int i;
-    int ret;
     int line = 0;
     int length = 0;
     int lasttype = -1;
@@ -407,7 +407,7 @@ static int highlight_node(struct list_node *node)
 
             length = 0;
             lasttype = -1;
-            while ((ret = tokenizer_get_token(t, &tok_data)) > 0) {
+            while (tokenizer_get_token(t, &tok_data) > 0) {
                 if (tok_data.e == TOKENIZER_NEWLINE)
                     break;
 
@@ -431,7 +431,7 @@ static int highlight_node(struct list_node *node)
             return -1;
         }
 
-        while ((ret = tokenizer_get_token(t, &tok_data)) > 0) {
+        while (tokenizer_get_token(t, &tok_data) > 0) {
             if (tok_data.e == TOKENIZER_NEWLINE) {
                 if (length > buf->max_width)
                     buf->max_width = length;
@@ -1115,10 +1115,9 @@ void source_hscroll(struct sviewer *sview, int offset)
 {
     int lwidth;
     int max_width;
-    int width, height;
+    int width;
 
     if (sview->cur) {
-        height = swin_getmaxy(sview->win);
         width = swin_getmaxx(sview->win);
 
         lwidth = log10_uint(sbcount(sview->cur->file_buf.lines)) + 1;
@@ -1377,7 +1376,6 @@ int source_reload(struct sviewer *sview, const char *path, int force)
 {
     time_t timestamp;
     struct list_node *cur;
-    struct list_node *prev = NULL;
     int auto_source_reload = cgdbrc_get_int(CGDBRC_AUTOSOURCERELOAD);
 
     if (!path)
@@ -1390,7 +1388,6 @@ int source_reload(struct sviewer *sview, const char *path, int force)
     for (cur = sview->list_head; cur != NULL; cur = cur->next) {
         if (strcmp(path, cur->path) == 0)
             break;
-        prev = cur;
     }
 
     if (cur == NULL)

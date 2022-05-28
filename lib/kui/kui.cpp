@@ -147,6 +147,7 @@ struct kui_map *kui_map_create(const char *key_data, const char *value_data)
     value = strdup(value_data);
 
     if (!value) {
+        free(key);
         kui_map_destroy(map);
         return NULL;
     }

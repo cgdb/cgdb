@@ -141,11 +141,10 @@ int cgdb_is_debugger_attached()
 
         FILE *fp = fopen("/proc/self/status", "r");
         if ( fp ) {
-            ssize_t chars_read;
             size_t line_len = 0;
             char *line = NULL;
 
-            while ((chars_read = getline(&line, &line_len, fp)) != -1) {
+            while (getline(&line, &line_len, fp) != -1) {
                 char *tracer_pid = strstr(line, TracerPid);
 
                 if (tracer_pid) {

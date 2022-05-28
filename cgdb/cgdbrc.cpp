@@ -766,9 +766,7 @@ int command_parse_syntax(int param)
        :syntax off
      */
 
-    int rv = 1;
-
-    switch ((rv = yylex())) {
+    switch (yylex()) {
         case EOL:{
             /* TODO: Print out syntax info (like vim?) */
         }
