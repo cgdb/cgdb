@@ -2,47 +2,22 @@
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
-#if HAVE_STDIO_H
 #include <stdio.h>
-#endif /* HAVE_STDIO_H */
+#include <string.h>
+#include <errno.h>
+#include <stdlib.h>
+
+#include <regex.h>
+#include <unistd.h>
+#include <unistd.h>
+#include <sys/select.h>
+#include <sys/types.h>
 
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
 
 /* Library includes */
-#ifdef HAVE_SYS_SELECT_H
-#include <sys/select.h>
-#endif
-
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-
-#ifdef HAVE_REGEX_H
-#include <regex.h>
-#endif
-
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-
-#if HAVE_STRING_H
-#include <string.h>
-#endif /* HAVE_STRING_H */
-
-#if HAVE_ERRNO_H
-#include <errno.h>
-#endif /* HAVE_ERRNO_H */
-
-#if HAVE_STDLIB_H
-#include <stdlib.h>
-#endif /* HAVE_STDLIB_H */
-
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif /* HAVE_UNISTD_H */
-
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
 #endif
@@ -73,12 +48,9 @@ static void usage(void)
             "   kui_driver [kui options]\r\n" "\r\n" "KUI Options:\r\n"
 #ifdef HAVE_GETOPT_H
             "   --file      Load an rc file consisting of map and unmap commands.\r\n"
-#else
-            "   -f          Load an rc file consisting of map and unmap commands.\r\n"
-#endif
-#ifdef HAVE_GETOPT_H
             "   --help      Print help (this message) and then exit.\r\n"
 #else
+            "   -f          Load an rc file consisting of map and unmap commands.\r\n"
             "   -h          Print help (this message) and then exit.\r\n"
 #endif
             "\r\nType 'q' to quit and Ctrl-z to send map or unmap command.\r\n");

@@ -3,17 +3,9 @@
 #endif /* HAVE_CONFIG_H */
 
 /* System Includes */
-#if HAVE_CTYPE_H
 #include <ctype.h>
-#endif
-
-#if HAVE_STDLIB_H
 #include <stdlib.h>
-#endif /* HAVE_STDLIB_H */
-
-#if HAVE_STRING_H
 #include <string.h>
-#endif /* HAVE_STRING_H */
 
 #include "sys_util.h"
 #include "stretchy.h"

@@ -7,25 +7,15 @@
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
-#if HAVE_STDLIB_H
 #include <stdlib.h>
-#endif /* HAVE_STDLIB_H */
-
-#if HAVE_STDIO_H
 #include <stdio.h>
-#endif /* HAVE_STDIO_H */
+#include <string.h>
+
+#include <termios.h>
 
 #if HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif /* HAVE_SYS_IOCTL_H */
-
-#if HAVE_TERMIOS_H
-#include <termios.h>
-#endif /* HAVE_TERMIOS_H */
-
-#if HAVE_STRING_H
-#include <string.h>
-#endif /* HAVE_STRING_H */
 
 /* includes {{{*/
 

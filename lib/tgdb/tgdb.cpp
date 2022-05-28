@@ -3,25 +3,12 @@
 #include "config.h"
 #endif
 
-#if HAVE_STDIO_H
 #include <stdio.h>
-#endif /* HAVE_STDIO_H */
-
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif /* HAVE_UNISTD_H */
-
-#if HAVE_SIGNAL_H
-#include <signal.h> /* sig_atomic_t */
-#endif
-
-#if HAVE_STRING_H
 #include <string.h>
-#endif /* HAVE_STRING_H */
 
-#if HAVE_SYS_WAIT_H
+#include <unistd.h>
+#include <signal.h> /* sig_atomic_t */
 #include <sys/wait.h>
-#endif
 
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>

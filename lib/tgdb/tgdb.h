@@ -1,9 +1,7 @@
 #ifndef __TGDB_H__
 #define __TGDB_H__
 
-#ifdef HAVE_STDINT_H
 #include <stdint.h>
-#endif
 
 /*! 
  * \file

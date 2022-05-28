@@ -2,21 +2,13 @@
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
-#if HAVE_STRING_H
 #include <string.h>
-#endif /* HAVE_STRING_H */
+#include <stdlib.h>
+#include <stdio.h>
 
 #if HAVE_STRINGS_H
 #include <strings.h>
 #endif /* HAVE_STRINGS_H */
-
-#if HAVE_STDLIB_H
-#include <stdlib.h>             /* for getenv */
-#endif /* HAVE_STDLIB_H */
-
-#if HAVE_STDIO_H
-#include <stdio.h>              /* for stderr */
-#endif /* HAVE_STDIO_H */
 
 /* term.h prototypes */
 #ifdef __cplusplus

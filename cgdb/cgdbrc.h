@@ -5,9 +5,7 @@
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
-#if HAVE_STDIO_H
 #include <stdio.h>
-#endif /* HAVE_STDIO_H */
 
 /* TODO: Remove this include. It is simply used to get 
  * enum tokenizer_language_support.

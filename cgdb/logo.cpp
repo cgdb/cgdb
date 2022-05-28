@@ -11,17 +11,9 @@
 #endif /* HAVE_CONFIG_H */
 
 /* System Includes */
-#if HAVE_STDLIB_H 
 #include <stdlib.h>
-#endif  /* HAVE_STDLIB_H */
-
-#if HAVE_STRING_H
 #include <string.h>
-#endif /* HAVE_STRING_H */
-
-#if HAVE_TIME_H
 #include <time.h>
-#endif /* HAVE_TIME_H */
 
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>

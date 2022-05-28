@@ -2,53 +2,22 @@
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
-#if HAVE_STDIO_H
 #include <stdio.h>
-#endif /* HAVE_STDIO_H */
-
-#if HAVE_STDARG_H
 #include <stdarg.h>
-#endif /* HAVE_STDARG_H */
-
-#if HAVE_STDLIB_H
 #include <stdlib.h>
-#endif /* HAVE_STDLIB_H */
-
-#if HAVE_ERRNO_H
 #include <errno.h>
-#endif /* HAVE_ERRNO_H */
-
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif /* HAVE_UNISTD_H */
-
-#if HAVE_SYS_STAT_H
-#include <sys/stat.h>
-#endif
-
-#if HAVE_STRING_H
 #include <string.h>
-#endif /* HAVE_STRING_H */
 
-#ifdef HAVE_FCNTL_H
+#include <unistd.h>
+#include <sys/select.h>
+#include <sys/stat.h>
+
 #include <fcntl.h>
-#endif /* HAVE_FCNTL_H */
-
-#if HAVE_SYS_TYPES_H
 #include <sys/types.h>
-#endif /* HAVE_SYS_TYPES_H */
 
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
-
-#ifdef HAVE_SYS_SELECT_H
-#include <sys/select.h>
-#endif /* HAVE_SYS_SELECT_H */
-
-#if HAVE_ERRNO_H
-#include <errno.h>
-#endif /* HAVE_ERRNO_H */
 
 #include "sys_util.h"
 #include "cgdb_clog.h"
@@ -176,7 +145,6 @@ int io_data_ready(int fd, int ms)
 {
     int ret;
 
-#if defined(HAVE_SYS_SELECT_H)
     fd_set readfds, exceptfds;
     struct timeval timeout;
     struct timeval *timeout_ptr = &timeout;
@@ -203,7 +171,6 @@ int io_data_ready(int fd, int ms)
         return 0;               /* Nothing to read. */
     else
         return 1;
-#endif
 }
 
 int io_getchar(int fd, unsigned int ms, int *key)
