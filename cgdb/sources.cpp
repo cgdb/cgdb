@@ -736,10 +736,6 @@ int source_goto_mark(struct sviewer *sview, int key)
         line = sview->jump_back_mark.line;
         node = sview->jump_back_mark.node;
     } else if (key == '.') {
-        /* Jump to currently executing line in the current file, if it's set */
-        line = sview->cur->exe_line;
-        node = (line >= 0) ? sview->cur : NULL;
-    } else if (key == ',') {
         /* Jump to currently executing file and line, if it's set */
         line = sview->cur_exe ? sview->cur_exe->exe_line : -1;
         node = (line >= 0) ? sview->cur_exe : NULL;
