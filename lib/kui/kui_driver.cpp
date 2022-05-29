@@ -285,6 +285,69 @@ void main_loop(std::unique_ptr<kui_manager>& i)
 static void create_mappings(std::unique_ptr<kui_manager>& kuim)
 {
     map = std::make_shared<kui_map_set>();
+
+#if 0
+
+#if 1
+
+    if (!map->register_map("abc", "xyz")) {
+        /* TODO: Free map and return */
+        return;
+    }
+
+    if (!map->deregister_map("abc")) {
+        /* TODO: Free map and return */
+        return;
+    }
+#endif
+
+    if (!map->register_map("abc", "xyz")) {
+        /* TODO: Free map and return */
+        return;
+    }
+
+    if (!map->register_map("abc", "xyp")) {
+        /* TODO: Free map and return */
+        return;
+    }
+#if 0
+    if (!map->register_map("xyzd", "<F4>")) {
+        /* TODO: Free map and return */
+        return;
+    }
+
+    if (!map->register_map("xyzd", "<F4>")) {
+        /* TODO: Free map and return */
+        return;
+    }
+
+    if (!map->register_map("a<F1>", "xyz")) {
+        /* TODO: Free map and return */
+        return;
+    }
+
+    if (!map->register_map("a<F1><F1>", "xxx")) {
+        /* TODO: Free map and return */
+        return;
+    }
+
+    if (!map->register_map("a<F1><F1>", "xxx")) {
+        /* TODO: Free map and return */
+        return;
+    }
+
+    if (!map->register_map("<Left><Right><F1><F1>", "<F2>")) {
+        /* TODO: Free map and return */
+        return;
+    }
+
+    if (!map->register_map("<F6>", "p<Space>argc<CR>")) {
+        /* TODO: Free map and return */
+        return;
+    }
+#endif
+#endif
+
     kuim->set_map_set(map);
 }
 
