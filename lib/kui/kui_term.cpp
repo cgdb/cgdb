@@ -473,6 +473,8 @@ int kui_term_string_to_key_array(const char *string, int **cgdb_key_array)
 
     /* Initialize the output buffer  */
     local_cgdb_key_array = (int *) malloc(sizeof (int) * (length + 1));
+    *cgdb_key_array = local_cgdb_key_array;
+
     cgdb_key_array_pos = 0;
 
     for (i = 0; i < length; i++) {
@@ -554,8 +556,6 @@ int kui_term_string_to_key_array(const char *string, int **cgdb_key_array)
     }
 
     local_cgdb_key_array[cgdb_key_array_pos++] = 0;
-
-    *cgdb_key_array = local_cgdb_key_array;
 
     free(macro);
     macro = NULL;
