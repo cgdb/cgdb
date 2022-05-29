@@ -138,8 +138,6 @@ public:
                                   const std::list<std::string> &keyseq);
 
 private:
-    bool init_success;
-
     /* Need a reference to the terminal escape sequence mappings when
      * destroying this context. (a list is populated in the create function)
      */

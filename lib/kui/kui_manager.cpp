@@ -51,7 +51,11 @@ std::unique_ptr<kui_manager> kui_manager::create(
 {
     std::unique_ptr<kui_manager> obj{
         new kui_manager{ stdinfd, keycode_timeout, mapping_timeout } };
-    return obj->init_success ? std::move(obj) : std::unique_ptr<kui_manager>{};
+    if (kui_term_get_terminal_mappings(*obj->terminal_key_set))
+    {
+        return obj;
+    }
+    return std::unique_ptr<kui_manager>{};
 }
 
 kui_manager::kui_manager(int stdinfd,
@@ -61,7 +65,6 @@ kui_manager::kui_manager(int stdinfd,
     , terminal_keys{ terminal_key_set, stdinfd, char_cb, keycode_timeout, nullptr }
     , normal_keys  { nullptr, -1, kui_cb, mapping_timeout, &terminal_keys }
 {
-    init_success = kui_term_get_terminal_mappings(*terminal_key_set);
 }
 
 void kui_manager::set_map_set(const std::shared_ptr<kui_map_set>& kui_ms)
