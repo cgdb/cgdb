@@ -16,16 +16,24 @@ std::shared_ptr<kui_map> kui_map::create(const char *key, const char *value)
 
     char *orig_value = strdup(value);
     if (!orig_value) {
+        free(orig_key);
         return {};
     }
 
     int *lit_key = nullptr;
     if (kui_term_string_to_key_array(orig_key, &lit_key) == -1) {
+        free(orig_key);
+        free(orig_value);
+        free(lit_key);
         return {};
     }
 
     int *lit_value = nullptr;
     if (kui_term_string_to_key_array(orig_value, &lit_value) == -1) {
+        free(orig_key);
+        free(orig_value);
+        free(lit_key);
+        free(lit_value);
         return {};
     }
 
