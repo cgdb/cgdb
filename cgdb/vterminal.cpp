@@ -542,7 +542,7 @@ void vterminal_fetch_row(VTerminal *terminal, int row,
     int attr;
     int width;
     terminal->fetch_row(row, start_col, end_col, attr, width);
-    if (terminal->textbuf) {
+    if (terminal->textbuf[0] != '\0') {
         utf8text = terminal->textbuf;
     } else {
         utf8text = "";
@@ -553,7 +553,7 @@ void vterminal_fetch_row_col(VTerminal *terminal, int row,
         int col, std::string &utf8text, int &attr, int &width)
 {
     terminal->fetch_row(row, col, col+1, attr, width);
-    if (terminal->textbuf) {
+    if (terminal->textbuf[0] != '\0') {
         utf8text = terminal->textbuf;
     } else {
         utf8text = "";
