@@ -70,6 +70,7 @@
 #include <assert.h>
 
 #include <string>
+#include <vector>
 
 /* Local Includes */
 #include "sys_util.h"
@@ -152,7 +153,223 @@ static char last_key_pressed = 0;   /* Last key user entered in cgdb mode */
 static std::string G_line_number;
 
 /* The cgdb status bar command */
-static std::string cur_sbc;
+class status_bar_cmd
+{
+    std::vector<std::string>                 d_history;
+    std::vector<std::string>::const_iterator d_history_point = d_history.begin() - 1;
+    std::string            d_str;
+    std::string::size_type d_pos;
+
+public:
+    status_bar_cmd() = default;
+
+    /* return the current string */
+    const char *str() const
+    {
+        return d_str.c_str();
+    }
+
+    std::string::size_type pos() const
+    {
+        return d_pos;
+    }
+
+    /* Delete one character from the current position
+     * @retval true, a character was deleted
+     * @retval false, no characters to delete
+     */
+    bool del()
+    {
+        if (d_pos == 0)
+            return false;
+        d_str.erase(--d_pos, 1);
+        return true;
+    }
+
+    /* Clear the string
+     * @retval true, could clear
+     * @retval false, string was empty
+     */
+    bool clear()
+    {
+        if (d_str.empty())
+            return false;
+
+        d_str.clear();
+        d_pos = 0;
+        return true;
+    }
+
+    /* Kill from the current position to the end of the line
+     * @retval true, could clear
+     * @retval false, string was empty
+     */
+    bool kill_line_forwards()
+    {
+        if (d_str.empty())
+            return false;
+
+        d_str.erase(d_pos);
+        return true;
+    }
+
+    /* Kill from the current position to the begin of the line
+     * @retval true, could clear
+     * @retval false, string was empty
+     */
+    bool kill_line_backwards()
+    {
+        if (d_str.empty())
+            return false;
+
+        d_str.erase(0, d_pos);
+        d_pos = 0;
+        return true;
+    }
+
+    /* Kill a word
+     * @retval true, could clear
+     * @retval false, string was empty
+     */
+    bool kill_word()
+    {
+        if (d_str.empty())
+            return false;
+
+        int i = d_pos;
+        while (i > 0 && d_str[--i] == ' ')
+            ;
+        while (i > 0 && d_str[--i] != ' ')
+            ;
+
+        if (i != 0)
+            ++i;
+
+        d_str.erase(i, d_pos - i);
+        d_pos = i;
+        return true;
+    }
+
+    /* Add a string at the current position */
+    void add(const char *str)
+    {
+        const auto len{ strlen(str) };
+        if (d_pos != d_str.size())
+        {
+            d_str.insert(d_pos, str);
+        }
+        else
+        {
+            d_str.append(str);
+        }
+        d_pos += len;
+    }
+
+    /* Add a single character at the current position */
+    void add(const char c)
+    {
+        if (d_pos != d_str.size())
+        {
+            d_str.insert(d_pos, 1, c);
+        }
+        else
+        {
+            d_str.append(1, c);
+        }
+        ++d_pos;
+    }
+
+    /* Move one character to the left
+     * @retval true, could move to the left
+     * @retval false, at begin of string already
+     */
+    bool left()
+    {
+        if (d_pos == 0)
+            return false;
+
+        --d_pos;
+        return true;
+    }
+
+    /* Move to the begin of the string
+     * @retval true, could move to the begin
+     * @retval false, at begin of string already
+     */
+    bool home()
+    {
+        if (d_pos == 0)
+            return false;
+
+        d_pos = 0;
+        return true;
+    }
+
+    /* Move one character to the right
+     * @retval true, could move to the right
+     * @retval false, at end of string already
+     */
+    bool right()
+    {
+        if (d_pos == d_str.size())
+            return false;
+
+        ++d_pos;
+        return true;
+    }
+
+    /* Move to the end of the string
+     * @retval true, could move to the end
+     * @retval false, at end of string already
+     */
+    bool end()
+    {
+        if (d_pos == d_str.size())
+            return false;
+
+        d_pos = d_str.size();
+        return true;
+    }
+
+    void history_push()
+    {
+        if (d_str.empty() || (d_history_point >= d_history.begin() &&
+                              d_history_point <  d_history.end() &&
+                              *d_history_point == d_str))
+            return;
+
+        d_history.push_back(d_str);
+        d_history_point = d_history.begin() - 1;
+    }
+
+    bool history_down()
+    {
+        if (d_history.empty())
+            return false;
+
+        if (d_history_point >= d_history.end() -1)
+            d_history_point = d_history.begin() - 1;
+        d_str = *++d_history_point;
+        d_pos = d_str.size();
+        return true;
+    }
+
+    bool history_up()
+    {
+        if (d_history.empty())
+            return false;
+
+        if (d_history_point <= d_history.begin())
+            d_history_point = d_history.end();
+
+        d_str = *--d_history_point;
+        d_pos = d_str.size();
+
+        return true;
+    }
+};
+
+static status_bar_cmd cur_sbc;
 
 enum StatusBarCommandKind {
     /* This is represented by a : */
@@ -416,7 +633,7 @@ static void update_status_win(enum win_refresh dorefresh)
     }
     /* A colon command typed at the status bar */
     else if (focus == CGDB_STATUS_BAR && sbc_kind == SBC_NORMAL) {
-        if_display_message(dorefresh, ":", cur_sbc.c_str());
+        if_display_message(dorefresh, ":", cur_sbc.str(), cur_sbc.pos() + 1);
         swin_curs_set(1);
     }
     /* Default: Current Filename */
@@ -436,7 +653,7 @@ static void update_status_win(enum win_refresh dorefresh)
 }
 
 void if_display_message(enum win_refresh dorefresh,
-        const char *header, const char *msg)
+        const char *header, const char *msg, size_t cur_pos)
 {
     char buf_display[MAXLINE];
     int pos, header_length, msg_length;
@@ -467,7 +684,10 @@ void if_display_message(enum win_refresh dorefresh,
 
     swin_mvwprintw(status_win, 0, 0, "%s", buf_display);
     swin_wattroff(status_win, attr);
-    
+
+    if (cur_pos != -1)
+        swin_wmove(status_win, 0, cur_pos);
+
     if (dorefresh == WIN_REFRESH)
         swin_wrefresh(status_win);
     else
@@ -721,17 +941,16 @@ static void signal_handler(int signo)
     assert(write(fdpipe, &signo, sizeof(signo)) == sizeof(signo));
 }
 
-static void if_run_command(struct sviewer *sview, const std::string &command)
+static void if_run_command(struct sviewer *sview, const char* command)
 {
     /* refresh and return if the user entered no data */
-    if (command.size() == 0) {
+    if (command[0] == '\0') {
         if_draw();
         return;
     }
 
-    if (command_parse_string(command.c_str())) {
-        if_display_message(WIN_NO_REFRESH, "Unknown command: ", 
-            command.c_str());
+    if (command_parse_string(command)) {
+        if_display_message(WIN_NO_REFRESH, "Unknown command: ", command);
     } else {
         update_status_win(WIN_NO_REFRESH);
     }
@@ -1027,28 +1246,73 @@ static int status_bar_normal_input(int key)
         case '\n':
         case CGDB_KEY_CTRL_M:
             /* Found a command */
-            if_run_command(src_viewer, cur_sbc);
+            cur_sbc.history_push();
+            if_run_command(src_viewer, cur_sbc.str());
             done = 1;
             break;
-        case 8:
-        case 127:
-            /* Backspace or DEL key */
-            if (cur_sbc.size() == 0) {
+        case CGDB_KEY_LEFT:
+            if (cur_sbc.left())
+                update_status_win(WIN_REFRESH);
+            break;
+        case CGDB_KEY_RIGHT:
+            if (cur_sbc.right())
+                update_status_win(WIN_REFRESH);
+            break;
+        case CGDB_KEY_HOME:
+            if (cur_sbc.home())
+                update_status_win(WIN_REFRESH);
+            break;
+        case CGDB_KEY_END:
+            if (cur_sbc.end())
+                update_status_win(WIN_REFRESH);
+            break;
+        case CGDB_KEY_CTRL_K:
+            if (cur_sbc.kill_line_forwards())
+                update_status_win(WIN_REFRESH);
+            break;
+        case CGDB_KEY_CTRL_U:
+            if (cur_sbc.kill_line_backwards())
+                update_status_win(WIN_REFRESH);
+            break;
+        case CGDB_KEY_CTRL_W:
+            if (cur_sbc.kill_word())
+                update_status_win(WIN_REFRESH);
+            break;
+        case CGDB_KEY_CTRL_I:
+            // TODO - handle tab completion
+            break;
+        case CGDB_KEY_CTRL_H:
+        case 8:   // backspace
+        case 127: // del
+            if (cur_sbc.del())
+                update_status_win(WIN_REFRESH);
+            else
                 done = 1;
-            } else {
-                cur_sbc.erase(cur_sbc.size() - 1);
+            break;
+        case CGDB_KEY_DC:
+            if (cur_sbc.right()) {
+                cur_sbc.del();
+                update_status_win(WIN_REFRESH);
+            }
+            break;
+        case CGDB_KEY_UP:
+            if (cur_sbc.history_up())
+            {
+                update_status_win(WIN_REFRESH);
+            }
+            break;
+        case CGDB_KEY_DOWN:
+            if (cur_sbc.history_down())
+            {
                 update_status_win(WIN_REFRESH);
             }
             break;
         default:
             if (kui_term_is_cgdb_key(key)) {
                 const char *keycode = kui_term_get_keycode_from_cgdb_key(key);
-                int length = strlen(keycode), i;
-
-                for (i = 0; i < length; i++)
-                    cur_sbc.push_back(keycode[i]);
+                cur_sbc.add(keycode);
             } else {
-                cur_sbc.push_back(key);
+                cur_sbc.add(key);
             }
             update_status_win(WIN_REFRESH);
             break;

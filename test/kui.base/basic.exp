@@ -1,3 +1,4 @@
+source config/unix.exp
 # Don't wait for more than 10 seconds
 set timeout 3 	
 
