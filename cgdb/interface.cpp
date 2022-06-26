@@ -1210,6 +1210,11 @@ static void source_input(struct sviewer *sview, int key)
             toggle_breakpoint(sview, t);
         }
             break;
+        case 'q':
+            if (sview->cur
+                    && sview->cur->language == TOKENIZER_LANGUAGE_CGDBHELP)
+                sview->cur = sview->prev;
+            break;
         default:
             break;
     }

@@ -40,6 +40,7 @@ struct sviewer_mark {
 struct sviewer {
     struct list_node *list_head;           /* File list */
     struct list_node *cur;                 /* Current node we're displaying */
+    struct list_node *prev;                /* Previous node we've displayed */
     sviewer_mark global_marks[MARK_COUNT]; /* Global A-Z marks */
     sviewer_mark jump_back_mark;           /* Location where last jump occurred from */
 

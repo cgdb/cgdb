@@ -745,6 +745,7 @@ int source_goto_mark(struct sviewer *sview, int key)
         sview->jump_back_mark.line = sview->cur->sel_line;
         sview->jump_back_mark.node = sview->cur;
 
+        sview->prev = sview->cur;
         sview->cur = node;
         source_set_sel_line(sview, line + 1);
         return 1;
@@ -1181,6 +1182,8 @@ static struct list_node *source_get_asmnode(struct sviewer *sview,
 int source_set_exec_line(struct sviewer *sview, const char *path, int sel_line, int exe_line)
 {
     if (path) {
+        sview->prev = sview->cur;
+
         /* If they passed us a path, try to locate that node */
         sview->cur = source_get_node(sview, path);
 
@@ -1219,6 +1222,8 @@ int source_set_exec_addr(struct sviewer *sview, uint64_t addr)
 
     if (!addr)
         addr = sview->addr_frame;
+
+    sview->prev = sview->cur;
 
     /* Search for a node which contains this address */
     sview->cur = source_get_asmnode(sview, addr, &line);
