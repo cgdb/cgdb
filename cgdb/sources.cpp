@@ -1321,6 +1321,13 @@ int source_search_regex(struct sviewer *sview,
             if (line == line_end)
                 break;
         }
+
+        // If a search was finalized and no results were found then
+        // no longer show the previous search results
+        if (opt == 2) {
+            hl_regex_free(&sview->last_hlregex);
+            sview->last_hlregex = 0;
+        }
     }
 
     /* Nothing found - go back to original line */
