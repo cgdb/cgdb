@@ -506,6 +506,7 @@ struct sviewer *source_new(SWINDOW *win)
     /* Initialize the structure */
     rv->win = win;
     rv->cur = NULL;
+    rv->cur_exe = NULL;
     rv->list_head = NULL;
 
     /* Initialize global marks */
