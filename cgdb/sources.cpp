@@ -689,6 +689,7 @@ int source_set_mark(struct sviewer *sview, int key)
 {
     int ret = 0;
     int old_line;
+    bool add = false;
     struct list_node *old_node;
     int sel_line = sview->cur->sel_line;
 
@@ -696,20 +697,23 @@ int source_set_mark(struct sviewer *sview, int key)
         /* Local buffer mark */
         old_line = sview->cur->local_marks[key - 'a'];
         old_node = sview->cur;
-        sview->cur->local_marks[key - 'a'] = sel_line;
+        add = sel_line != old_line;
+        sview->cur->local_marks[key - 'a'] = add ? sel_line : -1;
         ret = 1;
     } else if (key >= 'A' && key <= 'Z') {
         /* Global buffer mark */
         old_line = sview->global_marks[key - 'A'].line;
         old_node = sview->global_marks[key - 'A'].node;
-        sview->global_marks[key - 'A'].line = sel_line;
-        sview->global_marks[key - 'A'].node = sview->cur;
+        add = sel_line != old_line || old_node != sview->cur;
+        sview->global_marks[key - 'A'].line = add ? sel_line : 0;
+        sview->global_marks[key - 'A'].node = add ? sview->cur : NULL;
         ret = 1;
     }
 
     if (ret) {
-        /* Just added a mark to the selected line, flag it */
-        sview->cur->lflags[sel_line].has_mark = 1;
+        /* If we just added a mark to the selected line, flag it */
+        if (add)
+            sview->cur->lflags[sel_line].has_mark = 1;
 
         /* Check if the old line still has a mark */
         if (source_get_mark_char(sview, old_node, old_line) == 0)

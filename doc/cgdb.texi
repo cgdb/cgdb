@@ -361,7 +361,7 @@ Move to the top of file.
 Move to the bottom of file or to a line number within the file.
 
 @item m[a-zA-Z]
-Set a mark at the cursor position.  A lower case letter sets a local mark
+Toggle a mark at the cursor position.  A lower case letter sets a local mark
 that is valid within one file.  An upper case letter sets a global mark
 valid between files. If there are ten files, each file can have a mark
 @samp{a}, but only one can have a mark @samp{A}.
