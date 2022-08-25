@@ -15,6 +15,8 @@
 #define _SOURCES_H_
 
 #include "sys_win.h"
+#include <deque>
+#include <list>
 
 /* ----------- */
 /* Definitions */
@@ -83,18 +85,19 @@ struct buffer {
 };
 
 struct line_flags {
-    unsigned char breakpt : 2;
-    unsigned char has_mark : 1;
+    enum class breakpt_status{ none, enabled, disabled };
+    breakpt_status breakpt = breakpt_status::none;
+    std::list<unsigned char> marks;
 };
 
 struct list_node {
-    char *path;                 /* Full path to source file */
-    struct buffer file_buf;     /* File buffer */
-    line_flags *lflags;         /* Breakpoints */
-    int sel_line;               /* Current line selected in viewer */
-    int sel_col;                /* Current column selected in viewer */
-    int exe_line;               /* Current line executing, or -1 if not set */
-    int sel_rline;              /* Current line used by regex */
+    char *path;                    /* Full path to source file */
+    struct buffer file_buf;        /* File buffer */
+    std::deque<line_flags> lflags; /* Breakpoints */
+    int sel_line;                  /* Current line selected in viewer */
+    int sel_col;                   /* Current column selected in viewer */
+    int exe_line;                  /* Current line executing, or -1 if not set */
+    int sel_rline;                 /* Current line used by regex */
 
     enum tokenizer_language_support language;   /* The language type of this file */
 
