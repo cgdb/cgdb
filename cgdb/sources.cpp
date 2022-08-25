@@ -672,7 +672,7 @@ static int source_get_mark_char(struct sviewer *sview,
         int i;
 
         for (i = 0; i < MARK_COUNT; i++) {
-            if (sview->global_marks[i].line == line)
+            if (sview->global_marks[i].line == line && sview->global_marks[i].node == node)
                 return 'A' + i;
         }
 
