@@ -169,9 +169,6 @@ int resize_pipe[2] = { -1, -1 };
  */
 int signal_pipe[2] = { -1, -1 };
 
-/* Readline interface */
-static struct rline *rline;
-
 /* Original terminal attributes */
 static struct termios term_attributes;
 
@@ -935,12 +932,6 @@ static int tab_completion(int a, int b)
     return 0;
 }
 
-int init_readline(void)
-{
-    rline = rline_initialize(rlctx_send_user_command, tab_completion, "dumb");
-    return 0;
-}
-
 int update_kui(cgdbrc_config_option_ptr option)
 {
     kui_ctx->set_terminal_escape_sequence_timeout(
@@ -956,7 +947,7 @@ int add_readline_key_sequence(const char *readline_str, enum cgdb_key key)
     int result;
     std::list<std::string> keyseq;
 
-    result = rline_get_keyseq(rline, readline_str, keyseq);
+    result = rline_get_keyseq(readline_str, keyseq);
     if (result == 0) {
          result = kui_ctx->get_terminal_keys_kui_map(key, keyseq);
     }
@@ -1086,10 +1077,6 @@ int main(int argc, char *argv[])
     }
 
     /* From here on, the logger is initialized */
-    if (init_readline() == -1) {
-        clog_error(CLOG_CGDB, "Unable to init readline");
-        cgdb_cleanup_and_exit(-1);
-    }
 
     if (tty_cbreak(STDIN_FILENO, &term_attributes) == -1) {
         clog_error(CLOG_CGDB, "tty_cbreak error");
