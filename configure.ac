@@ -239,6 +239,19 @@ fi
 
 AH_BOTTOM([#include <cgdb_custom_config.h>])
 
+AC_ARG_WITH([zsh-completion-dir],
+    AS_HELP_STRING([--with-zsh-completion-dir[=PATH]],
+        [Install the zsh auto-completion script in this directory. @<:@default=yes@:>@]),
+    [],
+    [with_zsh_completion_dir=yes])
+if test "x$with_zsh_completion_dir" = "xyes"; then
+    ZSH_COMPLETION_DIR="$datadir/zsh/site-functions"
+else
+    ZSH_COMPLETION_DIR="$with_zsh_completion_dir"
+fi
+AC_SUBST([ZSH_COMPLETION_DIR])
+AM_CONDITIONAL([ENABLE_ZSH_COMPLETION], [test "x$with_zsh_completion_dir" != "xno"])
+
 AC_OUTPUT(
     cgdb_custom_config.h \
     Makefile \
