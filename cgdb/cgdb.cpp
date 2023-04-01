@@ -98,8 +98,8 @@
 
 struct tgdb *tgdb;              /* The main TGDB context */
 
-char cgdb_home_dir[FSUTIL_PATH_MAX]; /* Path to home dir with trailing slash */
-char cgdb_log_dir[FSUTIL_PATH_MAX]; /* Path to log dir with trailing slash */
+std::string cgdb_home_dir; /* Path to home dir with trailing slash */
+std::string cgdb_log_dir;  /* Path to log dir with trailing slash */
 
 static int gdb_console_fd = -1; /* GDB console descriptor */
 static int gdb_mi_fd = -1;      /* GDB Machine Interface descriptor */
@@ -223,10 +223,8 @@ int run_shell_command(const char *command)
 
 static void parse_cgdbrc_file()
 {
-    char config_file[FSUTIL_PATH_MAX];
-
-    fs_util_get_path(cgdb_home_dir, "cgdbrc", config_file);
-    command_parse_file(config_file);
+    std::string config_file = fs_util_get_path(cgdb_home_dir, "cgdbrc");
+    command_parse_file(config_file.c_str());
 }
 
 /* ------------------------ */
@@ -339,23 +337,23 @@ static int init_home_dir(void)
 
     /* Set the cgdb home directory */
     if (cgdb_home_envvar != NULL) { 
-        snprintf(cgdb_home_dir, FSUTIL_PATH_MAX, "%s", cgdb_home_envvar); 
+        cgdb_home_dir = cgdb_home_envvar;
     } else { 
-        snprintf(cgdb_home_dir, FSUTIL_PATH_MAX, "%s/.cgdb", getenv("HOME"));
+        cgdb_home_dir = fs_util_get_path(getenv("HOME"), ".cgdb");
     }
 
     /* Make sure the toplevel cgdb dir exists */
     if (!fs_util_create_dir(cgdb_home_dir)) {
         printf("Exiting, could not create home directory:\n  %s\n",
-                cgdb_home_dir);
+                cgdb_home_dir.c_str());
         return -1;
     }
 
     /* Try to create log directory */
-    snprintf(cgdb_log_dir, FSUTIL_PATH_MAX, "%s/logs", cgdb_home_dir);
+    cgdb_log_dir = fs_util_get_path(cgdb_home_dir, "logs");
     if (!fs_util_create_dir(cgdb_log_dir)) {
         printf("Exiting, could not create log directory:\n  %s\n",
-                cgdb_log_dir);
+                cgdb_log_dir.c_str());
         return -1;
     }
 
@@ -898,7 +896,7 @@ void cgdb_cleanup_and_exit(int val)
             " Search the logs for more details.\n"
             " CGDB log directory: %s\n"
             " Lines beginning with ERROR: are an issue.\n",
-            cgdb_log_dir);
+            cgdb_log_dir.c_str());
     }
 
     if (new_ui_unsupported) {

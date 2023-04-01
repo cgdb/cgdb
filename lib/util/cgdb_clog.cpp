@@ -5,7 +5,7 @@
  */
 bool clog_cgdb_error_occurred = false;
 
-int clog_open(int id, const char *fmt, const char *config_dir)
+int clog_open(int id, const char *fmt, const std::string &config_dir)
 {
     int i;
 
@@ -13,10 +13,10 @@ int clog_open(int id, const char *fmt, const char *config_dir)
      * several instances of cgdb without the logfiles getting borked. */
     for (i = 1; i < 100; i++)
     {
-        char filename[FSUTIL_PATH_MAX];
+        char filename[4096];
 
         /* Initialize the debug file that a2_tgdb writes to */
-        snprintf(filename, sizeof(filename), fmt, config_dir, i);
+        snprintf(filename, sizeof(filename), fmt, config_dir.c_str(), i);
 
         if (clog_init_path(id, filename) == 0) {
             return 0;

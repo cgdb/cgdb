@@ -33,62 +33,38 @@
 #include "sys_util.h"
 #include "fs_util.h"
 
-int fs_util_is_valid(const char *dir)
+int fs_util_is_valid(const std::string &dir)
 {
-    char actual_dir[FSUTIL_PATH_MAX];
-
-    if (dir == NULL) {
-        clog_error(CLOG_CGDB, "$HOME is not set");
-        return 0;
-    }
-
-    /* Get the directory to check */
-    strncpy(actual_dir, dir, strlen(dir) + 1);
-
     /* Check if directory dir is readable and writeable */
-    if (access(actual_dir, R_OK | W_OK) == -1) {
-        if (errno == ENOENT) {
-            clog_error(CLOG_CGDB,
-                    "directory '%s' is not set", dir);
-            return 0;
-        }
-
+    if (access(dir.c_str(), R_OK | W_OK) == -1) {
         clog_error(CLOG_CGDB,
-                "directory '%s' does not have read/write permissions", dir);
+                "directory '%s' does not have read/write permissions",
+                dir.c_str());
         return 0;
     }
 
     return 1;
 }
 
-int fs_util_create_dir(const char *dir)
+int fs_util_create_dir(const std::string &dir)
 {
-    char actual_dir[FSUTIL_PATH_MAX];
     struct stat st;
 
-    if (dir == NULL) {
-        clog_error(CLOG_CGDB, "dir is NULL");
-        return 0;
-    }
-
-    /* Get the directory to check */
-    strncpy(actual_dir, dir, strlen(dir) + 1);
-
     /* Check to see if already exists, if does not exist continue */
-    if (!stat(actual_dir, &st)) {
+    if (!stat(dir.c_str(), &st)) {
         /* The file exists, see if it is a directory */
         if (S_ISDIR(st.st_mode))
             return 1;
         else {
-            clog_error(CLOG_CGDB, "file %s is not a directory", actual_dir);
+            clog_error(CLOG_CGDB, "file %s is not a directory", dir.c_str());
             return 0;
         }
     } else {
         /* The file does not exist, create it */
         if (errno == ENOENT) {
-            if (mkdir(actual_dir, 0755) == -1) {
+            if (mkdir(dir.c_str(), 0755) == -1) {
                 clog_error(CLOG_CGDB,
-                        "directory %s could not be made", actual_dir);
+                        "directory %s could not be made", dir.c_str());
                 return 0;
             } else
                 return 1;
@@ -101,30 +77,29 @@ int fs_util_create_dir(const char *dir)
     return 1;
 }
 
-int fs_util_create_dir_in_base(const char *base, const char *dirname)
+int fs_util_create_dir_in_base(const std::string &base,
+        const std::string &dirname)
 {
-    char dir[FSUTIL_PATH_MAX];
-
-    snprintf(dir, sizeof(dir), "%s/%s", base, dirname);
-    return fs_util_create_dir(dir);
+    std::string dir = base + "/" + dirname;
+    return fs_util_create_dir(dir.c_str());
 }
 
-void fs_util_get_path(const char *base, const char *name, char *path)
+std::string fs_util_get_path(const std::string &base, const std::string &name)
 {
-    snprintf(path, FSUTIL_PATH_MAX, "%s/%s", base, name);
+    return base + "/" + name;
 }
 
-int fs_util_file_exists_in_path(char * filePath)
+int fs_util_file_exists_in_path(const std::string &filePath)
 {
     struct stat buff;
     char * tok, *local_pathStr;
-    char testPath[1024];
+    std::string testPath;
     int result = -1;
     char *pathStr = getenv("PATH");
     local_pathStr = (char *)malloc(strlen(pathStr) + 1);
     strcpy(local_pathStr, pathStr);
     
-    if (stat(filePath, &buff) >= 0)
+    if (stat(filePath.c_str(), &buff) >= 0)
     {
         free(local_pathStr);
         return 0;
@@ -133,8 +108,8 @@ int fs_util_file_exists_in_path(char * filePath)
     tok = strtok(local_pathStr, ":");
     while (tok != NULL)
     {
-        snprintf(testPath, sizeof(testPath), "%s/%s", tok, filePath);
-        if (stat(testPath, &buff) >= 0) {
+        testPath = fs_util_get_path(tok, filePath);
+        if (stat(testPath.c_str(), &buff) >= 0) {
             result = 0;
             break;
         }
@@ -144,12 +119,12 @@ int fs_util_file_exists_in_path(char * filePath)
     return result;
 }
 
-int fs_verify_file_exists(const char *path)
+int fs_verify_file_exists(const std::string &path)
 {
     struct stat st;
 
     /* Check for read permission of file, already exists */
-    if (stat(path, &st) == -1)
+    if (stat(path.c_str(), &st) == -1)
         return 0;
 
     return 1;

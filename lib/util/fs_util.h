@@ -1,21 +1,14 @@
 #ifndef __FS_UTIL_H__
 #define __FS_UTIL_H__
 
+#include <string>
+
 /*******************************************************************************
  *
  * This is the file system unit. All attempts to access the file system should
  * be directed through this unit.
  *
- * All char pointers passed to functions in this unit should be FSUTIL_PATH_MAX
- * in length at a minimum. Unfortunately, the POSIX PATH_MAX can't be used here
- * since it isn't defined with the HURD OS.
- *
- * Anyways, I think in the long run the static buffer will not be the best
- * option and it should be replaced with a dynamic data structure. However,
- * for the sake of time, it is done this way.
  ******************************************************************************/
-
-#define FSUTIL_PATH_MAX 4096
 
 /* fs_util_is_valid:
  * -----------------
@@ -26,7 +19,7 @@
  *
  *  Returns 1 on succes and 0 on failure
  */
-int fs_util_is_valid(const char *dir);
+int fs_util_is_valid(const std::string &dir);
 
 /* fs_util_create_dir:
  * -------------------
@@ -39,7 +32,7 @@ int fs_util_is_valid(const char *dir);
  *      1 on succes or if dir already exists.
  *      0 on failure.
  */
-int fs_util_create_dir(const char *dir);
+int fs_util_create_dir(const std::string &dir);
 
 /* fs_util_create_dir_in_base:
  * ---------------------------
@@ -55,7 +48,8 @@ int fs_util_create_dir(const char *dir);
  *      1 on succes or if dir already exists.
  *      0 on failure.
  */
-int fs_util_create_dir_in_base(const char *base, const char *dirname);
+int fs_util_create_dir_in_base(const std::string &base,
+        const std::string &dirname);
 
 /* fs_util_get_path:
  * -----------------
@@ -65,8 +59,11 @@ int fs_util_create_dir_in_base(const char *base, const char *dirname);
  *
  *  base    - The directory to put the new directory dirname
  *  name    - Then name of the name to create in directory base
+ *
+ * Returns
+ *    - The newly created path
  */
-void fs_util_get_path(const char *base, const char *name, char *path);
+std::string fs_util_get_path(const std::string &base, const std::string &name);
 
 /* fs_util_file_exists_in path:
  * ----------------------------
@@ -74,7 +71,7 @@ void fs_util_get_path(const char *base, const char *name, char *path);
  * Checks if the file exists in any known location (absolute path
  * and paths stored in $PATH.
  */
-int fs_util_file_exists_in_path(char * filePath);
+int fs_util_file_exists_in_path(const std::string &filePath);
 
 /* fs_verify_file_exists path:
  * ----------------------------
@@ -87,6 +84,6 @@ int fs_util_file_exists_in_path(char * filePath);
  * @return
  * 1 if the file exists, otherwise 0.
  */
-int fs_verify_file_exists(const char *path);
+int fs_verify_file_exists(const std::string &path);
 
 #endif
