@@ -1,7 +1,7 @@
 #include "kui_map_set.h"
 #include "kui_term.h"
 
-int kui_map_print_cgdb_key_array(struct kui_map *map)
+int kui_map_print_cgdb_key_array(kui_map *map)
 {
     if (!map)
         return -1;

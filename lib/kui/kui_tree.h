@@ -17,7 +17,7 @@
  */
 /* }}} */
 
-struct kui_map;
+class kui_map;
 class kui_tree_node;
 using node_ptr_type = std::shared_ptr<kui_tree_node>;
 
