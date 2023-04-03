@@ -49,8 +49,8 @@ std::shared_ptr<kui_map> kui_map::create(const char *key, const char *value)
 
 kui_map::~kui_map()
 {
-    free(original_key);
-    free(original_value);
-    free(literal_key);
-    free(literal_value);
+    free(m_original_key);
+    free(m_original_value);
+    free(m_literal_key);
+    free(m_literal_value);
 }
