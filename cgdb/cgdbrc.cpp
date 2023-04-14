@@ -58,6 +58,7 @@ static int command_set_winminwidth(int value);
 static int command_set_winsplit(const char *value);
 static int command_set_winsplitorientation(const char *value);
 static int command_set_syntax_type(const char *value);
+static int command_set_focus(const char *value);
 static int cgdbrc_set_val(struct cgdbrc_config_option config_option);
 
 struct cgdbrc_attach_item {
@@ -151,7 +152,7 @@ int command_sort_find(const void *_left_cmd, const void *_right_cmd)
 /**
  * This data structure stores all the active values of all the config options.
  */
-static struct cgdbrc_config_option cgdbrc_config_options[CGDBRC_WRAPSCAN + 1];
+static struct cgdbrc_config_option cgdbrc_config_options[CGDBRC_FOCUS + 1];
 
 /**
  * Initialize the config options with default values.
@@ -251,6 +252,10 @@ void cgdbrc_init_config_options(void)
 
     option.option_kind = CGDBRC_WRAPSCAN;
     option.variant.int_val = 1;
+    cgdbrc_config_options[i++] = option;
+
+    option.option_kind = CGDBRC_FOCUS;
+    option.variant.focus_val = GDB;
     cgdbrc_config_options[i++] = option;
 }
 
@@ -381,6 +386,10 @@ void cgdbrc_init_config_variables(void)
     cgdbrc_variables.push_back(ConfigVariable(
         "wrapscan", "ws", CONFIG_TYPE_BOOL,
         (void *)&cgdbrc_config_options[CGDBRC_WRAPSCAN].variant.int_val));
+    /* focus*/
+    cgdbrc_variables.push_back(ConfigVariable(
+        "focus", "fc", CONFIG_TYPE_FUNC_STRING,
+        (void *)command_set_focus));
 }
 
 void cgdbrc_init(void)
@@ -672,6 +681,26 @@ int command_set_syntax_type(const char *value)
         return 1;
 
     if_highlight_sviewer(lang);
+    return 0;
+}
+
+int command_set_focus(const char *value)
+{
+    struct cgdbrc_config_option option;
+    Focus _focus = GDB;
+
+    option.option_kind = CGDBRC_FOCUS;
+
+    if (strcasecmp(value, "gdb") == 0)
+        _focus = GDB;
+    else if (strcasecmp(value, "cgdb") == 0)
+        _focus = CGDB;
+
+    option.variant.focus_val = _focus;
+    if (cgdbrc_set_val(option))
+        return 1;
+
+    if_set_focus(_focus);
     return 0;
 }
 
