@@ -48,6 +48,8 @@
 #include <stdint.h>
 #endif
 
+#include <algorithm>
+
 /* Local Includes */
 #include "sys_util.h"
 #include "stretchy.h"
@@ -176,8 +178,7 @@ static int release_file_memory(struct list_node *node)
     release_file_buffer(&node->file_buf);
 
     // Free the flags associated with the file buffer
-    sbfree(node->lflags);
-    node->lflags = NULL;
+    node->lflags.clear();
 
     return 0;
 }
@@ -483,11 +484,9 @@ int source_highlight(struct list_node *node)
     }
 
     /* Allocate the breakpoints array */
-    if (!node->lflags) {
+    if (node->lflags.empty()) {
         int count = sbcount(node->file_buf.lines);
-        sbsetcount(node->lflags, count);
-
-        memset(node->lflags, 0, sbcount(node->lflags));
+        node->lflags.resize(count);
     }
 
     if (node->file_buf.lines)
@@ -506,6 +505,7 @@ struct sviewer *source_new(SWINDOW *win)
     /* Initialize the structure */
     rv->win = win;
     rv->cur = NULL;
+    rv->cur_exe = NULL;
     rv->list_head = NULL;
 
     /* Initialize global marks */
@@ -529,12 +529,11 @@ struct list_node *source_add(struct sviewer *sview, const char *path)
     if (new_node)
         return new_node;
 
-    new_node = (struct list_node *)cgdb_malloc(sizeof (struct list_node));
+    new_node = new list_node;
     new_node->path = strdup(path);
 
     init_file_buffer(&new_node->file_buf);
 
-    new_node->lflags = NULL;
     new_node->sel_line = 0;
     new_node->sel_col = 0;
     new_node->sel_rline = 0;
@@ -588,9 +587,8 @@ void source_add_disasm_line(struct list_node *node, const char *line)
 
     sbpush(node->file_buf.addrs, addr);
 
-    struct line_flags lf = { 0, 0 };
     sbpush(node->file_buf.lines, sline);
-    sbpush(node->lflags, lf);
+    node->lflags.emplace_back();
 }
 
 int source_del(struct sviewer *sview, const char *path)
@@ -616,9 +614,6 @@ int source_del(struct sviewer *sview, const char *path)
     free(cur->path);
     cur->path = NULL;
 
-    sbfree(cur->lflags);
-    cur->lflags = NULL;
-
     /* Remove link from list */
     if (cur == sview->list_head)
         sview->list_head = sview->list_head->next;
@@ -626,7 +621,7 @@ int source_del(struct sviewer *sview, const char *path)
         prev->next = cur->next;
 
     /* Free the node */
-    free(cur);
+    delete cur;
 
     /* Free any global marks pointing to this bugger */
     for (i = 0; i < sizeof(sview->global_marks) / sizeof(sview->global_marks[0]); i++) {
@@ -664,21 +659,11 @@ char *source_current_file(struct sviewer *sview)
 static int source_get_mark_char(struct sviewer *sview,
     struct list_node *node, int line)
 {
-    if (!node || (line < 0) || (line >= sbcount(node->lflags)))
+    if (!node || (line < 0) || (line >= node->lflags.size()))
         return -1;
 
-    if (node->lflags[line].has_mark) {
-        int i;
-
-        for (i = 0; i < MARK_COUNT; i++) {
-            if (sview->global_marks[i].line == line)
-                return 'A' + i;
-        }
-
-        for (i = 0; i < MARK_COUNT; i++) {
-            if (node->local_marks[i] == line)
-                return 'a' + i;
-        }
+    if (!node->lflags[line].marks.empty()) {
+        return node->lflags[line].marks.front();
     }
 
     return 0;
@@ -688,6 +673,7 @@ int source_set_mark(struct sviewer *sview, int key)
 {
     int ret = 0;
     int old_line;
+    bool add = false;
     struct list_node *old_node;
     int sel_line = sview->cur->sel_line;
 
@@ -695,24 +681,27 @@ int source_set_mark(struct sviewer *sview, int key)
         /* Local buffer mark */
         old_line = sview->cur->local_marks[key - 'a'];
         old_node = sview->cur;
-        sview->cur->local_marks[key - 'a'] = sel_line;
+        add = sel_line != old_line;
+        sview->cur->local_marks[key - 'a'] = add ? sel_line : -1;
         ret = 1;
     } else if (key >= 'A' && key <= 'Z') {
         /* Global buffer mark */
         old_line = sview->global_marks[key - 'A'].line;
         old_node = sview->global_marks[key - 'A'].node;
-        sview->global_marks[key - 'A'].line = sel_line;
-        sview->global_marks[key - 'A'].node = sview->cur;
+        add = sel_line != old_line || old_node != sview->cur;
+        sview->global_marks[key - 'A'].line = add ? sel_line : 0;
+        sview->global_marks[key - 'A'].node = add ? sview->cur : NULL;
         ret = 1;
     }
 
     if (ret) {
-        /* Just added a mark to the selected line, flag it */
-        sview->cur->lflags[sel_line].has_mark = 1;
-
-        /* Check if the old line still has a mark */
-        if (source_get_mark_char(sview, old_node, old_line) == 0)
-            old_node->lflags[old_line].has_mark = 0;
+        if (old_node && old_line != -1) {
+            auto& marks{ old_node->lflags[old_line].marks };
+            marks.erase(std::find(marks.begin(), marks.end(), key));
+        }
+        if (add) {
+            sview->cur->lflags[sel_line].marks.push_front(key);
+        }
     }
 
     return ret;
@@ -736,9 +725,9 @@ int source_goto_mark(struct sviewer *sview, int key)
         line = sview->jump_back_mark.line;
         node = sview->jump_back_mark.node;
     } else if (key == '.') {
-        /* Jump to currently executing line if it's set */
-        line = sview->cur->exe_line;
-        node = (line >= 0) ? sview->cur : NULL;
+        /* Jump to currently executing file and line, if it's set */
+        line = sview->cur_exe ? sview->cur_exe->exe_line : -1;
+        node = (line >= 0) ? sview->cur_exe : NULL;
     }
 
     if (node) {
@@ -918,15 +907,20 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
             swin_waddch(sview->win, '~');
         } else {
             int line_attr = 0;
-            int bp_val = sview->cur->lflags[line].breakpt;
-            if (bp_val == 1) {
-                line_attr = enabled_bp;
-            } else if (bp_val == 2) {
-                line_attr = disabled_bp;
-            } else if (bp_val == 0 && is_exe_line) {
-                line_attr = exelineno;
-            } else if (bp_val == 0 && is_sel_line) {
-                line_attr = sellineno;
+            switch (sview->cur->lflags[line].breakpt)
+            {
+                case line_flags::breakpt_status::enabled:
+                    line_attr = enabled_bp;
+                    break;
+                case line_flags::breakpt_status::disabled:
+                    line_attr = disabled_bp;
+                    break;
+                case line_flags::breakpt_status::none:
+                    if (is_exe_line)
+                        line_attr = exelineno;
+                    else if (is_sel_line)
+                        line_attr = sellineno;
+                    break;
             }
 
             swin_wattron(sview->win, line_attr);
@@ -1207,6 +1201,7 @@ int source_set_exec_line(struct sviewer *sview, const char *path, int sel_line, 
     if (exe_line == -1) {
         sview->cur->exe_line = -1;
     } else if (exe_line > 0) {
+        sview->cur_exe = sview->cur;
         sview->cur->exe_line = clamp_line(sview, exe_line - 1);
     }
 
@@ -1321,6 +1316,13 @@ int source_search_regex(struct sviewer *sview,
             if (line == line_end)
                 break;
         }
+
+        // If a search was finalized and no results were found then
+        // no longer show the previous search results
+        if (opt == 2) {
+            hl_regex_free(&sview->last_hlregex);
+            sview->last_hlregex = 0;
+        }
     }
 
     /* Nothing found - go back to original line */
@@ -1335,8 +1337,8 @@ static void source_clear_breaks(struct sviewer *sview)
     for (node = sview->list_head; node != NULL; node = node->next)
     {
         int i;
-        for (i = 0; i < sbcount(node->lflags); i++)
-            node->lflags[i].breakpt = 0;
+        for (auto& lf : node->lflags)
+            lf.breakpt = line_flags::breakpt_status::none;
     }
 }
 
@@ -1358,8 +1360,10 @@ void source_set_breakpoints(struct sviewer *sview,
             if (!load_file(node)) {
                 int line = breakpoints[i].line;
                 int enabled = breakpoints[i].enabled;
-                if (line > 0 && line <= sbcount(node->lflags)) {
-                    node->lflags[line - 1].breakpt = enabled ? 1 : 2;
+                if (line > 0 && line <= node->lflags.size()) {
+                    node->lflags[line - 1].breakpt = enabled
+                        ? line_flags::breakpt_status::enabled
+                        : line_flags::breakpt_status::disabled;
                 }
             }
         }
@@ -1367,7 +1371,9 @@ void source_set_breakpoints(struct sviewer *sview,
             int line = 0;
             node = source_get_asmnode(sview, breakpoints[i].addr, &line);
             if (node) {
-                node->lflags[line].breakpt = breakpoints[i].enabled ? 1 : 2;
+                node->lflags[line].breakpt = breakpoints[i].enabled
+                    ? line_flags::breakpt_status::enabled
+                    : line_flags::breakpt_status::disabled;
             }
         }
     }

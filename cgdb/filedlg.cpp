@@ -23,6 +23,7 @@
 #include "highlight.h"
 #include "sources.h"
 #include "kui_term.h"
+#include "kui_manager.h"
 #include "highlight_groups.h"
 
 struct file_buffer {
@@ -518,7 +519,7 @@ static int capture_regex(struct filedlg *fd)
     filedlg_display(fd);
 
     do {
-        c = kui_manager_getkey_blocking(kui_ctx);
+        c = kui_ctx->getkey_blocking();
 
         if (regex_line_pos == (MAX_LINE - 1) && !(c == CGDB_KEY_ESC || c == 8 || c == 127))
             continue;

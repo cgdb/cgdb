@@ -34,7 +34,7 @@ const int CLOG_GDBMIIO_ID = 3;
  * @return
  * 0 on success, -1 on failure
  */
-int clog_open(int id, const char *fmt, const char *config_dir);
+int clog_open(int id, const char *fmt, const std::string &config_dir);
 
 /**
  * Determine if an error log message was sent to the logger.

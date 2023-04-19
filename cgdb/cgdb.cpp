@@ -74,8 +74,10 @@
 #include "scroller.h"
 #include "sources.h"
 #include "tgdb.h"
-#include "kui.h"
+#include "kui_ctx.h"
+#include "kui_map_set.h"
 #include "kui_term.h"
+#include "kui_manager.h"
 #include "fs_util.h"
 #include "cgdbrc.h"
 #include "io.h"
@@ -96,8 +98,8 @@
 
 struct tgdb *tgdb;              /* The main TGDB context */
 
-char cgdb_home_dir[FSUTIL_PATH_MAX]; /* Path to home dir with trailing slash */
-char cgdb_log_dir[FSUTIL_PATH_MAX]; /* Path to log dir with trailing slash */
+std::string cgdb_home_dir; /* Path to home dir with trailing slash */
+std::string cgdb_log_dir;  /* Path to log dir with trailing slash */
 
 static int gdb_console_fd = -1; /* GDB console descriptor */
 static int gdb_mi_fd = -1;      /* GDB Machine Interface descriptor */
@@ -108,10 +110,10 @@ static char *debugger_path = NULL;  /* Path to debugger to use */
 /* Set to 1 if the user requested cgdb to wait for the debugger to attach. */
 static int wait_for_debugger_to_attach = 0;
 
-struct kui_manager *kui_ctx = NULL; /* The key input package */
+std::unique_ptr<kui_manager> kui_ctx; /* The key input package */
 
-struct kui_map_set *kui_map = NULL;
-struct kui_map_set *kui_imap = NULL;
+std::shared_ptr<kui_map_set> kui_map;
+std::shared_ptr<kui_map_set> kui_imap;
 
 /**
  * This allows CGDB to know if it is acceptable to read more input from
@@ -167,9 +169,6 @@ int resize_pipe[2] = { -1, -1 };
  */
 int signal_pipe[2] = { -1, -1 };
 
-/* Readline interface */
-static struct rline *rline;
-
 /* Original terminal attributes */
 static struct termios term_attributes;
 
@@ -221,10 +220,8 @@ int run_shell_command(const char *command)
 
 static void parse_cgdbrc_file()
 {
-    char config_file[FSUTIL_PATH_MAX];
-
-    fs_util_get_path(cgdb_home_dir, "cgdbrc", config_file);
-    command_parse_file(config_file);
+    std::string config_file = fs_util_get_path(cgdb_home_dir, "cgdbrc");
+    command_parse_file(config_file.c_str());
 }
 
 /* ------------------------ */
@@ -337,23 +334,23 @@ static int init_home_dir(void)
 
     /* Set the cgdb home directory */
     if (cgdb_home_envvar != NULL) { 
-        snprintf(cgdb_home_dir, FSUTIL_PATH_MAX, "%s", cgdb_home_envvar); 
+        cgdb_home_dir = cgdb_home_envvar;
     } else { 
-        snprintf(cgdb_home_dir, FSUTIL_PATH_MAX, "%s/.cgdb", getenv("HOME"));
+        cgdb_home_dir = fs_util_get_path(getenv("HOME"), ".cgdb");
     }
 
     /* Make sure the toplevel cgdb dir exists */
     if (!fs_util_create_dir(cgdb_home_dir)) {
         printf("Exiting, could not create home directory:\n  %s\n",
-                cgdb_home_dir);
+                cgdb_home_dir.c_str());
         return -1;
     }
 
     /* Try to create log directory */
-    snprintf(cgdb_log_dir, FSUTIL_PATH_MAX, "%s/logs", cgdb_home_dir);
+    cgdb_log_dir = fs_util_get_path(cgdb_home_dir, "logs");
     if (!fs_util_create_dir(cgdb_log_dir)) {
         printf("Exiting, could not create log directory:\n  %s\n",
-                cgdb_log_dir);
+                cgdb_log_dir.c_str());
         return -1;
     }
 
@@ -409,18 +406,14 @@ static int user_input(void)
 {
     static int key, val;
 
-    val = kui_manager_clear_map_set(kui_ctx);
-    if (val == -1) {
-        clog_error(CLOG_CGDB, "Could not clear the map set");
-        return -1;
-    }
-
     if (if_get_focus() == CGDB)
-        val = kui_manager_set_map_set(kui_ctx, kui_map);
+        kui_ctx->set_map_set(kui_map);
     else if (if_get_focus() == GDB)
-        val = kui_manager_set_map_set(kui_ctx, kui_imap);
+        kui_ctx->set_map_set(kui_imap);
+    else
+        kui_ctx->clear_map_set();
 
-    key = kui_manager_getkey(kui_ctx);
+    key = kui_ctx->getkey();
     if (key == -1) {
         clog_error(CLOG_CGDB, "kui_manager_getkey error");
         return -1;
@@ -478,7 +471,7 @@ static int user_input_loop()
             clog_error(CLOG_CGDB, "user_input_loop failed");
             return -1;
         }
-    } while (kui_manager_cangetkey(kui_ctx));
+    } while (kui_ctx->cangetkey());
 
     return 0;
 }
@@ -837,7 +830,7 @@ static int main_loop(void)
              * input. So, if we are in the file dialog, and are no longer
              * waiting for the gdb command, then read the input.
              */
-            if (kui_manager_cangetkey(kui_ctx)) {
+            if (kui_ctx->cangetkey()) {
                 user_input_loop();
             }
         }
@@ -900,7 +893,7 @@ void cgdb_cleanup_and_exit(int val)
             " Search the logs for more details.\n"
             " CGDB log directory: %s\n"
             " Lines beginning with ERROR: are an issue.\n",
-            cgdb_log_dir);
+            cgdb_log_dir.c_str());
     }
 
     if (new_ui_unsupported) {
@@ -939,17 +932,11 @@ static int tab_completion(int a, int b)
     return 0;
 }
 
-int init_readline(void)
-{
-    rline = rline_initialize(rlctx_send_user_command, tab_completion, "dumb");
-    return 0;
-}
-
 int update_kui(cgdbrc_config_option_ptr option)
 {
-    kui_manager_set_terminal_escape_sequence_timeout(kui_ctx,
+    kui_ctx->set_terminal_escape_sequence_timeout(
             cgdbrc_get_key_code_timeoutlen());
-    kui_manager_set_key_mapping_timeout(kui_ctx,
+    kui_ctx->set_key_mapping_timeout(
             cgdbrc_get_mapped_key_timeoutlen());
 
     return 0;
@@ -960,9 +947,9 @@ int add_readline_key_sequence(const char *readline_str, enum cgdb_key key)
     int result;
     std::list<std::string> keyseq;
 
-    result = rline_get_keyseq(rline, readline_str, keyseq);
+    result = rline_get_keyseq(readline_str, keyseq);
     if (result == 0) {
-         result = kui_manager_get_terminal_keys_kui_map(kui_ctx, key, keyseq);
+         result = kui_ctx->get_terminal_keys_kui_map(key, keyseq);
     }
 
     return result;
@@ -970,29 +957,18 @@ int add_readline_key_sequence(const char *readline_str, enum cgdb_key key)
 
 int init_kui(void)
 {
-    kui_ctx = kui_manager_create(STDIN_FILENO, cgdbrc_get_key_code_timeoutlen(),
-            cgdbrc_get_mapped_key_timeoutlen());
+    kui_ctx = kui_manager::create(STDIN_FILENO,
+                                  cgdbrc_get_key_code_timeoutlen(),
+                                  cgdbrc_get_mapped_key_timeoutlen());
     if (!kui_ctx) {
         clog_error(CLOG_CGDB, "Unable to initialize input library");
         cgdb_cleanup_and_exit(-1);
     }
 
-    kui_map = kui_ms_create();
-    if (!kui_map) {
-        clog_error(CLOG_CGDB, "Unable to initialize input library");
-        cgdb_cleanup_and_exit(-1);
-    }
+    kui_map = std::make_shared<kui_map_set>();
+    kui_imap = std::make_shared<kui_map_set>();
 
-    kui_imap = kui_ms_create();
-    if (!kui_imap) {
-        clog_error(CLOG_CGDB, "Unable to initialize input library");
-        cgdb_cleanup_and_exit(-1);
-    }
-
-    if (kui_manager_set_map_set(kui_ctx, kui_map) == -1) {
-        clog_error(CLOG_CGDB, "Unable to initialize input library");
-        cgdb_cleanup_and_exit(-1);
-    }
+    kui_ctx->set_map_set(kui_map);
 
     /* Combine the cgdbrc config package with libkui. If any of the options
      * below change, update the KUI.  Currently, the handles are not kept around,
@@ -1101,10 +1077,6 @@ int main(int argc, char *argv[])
     }
 
     /* From here on, the logger is initialized */
-    if (init_readline() == -1) {
-        clog_error(CLOG_CGDB, "Unable to init readline");
-        cgdb_cleanup_and_exit(-1);
-    }
 
     if (tty_cbreak(STDIN_FILENO, &term_attributes) == -1) {
         clog_error(CLOG_CGDB, "tty_cbreak error");

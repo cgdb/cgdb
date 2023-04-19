@@ -1106,15 +1106,11 @@ toggle_breakpoint(struct sviewer *sview, enum tgdb_breakpoint_action t)
     }
     else
     {
-
-        /* Get filename (strip path off -- GDB is dumb) */
-        path = strrchr(sview->cur->path, '/') + 1;
-        if (path == (char *)NULL + 1)
-            path = sview->cur->path;
+        path = sview->cur->path;
     }
 
     /* delete an existing breakpoint */
-    if (sview->cur->lflags[line].breakpt)
+    if (sview->cur->lflags[line].breakpt != line_flags::breakpt_status::none)
         t = TGDB_BREAKPOINT_DELETE;
 
     tgdb_request_modify_breakpoint(tgdb, path, line + 1, addr, t);
@@ -1563,17 +1559,17 @@ void if_show_file(char *path, int sel_line, int exe_line)
 
 void if_display_help(void)
 {
-    char cgdb_help_file[FSUTIL_PATH_MAX];
+    std::string cgdb_help_file;
     int ret_val = 0;
 
-    fs_util_get_path(PKGDATADIR, "cgdb.txt", cgdb_help_file);
+    cgdb_help_file = fs_util_get_path(PKGDATADIR, "cgdb.txt");
 
     /* File doesn't exist. Try to find cgdb.txt in the build dir in case
      * the user is running a built cgdb binary directly. */
     if (!fs_verify_file_exists(cgdb_help_file))
-        fs_util_get_path(TOPBUILDDIR, "doc/cgdb.txt", cgdb_help_file);
+        cgdb_help_file = fs_util_get_path(TOPBUILDDIR, "doc/cgdb.txt");
 
-    ret_val = source_set_exec_line(src_viewer, cgdb_help_file, 1, 0);
+    ret_val = source_set_exec_line(src_viewer, cgdb_help_file.c_str(), 1, 0);
 
     if (ret_val == 0)
     {
@@ -1582,7 +1578,8 @@ void if_display_help(void)
         if_draw();
     }
     else if (ret_val == 5)      /* File does not exist */
-        if_display_message(WIN_REFRESH, "No such file: ", cgdb_help_file);
+        if_display_message(WIN_REFRESH, "No such file: ",
+                cgdb_help_file.c_str());
 }
 
 void if_display_logo(int reset)

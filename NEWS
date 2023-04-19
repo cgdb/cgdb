@@ -1,3 +1,8 @@
+  * When selecting breakpoints with the space bar in the source viewer,
+    CGDB now selects breakpoints using an absolute path to the file
+    instead of a relative path. This prevents breakpoints being set on files
+    with the same base name.
+
   * Fix issue #293 - Random breakpoints are no displayed on file reload
     Previously, when running cgdb, if you change a file you are debugging,
     recompile the exe, and 'run' again in the gdb window in cgdb, cgdb would

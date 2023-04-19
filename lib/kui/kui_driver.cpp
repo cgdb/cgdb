@@ -49,17 +49,16 @@
 
 #include "sys_win.h"
 #include "sys_util.h"
-#include "kui.h"
+#include "kui_manager.h"
+#include "kui_map_set.h"
 #include "kui_term.h"
 
-struct kui_map_set *map;
-struct kui_manager *manager;
+std::shared_ptr<kui_map_set> map;
+std::unique_ptr<kui_manager> manager;
 
 static void kui_shutdown(int use_endwin)
 {
-    kui_manager_destroy(manager);
-
-    kui_ms_destroy(map);
+    manager.reset();
 
     /* Shutdown curses */
     if (use_endwin)
@@ -114,7 +113,7 @@ static int load_map(const char *line)
             strncpy(value, &line[pmatch[2].rm_so], size);
             value[size] = 0;
 
-            if (kui_ms_register_map(map, key, value) == 0) {
+            if (!map->register_map(key, value)) {
                 fprintf(stderr, "\r\nregestered key=%s value=%s", key, value);
                 return 1;
             }
@@ -129,7 +128,7 @@ static int load_map(const char *line)
             strncpy(key, &line[pmatch[1].rm_so], size);
             key[size] = 0;
 
-            if (kui_ms_deregister_map(map, key) == 0) {
+            if (!map->deregister_map(key)) {
                 fprintf(stderr, "\r\nderegister key=%s", key);
                 return 1;
             }
@@ -203,7 +202,7 @@ static void parse_long_options(int argc, char **argv)
     }
 }
 
-void main_loop(struct kui_manager *i)
+void main_loop(std::unique_ptr<kui_manager>& i)
 {
     int max;
     fd_set rfds;
@@ -227,7 +226,7 @@ void main_loop(struct kui_manager *i)
 
         if (FD_ISSET(STDIN_FILENO, &rfds)) {
             while (1) {
-                int c = kui_manager_getkey(i);
+                int c = i->getkey();
 
                 if (c == -1) {
                     fprintf(stderr, "kui_manager_getkey failed\n");
@@ -274,7 +273,7 @@ void main_loop(struct kui_manager *i)
                         fprintf(stderr, "%c", c);
                 }
 
-                if (kui_manager_cangetkey(i) == 1)
+                if (i->cangetkey() == 1)
                     continue;
                 else
                     break;
@@ -283,78 +282,73 @@ void main_loop(struct kui_manager *i)
     }
 }
 
-static int create_mappings(struct kui_manager *kuim)
+static void create_mappings(std::unique_ptr<kui_manager>& kuim)
 {
+    map = std::make_shared<kui_map_set>();
 
-    map = kui_ms_create();
-    if (!map)
-        return -1;
 #if 0
 
 #if 1
 
-    if (kui_ms_register_map(map, "abc", "xyz") == -1) {
+    if (!map->register_map("abc", "xyz")) {
         /* TODO: Free map and return */
-        return -1;
+        return;
     }
 
-    if (kui_ms_deregister_map(map, "abc") == -1) {
+    if (!map->deregister_map("abc")) {
         /* TODO: Free map and return */
-        return -1;
+        return;
     }
 #endif
 
-    if (kui_ms_register_map(map, "abc", "xyz") == -1) {
+    if (!map->register_map("abc", "xyz")) {
         /* TODO: Free map and return */
-        return -1;
+        return;
     }
 
-    if (kui_ms_register_map(map, "abc", "xyp") == -1) {
+    if (!map->register_map("abc", "xyp")) {
         /* TODO: Free map and return */
-        return -1;
+        return;
     }
 #if 0
-    if (kui_ms_register_map(map, "xyzd", "<F4>") == -1) {
+    if (!map->register_map("xyzd", "<F4>")) {
         /* TODO: Free map and return */
-        return -1;
+        return;
     }
 
-    if (kui_ms_register_map(map, "xyzd", "<F4>") == -1) {
+    if (!map->register_map("xyzd", "<F4>")) {
         /* TODO: Free map and return */
-        return -1;
+        return;
     }
 
-    if (kui_ms_register_map(map, "a<F1>", "xyz") == -1) {
+    if (!map->register_map("a<F1>", "xyz")) {
         /* TODO: Free map and return */
-        return -1;
+        return;
     }
 
-    if (kui_ms_register_map(map, "a<F1><F1>", "xxx") == -1) {
+    if (!map->register_map("a<F1><F1>", "xxx")) {
         /* TODO: Free map and return */
-        return -1;
+        return;
     }
 
-    if (kui_ms_register_map(map, "a<F1><F1>", "xxx") == -1) {
+    if (!map->register_map("a<F1><F1>", "xxx")) {
         /* TODO: Free map and return */
-        return -1;
+        return;
     }
 
-    if (kui_ms_register_map(map, "<Left><Right><F1><F1>", "<F2>") == -1) {
+    if (!map->register_map("<Left><Right><F1><F1>", "<F2>")) {
         /* TODO: Free map and return */
-        return -1;
+        return;
     }
 
-    if (kui_ms_register_map(map, "<F6>", "p<Space>argc<CR>") == -1) {
+    if (!map->register_map("<F6>", "p<Space>argc<CR>")) {
         /* TODO: Free map and return */
-        return -1;
+        return;
     }
 #endif
 #endif
-    if (kui_manager_set_map_set(kuim, map) == -1)
-        return -1;
 
-    return 0;
-
+    kuim->set_map_set(map);
 }
 
 /* Original terminal attributes */
@@ -366,7 +360,7 @@ int main(int argc, char **argv)
     swin_raw();
     swin_refresh();
 
-    manager = kui_manager_create(STDIN_FILENO, 40, 1000);
+    manager = kui_manager::create(STDIN_FILENO, 40, 1000);
 
     create_mappings(manager);
 
