@@ -60,6 +60,7 @@ AC_CHECK_HEADERS([regex.h],,[AC_MSG_ERROR([CGDB requires regex.h to build.])])
 AC_CHECK_HEADERS([curses.h],,[
    AC_CHECK_HEADERS([ncurses/curses.h],,[
       AC_MSG_ERROR([CGDB requires curses.h or ncurses/curses.h to build.])])])
+AC_CHECK_HEADERS([locale.h],,[AC_MSG_ERROR([CGDB requires locale.h to build.])])
 
 dnl Check for getopt.h, If this is here then getopt_long can be used.
 AC_CHECK_HEADERS([getopt.h],
