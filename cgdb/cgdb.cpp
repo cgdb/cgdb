@@ -58,6 +58,10 @@
 #include <ctype.h>
 #endif
 
+#if HAVE_LOCALE_H
+#include <locale.h>
+#endif
+
 #include <string>
 
 #define __STDC_FORMAT_MACROS
@@ -1077,6 +1081,8 @@ int main(int argc, char *argv[])
     }
 
     /* From here on, the logger is initialized */
+
+    setlocale(LC_CTYPE, "");
 
     if (tty_cbreak(STDIN_FILENO, &term_attributes) == -1) {
         clog_error(CLOG_CGDB, "tty_cbreak error");
