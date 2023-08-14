@@ -799,6 +799,11 @@ hich places the source window on the left and the GDB window on the right).
 @itemx :set wrapscan
 Searches wrap around the end of file.  The default is on.
 
+@item :set fc=@var{mode}
+@itemx :set focus=@var{mode}
+Set default interface mode to @var{mode}. The default mode is GDB.
+Possible values for @var{mode} are @samp{GDB} and @samp{CGDB}. 
+
 @item :c
 @itemx :continue
 Send a continue command to GDB.

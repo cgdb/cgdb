@@ -88,6 +88,15 @@ enum LineDisplayStyle {
     LINE_DISPLAY_BLOCK
 };
 
+/* enum Focus: An enumeration representing a focus state. 
+ * ------------
+ *  GDB: focus on the gdb i/o window
+ *  CGDB: focus on source window, accepts command input.
+ *  CGDB_STATUS_BAR: focus on the status bar, accepts commands.
+ *  FILE_DLG: focus on file dialog window
+ */
+typedef enum Focus { GDB, CGDB, CGDB_STATUS_BAR, FILE_DLG } Focus;
+
 /** window split type enumeration*/
 typedef enum { WIN_SPLIT_FREE = -3, /* split point not on quarter mark */
 
@@ -133,7 +142,8 @@ enum cgdbrc_option_kind {
     CGDBRC_WINMINWIDTH,
     CGDBRC_WINSPLIT,
     CGDBRC_WINSPLITORIENTATION,
-    CGDBRC_WRAPSCAN
+    CGDBRC_WRAPSCAN,
+    CGDBRC_FOCUS
 };
 
 /** This represents a single configuration option. */
@@ -168,6 +178,8 @@ struct cgdbrc_config_option {
         WIN_SPLIT_TYPE win_split_val;
         /* option_kind == CGDBRC_WINSPLITORIENTATION */
         WIN_SPLIT_ORIENTATION_TYPE win_split_orientation_val;
+        /* option_kind == CGDBRC_FOCUS*/
+        enum Focus focus_val;
     } variant;
 };
 
