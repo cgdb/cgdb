@@ -196,5 +196,13 @@ void scr_move(struct scroller *scr, SWINDOW *win);
 // Controls how the scroller should update the screen
 void scr_refresh(struct scroller *scr, int focus, enum win_refresh dorefresh);
 
+// Returns scroller text
+//
+// @param scr
+// The scroller to operate on
+//
+// @return
+// Scroller text
+const std::string &scr_gettext(struct scroller *scr);
 
 #endif

@@ -57,14 +57,6 @@ void if_print(const char *buf);
  */
 void if_print_message(const char *fmt, ...) ATTRIBUTE_PRINTF( 1, 2 );
 
-/**
- * Print a debugger command run by CGDB when showdebugcommands is enabled.
- *
- * @param command
- * The command that CGDB is about to issue to GDB.
- */
-void if_sdc_print(const char *command);
-
 /* if_show_file: Displays the requested file in the source display window.
  * -------------
  *
@@ -106,7 +98,17 @@ struct sviewer *if_get_sview();
  * If the width is 10, the status bar will be >f_country
  */
 void if_display_message(enum win_refresh dorefresh,
-        const char *header, const char *msg);
+        const char *header, const char *msgfmt, ...) ATTRIBUTE_PRINTF(3, 4);
+
+/*
+ * Display a warning on the source window status bar.
+ *
+ * Same as if_display_message, except this text will be
+ * override message and be displayed only until user
+ * hits any key.
+ */
+void if_display_warning(enum win_refresh dorefresh,
+        const char *header, const char *msgfmt, ...) ATTRIBUTE_PRINTF(3, 4);
 
 /* if_clear_filedlg: Clears all the files the file dialog has to show the user.
  * -----------------
@@ -243,5 +245,12 @@ int get_gdb_height(void);
 // @return
 // The width of the gdb window
 int get_gdb_width(void);
+
+/* if_write_scroller_output: write scroller output to file
+ * ---------------------
+ *
+ *  filename: filename to write scroller output to
+ */
+int if_write_scroller_output(const char *filename);
 
 #endif

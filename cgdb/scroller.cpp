@@ -664,3 +664,9 @@ void scr_refresh(struct scroller *scr, int focus, enum win_refresh dorefresh)
             break;
     }
 }
+
+const std::string &scr_gettext(struct scroller *scr)
+{
+    return scr->text;
+}
+
