@@ -3,7 +3,7 @@
 
 #include <memory>
 
-/* struct kui_map {{{ */
+/* class kui_map {{{ */
 
 /**
  * A kui map structure.
@@ -32,21 +32,21 @@ public:
 
     const int *get_literal_key() const
     {
-        return literal_key;
+        return m_literal_key;
     }
 
     const int *get_literal_value() const
     {
-        return literal_value;
+        return m_literal_value;
     }
 
 protected:
     kui_map(char *original_key,   int *literal_key,
             char *original_value, int *literal_value)
-        : original_key{ original_key }
-        , literal_key{ literal_key }
-        , original_value{ original_value }
-        , literal_value{ literal_value }
+        : m_original_key{ original_key }
+        , m_literal_key{ literal_key }
+        , m_original_value{ original_value }
+        , m_literal_value{ literal_value }
     {}
 
 private:
@@ -56,7 +56,7 @@ private:
 	 * This data representation is entirly in ascii, since the user has to 
 	 * be able to type the sequence on the keyboard.
 	 */
-    char *original_key = nullptr;
+    char *m_original_key = nullptr;
 
     /**
 	 * This is the list of keys that must be matched, in order for this map
@@ -65,12 +65,12 @@ private:
 	 *
 	 * This is a NULL terminated list.
 	 */
-    int *literal_key = nullptr;
+    int *m_literal_key = nullptr;
 
     /**
 	 * The value is the substitution data, if the literal_key is typed.
 	 */
-    char *original_value = nullptr;
+    char *m_original_value = nullptr;
 
     /**
 	 * This data is passed in place of the key, if the user types the 
@@ -78,7 +78,7 @@ private:
 	 *
 	 * This is a NULL terminated list.
 	 */
-    int *literal_value = nullptr;
+    int *m_literal_value = nullptr;
 };
 
 #endif

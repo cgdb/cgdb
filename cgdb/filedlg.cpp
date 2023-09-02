@@ -510,7 +510,7 @@ void filedlg_display_message(struct filedlg *fd, char *message)
 static int capture_regex(struct filedlg *fd)
 {
     int c;
-    extern struct kui_manager *kui_ctx;
+    extern kui_manager *kui_ctx;
 
     /* Initialize the function for finding a regex and tell user */
     regex_search = 1;

@@ -13,7 +13,7 @@
  */
 /******************************************************************************/
 
-struct kuictx;
+class kuictx;
 
 /**
  * The callback function that libkui will call when it needs a character 
@@ -75,21 +75,21 @@ public:
      */
     kuictx(const std::shared_ptr<kui_map_set>& map_set, int fd,
            kui_getkey_callback callback, unsigned long ms, kuictx *state_data)
-        : map_set{ map_set }
-        , callback{ callback }
-        , ms{ ms }
-        , state_data{ state_data }
-        , fd { fd }
+        : m_map_set{ map_set }
+        , m_callback{ callback }
+        , m_ms{ ms }
+        , m_state_data{ state_data }
+        , m_fd { fd }
     {}
 
     void set_map_set(const std::shared_ptr<kui_map_set>& map_set)
     {
-        this->map_set = map_set;
+        m_map_set = map_set;
     }
 
     std::shared_ptr<kui_map_set> get_map_set() const
     {
-        return map_set;
+        return m_map_set;
     }
 
     /**
@@ -102,7 +102,7 @@ public:
      */
     bool cangetkey() const
     {
-        return !buffer.empty();
+        return !m_buffer.empty();
     }
 
 	/**
@@ -128,7 +128,7 @@ public:
      */
     unsigned long get_blocking_ms() const
     {
-        return ms;
+        return m_ms;
     }
 
     /**
@@ -142,12 +142,12 @@ public:
      */
     void set_blocking_ms(unsigned long ms)
     {
-        this->ms = ms;
+        m_ms = ms;
     }
 
     int get_fd()
     {
-        return fd;
+        return m_fd;
     }
 
 private:
@@ -155,37 +155,37 @@ private:
     /**
      * The current map set for this KUI context.
      */
-    std::shared_ptr<kui_map_set> map_set;
+    std::shared_ptr<kui_map_set> m_map_set;
 
     /**
      * A list of characters, used as a buffer for stdin.
      */
-    std::list<int> buffer;
+    std::list<int> m_buffer;
 
     /**
      * A volitale buffer. This is reset upon every call to kui_getkey.
      */
-    std::list<int> volatile_buffer;
+    std::list<int> m_volatile_buffer;
 
     /**
      * The callback function used to get data read in.
      */
-    kui_getkey_callback callback;
+    kui_getkey_callback m_callback;
 
     /**
      * Milliseconds to block on a read.
      */
-    unsigned long ms;
+    unsigned long m_ms;
 
     /**
      * state data
      */
-    kuictx *state_data;
+    kuictx *m_state_data;
 
     /**
      * The file descriptor to read from.
      */
-    int fd;
+    int m_fd;
 
 private:
     int findkey(int& map_found);

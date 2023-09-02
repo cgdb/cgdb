@@ -7,7 +7,7 @@
 #include <map>
 #include <string>
 
-/* struct kui_map_set {{{ */
+/* class kui_map_set {{{ */
 
 /* Kui map set */
 
