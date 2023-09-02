@@ -126,7 +126,7 @@ int hl_groups_shutdown(hl_groups_ptr hl_groups);
 /******************************************************************************/
 /**
  * @name Functional commands
- * These functinos are used to ask the hl_groups context to perform a task.
+ * These functions are used to ask the hl_groups context to perform a task.
  */
 /******************************************************************************/
 
