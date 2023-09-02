@@ -6,6 +6,13 @@ AC_CONFIG_HEADERS(config.h)
 AM_INIT_AUTOMAKE
 
 dnl Checks for programs.
+m4_ifndef([AC_PROG_AR],[dnl
+  AN_MAKEVAR([AR], [AC_PROG_AR])
+  AN_PROGRAM([ar], [AC_PROG_AR])
+  AC_DEFUN([AC_PROG_AR],
+  [AC_CHECK_TOOL(AR, ar, :)])
+])
+AC_PROG_AR
 AC_PROG_CC
 AM_PROG_CC_C_O
 AC_PROG_CXX
