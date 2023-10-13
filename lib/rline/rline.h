@@ -12,6 +12,23 @@
 #include <string>
 #include <list>
 
+/*@{*/
+
+/**
+ * This initializes an rline library instance.
+ *
+ * The client must call this function before any other function in the
+ * rline library.
+ *
+ * @return
+ * 0 on success or -1 on error
+ */
+int rline_initialize(void);
+
+/*@}*/
+
+/*@{*/
+
 /**
  * This will get the key sequences that readline uses for a certain key.
  *
@@ -29,6 +46,5 @@
 int rline_get_keyseq(const char *named_function, std::list<std::string> &keyseq);
 
 /*@}*/
-/* }}}*/
 
 #endif /* __RL_H__ */

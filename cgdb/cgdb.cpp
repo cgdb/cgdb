@@ -928,14 +928,6 @@ int init_signal_pipe(void)
     return result;
 }
 
-static void rlctx_send_user_command(char *line)
-{
-}
-static int tab_completion(int a, int b)
-{
-    return 0;
-}
-
 int update_kui(cgdbrc_config_option_ptr option)
 {
     kui_ctx->set_terminal_escape_sequence_timeout(
@@ -1081,6 +1073,10 @@ int main(int argc, char *argv[])
     }
 
     /* From here on, the logger is initialized */
+    if (rline_initialize() == -1) {
+        clog_error(CLOG_CGDB, "Unable to init readline");
+        cgdb_cleanup_and_exit(-1);
+    }
 
     setlocale(LC_CTYPE, "");
 
