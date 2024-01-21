@@ -4,3 +4,8 @@
 AUTOMAKE_OPTIONS = -Wportability foreign
 SUBDIRS=lib cgdb doc test
 DIST_SUBDIRS=lib cgdb doc test
+
+if ENABLE_ZSH_COMPLETION
+zshcompletiondir = $(ZSH_COMPLETION_DIR)
+dist_zshcompletion_DATA = data/completions/zsh/_cgdb
+endif

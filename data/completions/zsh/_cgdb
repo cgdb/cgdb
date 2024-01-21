@@ -1,0 +1,12 @@
+#compdef cgdb
+
+if ((${${words[1, CURRENT]}[(I)--]})) && [[ ${words[CURRENT]} != -- ]]; then # cgdb -- <TAB>
+  _gdb
+else # cgdb <TAB> or cgdb <TAB> -- or cgdb --<TAB>
+  _arguments -s \
+    "(- : *)"{-v,--version}"[Print version information and then exit.]" \
+    "(- : *)"{-h,--help}"[Print help (this message) and then exit.]" \
+    -d"[Set debugger to use.]" \
+    -w"[Wait for debugger to attach before starting.]" \
+    --
+fi
