@@ -113,7 +113,7 @@ IDENTIFIER {L}+{T}*
 ".false."     { return(TOKENIZER_KEYWORD); }
 ".ge."        { return(TOKENIZER_KEYWORD); }
 ".gt."        { return(TOKENIZER_KEYWORD); }
-".lt."        { return(TOKENIZER_KEYWORD); }
+".le."        { return(TOKENIZER_KEYWORD); }
 ".lt."        { return(TOKENIZER_KEYWORD); }
 ".ne."        { return(TOKENIZER_KEYWORD); }
 ".not."       { return(TOKENIZER_KEYWORD); }
