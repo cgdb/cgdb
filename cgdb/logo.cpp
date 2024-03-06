@@ -93,6 +93,19 @@ static struct Logo CGDB_LOGO[] =
           "            _|_|                      "
         }
     },
+    { false, 10, 61,
+        {"     ,gggg,      ,gg,       ,gggggggggggg,    ,ggggggggggg,  ",
+         "   ,88\"\"\"Y8b,   i8\"\"8i     dP\"\"\"88\"\"\"\"\"\"Y8b, dP\"\"\"88\"\"\"\"\"\"Y8,",
+         "  d8\"     `Y8   `8,,8'     Yb,  88       `8b,Yb,  88      `8b",
+         " d8\'   8b  d8    `Y88aaad8  `\"  88        `8b `\"  88      ,8P",
+         ",8I    \"Y88P'     d8\"\"\"\"Y8,     88         Y8     88aaaad8P\" ",
+         "I8'              ,8P     8b     88         d8     88\"\"\"\"Y8ba ",
+         "d8               dP      Y8     88        ,8P     88      `8b",
+         "Y8,          _ ,dP\'      I8     88       ,8P\'     88      ,8P",
+         "`Yba,,_____, \"888,,_____,dP     88______,dP\'      88_____,d8\'",
+         "  `\"Y8888888 a8P\"Y888888P\"     888888888P\"       88888888P\"  "
+         }
+    },
 
     /* echo cgdb | boxes -d peek -a c -s 20x7 | toilet --gay -f term */
     { true, 7, 20,
