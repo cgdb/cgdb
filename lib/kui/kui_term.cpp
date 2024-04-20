@@ -93,7 +93,7 @@ struct keydata {
     const char *key_seq;
 };
 
-static std::array<keydata, 47> hard_coded_bindings{{
+static std::array<keydata, 53> hard_coded_bindings{{
     { CGDB_KEY_ESC, "\033" },
     /* Arrow bindings */
 
@@ -126,11 +126,19 @@ static std::array<keydata, 47> hard_coded_bindings{{
     { CGDB_KEY_LEFT   , "\033OD" },
     { CGDB_KEY_HOME   , "\033OH" },
     { CGDB_KEY_END    , "\033OF" },
-    /* Passed through to readline */
+    /* Meta bindings */
     { CGDB_KEY_BACKWARD_WORD      , "\033b" },
     { CGDB_KEY_FORWARD_WORD       , "\033f" },
     { CGDB_KEY_BACKWARD_KILL_WORD , "\033\b" },
     { CGDB_KEY_FORWARD_KILL_WORD  , "\033d" },
+    { CGDB_KEY_BACKWARD_KILL_WORD , "\033\177" },
+    /* Ctrl arrow bindings */
+    { CGDB_KEY_BACKWARD_WORD      , "\033[1;5D" },
+    { CGDB_KEY_FORWARD_WORD       , "\033[1;5C" },
+    { CGDB_KEY_FORWARD_KILL_WORD  , "\033[3;5~" },
+    /* Alt arrow bindings */
+    { CGDB_KEY_BACKWARD_WORD      , "\033[1;3D" },
+    { CGDB_KEY_FORWARD_WORD       , "\033[1;3C" },
     /* Ctrl bindings */
     { CGDB_KEY_CTRL_A , "\001" },
     { CGDB_KEY_CTRL_B , "\002" },
