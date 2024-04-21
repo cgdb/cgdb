@@ -251,5 +251,5 @@ AC_OUTPUT(
     lib/vterm/Makefile \
     doc/Makefile \
     cgdb/Makefile \
-    test/Makefile
+    testsuite/Makefile
 )
