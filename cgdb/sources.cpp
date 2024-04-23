@@ -1336,7 +1336,6 @@ static void source_clear_breaks(struct sviewer *sview)
 
     for (node = sview->list_head; node != NULL; node = node->next)
     {
-        int i;
         for (auto& lf : node->lflags)
             lf.breakpt = line_flags::breakpt_status::none;
     }

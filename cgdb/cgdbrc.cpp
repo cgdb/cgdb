@@ -798,7 +798,7 @@ extern std::shared_ptr<kui_map_set> kui_map, kui_imap;
 static int command_parse_map(int param)
 {
     std::shared_ptr<kui_map_set> kui_map_choice;
-    int key, value, val;
+    int key, value;
     char *key_token;
     extern int enter_map_id;
 
@@ -839,7 +839,7 @@ static int command_parse_map(int param)
 static int command_parse_unmap(int param)
 {
     std::shared_ptr<kui_map_set> kui_map_choice;
-    int key, val;
+    int key;
     extern int enter_map_id;
 
     enter_map_id = 1;

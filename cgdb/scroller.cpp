@@ -121,8 +121,6 @@ struct scroller {
 
 static void scr_ring_bell(void *data)
 {
-    struct scroller *scr = (struct scroller *)data;
-
     // TODO: Ring the bell
 }
 
