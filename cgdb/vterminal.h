@@ -27,9 +27,9 @@ struct VTerminalOptions
 
 // Create a new virtual terminal
 //
-// @param options
+// @param options_p
 // The options to use when creating the virtual terminal
-VTerminal *vterminal_new(VTerminalOptions options);
+VTerminal *vterminal_new(VTerminalOptions options_p);
 
 // Free a virtual terminal
 //
