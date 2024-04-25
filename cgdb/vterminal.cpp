@@ -13,7 +13,7 @@ typedef struct {
     // The number of cells in the list below
     size_t cols;
     // A list of cells
-    VTermScreenCell cells[];
+    VTermScreenCell *cells;
 } ScrollbackLine;
 
 struct VTerminal
@@ -211,6 +211,7 @@ VTerminal::VTerminal(VTerminalOptions options) : vt(nullptr)
 VTerminal::~VTerminal()
 {
     for (size_t i = 0; i < sb_current; i++) {
+      free(sb_buffer[i]->cells);
       free(sb_buffer[i]);
     }
     free(sb_buffer);
@@ -276,6 +277,7 @@ VTerminal::sb_pushline(int cols, const VTermScreenCell *cells)
             // Recycle old row if it's the right size
             sbrow = sb_buffer[sb_current - 1];
         } else {
+            free(sb_buffer[sb_current - 1]->cells);
             free(sb_buffer[sb_current - 1]);
         }
 
@@ -288,9 +290,9 @@ VTerminal::sb_pushline(int cols, const VTermScreenCell *cells)
     }
 
     if (!sbrow) {
-        sbrow = (ScrollbackLine *)malloc(
-            sizeof(ScrollbackLine) + c * sizeof(sbrow->cells[0]));
+        sbrow = (ScrollbackLine *)malloc(sizeof(ScrollbackLine));
         sbrow->cols = c;
+        sbrow->cells = (VTermScreenCell *)malloc(c * sizeof(sbrow->cells[0]));
     }
 
     // New row is added at the start of the storage buffer.
@@ -329,6 +331,7 @@ VTerminal::sb_popline(int cols, VTermScreenCell *cells)
         cells[col].width = 1;
     }
 
+    free(sbrow->cells);
     free(sbrow);
 
     return 1;
