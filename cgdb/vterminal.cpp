@@ -1,3 +1,4 @@
+#include <vector>
 #include "vterminal.h"
 // To use fill_utf8 
 #include "utf8.h"
@@ -496,11 +497,11 @@ VTerminal::push_screen_to_scrollback()
     // Take each row that has some content and push to scrollback buffer
     VTermPos pos;
     for (pos.row = 0; pos.row < height; ++pos.row) {
-        VTermScreenCell cells[width];
+        std::vector<VTermScreenCell> cells;
         for (pos.col = 0; pos.col < width; ++pos.col) {
             fetch_cell(pos.row, pos.col, &cells[pos.col]);
         }
-        sb_pushline(width, cells);
+        sb_pushline(width, cells.data());
 
         if (pos.row == cursorpos.row) {
             break;
