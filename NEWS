@@ -1,3 +1,9 @@
+  * Fix issue #345 - cgdb can now be configured to be built without
+    the need to also build documentation. To disable documentation,
+    pass --enable-docs=no or --disable-docs to the configure options.
+    This is useful when building on systems that don't have the
+    makeinfo executable available.
+
   * Fix issue #352 - gdb target output was not being displayed in cgdb.
     CGDB previously ignored target output from GDB. This prevented useful
     target output messages from being displayed back to the user in the
