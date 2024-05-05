@@ -1,3 +1,10 @@
+  * Fix issue #352 - gdb target output was not being displayed in cgdb.
+    CGDB previously ignored target output from GDB. This prevented useful
+    target output messages from being displayed back to the user in the
+    gdb console output window. CGDB now correctly displays target output
+    when remote debugging, including both from gdbserver directly or when
+    debugging a program through valgrind using the --vgdb-error=0 option.
+
   * When selecting breakpoints with the space bar in the source viewer,
     CGDB now selects breakpoints using an absolute path to the file
     instead of a relative path. This prevents breakpoints being set on files

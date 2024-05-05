@@ -818,7 +818,36 @@ static int main_loop(void)
                 return -1;
         }
 
-        /* gdb's output -> stdout */
+        /* This processes the mi output stream from gdb.
+         * 
+         * At one point, this was processed after the gdb console output.
+         * I suspect the order should not matter, however it does in the
+         * case described below.
+         *
+         * I ran across this issue,
+         *   https://github.com/cgdb/cgdb/issues/352
+         * where the target output wasn't being displayed by cgdb.
+         * cgdb was ignoring the target output. Once fixed, the target
+         * output and the gdb prompt were intermixed somewhat randomly.
+         *
+         * For instance, when running the command 'monitor help', 
+         * gdb returns two things,
+         *   - the gdb prompt on the console output
+         *   - the target output on the mi output
+         *
+         * If cgdb processes all the mi output first, the target output
+         * appears to show up before the gdb prompt. I fully expect to
+         * find a situation where the console output needs to be handled
+         * first one day. I've left this documentation to aid in the thought
+         * process when that day approaches.
+         */
+        if (FD_ISSET(gdb_mi_fd, &rset)) {
+            if (gdb_input(gdb_mi_fd) == -1) {
+                return -1;
+            }
+        }
+
+        /* This processes the console output stream from gdb.  */
         if (FD_ISSET(gdb_console_fd, &rset)) {
             if (gdb_input(gdb_console_fd) == -1) {
                 return -1;
@@ -835,11 +864,6 @@ static int main_loop(void)
             }
         }
 
-        if (FD_ISSET(gdb_mi_fd, &rset)) {
-            if (gdb_input(gdb_mi_fd) == -1) {
-                return -1;
-            }
-        }
     }
     return 0;
 }

@@ -392,18 +392,11 @@ static void gdbwire_stream_record_callback(void *context,
 {
     struct tgdb *tgdb = (struct tgdb*)context;
 
-    switch (tgdb->current_request_type) {
-        case TGDB_REQUEST_BREAKPOINTS:
-        case TGDB_REQUEST_INFO_FRAME:
-            /**
-             * When using GDB with annotate=2 and also using interpreter-exec,
-             * GDB spits out the annotations in the MI output. All of these
-             * annotations can be ignored.
-             */
-            break;
-        case TGDB_REQUEST_DISASSEMBLE_PC:
-        case TGDB_REQUEST_DISASSEMBLE_FUNC:
-            if (stream_record->kind == GDBWIRE_MI_CONSOLE) {
+    switch (stream_record->kind) {
+        case GDBWIRE_MI_CONSOLE:
+            if (tgdb->current_request_type == TGDB_REQUEST_DISASSEMBLE_PC ||
+                tgdb->current_request_type == TGDB_REQUEST_DISASSEMBLE_FUNC)
+            {
                 uint64_t address;
                 int result;
                 char *str = stream_record->cstring;
@@ -441,12 +434,24 @@ static void gdbwire_stream_record_callback(void *context,
                 }
             }
             break;
-        case TGDB_REQUEST_DATA_DISASSEMBLE_MODE_QUERY:
-        case TGDB_REQUEST_INFO_SOURCES:
-        case TGDB_REQUEST_INFO_SOURCE_FILE:
-        case TGDB_REQUEST_TTY:
-        case TGDB_REQUEST_DEBUGGER_COMMAND:
-        case TGDB_REQUEST_MODIFY_BREAKPOINT:
+        case GDBWIRE_MI_TARGET:
+        {
+            std::string cstring(stream_record->cstring);
+            std::string cstring_crnl;
+            for (auto c : cstring) {
+                if (c == '\n') {
+                    cstring_crnl.push_back('\r');
+                    cstring_crnl.push_back('\n');
+                } else {
+                    cstring_crnl.push_back(c);
+                }
+            }
+
+            tgdb->callbacks.console_output_callback(
+                    tgdb->callbacks.context, cstring_crnl.c_str());
+            break;
+        }
+        case GDBWIRE_MI_LOG:
             break;
     }
 }
