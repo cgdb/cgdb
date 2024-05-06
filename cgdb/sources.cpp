@@ -1042,7 +1042,10 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
                 printline_attrs, -1, -1, sview->cur->sel_col + column_offset,
                 width - lwidth - 2);
 
-            if (hlsearch && sview->last_hlregex) {
+            // if highlight search is on
+            //   display the last successful search
+            //   unless we are starting a new search
+            if (hlsearch && sview->last_hlregex && !sview->hlregex) {
                 struct hl_line_attr *attrs = hl_regex_highlight(
                         &sview->last_hlregex, sline->line, HLG_SEARCH);
                 if (sbcount(attrs)) {
@@ -1053,6 +1056,22 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
                 }
             }
 
+            // if highlight search is on
+            //   display the current search
+            if (hlsearch && sview->hlregex) {
+                struct hl_line_attr *attrs = hl_regex_highlight(
+                        &sview->hlregex, sline->line, HLG_SEARCH);
+                if (sbcount(attrs)) {
+                    hl_printline_highlight(sview->win, sline->line, sline->len,
+                        attrs, x, y, sview->cur->sel_col + column_offset,
+                        width - lwidth - 2);
+                    sbfree(attrs);
+                }
+            }
+
+
+            // if the currently line being displayed is the selected line
+            //   display the current search as an incremental search
             if (is_sel_line && sview->hlregex) {
                 struct hl_line_attr *attrs = hl_regex_highlight(
                         &sview->hlregex, sline->line, HLG_INCSEARCH);
