@@ -966,13 +966,19 @@ static int status_bar_regex_input(struct sviewer *sview, int key)
         case '\r':
         case '\n':
         case CGDB_KEY_CTRL_M:
-            /* Save for future searches via 'n' or 'N' */
-            regex_last = regex_cur;
+            if (regex_cur.size() == 0) {
+                // If the user searched for / only, that's like searching
+                // on the last string again. Don't modify regex_last.
+            } else {
+                // Save for future searches via 'n' or 'N'
+                regex_last = regex_cur;
+            }
 
             regex_direction_last = regex_direction_cur;
             source_search_regex(sview, regex_last.c_str(), 2,
                     regex_direction_last, regex_icase);
             if_draw();
+
             done = 1;
             break;
         case 8:
