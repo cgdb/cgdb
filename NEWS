@@ -5,6 +5,8 @@
     - hlsearch will allow you to backspace out of a search completely now.
       Previously it would always highlight the last char of search being
       backspaced out of.
+    - hlsearch will properly highlight the previous search when you
+      backspace out of a search completely
 
   * Fix issue #345 - cgdb can now be configured to be built without
     the need to also build documentation. To disable documentation,

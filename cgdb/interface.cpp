@@ -986,8 +986,6 @@ static int status_bar_regex_input(struct sviewer *sview, int key)
             /* Backspace or DEL key */
             if (regex_cur.size() == 0) {
                 done = 1;
-                source_search_regex(sview, "", 2,
-                        regex_direction_cur, regex_icase);
             } else {
                 regex_cur.erase(regex_cur.size() - 1);
                 source_search_regex(sview, regex_cur.c_str(), 1,
@@ -1014,6 +1012,7 @@ static int status_bar_regex_input(struct sviewer *sview, int key)
 
     if (done) {
         regex_cur.clear();
+        hl_regex_free(&src_viewer->hlregex);
 
         sbc_kind = SBC_NORMAL;
         if_set_focus(CGDB);
