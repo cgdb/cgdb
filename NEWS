@@ -1,3 +1,11 @@
+  * Several searching improvements have been made
+    - Searching again with / will repeat the last search
+    - Searching again with ? will repeat the last search in reverse
+    - hlsearch no longer highlights old searches when starting a new search
+    - hlsearch will allow you to backspace out of a search completely now.
+      Previously it would always highlight the last char of search being
+      backspaced out of.
+
   * Fix issue #345 - cgdb can now be configured to be built without
     the need to also build documentation. To disable documentation,
     pass --enable-docs=no or --disable-docs to the configure options.

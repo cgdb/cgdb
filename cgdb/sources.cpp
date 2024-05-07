@@ -1290,7 +1290,7 @@ int source_search_regex(struct sviewer *sview,
     if (!node)
         return -1;
 
-    if (regex && *regex) {
+    if (regex) {
         int line;
         int line_end;
         int line_inc = direction ? +1 : -1;
