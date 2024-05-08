@@ -176,34 +176,36 @@ int io_data_ready(int fd, int ms)
 {
     int ret;
 
-#if defined(HAVE_SYS_SELECT_H)
-    fd_set readfds, exceptfds;
-    struct timeval timeout;
-    struct timeval *timeout_ptr = &timeout;
+    for (;;) {
+        fd_set readfds, exceptfds;
+        struct timeval timeout;
+        struct timeval *timeout_ptr = &timeout;
 
-    FD_ZERO(&readfds);
-    FD_ZERO(&exceptfds);
-    FD_SET(fd, &readfds);
-    FD_SET(fd, &exceptfds);
+        FD_ZERO(&readfds);
+        FD_ZERO(&exceptfds);
+        FD_SET(fd, &readfds);
+        FD_SET(fd, &exceptfds);
 
-    timeout.tv_sec = ms / 1000;
-    timeout.tv_usec = (ms % 1000) * 1000;
+        timeout.tv_sec = ms / 1000;
+        timeout.tv_usec = (ms % 1000) * 1000;
 
-    /* Enforce blocking semantics if the user requested it */
-    if (ms == -1)
-        timeout_ptr = NULL;
+        /* Enforce blocking semantics if the user requested it */
+        if (ms == -1)
+            timeout_ptr = NULL;
 
-    ret = select(fd + 1, &readfds, (fd_set *) NULL, &exceptfds, timeout_ptr);
-    if (ret == -1) {
-        clog_error(CLOG_CGDB, "Errno(%d)\n", errno);
-        return -1;
+        ret = select(fd + 1, &readfds, (fd_set *)NULL, &exceptfds, timeout_ptr);
+        if (ret == -1) {
+            if (errno == EINTR)
+                continue;
+            else {
+                clog_error(CLOG_CGDB, "Errno(%d)\n", errno);
+                return -1;
+            }
+        }
+
+        // ready to read if at least 1 file is available
+        return ret > 0;
     }
-
-    if (ret <= 0)
-        return 0;               /* Nothing to read. */
-    else
-        return 1;
-#endif
 }
 
 int io_getchar(int fd, unsigned int ms, int *key)
