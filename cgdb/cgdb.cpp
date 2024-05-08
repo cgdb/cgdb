@@ -958,7 +958,7 @@ int update_kui(cgdbrc_config_option_ptr option)
     return 0;
 }
 
-int add_readline_key_sequence(const char *readline_str, enum cgdb_key key)
+static int add_readline_key_sequence(const char *readline_str, enum cgdb_key key)
 {
     int result;
     std::list<std::string> keyseq;
@@ -1008,6 +1008,7 @@ int init_kui(void)
 
     /* For now, I've decided it's OK for these functions to fail as they
      * only add functionality to CGDB. */
+    rline_initialize();
 
     /* Home key */
     add_readline_key_sequence("beginning-of-line", CGDB_KEY_HOME);
@@ -1093,11 +1094,6 @@ int main(int argc, char *argv[])
     }
 
     /* From here on, the logger is initialized */
-    if (rline_initialize() == -1) {
-        clog_error(CLOG_CGDB, "Unable to init readline");
-        cgdb_cleanup_and_exit(-1);
-    }
-
     if (tty_cbreak(STDIN_FILENO, &term_attributes) == -1) {
         clog_error(CLOG_CGDB, "tty_cbreak error");
         cgdb_cleanup_and_exit(-1);

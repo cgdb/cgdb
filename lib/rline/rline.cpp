@@ -22,36 +22,9 @@
 
 int rline_initialize(void)
 {
-    /* Master/Slave PTY used to keep readline off of stdin/stdout. */
-    pty_pair_ptr pty_pair = pty_pair_create();
-    if (!pty_pair) {
-        return -1;
-    }
-
-    int slavefd = pty_pair_get_masterfd(pty_pair);
-
-    rl_instream = fdopen(slavefd, "r");
-    if (!rl_instream) {
-        pty_pair_destroy(pty_pair);
-        return -1;
-    }
-
-    rl_outstream = fdopen(slavefd, "w");
-    if (!rl_outstream) {
-        fclose(rl_instream);
-        pty_pair_destroy(pty_pair);
-        return -1;
-    }
-
-    /* Tell readline not to catch signals */
-    rl_catch_signals = 0;
-    rl_catch_sigwinch = 0;
-
-    /* Initialize readline */
-    rl_initialize();
-
-    pty_pair_destroy(pty_pair);
-    return 0;
+    /* Don't need to initialize the whole readline state, only have it
+       read in 'inputrc' to expose key mappings for rline_get_keyseq. */
+    return rl_read_init_file(NULL);
 }
 
 int
