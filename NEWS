@@ -1,3 +1,7 @@
+  * CGDB now supports the :noh command, which stops the highlighting
+    of previously matched searches when using the hlsearch option.
+    This resolves issue #24.
+
   * Several searching improvements have been made
     - Searching again with / will repeat the last search
     - Searching again with ? will repeat the last search in reverse

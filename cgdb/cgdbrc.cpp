@@ -76,6 +76,7 @@ static int command_do_bang(int param);
 static int command_do_focus(int param);
 static int command_do_help(int param);
 static int command_do_logo(int param);
+static int command_do_noh(int param);
 static int command_do_quit(int param);
 static int command_do_shell(int param);
 static int command_source_reload(int param);
@@ -109,6 +110,7 @@ COMMANDS commands[] = {
     /* iunmap       */ {"iu", (action_t)command_parse_unmap, 0},
     /* insert       */ {"insert", (action_t)command_focus_gdb, 0},
     /* map          */ {"map", (action_t)command_parse_map, 0},
+    /* noh          */ {"noh", (action_t)command_do_noh, 0},
     /* quit         */ {"quit", (action_t)command_do_quit, 0},
     /* quit         */ {"q", (action_t)command_do_quit, 0},
     /* shell        */ {"shell", (action_t)command_do_shell, 0},
@@ -726,6 +728,12 @@ int command_do_help(int param)
 int command_do_logo(int param)
 {
     if_display_logo(1);
+    return 0;
+}
+
+int command_do_noh(int param)
+{
+    if_set_no_hlsearch();
     return 0;
 }
 

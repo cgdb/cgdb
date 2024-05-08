@@ -139,6 +139,48 @@ static std::string regex_cur;
 /* The last regex the user searched for */
 static std::string regex_last;
 
+// Used to temporarily disable hlsearch
+//
+// When set to true, previous searches should not be highlighted.
+// If the user starts another search, the new search should be highlighted.
+// If the user cancels the search, previous searches should not be highlighted.
+// If the user completes another search, this should be set to false.
+// TODO: If the user sets hlsearch, this should be set to false.
+//   In a future patch i'll make it easy to get callbacks when an option
+//   is changed.
+//
+// When false, no special behavior is required regarding previous searches.
+//
+// Note for testing:
+// - when hlsearch enabled (without noh)
+//   - do a valid search            -> search items highlighted
+//   - /                            -> old search items highlighted
+//   - /f                           -> f is higlighted
+//   - backspace to /               -> nothing highlighted
+//   - backspace to cancel search   -> old search items highlighted
+//   - /f                           -> f is higlighted
+//   - <ESC> to cancel search       -> old search items highlighted
+//
+// - when hlsearch enabled (with noh)
+//   - do a valid search            -> search items highlighted
+//   - then :noh                    -> nothing is highlighted
+//   - /                            -> nothing highlighted
+//   - /f                           -> f is higlighted
+//   - backspace to /               -> nothing highlighted
+//   - backspace to cancel search   -> nothing highlighted
+//   - /f                           -> f is higlighted
+//   - <ESC> to cancel search       -> nothing highlighted
+//
+static bool no_hlsearch = false;
+
+// When starting a search, recall the previous state of no_hlsearch
+// If a search is cancelled, the previous state can be restored
+static bool saved_no_hlsearch = false;
+
+// When starting a search, recall the previously matched regex
+// If a search is cancelled, the previously matched regex can be restored
+static struct hl_regex_info *saved_hlregex = 0;
+
 /* Direction to search */
 static int regex_direction_cur;
 static int regex_direction_last;
@@ -491,7 +533,7 @@ void if_draw(void)
         swin_wnoutrefresh(status_win);
 
     if (get_src_height() > 0)
-        source_display(src_viewer, focus == CGDB, WIN_NO_REFRESH);
+        source_display(src_viewer, focus == CGDB, WIN_NO_REFRESH, no_hlsearch);
 
     separator_display(cur_split_orientation == WSO_VERTICAL);
 
@@ -986,6 +1028,13 @@ static int status_bar_regex_input(struct sviewer *sview, int key)
             /* Backspace or DEL key */
             if (regex_cur.size() == 0) {
                 done = 1;
+
+                // the search was cancelled, restore the old state
+                if (saved_no_hlsearch) {
+                    no_hlsearch = saved_no_hlsearch;
+                    src_viewer->last_hlregex = saved_hlregex;
+                    saved_hlregex = 0;
+                }
             } else {
                 regex_cur.erase(regex_cur.size() - 1);
                 source_search_regex(sview, regex_cur.c_str(), 1,
@@ -1362,6 +1411,16 @@ static int cgdb_input(int key, int *last_key)
                 regex_direction_cur = ('/' == key);
                 orig_line_regex = src_viewer->cur->sel_line;
 
+                // The user has started another search, save the
+                // existing state and set no_hlsearch to false so
+                // highlighting resumes
+                if (no_hlsearch) {
+                    saved_no_hlsearch = no_hlsearch;
+                    saved_hlregex = src_viewer->last_hlregex;
+                    src_viewer->last_hlregex = 0;
+                    no_hlsearch = false;
+                }
+
                 sbc_kind = SBC_REGEX;
                 if_set_focus(CGDB_STATUS_BAR);
 
@@ -1441,6 +1500,13 @@ int internal_if_input(int key, int *last_key)
         if (focus == CGDB_STATUS_BAR && sbc_kind == SBC_NORMAL) {
             cur_sbc.clear();
         } else if (focus == CGDB_STATUS_BAR && sbc_kind == SBC_REGEX) {
+            // the search was cancelled, restore the old state
+            if (saved_no_hlsearch) {
+                no_hlsearch = saved_no_hlsearch;
+                src_viewer->last_hlregex = saved_hlregex;
+                saved_hlregex = 0;
+            }
+
             regex_cur.clear();
 
             hl_regex_free(&src_viewer->hlregex);
@@ -1736,4 +1802,10 @@ int if_clear_line()
     if_print(line.c_str());
 
     return 0;
+}
+
+void if_set_no_hlsearch(void)
+{
+    no_hlsearch = true;
+    saved_no_hlsearch = false;
 }

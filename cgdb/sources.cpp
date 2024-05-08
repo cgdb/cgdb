@@ -796,7 +796,8 @@ static int get_line_leading_ws_count(const char *otext, int length)
  *   if the line is the selected or executing line and the display is set
  *   to highlight.
  */
-int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
+int source_display(struct sviewer *sview, int focus,
+    enum win_refresh dorefresh, int no_hlsearch)
 {
     int i;
     int lwidth;
@@ -815,6 +816,7 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
     int showmarks = cgdbrc_get_int(CGDBRC_SHOWMARKS);
     int hlsearch = cgdbrc_get_int(CGDBRC_HLSEARCH);
     int mark_attr;
+    int do_hlsearch = hlsearch && !no_hlsearch;
 
     struct hl_line_attr *sel_highlight_attrs = 0;
     struct hl_line_attr *exe_highlight_attrs = 0;
@@ -1045,7 +1047,7 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
             // if highlight search is on
             //   display the last successful search
             //   unless we are starting a new search
-            if (hlsearch && sview->last_hlregex && !sview->hlregex) {
+            if (do_hlsearch && sview->last_hlregex && !sview->hlregex) {
                 struct hl_line_attr *attrs = hl_regex_highlight(
                         &sview->last_hlregex, sline->line, HLG_SEARCH);
                 if (sbcount(attrs)) {
@@ -1058,7 +1060,7 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
 
             // if highlight search is on
             //   display the current search
-            if (hlsearch && sview->hlregex) {
+            if (do_hlsearch && sview->hlregex) {
                 struct hl_line_attr *attrs = hl_regex_highlight(
                         &sview->hlregex, sline->line, HLG_SEARCH);
                 if (sbcount(attrs)) {
