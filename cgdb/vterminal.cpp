@@ -497,7 +497,7 @@ VTerminal::push_screen_to_scrollback()
     // Take each row that has some content and push to scrollback buffer
     VTermPos pos;
     for (pos.row = 0; pos.row < height; ++pos.row) {
-        std::vector<VTermScreenCell> cells;
+        std::vector<VTermScreenCell> cells(width);
         for (pos.col = 0; pos.col < width; ++pos.col) {
             fetch_cell(pos.row, pos.col, &cells[pos.col]);
         }
