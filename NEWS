@@ -1,3 +1,10 @@
+  * CGDB will now display breakpoints with multiple locations properly
+    (again). GDB creates multiple location breakpoints with C++ constructors,
+    inside C++ templates and in inlined functions. CGDB supported multiple
+    location breakpoints with GDB prior to GDB 9.0, when mi2 was the default
+    mi protocol. GDB 9.0 introduced the mi3 protocol which changed the way
+    the -break-info command returns breakpoint information.
+  
   * CGDB now allows you to execute until the currently selected line.
     In cgdb mode, you can navigate to any file/line (or address in assembly
     mode) and then type the 'u' key to have the debugger run until it hits

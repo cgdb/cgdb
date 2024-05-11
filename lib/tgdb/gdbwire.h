@@ -3,7 +3,7 @@
  *
  * This file is an amalgamation of the source files from GDBWIRE.
  *
- * It was created using gdbwire 1.0 and git revision 6cbdacc.
+ * It was created using gdbwire 1.0 and git revision b'6faba36'.
  *
  * GDBWIRE is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -2437,11 +2437,12 @@ void gdbwire_mi_command_free(struct gdbwire_mi_command *mi_command);
 #endif
 /***** End of gdbwire_mi_command.h *******************************************/
 /***** Begin file gdbwire_mi_grammar.h ***************************************/
-/* A Bison parser, made by GNU Bison 3.0.4.  */
+/* A Bison parser, made by GNU Bison 3.8.2.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015 Free Software Foundation, Inc.
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2021 Free Software Foundation,
+   Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -2454,7 +2455,7 @@ void gdbwire_mi_command_free(struct gdbwire_mi_command *mi_command);
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -2468,6 +2469,10 @@ void gdbwire_mi_command_free(struct gdbwire_mi_command *mi_command);
 
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
+
+/* DO NOT RELY ON FEATURES THAT ARE NOT DOCUMENTED in the manual,
+   especially those whose name start with YY_ or yy_.  They are
+   private implementation details that can be changed or removed.  */
 
 #ifndef YY_GDBWIRE_MI_SRC_GDBWIRE_MI_GRAMMAR_H_INCLUDED
 # define YY_GDBWIRE_MI_SRC_GDBWIRE_MI_GRAMMAR_H_INCLUDED
@@ -2490,32 +2495,41 @@ typedef void *yyscan_t;
     struct gdbwire_mi_output;
 
 
-/* Token type.  */
+/* Token kinds.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
   enum yytokentype
   {
-    OPEN_BRACE = 258,
-    CLOSED_BRACE = 259,
-    OPEN_PAREN = 260,
-    CLOSED_PAREN = 261,
-    ADD_OP = 262,
-    MULT_OP = 263,
-    EQUAL_SIGN = 264,
-    TILDA = 265,
-    AT_SYMBOL = 266,
-    AMPERSAND = 267,
-    OPEN_BRACKET = 268,
-    CLOSED_BRACKET = 269,
-    NEWLINE = 270,
-    INTEGER_LITERAL = 271,
-    STRING_LITERAL = 272,
-    CSTRING = 273,
-    COMMA = 274,
-    CARROT = 275
+    YYEMPTY = -2,
+    YYEOF = 0,                     /* "end of file"  */
+    YYerror = 256,                 /* error  */
+    YYUNDEF = 257,                 /* "invalid token"  */
+    OPEN_BRACE = 258,              /* OPEN_BRACE  */
+    CLOSED_BRACE = 259,            /* CLOSED_BRACE  */
+    OPEN_PAREN = 260,              /* OPEN_PAREN  */
+    CLOSED_PAREN = 261,            /* CLOSED_PAREN  */
+    ADD_OP = 262,                  /* ADD_OP  */
+    MULT_OP = 263,                 /* MULT_OP  */
+    EQUAL_SIGN = 264,              /* EQUAL_SIGN  */
+    TILDA = 265,                   /* TILDA  */
+    AT_SYMBOL = 266,               /* AT_SYMBOL  */
+    AMPERSAND = 267,               /* AMPERSAND  */
+    OPEN_BRACKET = 268,            /* OPEN_BRACKET  */
+    CLOSED_BRACKET = 269,          /* CLOSED_BRACKET  */
+    NEWLINE = 270,                 /* NEWLINE  */
+    INTEGER_LITERAL = 271,         /* INTEGER_LITERAL  */
+    STRING_LITERAL = 272,          /* STRING_LITERAL  */
+    CSTRING = 273,                 /* CSTRING  */
+    COMMA = 274,                   /* COMMA  */
+    CARROT = 275                   /* CARROT  */
   };
+  typedef enum yytokentype yytoken_kind_t;
 #endif
-/* Tokens.  */
+/* Token kinds.  */
+#define YYEMPTY -2
+#define YYEOF 0
+#define YYerror 256
+#define YYUNDEF 257
 #define OPEN_BRACE 258
 #define CLOSED_BRACE 259
 #define OPEN_PAREN 260
@@ -2537,7 +2551,6 @@ typedef void *yyscan_t;
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-
 union YYSTYPE
 {
 
@@ -2558,12 +2571,13 @@ union YYSTYPE
   struct gdbwire_mi_result *u_list;
   int u_stream_record_kind;
 
-};
 
+};
 typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif
+
 
 
 
@@ -2574,10 +2588,13 @@ enum { YYPUSH_MORE = 4 };
 
 typedef struct gdbwire_mi_pstate gdbwire_mi_pstate;
 
-int gdbwire_mi_push_parse (gdbwire_mi_pstate *ps, int pushed_char, YYSTYPE const *pushed_val, yyscan_t yyscanner, struct gdbwire_mi_output **gdbwire_mi_output);
 
-gdbwire_mi_pstate * gdbwire_mi_pstate_new (void);
+int gdbwire_mi_push_parse (gdbwire_mi_pstate *ps,
+                  int pushed_char, YYSTYPE const *pushed_val, yyscan_t yyscanner, struct gdbwire_mi_output **gdbwire_mi_output);
+
+gdbwire_mi_pstate *gdbwire_mi_pstate_new (void);
 void gdbwire_mi_pstate_delete (gdbwire_mi_pstate *ps);
+
 
 #endif /* !YY_GDBWIRE_MI_SRC_GDBWIRE_MI_GRAMMAR_H_INCLUDED  */
 /***** End of gdbwire_mi_grammar.h *******************************************/
