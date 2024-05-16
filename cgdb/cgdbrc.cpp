@@ -76,6 +76,7 @@ static int command_do_bang(int param);
 static int command_do_focus(int param);
 static int command_do_help(int param);
 static int command_do_logo(int param);
+static int command_do_noh(int param);
 static int command_do_quit(int param);
 static int command_do_shell(int param);
 static int command_source_reload(int param);
@@ -109,6 +110,7 @@ COMMANDS commands[] = {
     /* iunmap       */ {"iu", (action_t)command_parse_unmap, 0},
     /* insert       */ {"insert", (action_t)command_focus_gdb, 0},
     /* map          */ {"map", (action_t)command_parse_map, 0},
+    /* noh          */ {"noh", (action_t)command_do_noh, 0},
     /* quit         */ {"quit", (action_t)command_do_quit, 0},
     /* quit         */ {"q", (action_t)command_do_quit, 0},
     /* shell        */ {"shell", (action_t)command_do_shell, 0},
@@ -731,6 +733,12 @@ int command_do_logo(int param)
     return 0;
 }
 
+int command_do_noh(int param)
+{
+    if_set_no_hlsearch();
+    return 0;
+}
+
 int command_do_quit(int param)
 {
     /* FIXME: Test to see if debugged program is still running */
@@ -800,7 +808,7 @@ extern std::shared_ptr<kui_map_set> kui_map, kui_imap;
 static int command_parse_map(int param)
 {
     std::shared_ptr<kui_map_set> kui_map_choice;
-    int key, value, val;
+    int key, value;
     char *key_token;
     extern int enter_map_id;
 
@@ -841,7 +849,7 @@ static int command_parse_map(int param)
 static int command_parse_unmap(int param)
 {
     std::shared_ptr<kui_map_set> kui_map_choice;
-    int key, val;
+    int key;
     extern int enter_map_id;
 
     enter_map_id = 1;

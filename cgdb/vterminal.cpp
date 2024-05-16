@@ -1,3 +1,4 @@
+#include <vector>
 #include "vterminal.h"
 // To use fill_utf8 
 #include "utf8.h"
@@ -13,7 +14,7 @@ typedef struct {
     // The number of cells in the list below
     size_t cols;
     // A list of cells
-    VTermScreenCell cells[];
+    VTermScreenCell *cells;
 } ScrollbackLine;
 
 struct VTerminal
@@ -157,19 +158,19 @@ static int vterminal_sb_pushline(int cols, const VTermScreenCell *cells,
 static int vterminal_sb_popline(int cols, VTermScreenCell *cells, void *data);
 
 static VTermScreenCallbacks vterm_screen_callbacks = {
-  .damage      = vterminal_damage,
-  .moverect    = vterminal_moverect,
-  .movecursor  = vterminal_movecursor,
-  .settermprop = vterminal_settermprop,
-  .bell        = vterminal_bell,
-  .resize      = vterminal_resize,
-  .sb_pushline = vterminal_sb_pushline,
-  .sb_popline  = vterminal_sb_popline,
+  vterminal_damage,
+  vterminal_moverect,
+  vterminal_movecursor,
+  vterminal_settermprop,
+  vterminal_bell,
+  vterminal_resize,
+  vterminal_sb_pushline,
+  vterminal_sb_popline,
 };
 
-VTerminal::VTerminal(VTerminalOptions options) : vt(nullptr)
+VTerminal::VTerminal(VTerminalOptions options_p) : vt(nullptr)
 {
-    this->options = options;
+    options = options_p;
     cursorpos.row = 0;
     cursorpos.col = 0;
     cursor_visible = true;
@@ -178,12 +179,13 @@ VTerminal::VTerminal(VTerminalOptions options) : vt(nullptr)
     // do i need a new buffer concept?
 
     // Create vterm
-    vt = vterm_new(this->options.height, this->options.width);
+    vt = vterm_new(options.height, options.width);
     vterm_set_utf8(vt, 1);
 
+#if 0
     // Setup state
     VTermState *state = vterm_obtain_state(vt);
-#if 0
+
     // TODO: Determine if the colors are set by vterm automatically
     for (int index = 0; index < 16; ++index) {
         VTermColor color;
@@ -204,13 +206,14 @@ VTerminal::VTerminal(VTerminalOptions options) : vt(nullptr)
     // Configure the scrollback buffer.
     scroll_offset = 0;
     sb_current = 0;
-    sb_size = this->options.scrollback_buffer_size;
+    sb_size = options.scrollback_buffer_size;
     sb_buffer = (ScrollbackLine**)malloc(sizeof(ScrollbackLine *) * sb_size);
 }
 
 VTerminal::~VTerminal()
 {
     for (size_t i = 0; i < sb_current; i++) {
+      free(sb_buffer[i]->cells);
       free(sb_buffer[i]);
     }
     free(sb_buffer);
@@ -256,8 +259,8 @@ VTerminal::settermprop(VTermProp prop, VTermValue *val)
 void
 VTerminal::bell()
 {
-    if (this->options.ring_bell) {
-        this->options.ring_bell(this->options.data);
+    if (options.ring_bell) {
+        options.ring_bell(options.data);
     }
 }
 
@@ -276,6 +279,7 @@ VTerminal::sb_pushline(int cols, const VTermScreenCell *cells)
             // Recycle old row if it's the right size
             sbrow = sb_buffer[sb_current - 1];
         } else {
+            free(sb_buffer[sb_current - 1]->cells);
             free(sb_buffer[sb_current - 1]);
         }
 
@@ -288,9 +292,9 @@ VTerminal::sb_pushline(int cols, const VTermScreenCell *cells)
     }
 
     if (!sbrow) {
-        sbrow = (ScrollbackLine *)malloc(
-            sizeof(ScrollbackLine) + c * sizeof(sbrow->cells[0]));
+        sbrow = (ScrollbackLine *)malloc(sizeof(ScrollbackLine));
         sbrow->cols = c;
+        sbrow->cells = (VTermScreenCell *)malloc(c * sizeof(sbrow->cells[0]));
     }
 
     // New row is added at the start of the storage buffer.
@@ -329,6 +333,7 @@ VTerminal::sb_popline(int cols, VTermScreenCell *cells)
         cells[col].width = 1;
     }
 
+    free(sbrow->cells);
     free(sbrow);
 
     return 1;
@@ -346,7 +351,7 @@ static int get_ncurses_color_index(VTermColor &color, bool &bold)
     } else if (VTERM_COLOR_IS_DEFAULT_BG(&color)) {
         index = -1;
     } else if (VTERM_COLOR_IS_INDEXED(&color)) {
-        if (color.indexed.idx >= 0 && color.indexed.idx < 16) {
+        if (color.indexed.idx < 16) {
             index = color.indexed.idx;
         } else if (color.indexed.idx >=232) {
             int num = color.indexed.idx;
@@ -444,15 +449,13 @@ VTerminal::fetch_cell(int row, int col, VTermScreenCell *cell)
       *cell = sbrow->cells[col];
     } else {
       // fill the pointer with an empty cell
-      *cell = (VTermScreenCell) {
-        .chars = { 0 },
-        .width = 1,
-      };
+      cell->chars[0] = 0;
+      cell->width = 1;
       return false;
     }
   } else {
-    vterm_screen_get_cell(vts, (VTermPos){.row = row, .col = col},
-        cell);
+    VTermPos pos = { row, col };
+    vterm_screen_get_cell(vts, pos, cell);
   }
   return true;
 }
@@ -494,11 +497,11 @@ VTerminal::push_screen_to_scrollback()
     // Take each row that has some content and push to scrollback buffer
     VTermPos pos;
     for (pos.row = 0; pos.row < height; ++pos.row) {
-        VTermScreenCell cells[width];
+        std::vector<VTermScreenCell> cells(width);
         for (pos.col = 0; pos.col < width; ++pos.col) {
             fetch_cell(pos.row, pos.col, &cells[pos.col]);
         }
-        sb_pushline(width, cells);
+        sb_pushline(width, cells.data());
 
         if (pos.row == cursorpos.row) {
             break;

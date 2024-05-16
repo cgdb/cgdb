@@ -3,7 +3,7 @@
  *
  * This file is an amalgamation of the source files from GDBWIRE.
  *
- * It was created using gdbwire 1.0 and git revision 6cbdacc.
+ * It was created using gdbwire 1.0 and git revision b'6faba36'.
  *
  * GDBWIRE is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -744,11 +744,12 @@ gdbwire_logger_log(const char *file, int line, enum gdbwire_logger_level level,
 /***** Continuing where we left off in gdbwire_mi_parser.c *******************/
 /***** Include gdbwire_mi_grammar.h in the middle of gdbwire_mi_parser.c *****/
 /***** Begin file gdbwire_mi_grammar.h ***************************************/
-/* A Bison parser, made by GNU Bison 3.0.4.  */
+/* A Bison parser, made by GNU Bison 3.8.2.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015 Free Software Foundation, Inc.
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2021 Free Software Foundation,
+   Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -761,7 +762,7 @@ gdbwire_logger_log(const char *file, int line, enum gdbwire_logger_level level,
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -775,6 +776,10 @@ gdbwire_logger_log(const char *file, int line, enum gdbwire_logger_level level,
 
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
+
+/* DO NOT RELY ON FEATURES THAT ARE NOT DOCUMENTED in the manual,
+   especially those whose name start with YY_ or yy_.  They are
+   private implementation details that can be changed or removed.  */
 
 #ifndef YY_GDBWIRE_MI_SRC_GDBWIRE_MI_GRAMMAR_H_INCLUDED
 # define YY_GDBWIRE_MI_SRC_GDBWIRE_MI_GRAMMAR_H_INCLUDED
@@ -797,32 +802,41 @@ typedef void *yyscan_t;
     struct gdbwire_mi_output;
 
 
-/* Token type.  */
+/* Token kinds.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
   enum yytokentype
   {
-    OPEN_BRACE = 258,
-    CLOSED_BRACE = 259,
-    OPEN_PAREN = 260,
-    CLOSED_PAREN = 261,
-    ADD_OP = 262,
-    MULT_OP = 263,
-    EQUAL_SIGN = 264,
-    TILDA = 265,
-    AT_SYMBOL = 266,
-    AMPERSAND = 267,
-    OPEN_BRACKET = 268,
-    CLOSED_BRACKET = 269,
-    NEWLINE = 270,
-    INTEGER_LITERAL = 271,
-    STRING_LITERAL = 272,
-    CSTRING = 273,
-    COMMA = 274,
-    CARROT = 275
+    YYEMPTY = -2,
+    YYEOF = 0,                     /* "end of file"  */
+    YYerror = 256,                 /* error  */
+    YYUNDEF = 257,                 /* "invalid token"  */
+    OPEN_BRACE = 258,              /* OPEN_BRACE  */
+    CLOSED_BRACE = 259,            /* CLOSED_BRACE  */
+    OPEN_PAREN = 260,              /* OPEN_PAREN  */
+    CLOSED_PAREN = 261,            /* CLOSED_PAREN  */
+    ADD_OP = 262,                  /* ADD_OP  */
+    MULT_OP = 263,                 /* MULT_OP  */
+    EQUAL_SIGN = 264,              /* EQUAL_SIGN  */
+    TILDA = 265,                   /* TILDA  */
+    AT_SYMBOL = 266,               /* AT_SYMBOL  */
+    AMPERSAND = 267,               /* AMPERSAND  */
+    OPEN_BRACKET = 268,            /* OPEN_BRACKET  */
+    CLOSED_BRACKET = 269,          /* CLOSED_BRACKET  */
+    NEWLINE = 270,                 /* NEWLINE  */
+    INTEGER_LITERAL = 271,         /* INTEGER_LITERAL  */
+    STRING_LITERAL = 272,          /* STRING_LITERAL  */
+    CSTRING = 273,                 /* CSTRING  */
+    COMMA = 274,                   /* COMMA  */
+    CARROT = 275                   /* CARROT  */
   };
+  typedef enum yytokentype yytoken_kind_t;
 #endif
-/* Tokens.  */
+/* Token kinds.  */
+#define YYEMPTY -2
+#define YYEOF 0
+#define YYerror 256
+#define YYUNDEF 257
 #define OPEN_BRACE 258
 #define CLOSED_BRACE 259
 #define OPEN_PAREN 260
@@ -844,7 +858,6 @@ typedef void *yyscan_t;
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-
 union YYSTYPE
 {
 
@@ -865,12 +878,13 @@ union YYSTYPE
   struct gdbwire_mi_result *u_list;
   int u_stream_record_kind;
 
-};
 
+};
 typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif
+
 
 
 
@@ -881,10 +895,13 @@ enum { YYPUSH_MORE = 4 };
 
 typedef struct gdbwire_mi_pstate gdbwire_mi_pstate;
 
-int gdbwire_mi_push_parse (gdbwire_mi_pstate *ps, int pushed_char, YYSTYPE const *pushed_val, yyscan_t yyscanner, struct gdbwire_mi_output **gdbwire_mi_output);
 
-gdbwire_mi_pstate * gdbwire_mi_pstate_new (void);
+int gdbwire_mi_push_parse (gdbwire_mi_pstate *ps,
+                  int pushed_char, YYSTYPE const *pushed_val, yyscan_t yyscanner, struct gdbwire_mi_output **gdbwire_mi_output);
+
+gdbwire_mi_pstate *gdbwire_mi_pstate_new (void);
 void gdbwire_mi_pstate_delete (gdbwire_mi_pstate *ps);
+
 
 #endif /* !YY_GDBWIRE_MI_SRC_GDBWIRE_MI_GRAMMAR_H_INCLUDED  */
 /***** End of gdbwire_mi_grammar.h *******************************************/
@@ -2803,6 +2820,7 @@ break_info_for_breakpoint(struct gdbwire_mi_result *mi_result,
     unsigned long line = 0;
     unsigned long times = 0;
     char *original_location = 0;
+    struct gdbwire_mi_breakpoint *multi_breakpoints = 0;
 
     GDBWIRE_ASSERT(mi_result);
     GDBWIRE_ASSERT(bkpt);
@@ -2810,49 +2828,83 @@ break_info_for_breakpoint(struct gdbwire_mi_result *mi_result,
     *bkpt = 0;
 
     while (mi_result) {
-        if (mi_result->kind == GDBWIRE_MI_CSTRING) {
-            if (strcmp(mi_result->variable, "number") == 0) {
-                number = mi_result->variant.cstring;
+        GDBWIRE_ASSERT(mi_result->variable);
+        if (strcmp(mi_result->variable, "number") == 0) {
+            GDBWIRE_ASSERT(mi_result->kind == GDBWIRE_MI_CSTRING);
+            number = mi_result->variant.cstring;
 
-                if (strstr(number, ".") != NULL) {
-                    from_multi = 1;
-                }
-            } else if (strcmp(mi_result->variable, "enabled") == 0) {
-                enabled = mi_result->variant.cstring[0] == 'y';
-            } else if (strcmp(mi_result->variable, "addr") == 0) {
-                multi = strcmp(mi_result->variant.cstring, "<MULTIPLE>") == 0;
-                pending = strcmp(mi_result->variant.cstring, "<PENDING>") == 0;
-                address = mi_result->variant.cstring;
-            } else if (strcmp(mi_result->variable, "catch-type") == 0) {
-                catch_type = mi_result->variant.cstring;
-            } else if (strcmp(mi_result->variable, "type") == 0) {
-                type = mi_result->variant.cstring;
-            } else if (strcmp(mi_result->variable, "disp") == 0) {
-                if (strcmp(mi_result->variant.cstring, "del") == 0) {
-                    disp_kind = GDBWIRE_MI_BP_DISP_DELETE;
-                } else if (strcmp(mi_result->variant.cstring, "dstp") == 0) {
-                    disp_kind = GDBWIRE_MI_BP_DISP_DELETE_NEXT_STOP;
-                } else if (strcmp(mi_result->variant.cstring, "dis") == 0) {
-                    disp_kind = GDBWIRE_MI_BP_DISP_DISABLE;
-                } else if (strcmp(mi_result->variant.cstring, "keep") == 0) {
-                    disp_kind = GDBWIRE_MI_BP_DISP_KEEP;
+            if (strstr(number, ".") != NULL) {
+                from_multi = 1;
+            }
+        } else if (strcmp(mi_result->variable, "enabled") == 0) {
+            GDBWIRE_ASSERT(mi_result->kind == GDBWIRE_MI_CSTRING);
+            enabled = mi_result->variant.cstring[0] == 'y';
+        } else if (strcmp(mi_result->variable, "addr") == 0) {
+            GDBWIRE_ASSERT(mi_result->kind == GDBWIRE_MI_CSTRING);
+            multi = strcmp(mi_result->variant.cstring, "<MULTIPLE>") == 0;
+            pending = strcmp(mi_result->variant.cstring, "<PENDING>") == 0;
+            address = mi_result->variant.cstring;
+        } else if (strcmp(mi_result->variable, "catch-type") == 0) {
+            GDBWIRE_ASSERT(mi_result->kind == GDBWIRE_MI_CSTRING);
+            catch_type = mi_result->variant.cstring;
+        } else if (strcmp(mi_result->variable, "type") == 0) {
+            GDBWIRE_ASSERT(mi_result->kind == GDBWIRE_MI_CSTRING);
+            type = mi_result->variant.cstring;
+        } else if (strcmp(mi_result->variable, "disp") == 0) {
+            GDBWIRE_ASSERT(mi_result->kind == GDBWIRE_MI_CSTRING);
+            if (strcmp(mi_result->variant.cstring, "del") == 0) {
+                disp_kind = GDBWIRE_MI_BP_DISP_DELETE;
+            } else if (strcmp(mi_result->variant.cstring, "dstp") == 0) {
+                disp_kind = GDBWIRE_MI_BP_DISP_DELETE_NEXT_STOP;
+            } else if (strcmp(mi_result->variant.cstring, "dis") == 0) {
+                disp_kind = GDBWIRE_MI_BP_DISP_DISABLE;
+            } else if (strcmp(mi_result->variant.cstring, "keep") == 0) {
+                disp_kind = GDBWIRE_MI_BP_DISP_KEEP;
+            } else {
+                return GDBWIRE_LOGIC;
+            }
+        } else if (strcmp(mi_result->variable, "func") == 0) {
+            GDBWIRE_ASSERT(mi_result->kind == GDBWIRE_MI_CSTRING);
+            func_name = mi_result->variant.cstring;
+        } else if (strcmp(mi_result->variable, "file") == 0) {
+            GDBWIRE_ASSERT(mi_result->kind == GDBWIRE_MI_CSTRING);
+            file = mi_result->variant.cstring;
+        } else if (strcmp(mi_result->variable, "fullname") == 0) {
+            GDBWIRE_ASSERT(mi_result->kind == GDBWIRE_MI_CSTRING);
+            fullname = mi_result->variant.cstring;
+        } else if (strcmp(mi_result->variable, "line") == 0) {
+            GDBWIRE_ASSERT(mi_result->kind == GDBWIRE_MI_CSTRING);
+            GDBWIRE_ASSERT(gdbwire_string_to_ulong(
+                    mi_result->variant.cstring, &line) == GDBWIRE_OK);
+        } else if (strcmp(mi_result->variable, "times") == 0) {
+            GDBWIRE_ASSERT(mi_result->kind == GDBWIRE_MI_CSTRING);
+            GDBWIRE_ASSERT(gdbwire_string_to_ulong(
+                    mi_result->variant.cstring, &times) == GDBWIRE_OK);
+        } else if (strcmp(mi_result->variable, "original-location") == 0) {
+            GDBWIRE_ASSERT(mi_result->kind == GDBWIRE_MI_CSTRING);
+            original_location = mi_result->variant.cstring;
+        } else if (strcmp(mi_result->variable, "locations") == 0) {
+            struct gdbwire_mi_result *loc_result = mi_result;
+            GDBWIRE_ASSERT(loc_result->kind == GDBWIRE_MI_LIST);
+
+            loc_result = loc_result->variant.result;
+            while (loc_result) {
+                GDBWIRE_ASSERT(loc_result->kind == GDBWIRE_MI_TUPLE);
+                struct gdbwire_mi_breakpoint *new_bkpt = 0;
+                result = break_info_for_breakpoint(
+                        loc_result->variant.result, &new_bkpt);
+
+                /* Append breakpoint to the multiple location breakpoints */
+                if (multi_breakpoints) {
+                    struct gdbwire_mi_breakpoint *cur = multi_breakpoints;
+                    while (cur->next) {
+                        cur = cur->next;
+                    }
+                    cur->next = new_bkpt;
                 } else {
-                    return GDBWIRE_LOGIC;
+                    multi_breakpoints = new_bkpt;
                 }
-            } else if (strcmp(mi_result->variable, "func") == 0) {
-                func_name = mi_result->variant.cstring;
-            } else if (strcmp(mi_result->variable, "file") == 0) {
-                file = mi_result->variant.cstring;
-            } else if (strcmp(mi_result->variable, "fullname") == 0) {
-                fullname = mi_result->variant.cstring;
-            } else if (strcmp(mi_result->variable, "line") == 0) {
-                GDBWIRE_ASSERT(gdbwire_string_to_ulong(
-                        mi_result->variant.cstring, &line) == GDBWIRE_OK);
-            } else if (strcmp(mi_result->variable, "times") == 0) {
-                GDBWIRE_ASSERT(gdbwire_string_to_ulong(
-                        mi_result->variant.cstring, &times) == GDBWIRE_OK);
-            } else if (strcmp(mi_result->variable, "original-location") == 0) {
-                original_location = mi_result->variant.cstring;
+                loc_result = loc_result->next;
             }
         }
 
@@ -2884,6 +2936,15 @@ break_info_for_breakpoint(struct gdbwire_mi_result *mi_result,
     breakpoint->original_location =
         (original_location)?gdbwire_strdup(original_location):0;
     breakpoint->pending = pending;
+    breakpoint->multi_breakpoints = multi_breakpoints;
+
+    if (breakpoint->multi_breakpoints) {
+        struct gdbwire_mi_breakpoint *cur = breakpoint->multi_breakpoints;
+        while (cur) {
+            cur->multi_breakpoint = breakpoint;
+            cur = cur->next;
+        }
+    }
 
     /* Handle the out of memory situation */
     if (!breakpoint->number ||
@@ -2958,6 +3019,26 @@ break_info(
     GDBWIRE_ASSERT(!mi_result->next);
     mi_result = mi_result->variant.result;
 
+    // In GDB version 9, the output of -break-insert changed
+    // 
+    // Look at commit b4be1b0648608a2578bbed39841c8ee411773edd
+    // in GDB for details.
+    // 
+    // Prior to the change, we have mi2 -break-info output:
+    //   ^done,bkpt={...,addr="<MULTIPLE>",...},{number="1.1",...},{number="1.2",...}
+    // After the change, we have mi3 -break-info output:
+    //   ^done,bkpt={...,addr="<MULTIPLE>",locations=[{number="1.1",...},{number="1.2",...}]}
+    // 
+    //
+    // For both mi2 and mi3, this loop will iterate over all the
+    // breakpoints, ie. bkpt={...}
+    //
+    // In mi2 mode, break_info_for_breakpoint will return a single
+    // breakpoint and associated MULTIPLE breakpoints are found by looking
+    // at subsequent breakpoints and attaching them in this loop.
+    //
+    // In mi3 mode, break_info_for_breakpoint will return a single
+    // breakpoint with all MULTIPLE breakpoints already attached.
     while (mi_result) {
         struct gdbwire_mi_breakpoint *bkpt;
         GDBWIRE_ASSERT_GOTO(
@@ -3377,9 +3458,219 @@ void gdbwire_mi_command_free(struct gdbwire_mi_command *mi_command)
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
 #define YY_FLEX_MINOR_VERSION 6
-#define YY_FLEX_SUBMINOR_VERSION 0
+#define YY_FLEX_SUBMINOR_VERSION 4
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
+#endif
+
+#ifdef yy_create_buffer
+#define gdbwire_mi__create_buffer_ALREADY_DEFINED
+#else
+#define yy_create_buffer gdbwire_mi__create_buffer
+#endif
+
+#ifdef yy_delete_buffer
+#define gdbwire_mi__delete_buffer_ALREADY_DEFINED
+#else
+#define yy_delete_buffer gdbwire_mi__delete_buffer
+#endif
+
+#ifdef yy_scan_buffer
+#define gdbwire_mi__scan_buffer_ALREADY_DEFINED
+#else
+#define yy_scan_buffer gdbwire_mi__scan_buffer
+#endif
+
+#ifdef yy_scan_string
+#define gdbwire_mi__scan_string_ALREADY_DEFINED
+#else
+#define yy_scan_string gdbwire_mi__scan_string
+#endif
+
+#ifdef yy_scan_bytes
+#define gdbwire_mi__scan_bytes_ALREADY_DEFINED
+#else
+#define yy_scan_bytes gdbwire_mi__scan_bytes
+#endif
+
+#ifdef yy_init_buffer
+#define gdbwire_mi__init_buffer_ALREADY_DEFINED
+#else
+#define yy_init_buffer gdbwire_mi__init_buffer
+#endif
+
+#ifdef yy_flush_buffer
+#define gdbwire_mi__flush_buffer_ALREADY_DEFINED
+#else
+#define yy_flush_buffer gdbwire_mi__flush_buffer
+#endif
+
+#ifdef yy_load_buffer_state
+#define gdbwire_mi__load_buffer_state_ALREADY_DEFINED
+#else
+#define yy_load_buffer_state gdbwire_mi__load_buffer_state
+#endif
+
+#ifdef yy_switch_to_buffer
+#define gdbwire_mi__switch_to_buffer_ALREADY_DEFINED
+#else
+#define yy_switch_to_buffer gdbwire_mi__switch_to_buffer
+#endif
+
+#ifdef yypush_buffer_state
+#define gdbwire_mi_push_buffer_state_ALREADY_DEFINED
+#else
+#define yypush_buffer_state gdbwire_mi_push_buffer_state
+#endif
+
+#ifdef yypop_buffer_state
+#define gdbwire_mi_pop_buffer_state_ALREADY_DEFINED
+#else
+#define yypop_buffer_state gdbwire_mi_pop_buffer_state
+#endif
+
+#ifdef yyensure_buffer_stack
+#define gdbwire_mi_ensure_buffer_stack_ALREADY_DEFINED
+#else
+#define yyensure_buffer_stack gdbwire_mi_ensure_buffer_stack
+#endif
+
+#ifdef yylex
+#define gdbwire_mi_lex_ALREADY_DEFINED
+#else
+#define yylex gdbwire_mi_lex
+#endif
+
+#ifdef yyrestart
+#define gdbwire_mi_restart_ALREADY_DEFINED
+#else
+#define yyrestart gdbwire_mi_restart
+#endif
+
+#ifdef yylex_init
+#define gdbwire_mi_lex_init_ALREADY_DEFINED
+#else
+#define yylex_init gdbwire_mi_lex_init
+#endif
+
+#ifdef yylex_init_extra
+#define gdbwire_mi_lex_init_extra_ALREADY_DEFINED
+#else
+#define yylex_init_extra gdbwire_mi_lex_init_extra
+#endif
+
+#ifdef yylex_destroy
+#define gdbwire_mi_lex_destroy_ALREADY_DEFINED
+#else
+#define yylex_destroy gdbwire_mi_lex_destroy
+#endif
+
+#ifdef yyget_debug
+#define gdbwire_mi_get_debug_ALREADY_DEFINED
+#else
+#define yyget_debug gdbwire_mi_get_debug
+#endif
+
+#ifdef yyset_debug
+#define gdbwire_mi_set_debug_ALREADY_DEFINED
+#else
+#define yyset_debug gdbwire_mi_set_debug
+#endif
+
+#ifdef yyget_extra
+#define gdbwire_mi_get_extra_ALREADY_DEFINED
+#else
+#define yyget_extra gdbwire_mi_get_extra
+#endif
+
+#ifdef yyset_extra
+#define gdbwire_mi_set_extra_ALREADY_DEFINED
+#else
+#define yyset_extra gdbwire_mi_set_extra
+#endif
+
+#ifdef yyget_in
+#define gdbwire_mi_get_in_ALREADY_DEFINED
+#else
+#define yyget_in gdbwire_mi_get_in
+#endif
+
+#ifdef yyset_in
+#define gdbwire_mi_set_in_ALREADY_DEFINED
+#else
+#define yyset_in gdbwire_mi_set_in
+#endif
+
+#ifdef yyget_out
+#define gdbwire_mi_get_out_ALREADY_DEFINED
+#else
+#define yyget_out gdbwire_mi_get_out
+#endif
+
+#ifdef yyset_out
+#define gdbwire_mi_set_out_ALREADY_DEFINED
+#else
+#define yyset_out gdbwire_mi_set_out
+#endif
+
+#ifdef yyget_leng
+#define gdbwire_mi_get_leng_ALREADY_DEFINED
+#else
+#define yyget_leng gdbwire_mi_get_leng
+#endif
+
+#ifdef yyget_text
+#define gdbwire_mi_get_text_ALREADY_DEFINED
+#else
+#define yyget_text gdbwire_mi_get_text
+#endif
+
+#ifdef yyget_lineno
+#define gdbwire_mi_get_lineno_ALREADY_DEFINED
+#else
+#define yyget_lineno gdbwire_mi_get_lineno
+#endif
+
+#ifdef yyset_lineno
+#define gdbwire_mi_set_lineno_ALREADY_DEFINED
+#else
+#define yyset_lineno gdbwire_mi_set_lineno
+#endif
+
+#ifdef yyget_column
+#define gdbwire_mi_get_column_ALREADY_DEFINED
+#else
+#define yyget_column gdbwire_mi_get_column
+#endif
+
+#ifdef yyset_column
+#define gdbwire_mi_set_column_ALREADY_DEFINED
+#else
+#define yyset_column gdbwire_mi_set_column
+#endif
+
+#ifdef yywrap
+#define gdbwire_mi_wrap_ALREADY_DEFINED
+#else
+#define yywrap gdbwire_mi_wrap
+#endif
+
+#ifdef yyalloc
+#define gdbwire_mi_alloc_ALREADY_DEFINED
+#else
+#define yyalloc gdbwire_mi_alloc
+#endif
+
+#ifdef yyrealloc
+#define gdbwire_mi_realloc_ALREADY_DEFINED
+#else
+#define yyrealloc gdbwire_mi_realloc
+#endif
+
+#ifdef yyfree
+#define gdbwire_mi_free_ALREADY_DEFINED
+#else
+#define yyfree gdbwire_mi_free
 #endif
 
 /* First, we deal with  platform-specific or compiler-specific issues. */
@@ -3452,40 +3743,32 @@ typedef unsigned int flex_uint32_t;
 #define UINT32_MAX             (4294967295U)
 #endif
 
+#ifndef SIZE_MAX
+#define SIZE_MAX               (~(size_t)0)
+#endif
+
 #endif /* ! C99 */
 
 #endif /* ! FLEXINT_H */
 
-#ifdef __cplusplus
+/* begin standard C++ headers. */
 
-/* The "const" storage-class-modifier is valid. */
-#define YY_USE_CONST
-
-#else	/* ! __cplusplus */
-
-/* C99 requires __STDC__ to be defined as 1. */
-#if defined (__STDC__)
-
-#define YY_USE_CONST
-
-#endif	/* defined (__STDC__) */
-#endif	/* ! __cplusplus */
-
-#ifdef YY_USE_CONST
+/* TODO: this is always defined, so inline it */
 #define yyconst const
+
+#if defined(__GNUC__) && __GNUC__ >= 3
+#define yynoreturn __attribute__((__noreturn__))
 #else
-#define yyconst
+#define yynoreturn
 #endif
 
 /* Returned upon end-of-file. */
 #define YY_NULL 0
 
-/* Promotes a possibly negative, possibly signed char to an unsigned
- * integer for use as an array index.  If the signed char is negative,
- * we want to instead treat it as an 8-bit unsigned char, hence the
- * double cast.
+/* Promotes a possibly negative, possibly signed char to an
+ *   integer in range [0..255] for use as an array index.
  */
-#define YY_SC_TO_UI(c) ((unsigned int) (unsigned char) c)
+#define YY_SC_TO_UI(c) ((YY_CHAR) (c))
 
 /* An opaque pointer. */
 #ifndef YY_TYPEDEF_YY_SCANNER_T
@@ -3509,20 +3792,16 @@ typedef void* yyscan_t;
  * definition of BEGIN.
  */
 #define BEGIN yyg->yy_start = 1 + 2 *
-
 /* Translate the current start state into a value that can be later handed
  * to BEGIN to return to the state.  The YYSTATE alias is for lex
  * compatibility.
  */
 #define YY_START ((yyg->yy_start - 1) / 2)
 #define YYSTATE YY_START
-
 /* Action number for EOF rule of a given start state. */
 #define YY_STATE_EOF(state) (YY_END_OF_BUFFER + state + 1)
-
 /* Special action meaning "start processing a new file". */
-#define YY_NEW_FILE gdbwire_mi_restart(yyin ,yyscanner )
-
+#define YY_NEW_FILE yyrestart( yyin , yyscanner )
 #define YY_END_OF_BUFFER_CHAR 0
 
 /* Size of default input buffer. */
@@ -3555,7 +3834,7 @@ typedef size_t yy_size_t;
 #define EOB_ACT_CONTINUE_SCAN 0
 #define EOB_ACT_END_OF_FILE 1
 #define EOB_ACT_LAST_MATCH 2
-
+    
     #define YY_LESS_LINENO(n)
     #define YY_LINENO_REWIND_TO(ptr)
     
@@ -3572,7 +3851,6 @@ typedef size_t yy_size_t;
 		YY_DO_BEFORE_ACTION; /* set up yytext again */ \
 		} \
 	while ( 0 )
-
 #define unput(c) yyunput( c, yyg->yytext_ptr , yyscanner )
 
 #ifndef YY_STRUCT_YY_BUFFER_STATE
@@ -3587,7 +3865,7 @@ struct yy_buffer_state
 	/* Size of input buffer in bytes, not including room for EOB
 	 * characters.
 	 */
-	yy_size_t yy_buf_size;
+	int yy_buf_size;
 
 	/* Number of characters read into yy_ch_buf, not including EOB
 	 * characters.
@@ -3615,7 +3893,7 @@ struct yy_buffer_state
 
     int yy_bs_lineno; /**< The line count. */
     int yy_bs_column; /**< The column count. */
-    
+
 	/* Whether to try to fill the input buffer when we reach the
 	 * end of it.
 	 */
@@ -3632,7 +3910,7 @@ struct yy_buffer_state
 	 * possible backing-up.
 	 *
 	 * When we actually see the EOF, we change the status to "new"
-	 * (via gdbwire_mi_restart()), so that the user can continue scanning by
+	 * (via yyrestart()), so that the user can continue scanning by
 	 * just pointing yyin at a new input file.
 	 */
 #define YY_BUFFER_EOF_PENDING 2
@@ -3649,87 +3927,77 @@ struct yy_buffer_state
 #define YY_CURRENT_BUFFER ( yyg->yy_buffer_stack \
                           ? yyg->yy_buffer_stack[yyg->yy_buffer_stack_top] \
                           : NULL)
-
 /* Same as previous macro, but useful when we know that the buffer stack is not
  * NULL or when we need an lvalue. For internal use only.
  */
 #define YY_CURRENT_BUFFER_LVALUE yyg->yy_buffer_stack[yyg->yy_buffer_stack_top]
 
-void gdbwire_mi_restart (FILE *input_file ,yyscan_t yyscanner );
-void gdbwire_mi__switch_to_buffer (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
-YY_BUFFER_STATE gdbwire_mi__create_buffer (FILE *file,int size ,yyscan_t yyscanner );
-void gdbwire_mi__delete_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
-void gdbwire_mi__flush_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
-void gdbwire_mi_push_buffer_state (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
-void gdbwire_mi_pop_buffer_state (yyscan_t yyscanner );
+void yyrestart ( FILE *input_file , yyscan_t yyscanner );
+void yy_switch_to_buffer ( YY_BUFFER_STATE new_buffer , yyscan_t yyscanner );
+YY_BUFFER_STATE yy_create_buffer ( FILE *file, int size , yyscan_t yyscanner );
+void yy_delete_buffer ( YY_BUFFER_STATE b , yyscan_t yyscanner );
+void yy_flush_buffer ( YY_BUFFER_STATE b , yyscan_t yyscanner );
+void yypush_buffer_state ( YY_BUFFER_STATE new_buffer , yyscan_t yyscanner );
+void yypop_buffer_state ( yyscan_t yyscanner );
 
-static void gdbwire_mi_ensure_buffer_stack (yyscan_t yyscanner );
-static void gdbwire_mi__load_buffer_state (yyscan_t yyscanner );
-static void gdbwire_mi__init_buffer (YY_BUFFER_STATE b,FILE *file ,yyscan_t yyscanner );
+static void yyensure_buffer_stack ( yyscan_t yyscanner );
+static void yy_load_buffer_state ( yyscan_t yyscanner );
+static void yy_init_buffer ( YY_BUFFER_STATE b, FILE *file , yyscan_t yyscanner );
+#define YY_FLUSH_BUFFER yy_flush_buffer( YY_CURRENT_BUFFER , yyscanner)
 
-#define YY_FLUSH_BUFFER gdbwire_mi__flush_buffer(YY_CURRENT_BUFFER ,yyscanner)
+YY_BUFFER_STATE yy_scan_buffer ( char *base, yy_size_t size , yyscan_t yyscanner );
+YY_BUFFER_STATE yy_scan_string ( const char *yy_str , yyscan_t yyscanner );
+YY_BUFFER_STATE yy_scan_bytes ( const char *bytes, int len , yyscan_t yyscanner );
 
-YY_BUFFER_STATE gdbwire_mi__scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
-YY_BUFFER_STATE gdbwire_mi__scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
-YY_BUFFER_STATE gdbwire_mi__scan_bytes (yyconst char *bytes,yy_size_t len ,yyscan_t yyscanner );
+void *yyalloc ( yy_size_t , yyscan_t yyscanner );
+void *yyrealloc ( void *, yy_size_t , yyscan_t yyscanner );
+void yyfree ( void * , yyscan_t yyscanner );
 
-void *gdbwire_mi_alloc (yy_size_t ,yyscan_t yyscanner );
-void *gdbwire_mi_realloc (void *,yy_size_t ,yyscan_t yyscanner );
-void gdbwire_mi_free (void * ,yyscan_t yyscanner );
-
-#define yy_new_buffer gdbwire_mi__create_buffer
-
+#define yy_new_buffer yy_create_buffer
 #define yy_set_interactive(is_interactive) \
 	{ \
 	if ( ! YY_CURRENT_BUFFER ){ \
-        gdbwire_mi_ensure_buffer_stack (yyscanner); \
+        yyensure_buffer_stack (yyscanner); \
 		YY_CURRENT_BUFFER_LVALUE =    \
-            gdbwire_mi__create_buffer(yyin,YY_BUF_SIZE ,yyscanner); \
+            yy_create_buffer( yyin, YY_BUF_SIZE , yyscanner); \
 	} \
 	YY_CURRENT_BUFFER_LVALUE->yy_is_interactive = is_interactive; \
 	}
-
 #define yy_set_bol(at_bol) \
 	{ \
 	if ( ! YY_CURRENT_BUFFER ){\
-        gdbwire_mi_ensure_buffer_stack (yyscanner); \
+        yyensure_buffer_stack (yyscanner); \
 		YY_CURRENT_BUFFER_LVALUE =    \
-            gdbwire_mi__create_buffer(yyin,YY_BUF_SIZE ,yyscanner); \
+            yy_create_buffer( yyin, YY_BUF_SIZE , yyscanner); \
 	} \
 	YY_CURRENT_BUFFER_LVALUE->yy_at_bol = at_bol; \
 	}
-
 #define YY_AT_BOL() (YY_CURRENT_BUFFER_LVALUE->yy_at_bol)
 
 /* Begin user sect3 */
 
 #define gdbwire_mi_wrap(yyscanner) (/*CONSTCOND*/1)
 #define YY_SKIP_YYWRAP
-
-typedef unsigned char YY_CHAR;
+typedef flex_uint8_t YY_CHAR;
 
 typedef int yy_state_type;
 
 #define yytext_ptr yytext_r
 
-static yy_state_type yy_get_previous_state (yyscan_t yyscanner );
-static yy_state_type yy_try_NUL_trans (yy_state_type current_state  ,yyscan_t yyscanner);
-static int yy_get_next_buffer (yyscan_t yyscanner );
-#if defined(__GNUC__) && __GNUC__ >= 3
-__attribute__((__noreturn__))
-#endif
-static void yy_fatal_error (yyconst char msg[] ,yyscan_t yyscanner );
+static yy_state_type yy_get_previous_state ( yyscan_t yyscanner );
+static yy_state_type yy_try_NUL_trans ( yy_state_type current_state  , yyscan_t yyscanner);
+static int yy_get_next_buffer ( yyscan_t yyscanner );
+static void yynoreturn yy_fatal_error ( const char* msg , yyscan_t yyscanner );
 
 /* Done after the current pattern has been matched and before the
  * corresponding action - sets up yytext.
  */
 #define YY_DO_BEFORE_ACTION \
 	yyg->yytext_ptr = yy_bp; \
-	yyleng = (size_t) (yy_cp - yy_bp); \
+	yyleng = (int) (yy_cp - yy_bp); \
 	yyg->yy_hold_char = *yy_cp; \
 	*yy_cp = '\0'; \
 	yyg->yy_c_buf_p = yy_cp;
-
 #define YY_NUM_RULES 23
 #define YY_END_OF_BUFFER 24
 /* This struct is not used in this scanner,
@@ -3739,7 +4007,7 @@ struct yy_trans_info
 	flex_int32_t yy_verify;
 	flex_int32_t yy_nxt;
 	};
-static yyconst flex_int16_t yy_accept[33] =
+static const flex_int16_t yy_accept[33] =
     {   0,
         0,    0,   24,   21,   19,   15,   17,   21,    8,   13,
        14,    4,    3,    2,   18,    5,    7,   20,    9,   10,
@@ -3747,7 +4015,7 @@ static yyconst flex_int16_t yy_accept[33] =
        20,    0
     } ;
 
-static yyconst YY_CHAR yy_ec[256] =
+static const YY_CHAR yy_ec[256] =
     {   0,
         1,    1,    1,    1,    1,    1,    1,    1,    2,    3,
         2,    2,    4,    1,    1,    1,    1,    1,    1,    1,
@@ -3779,14 +4047,14 @@ static yyconst YY_CHAR yy_ec[256] =
         1,    1,    1,    1,    1
     } ;
 
-static yyconst YY_CHAR yy_meta[24] =
+static const YY_CHAR yy_meta[24] =
     {   0,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1
     } ;
 
-static yyconst flex_uint16_t yy_base[34] =
+static const flex_int16_t yy_base[34] =
     {   0,
         0,    0,   42,   43,   43,   43,   38,   19,   43,   43,
        43,   43,   43,   43,   26,   43,   43,   13,   43,   43,
@@ -3794,7 +4062,7 @@ static yyconst flex_uint16_t yy_base[34] =
        20,   43,   27
     } ;
 
-static yyconst flex_int16_t yy_def[34] =
+static const flex_int16_t yy_def[34] =
     {   0,
        32,    1,   32,   32,   32,   32,   32,   33,   32,   32,
        32,   32,   32,   32,   32,   32,   32,   32,   32,   32,
@@ -3802,7 +4070,7 @@ static yyconst flex_int16_t yy_def[34] =
        32,    0,   32
     } ;
 
-static yyconst flex_uint16_t yy_nxt[67] =
+static const flex_int16_t yy_nxt[67] =
     {   0,
         4,    5,    6,    7,    8,    9,   10,   11,   12,   13,
        14,    4,   15,   16,   17,   18,   19,    4,   20,   21,
@@ -3813,7 +4081,7 @@ static yyconst flex_uint16_t yy_nxt[67] =
        32,   32,   32,   32,   32,   32
     } ;
 
-static yyconst flex_int16_t yy_chk[67] =
+static const flex_int16_t yy_chk[67] =
     {   0,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
@@ -3886,7 +4154,7 @@ struct yyguts_t
     YY_BUFFER_STATE * yy_buffer_stack; /**< Stack as an array. */
     char yy_hold_char;
     int yy_n_chars;
-    yy_size_t yyleng_r;
+    int yyleng_r;
     char *yy_c_buf_p;
     int yy_init;
     int yy_start;
@@ -3906,44 +4174,44 @@ struct yyguts_t
 
     }; /* end struct yyguts_t */
 
-static int yy_init_globals (yyscan_t yyscanner );
+static int yy_init_globals ( yyscan_t yyscanner );
 
-int gdbwire_mi_lex_init (yyscan_t* scanner);
+int yylex_init (yyscan_t* scanner);
 
-int gdbwire_mi_lex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* scanner);
+int yylex_init_extra ( YY_EXTRA_TYPE user_defined, yyscan_t* scanner);
 
 /* Accessor methods to globals.
    These are made visible to non-reentrant scanners for convenience. */
 
-int gdbwire_mi_lex_destroy (yyscan_t yyscanner );
+int yylex_destroy ( yyscan_t yyscanner );
 
-int gdbwire_mi_get_debug (yyscan_t yyscanner );
+int yyget_debug ( yyscan_t yyscanner );
 
-void gdbwire_mi_set_debug (int debug_flag ,yyscan_t yyscanner );
+void yyset_debug ( int debug_flag , yyscan_t yyscanner );
 
-YY_EXTRA_TYPE gdbwire_mi_get_extra (yyscan_t yyscanner );
+YY_EXTRA_TYPE yyget_extra ( yyscan_t yyscanner );
 
-void gdbwire_mi_set_extra (YY_EXTRA_TYPE user_defined ,yyscan_t yyscanner );
+void yyset_extra ( YY_EXTRA_TYPE user_defined , yyscan_t yyscanner );
 
-FILE *gdbwire_mi_get_in (yyscan_t yyscanner );
+FILE *yyget_in ( yyscan_t yyscanner );
 
-void gdbwire_mi_set_in  (FILE * _in_str ,yyscan_t yyscanner );
+void yyset_in  ( FILE * _in_str , yyscan_t yyscanner );
 
-FILE *gdbwire_mi_get_out (yyscan_t yyscanner );
+FILE *yyget_out ( yyscan_t yyscanner );
 
-void gdbwire_mi_set_out  (FILE * _out_str ,yyscan_t yyscanner );
+void yyset_out  ( FILE * _out_str , yyscan_t yyscanner );
 
-yy_size_t gdbwire_mi_get_leng (yyscan_t yyscanner );
+			int yyget_leng ( yyscan_t yyscanner );
 
-char *gdbwire_mi_get_text (yyscan_t yyscanner );
+char *yyget_text ( yyscan_t yyscanner );
 
-int gdbwire_mi_get_lineno (yyscan_t yyscanner );
+int yyget_lineno ( yyscan_t yyscanner );
 
-void gdbwire_mi_set_lineno (int _line_number ,yyscan_t yyscanner );
+void yyset_lineno ( int _line_number , yyscan_t yyscanner );
 
-int gdbwire_mi_get_column  (yyscan_t yyscanner );
+int yyget_column  ( yyscan_t yyscanner );
 
-void gdbwire_mi_set_column (int _column_no ,yyscan_t yyscanner );
+void yyset_column ( int _column_no , yyscan_t yyscanner );
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -3951,9 +4219,9 @@ void gdbwire_mi_set_column (int _column_no ,yyscan_t yyscanner );
 
 #ifndef YY_SKIP_YYWRAP
 #ifdef __cplusplus
-extern "C" int gdbwire_mi_wrap (yyscan_t yyscanner );
+extern "C" int yywrap ( yyscan_t yyscanner );
 #else
-extern int gdbwire_mi_wrap (yyscan_t yyscanner );
+extern int yywrap ( yyscan_t yyscanner );
 #endif
 #endif
 
@@ -3962,19 +4230,18 @@ extern int gdbwire_mi_wrap (yyscan_t yyscanner );
 #endif
 
 #ifndef yytext_ptr
-static void yy_flex_strncpy (char *,yyconst char *,int ,yyscan_t yyscanner);
+static void yy_flex_strncpy ( char *, const char *, int , yyscan_t yyscanner);
 #endif
 
 #ifdef YY_NEED_STRLEN
-static int yy_flex_strlen (yyconst char * ,yyscan_t yyscanner);
+static int yy_flex_strlen ( const char * , yyscan_t yyscanner);
 #endif
 
 #ifndef YY_NO_INPUT
-
 #ifdef __cplusplus
-static int yyinput (yyscan_t yyscanner );
+static int yyinput ( yyscan_t yyscanner );
 #else
-static int input (yyscan_t yyscanner );
+static int input ( yyscan_t yyscanner );
 #endif
 
 #endif
@@ -3994,7 +4261,7 @@ static int input (yyscan_t yyscanner );
 /* This used to be an fputs(), but since the string might contain NUL's,
  * we now use fwrite().
  */
-#define ECHO do { if (fwrite( yytext, yyleng, 1, yyout )) {} } while (0)
+#define ECHO do { if (fwrite( yytext, (size_t) yyleng, 1, yyout )) {} } while (0)
 #endif
 
 /* Gets input and stuffs it into "buf".  number of characters read, or YY_NULL,
@@ -4005,7 +4272,7 @@ static int input (yyscan_t yyscanner );
 	if ( YY_CURRENT_BUFFER_LVALUE->yy_is_interactive ) \
 		{ \
 		int c = '*'; \
-		size_t n; \
+		int n; \
 		for ( n = 0; n < max_size && \
 			     (c = getc( yyin )) != EOF && c != '\n'; ++n ) \
 			buf[n] = (char) c; \
@@ -4018,7 +4285,7 @@ static int input (yyscan_t yyscanner );
 	else \
 		{ \
 		errno=0; \
-		while ( (result = fread(buf, 1, max_size, yyin))==0 && ferror(yyin)) \
+		while ( (result = (int) fread(buf, 1, (yy_size_t) max_size, yyin)) == 0 && ferror(yyin)) \
 			{ \
 			if( errno != EINTR) \
 				{ \
@@ -4059,9 +4326,9 @@ static int input (yyscan_t yyscanner );
 #ifndef YY_DECL
 #define YY_DECL_IS_OURS 1
 
-extern int gdbwire_mi_lex (yyscan_t yyscanner);
+extern int yylex (yyscan_t yyscanner);
 
-#define YY_DECL int gdbwire_mi_lex (yyscan_t yyscanner)
+#define YY_DECL int yylex (yyscan_t yyscanner)
 #endif /* !YY_DECL */
 
 /* Code executed at the beginning of each rule, after yytext and yyleng
@@ -4106,12 +4373,12 @@ YY_DECL
 			yyout = stdout;
 
 		if ( ! YY_CURRENT_BUFFER ) {
-			gdbwire_mi_ensure_buffer_stack (yyscanner);
+			yyensure_buffer_stack (yyscanner);
 			YY_CURRENT_BUFFER_LVALUE =
-				gdbwire_mi__create_buffer(yyin,YY_BUF_SIZE ,yyscanner);
+				yy_create_buffer( yyin, YY_BUF_SIZE , yyscanner);
 		}
 
-		gdbwire_mi__load_buffer_state(yyscanner );
+		yy_load_buffer_state( yyscanner );
 		}
 
 	{
@@ -4144,9 +4411,9 @@ yy_match:
 				{
 				yy_current_state = (int) yy_def[yy_current_state];
 				if ( yy_current_state >= 33 )
-					yy_c = yy_meta[(unsigned int) yy_c];
+					yy_c = yy_meta[yy_c];
 				}
-			yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
+			yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
 			++yy_cp;
 			}
 		while ( yy_current_state != 32 );
@@ -4281,7 +4548,7 @@ case YY_STATE_EOF(INITIAL):
 			/* We're scanning a new file or input source.  It's
 			 * possible that this happened because the user
 			 * just pointed yyin at a new source and called
-			 * gdbwire_mi_lex().  If so, then we have to assure
+			 * yylex().  If so, then we have to assure
 			 * consistency between YY_CURRENT_BUFFER and our
 			 * globals.  Here is the right place to do so, because
 			 * this is the first action (other than possibly a
@@ -4342,7 +4609,7 @@ case YY_STATE_EOF(INITIAL):
 				{
 				yyg->yy_did_buffer_switch_on_eof = 0;
 
-				if ( gdbwire_mi_wrap(yyscanner ) )
+				if ( yywrap( yyscanner ) )
 					{
 					/* Note: because we've taken care in
 					 * yy_get_next_buffer() to have set up
@@ -4396,7 +4663,7 @@ case YY_STATE_EOF(INITIAL):
 	} /* end of action switch */
 		} /* end of scanning one token */
 	} /* end of user's declarations */
-} /* end of gdbwire_mi_lex */
+} /* end of yylex */
 
 /* yy_get_next_buffer - try to read in a new buffer
  *
@@ -4410,7 +4677,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	char *dest = YY_CURRENT_BUFFER_LVALUE->yy_ch_buf;
 	char *source = yyg->yytext_ptr;
-	yy_size_t number_to_move, i;
+	int number_to_move, i;
 	int ret_val;
 
 	if ( yyg->yy_c_buf_p > &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[yyg->yy_n_chars + 1] )
@@ -4439,7 +4706,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 	/* Try to read more data. */
 
 	/* First move last chars to start of buffer. */
-	number_to_move = (yy_size_t) (yyg->yy_c_buf_p - yyg->yytext_ptr) - 1;
+	number_to_move = (int) (yyg->yy_c_buf_p - yyg->yytext_ptr - 1);
 
 	for ( i = 0; i < number_to_move; ++i )
 		*(dest++) = *(source++);
@@ -4452,7 +4719,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
 	else
 		{
-			yy_size_t num_to_read =
+			int num_to_read =
 			YY_CURRENT_BUFFER_LVALUE->yy_buf_size - number_to_move - 1;
 
 		while ( num_to_read <= 0 )
@@ -4466,7 +4733,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
 			if ( b->yy_is_our_buffer )
 				{
-				yy_size_t new_size = b->yy_buf_size * 2;
+				int new_size = b->yy_buf_size * 2;
 
 				if ( new_size <= 0 )
 					b->yy_buf_size += b->yy_buf_size / 8;
@@ -4475,11 +4742,12 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
 				b->yy_ch_buf = (char *)
 					/* Include room in for 2 EOB chars. */
-					gdbwire_mi_realloc((void *) b->yy_ch_buf,b->yy_buf_size + 2 ,yyscanner );
+					yyrealloc( (void *) b->yy_ch_buf,
+							 (yy_size_t) (b->yy_buf_size + 2) , yyscanner );
 				}
 			else
 				/* Can't grow it, we don't own it. */
-				b->yy_ch_buf = 0;
+				b->yy_ch_buf = NULL;
 
 			if ( ! b->yy_ch_buf )
 				YY_FATAL_ERROR(
@@ -4507,7 +4775,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 		if ( number_to_move == YY_MORE_ADJ )
 			{
 			ret_val = EOB_ACT_END_OF_FILE;
-			gdbwire_mi_restart(yyin  ,yyscanner);
+			yyrestart( yyin  , yyscanner);
 			}
 
 		else
@@ -4521,12 +4789,15 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 	else
 		ret_val = EOB_ACT_CONTINUE_SCAN;
 
-	if ((int) (yyg->yy_n_chars + number_to_move) > YY_CURRENT_BUFFER_LVALUE->yy_buf_size) {
+	if ((yyg->yy_n_chars + number_to_move) > YY_CURRENT_BUFFER_LVALUE->yy_buf_size) {
 		/* Extend the array by 50%, plus the number we really need. */
 		int new_size = yyg->yy_n_chars + number_to_move + (yyg->yy_n_chars >> 1);
-		YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char *) gdbwire_mi_realloc((void *) YY_CURRENT_BUFFER_LVALUE->yy_ch_buf,new_size ,yyscanner );
+		YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char *) yyrealloc(
+			(void *) YY_CURRENT_BUFFER_LVALUE->yy_ch_buf, (yy_size_t) new_size , yyscanner );
 		if ( ! YY_CURRENT_BUFFER_LVALUE->yy_ch_buf )
 			YY_FATAL_ERROR( "out of dynamic memory in yy_get_next_buffer()" );
+		/* "- 2" to take care of EOB's */
+		YY_CURRENT_BUFFER_LVALUE->yy_buf_size = (int) (new_size - 2);
 	}
 
 	yyg->yy_n_chars += number_to_move;
@@ -4560,9 +4831,9 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 			{
 			yy_current_state = (int) yy_def[yy_current_state];
 			if ( yy_current_state >= 33 )
-				yy_c = yy_meta[(unsigned int) yy_c];
+				yy_c = yy_meta[yy_c];
 			}
-		yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
+		yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
 		}
 
 	return yy_current_state;
@@ -4589,9 +4860,9 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 		{
 		yy_current_state = (int) yy_def[yy_current_state];
 		if ( yy_current_state >= 33 )
-			yy_c = yy_meta[(unsigned int) yy_c];
+			yy_c = yy_meta[yy_c];
 		}
-	yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
+	yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
 	yy_is_jam = (yy_current_state == 32);
 
 	(void)yyg;
@@ -4627,7 +4898,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
 		else
 			{ /* need more input */
-			yy_size_t offset = yyg->yy_c_buf_p - yyg->yytext_ptr;
+			int offset = (int) (yyg->yy_c_buf_p - yyg->yytext_ptr);
 			++yyg->yy_c_buf_p;
 
 			switch ( yy_get_next_buffer( yyscanner ) )
@@ -4644,14 +4915,14 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 					 */
 
 					/* Reset buffer status. */
-					gdbwire_mi_restart(yyin ,yyscanner);
+					yyrestart( yyin , yyscanner);
 
 					/*FALLTHROUGH*/
 
 				case EOB_ACT_END_OF_FILE:
 					{
-					if ( gdbwire_mi_wrap(yyscanner ) )
-						return EOF;
+					if ( yywrap( yyscanner ) )
+						return 0;
 
 					if ( ! yyg->yy_did_buffer_switch_on_eof )
 						YY_NEW_FILE;
@@ -4682,34 +4953,34 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
  * @param yyscanner The scanner object.
  * @note This function does not reset the start condition to @c INITIAL .
  */
-    void gdbwire_mi_restart  (FILE * input_file , yyscan_t yyscanner)
+    void yyrestart  (FILE * input_file , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
 	if ( ! YY_CURRENT_BUFFER ){
-        gdbwire_mi_ensure_buffer_stack (yyscanner);
+        yyensure_buffer_stack (yyscanner);
 		YY_CURRENT_BUFFER_LVALUE =
-            gdbwire_mi__create_buffer(yyin,YY_BUF_SIZE ,yyscanner);
+            yy_create_buffer( yyin, YY_BUF_SIZE , yyscanner);
 	}
 
-	gdbwire_mi__init_buffer(YY_CURRENT_BUFFER,input_file ,yyscanner);
-	gdbwire_mi__load_buffer_state(yyscanner );
+	yy_init_buffer( YY_CURRENT_BUFFER, input_file , yyscanner);
+	yy_load_buffer_state( yyscanner );
 }
 
 /** Switch to a different input buffer.
  * @param new_buffer The new input buffer.
  * @param yyscanner The scanner object.
  */
-    void gdbwire_mi__switch_to_buffer  (YY_BUFFER_STATE  new_buffer , yyscan_t yyscanner)
+    void yy_switch_to_buffer  (YY_BUFFER_STATE  new_buffer , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
 	/* TODO. We should be able to replace this entire function body
 	 * with
-	 *		gdbwire_mi_pop_buffer_state();
-	 *		gdbwire_mi_push_buffer_state(new_buffer);
+	 *		yypop_buffer_state();
+	 *		yypush_buffer_state(new_buffer);
      */
-	gdbwire_mi_ensure_buffer_stack (yyscanner);
+	yyensure_buffer_stack (yyscanner);
 	if ( YY_CURRENT_BUFFER == new_buffer )
 		return;
 
@@ -4722,17 +4993,17 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 		}
 
 	YY_CURRENT_BUFFER_LVALUE = new_buffer;
-	gdbwire_mi__load_buffer_state(yyscanner );
+	yy_load_buffer_state( yyscanner );
 
 	/* We don't actually know whether we did this switch during
-	 * EOF (gdbwire_mi_wrap()) processing, but the only time this flag
-	 * is looked at is after gdbwire_mi_wrap() is called, so it's safe
+	 * EOF (yywrap()) processing, but the only time this flag
+	 * is looked at is after yywrap() is called, so it's safe
 	 * to go ahead and always set it.
 	 */
 	yyg->yy_did_buffer_switch_on_eof = 1;
 }
 
-static void gdbwire_mi__load_buffer_state  (yyscan_t yyscanner)
+static void yy_load_buffer_state  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	yyg->yy_n_chars = YY_CURRENT_BUFFER_LVALUE->yy_n_chars;
@@ -4747,35 +5018,35 @@ static void gdbwire_mi__load_buffer_state  (yyscan_t yyscanner)
  * @param yyscanner The scanner object.
  * @return the allocated buffer state.
  */
-    YY_BUFFER_STATE gdbwire_mi__create_buffer  (FILE * file, int  size , yyscan_t yyscanner)
+    YY_BUFFER_STATE yy_create_buffer  (FILE * file, int  size , yyscan_t yyscanner)
 {
 	YY_BUFFER_STATE b;
     
-	b = (YY_BUFFER_STATE) gdbwire_mi_alloc(sizeof( struct yy_buffer_state ) ,yyscanner );
+	b = (YY_BUFFER_STATE) yyalloc( sizeof( struct yy_buffer_state ) , yyscanner );
 	if ( ! b )
-		YY_FATAL_ERROR( "out of dynamic memory in gdbwire_mi__create_buffer()" );
+		YY_FATAL_ERROR( "out of dynamic memory in yy_create_buffer()" );
 
-	b->yy_buf_size = (yy_size_t)size;
+	b->yy_buf_size = size;
 
 	/* yy_ch_buf has to be 2 characters longer than the size given because
 	 * we need to put in 2 end-of-buffer characters.
 	 */
-	b->yy_ch_buf = (char *) gdbwire_mi_alloc(b->yy_buf_size + 2 ,yyscanner );
+	b->yy_ch_buf = (char *) yyalloc( (yy_size_t) (b->yy_buf_size + 2) , yyscanner );
 	if ( ! b->yy_ch_buf )
-		YY_FATAL_ERROR( "out of dynamic memory in gdbwire_mi__create_buffer()" );
+		YY_FATAL_ERROR( "out of dynamic memory in yy_create_buffer()" );
 
 	b->yy_is_our_buffer = 1;
 
-	gdbwire_mi__init_buffer(b,file ,yyscanner);
+	yy_init_buffer( b, file , yyscanner);
 
 	return b;
 }
 
 /** Destroy the buffer.
- * @param b a buffer created with gdbwire_mi__create_buffer()
+ * @param b a buffer created with yy_create_buffer()
  * @param yyscanner The scanner object.
  */
-    void gdbwire_mi__delete_buffer (YY_BUFFER_STATE  b , yyscan_t yyscanner)
+    void yy_delete_buffer (YY_BUFFER_STATE  b , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
@@ -4786,28 +5057,28 @@ static void gdbwire_mi__load_buffer_state  (yyscan_t yyscanner)
 		YY_CURRENT_BUFFER_LVALUE = (YY_BUFFER_STATE) 0;
 
 	if ( b->yy_is_our_buffer )
-		gdbwire_mi_free((void *) b->yy_ch_buf ,yyscanner );
+		yyfree( (void *) b->yy_ch_buf , yyscanner );
 
-	gdbwire_mi_free((void *) b ,yyscanner );
+	yyfree( (void *) b , yyscanner );
 }
 
 /* Initializes or reinitializes a buffer.
  * This function is sometimes called more than once on the same buffer,
- * such as during a gdbwire_mi_restart() or at EOF.
+ * such as during a yyrestart() or at EOF.
  */
-    static void gdbwire_mi__init_buffer  (YY_BUFFER_STATE  b, FILE * file , yyscan_t yyscanner)
+    static void yy_init_buffer  (YY_BUFFER_STATE  b, FILE * file , yyscan_t yyscanner)
 
 {
 	int oerrno = errno;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-	gdbwire_mi__flush_buffer(b ,yyscanner);
+	yy_flush_buffer( b , yyscanner);
 
 	b->yy_input_file = file;
 	b->yy_fill_buffer = 1;
 
-    /* If b is the current buffer, then gdbwire_mi__init_buffer was _probably_
-     * called from gdbwire_mi_restart() or through yy_get_next_buffer.
+    /* If b is the current buffer, then yy_init_buffer was _probably_
+     * called from yyrestart() or through yy_get_next_buffer.
      * In that case, we don't want to reset the lineno or column.
      */
     if (b != YY_CURRENT_BUFFER){
@@ -4824,7 +5095,7 @@ static void gdbwire_mi__load_buffer_state  (yyscan_t yyscanner)
  * @param b the buffer state to be flushed, usually @c YY_CURRENT_BUFFER.
  * @param yyscanner The scanner object.
  */
-    void gdbwire_mi__flush_buffer (YY_BUFFER_STATE  b , yyscan_t yyscanner)
+    void yy_flush_buffer (YY_BUFFER_STATE  b , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	if ( ! b )
@@ -4845,7 +5116,7 @@ static void gdbwire_mi__load_buffer_state  (yyscan_t yyscanner)
 	b->yy_buffer_status = YY_BUFFER_NEW;
 
 	if ( b == YY_CURRENT_BUFFER )
-		gdbwire_mi__load_buffer_state(yyscanner );
+		yy_load_buffer_state( yyscanner );
 }
 
 /** Pushes the new state onto the stack. The new state becomes
@@ -4854,15 +5125,15 @@ static void gdbwire_mi__load_buffer_state  (yyscan_t yyscanner)
  *  @param new_buffer The new state.
  *  @param yyscanner The scanner object.
  */
-void gdbwire_mi_push_buffer_state (YY_BUFFER_STATE new_buffer , yyscan_t yyscanner)
+void yypush_buffer_state (YY_BUFFER_STATE new_buffer , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	if (new_buffer == NULL)
 		return;
 
-	gdbwire_mi_ensure_buffer_stack(yyscanner);
+	yyensure_buffer_stack(yyscanner);
 
-	/* This block is copied from gdbwire_mi__switch_to_buffer. */
+	/* This block is copied from yy_switch_to_buffer. */
 	if ( YY_CURRENT_BUFFER )
 		{
 		/* Flush out information for old buffer. */
@@ -4876,8 +5147,8 @@ void gdbwire_mi_push_buffer_state (YY_BUFFER_STATE new_buffer , yyscan_t yyscann
 		yyg->yy_buffer_stack_top++;
 	YY_CURRENT_BUFFER_LVALUE = new_buffer;
 
-	/* copied from gdbwire_mi__switch_to_buffer. */
-	gdbwire_mi__load_buffer_state(yyscanner );
+	/* copied from yy_switch_to_buffer. */
+	yy_load_buffer_state( yyscanner );
 	yyg->yy_did_buffer_switch_on_eof = 1;
 }
 
@@ -4885,19 +5156,19 @@ void gdbwire_mi_push_buffer_state (YY_BUFFER_STATE new_buffer , yyscan_t yyscann
  *  The next element becomes the new top.
  *  @param yyscanner The scanner object.
  */
-void gdbwire_mi_pop_buffer_state (yyscan_t yyscanner)
+void yypop_buffer_state (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	if (!YY_CURRENT_BUFFER)
 		return;
 
-	gdbwire_mi__delete_buffer(YY_CURRENT_BUFFER ,yyscanner);
+	yy_delete_buffer(YY_CURRENT_BUFFER , yyscanner);
 	YY_CURRENT_BUFFER_LVALUE = NULL;
 	if (yyg->yy_buffer_stack_top > 0)
 		--yyg->yy_buffer_stack_top;
 
 	if (YY_CURRENT_BUFFER) {
-		gdbwire_mi__load_buffer_state(yyscanner );
+		yy_load_buffer_state( yyscanner );
 		yyg->yy_did_buffer_switch_on_eof = 1;
 	}
 }
@@ -4905,7 +5176,7 @@ void gdbwire_mi_pop_buffer_state (yyscan_t yyscanner)
 /* Allocates the stack if it does not exist.
  *  Guarantees space for at least one push.
  */
-static void gdbwire_mi_ensure_buffer_stack (yyscan_t yyscanner)
+static void yyensure_buffer_stack (yyscan_t yyscanner)
 {
 	yy_size_t num_to_alloc;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
@@ -4916,15 +5187,15 @@ static void gdbwire_mi_ensure_buffer_stack (yyscan_t yyscanner)
 		 * scanner will even need a stack. We use 2 instead of 1 to avoid an
 		 * immediate realloc on the next call.
          */
-		num_to_alloc = 1; /* After all that talk, this was set to 1 anyways... */
-		yyg->yy_buffer_stack = (struct yy_buffer_state**)gdbwire_mi_alloc
+      num_to_alloc = 1; /* After all that talk, this was set to 1 anyways... */
+		yyg->yy_buffer_stack = (struct yy_buffer_state**)yyalloc
 								(num_to_alloc * sizeof(struct yy_buffer_state*)
 								, yyscanner);
 		if ( ! yyg->yy_buffer_stack )
-			YY_FATAL_ERROR( "out of dynamic memory in gdbwire_mi_ensure_buffer_stack()" );
-								  
+			YY_FATAL_ERROR( "out of dynamic memory in yyensure_buffer_stack()" );
+
 		memset(yyg->yy_buffer_stack, 0, num_to_alloc * sizeof(struct yy_buffer_state*));
-				
+
 		yyg->yy_buffer_stack_max = num_to_alloc;
 		yyg->yy_buffer_stack_top = 0;
 		return;
@@ -4936,12 +5207,12 @@ static void gdbwire_mi_ensure_buffer_stack (yyscan_t yyscanner)
 		yy_size_t grow_size = 8 /* arbitrary grow size */;
 
 		num_to_alloc = yyg->yy_buffer_stack_max + grow_size;
-		yyg->yy_buffer_stack = (struct yy_buffer_state**)gdbwire_mi_realloc
+		yyg->yy_buffer_stack = (struct yy_buffer_state**)yyrealloc
 								(yyg->yy_buffer_stack,
 								num_to_alloc * sizeof(struct yy_buffer_state*)
 								, yyscanner);
 		if ( ! yyg->yy_buffer_stack )
-			YY_FATAL_ERROR( "out of dynamic memory in gdbwire_mi_ensure_buffer_stack()" );
+			YY_FATAL_ERROR( "out of dynamic memory in yyensure_buffer_stack()" );
 
 		/* zero only the new slots.*/
 		memset(yyg->yy_buffer_stack + yyg->yy_buffer_stack_max, 0, grow_size * sizeof(struct yy_buffer_state*));
@@ -4953,9 +5224,9 @@ static void gdbwire_mi_ensure_buffer_stack (yyscan_t yyscanner)
  * @param base the character buffer
  * @param size the size in bytes of the character buffer
  * @param yyscanner The scanner object.
- * @return the newly allocated buffer state object. 
+ * @return the newly allocated buffer state object.
  */
-YY_BUFFER_STATE gdbwire_mi__scan_buffer  (char * base, yy_size_t  size , yyscan_t yyscanner)
+YY_BUFFER_STATE yy_scan_buffer  (char * base, yy_size_t  size , yyscan_t yyscanner)
 {
 	YY_BUFFER_STATE b;
     
@@ -4963,69 +5234,69 @@ YY_BUFFER_STATE gdbwire_mi__scan_buffer  (char * base, yy_size_t  size , yyscan_
 	     base[size-2] != YY_END_OF_BUFFER_CHAR ||
 	     base[size-1] != YY_END_OF_BUFFER_CHAR )
 		/* They forgot to leave room for the EOB's. */
-		return 0;
+		return NULL;
 
-	b = (YY_BUFFER_STATE) gdbwire_mi_alloc(sizeof( struct yy_buffer_state ) ,yyscanner );
+	b = (YY_BUFFER_STATE) yyalloc( sizeof( struct yy_buffer_state ) , yyscanner );
 	if ( ! b )
-		YY_FATAL_ERROR( "out of dynamic memory in gdbwire_mi__scan_buffer()" );
+		YY_FATAL_ERROR( "out of dynamic memory in yy_scan_buffer()" );
 
-	b->yy_buf_size = size - 2;	/* "- 2" to take care of EOB's */
+	b->yy_buf_size = (int) (size - 2);	/* "- 2" to take care of EOB's */
 	b->yy_buf_pos = b->yy_ch_buf = base;
 	b->yy_is_our_buffer = 0;
-	b->yy_input_file = 0;
+	b->yy_input_file = NULL;
 	b->yy_n_chars = b->yy_buf_size;
 	b->yy_is_interactive = 0;
 	b->yy_at_bol = 1;
 	b->yy_fill_buffer = 0;
 	b->yy_buffer_status = YY_BUFFER_NEW;
 
-	gdbwire_mi__switch_to_buffer(b ,yyscanner );
+	yy_switch_to_buffer( b , yyscanner );
 
 	return b;
 }
 
-/** Setup the input buffer state to scan a string. The next call to gdbwire_mi_lex() will
+/** Setup the input buffer state to scan a string. The next call to yylex() will
  * scan from a @e copy of @a str.
  * @param yystr a NUL-terminated string to scan
  * @param yyscanner The scanner object.
  * @return the newly allocated buffer state object.
  * @note If you want to scan bytes that may contain NUL values, then use
- *       gdbwire_mi__scan_bytes() instead.
+ *       yy_scan_bytes() instead.
  */
-YY_BUFFER_STATE gdbwire_mi__scan_string (yyconst char * yystr , yyscan_t yyscanner)
+YY_BUFFER_STATE yy_scan_string (const char * yystr , yyscan_t yyscanner)
 {
     
-	return gdbwire_mi__scan_bytes(yystr,strlen(yystr) ,yyscanner);
+	return yy_scan_bytes( yystr, (int) strlen(yystr) , yyscanner);
 }
 
-/** Setup the input buffer state to scan the given bytes. The next call to gdbwire_mi_lex() will
+/** Setup the input buffer state to scan the given bytes. The next call to yylex() will
  * scan from a @e copy of @a bytes.
  * @param yybytes the byte buffer to scan
  * @param _yybytes_len the number of bytes in the buffer pointed to by @a bytes.
  * @param yyscanner The scanner object.
  * @return the newly allocated buffer state object.
  */
-YY_BUFFER_STATE gdbwire_mi__scan_bytes  (yyconst char * yybytes, yy_size_t  _yybytes_len , yyscan_t yyscanner)
+YY_BUFFER_STATE yy_scan_bytes  (const char * yybytes, int  _yybytes_len , yyscan_t yyscanner)
 {
 	YY_BUFFER_STATE b;
 	char *buf;
 	yy_size_t n;
-	yy_size_t i;
+	int i;
     
 	/* Get memory for full buffer, including space for trailing EOB's. */
-	n = _yybytes_len + 2;
-	buf = (char *) gdbwire_mi_alloc(n ,yyscanner );
+	n = (yy_size_t) (_yybytes_len + 2);
+	buf = (char *) yyalloc( n , yyscanner );
 	if ( ! buf )
-		YY_FATAL_ERROR( "out of dynamic memory in gdbwire_mi__scan_bytes()" );
+		YY_FATAL_ERROR( "out of dynamic memory in yy_scan_bytes()" );
 
 	for ( i = 0; i < _yybytes_len; ++i )
 		buf[i] = yybytes[i];
 
 	buf[_yybytes_len] = buf[_yybytes_len+1] = YY_END_OF_BUFFER_CHAR;
 
-	b = gdbwire_mi__scan_buffer(buf,n ,yyscanner);
+	b = yy_scan_buffer( buf, n , yyscanner);
 	if ( ! b )
-		YY_FATAL_ERROR( "bad buffer in gdbwire_mi__scan_bytes()" );
+		YY_FATAL_ERROR( "bad buffer in yy_scan_bytes()" );
 
 	/* It's okay to grow etc. this buffer, and we should throw it
 	 * away when we're done.
@@ -5039,11 +5310,11 @@ YY_BUFFER_STATE gdbwire_mi__scan_bytes  (yyconst char * yybytes, yy_size_t  _yyb
 #define YY_EXIT_FAILURE 2
 #endif
 
-static void yy_fatal_error (yyconst char* msg , yyscan_t yyscanner)
+static void yynoreturn yy_fatal_error (const char* msg , yyscan_t yyscanner)
 {
 	struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	(void)yyg;
-	(void) fprintf( stderr, "%s\n", msg );
+	fprintf( stderr, "%s\n", msg );
 	exit( YY_EXIT_FAILURE );
 }
 
@@ -5069,7 +5340,7 @@ static void yy_fatal_error (yyconst char* msg , yyscan_t yyscanner)
 /** Get the user-defined data for this scanner.
  * @param yyscanner The scanner object.
  */
-YY_EXTRA_TYPE gdbwire_mi_get_extra  (yyscan_t yyscanner)
+YY_EXTRA_TYPE yyget_extra  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yyextra;
@@ -5078,10 +5349,10 @@ YY_EXTRA_TYPE gdbwire_mi_get_extra  (yyscan_t yyscanner)
 /** Get the current line number.
  * @param yyscanner The scanner object.
  */
-int gdbwire_mi_get_lineno  (yyscan_t yyscanner)
+int yyget_lineno  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-    
+
         if (! YY_CURRENT_BUFFER)
             return 0;
     
@@ -5091,10 +5362,10 @@ int gdbwire_mi_get_lineno  (yyscan_t yyscanner)
 /** Get the current column number.
  * @param yyscanner The scanner object.
  */
-int gdbwire_mi_get_column  (yyscan_t yyscanner)
+int yyget_column  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-    
+
         if (! YY_CURRENT_BUFFER)
             return 0;
     
@@ -5104,7 +5375,7 @@ int gdbwire_mi_get_column  (yyscan_t yyscanner)
 /** Get the input stream.
  * @param yyscanner The scanner object.
  */
-FILE *gdbwire_mi_get_in  (yyscan_t yyscanner)
+FILE *yyget_in  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yyin;
@@ -5113,7 +5384,7 @@ FILE *gdbwire_mi_get_in  (yyscan_t yyscanner)
 /** Get the output stream.
  * @param yyscanner The scanner object.
  */
-FILE *gdbwire_mi_get_out  (yyscan_t yyscanner)
+FILE *yyget_out  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yyout;
@@ -5122,7 +5393,7 @@ FILE *gdbwire_mi_get_out  (yyscan_t yyscanner)
 /** Get the length of the current token.
  * @param yyscanner The scanner object.
  */
-yy_size_t gdbwire_mi_get_leng  (yyscan_t yyscanner)
+int yyget_leng  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yyleng;
@@ -5132,7 +5403,7 @@ yy_size_t gdbwire_mi_get_leng  (yyscan_t yyscanner)
  * @param yyscanner The scanner object.
  */
 
-char *gdbwire_mi_get_text  (yyscan_t yyscanner)
+char *yyget_text  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yytext;
@@ -5142,7 +5413,7 @@ char *gdbwire_mi_get_text  (yyscan_t yyscanner)
  * @param user_defined The data to be associated with this scanner.
  * @param yyscanner The scanner object.
  */
-void gdbwire_mi_set_extra (YY_EXTRA_TYPE  user_defined , yyscan_t yyscanner)
+void yyset_extra (YY_EXTRA_TYPE  user_defined , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     yyextra = user_defined ;
@@ -5152,13 +5423,13 @@ void gdbwire_mi_set_extra (YY_EXTRA_TYPE  user_defined , yyscan_t yyscanner)
  * @param _line_number line number
  * @param yyscanner The scanner object.
  */
-void gdbwire_mi_set_lineno (int  _line_number , yyscan_t yyscanner)
+void yyset_lineno (int  _line_number , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
         /* lineno is only valid if an input buffer exists. */
         if (! YY_CURRENT_BUFFER )
-           YY_FATAL_ERROR( "gdbwire_mi_set_lineno called with no buffer" );
+           YY_FATAL_ERROR( "yyset_lineno called with no buffer" );
     
     yylineno = _line_number;
 }
@@ -5167,13 +5438,13 @@ void gdbwire_mi_set_lineno (int  _line_number , yyscan_t yyscanner)
  * @param _column_no column number
  * @param yyscanner The scanner object.
  */
-void gdbwire_mi_set_column (int  _column_no , yyscan_t yyscanner)
+void yyset_column (int  _column_no , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
         /* column is only valid if an input buffer exists. */
         if (! YY_CURRENT_BUFFER )
-           YY_FATAL_ERROR( "gdbwire_mi_set_column called with no buffer" );
+           YY_FATAL_ERROR( "yyset_column called with no buffer" );
     
     yycolumn = _column_no;
 }
@@ -5182,27 +5453,27 @@ void gdbwire_mi_set_column (int  _column_no , yyscan_t yyscanner)
  * input buffer.
  * @param _in_str A readable stream.
  * @param yyscanner The scanner object.
- * @see gdbwire_mi__switch_to_buffer
+ * @see yy_switch_to_buffer
  */
-void gdbwire_mi_set_in (FILE *  _in_str , yyscan_t yyscanner)
+void yyset_in (FILE *  _in_str , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     yyin = _in_str ;
 }
 
-void gdbwire_mi_set_out (FILE *  _out_str , yyscan_t yyscanner)
+void yyset_out (FILE *  _out_str , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     yyout = _out_str ;
 }
 
-int gdbwire_mi_get_debug  (yyscan_t yyscanner)
+int yyget_debug  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yy_flex_debug;
 }
 
-void gdbwire_mi_set_debug (int  _bdebug , yyscan_t yyscanner)
+void yyset_debug (int  _bdebug , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     yy_flex_debug = _bdebug ;
@@ -5212,20 +5483,18 @@ void gdbwire_mi_set_debug (int  _bdebug , yyscan_t yyscanner)
 
 /* User-visible API */
 
-/* gdbwire_mi_lex_init is special because it creates the scanner itself, so it is
+/* yylex_init is special because it creates the scanner itself, so it is
  * the ONLY reentrant function that doesn't take the scanner as the last argument.
  * That's why we explicitly handle the declaration, instead of using our macros.
  */
-
-int gdbwire_mi_lex_init(yyscan_t* ptr_yy_globals)
-
+int yylex_init(yyscan_t* ptr_yy_globals)
 {
     if (ptr_yy_globals == NULL){
         errno = EINVAL;
         return 1;
     }
 
-    *ptr_yy_globals = (yyscan_t) gdbwire_mi_alloc ( sizeof( struct yyguts_t ), NULL );
+    *ptr_yy_globals = (yyscan_t) yyalloc ( sizeof( struct yyguts_t ), NULL );
 
     if (*ptr_yy_globals == NULL){
         errno = ENOMEM;
@@ -5238,39 +5507,37 @@ int gdbwire_mi_lex_init(yyscan_t* ptr_yy_globals)
     return yy_init_globals ( *ptr_yy_globals );
 }
 
-/* gdbwire_mi_lex_init_extra has the same functionality as gdbwire_mi_lex_init, but follows the
+/* yylex_init_extra has the same functionality as yylex_init, but follows the
  * convention of taking the scanner as the last argument. Note however, that
  * this is a *pointer* to a scanner, as it will be allocated by this call (and
  * is the reason, too, why this function also must handle its own declaration).
- * The user defined value in the first argument will be available to gdbwire_mi_alloc in
+ * The user defined value in the first argument will be available to yyalloc in
  * the yyextra field.
  */
-
-int gdbwire_mi_lex_init_extra(YY_EXTRA_TYPE yy_user_defined,yyscan_t* ptr_yy_globals )
-
+int yylex_init_extra( YY_EXTRA_TYPE yy_user_defined, yyscan_t* ptr_yy_globals )
 {
     struct yyguts_t dummy_yyguts;
 
-    gdbwire_mi_set_extra (yy_user_defined, &dummy_yyguts);
+    yyset_extra (yy_user_defined, &dummy_yyguts);
 
     if (ptr_yy_globals == NULL){
         errno = EINVAL;
         return 1;
     }
-	
-    *ptr_yy_globals = (yyscan_t) gdbwire_mi_alloc ( sizeof( struct yyguts_t ), &dummy_yyguts );
-	
+
+    *ptr_yy_globals = (yyscan_t) yyalloc ( sizeof( struct yyguts_t ), &dummy_yyguts );
+
     if (*ptr_yy_globals == NULL){
         errno = ENOMEM;
         return 1;
     }
-    
+
     /* By setting to 0xAA, we expose bugs in
     yy_init_globals. Leave at 0x00 for releases. */
     memset(*ptr_yy_globals,0x00,sizeof(struct yyguts_t));
-    
-    gdbwire_mi_set_extra (yy_user_defined, *ptr_yy_globals);
-    
+
+    yyset_extra (yy_user_defined, *ptr_yy_globals);
+
     return yy_init_globals ( *ptr_yy_globals );
 }
 
@@ -5278,13 +5545,13 @@ static int yy_init_globals (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     /* Initialization is the same as for the non-reentrant scanner.
-     * This function is called from gdbwire_mi_lex_destroy(), so don't allocate here.
+     * This function is called from yylex_destroy(), so don't allocate here.
      */
 
-    yyg->yy_buffer_stack = 0;
+    yyg->yy_buffer_stack = NULL;
     yyg->yy_buffer_stack_top = 0;
     yyg->yy_buffer_stack_max = 0;
-    yyg->yy_c_buf_p = (char *) 0;
+    yyg->yy_c_buf_p = NULL;
     yyg->yy_init = 0;
     yyg->yy_start = 0;
 
@@ -5297,42 +5564,42 @@ static int yy_init_globals (yyscan_t yyscanner)
     yyin = stdin;
     yyout = stdout;
 #else
-    yyin = (FILE *) 0;
-    yyout = (FILE *) 0;
+    yyin = NULL;
+    yyout = NULL;
 #endif
 
     /* For future reference: Set errno on error, since we are called by
-     * gdbwire_mi_lex_init()
+     * yylex_init()
      */
     return 0;
 }
 
-/* gdbwire_mi_lex_destroy is for both reentrant and non-reentrant scanners. */
-int gdbwire_mi_lex_destroy  (yyscan_t yyscanner)
+/* yylex_destroy is for both reentrant and non-reentrant scanners. */
+int yylex_destroy  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
     /* Pop the buffer stack, destroying each element. */
 	while(YY_CURRENT_BUFFER){
-		gdbwire_mi__delete_buffer(YY_CURRENT_BUFFER ,yyscanner );
+		yy_delete_buffer( YY_CURRENT_BUFFER , yyscanner );
 		YY_CURRENT_BUFFER_LVALUE = NULL;
-		gdbwire_mi_pop_buffer_state(yyscanner);
+		yypop_buffer_state(yyscanner);
 	}
 
 	/* Destroy the stack itself. */
-	gdbwire_mi_free(yyg->yy_buffer_stack ,yyscanner);
+	yyfree(yyg->yy_buffer_stack , yyscanner);
 	yyg->yy_buffer_stack = NULL;
 
     /* Destroy the start condition stack. */
-        gdbwire_mi_free(yyg->yy_start_stack ,yyscanner );
+        yyfree( yyg->yy_start_stack , yyscanner );
         yyg->yy_start_stack = NULL;
 
     /* Reset the globals. This is important in a non-reentrant scanner so the next time
-     * gdbwire_mi_lex() is called, initialization will occur. */
+     * yylex() is called, initialization will occur. */
     yy_init_globals( yyscanner);
 
     /* Destroy the main struct (reentrant only). */
-    gdbwire_mi_free ( yyscanner , yyscanner );
+    yyfree ( yyscanner , yyscanner );
     yyscanner = NULL;
     return 0;
 }
@@ -5342,7 +5609,7 @@ int gdbwire_mi_lex_destroy  (yyscan_t yyscanner)
  */
 
 #ifndef yytext_ptr
-static void yy_flex_strncpy (char* s1, yyconst char * s2, int n , yyscan_t yyscanner)
+static void yy_flex_strncpy (char* s1, const char * s2, int n , yyscan_t yyscanner)
 {
 	struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	(void)yyg;
@@ -5354,7 +5621,7 @@ static void yy_flex_strncpy (char* s1, yyconst char * s2, int n , yyscan_t yysca
 #endif
 
 #ifdef YY_NEED_STRLEN
-static int yy_flex_strlen (yyconst char * s , yyscan_t yyscanner)
+static int yy_flex_strlen (const char * s , yyscan_t yyscanner)
 {
 	int n;
 	for ( n = 0; s[n]; ++n )
@@ -5364,14 +5631,14 @@ static int yy_flex_strlen (yyconst char * s , yyscan_t yyscanner)
 }
 #endif
 
-void *gdbwire_mi_alloc (yy_size_t  size , yyscan_t yyscanner)
+void *yyalloc (yy_size_t  size , yyscan_t yyscanner)
 {
 	struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	(void)yyg;
-	return (void *) malloc( size );
+	return malloc(size);
 }
 
-void *gdbwire_mi_realloc  (void * ptr, yy_size_t  size , yyscan_t yyscanner)
+void *yyrealloc  (void * ptr, yy_size_t  size , yyscan_t yyscanner)
 {
 	struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	(void)yyg;
@@ -5383,28 +5650,28 @@ void *gdbwire_mi_realloc  (void * ptr, yy_size_t  size , yyscan_t yyscanner)
 	 * any pointer type to void*, and deal with argument conversions
 	 * as though doing an assignment.
 	 */
-	return (void *) realloc( (char *) ptr, size );
+	return realloc(ptr, size);
 }
 
-void gdbwire_mi_free (void * ptr , yyscan_t yyscanner)
+void yyfree (void * ptr , yyscan_t yyscanner)
 {
 	struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	(void)yyg;
-	free( (char *) ptr );	/* see gdbwire_mi_realloc() for (char *) cast */
+	free( (char *) ptr );	/* see yyrealloc() for (char *) cast */
 }
 
 #define YYTABLES_NAME "yytables"
 
 
 
-
 /***** End of gdbwire_mi_lexer.c *********************************************/
 /***** Begin file gdbwire_mi_grammar.c ***************************************/
-/* A Bison parser, made by GNU Bison 3.0.4.  */
+/* A Bison parser, made by GNU Bison 3.8.2.  */
 
 /* Bison implementation for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015 Free Software Foundation, Inc.
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2021 Free Software Foundation,
+   Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -5417,7 +5684,7 @@ void gdbwire_mi_free (void * ptr , yyscan_t yyscanner)
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -5435,6 +5702,10 @@ void gdbwire_mi_free (void * ptr , yyscan_t yyscanner)
 /* C LALR(1) parser skeleton written by Richard Stallman, by
    simplifying the original so-called "semantic" parser.  */
 
+/* DO NOT RELY ON FEATURES THAT ARE NOT DOCUMENTED in the manual,
+   especially those whose name start with YY_ or yy_.  They are
+   private implementation details that can be changed or removed.  */
+
 /* All symbols defined below should begin with yy or YY, to avoid
    infringing on user name space.  This should be done even for local
    variables, as they might otherwise be expanded by user macros.
@@ -5442,11 +5713,11 @@ void gdbwire_mi_free (void * ptr , yyscan_t yyscanner)
    define necessary library symbols; they are noted "INFRINGES ON
    USER NAME SPACE" below.  */
 
-/* Identify Bison output.  */
-#define YYBISON 1
+/* Identify Bison output, and Bison version.  */
+#define YYBISON 30802
 
-/* Bison version.  */
-#define YYBISON_VERSION "3.0.4"
+/* Bison version string.  */
+#define YYBISON_VERSION "3.8.2"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -5464,6 +5735,7 @@ void gdbwire_mi_free (void * ptr , yyscan_t yyscanner)
 /* Substitute the variable and function names.  */
 #define yypush_parse    gdbwire_mi_push_parse
 #define yypstate_new    gdbwire_mi_pstate_new
+#define yypstate_clear  gdbwire_mi_pstate_clear
 #define yypstate_delete gdbwire_mi_pstate_delete
 #define yypstate        gdbwire_mi_pstate
 #define yylex           gdbwire_mi_lex
@@ -5471,8 +5743,7 @@ void gdbwire_mi_free (void * ptr , yyscan_t yyscanner)
 #define yydebug         gdbwire_mi_debug
 #define yynerrs         gdbwire_mi_nerrs
 
-
-/* Copy the first part of user declarations.  */
+/* First part of user prologue.  */
 
 #include <string.h>
 #include <stdio.h>
@@ -5636,24 +5907,29 @@ static char *gdbwire_mi_unescape_cstring(char *str)
 
 
 
-# ifndef YY_NULLPTR
-#  if defined __cplusplus && 201103L <= __cplusplus
-#   define YY_NULLPTR nullptr
+# ifndef YY_CAST
+#  ifdef __cplusplus
+#   define YY_CAST(Type, Val) static_cast<Type> (Val)
+#   define YY_REINTERPRET_CAST(Type, Val) reinterpret_cast<Type> (Val)
 #  else
-#   define YY_NULLPTR 0
+#   define YY_CAST(Type, Val) ((Type) (Val))
+#   define YY_REINTERPRET_CAST(Type, Val) ((Type) (Val))
+#  endif
+# endif
+# ifndef YY_NULLPTR
+#  if defined __cplusplus
+#   if 201103L <= __cplusplus
+#    define YY_NULLPTR nullptr
+#   else
+#    define YY_NULLPTR 0
+#   endif
+#  else
+#   define YY_NULLPTR ((void*)0)
 #  endif
 # endif
 
-/* Enabling verbose error messages.  */
-#ifdef YYERROR_VERBOSE
-# undef YYERROR_VERBOSE
-# define YYERROR_VERBOSE 1
-#else
-# define YYERROR_VERBOSE 0
-#endif
-
-/* In a future release of Bison, this section will be replaced
-   by #include "y.tab.h".  */
+/* Use api.header.include to #include this header
+   instead of duplicating it here.  */
 #ifndef YY_GDBWIRE_MI_SRC_GDBWIRE_MI_GRAMMAR_H_INCLUDED
 # define YY_GDBWIRE_MI_SRC_GDBWIRE_MI_GRAMMAR_H_INCLUDED
 /* Debug traces.  */
@@ -5675,32 +5951,41 @@ typedef void *yyscan_t;
     struct gdbwire_mi_output;
 
 
-/* Token type.  */
+/* Token kinds.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
   enum yytokentype
   {
-    OPEN_BRACE = 258,
-    CLOSED_BRACE = 259,
-    OPEN_PAREN = 260,
-    CLOSED_PAREN = 261,
-    ADD_OP = 262,
-    MULT_OP = 263,
-    EQUAL_SIGN = 264,
-    TILDA = 265,
-    AT_SYMBOL = 266,
-    AMPERSAND = 267,
-    OPEN_BRACKET = 268,
-    CLOSED_BRACKET = 269,
-    NEWLINE = 270,
-    INTEGER_LITERAL = 271,
-    STRING_LITERAL = 272,
-    CSTRING = 273,
-    COMMA = 274,
-    CARROT = 275
+    YYEMPTY = -2,
+    YYEOF = 0,                     /* "end of file"  */
+    YYerror = 256,                 /* error  */
+    YYUNDEF = 257,                 /* "invalid token"  */
+    OPEN_BRACE = 258,              /* OPEN_BRACE  */
+    CLOSED_BRACE = 259,            /* CLOSED_BRACE  */
+    OPEN_PAREN = 260,              /* OPEN_PAREN  */
+    CLOSED_PAREN = 261,            /* CLOSED_PAREN  */
+    ADD_OP = 262,                  /* ADD_OP  */
+    MULT_OP = 263,                 /* MULT_OP  */
+    EQUAL_SIGN = 264,              /* EQUAL_SIGN  */
+    TILDA = 265,                   /* TILDA  */
+    AT_SYMBOL = 266,               /* AT_SYMBOL  */
+    AMPERSAND = 267,               /* AMPERSAND  */
+    OPEN_BRACKET = 268,            /* OPEN_BRACKET  */
+    CLOSED_BRACKET = 269,          /* CLOSED_BRACKET  */
+    NEWLINE = 270,                 /* NEWLINE  */
+    INTEGER_LITERAL = 271,         /* INTEGER_LITERAL  */
+    STRING_LITERAL = 272,          /* STRING_LITERAL  */
+    CSTRING = 273,                 /* CSTRING  */
+    COMMA = 274,                   /* COMMA  */
+    CARROT = 275                   /* CARROT  */
   };
+  typedef enum yytokentype yytoken_kind_t;
 #endif
-/* Tokens.  */
+/* Token kinds.  */
+#define YYEMPTY -2
+#define YYEOF 0
+#define YYerror 256
+#define YYUNDEF 257
 #define OPEN_BRACE 258
 #define CLOSED_BRACE 259
 #define OPEN_PAREN 260
@@ -5722,7 +6007,6 @@ typedef void *yyscan_t;
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-
 union YYSTYPE
 {
 
@@ -5743,12 +6027,13 @@ union YYSTYPE
   struct gdbwire_mi_result *u_list;
   int u_stream_record_kind;
 
-};
 
+};
 typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif
+
 
 
 
@@ -5759,42 +6044,153 @@ enum { YYPUSH_MORE = 4 };
 
 typedef struct gdbwire_mi_pstate gdbwire_mi_pstate;
 
-int gdbwire_mi_push_parse (gdbwire_mi_pstate *ps, int pushed_char, YYSTYPE const *pushed_val, yyscan_t yyscanner, struct gdbwire_mi_output **gdbwire_mi_output);
 
-gdbwire_mi_pstate * gdbwire_mi_pstate_new (void);
+int gdbwire_mi_push_parse (gdbwire_mi_pstate *ps,
+                  int pushed_char, YYSTYPE const *pushed_val, yyscan_t yyscanner, struct gdbwire_mi_output **gdbwire_mi_output);
+
+gdbwire_mi_pstate *gdbwire_mi_pstate_new (void);
 void gdbwire_mi_pstate_delete (gdbwire_mi_pstate *ps);
 
-#endif /* !YY_GDBWIRE_MI_SRC_GDBWIRE_MI_GRAMMAR_H_INCLUDED  */
 
-/* Copy the second part of user declarations.  */
+#endif /* !YY_GDBWIRE_MI_SRC_GDBWIRE_MI_GRAMMAR_H_INCLUDED  */
+/* Symbol kind.  */
+enum yysymbol_kind_t
+{
+  YYSYMBOL_YYEMPTY = -2,
+  YYSYMBOL_YYEOF = 0,                      /* "end of file"  */
+  YYSYMBOL_YYerror = 1,                    /* error  */
+  YYSYMBOL_YYUNDEF = 2,                    /* "invalid token"  */
+  YYSYMBOL_OPEN_BRACE = 3,                 /* OPEN_BRACE  */
+  YYSYMBOL_CLOSED_BRACE = 4,               /* CLOSED_BRACE  */
+  YYSYMBOL_OPEN_PAREN = 5,                 /* OPEN_PAREN  */
+  YYSYMBOL_CLOSED_PAREN = 6,               /* CLOSED_PAREN  */
+  YYSYMBOL_ADD_OP = 7,                     /* ADD_OP  */
+  YYSYMBOL_MULT_OP = 8,                    /* MULT_OP  */
+  YYSYMBOL_EQUAL_SIGN = 9,                 /* EQUAL_SIGN  */
+  YYSYMBOL_TILDA = 10,                     /* TILDA  */
+  YYSYMBOL_AT_SYMBOL = 11,                 /* AT_SYMBOL  */
+  YYSYMBOL_AMPERSAND = 12,                 /* AMPERSAND  */
+  YYSYMBOL_OPEN_BRACKET = 13,              /* OPEN_BRACKET  */
+  YYSYMBOL_CLOSED_BRACKET = 14,            /* CLOSED_BRACKET  */
+  YYSYMBOL_NEWLINE = 15,                   /* NEWLINE  */
+  YYSYMBOL_INTEGER_LITERAL = 16,           /* INTEGER_LITERAL  */
+  YYSYMBOL_STRING_LITERAL = 17,            /* STRING_LITERAL  */
+  YYSYMBOL_CSTRING = 18,                   /* CSTRING  */
+  YYSYMBOL_COMMA = 19,                     /* COMMA  */
+  YYSYMBOL_CARROT = 20,                    /* CARROT  */
+  YYSYMBOL_YYACCEPT = 21,                  /* $accept  */
+  YYSYMBOL_output_list = 22,               /* output_list  */
+  YYSYMBOL_output = 23,                    /* output  */
+  YYSYMBOL_output_variant = 24,            /* output_variant  */
+  YYSYMBOL_25_1 = 25,                      /* $@1  */
+  YYSYMBOL_result_record = 26,             /* result_record  */
+  YYSYMBOL_oob_record = 27,                /* oob_record  */
+  YYSYMBOL_async_record = 28,              /* async_record  */
+  YYSYMBOL_async_record_class = 29,        /* async_record_class  */
+  YYSYMBOL_result_class = 30,              /* result_class  */
+  YYSYMBOL_async_class = 31,               /* async_class  */
+  YYSYMBOL_opt_variable = 32,              /* opt_variable  */
+  YYSYMBOL_result_list = 33,               /* result_list  */
+  YYSYMBOL_result = 34,                    /* result  */
+  YYSYMBOL_variable = 35,                  /* variable  */
+  YYSYMBOL_cstring = 36,                   /* cstring  */
+  YYSYMBOL_tuple = 37,                     /* tuple  */
+  YYSYMBOL_list = 38,                      /* list  */
+  YYSYMBOL_stream_record = 39,             /* stream_record  */
+  YYSYMBOL_stream_record_class = 40,       /* stream_record_class  */
+  YYSYMBOL_opt_token = 41,                 /* opt_token  */
+  YYSYMBOL_token = 42                      /* token  */
+};
+typedef enum yysymbol_kind_t yysymbol_kind_t;
+
+
 
 
 #ifdef short
 # undef short
 #endif
 
-#ifdef YYTYPE_UINT8
-typedef YYTYPE_UINT8 yytype_uint8;
-#else
-typedef unsigned char yytype_uint8;
+/* On compilers that do not define __PTRDIFF_MAX__ etc., make sure
+   <limits.h> and (if available) <stdint.h> are included
+   so that the code can choose integer types of a good width.  */
+
+#ifndef __PTRDIFF_MAX__
+# include <limits.h> /* INFRINGES ON USER NAME SPACE */
+# if defined __STDC_VERSION__ && 199901 <= __STDC_VERSION__
+#  include <stdint.h> /* INFRINGES ON USER NAME SPACE */
+#  define YY_STDINT_H
+# endif
 #endif
 
-#ifdef YYTYPE_INT8
-typedef YYTYPE_INT8 yytype_int8;
+/* Narrow types that promote to a signed type and that can represent a
+   signed or unsigned integer of at least N bits.  In tables they can
+   save space and decrease cache pressure.  Promoting to a signed type
+   helps avoid bugs in integer arithmetic.  */
+
+#ifdef __INT_LEAST8_MAX__
+typedef __INT_LEAST8_TYPE__ yytype_int8;
+#elif defined YY_STDINT_H
+typedef int_least8_t yytype_int8;
 #else
 typedef signed char yytype_int8;
 #endif
 
-#ifdef YYTYPE_UINT16
-typedef YYTYPE_UINT16 yytype_uint16;
+#ifdef __INT_LEAST16_MAX__
+typedef __INT_LEAST16_TYPE__ yytype_int16;
+#elif defined YY_STDINT_H
+typedef int_least16_t yytype_int16;
 #else
-typedef unsigned short int yytype_uint16;
+typedef short yytype_int16;
 #endif
 
-#ifdef YYTYPE_INT16
-typedef YYTYPE_INT16 yytype_int16;
+/* Work around bug in HP-UX 11.23, which defines these macros
+   incorrectly for preprocessor constants.  This workaround can likely
+   be removed in 2023, as HPE has promised support for HP-UX 11.23
+   (aka HP-UX 11i v2) only through the end of 2022; see Table 2 of
+   <https://h20195.www2.hpe.com/V2/getpdf.aspx/4AA4-7673ENW.pdf>.  */
+#ifdef __hpux
+# undef UINT_LEAST8_MAX
+# undef UINT_LEAST16_MAX
+# define UINT_LEAST8_MAX 255
+# define UINT_LEAST16_MAX 65535
+#endif
+
+#if defined __UINT_LEAST8_MAX__ && __UINT_LEAST8_MAX__ <= __INT_MAX__
+typedef __UINT_LEAST8_TYPE__ yytype_uint8;
+#elif (!defined __UINT_LEAST8_MAX__ && defined YY_STDINT_H \
+       && UINT_LEAST8_MAX <= INT_MAX)
+typedef uint_least8_t yytype_uint8;
+#elif !defined __UINT_LEAST8_MAX__ && UCHAR_MAX <= INT_MAX
+typedef unsigned char yytype_uint8;
 #else
-typedef short int yytype_int16;
+typedef short yytype_uint8;
+#endif
+
+#if defined __UINT_LEAST16_MAX__ && __UINT_LEAST16_MAX__ <= __INT_MAX__
+typedef __UINT_LEAST16_TYPE__ yytype_uint16;
+#elif (!defined __UINT_LEAST16_MAX__ && defined YY_STDINT_H \
+       && UINT_LEAST16_MAX <= INT_MAX)
+typedef uint_least16_t yytype_uint16;
+#elif !defined __UINT_LEAST16_MAX__ && USHRT_MAX <= INT_MAX
+typedef unsigned short yytype_uint16;
+#else
+typedef int yytype_uint16;
+#endif
+
+#ifndef YYPTRDIFF_T
+# if defined __PTRDIFF_TYPE__ && defined __PTRDIFF_MAX__
+#  define YYPTRDIFF_T __PTRDIFF_TYPE__
+#  define YYPTRDIFF_MAXIMUM __PTRDIFF_MAX__
+# elif defined PTRDIFF_MAX
+#  ifndef ptrdiff_t
+#   include <stddef.h> /* INFRINGES ON USER NAME SPACE */
+#  endif
+#  define YYPTRDIFF_T ptrdiff_t
+#  define YYPTRDIFF_MAXIMUM PTRDIFF_MAX
+# else
+#  define YYPTRDIFF_T long
+#  define YYPTRDIFF_MAXIMUM LONG_MAX
+# endif
 #endif
 
 #ifndef YYSIZE_T
@@ -5802,15 +6198,28 @@ typedef short int yytype_int16;
 #  define YYSIZE_T __SIZE_TYPE__
 # elif defined size_t
 #  define YYSIZE_T size_t
-# elif ! defined YYSIZE_T
+# elif defined __STDC_VERSION__ && 199901 <= __STDC_VERSION__
 #  include <stddef.h> /* INFRINGES ON USER NAME SPACE */
 #  define YYSIZE_T size_t
 # else
-#  define YYSIZE_T unsigned int
+#  define YYSIZE_T unsigned
 # endif
 #endif
 
-#define YYSIZE_MAXIMUM ((YYSIZE_T) -1)
+#define YYSIZE_MAXIMUM                                  \
+  YY_CAST (YYPTRDIFF_T,                                 \
+           (YYPTRDIFF_MAXIMUM < YY_CAST (YYSIZE_T, -1)  \
+            ? YYPTRDIFF_MAXIMUM                         \
+            : YY_CAST (YYSIZE_T, -1)))
+
+#define YYSIZEOF(X) YY_CAST (YYPTRDIFF_T, sizeof (X))
+
+
+/* Stored state numbers (used for stacks). */
+typedef yytype_int8 yy_state_t;
+
+/* State numbers in computations.  */
+typedef int yy_state_fast_t;
 
 #ifndef YY_
 # if defined YYENABLE_NLS && YYENABLE_NLS
@@ -5824,47 +6233,43 @@ typedef short int yytype_int16;
 # endif
 #endif
 
-#ifndef YY_ATTRIBUTE
-# if (defined __GNUC__                                               \
-      && (2 < __GNUC__ || (__GNUC__ == 2 && 96 <= __GNUC_MINOR__)))  \
-     || defined __SUNPRO_C && 0x5110 <= __SUNPRO_C
-#  define YY_ATTRIBUTE(Spec) __attribute__(Spec)
+
+#ifndef YY_ATTRIBUTE_PURE
+# if defined __GNUC__ && 2 < __GNUC__ + (96 <= __GNUC_MINOR__)
+#  define YY_ATTRIBUTE_PURE __attribute__ ((__pure__))
 # else
-#  define YY_ATTRIBUTE(Spec) /* empty */
+#  define YY_ATTRIBUTE_PURE
 # endif
 #endif
 
-#ifndef YY_ATTRIBUTE_PURE
-# define YY_ATTRIBUTE_PURE   YY_ATTRIBUTE ((__pure__))
-#endif
-
 #ifndef YY_ATTRIBUTE_UNUSED
-# define YY_ATTRIBUTE_UNUSED YY_ATTRIBUTE ((__unused__))
-#endif
-
-#if !defined _Noreturn \
-     && (!defined __STDC_VERSION__ || __STDC_VERSION__ < 201112)
-# if defined _MSC_VER && 1200 <= _MSC_VER
-#  define _Noreturn __declspec (noreturn)
+# if defined __GNUC__ && 2 < __GNUC__ + (7 <= __GNUC_MINOR__)
+#  define YY_ATTRIBUTE_UNUSED __attribute__ ((__unused__))
 # else
-#  define _Noreturn YY_ATTRIBUTE ((__noreturn__))
+#  define YY_ATTRIBUTE_UNUSED
 # endif
 #endif
 
 /* Suppress unused-variable warnings by "using" E.  */
 #if ! defined lint || defined __GNUC__
-# define YYUSE(E) ((void) (E))
+# define YY_USE(E) ((void) (E))
 #else
-# define YYUSE(E) /* empty */
+# define YY_USE(E) /* empty */
 #endif
 
-#if defined __GNUC__ && 407 <= __GNUC__ * 100 + __GNUC_MINOR__
 /* Suppress an incorrect diagnostic about yylval being uninitialized.  */
-# define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN \
-    _Pragma ("GCC diagnostic push") \
-    _Pragma ("GCC diagnostic ignored \"-Wuninitialized\"")\
+#if defined __GNUC__ && ! defined __ICC && 406 <= __GNUC__ * 100 + __GNUC_MINOR__
+# if __GNUC__ * 100 + __GNUC_MINOR__ < 407
+#  define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN                           \
+    _Pragma ("GCC diagnostic push")                                     \
+    _Pragma ("GCC diagnostic ignored \"-Wuninitialized\"")
+# else
+#  define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN                           \
+    _Pragma ("GCC diagnostic push")                                     \
+    _Pragma ("GCC diagnostic ignored \"-Wuninitialized\"")              \
     _Pragma ("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")
-# define YY_IGNORE_MAYBE_UNINITIALIZED_END \
+# endif
+# define YY_IGNORE_MAYBE_UNINITIALIZED_END      \
     _Pragma ("GCC diagnostic pop")
 #else
 # define YY_INITIAL_VALUE(Value) Value
@@ -5877,8 +6282,22 @@ typedef short int yytype_int16;
 # define YY_INITIAL_VALUE(Value) /* Nothing. */
 #endif
 
+#if defined __cplusplus && defined __GNUC__ && ! defined __ICC && 6 <= __GNUC__
+# define YY_IGNORE_USELESS_CAST_BEGIN                          \
+    _Pragma ("GCC diagnostic push")                            \
+    _Pragma ("GCC diagnostic ignored \"-Wuseless-cast\"")
+# define YY_IGNORE_USELESS_CAST_END            \
+    _Pragma ("GCC diagnostic pop")
+#endif
+#ifndef YY_IGNORE_USELESS_CAST_BEGIN
+# define YY_IGNORE_USELESS_CAST_BEGIN
+# define YY_IGNORE_USELESS_CAST_END
+#endif
 
-#if ! defined yyoverflow || YYERROR_VERBOSE
+
+#define YY_ASSERT(E) ((void) (0 && (E)))
+
+#if !defined yyoverflow
 
 /* The parser invokes alloca or malloc; define the necessary symbols.  */
 
@@ -5919,8 +6338,7 @@ void free (void *); /* INFRINGES ON USER NAME SPACE */
 #   endif
 #  endif
 # endif
-#endif /* ! defined yyoverflow || YYERROR_VERBOSE */
-
+#endif /* !defined yyoverflow */
 
 #if (! defined yyoverflow \
      && (! defined __cplusplus \
@@ -5929,17 +6347,17 @@ void free (void *); /* INFRINGES ON USER NAME SPACE */
 /* A type that is properly aligned for any stack member.  */
 union yyalloc
 {
-  yytype_int16 yyss_alloc;
+  yy_state_t yyss_alloc;
   YYSTYPE yyvs_alloc;
 };
 
 /* The size of the maximum gap between one aligned stack and the next.  */
-# define YYSTACK_GAP_MAXIMUM (sizeof (union yyalloc) - 1)
+# define YYSTACK_GAP_MAXIMUM (YYSIZEOF (union yyalloc) - 1)
 
 /* The size of an array large to enough to hold all stacks, each with
    N elements.  */
 # define YYSTACK_BYTES(N) \
-     ((N) * (sizeof (yytype_int16) + sizeof (YYSTYPE)) \
+     ((N) * (YYSIZEOF (yy_state_t) + YYSIZEOF (YYSTYPE)) \
       + YYSTACK_GAP_MAXIMUM)
 
 # define YYCOPY_NEEDED 1
@@ -5952,11 +6370,11 @@ union yyalloc
 # define YYSTACK_RELOCATE(Stack_alloc, Stack)                           \
     do                                                                  \
       {                                                                 \
-        YYSIZE_T yynewbytes;                                            \
+        YYPTRDIFF_T yynewbytes;                                         \
         YYCOPY (&yyptr->Stack_alloc, Stack, yysize);                    \
         Stack = &yyptr->Stack_alloc;                                    \
-        yynewbytes = yystacksize * sizeof (*Stack) + YYSTACK_GAP_MAXIMUM; \
-        yyptr += yynewbytes / sizeof (*yyptr);                          \
+        yynewbytes = yystacksize * YYSIZEOF (*Stack) + YYSTACK_GAP_MAXIMUM; \
+        yyptr += yynewbytes / YYSIZEOF (*yyptr);                        \
       }                                                                 \
     while (0)
 
@@ -5968,12 +6386,12 @@ union yyalloc
 # ifndef YYCOPY
 #  if defined __GNUC__ && 1 < __GNUC__
 #   define YYCOPY(Dst, Src, Count) \
-      __builtin_memcpy (Dst, Src, (Count) * sizeof (*(Src)))
+      __builtin_memcpy (Dst, Src, YY_CAST (YYSIZE_T, (Count)) * sizeof (*(Src)))
 #  else
 #   define YYCOPY(Dst, Src, Count)              \
       do                                        \
         {                                       \
-          YYSIZE_T yyi;                         \
+          YYPTRDIFF_T yyi;                      \
           for (yyi = 0; yyi < (Count); yyi++)   \
             (Dst)[yyi] = (Src)[yyi];            \
         }                                       \
@@ -5996,17 +6414,20 @@ union yyalloc
 /* YYNSTATES -- Number of states.  */
 #define YYNSTATES  56
 
-/* YYTRANSLATE[YYX] -- Symbol number corresponding to YYX as returned
-   by yylex, with out-of-bounds checking.  */
-#define YYUNDEFTOK  2
+/* YYMAXUTOK -- Last valid token kind.  */
 #define YYMAXUTOK   275
 
-#define YYTRANSLATE(YYX)                                                \
-  ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
+
+/* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
+   as returned by yylex, with out-of-bounds checking.  */
+#define YYTRANSLATE(YYX)                                \
+  (0 <= (YYX) && (YYX) <= YYMAXUTOK                     \
+   ? YY_CAST (yysymbol_kind_t, yytranslate[YYX])        \
+   : YYSYMBOL_YYUNDEF)
 
 /* YYTRANSLATE[TOKEN-NUM] -- Symbol number corresponding to TOKEN-NUM
-   as returned by yylex, without out-of-bounds checking.  */
-static const yytype_uint8 yytranslate[] =
+   as returned by yylex.  */
+static const yytype_int8 yytranslate[] =
 {
        0,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -6039,8 +6460,8 @@ static const yytype_uint8 yytranslate[] =
 };
 
 #if YYDEBUG
-  /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
-static const yytype_uint16 yyrline[] =
+/* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
+static const yytype_int16 yyrline[] =
 {
        0,   264,   264,   267,   270,   274,   278,   284,   290,   290,
      302,   309,   317,   323,   329,   337,   346,   350,   354,   358,
@@ -6050,46 +6471,48 @@ static const yytype_uint16 yyrline[] =
 };
 #endif
 
-#if YYDEBUG || YYERROR_VERBOSE || 0
+/** Accessing symbol of state STATE.  */
+#define YY_ACCESSING_SYMBOL(State) YY_CAST (yysymbol_kind_t, yystos[State])
+
+#if YYDEBUG || 0
+/* The user-facing name of the symbol whose (internal) number is
+   YYSYMBOL.  No bounds checking.  */
+static const char *yysymbol_name (yysymbol_kind_t yysymbol) YY_ATTRIBUTE_UNUSED;
+
 /* YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
 {
-  "$end", "error", "$undefined", "OPEN_BRACE", "CLOSED_BRACE",
-  "OPEN_PAREN", "CLOSED_PAREN", "ADD_OP", "MULT_OP", "EQUAL_SIGN", "TILDA",
-  "AT_SYMBOL", "AMPERSAND", "OPEN_BRACKET", "CLOSED_BRACKET", "NEWLINE",
-  "INTEGER_LITERAL", "STRING_LITERAL", "CSTRING", "COMMA", "CARROT",
-  "$accept", "output_list", "output", "output_variant", "$@1",
-  "result_record", "oob_record", "async_record", "async_record_class",
-  "result_class", "async_class", "opt_variable", "result_list", "result",
-  "variable", "cstring", "tuple", "list", "stream_record",
-  "stream_record_class", "opt_token", "token", YY_NULLPTR
+  "\"end of file\"", "error", "\"invalid token\"", "OPEN_BRACE",
+  "CLOSED_BRACE", "OPEN_PAREN", "CLOSED_PAREN", "ADD_OP", "MULT_OP",
+  "EQUAL_SIGN", "TILDA", "AT_SYMBOL", "AMPERSAND", "OPEN_BRACKET",
+  "CLOSED_BRACKET", "NEWLINE", "INTEGER_LITERAL", "STRING_LITERAL",
+  "CSTRING", "COMMA", "CARROT", "$accept", "output_list", "output",
+  "output_variant", "$@1", "result_record", "oob_record", "async_record",
+  "async_record_class", "result_class", "async_class", "opt_variable",
+  "result_list", "result", "variable", "cstring", "tuple", "list",
+  "stream_record", "stream_record_class", "opt_token", "token", YY_NULLPTR
 };
+
+static const char *
+yysymbol_name (yysymbol_kind_t yysymbol)
+{
+  return yytname[yysymbol];
+}
 #endif
 
-# ifdef YYPRINT
-/* YYTOKNUM[NUM] -- (External) token number corresponding to the
-   (internal) symbol number NUM (which must be that of a token).  */
-static const yytype_uint16 yytoknum[] =
-{
-       0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
-     265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
-     275
-};
-# endif
+#define YYPACT_NINF (-19)
 
-#define YYPACT_NINF -19
+#define yypact_value_is_default(Yyn) \
+  ((Yyn) == YYPACT_NINF)
 
-#define yypact_value_is_default(Yystate) \
-  (!!((Yystate) == (-19)))
+#define YYTABLE_NINF (-39)
 
-#define YYTABLE_NINF -39
-
-#define yytable_value_is_error(Yytable_value) \
+#define yytable_value_is_error(Yyn) \
   0
 
-  /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
-     STATE-NUM.  */
+/* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
+   STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
      -19,     0,   -19,    15,    11,   -19,   -19,   -19,   -19,   -19,
@@ -6100,10 +6523,10 @@ static const yytype_int8 yypact[] =
       -2,   -19,    13,   -19,   -19,   -19
 };
 
-  /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
-     Performed when YYTABLE does not specify something else to do.  Zero
-     means the default is an error.  */
-static const yytype_uint8 yydefact[] =
+/* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
+   Performed when YYTABLE does not specify something else to do.  Zero
+   means the default is an error.  */
+static const yytype_int8 yydefact[] =
 {
        2,     0,     1,     0,     0,    35,    36,    37,    40,     3,
        0,     7,     6,    12,    13,     0,     0,    39,     5,    28,
@@ -6113,7 +6536,7 @@ static const yytype_uint8 yydefact[] =
        0,    32,     0,    24,    31,    33
 };
 
-  /* YYPGOTO[NTERM-NUM].  */
+/* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
      -19,   -19,   -19,   -19,   -19,   -19,   -19,   -19,   -19,   -19,
@@ -6121,17 +6544,17 @@ static const yytype_int8 yypgoto[] =
      -19,   -19
 };
 
-  /* YYDEFGOTO[NTERM-NUM].  */
+/* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     1,     9,    10,    29,    11,    12,    13,    28,    31,
+       0,     1,     9,    10,    29,    11,    12,    13,    28,    31,
       33,    37,    38,    39,    40,    23,    45,    46,    14,    15,
       16,    17
 };
 
-  /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
-     positive, shift that token.  If negative, reduce the rule whose
-     number is the opposite.  If YYTABLE_NINF, syntax error.  */
+/* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
+   positive, shift that token.  If negative, reduce the rule whose
+   number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
        2,     3,    54,    51,    42,     4,    19,   -38,   -38,   -38,
@@ -6141,7 +6564,7 @@ static const yytype_int8 yytable[] =
       53,    20,    44
 };
 
-static const yytype_uint8 yycheck[] =
+static const yytype_int8 yycheck[] =
 {
        0,     1,     4,    14,     3,     5,    17,     7,     8,     9,
       10,    11,    12,     4,    13,    18,    16,    19,    36,    18,
@@ -6150,9 +6573,9 @@ static const yytype_uint8 yycheck[] =
       47,     4,    37
 };
 
-  /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
-     symbol of state STATE-NUM.  */
-static const yytype_uint8 yystos[] =
+/* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
+   state STATE-NUM.  */
+static const yytype_int8 yystos[] =
 {
        0,    22,     0,     1,     5,    10,    11,    12,    16,    23,
       24,    26,    27,    28,    39,    40,    41,    42,    15,    17,
@@ -6162,8 +6585,8 @@ static const yytype_uint8 yystos[] =
       33,    14,    33,    34,     4,    14
 };
 
-  /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
-static const yytype_uint8 yyr1[] =
+/* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
+static const yytype_int8 yyr1[] =
 {
        0,    21,    22,    22,    23,    23,    24,    24,    25,    24,
       26,    26,    27,    27,    28,    28,    29,    29,    29,    30,
@@ -6172,8 +6595,8 @@ static const yytype_uint8 yyr1[] =
       42
 };
 
-  /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
-static const yytype_uint8 yyr2[] =
+/* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
+static const yytype_int8 yyr2[] =
 {
        0,     2,     0,     2,     2,     2,     1,     1,     0,     4,
        3,     5,     1,     1,     3,     5,     1,     1,     1,     1,
@@ -6183,39 +6606,39 @@ static const yytype_uint8 yyr2[] =
 };
 
 
+enum { YYENOMEM = -2 };
+
 #define yyerrok         (yyerrstatus = 0)
 #define yyclearin       (yychar = YYEMPTY)
-#define YYEMPTY         (-2)
-#define YYEOF           0
 
 #define YYACCEPT        goto yyacceptlab
 #define YYABORT         goto yyabortlab
 #define YYERROR         goto yyerrorlab
+#define YYNOMEM         goto yyexhaustedlab
 
 
 #define YYRECOVERING()  (!!yyerrstatus)
 
-#define YYBACKUP(Token, Value)                                  \
-do                                                              \
-  if (yychar == YYEMPTY)                                        \
-    {                                                           \
-      yychar = (Token);                                         \
-      yylval = (Value);                                         \
-      YYPOPSTACK (yylen);                                       \
-      yystate = *yyssp;                                         \
-      goto yybackup;                                            \
-    }                                                           \
-  else                                                          \
-    {                                                           \
-      yyerror (yyscanner, gdbwire_mi_output, YY_("syntax error: cannot back up")); \
-      YYERROR;                                                  \
-    }                                                           \
-while (0)
+#define YYBACKUP(Token, Value)                                    \
+  do                                                              \
+    if (yychar == YYEMPTY)                                        \
+      {                                                           \
+        yychar = (Token);                                         \
+        yylval = (Value);                                         \
+        YYPOPSTACK (yylen);                                       \
+        yystate = *yyssp;                                         \
+        goto yybackup;                                            \
+      }                                                           \
+    else                                                          \
+      {                                                           \
+        yyerror (yyscanner, gdbwire_mi_output, YY_("syntax error: cannot back up")); \
+        YYERROR;                                                  \
+      }                                                           \
+  while (0)
 
-/* Error token number */
-#define YYTERROR        1
-#define YYERRCODE       256
-
+/* Backward compatibility with an undocumented macro.
+   Use YYerror or YYUNDEF. */
+#define YYERRCODE YYUNDEF
 
 
 /* Enable debugging if requested.  */
@@ -6232,57 +6655,54 @@ do {                                            \
     YYFPRINTF Args;                             \
 } while (0)
 
-/* This macro is provided for backward compatibility. */
-#ifndef YY_LOCATION_PRINT
-# define YY_LOCATION_PRINT(File, Loc) ((void) 0)
-#endif
 
 
-# define YY_SYMBOL_PRINT(Title, Type, Value, Location)                    \
+
+# define YY_SYMBOL_PRINT(Title, Kind, Value, Location)                    \
 do {                                                                      \
   if (yydebug)                                                            \
     {                                                                     \
       YYFPRINTF (stderr, "%s ", Title);                                   \
       yy_symbol_print (stderr,                                            \
-                  Type, Value, yyscanner, gdbwire_mi_output); \
+                  Kind, Value, yyscanner, gdbwire_mi_output); \
       YYFPRINTF (stderr, "\n");                                           \
     }                                                                     \
 } while (0)
 
 
-/*----------------------------------------.
-| Print this symbol's value on YYOUTPUT.  |
-`----------------------------------------*/
+/*-----------------------------------.
+| Print this symbol's value on YYO.  |
+`-----------------------------------*/
 
 static void
-yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, yyscan_t yyscanner, struct gdbwire_mi_output **gdbwire_mi_output)
+yy_symbol_value_print (FILE *yyo,
+                       yysymbol_kind_t yykind, YYSTYPE const * const yyvaluep, yyscan_t yyscanner, struct gdbwire_mi_output **gdbwire_mi_output)
 {
-  FILE *yyo = yyoutput;
-  YYUSE (yyo);
-  YYUSE (yyscanner);
-  YYUSE (gdbwire_mi_output);
+  FILE *yyoutput = yyo;
+  YY_USE (yyoutput);
+  YY_USE (yyscanner);
+  YY_USE (gdbwire_mi_output);
   if (!yyvaluep)
     return;
-# ifdef YYPRINT
-  if (yytype < YYNTOKENS)
-    YYPRINT (yyoutput, yytoknum[yytype], *yyvaluep);
-# endif
-  YYUSE (yytype);
+  YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
+  YY_USE (yykind);
+  YY_IGNORE_MAYBE_UNINITIALIZED_END
 }
 
 
-/*--------------------------------.
-| Print this symbol on YYOUTPUT.  |
-`--------------------------------*/
+/*---------------------------.
+| Print this symbol on YYO.  |
+`---------------------------*/
 
 static void
-yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, yyscan_t yyscanner, struct gdbwire_mi_output **gdbwire_mi_output)
+yy_symbol_print (FILE *yyo,
+                 yysymbol_kind_t yykind, YYSTYPE const * const yyvaluep, yyscan_t yyscanner, struct gdbwire_mi_output **gdbwire_mi_output)
 {
-  YYFPRINTF (yyoutput, "%s %s (",
-             yytype < YYNTOKENS ? "token" : "nterm", yytname[yytype]);
+  YYFPRINTF (yyo, "%s %s (",
+             yykind < YYNTOKENS ? "token" : "nterm", yysymbol_name (yykind));
 
-  yy_symbol_value_print (yyoutput, yytype, yyvaluep, yyscanner, gdbwire_mi_output);
-  YYFPRINTF (yyoutput, ")");
+  yy_symbol_value_print (yyo, yykind, yyvaluep, yyscanner, gdbwire_mi_output);
+  YYFPRINTF (yyo, ")");
 }
 
 /*------------------------------------------------------------------.
@@ -6291,7 +6711,7 @@ yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, yys
 `------------------------------------------------------------------*/
 
 static void
-yy_stack_print (yytype_int16 *yybottom, yytype_int16 *yytop)
+yy_stack_print (yy_state_t *yybottom, yy_state_t *yytop)
 {
   YYFPRINTF (stderr, "Stack now");
   for (; yybottom <= yytop; yybottom++)
@@ -6314,21 +6734,21 @@ do {                                                            \
 `------------------------------------------------*/
 
 static void
-yy_reduce_print (yytype_int16 *yyssp, YYSTYPE *yyvsp, int yyrule, yyscan_t yyscanner, struct gdbwire_mi_output **gdbwire_mi_output)
+yy_reduce_print (yy_state_t *yyssp, YYSTYPE *yyvsp,
+                 int yyrule, yyscan_t yyscanner, struct gdbwire_mi_output **gdbwire_mi_output)
 {
-  unsigned long int yylno = yyrline[yyrule];
+  int yylno = yyrline[yyrule];
   int yynrhs = yyr2[yyrule];
   int yyi;
-  YYFPRINTF (stderr, "Reducing stack by rule %d (line %lu):\n",
+  YYFPRINTF (stderr, "Reducing stack by rule %d (line %d):\n",
              yyrule - 1, yylno);
   /* The symbols being reduced.  */
   for (yyi = 0; yyi < yynrhs; yyi++)
     {
       YYFPRINTF (stderr, "   $%d = ", yyi + 1);
       yy_symbol_print (stderr,
-                       yystos[yyssp[yyi + 1 - yynrhs]],
-                       &(yyvsp[(yyi + 1) - (yynrhs)])
-                                              , yyscanner, gdbwire_mi_output);
+                       YY_ACCESSING_SYMBOL (+yyssp[yyi + 1 - yynrhs]),
+                       &yyvsp[(yyi + 1) - (yynrhs)], yyscanner, gdbwire_mi_output);
       YYFPRINTF (stderr, "\n");
     }
 }
@@ -6343,8 +6763,8 @@ do {                                    \
    multiple parsers can coexist.  */
 int yydebug;
 #else /* !YYDEBUG */
-# define YYDPRINTF(Args)
-# define YY_SYMBOL_PRINT(Title, Type, Value, Location)
+# define YYDPRINTF(Args) ((void) 0)
+# define YY_SYMBOL_PRINT(Title, Kind, Value, Location)
 # define YY_STACK_PRINT(Bottom, Top)
 # define YY_REDUCE_PRINT(Rule)
 #endif /* !YYDEBUG */
@@ -6365,271 +6785,82 @@ int yydebug;
 #ifndef YYMAXDEPTH
 # define YYMAXDEPTH 10000
 #endif
-
-
-#if YYERROR_VERBOSE
-
-# ifndef yystrlen
-#  if defined __GLIBC__ && defined _STRING_H
-#   define yystrlen strlen
-#  else
-/* Return the length of YYSTR.  */
-static YYSIZE_T
-yystrlen (const char *yystr)
-{
-  YYSIZE_T yylen;
-  for (yylen = 0; yystr[yylen]; yylen++)
-    continue;
-  return yylen;
-}
-#  endif
-# endif
-
-# ifndef yystpcpy
-#  if defined __GLIBC__ && defined _STRING_H && defined _GNU_SOURCE
-#   define yystpcpy stpcpy
-#  else
-/* Copy YYSRC to YYDEST, returning the address of the terminating '\0' in
-   YYDEST.  */
-static char *
-yystpcpy (char *yydest, const char *yysrc)
-{
-  char *yyd = yydest;
-  const char *yys = yysrc;
-
-  while ((*yyd++ = *yys++) != '\0')
-    continue;
-
-  return yyd - 1;
-}
-#  endif
-# endif
-
-# ifndef yytnamerr
-/* Copy to YYRES the contents of YYSTR after stripping away unnecessary
-   quotes and backslashes, so that it's suitable for yyerror.  The
-   heuristic is that double-quoting is unnecessary unless the string
-   contains an apostrophe, a comma, or backslash (other than
-   backslash-backslash).  YYSTR is taken from yytname.  If YYRES is
-   null, do not copy; instead, return the length of what the result
-   would have been.  */
-static YYSIZE_T
-yytnamerr (char *yyres, const char *yystr)
-{
-  if (*yystr == '"')
-    {
-      YYSIZE_T yyn = 0;
-      char const *yyp = yystr;
-
-      for (;;)
-        switch (*++yyp)
-          {
-          case '\'':
-          case ',':
-            goto do_not_strip_quotes;
-
-          case '\\':
-            if (*++yyp != '\\')
-              goto do_not_strip_quotes;
-            /* Fall through.  */
-          default:
-            if (yyres)
-              yyres[yyn] = *yyp;
-            yyn++;
-            break;
-
-          case '"':
-            if (yyres)
-              yyres[yyn] = '\0';
-            return yyn;
-          }
-    do_not_strip_quotes: ;
-    }
-
-  if (! yyres)
-    return yystrlen (yystr);
-
-  return yystpcpy (yyres, yystr) - yyres;
-}
-# endif
-
-/* Copy into *YYMSG, which is of size *YYMSG_ALLOC, an error message
-   about the unexpected token YYTOKEN for the state stack whose top is
-   YYSSP.
-
-   Return 0 if *YYMSG was successfully written.  Return 1 if *YYMSG is
-   not large enough to hold the message.  In that case, also set
-   *YYMSG_ALLOC to the required number of bytes.  Return 2 if the
-   required number of bytes is too large to store.  */
-static int
-yysyntax_error (YYSIZE_T *yymsg_alloc, char **yymsg,
-                yytype_int16 *yyssp, int yytoken)
-{
-  YYSIZE_T yysize0 = yytnamerr (YY_NULLPTR, yytname[yytoken]);
-  YYSIZE_T yysize = yysize0;
-  enum { YYERROR_VERBOSE_ARGS_MAXIMUM = 5 };
-  /* Internationalized format string. */
-  const char *yyformat = YY_NULLPTR;
-  /* Arguments of yyformat. */
-  char const *yyarg[YYERROR_VERBOSE_ARGS_MAXIMUM];
-  /* Number of reported tokens (one for the "unexpected", one per
-     "expected"). */
-  int yycount = 0;
-
-  /* There are many possibilities here to consider:
-     - If this state is a consistent state with a default action, then
-       the only way this function was invoked is if the default action
-       is an error action.  In that case, don't check for expected
-       tokens because there are none.
-     - The only way there can be no lookahead present (in yychar) is if
-       this state is a consistent state with a default action.  Thus,
-       detecting the absence of a lookahead is sufficient to determine
-       that there is no unexpected or expected token to report.  In that
-       case, just report a simple "syntax error".
-     - Don't assume there isn't a lookahead just because this state is a
-       consistent state with a default action.  There might have been a
-       previous inconsistent state, consistent state with a non-default
-       action, or user semantic action that manipulated yychar.
-     - Of course, the expected token list depends on states to have
-       correct lookahead information, and it depends on the parser not
-       to perform extra reductions after fetching a lookahead from the
-       scanner and before detecting a syntax error.  Thus, state merging
-       (from LALR or IELR) and default reductions corrupt the expected
-       token list.  However, the list is correct for canonical LR with
-       one exception: it will still contain any token that will not be
-       accepted due to an error action in a later state.
-  */
-  if (yytoken != YYEMPTY)
-    {
-      int yyn = yypact[*yyssp];
-      yyarg[yycount++] = yytname[yytoken];
-      if (!yypact_value_is_default (yyn))
-        {
-          /* Start YYX at -YYN if negative to avoid negative indexes in
-             YYCHECK.  In other words, skip the first -YYN actions for
-             this state because they are default actions.  */
-          int yyxbegin = yyn < 0 ? -yyn : 0;
-          /* Stay within bounds of both yycheck and yytname.  */
-          int yychecklim = YYLAST - yyn + 1;
-          int yyxend = yychecklim < YYNTOKENS ? yychecklim : YYNTOKENS;
-          int yyx;
-
-          for (yyx = yyxbegin; yyx < yyxend; ++yyx)
-            if (yycheck[yyx + yyn] == yyx && yyx != YYTERROR
-                && !yytable_value_is_error (yytable[yyx + yyn]))
-              {
-                if (yycount == YYERROR_VERBOSE_ARGS_MAXIMUM)
-                  {
-                    yycount = 1;
-                    yysize = yysize0;
-                    break;
-                  }
-                yyarg[yycount++] = yytname[yyx];
-                {
-                  YYSIZE_T yysize1 = yysize + yytnamerr (YY_NULLPTR, yytname[yyx]);
-                  if (! (yysize <= yysize1
-                         && yysize1 <= YYSTACK_ALLOC_MAXIMUM))
-                    return 2;
-                  yysize = yysize1;
-                }
-              }
-        }
-    }
-
-  switch (yycount)
-    {
-# define YYCASE_(N, S)                      \
-      case N:                               \
-        yyformat = S;                       \
-      break
-      YYCASE_(0, YY_("syntax error"));
-      YYCASE_(1, YY_("syntax error, unexpected %s"));
-      YYCASE_(2, YY_("syntax error, unexpected %s, expecting %s"));
-      YYCASE_(3, YY_("syntax error, unexpected %s, expecting %s or %s"));
-      YYCASE_(4, YY_("syntax error, unexpected %s, expecting %s or %s or %s"));
-      YYCASE_(5, YY_("syntax error, unexpected %s, expecting %s or %s or %s or %s"));
-# undef YYCASE_
-    }
-
+/* Parser data structure.  */
+struct yypstate
   {
-    YYSIZE_T yysize1 = yysize + yystrlen (yyformat);
-    if (! (yysize <= yysize1 && yysize1 <= YYSTACK_ALLOC_MAXIMUM))
-      return 2;
-    yysize = yysize1;
-  }
+    /* Number of syntax errors so far.  */
+    int yynerrs;
 
-  if (*yymsg_alloc < yysize)
-    {
-      *yymsg_alloc = 2 * yysize;
-      if (! (yysize <= *yymsg_alloc
-             && *yymsg_alloc <= YYSTACK_ALLOC_MAXIMUM))
-        *yymsg_alloc = YYSTACK_ALLOC_MAXIMUM;
-      return 1;
-    }
+    yy_state_fast_t yystate;
+    /* Number of tokens to shift before error messages enabled.  */
+    int yyerrstatus;
 
-  /* Avoid sprintf, as that infringes on the user's name space.
-     Don't have undefined behavior even if the translation
-     produced a string with the wrong number of "%s"s.  */
-  {
-    char *yyp = *yymsg;
-    int yyi = 0;
-    while ((*yyp = *yyformat) != '\0')
-      if (*yyp == '%' && yyformat[1] == 's' && yyi < yycount)
-        {
-          yyp += yytnamerr (yyp, yyarg[yyi++]);
-          yyformat += 2;
-        }
-      else
-        {
-          yyp++;
-          yyformat++;
-        }
-  }
-  return 0;
-}
-#endif /* YYERROR_VERBOSE */
+    /* Refer to the stacks through separate pointers, to allow yyoverflow
+       to reallocate them elsewhere.  */
+
+    /* Their size.  */
+    YYPTRDIFF_T yystacksize;
+
+    /* The state stack: array, bottom, top.  */
+    yy_state_t yyssa[YYINITDEPTH];
+    yy_state_t *yyss;
+    yy_state_t *yyssp;
+
+    /* The semantic value stack: array, bottom, top.  */
+    YYSTYPE yyvsa[YYINITDEPTH];
+    YYSTYPE *yyvs;
+    YYSTYPE *yyvsp;
+    /* Whether this instance has not started parsing yet.
+     * If 2, it corresponds to a finished parsing.  */
+    int yynew;
+  };
+
+
+
+
+
 
 /*-----------------------------------------------.
 | Release the memory associated to this symbol.  |
 `-----------------------------------------------*/
 
 static void
-yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, yyscan_t yyscanner, struct gdbwire_mi_output **gdbwire_mi_output)
+yydestruct (const char *yymsg,
+            yysymbol_kind_t yykind, YYSTYPE *yyvaluep, yyscan_t yyscanner, struct gdbwire_mi_output **gdbwire_mi_output)
 {
-  YYUSE (yyvaluep);
-  YYUSE (yyscanner);
-  YYUSE (gdbwire_mi_output);
+  YY_USE (yyvaluep);
+  YY_USE (yyscanner);
+  YY_USE (gdbwire_mi_output);
   if (!yymsg)
     yymsg = "Deleting";
-  YY_SYMBOL_PRINT (yymsg, yytype, yyvaluep, yylocationp);
+  YY_SYMBOL_PRINT (yymsg, yykind, yyvaluep, yylocationp);
 
   YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
-  switch (yytype)
+  switch (yykind)
     {
-          case 24: /* output_variant  */
-      { gdbwire_mi_output_free(((*yyvaluep).u_output)); }
+    case YYSYMBOL_output_variant: /* output_variant  */
+            { gdbwire_mi_output_free(((*yyvaluep).u_output)); }
         break;
 
-    case 32: /* opt_variable  */
-      { free(((*yyvaluep).u_variable)); }
+    case YYSYMBOL_opt_variable: /* opt_variable  */
+            { free(((*yyvaluep).u_variable)); }
         break;
 
-    case 33: /* result_list  */
-      { gdbwire_mi_result_free(((*yyvaluep).u_result_list)->head); free(((*yyvaluep).u_result_list)); }
+    case YYSYMBOL_result_list: /* result_list  */
+            { gdbwire_mi_result_free(((*yyvaluep).u_result_list)->head); free(((*yyvaluep).u_result_list)); }
         break;
 
-    case 34: /* result  */
-      { gdbwire_mi_result_free(((*yyvaluep).u_result)); }
+    case YYSYMBOL_result: /* result  */
+            { gdbwire_mi_result_free(((*yyvaluep).u_result)); }
         break;
 
-    case 35: /* variable  */
-      { free(((*yyvaluep).u_variable)); }
+    case YYSYMBOL_variable: /* variable  */
+            { free(((*yyvaluep).u_variable)); }
         break;
 
-    case 41: /* opt_token  */
-      { free(((*yyvaluep).u_token)); }
+    case YYSYMBOL_opt_token: /* opt_token  */
+            { free(((*yyvaluep).u_token)); }
         break;
-
 
       default:
         break;
@@ -6639,61 +6870,7 @@ yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, yyscan_t yyscanner
 
 
 
-struct yypstate
-  {
-    /* Number of syntax errors so far.  */
-    int yynerrs;
 
-    int yystate;
-    /* Number of tokens to shift before error messages enabled.  */
-    int yyerrstatus;
-
-    /* The stacks and their tools:
-       'yyss': related to states.
-       'yyvs': related to semantic values.
-
-       Refer to the stacks through separate pointers, to allow yyoverflow
-       to reallocate them elsewhere.  */
-
-    /* The state stack.  */
-    yytype_int16 yyssa[YYINITDEPTH];
-    yytype_int16 *yyss;
-    yytype_int16 *yyssp;
-
-    /* The semantic value stack.  */
-    YYSTYPE yyvsa[YYINITDEPTH];
-    YYSTYPE *yyvs;
-    YYSTYPE *yyvsp;
-
-    YYSIZE_T yystacksize;
-    /* Used to determine if this is the first time this instance has
-       been used.  */
-    int yynew;
-  };
-
-/* Initialize the parser data structure.  */
-yypstate *
-yypstate_new (void)
-{
-  yypstate *yyps;
-  yyps = (yypstate *) malloc (sizeof *yyps);
-  if (!yyps)
-    return YY_NULLPTR;
-  yyps->yynew = 1;
-  return yyps;
-}
-
-void
-yypstate_delete (yypstate *yyps)
-{
-#ifndef yyoverflow
-  /* If the stack was reallocated but the parse did not complete, then the
-     stack still needs to be freed.  */
-  if (!yyps->yynew && yyps->yyss != yyps->yyssa)
-    YYSTACK_FREE (yyps->yyss);
-#endif
-  free (yyps);
-}
 
 #define gdbwire_mi_nerrs yyps->gdbwire_mi_nerrs
 #define yystate yyps->yystate
@@ -6706,15 +6883,64 @@ yypstate_delete (yypstate *yyps)
 #define yyvsp yyps->yyvsp
 #define yystacksize yyps->yystacksize
 
+/* Initialize the parser data structure.  */
+static void
+yypstate_clear (yypstate *yyps)
+{
+  yynerrs = 0;
+  yystate = 0;
+  yyerrstatus = 0;
+
+  yyssp = yyss;
+  yyvsp = yyvs;
+
+  /* Initialize the state stack, in case yypcontext_expected_tokens is
+     called before the first call to yyparse. */
+  *yyssp = 0;
+  yyps->yynew = 1;
+}
+
+/* Initialize the parser data structure.  */
+yypstate *
+yypstate_new (void)
+{
+  yypstate *yyps;
+  yyps = YY_CAST (yypstate *, YYMALLOC (sizeof *yyps));
+  if (!yyps)
+    return YY_NULLPTR;
+  yystacksize = YYINITDEPTH;
+  yyss = yyssa;
+  yyvs = yyvsa;
+  yypstate_clear (yyps);
+  return yyps;
+}
+
+void
+yypstate_delete (yypstate *yyps)
+{
+  if (yyps)
+    {
+#ifndef yyoverflow
+      /* If the stack was reallocated but the parse did not complete, then the
+         stack still needs to be freed.  */
+      if (yyss != yyssa)
+        YYSTACK_FREE (yyss);
+#endif
+      YYFREE (yyps);
+    }
+}
+
+
 
 /*---------------.
 | yypush_parse.  |
 `---------------*/
 
 int
-yypush_parse (yypstate *yyps, int yypushed_char, YYSTYPE const *yypushed_val, yyscan_t yyscanner, struct gdbwire_mi_output **gdbwire_mi_output)
+yypush_parse (yypstate *yyps,
+              int yypushed_char, YYSTYPE const *yypushed_val, yyscan_t yyscanner, struct gdbwire_mi_output **gdbwire_mi_output)
 {
-/* The lookahead symbol.  */
+/* Lookahead token kind.  */
 int yychar;
 
 
@@ -6725,19 +6951,15 @@ YY_INITIAL_VALUE (static YYSTYPE yyval_default;)
 YYSTYPE yylval YY_INITIAL_VALUE (= yyval_default);
 
   int yyn;
+  /* The return value of yyparse.  */
   int yyresult;
-  /* Lookahead token as an internal (translated) token number.  */
-  int yytoken = 0;
+  /* Lookahead symbol kind.  */
+  yysymbol_kind_t yytoken = YYSYMBOL_YYEMPTY;
   /* The variables used to return semantic value and location from the
      action routines.  */
   YYSTYPE yyval;
 
-#if YYERROR_VERBOSE
-  /* Buffer for error messages, and its allocated size.  */
-  char yymsgbuf[128];
-  char *yymsg = yymsgbuf;
-  YYSIZE_T yymsg_alloc = sizeof yymsgbuf;
-#endif
+
 
 #define YYPOPSTACK(N)   (yyvsp -= (N), yyssp -= (N))
 
@@ -6745,77 +6967,89 @@ YYSTYPE yylval YY_INITIAL_VALUE (= yyval_default);
      Keep to zero when no symbol should be popped.  */
   int yylen = 0;
 
-  if (!yyps->yynew)
+  switch (yyps->yynew)
     {
+    case 0:
       yyn = yypact[yystate];
       goto yyread_pushed_token;
-    }
 
-  yyssp = yyss = yyssa;
-  yyvsp = yyvs = yyvsa;
-  yystacksize = YYINITDEPTH;
+    case 2:
+      yypstate_clear (yyps);
+      break;
+
+    default:
+      break;
+    }
 
   YYDPRINTF ((stderr, "Starting parse\n"));
 
-  yystate = 0;
-  yyerrstatus = 0;
-  yynerrs = 0;
   yychar = YYEMPTY; /* Cause a token to be read.  */
+
   goto yysetstate;
 
+
 /*------------------------------------------------------------.
-| yynewstate -- Push a new state, which is found in yystate.  |
+| yynewstate -- push a new state, which is found in yystate.  |
 `------------------------------------------------------------*/
- yynewstate:
+yynewstate:
   /* In all cases, when you get here, the value and location stacks
      have just been pushed.  So pushing a state here evens the stacks.  */
   yyssp++;
 
- yysetstate:
-  *yyssp = yystate;
+
+/*--------------------------------------------------------------------.
+| yysetstate -- set current state (the top of the stack) to yystate.  |
+`--------------------------------------------------------------------*/
+yysetstate:
+  YYDPRINTF ((stderr, "Entering state %d\n", yystate));
+  YY_ASSERT (0 <= yystate && yystate < YYNSTATES);
+  YY_IGNORE_USELESS_CAST_BEGIN
+  *yyssp = YY_CAST (yy_state_t, yystate);
+  YY_IGNORE_USELESS_CAST_END
+  YY_STACK_PRINT (yyss, yyssp);
 
   if (yyss + yystacksize - 1 <= yyssp)
+#if !defined yyoverflow && !defined YYSTACK_RELOCATE
+    YYNOMEM;
+#else
     {
       /* Get the current used size of the three stacks, in elements.  */
-      YYSIZE_T yysize = yyssp - yyss + 1;
+      YYPTRDIFF_T yysize = yyssp - yyss + 1;
 
-#ifdef yyoverflow
+# if defined yyoverflow
       {
         /* Give user a chance to reallocate the stack.  Use copies of
            these so that the &'s don't force the real ones into
            memory.  */
+        yy_state_t *yyss1 = yyss;
         YYSTYPE *yyvs1 = yyvs;
-        yytype_int16 *yyss1 = yyss;
 
         /* Each stack pointer address is followed by the size of the
            data in use in that stack, in bytes.  This used to be a
            conditional around just the two extra args, but that might
            be undefined if yyoverflow is a macro.  */
         yyoverflow (YY_("memory exhausted"),
-                    &yyss1, yysize * sizeof (*yyssp),
-                    &yyvs1, yysize * sizeof (*yyvsp),
+                    &yyss1, yysize * YYSIZEOF (*yyssp),
+                    &yyvs1, yysize * YYSIZEOF (*yyvsp),
                     &yystacksize);
-
         yyss = yyss1;
         yyvs = yyvs1;
       }
-#else /* no yyoverflow */
-# ifndef YYSTACK_RELOCATE
-      goto yyexhaustedlab;
-# else
+# else /* defined YYSTACK_RELOCATE */
       /* Extend the stack our own way.  */
       if (YYMAXDEPTH <= yystacksize)
-        goto yyexhaustedlab;
+        YYNOMEM;
       yystacksize *= 2;
       if (YYMAXDEPTH < yystacksize)
         yystacksize = YYMAXDEPTH;
 
       {
-        yytype_int16 *yyss1 = yyss;
+        yy_state_t *yyss1 = yyss;
         union yyalloc *yyptr =
-          (union yyalloc *) YYSTACK_ALLOC (YYSTACK_BYTES (yystacksize));
+          YY_CAST (union yyalloc *,
+                   YYSTACK_ALLOC (YY_CAST (YYSIZE_T, YYSTACK_BYTES (yystacksize))));
         if (! yyptr)
-          goto yyexhaustedlab;
+          YYNOMEM;
         YYSTACK_RELOCATE (yyss_alloc, yyss);
         YYSTACK_RELOCATE (yyvs_alloc, yyvs);
 #  undef YYSTACK_RELOCATE
@@ -6823,30 +7057,31 @@ YYSTYPE yylval YY_INITIAL_VALUE (= yyval_default);
           YYSTACK_FREE (yyss1);
       }
 # endif
-#endif /* no yyoverflow */
 
       yyssp = yyss + yysize - 1;
       yyvsp = yyvs + yysize - 1;
 
-      YYDPRINTF ((stderr, "Stack size increased to %lu\n",
-                  (unsigned long int) yystacksize));
+      YY_IGNORE_USELESS_CAST_BEGIN
+      YYDPRINTF ((stderr, "Stack size increased to %ld\n",
+                  YY_CAST (long, yystacksize)));
+      YY_IGNORE_USELESS_CAST_END
 
       if (yyss + yystacksize - 1 <= yyssp)
         YYABORT;
     }
+#endif /* !defined yyoverflow && !defined YYSTACK_RELOCATE */
 
-  YYDPRINTF ((stderr, "Entering state %d\n", yystate));
 
   if (yystate == YYFINAL)
     YYACCEPT;
 
   goto yybackup;
 
+
 /*-----------.
 | yybackup.  |
 `-----------*/
 yybackup:
-
   /* Do appropriate processing given the current state.  Read a
      lookahead token if we need one and don't already have one.  */
 
@@ -6857,7 +7092,7 @@ yybackup:
 
   /* Not known => get a lookahead token if don't already have one.  */
 
-  /* YYCHAR is either YYEMPTY or YYEOF or a valid lookahead symbol.  */
+  /* YYCHAR is either empty, or end-of-input, or a valid lookahead.  */
   if (yychar == YYEMPTY)
     {
       if (!yyps->yynew)
@@ -6868,7 +7103,7 @@ yybackup:
         }
       yyps->yynew = 0;
 yyread_pushed_token:
-      YYDPRINTF ((stderr, "Reading a token: "));
+      YYDPRINTF ((stderr, "Reading a token\n"));
       yychar = yypushed_char;
       if (yypushed_val)
         yylval = *yypushed_val;
@@ -6876,8 +7111,19 @@ yyread_pushed_token:
 
   if (yychar <= YYEOF)
     {
-      yychar = yytoken = YYEOF;
+      yychar = YYEOF;
+      yytoken = YYSYMBOL_YYEOF;
       YYDPRINTF ((stderr, "Now at end of input.\n"));
+    }
+  else if (yychar == YYerror)
+    {
+      /* The scanner already issued an error message, process directly
+         to error recovery.  But do not keep the error token as
+         lookahead, it is too special and may lead us to an endless
+         loop in error recovery. */
+      yychar = YYUNDEF;
+      yytoken = YYSYMBOL_YYerror;
+      goto yyerrlab1;
     }
   else
     {
@@ -6906,15 +7152,13 @@ yyread_pushed_token:
 
   /* Shift the lookahead token.  */
   YY_SYMBOL_PRINT ("Shifting", yytoken, &yylval, &yylloc);
-
-  /* Discard the shifted token.  */
-  yychar = YYEMPTY;
-
   yystate = yyn;
   YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
   *++yyvsp = yylval;
   YY_IGNORE_MAYBE_UNINITIALIZED_END
 
+  /* Discard the shifted token.  */
+  yychar = YYEMPTY;
   goto yynewstate;
 
 
@@ -6929,7 +7173,7 @@ yydefault:
 
 
 /*-----------------------------.
-| yyreduce -- Do a reduction.  |
+| yyreduce -- do a reduction.  |
 `-----------------------------*/
 yyreduce:
   /* yyn is the number of a rule to reduce with.  */
@@ -6949,46 +7193,46 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-        case 2:
-    {
+  case 2: /* output_list: %empty  */
+             {
 }
     break;
 
-  case 3:
-    {
+  case 3: /* output_list: output_list output  */
+                                {
 }
     break;
 
-  case 4:
-    {
+  case 4: /* output: output_variant NEWLINE  */
+                               {
   *gdbwire_mi_output = (yyvsp[-1].u_output);
 }
     break;
 
-  case 5:
-    {
+  case 5: /* output: error NEWLINE  */
+                      {
   yyerrok;
 }
     break;
 
-  case 6:
-    {
+  case 6: /* output_variant: oob_record  */
+                           {
   (yyval.u_output) = gdbwire_mi_output_alloc();
   (yyval.u_output)->kind = GDBWIRE_MI_OUTPUT_OOB;
   (yyval.u_output)->variant.oob_record = (yyvsp[0].u_oob_record);
 }
     break;
 
-  case 7:
-    {
+  case 7: /* output_variant: result_record  */
+                              {
   (yyval.u_output) = gdbwire_mi_output_alloc();
   (yyval.u_output)->kind = GDBWIRE_MI_OUTPUT_RESULT;
   (yyval.u_output)->variant.result_record = (yyvsp[0].u_result_record);
 }
     break;
 
-  case 8:
-    {
+  case 8: /* $@1: %empty  */
+                                    {
       if (strcmp("gdb", (yyvsp[0].u_variable)) != 0) {
           /* Destructor will be called to free $2 on error */
           yyerror(yyscanner, gdbwire_mi_output, "");
@@ -6997,16 +7241,16 @@ yyreduce:
     }
     break;
 
-  case 9:
-    {
+  case 9: /* output_variant: OPEN_PAREN variable $@1 CLOSED_PAREN  */
+                   {
       (yyval.u_output) = gdbwire_mi_output_alloc();
       (yyval.u_output)->kind = GDBWIRE_MI_OUTPUT_PROMPT;
       free((yyvsp[-2].u_variable));
     }
     break;
 
-  case 10:
-    {
+  case 10: /* result_record: opt_token CARROT result_class  */
+                                             {
   (yyval.u_result_record) = gdbwire_mi_result_record_alloc();
   (yyval.u_result_record)->token = (yyvsp[-2].u_token);
   (yyval.u_result_record)->result_class = (yyvsp[0].u_result_class);
@@ -7014,8 +7258,8 @@ yyreduce:
 }
     break;
 
-  case 11:
-    {
+  case 11: /* result_record: opt_token CARROT result_class COMMA result_list  */
+                                                               {
   (yyval.u_result_record) = gdbwire_mi_result_record_alloc();
   (yyval.u_result_record)->token = (yyvsp[-4].u_token);
   (yyval.u_result_record)->result_class = (yyvsp[-2].u_result_class);
@@ -7024,24 +7268,24 @@ yyreduce:
 }
     break;
 
-  case 12:
-    {
+  case 12: /* oob_record: async_record  */
+                         {
   (yyval.u_oob_record) = gdbwire_mi_oob_record_alloc();
   (yyval.u_oob_record)->kind = GDBWIRE_MI_ASYNC;
   (yyval.u_oob_record)->variant.async_record = (yyvsp[0].u_async_record);
 }
     break;
 
-  case 13:
-    {
+  case 13: /* oob_record: stream_record  */
+                          {
   (yyval.u_oob_record) = gdbwire_mi_oob_record_alloc();
   (yyval.u_oob_record)->kind = GDBWIRE_MI_STREAM;
   (yyval.u_oob_record)->variant.stream_record = (yyvsp[0].u_stream_record);
 }
     break;
 
-  case 14:
-    {
+  case 14: /* async_record: opt_token async_record_class async_class  */
+                                                       {
   (yyval.u_async_record) = gdbwire_mi_async_record_alloc();
   (yyval.u_async_record)->token = (yyvsp[-2].u_token);
   (yyval.u_async_record)->kind = (yyvsp[-1].u_async_record_kind);
@@ -7050,8 +7294,8 @@ yyreduce:
 }
     break;
 
-  case 15:
-    {
+  case 15: /* async_record: opt_token async_record_class async_class COMMA result_list  */
+                                                                         {
   (yyval.u_async_record) = gdbwire_mi_async_record_alloc();
   (yyval.u_async_record)->token = (yyvsp[-4].u_token);
   (yyval.u_async_record)->kind = (yyvsp[-3].u_async_record_kind);
@@ -7061,26 +7305,26 @@ yyreduce:
 }
     break;
 
-  case 16:
-    {
+  case 16: /* async_record_class: MULT_OP  */
+                            {
   (yyval.u_async_record_kind) = GDBWIRE_MI_EXEC;
 }
     break;
 
-  case 17:
-    {
+  case 17: /* async_record_class: ADD_OP  */
+                           {
   (yyval.u_async_record_kind) = GDBWIRE_MI_STATUS;
 }
     break;
 
-  case 18:
-    {
+  case 18: /* async_record_class: EQUAL_SIGN  */
+                               {
   (yyval.u_async_record_kind) = GDBWIRE_MI_NOTIFY;	
 }
     break;
 
-  case 19:
-    {
+  case 19: /* result_class: STRING_LITERAL  */
+                             {
   char *text = gdbwire_mi_get_text(yyscanner);
   if (strcmp("done", text) == 0) {
     (yyval.u_result_class) = GDBWIRE_MI_DONE;
@@ -7098,8 +7342,8 @@ yyreduce:
 }
     break;
 
-  case 20:
-    {
+  case 20: /* async_class: STRING_LITERAL  */
+                            {
   char *text = gdbwire_mi_get_text(yyscanner);
   if (strcmp("download", text) == 0) {
       (yyval.u_async_class) = GDBWIRE_MI_ASYNC_DOWNLOAD;
@@ -7153,34 +7397,34 @@ yyreduce:
 }
     break;
 
-  case 21:
-    {
+  case 21: /* opt_variable: %empty  */
+              {
     (yyval.u_variable) = 0;
 }
     break;
 
-  case 22:
-    {
+  case 22: /* opt_variable: variable EQUAL_SIGN  */
+                                  {
     (yyval.u_variable) = (yyvsp[-1].u_variable);
 }
     break;
 
-  case 23:
-    {
+  case 23: /* result_list: result  */
+                    {
   (yyval.u_result_list) = gdbwire_mi_result_list_alloc();
   gdbwire_mi_result_list_push_back((yyval.u_result_list), (yyvsp[0].u_result));
 }
     break;
 
-  case 24:
-    {
+  case 24: /* result_list: result_list COMMA result  */
+                                      {
   gdbwire_mi_result_list_push_back((yyvsp[-2].u_result_list), (yyvsp[0].u_result));
   (yyval.u_result_list) = (yyvsp[-2].u_result_list);
 }
     break;
 
-  case 25:
-    {
+  case 25: /* result: opt_variable cstring  */
+                             {
   (yyval.u_result) = gdbwire_mi_result_alloc();
   (yyval.u_result)->variable = (yyvsp[-1].u_variable);
   (yyval.u_result)->kind = GDBWIRE_MI_CSTRING;
@@ -7188,8 +7432,8 @@ yyreduce:
 }
     break;
 
-  case 26:
-    {
+  case 26: /* result: opt_variable tuple  */
+                           {
   (yyval.u_result) = gdbwire_mi_result_alloc();
   (yyval.u_result)->variable = (yyvsp[-1].u_variable);
   (yyval.u_result)->kind = GDBWIRE_MI_TUPLE;
@@ -7197,8 +7441,8 @@ yyreduce:
 }
     break;
 
-  case 27:
-    {
+  case 27: /* result: opt_variable list  */
+                          {
   (yyval.u_result) = gdbwire_mi_result_alloc();
   (yyval.u_result)->variable = (yyvsp[-1].u_variable);
   (yyval.u_result)->kind = GDBWIRE_MI_LIST;
@@ -7206,90 +7450,91 @@ yyreduce:
 }
     break;
 
-  case 28:
-    {
+  case 28: /* variable: STRING_LITERAL  */
+                         {
   char *text = gdbwire_mi_get_text(yyscanner);
   (yyval.u_variable) = gdbwire_strdup(text);
 }
     break;
 
-  case 29:
-    {
+  case 29: /* cstring: CSTRING  */
+                 {
   char *text = gdbwire_mi_get_text(yyscanner);
   (yyval.u_cstring) = gdbwire_mi_unescape_cstring(text);
 }
     break;
 
-  case 30:
-    {
+  case 30: /* tuple: OPEN_BRACE CLOSED_BRACE  */
+                               {
   (yyval.u_tuple) = NULL;
 }
     break;
 
-  case 31:
-    {
+  case 31: /* tuple: OPEN_BRACE result_list CLOSED_BRACE  */
+                                           {
   (yyval.u_tuple) = (yyvsp[-1].u_result_list)->head;
   free((yyvsp[-1].u_result_list));
 }
     break;
 
-  case 32:
-    {
+  case 32: /* list: OPEN_BRACKET CLOSED_BRACKET  */
+                                  {
   (yyval.u_list) = NULL;
 }
     break;
 
-  case 33:
-    {
+  case 33: /* list: OPEN_BRACKET result_list CLOSED_BRACKET  */
+                                              {
   (yyval.u_list) = (yyvsp[-1].u_result_list)->head;
   free((yyvsp[-1].u_result_list));
 }
     break;
 
-  case 34:
-    {
+  case 34: /* stream_record: stream_record_class cstring  */
+                                           {
   (yyval.u_stream_record) = gdbwire_mi_stream_record_alloc();
   (yyval.u_stream_record)->kind = (yyvsp[-1].u_stream_record_kind);
   (yyval.u_stream_record)->cstring = (yyvsp[0].u_cstring);
 }
     break;
 
-  case 35:
-    {
+  case 35: /* stream_record_class: TILDA  */
+                           {
   (yyval.u_stream_record_kind) = GDBWIRE_MI_CONSOLE;
 }
     break;
 
-  case 36:
-    {
+  case 36: /* stream_record_class: AT_SYMBOL  */
+                               {
   (yyval.u_stream_record_kind) = GDBWIRE_MI_TARGET;
 }
     break;
 
-  case 37:
-    {
+  case 37: /* stream_record_class: AMPERSAND  */
+                               {
   (yyval.u_stream_record_kind) = GDBWIRE_MI_LOG;
 }
     break;
 
-  case 38:
-    {
+  case 38: /* opt_token: %empty  */
+           {
   (yyval.u_token) = NULL;	
 }
     break;
 
-  case 39:
-    {
+  case 39: /* opt_token: token  */
+                 {
   (yyval.u_token) = (yyvsp[0].u_token);
 }
     break;
 
-  case 40:
-    {
+  case 40: /* token: INTEGER_LITERAL  */
+                       {
   char *text = gdbwire_mi_get_text(yyscanner);
   (yyval.u_token) = gdbwire_strdup(text);
 }
     break;
+
 
 
       default: break;
@@ -7305,25 +7550,23 @@ yyreduce:
      case of YYERROR or YYBACKUP, subsequent parser actions might lead
      to an incorrect destructor call or verbose syntax error message
      before the lookahead is translated.  */
-  YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
+  YY_SYMBOL_PRINT ("-> $$ =", YY_CAST (yysymbol_kind_t, yyr1[yyn]), &yyval, &yyloc);
 
   YYPOPSTACK (yylen);
   yylen = 0;
-  YY_STACK_PRINT (yyss, yyssp);
 
   *++yyvsp = yyval;
 
   /* Now 'shift' the result of the reduction.  Determine what state
      that goes to, based on the state we popped back to and the rule
      number reduced by.  */
-
-  yyn = yyr1[yyn];
-
-  yystate = yypgoto[yyn - YYNTOKENS] + *yyssp;
-  if (0 <= yystate && yystate <= YYLAST && yycheck[yystate] == *yyssp)
-    yystate = yytable[yystate];
-  else
-    yystate = yydefgoto[yyn - YYNTOKENS];
+  {
+    const int yylhs = yyr1[yyn] - YYNTOKENS;
+    const int yyi = yypgoto[yylhs] + *yyssp;
+    yystate = (0 <= yyi && yyi <= YYLAST && yycheck[yyi] == *yyssp
+               ? yytable[yyi]
+               : yydefgoto[yylhs]);
+  }
 
   goto yynewstate;
 
@@ -7334,49 +7577,13 @@ yyreduce:
 yyerrlab:
   /* Make sure we have latest lookahead translation.  See comments at
      user semantic actions for why this is necessary.  */
-  yytoken = yychar == YYEMPTY ? YYEMPTY : YYTRANSLATE (yychar);
-
+  yytoken = yychar == YYEMPTY ? YYSYMBOL_YYEMPTY : YYTRANSLATE (yychar);
   /* If not already recovering from an error, report this error.  */
   if (!yyerrstatus)
     {
       ++yynerrs;
-#if ! YYERROR_VERBOSE
       yyerror (yyscanner, gdbwire_mi_output, YY_("syntax error"));
-#else
-# define YYSYNTAX_ERROR yysyntax_error (&yymsg_alloc, &yymsg, \
-                                        yyssp, yytoken)
-      {
-        char const *yymsgp = YY_("syntax error");
-        int yysyntax_error_status;
-        yysyntax_error_status = YYSYNTAX_ERROR;
-        if (yysyntax_error_status == 0)
-          yymsgp = yymsg;
-        else if (yysyntax_error_status == 1)
-          {
-            if (yymsg != yymsgbuf)
-              YYSTACK_FREE (yymsg);
-            yymsg = (char *) YYSTACK_ALLOC (yymsg_alloc);
-            if (!yymsg)
-              {
-                yymsg = yymsgbuf;
-                yymsg_alloc = sizeof yymsgbuf;
-                yysyntax_error_status = 2;
-              }
-            else
-              {
-                yysyntax_error_status = YYSYNTAX_ERROR;
-                yymsgp = yymsg;
-              }
-          }
-        yyerror (yyscanner, gdbwire_mi_output, yymsgp);
-        if (yysyntax_error_status == 2)
-          goto yyexhaustedlab;
-      }
-# undef YYSYNTAX_ERROR
-#endif
     }
-
-
 
   if (yyerrstatus == 3)
     {
@@ -7406,12 +7613,11 @@ yyerrlab:
 | yyerrorlab -- error raised explicitly by YYERROR.  |
 `---------------------------------------------------*/
 yyerrorlab:
-
-  /* Pacify compilers like GCC when the user code never invokes
-     YYERROR and the label yyerrorlab therefore never appears in user
-     code.  */
-  if (/*CONSTCOND*/ 0)
-     goto yyerrorlab;
+  /* Pacify compilers when the user code never invokes YYERROR and the
+     label yyerrorlab therefore never appears in user code.  */
+  if (0)
+    YYERROR;
+  ++yynerrs;
 
   /* Do not reclaim the symbols of the rule whose action triggered
      this YYERROR.  */
@@ -7428,13 +7634,14 @@ yyerrorlab:
 yyerrlab1:
   yyerrstatus = 3;      /* Each real token shifted decrements this.  */
 
+  /* Pop stack until we find a state that shifts the error token.  */
   for (;;)
     {
       yyn = yypact[yystate];
       if (!yypact_value_is_default (yyn))
         {
-          yyn += YYTERROR;
-          if (0 <= yyn && yyn <= YYLAST && yycheck[yyn] == YYTERROR)
+          yyn += YYSYMBOL_YYerror;
+          if (0 <= yyn && yyn <= YYLAST && yycheck[yyn] == YYSYMBOL_YYerror)
             {
               yyn = yytable[yyn];
               if (0 < yyn)
@@ -7448,7 +7655,7 @@ yyerrlab1:
 
 
       yydestruct ("Error: popping",
-                  yystos[yystate], yyvsp, yyscanner, gdbwire_mi_output);
+                  YY_ACCESSING_SYMBOL (yystate), yyvsp, yyscanner, gdbwire_mi_output);
       YYPOPSTACK (1);
       yystate = *yyssp;
       YY_STACK_PRINT (yyss, yyssp);
@@ -7460,7 +7667,7 @@ yyerrlab1:
 
 
   /* Shift the error token.  */
-  YY_SYMBOL_PRINT ("Shifting", yystos[yyn], yyvsp, yylsp);
+  YY_SYMBOL_PRINT ("Shifting", YY_ACCESSING_SYMBOL (yyn), yyvsp, yylsp);
 
   yystate = yyn;
   goto yynewstate;
@@ -7471,26 +7678,30 @@ yyerrlab1:
 `-------------------------------------*/
 yyacceptlab:
   yyresult = 0;
-  goto yyreturn;
+  goto yyreturnlab;
+
 
 /*-----------------------------------.
 | yyabortlab -- YYABORT comes here.  |
 `-----------------------------------*/
 yyabortlab:
   yyresult = 1;
-  goto yyreturn;
+  goto yyreturnlab;
 
-#if !defined yyoverflow || YYERROR_VERBOSE
-/*-------------------------------------------------.
-| yyexhaustedlab -- memory exhaustion comes here.  |
-`-------------------------------------------------*/
+
+/*-----------------------------------------------------------.
+| yyexhaustedlab -- YYNOMEM (memory exhaustion) comes here.  |
+`-----------------------------------------------------------*/
 yyexhaustedlab:
   yyerror (yyscanner, gdbwire_mi_output, YY_("memory exhausted"));
   yyresult = 2;
-  /* Fall through.  */
-#endif
+  goto yyreturnlab;
 
-yyreturn:
+
+/*----------------------------------------------------------.
+| yyreturnlab -- parsing is finished, clean up and return.  |
+`----------------------------------------------------------*/
+yyreturnlab:
   if (yychar != YYEMPTY)
     {
       /* Make sure we have latest lookahead translation.  See comments at
@@ -7506,22 +7717,30 @@ yyreturn:
   while (yyssp != yyss)
     {
       yydestruct ("Cleanup: popping",
-                  yystos[*yyssp], yyvsp, yyscanner, gdbwire_mi_output);
+                  YY_ACCESSING_SYMBOL (+*yyssp), yyvsp, yyscanner, gdbwire_mi_output);
       YYPOPSTACK (1);
     }
-#ifndef yyoverflow
-  if (yyss != yyssa)
-    YYSTACK_FREE (yyss);
-#endif
-  yyps->yynew = 1;
+  yyps->yynew = 2;
+  goto yypushreturn;
 
+
+/*-------------------------.
+| yypushreturn -- return.  |
+`-------------------------*/
 yypushreturn:
-#if YYERROR_VERBOSE
-  if (yymsg != yymsgbuf)
-    YYSTACK_FREE (yymsg);
-#endif
+
   return yyresult;
 }
+#undef gdbwire_mi_nerrs
+#undef yystate
+#undef yyerrstatus
+#undef yyssa
+#undef yyss
+#undef yyssp
+#undef yyvsa
+#undef yyvs
+#undef yyvsp
+#undef yystacksize
 /***** End of gdbwire_mi_grammar.c *******************************************/
 /***** Begin file gdbwire.c **************************************************/
 /**

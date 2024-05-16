@@ -30,7 +30,7 @@
  * point there is only need for one cgdbrc package. Feel free to make
  * a 'struct cgdbrc' if it's needed in the future.
  *
- * Also, the higlight_group package is really part of the configuration too.
+ * Also, the highlight_group package is really part of the configuration too.
  * Feel free to integrate the two files somehow.
  */
 
@@ -223,7 +223,7 @@ int cgdbrc_get_int(enum cgdbrc_option_kind option);
 enum LineDisplayStyle cgdbrc_get_displaystyle(enum cgdbrc_option_kind option);
 
 /**
- * A convience function for determining the timeout that should be used to
+ * A convenience function for determining the timeout that should be used to
  * allow a key code sequence to complete. This function can not fail.
  *
  * \return
@@ -233,7 +233,7 @@ enum LineDisplayStyle cgdbrc_get_displaystyle(enum cgdbrc_option_kind option);
 int cgdbrc_get_key_code_timeoutlen(void);
 
 /**
- * A convience function for determining the timeout that should be used to
+ * A convenience function for determining the timeout that should be used to
  * allow a mapped key sequence to complete. This function can not fail.
  *
  * \return

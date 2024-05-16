@@ -225,7 +225,7 @@ static char *detab_buffer(char *buffer, int tabstop)
  * name of file to load
  *
  * \return
- * 0 on sucess, -1 on error
+ * 0 on success, -1 on error
  */
 static int load_file_buf(struct buffer *buf, const char *filename)
 {
@@ -289,6 +289,7 @@ static int load_file_buf(struct buffer *buf, const char *filename)
                 sline.line = NULL;
                 sbsetcount(sline.line, line_len + 1);
                 strncpy(sline.line, line_start, line_len);
+                sline.line[line_len] = 0;
                 sline.len = line_len;
                 sline.attrs = NULL;
 
@@ -796,7 +797,8 @@ static int get_line_leading_ws_count(const char *otext, int length)
  *   if the line is the selected or executing line and the display is set
  *   to highlight.
  */
-int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
+int source_display(struct sviewer *sview, int focus,
+    enum win_refresh dorefresh, int no_hlsearch)
 {
     int i;
     int lwidth;
@@ -815,6 +817,7 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
     int showmarks = cgdbrc_get_int(CGDBRC_SHOWMARKS);
     int hlsearch = cgdbrc_get_int(CGDBRC_HLSEARCH);
     int mark_attr;
+    int do_hlsearch = hlsearch && !no_hlsearch;
 
     struct hl_line_attr *sel_highlight_attrs = 0;
     struct hl_line_attr *exe_highlight_attrs = 0;
@@ -1042,7 +1045,10 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
                 printline_attrs, -1, -1, sview->cur->sel_col + column_offset,
                 width - lwidth - 2);
 
-            if (hlsearch && sview->last_hlregex) {
+            // if highlight search is on
+            //   display the last successful search
+            //   unless we are starting a new search
+            if (do_hlsearch && sview->last_hlregex && !sview->hlregex) {
                 struct hl_line_attr *attrs = hl_regex_highlight(
                         &sview->last_hlregex, sline->line, HLG_SEARCH);
                 if (sbcount(attrs)) {
@@ -1053,6 +1059,22 @@ int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh)
                 }
             }
 
+            // if highlight search is on
+            //   display the current search
+            if (do_hlsearch && sview->hlregex) {
+                struct hl_line_attr *attrs = hl_regex_highlight(
+                        &sview->hlregex, sline->line, HLG_SEARCH);
+                if (sbcount(attrs)) {
+                    hl_printline_highlight(sview->win, sline->line, sline->len,
+                        attrs, x, y, sview->cur->sel_col + column_offset,
+                        width - lwidth - 2);
+                    sbfree(attrs);
+                }
+            }
+
+
+            // if the currently line being displayed is the selected line
+            //   display the current search as an incremental search
             if (is_sel_line && sview->hlregex) {
                 struct hl_line_attr *attrs = hl_regex_highlight(
                         &sview->hlregex, sline->line, HLG_INCSEARCH);
@@ -1271,7 +1293,7 @@ int source_search_regex(struct sviewer *sview,
     if (!node)
         return -1;
 
-    if (regex && *regex) {
+    if (regex) {
         int line;
         int line_end;
         int line_inc = direction ? +1 : -1;
@@ -1336,7 +1358,6 @@ static void source_clear_breaks(struct sviewer *sview)
 
     for (node = sview->list_head; node != NULL; node = node->next)
     {
-        int i;
         for (auto& lf : node->lflags)
             lf.breakpt = line_flags::breakpt_status::none;
     }

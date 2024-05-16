@@ -396,6 +396,9 @@ Sets a breakpoint at the current line number.
 @item t
 Sets a temporary breakpoint at the current line number.
 
+@item u
+Tells GDB to skip execution until the current line number.
+
 @item -
 Shrink source window 1 line or column (depending on split orientation).
 
@@ -674,7 +677,8 @@ draws an inverse block (cursor) next to the source code being executed.
 @item :set hls
 @itemx :set hlsearch
 When enabled, if there is a previous search pattern, highlight all its matches.
-The default is disabled.
+The default is disabled. To temporarily disable the highlighting of the
+previous search pattern issue the @var{noh} command.
 
 @item :set ic
 @itemx :set ignorecase
@@ -842,6 +846,10 @@ the video attributes for monochrome terminals.  Some examples are,
 :highlight Normal cterm=reverse ctermfg=White ctermbg=Black
 :hi Normal term=bold
 @end smallexample
+
+@item :noh
+Stop the highlighting for the @var{hlsearch} option. Highlighting is automatically turned back on when using a search command, or setting the @var{hlsearch}
+option.
 
 @item :insert
 Move focus to the GDB window.

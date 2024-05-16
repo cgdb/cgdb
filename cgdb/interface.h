@@ -244,4 +244,7 @@ int get_gdb_height(void);
 // The width of the gdb window
 int get_gdb_width(void);
 
+// Set the no highlight searching flag
+void if_set_no_hlsearch(void);
+
 #endif

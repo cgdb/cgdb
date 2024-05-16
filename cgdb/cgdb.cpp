@@ -58,10 +58,6 @@
 #include <ctype.h>
 #endif
 
-#if HAVE_LOCALE_H
-#include <locale.h>
-#endif
-
 #include <string>
 
 #define __STDC_FORMAT_MACROS
@@ -132,7 +128,7 @@ std::shared_ptr<kui_map_set> kui_imap;
  *
  * For example, when the user types 'o' at the CGDB source window, the
  * user is requesting the file dialog to open. CGDB must first ask GDB for 
- * the list of files. While it is retreiving these files, CGDB shouldn't 
+ * the list of files. While it is retrieving these files, CGDB shouldn't 
  * shoot through the rest of the kui keys available. If the user had
  * typed 'o /main' they would want to open the file dialog and start 
  * searching for a file that had the substring 'main' in it. So, CGDB must
@@ -822,7 +818,36 @@ static int main_loop(void)
                 return -1;
         }
 
-        /* gdb's output -> stdout */
+        /* This processes the mi output stream from gdb.
+         * 
+         * At one point, this was processed after the gdb console output.
+         * I suspect the order should not matter, however it does in the
+         * case described below.
+         *
+         * I ran across this issue,
+         *   https://github.com/cgdb/cgdb/issues/352
+         * where the target output wasn't being displayed by cgdb.
+         * cgdb was ignoring the target output. Once fixed, the target
+         * output and the gdb prompt were intermixed somewhat randomly.
+         *
+         * For instance, when running the command 'monitor help', 
+         * gdb returns two things,
+         *   - the gdb prompt on the console output
+         *   - the target output on the mi output
+         *
+         * If cgdb processes all the mi output first, the target output
+         * appears to show up before the gdb prompt. I fully expect to
+         * find a situation where the console output needs to be handled
+         * first one day. I've left this documentation to aid in the thought
+         * process when that day approaches.
+         */
+        if (FD_ISSET(gdb_mi_fd, &rset)) {
+            if (gdb_input(gdb_mi_fd) == -1) {
+                return -1;
+            }
+        }
+
+        /* This processes the console output stream from gdb.  */
         if (FD_ISSET(gdb_console_fd, &rset)) {
             if (gdb_input(gdb_console_fd) == -1) {
                 return -1;
@@ -839,11 +864,6 @@ static int main_loop(void)
             }
         }
 
-        if (FD_ISSET(gdb_mi_fd, &rset)) {
-            if (gdb_input(gdb_mi_fd) == -1) {
-                return -1;
-            }
-        }
     }
     return 0;
 }
@@ -926,14 +946,6 @@ int init_signal_pipe(void)
     }
 
     return result;
-}
-
-static void rlctx_send_user_command(char *line)
-{
-}
-static int tab_completion(int a, int b)
-{
-    return 0;
 }
 
 int update_kui(cgdbrc_config_option_ptr option)
@@ -1081,8 +1093,10 @@ int main(int argc, char *argv[])
     }
 
     /* From here on, the logger is initialized */
-
-    setlocale(LC_CTYPE, "");
+    if (rline_initialize() == -1) {
+        clog_error(CLOG_CGDB, "Unable to init readline");
+        cgdb_cleanup_and_exit(-1);
+    }
 
     if (tty_cbreak(STDIN_FILENO, &term_attributes) == -1) {
         clog_error(CLOG_CGDB, "tty_cbreak error");

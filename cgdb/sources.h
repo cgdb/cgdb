@@ -175,10 +175,12 @@ char *source_current_file(struct sviewer *sview);
  *
  *   sview:  Source viewer object
  *   focus:  If the window should have focus
+ *   no_hlsearch: Disable higlighting of previous search matches temporarily
  *
  * Return Value:  Zero on success, non-zero on error.
  */
-int source_display(struct sviewer *sview, int focus, enum win_refresh dorefresh);
+int source_display(struct sviewer *sview, int focus,
+    enum win_refresh dorefresh, int no_hlsearch);
 
 /* Relocate the source window.
  *

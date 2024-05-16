@@ -55,7 +55,7 @@ int hl_regex_search(struct hl_regex_info **info, const char *line,
     *start = -1;
     *end = -1;
 
-    if (!regex || !regex[0])
+    if (!regex)
         return -1;
     
     if (!*info) {

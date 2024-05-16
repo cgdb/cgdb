@@ -1,3 +1,42 @@
+  * CGDB will now display breakpoints with multiple locations properly
+    (again). GDB creates multiple location breakpoints with C++ constructors,
+    inside C++ templates and in inlined functions. CGDB supported multiple
+    location breakpoints with GDB prior to GDB 9.0, when mi2 was the default
+    mi protocol. GDB 9.0 introduced the mi3 protocol which changed the way
+    the -break-info command returns breakpoint information.
+  
+  * CGDB now allows you to execute until the currently selected line.
+    In cgdb mode, you can navigate to any file/line (or address in assembly
+    mode) and then type the 'u' key to have the debugger run until it hits
+    that file/line (or address).
+
+  * CGDB now supports the :noh command, which stops the highlighting
+    of previously matched searches when using the hlsearch option.
+    This resolves issue #24.
+
+  * Several searching improvements have been made
+    - Searching again with / will repeat the last search
+    - Searching again with ? will repeat the last search in reverse
+    - hlsearch no longer highlights old searches when starting a new search
+    - hlsearch will allow you to backspace out of a search completely now.
+      Previously it would always highlight the last char of search being
+      backspaced out of.
+    - hlsearch will properly highlight the previous search when you
+      backspace out of a search completely
+
+  * Fix issue #345 - cgdb can now be configured to be built without
+    the need to also build documentation. To disable documentation,
+    pass --enable-docs=no or --disable-docs to the configure options.
+    This is useful when building on systems that don't have the
+    makeinfo executable available.
+
+  * Fix issue #352 - gdb target output was not being displayed in cgdb.
+    CGDB previously ignored target output from GDB. This prevented useful
+    target output messages from being displayed back to the user in the
+    gdb console output window. CGDB now correctly displays target output
+    when remote debugging, including both from gdbserver directly or when
+    debugging a program through valgrind using the --vgdb-error=0 option.
+
   * When selecting breakpoints with the space bar in the source viewer,
     CGDB now selects breakpoints using an absolute path to the file
     instead of a relative path. This prevents breakpoints being set on files

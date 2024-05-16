@@ -60,7 +60,6 @@ AC_CHECK_HEADERS([regex.h],,[AC_MSG_ERROR([CGDB requires regex.h to build.])])
 AC_CHECK_HEADERS([curses.h],,[
    AC_CHECK_HEADERS([ncurses/curses.h],,[
       AC_MSG_ERROR([CGDB requires curses.h or ncurses/curses.h to build.])])])
-AC_CHECK_HEADERS([locale.h],,[AC_MSG_ERROR([CGDB requires locale.h to build.])])
 
 dnl Check for getopt.h, If this is here then getopt_long can be used.
 AC_CHECK_HEADERS([getopt.h],
@@ -108,8 +107,30 @@ AC_TRY_LINK([#ifndef _GNU_SOURCE
             [AC_DEFINE(HAVE_PTSNAME_R, 1,
                      Define to 1 if you have a re-entrant version of ptsname)])
 
-dnl program checks
-AC_CHECK_PROG([HAS_MAKEINFO], [makeinfo], [yes], [no])
+dnl Add support for creating documentation
+dnl
+dnl It enables the use of the makinfo documentation tool to
+dnl create html and pdf documentation for distribution with cgdb
+AC_ARG_ENABLE([docs],
+    [AS_HELP_STRING([--enable-docs], [generate documentation with makeinfo
+    (default yes)])],
+    [case "${enableval}" in
+        yes) enable_docs=yes ;;
+        no)  enable_docs=no ;;
+        *) AC_MSG_ERROR([bad value ${enableval} for --enable-docs, to \
+disable this option use "--disable-docs" or "--enable-docs=no"]) ;;
+         esac],
+    [enable_docs=yes])
+
+if test "$enable_docs" = "yes"; then
+  AC_CHECK_PROG([HAS_MAKEINFO], [makeinfo], [yes], [no])
+fi
+
+dnl Build the documentation if enable docs is true
+AM_CONDITIONAL([WANT_DOCS], [test x$enable_docs = xyes])
+
+
+
 dnl Default variables
 dnl If ncurses is yes after arguments, than use ncurses. Otherwise, use curses
 opt_with_readline_prefix=no
@@ -151,8 +172,10 @@ if test "$LEX" != "flex" -a "$LEX" != "lex"; then
 fi
 
 dnl check that the required tools are available to generate documentation
-if test "$HAS_MAKEINFO" != "yes" ; then
-	AC_MSG_ERROR([Please install makeinfo before installing])
+if test "$enable_docs" = "yes"; then
+    if test "$HAS_MAKEINFO" != "yes" ; then
+        AC_MSG_ERROR([Please install makeinfo before installing])
+    fi
 fi
 
 dnl readline and ncurses/curses configure magic is difficult.
@@ -252,5 +275,31 @@ AC_OUTPUT(
     lib/vterm/Makefile \
     doc/Makefile \
     cgdb/Makefile \
-    test/Makefile
+    testsuite/Makefile
 )
+
+# Display configuration options.
+cat <<EOF
+
+$PACKAGE_NAME configuration summary:
+
+    Install prefix ........... : ${prefix}
+
+    flex ..................... : ${LEX}
+
+    C preprocessor ........... : ${CPP}
+    C compiler ............... : ${CC}
+    C++ preprocessor ......... : ${CXXCPP}
+    C++ compiler ............. : ${CXX}
+    Linker ................... : ${LD}
+
+    C preprocessor flags ..... : ${CPPFLAGS}
+    C compiler flags ......... : ${CFLAGS}
+    C++ compiler flags ....... : ${CXXFLAGS}
+    Linker flags ............. : ${LDFLAGS}
+    Extra libraries .......... : ${LIBS}
+
+    Enabled options:
+    --enable-docs ............ : ${enable_docs}
+
+EOF

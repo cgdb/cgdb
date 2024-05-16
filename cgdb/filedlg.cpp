@@ -429,7 +429,10 @@ int filedlg_display(struct filedlg *fd)
         hl_printline(fd->win, filename, strlen(filename),
                      NULL, -1, -1, fd->buf->sel_col, width - lwidth - 2);
 
-        if (hlsearch && fd->last_hlregex) {
+        // if highlight search is on
+        //   display the last successful search
+        //   unless we are starting a new search
+        if (hlsearch && fd->last_hlregex && !fd->hlregex) {
             struct hl_line_attr *attrs = hl_regex_highlight(
                     &fd->last_hlregex, filename, HLG_SEARCH);
 
@@ -440,6 +443,21 @@ int filedlg_display(struct filedlg *fd)
             }
         }
 
+        // if highlight search is on
+        //   display the current search
+        if (hlsearch && fd->hlregex) {
+            struct hl_line_attr *attrs = hl_regex_highlight(
+                    &fd->hlregex, filename, HLG_SEARCH);
+
+            if (sbcount(attrs)) {
+                hl_printline_highlight(fd->win, filename, strlen(filename),
+                             attrs, x, y, fd->buf->sel_col, width - lwidth - 2);
+                sbfree(attrs);
+            }
+        }
+
+        // if the currently line being displayed is the selected line
+        //   display the current search as an incremental search
         if (regex_search && file == fd->buf->sel_line) {
             struct hl_line_attr *attrs = hl_regex_highlight(
                     &fd->hlregex, filename, HLG_INCSEARCH);
@@ -510,7 +528,7 @@ void filedlg_display_message(struct filedlg *fd, char *message)
 static int capture_regex(struct filedlg *fd)
 {
     int c;
-    extern struct kui_manager *kui_ctx;
+    extern kui_manager *kui_ctx;
 
     /* Initialize the function for finding a regex and tell user */
     regex_search = 1;

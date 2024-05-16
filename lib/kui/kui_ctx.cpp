@@ -45,13 +45,13 @@ static int intlen(const int *val)
  */
 void kuictx::update_buffer(kui_map *the_map_found, int *key)
 {
-    if (!the_map_found && volatile_buffer.size()) {
-        *key = volatile_buffer.back();
-        volatile_buffer.pop_back();
+    if (!the_map_found && m_volatile_buffer.size()) {
+        *key = m_volatile_buffer.back();
+        m_volatile_buffer.pop_back();
     }
 
-    for (auto it : volatile_buffer) {
-        buffer.push_front(it);
+    for (auto it : m_volatile_buffer) {
+        m_buffer.push_front(it);
     }
 
     /* Add the map value */
@@ -61,7 +61,7 @@ void kuictx::update_buffer(kui_map *the_map_found, int *key)
         int length = intlen(literal_value);
 
         for (int i = length - 1; i >= 0; --i) {
-            buffer.push_front(literal_value[i]);
+            m_buffer.push_front(literal_value[i]);
         }
     }
 }
@@ -82,14 +82,14 @@ void kuictx::update_buffer(kui_map *the_map_found, int *key)
  */
 int kuictx::findchar(int& key)
 {
-    if (buffer.size()) {
-        key = buffer.front();
-        buffer.pop_front();
+    if (m_buffer.size()) {
+        key = m_buffer.front();
+        m_buffer.pop_front();
         return 1;
     } else {
         /* Otherwise, look to read in a char,
          * This function called returns the same conditions as this function*/
-        return callback(fd, ms, state_data, &key);
+        return m_callback(m_fd, m_ms, m_state_data, &key);
     }
 }
 
@@ -114,12 +114,12 @@ int kuictx::update_map_set(int key, int& map_found)
      * there is no need to keep looking
      */
 
-    if (!map_set->push_key(key, &map_found))
+    if (!m_map_set->push_key(key, &map_found))
         return -1;
 
     if (map_found) {
         /* If a map was found, reset the extra char's read */
-        volatile_buffer.clear();
+        m_volatile_buffer.clear();
     }
 
     return 0;
@@ -139,7 +139,7 @@ bool kuictx::should_continue_looking() const
      * KUI_MAP_STILL_LOOKING. If none of the lists is at this state, then
      * there is no need to keep looking
      */
-    return map_set->get_state() == kui_tree::kui_tree_state::MATCHING;
+    return m_map_set->get_state() == kui_tree::kui_tree_state::MATCHING;
 }
 
 /**
@@ -156,8 +156,8 @@ kui_map *kuictx::get_found_map() const
      * Otherwise, no map is found.
      */
 
-    if (map_set->get_state() == kui_tree::kui_tree_state::FOUND) {
-        return map_set->get_data();
+    if (m_map_set->get_state() == kui_tree::kui_tree_state::FOUND) {
+        return m_map_set->get_data();
     }
 
     return nullptr;
@@ -178,14 +178,13 @@ kui_map *kuictx::get_found_map() const
 int kuictx::findkey(int& was_map_found)
 {
     int key, retval;
-    struct kui_map *the_map_found = NULL;
     int map_found;
 
     /* Initialize variables on stack */
     key = -1;
     was_map_found = 0;
 
-    if (!map_set) {
+    if (!m_map_set) {
         retval = findchar(key);
         if (retval == -1) {
             return -1;
@@ -194,8 +193,8 @@ int kuictx::findkey(int& was_map_found)
         }
     }
 
-    volatile_buffer.clear();
-    map_set->reset_state();
+    m_volatile_buffer.clear();
+    m_map_set->reset_state();
 
     /* Start the main loop */
     while (1) {
@@ -207,7 +206,7 @@ int kuictx::findkey(int& was_map_found)
         if (retval == 0)
             break;
 
-        volatile_buffer.push_front(key);
+        m_volatile_buffer.push_front(key);
 
         /* Update each list, with the character read, and the position. */
         if (update_map_set(key, map_found) == -1)
@@ -230,7 +229,7 @@ int kuictx::findkey(int& was_map_found)
      * If the user types abcd, the list will still be looking,
      * even though it already found a mapping.
      */
-    map_set->finalize_state();
+    m_map_set->finalize_state();
 
     /* Update the buffer and get the final char. */
     kui_map *map = get_found_map();

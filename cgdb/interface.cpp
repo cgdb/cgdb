@@ -139,6 +139,48 @@ static std::string regex_cur;
 /* The last regex the user searched for */
 static std::string regex_last;
 
+// Used to temporarily disable hlsearch
+//
+// When set to true, previous searches should not be highlighted.
+// If the user starts another search, the new search should be highlighted.
+// If the user cancels the search, previous searches should not be highlighted.
+// If the user completes another search, this should be set to false.
+// TODO: If the user sets hlsearch, this should be set to false.
+//   In a future patch i'll make it easy to get callbacks when an option
+//   is changed.
+//
+// When false, no special behavior is required regarding previous searches.
+//
+// Note for testing:
+// - when hlsearch enabled (without noh)
+//   - do a valid search            -> search items highlighted
+//   - /                            -> old search items highlighted
+//   - /f                           -> f is higlighted
+//   - backspace to /               -> nothing highlighted
+//   - backspace to cancel search   -> old search items highlighted
+//   - /f                           -> f is higlighted
+//   - <ESC> to cancel search       -> old search items highlighted
+//
+// - when hlsearch enabled (with noh)
+//   - do a valid search            -> search items highlighted
+//   - then :noh                    -> nothing is highlighted
+//   - /                            -> nothing highlighted
+//   - /f                           -> f is higlighted
+//   - backspace to /               -> nothing highlighted
+//   - backspace to cancel search   -> nothing highlighted
+//   - /f                           -> f is higlighted
+//   - <ESC> to cancel search       -> nothing highlighted
+//
+static bool no_hlsearch = false;
+
+// When starting a search, recall the previous state of no_hlsearch
+// If a search is cancelled, the previous state can be restored
+static bool saved_no_hlsearch = false;
+
+// When starting a search, recall the previously matched regex
+// If a search is cancelled, the previously matched regex can be restored
+static struct hl_regex_info *saved_hlregex = 0;
+
 /* Direction to search */
 static int regex_direction_cur;
 static int regex_direction_last;
@@ -491,7 +533,7 @@ void if_draw(void)
         swin_wnoutrefresh(status_win);
 
     if (get_src_height() > 0)
-        source_display(src_viewer, focus == CGDB, WIN_NO_REFRESH);
+        source_display(src_viewer, focus == CGDB, WIN_NO_REFRESH, no_hlsearch);
 
     separator_display(cur_split_orientation == WSO_VERTICAL);
 
@@ -966,13 +1008,19 @@ static int status_bar_regex_input(struct sviewer *sview, int key)
         case '\r':
         case '\n':
         case CGDB_KEY_CTRL_M:
-            /* Save for future searches via 'n' or 'N' */
-            regex_last = regex_cur;
+            if (regex_cur.size() == 0) {
+                // If the user searched for / only, that's like searching
+                // on the last string again. Don't modify regex_last.
+            } else {
+                // Save for future searches via 'n' or 'N'
+                regex_last = regex_cur;
+            }
 
             regex_direction_last = regex_direction_cur;
             source_search_regex(sview, regex_last.c_str(), 2,
                     regex_direction_last, regex_icase);
             if_draw();
+
             done = 1;
             break;
         case 8:
@@ -980,8 +1028,13 @@ static int status_bar_regex_input(struct sviewer *sview, int key)
             /* Backspace or DEL key */
             if (regex_cur.size() == 0) {
                 done = 1;
-                source_search_regex(sview, "", 2,
-                        regex_direction_cur, regex_icase);
+
+                // the search was cancelled, restore the old state
+                if (saved_no_hlsearch) {
+                    no_hlsearch = saved_no_hlsearch;
+                    src_viewer->last_hlregex = saved_hlregex;
+                    saved_hlregex = 0;
+                }
             } else {
                 regex_cur.erase(regex_cur.size() - 1);
                 source_search_regex(sview, regex_cur.c_str(), 1,
@@ -1008,6 +1061,7 @@ static int status_bar_regex_input(struct sviewer *sview, int key)
 
     if (done) {
         regex_cur.clear();
+        hl_regex_free(&src_viewer->hlregex);
 
         sbc_kind = SBC_NORMAL;
         if_set_focus(CGDB);
@@ -1074,6 +1128,37 @@ static int status_bar_input(struct sviewer *sview, int key)
     return -1;
 }
 
+static int get_sviewer_location(struct sviewer *sview, char **path, int *line,
+                                uint64_t *addr)
+{
+    char *l_path = NULL;
+    int l_line = 0;
+    uint64_t l_addr = 0;
+
+    if (!sview || !sview->cur || !sview->cur->path)
+        return -1;
+
+    l_line = sview->cur->sel_line;
+
+    if (sview->cur->path[0] == '*')
+    {
+        l_addr = sview->cur->file_buf.addrs[l_line];
+        if (!l_addr)
+            return -1;
+    }
+    else
+    {
+        l_path = sview->cur->path;
+    }
+
+    /* l_line is 0-indexed, but the actual file is 1-indexed */
+    *line = l_line + 1;
+    *path = l_path;
+    *addr = l_addr;
+
+    return 0;
+}
+
 /**
  * toggle a breakpoint
  * 
@@ -1089,31 +1174,18 @@ static int status_bar_input(struct sviewer *sview, int key)
 static int
 toggle_breakpoint(struct sviewer *sview, enum tgdb_breakpoint_action t)
 {
+    char *path;
     int line;
-    uint64_t addr = 0;
-    char *path = NULL;
+    uint64_t addr;
 
-    if (!sview || !sview->cur || !sview->cur->path)
+    if (get_sviewer_location(sview, &path, &line, &addr) == -1)
         return -1;
-
-    line = sview->cur->sel_line;
-
-    if (sview->cur->path[0] == '*')
-    {
-        addr = sview->cur->file_buf.addrs[line];
-        if (!addr)
-            return -1;
-    }
-    else
-    {
-        path = sview->cur->path;
-    }
 
     /* delete an existing breakpoint */
     if (sview->cur->lflags[line].breakpt != line_flags::breakpt_status::none)
         t = TGDB_BREAKPOINT_DELETE;
 
-    tgdb_request_modify_breakpoint(tgdb, path, line + 1, addr, t);
+    tgdb_request_modify_breakpoint(tgdb, path, line, addr, t);
     return 0;
 }
 
@@ -1208,6 +1280,15 @@ static void source_input(struct sviewer *sview, int key)
             enum tgdb_breakpoint_action t = TGDB_TBREAKPOINT_ADD;
 
             toggle_breakpoint(sview, t);
+        }
+            break;
+        case 'u':
+        {
+            char *path;
+            int line;
+            uint64_t addr;
+            if (get_sviewer_location(sview, &path, &line, &addr) != -1)
+                tgdb_request_until_line(tgdb, path, line, addr);
         }
             break;
         default:
@@ -1357,6 +1438,16 @@ static int cgdb_input(int key, int *last_key)
                 regex_direction_cur = ('/' == key);
                 orig_line_regex = src_viewer->cur->sel_line;
 
+                // The user has started another search, save the
+                // existing state and set no_hlsearch to false so
+                // highlighting resumes
+                if (no_hlsearch) {
+                    saved_no_hlsearch = no_hlsearch;
+                    saved_hlregex = src_viewer->last_hlregex;
+                    src_viewer->last_hlregex = 0;
+                    no_hlsearch = false;
+                }
+
                 sbc_kind = SBC_REGEX;
                 if_set_focus(CGDB_STATUS_BAR);
 
@@ -1436,6 +1527,13 @@ int internal_if_input(int key, int *last_key)
         if (focus == CGDB_STATUS_BAR && sbc_kind == SBC_NORMAL) {
             cur_sbc.clear();
         } else if (focus == CGDB_STATUS_BAR && sbc_kind == SBC_REGEX) {
+            // the search was cancelled, restore the old state
+            if (saved_no_hlsearch) {
+                no_hlsearch = saved_no_hlsearch;
+                src_viewer->last_hlregex = saved_hlregex;
+                saved_hlregex = 0;
+            }
+
             regex_cur.clear();
 
             hl_regex_free(&src_viewer->hlregex);
@@ -1731,4 +1829,10 @@ int if_clear_line()
     if_print(line.c_str());
 
     return 0;
+}
+
+void if_set_no_hlsearch(void)
+{
+    no_hlsearch = true;
+    saved_no_hlsearch = false;
 }

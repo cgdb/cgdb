@@ -8,7 +8,7 @@
 //   Allows iterating from 0:height-1 but displaying the scrolled to text
 //   The default is 0, which is represented by d0
 //   Scrolling back all the way to -6 is represented by d-6
-//   Scrolling back partiall to -2 is represented by d-2
+//   Scrolling back partially to -2 is represented by d-2
 // - The scroller has introduced the concept of a search id (sid)
 //   The purpose is to iterate easily over all the text (vterm+scrollback)
 //
@@ -121,8 +121,6 @@ struct scroller {
 
 static void scr_ring_bell(void *data)
 {
-    struct scroller *scr = (struct scroller *)data;
-
     // TODO: Ring the bell
 }
 
@@ -214,7 +212,7 @@ void scr_up(struct scroller *scr, int nlines)
     // When moving 1 line up
     //   Move the cursor towards the top of the screen
     //   If it hits the top, then start scrolling back
-    // Otherwise whem moving many lines up, simply scroll
+    // Otherwise when moving many lines up, simply scroll
     if (scr->scroll_cursor_row > 0 && nlines == 1) {
         scr->scroll_cursor_row = scr->scroll_cursor_row - 1;
     } else {
@@ -231,7 +229,7 @@ void scr_down(struct scroller *scr, int nlines)
     // When moving 1 line down
     //   Move the cursor towards the botttom of the screen
     //   If it hits the botttom, then start scrolling forward
-    // Otherwise whem moving many lines down, simply scroll
+    // Otherwise when moving many lines down, simply scroll
     if (scr->scroll_cursor_row < height - 1 && nlines == 1) {
         scr->scroll_cursor_row = scr->scroll_cursor_row + 1;
     } else {
