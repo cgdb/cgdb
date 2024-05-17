@@ -9,6 +9,7 @@ const char *c_extensions[] = {
 };
 const char *asm_extensions[] = { ".s" };
 const char *d_extensions[] = { ".d", ".di" };
+const char *fortran_extensions[] = { ".f", "*.for", ".f90", ".f95", "f03" };
 const char *go_extensions[] = { ".go" };
 const char *rust_extensions[] = { ".rs" };
 const char *ada_extensions[] = { ".adb", ".ads", ".ada" };
@@ -24,6 +25,7 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 DECLARE_LEX_FUNCTIONS(c)
 DECLARE_LEX_FUNCTIONS(asm)
 DECLARE_LEX_FUNCTIONS(d)
+DECLARE_LEX_FUNCTIONS(fortran)
 DECLARE_LEX_FUNCTIONS(go)
 DECLARE_LEX_FUNCTIONS(rust)
 DECLARE_LEX_FUNCTIONS(ada)
@@ -90,6 +92,8 @@ int tokenizer_set_buffer(struct tokenizer *t, const char *buffer, enum tokenizer
         INIT_LEX(asm);
     } else if (l == TOKENIZER_LANGUAGE_D) {
         INIT_LEX(d);
+    } else if (l == TOKENIZER_LANGUAGE_FORTRAN) {
+        INIT_LEX(fortran);
     } else if (l == TOKENIZER_LANGUAGE_GO) {
         INIT_LEX(go);
     } else if (l == TOKENIZER_LANGUAGE_CGDBHELP) {
@@ -158,6 +162,10 @@ enum tokenizer_language_support tokenizer_get_default_file_type(const char
     for (i = 0; i < sizeof (d_extensions) / sizeof (char *); i++)
         if (strcasecmp(file_extension, d_extensions[i]) == 0)
             return TOKENIZER_LANGUAGE_D;
+
+    for (i = 0; i < sizeof (fortran_extensions) / sizeof (char *); i++)
+        if (strcasecmp(file_extension, fortran_extensions[i]) == 0)
+            return TOKENIZER_LANGUAGE_FORTRAN;
 
     for (i = 0; i < sizeof (go_extensions) / sizeof (char *); i++)
         if (strcasecmp(file_extension, go_extensions[i]) == 0)
