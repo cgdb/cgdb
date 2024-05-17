@@ -254,12 +254,10 @@ static void tgdb_commands_process_breakpoints(struct tgdb *tgdb,
 }
 
 static void tgdb_commands_send_source_files(struct tgdb *tgdb,
-        char **source_files)
+        const std::list<std::string> &source_files)
 {
-    struct tgdb_response *response =
-        tgdb_create_response(TGDB_UPDATE_SOURCE_FILES);
-    response->choice.update_source_files.source_files = source_files;
-    tgdb_send_response(tgdb, response);
+    tgdb->callbacks.tgdb_inferiors_soure_files_fn(
+            tgdb->callbacks.context, source_files);
 }
 
 /* This function is capable of parsing the output of 'info source'.
@@ -274,12 +272,12 @@ tgdb_commands_process_info_sources(struct tgdb *tgdb,
     result = gdbwire_get_mi_command(GDBWIRE_MI_FILE_LIST_EXEC_SOURCE_FILES,
         result_record, &mi_command);
     if (result == GDBWIRE_OK) {
-        char **source_files = NULL;
+        std::list<std::string> source_files;
         struct gdbwire_mi_source_file *files =
             mi_command->variant.file_list_exec_source_files.files;
         while (files) {
             char *file = (files->fullname)?files->fullname:files->file;
-            sbpush(source_files, strdup(file));
+            source_files.push_back(file);
             files = files->next;
         }
 
@@ -1187,19 +1185,6 @@ static int tgdb_delete_response(struct tgdb_response *com)
             free(tfp);
 
             com->choice.update_file_position.file_position = NULL;
-            break;
-        }
-        case TGDB_UPDATE_SOURCE_FILES:
-        {
-            int i;
-            char **source_files = com->choice.update_source_files.source_files;
-
-            for (i = 0; i < sbcount(source_files); i++) {
-                free(source_files[i]);
-            }
-            sbfree(source_files);
-
-            com->choice.update_source_files.source_files = NULL;
             break;
         }
         case TGDB_DISASSEMBLE_PC:

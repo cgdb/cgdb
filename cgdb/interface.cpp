@@ -1698,9 +1698,9 @@ void if_clear_filedlg(void)
     filedlg_clear(fd);
 }
 
-void if_add_filedlg_choice(const char *filename)
+void if_add_filedlg_choice(const std::string &filename)
 {
-    filedlg_add_file_choice(fd, filename);
+    filedlg_add_file_choice(fd, filename.c_str());
 }
 
 void if_filedlg_display_message(char *message)

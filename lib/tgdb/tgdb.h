@@ -177,10 +177,6 @@
         // This is a 'struct tgdb_file_position *'.
         TGDB_UPDATE_FILE_POSITION,
 
-        // This returns a list of all the source files that make up the 
-        // inferior program.
-        TGDB_UPDATE_SOURCE_FILES,
-
         // Disassemble $pc output
         TGDB_DISASSEMBLE_PC,
 
@@ -203,13 +199,6 @@
             struct {
                 struct tgdb_file_position *file_position;
             } update_file_position;
-
-            // header == TGDB_UPDATE_SOURCE_FILES
-            struct {
-                // This list has elements of 'const char *' representing each 
-                // filename. The filename may be relative or absolute.
-                char **source_files;
-            } update_source_files;
 
             // header == TGDB_INFERIOR_EXITED
             struct {
@@ -305,6 +294,20 @@
          */
         void (*tgdb_breakpoints_fn)(void *context,
             const std::list<tgdb_breakpoint> &breakpoints);
+
+
+        /**
+         * A list of all the source files that make up the program.
+         *
+         * @param context
+         * The tgdb instance to operate on
+         *
+         * @param source_files
+         * This list of source files representing each filename.
+         * The filename may be relative or absolute.
+         */
+        void (*tgdb_inferiors_soure_files_fn)(void *context,
+                const std::list<std::string> &source_files);
     };
 
   /**

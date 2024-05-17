@@ -373,12 +373,15 @@ static void console_output(void *context, const std::string &str) {
 static void command_response(void *context, struct tgdb_response *response);
 static void breakpoints(void *context,
         const std::list<tgdb_breakpoint> &breakpoints);
+static void inferiors_source_files(void *context,
+        const std::list<std::string> &source_files);
             
 tgdb_callbacks callbacks = { 
     NULL,       
     console_output,
     command_response,
-    breakpoints
+    breakpoints,
+    inferiors_source_files
 };
 
 
@@ -562,9 +565,8 @@ static void update_file_position(struct tgdb_response *response)
 }
 
 /* This is a list of all the source files */
-static void update_source_files(struct tgdb_response *response)
+static void update_source_files(const std::list<std::string> &source_files)
 {
-    char **source_files = response->choice.update_source_files.source_files;
     sviewer *sview = if_get_sview();
     struct list_node *cur;
     int added_disasm = 0;
@@ -580,15 +582,13 @@ static void update_source_files(struct tgdb_response *response)
         }
     }
 
-    if (!sbcount(source_files) && !added_disasm) {
+    if (source_files.size() == 0 && !added_disasm) {
         /* No files returned? */
         if_display_message(WIN_REFRESH, "Error:",
             " No sources available! Was the program compiled with debug?");
     } else {
-        int i;
-
-        for (i = 0; i < sbcount(source_files); i++) {
-            if_add_filedlg_choice(source_files[i]);
+        for (auto iter : source_files) {
+            if_add_filedlg_choice(iter);
         }
 
         if_set_focus(FILE_DLG);
@@ -668,9 +668,6 @@ static void command_response(void *context, struct tgdb_response *response)
     case TGDB_UPDATE_FILE_POSITION:
         update_file_position(response);
         break;
-    case TGDB_UPDATE_SOURCE_FILES:
-        update_source_files(response);
-        break;
     case TGDB_DISASSEMBLE_PC:
     case TGDB_DISASSEMBLE_FUNC:
         update_disassemble(response);
@@ -686,6 +683,12 @@ static void breakpoints(void *context,
         const std::list<tgdb_breakpoint> &breakpoints)
 {
     update_breakpoints(breakpoints);
+}
+
+static void inferiors_source_files(void *context,
+        const std::list<std::string> &source_files)
+{
+    update_source_files(source_files);
 }
 
 /* gdb_input: Receives data from tgdb:

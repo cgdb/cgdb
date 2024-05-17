@@ -236,11 +236,19 @@ void breakpoints(void *context,
 {
 }
 
+static
+void inferiors_source_files(void *context,
+        const std::list<std::string> &source_files)
+{
+}
+
+
 tgdb_callbacks callbacks = {
     NULL,
     console_output,
     command_response,
-    breakpoints
+    breakpoints,
+    inferiors_source_files
 };
 
 int main(int argc, char **argv)

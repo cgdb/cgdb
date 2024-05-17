@@ -118,7 +118,7 @@ void if_clear_filedlg(void);
  *
  *  filename: a file the user can choose to open.
  */
-void if_add_filedlg_choice(const char *filename);
+void if_add_filedlg_choice(const std::string &filename);
 
 /* if_filedlg_display_message: Displays a message on the filedlg window status bar.
  * ---------------------------
