@@ -1364,9 +1364,8 @@ static void source_clear_breaks(struct sviewer *sview)
 }
 
 void source_set_breakpoints(struct sviewer *sview,
-        struct tgdb_breakpoint *breakpoints)
+        const std::list<tgdb_breakpoint> &breakpoints)
 {
-    int i;
     struct list_node *node;
 
     source_clear_breaks(sview);
@@ -1375,12 +1374,12 @@ void source_set_breakpoints(struct sviewer *sview,
     // disassembly view know about them. This way if you set a breakpoint
     // in one mode, then switch modes, the other mode will know about
     // it as well.
-    for (i = 0; i < sbcount(breakpoints); i++) {
-        if (breakpoints[i].path) {
-            node = source_get_node(sview, breakpoints[i].path);
+    for (auto iter : breakpoints) {
+        if (iter.path) {
+            node = source_get_node(sview, iter.path);
             if (!load_file(node)) {
-                int line = breakpoints[i].line;
-                int enabled = breakpoints[i].enabled;
+                int line = iter.line;
+                int enabled = iter.enabled;
                 if (line > 0 && line <= node->lflags.size()) {
                     node->lflags[line - 1].breakpt = enabled
                         ? line_flags::breakpt_status::enabled
@@ -1388,11 +1387,11 @@ void source_set_breakpoints(struct sviewer *sview,
                 }
             }
         }
-        if (breakpoints[i].addr) {
+        if (iter.addr) {
             int line = 0;
-            node = source_get_asmnode(sview, breakpoints[i].addr, &line);
+            node = source_get_asmnode(sview, iter.addr, &line);
             if (node) {
-                node->lflags[line].breakpt = breakpoints[i].enabled
+                node->lflags[line].breakpt = iter.enabled
                     ? line_flags::breakpt_status::enabled
                     : line_flags::breakpt_status::disabled;
             }

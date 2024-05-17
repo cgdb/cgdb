@@ -371,11 +371,14 @@ static void console_output(void *context, const std::string &str) {
 }
 
 static void command_response(void *context, struct tgdb_response *response);
+static void breakpoints(void *context,
+        const std::list<tgdb_breakpoint> &breakpoints);
             
 tgdb_callbacks callbacks = { 
     NULL,       
     console_output,
-    command_response
+    command_response,
+    breakpoints
 };
 
 
@@ -477,10 +480,9 @@ static int user_input_loop()
 }
 
 /* This updates all the breakpoints */
-static void update_breakpoints(struct tgdb_response *response)
+static void update_breakpoints(const std::list<tgdb_breakpoint> &breakpoints)
 {
-    source_set_breakpoints(if_get_sview(),
-        response->choice.update_breakpoints.breakpoints);
+    source_set_breakpoints(if_get_sview(), breakpoints);
     if_show_file(NULL, 0, 0);
 }
 
@@ -663,9 +665,6 @@ static void command_response(void *context, struct tgdb_response *response)
 {
     switch (response->header)
     {
-    case TGDB_UPDATE_BREAKPOINTS:
-        update_breakpoints(response);
-        break;
     case TGDB_UPDATE_FILE_POSITION:
         update_file_position(response);
         break;
@@ -681,6 +680,12 @@ static void command_response(void *context, struct tgdb_response *response)
         cgdb_cleanup_and_exit(0);
         break;
     }
+}
+
+static void breakpoints(void *context,
+        const std::list<tgdb_breakpoint> &breakpoints)
+{
+    update_breakpoints(breakpoints);
 }
 
 /* gdb_input: Receives data from tgdb:

@@ -180,18 +180,14 @@ void tgdb_run_or_queue_request(struct tgdb *tgdb,
 // Command Functions {{{
 static void
 tgdb_commands_send_breakpoints(struct tgdb *tgdb,
-    struct tgdb_breakpoint *breakpoints)
+        const std::list<tgdb_breakpoint> &breakpoints)
 {
-    struct tgdb_response *response = (struct tgdb_response *)
-        tgdb_create_response(TGDB_UPDATE_BREAKPOINTS);
-
-    response->choice.update_breakpoints.breakpoints = breakpoints;
-
-    tgdb_send_response(tgdb, response);
+    tgdb->callbacks.tgdb_breakpoints_fn(
+            tgdb->callbacks.context, breakpoints);
 }
 
 static void tgdb_commands_process_breakpoint(
-        struct tgdb_breakpoint *&breakpoints,
+        std::list<tgdb_breakpoint> &breakpoints,
         struct gdbwire_mi_breakpoint *breakpoint)
 {
     bool file_location_avialable =
@@ -221,7 +217,7 @@ static void tgdb_commands_process_breakpoint(
         }
 
         tb.enabled = breakpoint->enabled;
-        sbpush(breakpoints, tb);
+        breakpoints.push_back(tb);
     }
 }
 
@@ -233,7 +229,7 @@ static void tgdb_commands_process_breakpoints(struct tgdb *tgdb,
     result = gdbwire_get_mi_command(GDBWIRE_MI_BREAK_INFO,
         result_record, &mi_command);
     if (result == GDBWIRE_OK) {
-        struct tgdb_breakpoint *breakpoints = NULL;
+        std::list<tgdb_breakpoint> breakpoints;
         struct gdbwire_mi_breakpoint *breakpoint =
             mi_command->variant.break_info.breakpoints;
         while (breakpoint) {
@@ -1179,23 +1175,6 @@ static int tgdb_delete_response(struct tgdb_response *com)
         return -1;
 
     switch (com->header) {
-        case TGDB_UPDATE_BREAKPOINTS:
-        {
-            int i;
-            struct tgdb_breakpoint *breakpoints =
-                com->choice.update_breakpoints.breakpoints;
-
-            for (i = 0; i < sbcount(breakpoints); i++) {
-
-                struct tgdb_breakpoint *tb = &breakpoints[i];
-
-                free(tb->path);
-            }
-
-            sbfree(breakpoints);
-            com->choice.update_breakpoints.breakpoints = NULL;
-            break;
-        }
         case TGDB_UPDATE_FILE_POSITION:
         {
             struct tgdb_file_position *tfp =

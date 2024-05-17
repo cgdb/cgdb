@@ -15,6 +15,7 @@
 #define _SOURCES_H_
 
 #include "sys_win.h"
+#include "tgdb.h"
 #include <deque>
 #include <list>
 
@@ -290,7 +291,7 @@ void source_free(struct sviewer *sview);
  * The new breakpoints to set
  */
 void source_set_breakpoints(struct sviewer *sview,
-        struct tgdb_breakpoint *breakpoints);
+        const std::list<tgdb_breakpoint> &breakpoints);
 
 /**
  * Check's to see if the current source file has changed. If it has it loads

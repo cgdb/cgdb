@@ -221,6 +221,7 @@ void console_output(void *context, const std::string &str) {
     }
 }
 
+static
 void command_response(void *context, struct tgdb_response *response)
 {
     if (response->header == TGDB_QUIT) {
@@ -229,10 +230,17 @@ void command_response(void *context, struct tgdb_response *response)
     }
 }
 
+static
+void breakpoints(void *context,
+        const std::list<tgdb_breakpoint> &breakpoints)
+{
+}
+
 tgdb_callbacks callbacks = {
     NULL,
     console_output,
-    command_response
+    command_response,
+    breakpoints
 };
 
 int main(int argc, char **argv)

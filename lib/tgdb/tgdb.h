@@ -5,6 +5,8 @@
 #include <stdint.h>
 #endif
 
+#include <list>
+
 /*! 
  * \file
  * tgdb.h
@@ -170,9 +172,6 @@
     // the front end will find out about it through one of these enums.
     enum tgdb_response_type {
 
-        // All breakpoints that are set
-        TGDB_UPDATE_BREAKPOINTS,
-
         // This tells the gui what filename/line number the debugger is on.
         // It gets generated whenever it changes.
         // This is a 'struct tgdb_file_position *'.
@@ -200,13 +199,6 @@
         enum tgdb_response_type header;
 
         union {
-            // header == TGDB_UPDATE_BREAKPOINTS
-            struct {
-                // This list has elements of 'struct tgdb_breakpoint *' 
-                // representing each breakpoint
-                struct tgdb_breakpoint *breakpoints;
-            } update_breakpoints;
-
             // header == TGDB_UPDATE_FILE_POSITION
             struct {
                 struct tgdb_file_position *file_position;
@@ -260,10 +252,21 @@
    */
     struct tgdb;
 
-
+    /**
+     * The primary mechanism for tgdb to send events to the caller.
+     *
+     * The flow is like this:
+     * - create a tgdb instance
+     * - loop:
+     *   - call tgdb functions to send commands to gdb
+     *   - receive callback events with results when they become available
+     * - destroy the instance
+     */
     struct tgdb_callbacks {
         /**
          * An arbitrary pointer to associate with the callbacks.
+         *
+         * This pointer will be passed back to the caller in each callback.
          */
         void *context;
 
@@ -290,6 +293,18 @@
          */
         void (*command_response_callback)(void *context,
                 struct tgdb_response *response);
+
+        /**
+         * A breakpoint response is available for consumption.
+         *
+         * @param context
+         * The tgdb instance to operate on
+         *
+         * @param breakpoints
+         * The list of breakpoints requested
+         */
+        void (*tgdb_breakpoints_fn)(void *context,
+            const std::list<tgdb_breakpoint> &breakpoints);
     };
 
   /**
