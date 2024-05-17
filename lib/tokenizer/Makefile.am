@@ -11,6 +11,7 @@ libtokenizer_a_SOURCES = \
     clexer.lpp \
     asmlexer.lpp \
     dlexer.lpp \
+    fortranlexer.lpp \
     golexer.lpp \
     cgdbhelplexer.lpp \
     rustlexer.lpp \
