@@ -9,7 +9,7 @@ const char *c_extensions[] = {
 };
 const char *asm_extensions[] = { ".s" };
 const char *d_extensions[] = { ".d", ".di" };
-const char *fortran_extensions[] = { ".f", "*.for", ".f90", ".f95", "f03" };
+const char *fortran_extensions[] = { ".f", ".for", ".f90", ".f95", ".f03" };
 const char *go_extensions[] = { ".go" };
 const char *rust_extensions[] = { ".rs" };
 const char *ada_extensions[] = { ".adb", ".ads", ".ada" };
