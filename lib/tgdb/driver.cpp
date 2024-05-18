@@ -242,13 +242,29 @@ void inferiors_source_files(void *context,
 {
 }
 
+static
+void disassemble_func(void *context,
+        uint64_t addr_start, uint64_t addr_end, bool error,
+        const std::list<std::string> &disasm)
+{
+}
+
+static
+void disassemble_pc(void *context,
+        uint64_t addr_start, uint64_t addr_end, bool error,
+        const std::list<std::string> &disasm)
+{
+}
+
 
 tgdb_callbacks callbacks = {
     NULL,
     console_output,
     command_response,
     breakpoints,
-    inferiors_source_files
+    inferiors_source_files,
+    disassemble_func,
+    disassemble_pc
 };
 
 int main(int argc, char **argv)

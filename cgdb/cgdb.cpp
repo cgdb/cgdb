@@ -375,13 +375,21 @@ static void breakpoints(void *context,
         const std::list<tgdb_breakpoint> &breakpoints);
 static void inferiors_source_files(void *context,
         const std::list<std::string> &source_files);
+static void disassemble_func(void *context,
+        uint64_t addr_start, uint64_t addr_end, bool error,
+        const std::list<std::string> &disasm);
+static void disassemble_pc(void *context,
+        uint64_t addr_start, uint64_t addr_end, bool error,
+        const std::list<std::string> &disasm);
             
 tgdb_callbacks callbacks = { 
     NULL,       
     console_output,
     command_response,
     breakpoints,
-    inferiors_source_files
+    inferiors_source_files,
+    disassemble_func,
+    disassemble_pc
 };
 
 
@@ -596,35 +604,32 @@ static void update_source_files(const std::list<std::string> &source_files)
     kui_input_acceptable = 1;
 }
 
-static void update_disassemble(struct tgdb_response *response)
+static void update_disassemble(bool pc, uint64_t addr_start, uint64_t addr_end,
+        bool error, const std::list<std::string> &disasm)
 {
-    if (response->choice.disassemble_function.error) {
+    if (error) {
         //$ TODO mikesart: Get module name in here somehow? Passed in when calling tgdb_request_disassemble?
         //      or info sharedlibrary?
         //$ TODO mikesart: Need way to make sure we don't recurse here on error.
         //$ TODO mikesart: 100 lines? Way to load more at end?
 
-        if (response->header == TGDB_DISASSEMBLE_PC) {
+        if (pc) {
             /* Spew out a warning about disassemble failing
              * and disasm next 100 instructions. */
-            if_print_message("\nWarning: disassemble address 0x%" PRIx64 " failed.\n",
-                response->choice.disassemble_function.addr_start);
+            if_print_message(
+                    "\nWarning: disassemble address 0x%" PRIx64 " failed.\n",
+                    addr_start);
         } else {
             tgdb_request_disassemble_pc(tgdb, 100);
         }
     } else {
-        uint64_t addr_start = response->choice.disassemble_function.addr_start;
-        uint64_t addr_end = response->choice.disassemble_function.addr_end;
-        char **disasm = response->choice.disassemble_function.disasm;
-
         //$ TODO: If addr_start is equal to addr_end of some other
         // buffer, then append it to that buffer?
 
         //$ TODO: If there is a disassembly view, update the location
         // even if we don't display it? Useful with global marks, etc.
 
-        if (disasm && disasm[0]) {
-            int i;
+        if (disasm.size() > 0) {
             char *path;
             struct list_node *node;
             sviewer *sview = if_get_sview();
@@ -632,9 +637,9 @@ static void update_disassemble(struct tgdb_response *response)
             if (addr_start) {
                 path = sys_aprintf(
                     "** %s (%" PRIx64 " - %" PRIx64 ") **",
-                    disasm[0], addr_start, addr_end);
+                    disasm.front().c_str(), addr_start, addr_end);
             } else {
-                path = sys_aprintf("** %s **", disasm[0]);
+                path = sys_aprintf("** %s **", disasm.front().c_str());
             }
 
             node = source_get_node(sview, path);
@@ -646,8 +651,8 @@ static void update_disassemble(struct tgdb_response *response)
                 node->addr_start = addr_start;
                 node->addr_end = addr_end;
 
-                for (i = 0; i < sbcount(disasm); i++) {
-                    source_add_disasm_line(node, disasm[i]);
+                for (auto iter : disasm) {
+                    source_add_disasm_line(node, iter.c_str());
                 }
 
                 source_highlight(node);
@@ -668,10 +673,6 @@ static void command_response(void *context, struct tgdb_response *response)
     case TGDB_UPDATE_FILE_POSITION:
         update_file_position(response);
         break;
-    case TGDB_DISASSEMBLE_PC:
-    case TGDB_DISASSEMBLE_FUNC:
-        update_disassemble(response);
-        break;
     case TGDB_QUIT:
         new_ui_unsupported = response->choice.quit.new_ui_unsupported;
         cgdb_cleanup_and_exit(0);
@@ -689,6 +690,20 @@ static void inferiors_source_files(void *context,
         const std::list<std::string> &source_files)
 {
     update_source_files(source_files);
+}
+
+static void disassemble_func(void *context,
+        uint64_t addr_start, uint64_t addr_end, bool error,
+        const std::list<std::string> &disasm)
+{
+    update_disassemble(false, addr_start, addr_end, error, disasm);
+}
+
+static void disassemble_pc(void *context,
+        uint64_t addr_start, uint64_t addr_end, bool error,
+        const std::list<std::string> &disasm)
+{
+    update_disassemble(true, addr_start, addr_end, error, disasm);
 }
 
 /* gdb_input: Receives data from tgdb:

@@ -35,7 +35,6 @@
 #include "terminal.h"
 #include "pseudo.h" /* SLAVE_SIZE constant */
 #include "sys_util.h"
-#include "stretchy.h"
 #include "cgdb_clog.h"
 #include "gdbwire.h"
 
@@ -94,7 +93,7 @@ struct tgdb {
     enum tgdb_request_type current_request_type;
 
     // The disassemble command output.
-    char **disasm;
+    std::list<std::string> disasm;
     uint64_t address_start, address_end;
 
     // The gdbwire context to talk to GDB with.
@@ -290,24 +289,10 @@ tgdb_commands_process_info_sources(struct tgdb *tgdb,
 static void send_disassemble_func_complete_response(struct tgdb *tgdb,
         struct gdbwire_mi_result_record *result_record)
 {
-    tgdb_response_type type =
-            (tgdb->current_request_type == TGDB_REQUEST_DISASSEMBLE_PC) ?
-                TGDB_DISASSEMBLE_PC : TGDB_DISASSEMBLE_FUNC;
-    struct tgdb_response *response =
-        tgdb_create_response(type);
-
-    response->choice.disassemble_function.error = 
-        (result_record->result_class == GDBWIRE_MI_ERROR);
-            
-    response->choice.disassemble_function.disasm = tgdb->disasm;
-    response->choice.disassemble_function.addr_start = tgdb->address_start;
-    response->choice.disassemble_function.addr_end = tgdb->address_end;
+    bool error = result_record->result_class == GDBWIRE_MI_ERROR;
     
-    tgdb->disasm = NULL;
-    tgdb->address_start = 0;
-    tgdb->address_end = 0;
-
-    tgdb_send_response(tgdb, response);
+    tgdb->callbacks.tgdb_disassemble_func_fn(tgdb->callbacks.context,
+            tgdb->address_start, tgdb->address_end, error, tgdb->disasm);
 }
 
 static void
@@ -416,7 +401,7 @@ static void gdbwire_stream_record_callback(void *context,
                     str[1] = ' ';
                 }
 
-                sbpush(tgdb->disasm, cgdb_strdup(str));
+                tgdb->disasm.push_back(str);
 
                 colon = strchr((char*)str, ':');
                 if (colon) {
@@ -645,7 +630,6 @@ static struct tgdb *initialize_tgdb_context(tgdb_callbacks callbacks)
 
     tgdb->callbacks = callbacks;
 
-    tgdb->disasm = NULL;
     tgdb->address_start = 0;
     tgdb->address_end = 0;
 
@@ -1185,18 +1169,6 @@ static int tgdb_delete_response(struct tgdb_response *com)
             free(tfp);
 
             com->choice.update_file_position.file_position = NULL;
-            break;
-        }
-        case TGDB_DISASSEMBLE_PC:
-        case TGDB_DISASSEMBLE_FUNC:
-        {
-            int i;
-            char **disasm = com->choice.disassemble_function.disasm;
-
-            for (i = 0; i < sbcount(disasm); i++) {
-                free(disasm[i]);
-            }
-            sbfree(disasm);
             break;
         }
         case TGDB_QUIT:

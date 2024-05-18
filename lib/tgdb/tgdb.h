@@ -177,12 +177,6 @@
         // This is a 'struct tgdb_file_position *'.
         TGDB_UPDATE_FILE_POSITION,
 
-        // Disassemble $pc output
-        TGDB_DISASSEMBLE_PC,
-
-        // Disassemble function output
-        TGDB_DISASSEMBLE_FUNC,
-
         // This happens when gdb quits.
         // You will get no more responses after this one.
         // This is a 'struct tgdb_quit_status *'
@@ -204,14 +198,6 @@
             struct {
                 int exit_status;
             } inferior_exited;
-
-            // header == TGDB_DISASSEMBLE_FUNC
-            struct {
-                uint64_t addr_start;
-                uint64_t addr_end;
-                int error;
-                char **disasm;
-            } disassemble_function;
 
             // header == TGDB_QUIT
             struct {
@@ -308,6 +294,58 @@
          */
         void (*tgdb_inferiors_soure_files_fn)(void *context,
                 const std::list<std::string> &source_files);
+
+        /**
+         * The disassemble for the entire function.
+         *
+         * @param context
+         * The tgdb instance to operate on
+         *
+         * @param addr_start
+         * The start address of the disassembly
+         *
+         * @param addr_end
+         * The end address of the disassembly
+         *
+         * @param addr_end
+         * The end address of the disassembly
+         *
+         * @param error
+         * If an error occurred getting the disassembly
+         * In this case, the disasm param should not be used
+         *
+         * @param disasm
+         * The disassembly of the function
+         */
+        void (*tgdb_disassemble_func_fn)(void *context,
+                uint64_t addr_start, uint64_t addr_end, bool error,
+                const std::list<std::string> &disasm);
+
+        /**
+         * The disassemble for the $pc.
+         *
+         * @param context
+         * The tgdb instance to operate on
+         *
+         * @param addr_start
+         * The start address of the disassembly
+         *
+         * @param addr_end
+         * The end address of the disassembly
+         *
+         * @param addr_end
+         * The end address of the disassembly
+         *
+         * @param error
+         * If an error occurred getting the disassembly
+         * In this case, the disasm param should not be used
+         *
+         * @param disasm
+         * The disassembly of the $pc
+         */
+        void (*tgdb_disassemble_pc_fn)(void *context,
+                uint64_t addr_start, uint64_t addr_end, bool error,
+                const std::list<std::string> &disasm);
     };
 
   /**
