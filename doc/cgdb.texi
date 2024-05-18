@@ -717,10 +717,10 @@ The default is off.
 @itemx :set syntax=@var{style}
 Sets the current highlighting mode of the current file to have the syntax 
 @var{style}.  Possible values for @var{syntax} are @samp{c}, @samp{asm},
-@samp{d}, @samp{go}, @samp{ada}, @samp{rust}, @samp{off}, @samp{no},
-@samp{on} or @samp{yes}.  Normally, the user will never have to do this,
-since CGDB automatically detects what syntax a file should be based on
-its file extension.  However, this feature can currently be useful for
+@samp{d}, @samp{fortran}, @samp{go}, @samp{ada}, @samp{rust}, @samp{off},
+@samp{no}, @samp{on} or @samp{yes}.  Normally, the user will never have to
+do this, since CGDB automatically detects what syntax a file should be based
+on its file extension.  However, this feature can currently be useful for
 debugging purposes. @samp{on} and @samp{yes} enable syntax highlighting based
 on the source files extension. @samp{off} and @samp{no} disable syntax
 highlighting. The remaining values set the specific language highlighters

@@ -1,3 +1,5 @@
+  * CGDB now supports syntax highlighting Fotran files.
+
   * CGDB will now display breakpoints with multiple locations properly
     (again). GDB creates multiple location breakpoints with C++ constructors,
     inside C++ templates and in inlined functions. CGDB supported multiple
