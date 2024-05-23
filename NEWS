@@ -1,3 +1,7 @@
+  * Fix issue #291 - The gdb process can still be running when CGDB exits.
+    Previously, when CGDB would exit, gdb would not also always exit,
+    leaving it running in the background. Now gdb exits when CGDB does.
+
   * CGDB now supports syntax highlighting Fotran files.
 
   * CGDB will now display breakpoints with multiple locations properly

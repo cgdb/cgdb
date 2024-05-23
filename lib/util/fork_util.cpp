@@ -180,7 +180,7 @@ static int pty_free_memory(char *s, int fd, int argc, char *argv[])
 
 int invoke_debugger(const char *path,
         int argc, char *argv[], int gdb_win_rows, int gdb_win_cols,
-        int *in, int *out, const char *new_ui_tty)
+        int *in, int *out, pty_pair_ptr new_ui_pair)
 {
     pid_t pid;
     const char *const GDB = "gdb";
@@ -191,6 +191,9 @@ int invoke_debugger(const char *path,
     int malloc_size = argc + extra;
     char slavename[64];
     int masterfd;
+    const char *device_name = pty_pair_get_slavename(new_ui_pair);
+    int new_ui_masterfd = pty_pair_get_masterfd(new_ui_pair);
+    int new_ui_slavefd = pty_pair_get_slavefd(new_ui_pair);
 
     struct winsize size, *winsize;
     size.ws_row = gdb_win_rows;
@@ -221,7 +224,7 @@ int invoke_debugger(const char *path,
 
     local_argv[j++] = cgdb_strdup(EX);
     local_argv[j++] = cgdb_strdup(std::string("new-ui mi ").
-            append(new_ui_tty).c_str());
+            append(device_name).c_str());
 
     /* copy in all the data the user entered */
     for (i = 0; i < argc; i++)
@@ -249,6 +252,9 @@ int invoke_debugger(const char *path,
         clog_error(CLOG_CGDB, "fork failed");
         return -1;
     } else if (pid == 0) {      /* child */
+        // Close the master fd for new ui
+        close(new_ui_masterfd);
+        
         execvp(local_argv[0], local_argv);
 
         /* Will get here if exec failed. This will happen when the 
@@ -257,6 +263,8 @@ int invoke_debugger(const char *path,
          *   not able to be exec'd.
          */
         exit(0);
+    } else {
+        close(new_ui_slavefd);
     }
 
     *in = masterfd;

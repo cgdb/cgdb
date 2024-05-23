@@ -767,9 +767,8 @@ int tgdb_start_gdb(struct tgdb *tgdb,
         int *gdb_mi_fd)
 {
     tgdb->debugger_pid = invoke_debugger(debugger, argc, argv,
-            gdb_win_rows, gdb_win_cols, 
-            &tgdb->debugger_stdin, &tgdb->debugger_stdout,
-            pty_pair_get_slavename(tgdb->new_ui_pty_pair));
+            gdb_win_rows, gdb_win_cols, &tgdb->debugger_stdin,
+            &tgdb->debugger_stdout, tgdb->new_ui_pty_pair);
 
     /* Couldn't invoke process */
     if (tgdb->debugger_pid == -1)
