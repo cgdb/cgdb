@@ -72,7 +72,7 @@ void if_sdc_print(const char *command);
  *   sel_line:  Current line of the file being selected (0 to leave unchanged)
  *   exe_line:  Current line of the file being executed (0 to leave unchanged)
  */
-void if_show_file(char *path, int sel_line, int exe_line);
+void if_show_file(const char *path, int sel_line, int exe_line);
 
 /* if_get_sview: Return a pointer to the source viewer object.
  * -------------

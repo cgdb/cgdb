@@ -80,7 +80,7 @@
          // available for GDB it will be a relative path.
          //
          // Will be NULL if the source information is not available
-        char *path;
+        const char *path;
 
         // The line number in the file or 0 if unknown
         int line_number;
@@ -89,10 +89,10 @@
         uint64_t addr;
 
         // Shared library where this function is defined or NULL if unknown
-        char *from;
+        const char *from;
 
         // Function name or NULL if unknown
-        char *func;
+        const char *func;
     };
 
     enum tgdb_request_type {
@@ -171,11 +171,6 @@
     // When TGDB is responding to a request or when an event is being generated
     // the front end will find out about it through one of these enums.
     enum tgdb_response_type {
-
-        // This tells the gui what filename/line number the debugger is on.
-        // It gets generated whenever it changes.
-        // This is a 'struct tgdb_file_position *'.
-        TGDB_UPDATE_FILE_POSITION,
 
         // This happens when gdb quits.
         // You will get no more responses after this one.
@@ -346,6 +341,18 @@
         void (*tgdb_disassemble_pc_fn)(void *context,
                 uint64_t addr_start, uint64_t addr_end, bool error,
                 const std::list<std::string> &disasm);
+
+        /**
+         * Update the file position
+         *
+         * @param context
+         * The tgdb instance to operate on
+         *
+         * @param file_position
+         * The new file position
+         */
+        void (*tgdb_update_file_pos_fn)(void *context,
+                const tgdb_file_position &file_position);
     };
 
   /**

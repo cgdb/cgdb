@@ -256,6 +256,12 @@ void disassemble_pc(void *context,
 {
 }
 
+static
+void update_file_pos(void *context,
+        const tgdb_file_position &file_position)
+{
+}
+
 
 tgdb_callbacks callbacks = {
     NULL,
@@ -264,7 +270,8 @@ tgdb_callbacks callbacks = {
     breakpoints,
     inferiors_source_files,
     disassemble_func,
-    disassemble_pc
+    disassemble_pc,
+    update_file_pos
 };
 
 int main(int argc, char **argv)

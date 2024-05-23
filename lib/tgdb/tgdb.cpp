@@ -298,27 +298,19 @@ tgdb_commands_send_source_file(struct tgdb *tgdb, const char *fullname,
         const char *file, uint64_t address, const char *from,
         const char *func, int line)
 {
-    /* This section allocates a new structure to add into the queue 
-     * All of its members will need to be freed later.
-     */
-    struct tgdb_file_position *tfp = (struct tgdb_file_position *)
-            cgdb_malloc(sizeof (struct tgdb_file_position));
-    struct tgdb_response *response =
-            tgdb_create_response(TGDB_UPDATE_FILE_POSITION);
+    struct tgdb_file_position tfp;
 
     if (fullname || file) {
-        tfp->path = (fullname)?cgdb_strdup(fullname):cgdb_strdup(file);
+        tfp.path = (fullname)?fullname:file;
     } else {
-        tfp->path = 0;
+        tfp.path = 0;
     }
-    tfp->addr = address;
-    tfp->from = (from)?cgdb_strdup(from):0;
-    tfp->func = (func)?cgdb_strdup(func):0;
-    tfp->line_number = line;
+    tfp.addr = address;
+    tfp.from = from;
+    tfp.func = func;
+    tfp.line_number = line;
 
-    response->choice.update_file_position.file_position = tfp;
-
-    tgdb_send_response(tgdb, response);
+    tgdb->callbacks.tgdb_update_file_pos_fn(tgdb->callbacks.context, tfp);
 }
 
 static void tgdb_commands_process_info_source(struct tgdb *tgdb,
@@ -1154,20 +1146,6 @@ static int tgdb_delete_response(struct tgdb_response *com)
         return -1;
 
     switch (com->header) {
-        case TGDB_UPDATE_FILE_POSITION:
-        {
-            struct tgdb_file_position *tfp =
-                    com->choice.update_file_position.file_position;
-
-            free(tfp->path);
-            free(tfp->from);
-            free(tfp->func);
-
-            free(tfp);
-
-            com->choice.update_file_position.file_position = NULL;
-            break;
-        }
         case TGDB_QUIT:
             break;
     }

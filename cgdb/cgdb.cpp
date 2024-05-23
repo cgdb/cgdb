@@ -381,6 +381,9 @@ static void disassemble_func(void *context,
 static void disassemble_pc(void *context,
         uint64_t addr_start, uint64_t addr_end, bool error,
         const std::list<std::string> &disasm);
+static
+void update_file_pos(void *context,
+        const tgdb_file_position &file_position);
             
 tgdb_callbacks callbacks = { 
     NULL,       
@@ -389,7 +392,8 @@ tgdb_callbacks callbacks = {
     breakpoints,
     inferiors_source_files,
     disassemble_func,
-    disassemble_pc
+    disassemble_pc,
+    update_file_pos
 };
 
 
@@ -498,7 +502,7 @@ static void update_breakpoints(const std::list<tgdb_breakpoint> &breakpoints)
 }
 
 /* This means a source file or line number changed */
-static void update_file_position(struct tgdb_response *response)
+static void update_file_position(const tgdb_file_position &tfp)
 {
     /**
      * Updating the location that cgdb should point the user to.
@@ -519,17 +523,14 @@ static void update_file_position(struct tgdb_response *response)
      * - if function disassembly unavailable, show disassembly
      * - if disassembly unavailable, show nothing
      */
-    struct tgdb_file_position *tfp;
     struct sviewer *sview = if_get_sview();
     int source_reload_status = -1;
 
-    tfp = response->choice.update_file_position.file_position;
-    
     /* Tell source viewer what the current $pc address is. */
-    sview->addr_frame = tfp->addr;
+    sview->addr_frame = tfp.addr;
 
     /* If we got a pathname and we're not showing disasm... */
-    if (tfp->path && !cgdbrc_get_int(CGDBRC_DISASM)) {
+    if (tfp.path && !cgdbrc_get_int(CGDBRC_DISASM)) {
 
         /**
          * GDB will provide an executing line number even when the program
@@ -537,14 +538,14 @@ static void update_file_position(struct tgdb_response *response)
          * helps cgdb to not show an executing line unless there is a stack,
          * which tells us the inferior is running.
          */
-        int exe_line = sview->addr_frame ? tfp->line_number : -1;
+        int exe_line = sview->addr_frame ? tfp.line_number : -1;
 
         /* Update the file */
         source_reload_status = 
-            source_reload(if_get_sview(), tfp->path, 0);
+            source_reload(if_get_sview(), tfp.path, 0);
 
         /* Show the source file at this line number */
-        if_show_file(tfp->path, tfp->line_number, exe_line);
+        if_show_file(tfp.path, tfp.line_number, exe_line);
     }
 
     /**
@@ -670,9 +671,6 @@ static void command_response(void *context, struct tgdb_response *response)
 {
     switch (response->header)
     {
-    case TGDB_UPDATE_FILE_POSITION:
-        update_file_position(response);
-        break;
     case TGDB_QUIT:
         new_ui_unsupported = response->choice.quit.new_ui_unsupported;
         cgdb_cleanup_and_exit(0);
@@ -704,6 +702,12 @@ static void disassemble_pc(void *context,
         const std::list<std::string> &disasm)
 {
     update_disassemble(true, addr_start, addr_end, error, disasm);
+}
+
+static void update_file_pos(void *context,
+        const tgdb_file_position &file_position)
+{
+    update_file_position(file_position);
 }
 
 /* gdb_input: Receives data from tgdb:
