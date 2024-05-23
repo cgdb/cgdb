@@ -199,11 +199,9 @@ static void tgdb_commands_process_breakpoint(
 
         if (file_location_avialable) {
             tb.path = (breakpoint->fullname)?
-                cgdb_strdup(breakpoint->fullname):
-                cgdb_strdup(breakpoint->file);
+                breakpoint->fullname: breakpoint->file;
             tb.line = breakpoint->line;
         } else {
-            tb.path = 0;
             tb.line = 0;
         }
 

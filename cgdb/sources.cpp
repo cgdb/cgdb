@@ -1375,8 +1375,8 @@ void source_set_breakpoints(struct sviewer *sview,
     // in one mode, then switch modes, the other mode will know about
     // it as well.
     for (auto iter : breakpoints) {
-        if (iter.path) {
-            node = source_get_node(sview, iter.path);
+        if (iter.path.size() > 0) {
+            node = source_get_node(sview, iter.path.c_str());
             if (!load_file(node)) {
                 int line = iter.line;
                 int enabled = iter.enabled;

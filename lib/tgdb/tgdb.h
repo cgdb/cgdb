@@ -54,7 +54,7 @@
          //
          // This will usually be absolute. If the absolute path is not
          // available for GDB it will be a relative path
-        char *path;
+        std::string path;
 
         // The line number where the breakpoint is set
         int line;
