@@ -126,7 +126,6 @@ static void init_file_buffer(struct buffer *buf)
 {
     buf->addrs = NULL;
     buf->max_width = 0;
-    buf->file_data = NULL;
     buf->tabstop = cgdbrc_get_int(CGDBRC_TABSTOP);
     buf->language = TOKENIZER_LANGUAGE_UNKNOWN;
 }
@@ -135,8 +134,7 @@ static void release_file_buffer(struct buffer *buf)
 {
     if (buf) {
         /* Free entire file buffer */
-        sbfree(buf->file_data);
-        buf->file_data = NULL;
+        buf->file_data.clear();
 
         buf->lines.clear();
 
@@ -171,37 +169,36 @@ static int release_file_memory(struct list_node *node)
     return 0;
 }
 
-static char *detab_buffer(char *buffer, int tabstop)
+static
+std::string detab_buffer_str(const std::string &buffer, int tabstop)
 {
-    int i;
     int dst = 0;
-    char *newbuf = NULL;
-    int size = sbcount(buffer);
+    std::string newbuf;
+    std::string::const_iterator i = buffer.begin();
 
-    char *tab = strchr(buffer, '\t');
-    if (!tab)
+    if (buffer.find('\t') == std::string::npos)
         return buffer;
 
-    for (i = 0; i < size; i++) {
-        if (buffer[i] == '\t') {
+    for (i = buffer.begin(); i < buffer.end(); ++i) {
+        if (*i == '\t') {
             int spaces = tabstop - dst % tabstop;
 
             while(spaces--) {
-                sbpush(newbuf, ' ');
+                newbuf.push_back(' ');
                 dst++;
             }
         } else {
-            sbpush(newbuf, buffer[i]);
+            newbuf.push_back(*i);
             dst++;
         }
 
-        if (buffer[i] == '\n' || buffer[i] == '\r')
+        if (*i == '\n' || *i == '\r')
             dst = 0;
     }
 
-    sbfree(buffer);
     return newbuf;
 }
+
 
 /**
  * Load file and fill tlines line pointers.
@@ -234,16 +231,14 @@ static int load_file_buf(struct buffer *buf, const char *filename)
         size_t bytes_read;
 
         /* Set the stretchy buffer size to our file size plus one for nil */
-        sbsetcount(buf->file_data, file_size + 1);
+        buf->file_data.resize(file_size);
 
         /* Read in the entire file */
-        bytes_read = fread(buf->file_data, 1, file_size, file);
+        bytes_read = fread(&buf->file_data[0], sizeof(char), file_size, file);
 
         /* If we had a partial read, bail */
         if (bytes_read != file_size) {
-            sbfree(buf->file_data);
-            buf->file_data = NULL;
-
+            buf->file_data.clear();
             fclose(file);
             return -1;
         }
@@ -253,10 +248,10 @@ static int load_file_buf(struct buffer *buf, const char *filename)
 
         /* Convert tabs to spaces */
         buf->tabstop = cgdbrc_get_int(CGDBRC_TABSTOP);
-        buf->file_data = detab_buffer(buf->file_data, buf->tabstop);
+        detab_buffer_str(buf->file_data, buf->tabstop);
 
         {
-            char *line_start = buf->file_data;
+            char *line_start = (char*)buf->file_data.data();
             char *line_feed = strchr(line_start, '\n');
 
             while (line_feed)
@@ -378,7 +373,7 @@ static int highlight_node(struct list_node *node)
         line.attrs.clear();
     }
 
-    if (!buf->file_data) {
+    if (buf->file_data.size() != 0) {
         for (auto &line : buf->lines) {
             tokenizer_set_buffer(t, line.line.c_str(), buf->language);
 
@@ -404,7 +399,7 @@ static int highlight_node(struct list_node *node)
 
     } else {
         int line = 0;
-        if (tokenizer_set_buffer(t, buf->file_data, buf->language) == -1) {
+        if (tokenizer_set_buffer(t, buf->file_data.data(), buf->language) == -1) {
             if_print_message("%s:%d tokenizer_set_buffer error", __FILE__, __LINE__);
             return -1;
         }
@@ -535,36 +530,6 @@ struct list_node *source_add(struct sviewer *sview, const char *path)
     }
 
     return new_node;
-}
-
-static
-std::string detab_buffer_str(const std::string &buffer, int tabstop)
-{
-    int dst = 0;
-    std::string newbuf;
-    std::string::const_iterator i = buffer.begin();
-
-    if (buffer.find('\t') == std::string::npos)
-        return buffer;
-
-    for (i = buffer.begin(); i < buffer.end(); ++i) {
-        if (*i == '\t') {
-            int spaces = tabstop - dst % tabstop;
-
-            while(spaces--) {
-                newbuf.push_back(' ');
-                dst++;
-            }
-        } else {
-            newbuf.push_back(*i);
-            dst++;
-        }
-
-        if (*i == '\n' || *i == '\r')
-            dst = 0;
-    }
-
-    return newbuf;
 }
 
 void source_add_disasm_line(struct list_node *node, const char *line)

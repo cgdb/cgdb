@@ -81,7 +81,7 @@ struct buffer {
     std::vector<source_line> lines;
     uint64_t *addrs;            /* The list of corresponding addresses */
     int max_width;              /* Width of longest line in file */
-    char *file_data;            /* Entire file pointer if read in that way */
+    std::string file_data;      /* Entire file pointer if read in that way */
     int tabstop;                /* Tabstop value used to load file */
     enum tokenizer_language_support language;   /* The language type of this file */
 };
