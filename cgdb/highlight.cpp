@@ -100,10 +100,11 @@ int hl_regex_search(struct hl_regex_info **info, const char *line,
     return 0;
 }
 
-struct hl_line_attr *hl_regex_highlight(struct hl_regex_info **info,
+std::vector<hl_line_attr>
+hl_regex_highlight(struct hl_regex_info **info,
         char *line, enum hl_group_kind group_kind)
 {
-    hl_line_attr *attrs = NULL;
+    std::vector<hl_line_attr> attrs;
 
     if (*info && (*info)->regex && (*info)->regex[0]) {
         int pos = 0;
@@ -121,10 +122,10 @@ struct hl_line_attr *hl_regex_highlight(struct hl_regex_info **info,
             pos += start;
 
             /* Push search attribute */
-            sbpush(attrs, hl_line_attr(pos, group_kind));
+            attrs.push_back(hl_line_attr(pos, group_kind));
 
             /* And the back to regular text attribute */
-            sbpush(attrs, hl_line_attr(pos + len, 0));
+            attrs.push_back(hl_line_attr(pos + len, 0));
 
             pos += len;
         }

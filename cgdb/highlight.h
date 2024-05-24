@@ -58,11 +58,10 @@ void hl_regex_free(struct hl_regex_info **info);
  * The group_kind to use for highlighting.
  *
  * @return
- * A list of line attributes corresponding to the positions in the
+ * A list of vector attributes corresponding to the positions in the
  * line that matched the regular expression and should be highlighted.
- * Will return NULL if no matches were found.
  */
-struct hl_line_attr *hl_regex_highlight(struct hl_regex_info **info,
+std::vector<hl_line_attr> hl_regex_highlight(struct hl_regex_info **info,
     char *line, enum hl_group_kind group_kind);
 
 #endif /* _HIGHLIGHT_H_ */

@@ -191,10 +191,10 @@ static void center_line(SWINDOW *win, int row, int width, const char *data,
     int i, attr;
     char *line = NULL;
     int datalen = strlen(data);
-    hl_line_attr *attrs = NULL;
+    std::vector<hl_line_attr> attrs;
 
     /* Set up default attributes at column 0 */
-    sbpush(attrs, hl_line_attr(0, group_kind));
+    attrs.push_back(hl_line_attr(0, group_kind));
 
     /* Parse ansi escape color codes in string */
     for (i = 0; i < datalen; i++) {
@@ -202,7 +202,7 @@ static void center_line(SWINDOW *win, int row, int width, const char *data,
             int ansi_count = hl_ansi_get_color_attrs(
                     hl_groups_instance, data + i, &attr);
             if (ansi_count) {
-                sbpush(attrs, hl_line_attr(sbcount(line), attr));
+                attrs.push_back(hl_line_attr(sbcount(line), attr));
 
                 i += ansi_count - 1;
                 continue;
@@ -215,7 +215,6 @@ static void center_line(SWINDOW *win, int row, int width, const char *data,
 
     hl_printline(win, line, strlen(line), attrs, (width - datawidth) / 2, row, 0, width);
 
-    sbfree(attrs);
     sbfree(line);
 }
 

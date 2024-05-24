@@ -1,6 +1,8 @@
 #ifndef __HIGHLIGHT_GROUPS_H__
 #define __HIGHLIGHT_GROUPS_H__
 
+#include <vector>
+
 /*!
  * \file
  * highlight_group.h
@@ -276,7 +278,8 @@ struct hl_line_attr {
  * @param width
  */
 void hl_printline(SWINDOW *win, const char *line, int line_len,
-        const hl_line_attr *attrs, int x, int y, int col, int width);
+        const std::vector<hl_line_attr> &attrs,
+        int x, int y, int col, int width);
 
 /**
  * Print a line with highlighting.
@@ -310,7 +313,8 @@ void hl_printline(SWINDOW *win, const char *line, int line_len,
  * @param width
  */
 void hl_printline_highlight(SWINDOW *win, const char *line, int line_len,
-        const hl_line_attr *attrs, int x, int y, int col, int width);
+        const std::vector<hl_line_attr> &attrs,
+        int x, int y, int col, int width);
 
 /**
  * Given a fg and bg index, get the corresponding color pair attribute.

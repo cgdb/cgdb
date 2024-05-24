@@ -124,7 +124,6 @@ static int get_timestamp(const char *path, time_t * timestamp)
 
 static void init_file_buffer(struct buffer *buf)
 {
-    buf->lines = NULL;
     buf->addrs = NULL;
     buf->max_width = 0;
     buf->file_data = NULL;
@@ -135,22 +134,16 @@ static void init_file_buffer(struct buffer *buf)
 static void release_file_buffer(struct buffer *buf)
 {
     if (buf) {
-        int i;
-
-        for (i = 0; i < sbcount(buf->lines); i++) {
-            sbfree(buf->lines[i].attrs);
-            buf->lines[i].attrs = NULL;
-
-            sbfree(buf->lines[i].line);
-            buf->lines[i].line = NULL;
+        for (auto iter : buf->lines) {
+            sbfree(iter.line);
+            iter.line = NULL;
         }
 
         /* Free entire file buffer */
         sbfree(buf->file_data);
         buf->file_data = NULL;
 
-        sbfree(buf->lines);
-        buf->lines = NULL;
+        buf->lines.clear();
 
         sbfree(buf->addrs);
         buf->addrs = NULL;
@@ -291,10 +284,9 @@ static int load_file_buf(struct buffer *buf, const char *filename)
                 strncpy(sline.line, line_start, line_len);
                 sline.line[line_len] = 0;
                 sline.len = line_len;
-                sline.attrs = NULL;
 
                 /* Add this line to lines array */
-                sbpush(buf->lines, sline);
+                buf->lines.push_back(sline);
 
                 line_start = line_feed + 1;
                 line_feed = strchr(line_start, '\n');
@@ -307,9 +299,8 @@ static int load_file_buf(struct buffer *buf, const char *filename)
                 sbsetcount(sline.line, len + 1);
                 strncpy(sline.line, line_start, len);
                 sline.len = len;
-                sline.attrs = NULL;
 
-                sbpush(buf->lines, sline);
+                buf->lines.push_back(sline);
             }
 
             ret = 0;
@@ -334,7 +325,8 @@ static int load_file(struct list_node *node)
         return -1;
 
     /* File already loaded - success! */
-    if (node->file_buf.lines)
+    // TODO: Do i need a flag for this?
+    if (node->file_buf.lines.size() > 0)
         return 0;
 
     /* Stat the file to get the timestamp */
@@ -387,25 +379,20 @@ static enum hl_group_kind hlg_from_tokenizer_type(enum tokenizer_type type, cons
 
 static int highlight_node(struct list_node *node)
 {
-    int i;
     int ret;
-    int line = 0;
     int length = 0;
     int lasttype = -1;
     struct token_data tok_data;
     struct tokenizer *t = tokenizer_init();
     struct buffer *buf = &node->file_buf;
 
-    for (i = 0; i < sbcount(buf->lines); i++) {
-        sbfree(buf->lines[i].attrs);
-        buf->lines[i].attrs = NULL;
+    for (auto &line : buf->lines) {
+        line.attrs.clear();
     }
 
     if (!buf->file_data) {
-        for (line = 0; line < sbcount(buf->lines); line++) {
-            struct source_line *sline = &buf->lines[line];
-
-            tokenizer_set_buffer(t, sline->line, buf->language);
+        for (auto &line : buf->lines) {
+            tokenizer_set_buffer(t, line.line, buf->language);
 
             length = 0;
             lasttype = -1;
@@ -417,7 +404,7 @@ static int highlight_node(struct list_node *node)
 
                 /* Add attribute if highlight group has changed */
                 if (lasttype != hlg) {
-                    sbpush(buf->lines[line].attrs, hl_line_attr(length, hlg));
+                    line.attrs.push_back(hl_line_attr(length, hlg));
 
                     lasttype = hlg;
                 }
@@ -428,6 +415,7 @@ static int highlight_node(struct list_node *node)
         }
 
     } else {
+        int line = 0;
         if (tokenizer_set_buffer(t, buf->file_data, buf->language) == -1) {
             if_print_message("%s:%d tokenizer_set_buffer error", __FILE__, __LINE__);
             return -1;
@@ -451,7 +439,7 @@ static int highlight_node(struct list_node *node)
 
                 /* Add attribute if highlight group has changed */
                 if (lasttype != hlg) {
-                    sbpush(buf->lines[line].attrs, hl_line_attr(length, hlg));
+                    buf->lines[line].attrs.push_back(hl_line_attr(length, hlg));
 
                     lasttype = hlg;
                 }
@@ -473,7 +461,7 @@ int source_highlight(struct list_node *node)
                    swin_has_colors();
 
     /* Load the entire file */
-    if (!sbcount(node->file_buf.lines))
+    if (node->file_buf.lines.size() == 0)
         load_file_buf(&node->file_buf, node->path);
 
     /* If we're doing color and we haven't already loaded this file
@@ -486,11 +474,12 @@ int source_highlight(struct list_node *node)
 
     /* Allocate the breakpoints array */
     if (node->lflags.empty()) {
-        int count = sbcount(node->file_buf.lines);
+        int count = node->file_buf.lines.size();
         node->lflags.resize(count);
     }
 
-    if (node->file_buf.lines)
+    // TODO: DO i need a flag?
+    if (node->file_buf.lines.size() > 0)
         return 0;
 
     return -1;
@@ -571,7 +560,6 @@ void source_add_disasm_line(struct list_node *node, const char *line)
     strcpy(sline.line, line);
     sline.line = detab_buffer(sline.line, node->file_buf.tabstop);
 
-    sline.attrs = NULL;
     sline.len = sbcount(sline.line);
 
     colon = strchr((char*)line, ':');
@@ -588,7 +576,7 @@ void source_add_disasm_line(struct list_node *node, const char *line)
 
     sbpush(node->file_buf.addrs, addr);
 
-    sbpush(node->file_buf.lines, sline);
+    node->file_buf.lines.push_back(sline);
     node->lflags.emplace_back();
 }
 
@@ -641,7 +629,7 @@ int source_length(struct sviewer *sview, const char *path)
     if (load_file(cur))
         return -1;
 
-    return sbcount(cur->file_buf.lines);
+    return cur->file_buf.lines.size();
 }
 
 char *source_current_file(struct sviewer *sview)
@@ -819,11 +807,11 @@ int source_display(struct sviewer *sview, int focus,
     int mark_attr;
     int do_hlsearch = hlsearch && !no_hlsearch;
 
-    struct hl_line_attr *sel_highlight_attrs = 0;
-    struct hl_line_attr *exe_highlight_attrs = 0;
+    std::vector<hl_line_attr> sel_highlight_attrs;
+    std::vector<hl_line_attr> exe_highlight_attrs;
 
     /* Check that a file is loaded */
-    if (!sview->cur || !sview->cur->file_buf.lines) {
+    if (!sview->cur || sview->cur->file_buf.lines.size() == 0) {
         logo_display(sview->win);
 
         if (dorefresh == WIN_REFRESH)
@@ -864,8 +852,8 @@ int source_display(struct sviewer *sview, int focus,
 
     mark_attr = hl_groups_get_attr(hl_groups_instance, HLG_MARK);
 
-    sbpush(sel_highlight_attrs, hl_line_attr(0, HLG_SELECTED_LINE_HIGHLIGHT));
-    sbpush(exe_highlight_attrs, hl_line_attr(0, HLG_EXECUTING_LINE_HIGHLIGHT));
+    sel_highlight_attrs.push_back(hl_line_attr(0, HLG_SELECTED_LINE_HIGHLIGHT));
+    exe_highlight_attrs.push_back(hl_line_attr(0, HLG_EXECUTING_LINE_HIGHLIGHT));
     
     /* Make sure cursor is visible */
     swin_curs_set(!!focus);
@@ -875,7 +863,7 @@ int source_display(struct sviewer *sview, int focus,
     width = swin_getmaxx(sview->win);
 
     /* Set starting line number (center source file if it's small enough) */
-    count = sbcount(sview->cur->file_buf.lines);
+    count = sview->cur->file_buf.lines.size();
     if (count < height) {
         line = (count - height) / 2;
     } else {
@@ -899,7 +887,11 @@ int source_display(struct sviewer *sview, int focus,
         int is_exe_line = (line >= 0 && sview->cur->exe_line == line);
         struct source_line *sline = (line < 0 || line >= count)?
             NULL:&sview->cur->file_buf.lines[line];
-        struct hl_line_attr *printline_attrs = (sline)?sline->attrs:0;
+        std::vector<hl_line_attr> printline_attrs; 
+
+        if (sline) {
+            printline_attrs = sline->attrs;
+        }
 
         swin_wmove(sview->win, i, 0);
 
@@ -970,7 +962,7 @@ int source_display(struct sviewer *sview, int focus,
         if (is_exe_line || is_sel_line) {
             enum LineDisplayStyle display_style;
             int arrow_attr, block_attr;
-            struct hl_line_attr *highlight_attr;
+            std::vector<hl_line_attr> highlight_attr;
 
             if (is_exe_line) {
                 display_style = exe_display_style;
@@ -1049,26 +1041,24 @@ int source_display(struct sviewer *sview, int focus,
             //   display the last successful search
             //   unless we are starting a new search
             if (do_hlsearch && sview->last_hlregex && !sview->hlregex) {
-                struct hl_line_attr *attrs = hl_regex_highlight(
+                std::vector<hl_line_attr> attrs = hl_regex_highlight(
                         &sview->last_hlregex, sline->line, HLG_SEARCH);
-                if (sbcount(attrs)) {
+                if (attrs.size() > 0) {
                     hl_printline_highlight(sview->win, sline->line, sline->len,
                         attrs, x, y, sview->cur->sel_col + column_offset,
                         width - lwidth - 2);
-                    sbfree(attrs);
                 }
             }
 
             // if highlight search is on
             //   display the current search
             if (do_hlsearch && sview->hlregex) {
-                struct hl_line_attr *attrs = hl_regex_highlight(
+                std::vector<hl_line_attr> attrs = hl_regex_highlight(
                         &sview->hlregex, sline->line, HLG_SEARCH);
-                if (sbcount(attrs)) {
+                if (attrs.size() > 0) {
                     hl_printline_highlight(sview->win, sline->line, sline->len,
                         attrs, x, y, sview->cur->sel_col + column_offset,
                         width - lwidth - 2);
-                    sbfree(attrs);
                 }
             }
 
@@ -1076,13 +1066,12 @@ int source_display(struct sviewer *sview, int focus,
             // if the currently line being displayed is the selected line
             //   display the current search as an incremental search
             if (is_sel_line && sview->hlregex) {
-                struct hl_line_attr *attrs = hl_regex_highlight(
+                std::vector<hl_line_attr> attrs = hl_regex_highlight(
                         &sview->hlregex, sline->line, HLG_INCSEARCH);
-                if (sbcount(attrs)) {
+                if (attrs.size() > 0) {
                     hl_printline_highlight(sview->win, sline->line, sline->len,
                         attrs, x, y, sview->cur->sel_col + column_offset,
                         width - lwidth - 2);
-                    sbfree(attrs);
                 }
             }
         }
@@ -1097,9 +1086,6 @@ int source_display(struct sviewer *sview, int focus,
             break;
     }
 
-    sbfree(sel_highlight_attrs);
-    sbfree(exe_highlight_attrs);
-
     return 0;
 }
 
@@ -1113,8 +1099,8 @@ static int clamp_line(struct sviewer *sview, int line)
 {
     if (line < 0)
         line = 0;
-    if (line >= sbcount(sview->cur->file_buf.lines))
-        line = sbcount(sview->cur->file_buf.lines) - 1;
+    if (line >= sview->cur->file_buf.lines.size())
+        line = sview->cur->file_buf.lines.size() - 1;
 
     return line;
 }
@@ -1137,7 +1123,7 @@ void source_hscroll(struct sviewer *sview, int offset)
         height = swin_getmaxy(sview->win);
         width = swin_getmaxx(sview->win);
 
-        lwidth = log10_uint(sbcount(sview->cur->file_buf.lines)) + 1;
+        lwidth = log10_uint(sview->cur->file_buf.lines.size()) + 1;
         max_width = sview->cur->file_buf.max_width - width + lwidth + 6;
 
         sview->cur->sel_col += offset;
@@ -1152,7 +1138,7 @@ void source_set_sel_line(struct sviewer *sview, int line)
 {
     if (sview->cur) {
         if (line == -1) {
-            sview->cur->sel_line = sbcount(sview->cur->file_buf.lines) - 1;
+            sview->cur->sel_line = sview->cur->file_buf.lines.size() - 1;
         } else {
             /* Set line (note correction for 0-based line counting) */
             sview->cur->sel_line = clamp_line(sview, line - 1);
@@ -1275,7 +1261,7 @@ void source_search_regex_init(struct sviewer *sview)
 
 static int wrap_line(struct list_node *node, int line)
 {
-    int count = sbcount(node->file_buf.lines);
+    int count = node->file_buf.lines.size();
 
     if (line < 0)
         line = count - 1;
@@ -1310,7 +1296,7 @@ int source_search_regex(struct sviewer *sview,
         {
             // No wrapping. Stop at line 0 if searching down and last line
             // if searching up.
-            line_end = direction ? 0 : sbcount(node->file_buf.lines) - 1;
+            line_end = direction ? 0 : node->file_buf.lines.size() - 1;
         }
 
         for(;;) {

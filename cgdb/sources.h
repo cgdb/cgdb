@@ -16,8 +16,10 @@
 
 #include "sys_win.h"
 #include "tgdb.h"
+#include "highlight_groups.h"
 #include <deque>
 #include <list>
+#include <vector>
 
 /* ----------- */
 /* Definitions */
@@ -73,11 +75,11 @@ struct sviewer {
 struct source_line {
     char *line;
     int len;
-    struct hl_line_attr *attrs;
+    std::vector<hl_line_attr> attrs;
 };
 
 struct buffer {
-    struct source_line *lines;  /* Stretch buffer array with line information */
+    std::vector<source_line> lines;
     uint64_t *addrs;            /* The list of corresponding addresses */
     int max_width;              /* Width of longest line in file */
     char *file_data;            /* Entire file pointer if read in that way */
