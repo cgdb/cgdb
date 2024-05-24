@@ -73,8 +73,7 @@ struct sviewer {
 };
 
 struct source_line {
-    char *line;
-    int len;
+    std::string line;
     std::vector<hl_line_attr> attrs;
 };
 

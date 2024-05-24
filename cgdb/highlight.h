@@ -62,6 +62,6 @@ void hl_regex_free(struct hl_regex_info **info);
  * line that matched the regular expression and should be highlighted.
  */
 std::vector<hl_line_attr> hl_regex_highlight(struct hl_regex_info **info,
-    char *line, enum hl_group_kind group_kind);
+    const char *line, enum hl_group_kind group_kind);
 
 #endif /* _HIGHLIGHT_H_ */

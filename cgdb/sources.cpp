@@ -134,11 +134,6 @@ static void init_file_buffer(struct buffer *buf)
 static void release_file_buffer(struct buffer *buf)
 {
     if (buf) {
-        for (auto iter : buf->lines) {
-            sbfree(iter.line);
-            iter.line = NULL;
-        }
-
         /* Free entire file buffer */
         sbfree(buf->file_data);
         buf->file_data = NULL;
@@ -279,11 +274,7 @@ static int load_file_buf(struct buffer *buf, const char *filename)
                     buf->max_width = line_len;
 
                 struct source_line sline;
-                sline.line = NULL;
-                sbsetcount(sline.line, line_len + 1);
-                strncpy(sline.line, line_start, line_len);
-                sline.line[line_len] = 0;
-                sline.len = line_len;
+                sline.line = std::string(line_start, line_len);
 
                 /* Add this line to lines array */
                 buf->lines.push_back(sline);
@@ -295,10 +286,7 @@ static int load_file_buf(struct buffer *buf, const char *filename)
             if (*line_start) {
                 struct source_line sline;
                 int len = strlen(line_start);
-                sline.line = NULL;
-                sbsetcount(sline.line, len + 1);
-                strncpy(sline.line, line_start, len);
-                sline.len = len;
+                sline.line = std::string(line_start, len);
 
                 buf->lines.push_back(sline);
             }
@@ -392,7 +380,7 @@ static int highlight_node(struct list_node *node)
 
     if (!buf->file_data) {
         for (auto &line : buf->lines) {
-            tokenizer_set_buffer(t, line.line, buf->language);
+            tokenizer_set_buffer(t, line.line.c_str(), buf->language);
 
             length = 0;
             lasttype = -1;
@@ -549,18 +537,43 @@ struct list_node *source_add(struct sviewer *sview, const char *path)
     return new_node;
 }
 
+static
+std::string detab_buffer_str(const std::string &buffer, int tabstop)
+{
+    int dst = 0;
+    std::string newbuf;
+    std::string::const_iterator i = buffer.begin();
+
+    if (buffer.find('\t') == std::string::npos)
+        return buffer;
+
+    for (i = buffer.begin(); i < buffer.end(); ++i) {
+        if (*i == '\t') {
+            int spaces = tabstop - dst % tabstop;
+
+            while(spaces--) {
+                newbuf.push_back(' ');
+                dst++;
+            }
+        } else {
+            newbuf.push_back(*i);
+            dst++;
+        }
+
+        if (*i == '\n' || *i == '\r')
+            dst = 0;
+    }
+
+    return newbuf;
+}
+
 void source_add_disasm_line(struct list_node *node, const char *line)
 {
     uint64_t addr = 0;
     struct source_line sline;
     char *colon = 0, colon_char = 0;
 
-    sline.line = NULL;
-    sbsetcount(sline.line, strlen(line) + 1);
-    strcpy(sline.line, line);
-    sline.line = detab_buffer(sline.line, node->file_buf.tabstop);
-
-    sline.len = sbcount(sline.line);
+    sline.line = detab_buffer_str(line, node->file_buf.tabstop);
 
     colon = strchr((char*)line, ':');
     if (colon) {
@@ -985,7 +998,7 @@ int source_display(struct sviewer *sview, int focus,
                 case LINE_DISPLAY_LONG_ARROW:
                     swin_wattron(sview->win, arrow_attr);
                     column_offset = get_line_leading_ws_count(
-                        sline->line, sline->len);
+                        sline->line.data(), sline->line.size());
                     column_offset -= (sview->cur->sel_col + 1);
                     if (column_offset < 0)
                         column_offset = 0;
@@ -1004,7 +1017,7 @@ int source_display(struct sviewer *sview, int focus,
                     break;
                 case LINE_DISPLAY_BLOCK:
                     column_offset = get_line_leading_ws_count(
-                        sline->line, sline->len);
+                        sline->line.data(), sline->line.size());
                     column_offset -= (sview->cur->sel_col + 1);
                     if (column_offset < 0)
                         column_offset = 0;
@@ -1033,7 +1046,7 @@ int source_display(struct sviewer *sview, int focus,
             y = swin_getcury(sview->win);
             x = swin_getcurx(sview->win);
 
-            hl_printline(sview->win, sline->line, sline->len,
+            hl_printline(sview->win, sline->line.data(), sline->line.size(),
                 printline_attrs, -1, -1, sview->cur->sel_col + column_offset,
                 width - lwidth - 2);
 
@@ -1042,10 +1055,11 @@ int source_display(struct sviewer *sview, int focus,
             //   unless we are starting a new search
             if (do_hlsearch && sview->last_hlregex && !sview->hlregex) {
                 std::vector<hl_line_attr> attrs = hl_regex_highlight(
-                        &sview->last_hlregex, sline->line, HLG_SEARCH);
+                        &sview->last_hlregex, sline->line.c_str(), HLG_SEARCH);
                 if (attrs.size() > 0) {
-                    hl_printline_highlight(sview->win, sline->line, sline->len,
-                        attrs, x, y, sview->cur->sel_col + column_offset,
+                    hl_printline_highlight(sview->win, sline->line.data(),
+                        sline->line.size(), attrs, x, y,
+                        sview->cur->sel_col + column_offset,
                         width - lwidth - 2);
                 }
             }
@@ -1054,10 +1068,11 @@ int source_display(struct sviewer *sview, int focus,
             //   display the current search
             if (do_hlsearch && sview->hlregex) {
                 std::vector<hl_line_attr> attrs = hl_regex_highlight(
-                        &sview->hlregex, sline->line, HLG_SEARCH);
+                        &sview->hlregex, sline->line.c_str(), HLG_SEARCH);
                 if (attrs.size() > 0) {
-                    hl_printline_highlight(sview->win, sline->line, sline->len,
-                        attrs, x, y, sview->cur->sel_col + column_offset,
+                    hl_printline_highlight(sview->win, sline->line.data(),
+                        sline->line.size(), attrs, x, y,
+                        sview->cur->sel_col + column_offset,
                         width - lwidth - 2);
                 }
             }
@@ -1067,10 +1082,11 @@ int source_display(struct sviewer *sview, int focus,
             //   display the current search as an incremental search
             if (is_sel_line && sview->hlregex) {
                 std::vector<hl_line_attr> attrs = hl_regex_highlight(
-                        &sview->hlregex, sline->line, HLG_INCSEARCH);
+                        &sview->hlregex, sline->line.c_str(), HLG_INCSEARCH);
                 if (attrs.size() > 0) {
-                    hl_printline_highlight(sview->win, sline->line, sline->len,
-                        attrs, x, y, sview->cur->sel_col + column_offset,
+                    hl_printline_highlight(sview->win, sline->line.data(),
+                        sline->line.size(), attrs, x, y,
+                        sview->cur->sel_col + column_offset,
                         width - lwidth - 2);
                 }
             }
@@ -1302,7 +1318,7 @@ int source_search_regex(struct sviewer *sview,
         for(;;) {
             int ret;
             int start, end;
-            char *line_str = node->file_buf.lines[line].line;
+            const char *line_str = node->file_buf.lines[line].line.c_str();
 
             ret = hl_regex_search(&sview->hlregex, line_str, regex, icase, &start, &end);
             if (ret > 0) {

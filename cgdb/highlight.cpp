@@ -102,7 +102,7 @@ int hl_regex_search(struct hl_regex_info **info, const char *line,
 
 std::vector<hl_line_attr>
 hl_regex_highlight(struct hl_regex_info **info,
-        char *line, enum hl_group_kind group_kind)
+        const char *line, enum hl_group_kind group_kind)
 {
     std::vector<hl_line_attr> attrs;
 
