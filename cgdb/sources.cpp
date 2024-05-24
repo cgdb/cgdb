@@ -52,7 +52,6 @@
 
 /* Local Includes */
 #include "sys_util.h"
-#include "stretchy.h"
 #include "sys_win.h"
 #include "cgdb.h"
 #include "highlight.h"
@@ -124,7 +123,6 @@ static int get_timestamp(const char *path, time_t * timestamp)
 
 static void init_file_buffer(struct buffer *buf)
 {
-    buf->addrs = NULL;
     buf->max_width = 0;
     buf->tabstop = cgdbrc_get_int(CGDBRC_TABSTOP);
     buf->language = TOKENIZER_LANGUAGE_UNKNOWN;
@@ -135,11 +133,8 @@ static void release_file_buffer(struct buffer *buf)
     if (buf) {
         /* Free entire file buffer */
         buf->file_data.clear();
-
         buf->lines.clear();
-
-        sbfree(buf->addrs);
-        buf->addrs = NULL;
+        buf->addrs.clear();
 
         buf->max_width = 0;
         buf->language = TOKENIZER_LANGUAGE_UNKNOWN;
@@ -552,8 +547,7 @@ void source_add_disasm_line(struct list_node *node, const char *line)
         *colon = colon_char;
     }
 
-    sbpush(node->file_buf.addrs, addr);
-
+    node->file_buf.addrs.push_back(addr);
     node->file_buf.lines.push_back(sline);
     node->lflags.emplace_back();
 }
@@ -1148,7 +1142,7 @@ static struct list_node *source_get_asmnode(struct sviewer *sview,
     {
         int i;
 
-        for (i = 0; i < sbcount(node->file_buf.addrs); i++)
+        for (i = 0; i < node->file_buf.addrs.size(); i++)
         {
             if (node->file_buf.addrs[i] == addr)
             {

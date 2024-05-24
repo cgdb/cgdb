@@ -603,34 +603,34 @@ int tgdb_commands_disassemble_supports_s_mode(struct tgdb *tgdb)
 
 static struct tgdb *initialize_tgdb_context(tgdb_callbacks callbacks)
 {
-    struct tgdb *tgdb = (struct tgdb *) cgdb_malloc(sizeof (struct tgdb));
+    tgdb *obj = new tgdb();
 
-    tgdb->control_c = 0;
+    obj->control_c = 0;
 
-    tgdb->debugger_stdout = -1;
-    tgdb->debugger_stdin = -1;
+    obj->debugger_stdout = -1;
+    obj->debugger_stdin = -1;
 
-    tgdb->gdb_mi_ui_fd = -1;
+    obj->gdb_mi_ui_fd = -1;
 
-    tgdb->new_ui_pty_pair = NULL;
+    obj->new_ui_pty_pair = NULL;
 
-    tgdb->command_requests = new tgdb_request_ptr_list();
+    obj->command_requests = new tgdb_request_ptr_list();
 
-    tgdb->is_gdb_ready_for_next_command = 0;
+    obj->is_gdb_ready_for_next_command = 0;
 
-    tgdb->callbacks = callbacks;
+    obj->callbacks = callbacks;
 
-    tgdb->address_start = 0;
-    tgdb->address_end = 0;
+    obj->address_start = 0;
+    obj->address_end = 0;
 
-    wire_callbacks.context = (void*)tgdb;
-    tgdb->wire = gdbwire_create(wire_callbacks);
+    wire_callbacks.context = (void*)obj;
+    obj->wire = gdbwire_create(wire_callbacks);
 
-    tgdb->disassemble_supports_s_mode = 0;
-    tgdb->gdb_supports_new_ui_command = true;
-    tgdb->undefined_new_ui_command = new std::string();
+    obj->disassemble_supports_s_mode = 0;
+    obj->gdb_supports_new_ui_command = true;
+    obj->undefined_new_ui_command = new std::string();
 
-    return tgdb;
+    return obj;
 }
 
 /*******************************************************************************
@@ -788,6 +788,8 @@ int tgdb_shutdown(struct tgdb *tgdb)
     }
 
     gdbwire_destroy(tgdb->wire);
+
+    delete tgdb;
 
     return 0;
 }

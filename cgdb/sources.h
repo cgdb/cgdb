@@ -79,7 +79,7 @@ struct source_line {
 
 struct buffer {
     std::vector<source_line> lines;
-    uint64_t *addrs;            /* The list of corresponding addresses */
+    std::vector<uint64_t> addrs;/* The array of corresponding addresses */
     int max_width;              /* Width of longest line in file */
     std::string file_data;      /* Entire file pointer if read in that way */
     int tabstop;                /* Tabstop value used to load file */
