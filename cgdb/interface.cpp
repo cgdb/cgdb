@@ -1152,7 +1152,7 @@ static int get_sviewer_location(struct sviewer *sview, char **path, int *line,
     }
 
     /* l_line is 0-indexed, but the actual file is 1-indexed */
-    *line = l_line + 1;
+    *line = l_line;
     *path = l_path;
     *addr = l_addr;
 
@@ -1185,7 +1185,7 @@ toggle_breakpoint(struct sviewer *sview, enum tgdb_breakpoint_action t)
     if (sview->cur->lflags[line].breakpt != line_flags::breakpt_status::none)
         t = TGDB_BREAKPOINT_DELETE;
 
-    tgdb_request_modify_breakpoint(tgdb, path, line, addr, t);
+    tgdb_request_modify_breakpoint(tgdb, path, line + 1, addr, t);
     return 0;
 }
 
@@ -1288,7 +1288,7 @@ static void source_input(struct sviewer *sview, int key)
             int line;
             uint64_t addr;
             if (get_sviewer_location(sview, &path, &line, &addr) != -1)
-                tgdb_request_until_line(tgdb, path, line, addr);
+                tgdb_request_until_line(tgdb, path, line + 1, addr);
         }
             break;
         default:
