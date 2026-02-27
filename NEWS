@@ -1,3 +1,5 @@
+  * Fix issue #369 - build error on redhat with g++ (GCC) 4.8.5
+  
   * Fix issue #291 - The gdb process can still be running when CGDB exits.
     Previously, when CGDB would exit, gdb would not also always exit,
     leaving it running in the background. Now gdb exits when CGDB does.

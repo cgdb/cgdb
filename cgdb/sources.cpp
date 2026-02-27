@@ -657,7 +657,7 @@ int source_set_mark(struct sviewer *sview, int key)
 
     if (ret) {
         if (old_node && old_line != -1) {
-            auto& marks{ old_node->lflags[old_line].marks };
+            auto& marks = old_node->lflags[old_line].marks;
             marks.erase(std::find(marks.begin(), marks.end(), key));
         }
         if (add) {
