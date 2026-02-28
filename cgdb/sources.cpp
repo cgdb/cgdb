@@ -243,7 +243,7 @@ static int load_file_buf(struct buffer *buf, const char *filename)
 
         /* Convert tabs to spaces */
         buf->tabstop = cgdbrc_get_int(CGDBRC_TABSTOP);
-        detab_buffer_str(buf->file_data, buf->tabstop);
+        buf->file_data = detab_buffer_str(buf->file_data, buf->tabstop);
 
         {
             char *line_start = (char*)buf->file_data.data();
