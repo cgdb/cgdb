@@ -2060,10 +2060,30 @@ enum gdbwire_mi_command_kind {
     /* -stack-info-frame */
     GDBWIRE_MI_STACK_INFO_FRAME,
 
+    /* -stack-list-variables */
+    GDBWIRE_MI_STACK_LIST_VARIABLES,
+
     /* -file-list-exec-source-file */
     GDBWIRE_MI_FILE_LIST_EXEC_SOURCE_FILE,
     /* -file-list-exec-source-files */
     GDBWIRE_MI_FILE_LIST_EXEC_SOURCE_FILES
+};
+
+/**
+ * A single variable from the -stack-list-variables output.
+ *
+ * Variables with complex types (structs, arrays) will have an empty
+ * value string; simple types will have a value.
+ */
+struct gdbwire_mi_stack_list_variables {
+    /** The variable name. */
+    char *name;
+    /** The variable value, or empty string for complex types. */
+    char *value;
+    /** Non-zero if this is a function argument, zero if a local variable. */
+    int is_arg;
+    /** The next variable in the list, NULL if this is the last. */
+    struct gdbwire_mi_stack_list_variables *next;
 };
 
 /**
@@ -2340,6 +2360,11 @@ struct gdbwire_mi_command {
         struct {
             struct gdbwire_mi_stack_frame *frame;
         } stack_info_frame;
+
+        /** When kind == GDBWIRE_MI_STACK_LIST_VARIABLES */
+        struct {
+            struct gdbwire_mi_stack_list_variables *variables;
+        } stack_list_variables;
 
         /** When kind == GDBWIRE_MI_FILE_LIST_EXEC_SOURCE_FILE */
         struct {
@@ -2650,10 +2675,30 @@ enum gdbwire_mi_command_kind {
     /* -stack-info-frame */
     GDBWIRE_MI_STACK_INFO_FRAME,
 
+    /* -stack-list-variables */
+    GDBWIRE_MI_STACK_LIST_VARIABLES,
+
     /* -file-list-exec-source-file */
     GDBWIRE_MI_FILE_LIST_EXEC_SOURCE_FILE,
     /* -file-list-exec-source-files */
     GDBWIRE_MI_FILE_LIST_EXEC_SOURCE_FILES
+};
+
+/**
+ * A single variable from the -stack-list-variables output.
+ *
+ * Variables with complex types (structs, arrays) will have an empty
+ * value string; simple types will have a value.
+ */
+struct gdbwire_mi_stack_list_variables {
+    /** The variable name. */
+    char *name;
+    /** The variable value, or empty string for complex types. */
+    char *value;
+    /** Non-zero if this is a function argument, zero if a local variable. */
+    int is_arg;
+    /** The next variable in the list, NULL if this is the last. */
+    struct gdbwire_mi_stack_list_variables *next;
 };
 
 /**
@@ -2930,6 +2975,11 @@ struct gdbwire_mi_command {
         struct {
             struct gdbwire_mi_stack_frame *frame;
         } stack_info_frame;
+
+        /** When kind == GDBWIRE_MI_STACK_LIST_VARIABLES */
+        struct {
+            struct gdbwire_mi_stack_list_variables *variables;
+        } stack_list_variables;
 
         /** When kind == GDBWIRE_MI_FILE_LIST_EXEC_SOURCE_FILE */
         struct {

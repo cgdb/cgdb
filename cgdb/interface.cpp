@@ -88,6 +88,7 @@
 #include "highlight_groups.h"
 #include "fs_util.h"
 #include "logo.h"
+#include "locals.h"
 
 /* ----------- */
 /* Prototypes  */
@@ -126,6 +127,8 @@ WIN_SPLIT_ORIENTATION_TYPE cur_split_orientation = WSO_HORIZONTAL;
 /* --------------- */
 static struct scroller *gdb_scroller = NULL;
 static struct sviewer *src_viewer = NULL;  /* The source viewer window */
+static struct lviewer *locals_viewer = NULL; /* Local variables viewer window */
+static SWINDOW *locals_sep_win = NULL;   /* Separator between GDB and locals */
 static SWINDOW *status_win = NULL;   /* The status line */
 static SWINDOW *vseparator_win = NULL;   /* Separator gets own window */
 static enum Focus focus = GDB;  /* Which pane is currently focused */
@@ -344,7 +347,8 @@ int get_gdb_height(void)
             break;
         }
         case WSO_VERTICAL:
-            result = screen_size.ws_row;
+            /* Share the right column with the locals pane */
+            result = screen_size.ws_row / 2;
             break;
     }
 
@@ -357,18 +361,92 @@ int get_gdb_width(void)
 
     switch (cur_split_orientation) {
         case WSO_HORIZONTAL:
-            result = screen_size.ws_col;
+            /* Share the bottom area with the locals pane */
+            result = screen_size.ws_col / 2;
             break;
         case WSO_VERTICAL: {
             int window_size = ((screen_size.ws_col / 2) - window_shift - 1);
             int odd_screen_size = (screen_size.ws_col % 2);
 
             result = window_size + odd_screen_size;
-            break; 
+            break;
         }
     }
 
     return result;
+}
+
+/* Geometry for the locals pane */
+
+static int get_locals_row(void)
+{
+    switch (cur_split_orientation) {
+        case WSO_HORIZONTAL:
+            return get_src_status_row() + get_src_status_height();
+        case WSO_VERTICAL:
+            /* Below the GDB pane in the right column */
+            return get_gdb_height();
+    }
+    return 0;
+}
+
+static int get_locals_col(void)
+{
+    switch (cur_split_orientation) {
+        case WSO_HORIZONTAL:
+            /* One column to the right of the GDB pane + separator */
+            return get_gdb_width() + 1;
+        case WSO_VERTICAL:
+            return get_sep_col() + get_sep_width();
+    }
+    return 0;
+}
+
+int get_locals_height(void)
+{
+    switch (cur_split_orientation) {
+        case WSO_HORIZONTAL: {
+            int window_size = ((screen_size.ws_row / 2) - window_shift - 1);
+            int odd_screen_size = (screen_size.ws_row % 2);
+            return window_size + odd_screen_size;
+        }
+        case WSO_VERTICAL:
+            /* Remaining rows after the GDB pane */
+            return screen_size.ws_row - get_gdb_height();
+    }
+    return 0;
+}
+
+static int get_locals_width(void)
+{
+    switch (cur_split_orientation) {
+        case WSO_HORIZONTAL:
+            /* Remaining columns after the GDB pane + separator */
+            return screen_size.ws_col - get_gdb_width() - 1;
+        case WSO_VERTICAL: {
+            int window_size = ((screen_size.ws_col / 2) - window_shift - 1);
+            int odd_screen_size = (screen_size.ws_col % 2);
+            return window_size + odd_screen_size;
+        }
+    }
+    return 0;
+}
+
+/* Geometry for the separator between GDB and locals in horizontal mode */
+
+static int get_locals_sep_col(void)
+{
+    return get_gdb_width();
+}
+
+static int get_locals_sep_row(void)
+{
+    return get_src_status_row() + get_src_status_height();
+}
+
+static int get_locals_sep_height(void)
+{
+    return get_gdb_height();
 }
 
 /*
@@ -418,6 +496,33 @@ static void separator_display(int draw)
         swin_wvline(vseparator_win, SWIN_SYM_VLINE, h);
 
         swin_wnoutrefresh(vseparator_win);
+    }
+}
+
+/* Draw the vertical separator between the GDB pane and the locals pane
+ * in horizontal split mode. */
+static void locals_sep_display(void)
+{
+    if (cur_split_orientation != WSO_HORIZONTAL)
+    {
+        if (locals_sep_win) {
+            swin_delwin(locals_sep_win);
+            locals_sep_win = NULL;
+        }
+        return;
+    }
+
+    int x = get_locals_sep_col();
+    int y = get_locals_sep_row();
+    int h = get_locals_sep_height();
+
+    create_swindow(&locals_sep_win, h, 1, y, x);
+
+    if (locals_sep_win)
+    {
+        swin_wmove(locals_sep_win, 0, 0);
+        swin_wvline(locals_sep_win, SWIN_SYM_VLINE, h);
+        swin_wnoutrefresh(locals_sep_win);
     }
 }
 
@@ -536,9 +641,13 @@ void if_draw(void)
         source_display(src_viewer, focus == CGDB, WIN_NO_REFRESH, no_hlsearch);
 
     separator_display(cur_split_orientation == WSO_VERTICAL);
+    locals_sep_display();
 
     if (get_gdb_height() > 0)
         scr_refresh(gdb_scroller, focus == GDB, WIN_NO_REFRESH);
+
+    if (locals_viewer && get_locals_height() > 0)
+        locals_refresh(locals_viewer, focus == GDB, WIN_NO_REFRESH);
 
     /* This check is here so that the cursor goes to the 
      * cgdb window. The cursor would stay in the gdb window 
@@ -589,6 +698,7 @@ int if_layout()
 {
     SWINDOW *gdb_scroller_win = NULL;
     SWINDOW *src_viewer_win = NULL;
+    SWINDOW *locals_viewer_win = NULL;
 
     /* Verify the window size is reasonable */
     validate_window_sizes();
@@ -611,6 +721,15 @@ int if_layout()
         scr_move(gdb_scroller, gdb_scroller_win);
     } else {
         gdb_scroller = scr_new(gdb_scroller_win);
+    }
+
+    /* Resize the locals window */
+    create_swindow(&locals_viewer_win, get_locals_height(), get_locals_width(),
+        get_locals_row(), get_locals_col());
+    if (locals_viewer) {
+        locals_move(locals_viewer, locals_viewer_win);
+    } else {
+        locals_viewer = locals_new(locals_viewer_win);
     }
 
     /* Initialize the status bar window */
@@ -1484,6 +1603,14 @@ static int cgdb_input(int key, int *last_key)
         case CGDB_KEY_F1:
             if_display_help();
             return 0;
+        case CGDB_KEY_F3:
+            /* Walk up the call stack */
+            tgdb_request_run_debugger_command(tgdb, TGDB_UP);
+            return 0;
+        case CGDB_KEY_F4:
+            /* Walk down the call stack */
+            tgdb_request_run_debugger_command(tgdb, TGDB_DOWN);
+            return 0;
         case CGDB_KEY_F5:
             /* Issue GDB run command */
             tgdb_request_run_debugger_command(tgdb, TGDB_RUN);
@@ -1693,6 +1820,17 @@ struct sviewer *if_get_sview()
     return src_viewer;
 }
 
+struct lviewer *if_get_lviewer()
+{
+    return locals_viewer;
+}
+
+void if_update_locals(const std::list<tgdb_local_variable> &locals)
+{
+    if (locals_viewer)
+        locals_set(locals_viewer, locals);
+}
+
 void if_clear_filedlg(void)
 {
     filedlg_clear(fd);
@@ -1728,6 +1866,16 @@ void if_shutdown(void)
     if (vseparator_win) {
         swin_delwin(vseparator_win);
         vseparator_win = NULL;
+    }
+
+    if (locals_sep_win) {
+        swin_delwin(locals_sep_win);
+        locals_sep_win = NULL;
+    }
+
+    if (locals_viewer) {
+        locals_free(locals_viewer);
+        locals_viewer = NULL;
     }
 }
 
