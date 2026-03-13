@@ -95,6 +95,9 @@ struct sviewer *if_get_sview();
  * size of the status bar, the left most part of the string will be truncated.
  * Should never be NULL, use "" instead.
  *
+ * @param pos
+ * The position of the cursor on the line, or -1 to indicate end of msg.
+ *
  * Examples
  *
  * Header is "/" and message is "for_the_love_of_country".
@@ -106,7 +109,7 @@ struct sviewer *if_get_sview();
  * If the width is 10, the status bar will be >f_country
  */
 void if_display_message(enum win_refresh dorefresh,
-        const char *header, const char *msg);
+        const char *header, const char *msg, size_t cur_pos = -1);
 
 /* if_clear_filedlg: Clears all the files the file dialog has to show the user.
  * -----------------
