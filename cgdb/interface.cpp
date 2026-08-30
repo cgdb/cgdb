@@ -1182,7 +1182,7 @@ toggle_breakpoint(struct sviewer *sview, enum tgdb_breakpoint_action t)
         return -1;
 
     /* delete an existing breakpoint */
-    if (sview->cur->lflags[line].breakpt != line_flags::breakpt_status::none)
+    if (sview->cur->lflags[sview->cur->sel_line].breakpt != line_flags::breakpt_status::none)
         t = TGDB_BREAKPOINT_DELETE;
 
     tgdb_request_modify_breakpoint(tgdb, path, line, addr, t);
