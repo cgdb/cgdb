@@ -4,42 +4,52 @@ Steps for releasing a new CGDB version, follow these in order.
 All of the steps below are automated by autorelease.sh, just check to make
 sure that it worked properly.
 
-- Run autorelease.sh
-  ./autorelease.sh
-  - It prompts for version, put in the version, for example: 0.6.8
+1. Run autorelease.sh
+   ./autorelease.sh
+   - It prompts for version, put in the version, for example: 0.8.1
 
-- Look at tar file in releasedir to make sure it has the correct version.
-  untar it and run to make sure it shows the correct version and that it runs.
+2. Look at tar file in releasedir to make sure it has the correct version.
+   untar it and run to make sure it shows the correct version and that it runs.
 
-- Ensure doc/htdocs/download.php has correct version set in the definition
-  of 'LATEST' at the top of the file.
-  You can do 'git diff' and notice only the NEWS file and the
-  download.php file modified.
-
-- Verify documentation is correct. cgdb.pdf, cgdb.html, cgdb.text, 
-  cgdb-split.html and cgdb.info.
+3. Verify documentation is correct. cgdb.pdf, cgdb.html, cgdb.text,
+   cgdb-split.html and cgdb.info.
 
 --------------------------------------------------------------------------------
 These steps are manual.
 
-- Commit all currently modified files.
+1. Commit all currently modified files.
+   git commit -a -m "Release vX.Y.Z"
 
-- Update documentation in website
-  - cd release
-  - ./scripts/update_docs.sh
-  - update release date from 0.6.7 to 0.6.8
-  - update md5 sum
+2. Tag the release in git
+   cd release
+   ./scripts/tag.sh
+   - This will commit and tag the release
+   - Then push: git push origin vX.Y.Z
 
--  Tag the release in git
-  - cd release
-  - ./scripts/tag.sh
+3. Create a GitHub release
+   - Go to https://github.com/cgdb/cgdb/releases/new
+   - Choose the tag you just created (e.g. vX.Y.Z)
+   - Set the release title to "CGDB X.Y.Z"
+   - Copy the release notes from release/cgdb.email into the description
+   - Attach the tarball, .md5, and .sha1 files from the release/ directory
+   - Click "Save draft" (this won't notify watchers)
+   - Review and click "Publish release" when ready
 
-- Email the release tar ball ./release/cgdb-version.tar.gz to knave
+4. Update the website
+   - cd release
+   - ./scripts/update_docs.sh
+   - This copies documentation to the local cgdb.github.com repository
+   - Review and commit changes in the web repository
+   - Update the download link in the cgdb.github.com repository, too
+   - Push it out
 
-- Test website by looking at it and attempting to download file.
+5. Announce the release
+   - Send email to cgdb-users@googlegroups.com
+   - Use the email template in release/cgdb.email
+   - Subject: CGDB X.Y.Z released
 
-- Download and test the new version
-
-- Announce the release on cgdb-users@googlegroups.com
-  with email from release/cgdb.email.
-  Subject: CGDB 0.Major.Minor released
+--------------------------------------------------------------------------------
+Notes:
+- GitHub releases are the primary distribution method
+- Use the GitHub web UI to create draft releases (no PAT needed)
+- The homepage (https://cgdb.github.io) links to GitHub releases for downloads

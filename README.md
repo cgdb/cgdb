@@ -8,8 +8,8 @@ feel right at home using it.
 Screenshot, downloads, and documentation are available from the home page:
 https://cgdb.github.io
 
-Official source releases are available here:
-https://cgdb.me/files/
+Official source releases are available on GitHub:
+https://github.com/cgdb/cgdb/releases
 
 ## Build Instructions
 
