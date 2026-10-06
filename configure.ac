@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_PREREQ(2.5)
-AC_INIT(cgdb, [m4_esyscmd_s([cat VERSION])])
+AC_PREREQ([2.72])
+AC_INIT([cgdb],[m4_esyscmd_s([cat VERSION])])
 AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_HEADERS(config.h)
 AM_INIT_AUTOMAKE
@@ -11,7 +11,7 @@ AM_PROG_CC_C_O
 AC_PROG_CXX
 AC_PROG_INSTALL
 AC_PROG_RANLIB
-AM_PROG_LEX
+AC_PROG_LEX([noyywrap])
 AC_PROG_YACC
 
 dnl determine if we are running in linux, cygwin, solaris, or freebsd
@@ -29,7 +29,6 @@ case $host in
 esac
 
 dnl Checks for header files.
-AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
 
 dnl determine if terminal headers are available for opening pty
@@ -89,7 +88,6 @@ AC_TYPE_SIZE_T
 
 dnl Checks for library functions.
 AC_FUNC_SETPGRP
-AC_TYPE_SIGNAL
 AC_FUNC_VPRINTF
 
 AC_CHECK_FUNC([putenv],,AC_MSG_ERROR([CGDB requires putenv to build.]))
@@ -99,13 +97,11 @@ AC_CHECK_FUNC([strerror],,AC_MSG_ERROR([CGDB requires strerror to build.]))
 AC_CHECK_FUNC([ttyname_r],[AC_DEFINE(HAVE_TTYNAME_R, 1, [Define to 1 if you have the ttyname_r function])],)
 
 dnl define HAVE_PTSNAME_R if we have reentrant version of ptsname.
-AC_TRY_LINK([#ifndef _GNU_SOURCE
+AC_LINK_IFELSE([AC_LANG_PROGRAM([[#ifndef _GNU_SOURCE
              #define _GNU_SOURCE
              #endif
-             #include <stdlib.h>],
-            [char buf[10]; ptsname_r(0, buf, sizeof(buf));],
-            [AC_DEFINE(HAVE_PTSNAME_R, 1,
-                     Define to 1 if you have a re-entrant version of ptsname)])
+             #include <stdlib.h>]], [[char buf[10]; ptsname_r(0, buf, sizeof(buf));]])],[AC_DEFINE(HAVE_PTSNAME_R, 1,
+                     Define to 1 if you have a re-entrant version of ptsname)],[])
 
 dnl Add support for creating documentation
 dnl
@@ -139,9 +135,9 @@ opt_with_ncurses_prefix=no
 opt_with_curses_prefix=no
 
 dnl argument to configure
-AC_ARG_WITH(readline, AC_HELP_STRING([--with-readline=PREFIX], [Use system installed readline library]), opt_with_readline_prefix=$withval)
-AC_ARG_WITH(ncurses, AC_HELP_STRING([--with-ncurses=PREFIX], [Use system installed ncurses library]), opt_with_ncurses_prefix=$withval)
-AC_ARG_WITH(curses, AC_HELP_STRING([--with-curses=PREFIX], [Use system installed curses library]), opt_with_curses_prefix=$withval use_ncurses_library=no)
+AC_ARG_WITH(readline, AS_HELP_STRING([--with-readline=PREFIX],[Use system installed readline library]), opt_with_readline_prefix=$withval)
+AC_ARG_WITH(ncurses, AS_HELP_STRING([--with-ncurses=PREFIX],[Use system installed ncurses library]), opt_with_ncurses_prefix=$withval)
+AC_ARG_WITH(curses, AS_HELP_STRING([--with-curses=PREFIX],[Use system installed curses library]), opt_with_curses_prefix=$withval use_ncurses_library=no)
 
 
 if test "$opt_with_readline_prefix" != "no"; then
@@ -228,16 +224,13 @@ fi
 
 dnl Detect __attribute__( ( __format__( __printf__ ) ) ) support
 AC_MSG_CHECKING([Checking attribute printf support])
-    AC_TRY_LINK([#include <stdlib.h>
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <stdlib.h>
                  static void test(const char *fmt, ...)
                     __attribute__((format(__printf__, 1, 2)));
-                 static void test(const char *fmt, ...) { (void)fmt; }],
-                [test("foobar");],
-                [AC_MSG_RESULT([yes])
+                 static void test(const char *fmt, ...) { (void)fmt; }]], [[test("foobar");]])],[AC_MSG_RESULT([yes])
                  AC_DEFINE(HAVE_ATTRIBUTE_PRINTF, 1,
                     Define to 1 if compiler supports attribute format
-                    printf)],
-                [AC_MSG_RESULT([no])])
+                    printf)],[AC_MSG_RESULT([no])])
 
 dnl Make sure there is a version of readline that CGDB supports.
 dnl Simply putting 5.1* -> 5.9* just to take into account future versions.
@@ -263,8 +256,7 @@ fi
 
 AH_BOTTOM([#include <cgdb_custom_config.h>])
 
-AC_OUTPUT(
-    cgdb_custom_config.h \
+AC_CONFIG_FILES([cgdb_custom_config.h \
     Makefile \
     lib/Makefile \
     lib/kui/Makefile \
@@ -276,7 +268,8 @@ AC_OUTPUT(
     doc/Makefile \
     cgdb/Makefile \
     testsuite/Makefile
-)
+])
+AC_OUTPUT
 
 # Display configuration options.
 cat <<EOF

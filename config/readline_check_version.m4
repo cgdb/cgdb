@@ -81,12 +81,13 @@ CFLAGS="$CFLAGS -I${ac_cv_rl_includedir}"
 LDFLAGS="$LDFLAGS -L${ac_cv_rl_libdir}"
 
 AC_CACHE_VAL(ac_cv_rl_version,
-[AC_TRY_RUN([
+[AC_RUN_IFELSE([
+AC_LANG_SOURCE([
 #include <stdio.h>
 #include <stdlib.h>
 #include <readline/readline.h>
 
-main()
+int main()
 {
 	FILE *fp;
 	fp = fopen("conftest.rlv", "w");
@@ -95,7 +96,7 @@ main()
 	fclose(fp);
 	exit(0);
 }
-],
+])],
 ac_cv_rl_version=`cat conftest.rlv`,
 ac_cv_rl_version='0.0',
 ac_cv_rl_version='4.2')])
