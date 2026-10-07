@@ -46,7 +46,7 @@ echo ""
 echo "-- Release build starting."
  
 CGDB_RELEASE=cgdb-$CGDB_VERSION
-CGDB_RELEASE_STR=`echo "$CGDB_RELEASE" | perl -pi -e 's/\./_/g'`
+CGDB_RELEASE_STR=`echo "$CGDB_RELEASE" | perl -pe 's/\./_/g'`
 CGDB_SOURCE_DIR="$PWD"
 CGDB_RELEASE_DIR="$PWD/release"
 CGDB_BUILD_DIR="$CGDB_RELEASE_DIR/build"
@@ -152,11 +152,8 @@ echo "echo \"-- Tag release $TAG_NAME\"" >> $CGDB_RELEASE_TAG_SH
 echo "git tag -m \"Tag $TAG_NAME release.\" $TAG_NAME" >> $CGDB_RELEASE_TAG_SH
 echo "echo \"-- Push this tag with: git push $TAG_NAME\"" >> $CGDB_RELEASE_TAG_SH 
 
-# TODO: Github file uploads
-#       see: https://github.com/wereHamster/ghup
-#echo 'echo "-- uploading the file $CGDB_RELEASE.tar.gz"' >> $CGDB_RELEASE_UPLOAD_SH
-#echo 'scp $CGDB_RELEASE.tar.gz bobbybrasko@upload.sf.net' >> $CGDB_RELEASE_UPLOAD_SH
-#echo '' >>  $CGDB_RELEASE_UPLOAD_SH
+# After running this script, follow the instructions below to create
+# a draft release on GitHub with the tarball and checksums.
 
 # Create release/scripts/update_docs.sh
 if [ "$CGDB_WEB" != "" ]; then
@@ -186,7 +183,7 @@ echo "-------------------" >> $CGDB_RELEASE_EMAIL
 echo "" >> $CGDB_RELEASE_EMAIL
 echo "Downloading:" >> $CGDB_RELEASE_EMAIL
 echo "" >> $CGDB_RELEASE_EMAIL
-echo "    Go to http://cgdb.github.io/ for download link and instructions." >> $CGDB_RELEASE_EMAIL
+echo "    Go to https://github.com/cgdb/cgdb/releases for download link and instructions." >> $CGDB_RELEASE_EMAIL
 echo "" >> $CGDB_RELEASE_EMAIL
 echo "This new version contains the following changes:" >> $CGDB_RELEASE_EMAIL
 echo "" >> $CGDB_RELEASE_EMAIL
