@@ -164,7 +164,10 @@
         TGDB_REQUEST_DISASSEMBLE_FUNC,
 
         // Request GDB to skip to the given line.
-        TGDB_REQUEST_UNTIL_LINE
+        TGDB_REQUEST_UNTIL_LINE,
+
+        // Request the local variables for the current stack frame.
+        TGDB_REQUEST_STACK_LOCALS
     };
 
     // This is the commands interface used between the front end and TGDB.
@@ -221,6 +224,21 @@
    *  This struct is a reference to a libtgdb instance.
    */
     struct tgdb;
+
+    /**
+     * A single local variable or function argument for the current frame.
+     *
+     * Variables with complex types (structs, arrays) will have an empty
+     * value string; simple types will have a value.
+     */
+    struct tgdb_local_variable {
+        // The variable name
+        std::string name;
+        // The variable value, empty for complex types
+        std::string value;
+        // True if this is a function argument, false if a local variable
+        bool is_arg;
+    };
 
     /**
      * The primary mechanism for tgdb to send events to the caller.
@@ -353,6 +371,19 @@
          */
         void (*tgdb_update_file_pos_fn)(void *context,
                 const tgdb_file_position &file_position);
+
+        /**
+         * Update the local variables for the current stack frame.
+         *
+         * @param context
+         * The tgdb instance to operate on
+         *
+         * @param locals
+         * The list of local variables and arguments for the current frame.
+         * Empty when the program is not stopped at a source location.
+         */
+        void (*tgdb_update_locals_fn)(void *context,
+                const std::list<tgdb_local_variable> &locals);
     };
 
   /**
@@ -507,6 +538,14 @@
    * An instance of the tgdb library to operate on.
    */
    void tgdb_request_current_location(struct tgdb *tgdb);
+
+   /**
+    * Request the local variables for the current stack frame.
+    *
+    * @param tgdb
+    * An instance of the tgdb library to operate on.
+    */
+   void tgdb_request_stack_locals(struct tgdb *tgdb);
 
    /**
     * Request an update of the breakpoints to the front end.

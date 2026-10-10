@@ -44,6 +44,8 @@ cgdb_SOURCES = \
     highlight_groups.h \
     interface.cpp \
     interface.h \
+    locals.cpp \
+    locals.h \
     logo.cpp \
     logo.h \
     scroller.cpp \

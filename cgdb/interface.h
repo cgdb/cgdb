@@ -11,6 +11,8 @@
 /* Local Includes */
 #include "sources.h"
 #include "cgdbrc.h"
+#include "locals.h"
+#include "tgdb.h"
 
 /* --------- */
 /* Functions */
@@ -78,6 +80,16 @@ void if_show_file(const char *path, int sel_line, int exe_line);
  * -------------
  */
 struct sviewer *if_get_sview();
+
+/* if_get_lviewer: Return a pointer to the locals viewer object.
+ * ----------------
+ */
+struct lviewer *if_get_lviewer();
+
+/* if_update_locals: Update the locals viewer with a new variable list.
+ * ------------------
+ */
+void if_update_locals(const std::list<tgdb_local_variable> &locals);
 
 /**
  * Display a message on the source window status bar.

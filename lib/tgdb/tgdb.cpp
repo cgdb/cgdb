@@ -365,6 +365,34 @@ static void tgdb_commands_process_info_frame(struct tgdb *tgdb,
     }
 }
 
+static void tgdb_commands_process_stack_variables(struct tgdb *tgdb,
+        struct gdbwire_mi_result_record *result_record)
+{
+    std::list<tgdb_local_variable> locals;
+
+    enum gdbwire_result result;
+    struct gdbwire_mi_command *mi_command = 0;
+    result = gdbwire_get_mi_command(GDBWIRE_MI_STACK_LIST_VARIABLES,
+        result_record, &mi_command);
+    if (result == GDBWIRE_OK) {
+        struct gdbwire_mi_stack_list_variables *var =
+            mi_command->variant.stack_list_variables.variables;
+        while (var) {
+            tgdb_local_variable lv;
+            lv.name = var->name ? var->name : "";
+            lv.value = var->value ? var->value : "";
+            lv.is_arg = var->is_arg != 0;
+            locals.push_back(lv);
+            var = var->next;
+        }
+        gdbwire_mi_command_free(mi_command);
+    } else {
+        clog_error(CLOG_CGDB, "Could not get local variables for frame");
+    }
+
+    tgdb->callbacks.tgdb_update_locals_fn(tgdb->callbacks.context, locals);
+}
+
 static void gdbwire_stream_record_callback(void *context,
     struct gdbwire_mi_stream_record *stream_record)
 {
@@ -492,6 +520,7 @@ static void gdbwire_async_record_callback(void *context,
         case GDBWIRE_MI_ASYNC_STOPPED:
         case GDBWIRE_MI_ASYNC_THREAD_SELECTED:
             source_position_changed(tgdb, async_record->result);
+            tgdb_request_stack_locals(tgdb);
             break;
         case GDBWIRE_MI_ASYNC_BREAKPOINT_CREATED:
         case GDBWIRE_MI_ASYNC_BREAKPOINT_MODIFIED:
@@ -535,6 +564,9 @@ static void gdbwire_result_record_callback(void *context,
             break;
         case TGDB_REQUEST_INFO_FRAME:
             tgdb_commands_process_info_frame(tgdb, result_record);
+            break;
+        case TGDB_REQUEST_STACK_LOCALS:
+            tgdb_commands_process_stack_variables(tgdb, result_record);
             break;
         case TGDB_REQUEST_TTY:
         case TGDB_REQUEST_DEBUGGER_COMMAND:
@@ -656,6 +688,7 @@ static void tgdb_source_location_changed(void *context)
 {
     struct tgdb *tgdb = (struct tgdb*)context;
     tgdb_request_current_location(tgdb);
+    tgdb_request_stack_locals(tgdb);
 }
 
 static void tgdb_command_error(void *context, const std::string &msg)
@@ -1214,6 +1247,17 @@ void tgdb_request_current_location(struct tgdb * tgdb)
     tgdb_run_or_queue_request(tgdb, request_ptr, true);
 }
 
+void tgdb_request_stack_locals(struct tgdb * tgdb)
+{
+    tgdb_request_ptr request_ptr;
+
+    request_ptr = (tgdb_request_ptr)cgdb_malloc(sizeof (struct tgdb_request));
+
+    request_ptr->header = TGDB_REQUEST_STACK_LOCALS;
+
+    tgdb_run_or_queue_request(tgdb, request_ptr, true);
+}
+
 void tgdb_request_breakpoints(struct tgdb * tgdb)
 {
     tgdb_request_ptr request_ptr;
@@ -1328,6 +1372,9 @@ int tgdb_get_gdb_command(struct tgdb *tgdb, tgdb_request_ptr request,
             break;
         case TGDB_REQUEST_INFO_FRAME:
             command = "-stack-info-frame\n";
+            break;
+        case TGDB_REQUEST_STACK_LOCALS:
+            command = "-stack-list-variables --skip-unavailable 1\n";
             break;
         case TGDB_REQUEST_DATA_DISASSEMBLE_MODE_QUERY:
             command = "-data-disassemble -s 0 -e 0 -- 4\n";

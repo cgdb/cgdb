@@ -381,10 +381,12 @@ static void disassemble_func(void *context,
 static void disassemble_pc(void *context,
         uint64_t addr_start, uint64_t addr_end, bool error,
         const std::list<std::string> &disasm);
-static
-void update_file_pos(void *context,
+static void update_file_pos(void *context,
         const tgdb_file_position &file_position);
-            
+
+static void update_locals_cb(void *context,
+        const std::list<tgdb_local_variable> &locals);
+
 tgdb_callbacks callbacks = { 
     NULL,       
     console_output,
@@ -393,7 +395,8 @@ tgdb_callbacks callbacks = {
     inferiors_source_files,
     disassemble_func,
     disassemble_pc,
-    update_file_pos
+    update_file_pos,
+    update_locals_cb
 };
 
 
@@ -708,6 +711,13 @@ static void update_file_pos(void *context,
         const tgdb_file_position &file_position)
 {
     update_file_position(file_position);
+}
+
+static void update_locals_cb(void *context,
+        const std::list<tgdb_local_variable> &locals)
+{
+    if_update_locals(locals);
+    if_draw();
 }
 
 /* gdb_input: Receives data from tgdb:

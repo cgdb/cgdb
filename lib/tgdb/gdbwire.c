@@ -2309,6 +2309,9 @@ enum gdbwire_mi_command_kind {
     /* -stack-info-frame */
     GDBWIRE_MI_STACK_INFO_FRAME,
 
+    /* -stack-list-variables */
+    GDBWIRE_MI_STACK_LIST_VARIABLES,
+
     /* -file-list-exec-source-file */
     GDBWIRE_MI_FILE_LIST_EXEC_SOURCE_FILE,
     /* -file-list-exec-source-files */
@@ -2570,6 +2573,21 @@ struct gdbwire_mi_stack_frame {
 };
 
 /**
+ * A single local variable or function argument returned by
+ * -stack-list-variables.
+ */
+struct gdbwire_mi_stack_list_variables {
+    /** The variable name. Always present. */
+    char *name;
+    /** The variable value, or NULL for complex types. */
+    char *value;
+    /** Non-zero if this entry is a function argument. */
+    int is_arg;
+    /** The next variable or NULL if no more. */
+    struct gdbwire_mi_stack_list_variables *next;
+};
+
+/**
  * Represents a GDB/MI command.
  */
 struct gdbwire_mi_command {
@@ -2589,6 +2607,11 @@ struct gdbwire_mi_command {
         struct {
             struct gdbwire_mi_stack_frame *frame;
         } stack_info_frame;
+
+        /** When kind == GDBWIRE_MI_STACK_LIST_VARIABLES */
+        struct {
+            struct gdbwire_mi_stack_list_variables *variables;
+        } stack_list_variables;
 
         /** When kind == GDBWIRE_MI_FILE_LIST_EXEC_SOURCE_FILE */
         struct {
@@ -3213,6 +3236,119 @@ stack_info_frame(
 }
 
 /**
+ * Free a stack variables list.
+ *
+ * @param variables
+ * The stack variables list to free, OK to pass NULL.
+ */
+static void
+gdbwire_mi_stack_list_variables_free(
+    struct gdbwire_mi_stack_list_variables *variables)
+{
+    struct gdbwire_mi_stack_list_variables *tmp, *cur = variables;
+    while (cur) {
+        free(cur->name);
+        free(cur->value);
+        tmp = cur;
+        cur = cur->next;
+        free(tmp);
+    }
+}
+
+/**
+ * Handle the -stack-list-variables command.
+ *
+ * @param result_record
+ * The mi result record that makes up the command output from gdb.
+ *
+ * @param out
+ * The output command, null on error.
+ *
+ * @return
+ * GDBWIRE_OK on success, otherwise failure and out is NULL.
+ */
+static enum gdbwire_result
+stack_list_variables(
+    struct gdbwire_mi_result_record *result_record,
+    struct gdbwire_mi_command **out)
+{
+    struct gdbwire_mi_result *mi_result;
+    struct gdbwire_mi_result *mi_var;
+    struct gdbwire_mi_command *mi_command = 0;
+
+    struct gdbwire_mi_stack_list_variables *variables = NULL;
+    struct gdbwire_mi_stack_list_variables *current = NULL;
+    struct gdbwire_mi_stack_list_variables *temp = NULL;
+
+    *out = 0;
+
+    GDBWIRE_ASSERT(result_record->result_class == GDBWIRE_MI_DONE);
+    GDBWIRE_ASSERT(result_record->result);
+
+    mi_result = result_record->result;
+    GDBWIRE_ASSERT(mi_result->kind == GDBWIRE_MI_LIST);
+    GDBWIRE_ASSERT(strcmp(mi_result->variable, "variables") == 0);
+    GDBWIRE_ASSERT(!mi_result->next);
+
+    /* Iterate over each {name="...",arg="...",value="..."} tuple */
+    mi_result = mi_result->variant.result;
+    while (mi_result) {
+        if (mi_result->kind == GDBWIRE_MI_TUPLE) {
+            temp = (struct gdbwire_mi_stack_list_variables *)
+                calloc(1, sizeof(struct gdbwire_mi_stack_list_variables));
+            if (!temp) {
+                gdbwire_mi_stack_list_variables_free(variables);
+                return GDBWIRE_NOMEM;
+            }
+
+            mi_var = mi_result->variant.result;
+            while (mi_var) {
+                if (mi_var->kind == GDBWIRE_MI_CSTRING) {
+                    if (strcmp(mi_var->variable, "name") == 0) {
+                        temp->name = mi_var->variant.cstring
+                            ? gdbwire_strdup(mi_var->variant.cstring) : 0;
+                    } else if (strcmp(mi_var->variable, "value") == 0) {
+                        temp->value = mi_var->variant.cstring
+                            ? gdbwire_strdup(mi_var->variant.cstring) : 0;
+                    } else if (strcmp(mi_var->variable, "arg") == 0) {
+                        temp->is_arg = mi_var->variant.cstring
+                            ? atoi(mi_var->variant.cstring) : 0;
+                    }
+                }
+                mi_var = mi_var->next;
+            }
+
+            /* Only link if we got at least a name */
+            if (temp->name) {
+                if (variables == NULL) {
+                    variables = temp;
+                } else {
+                    current->next = temp;
+                }
+                current = temp;
+            } else {
+                free(temp);
+            }
+        }
+        mi_result = mi_result->next;
+    }
+
+    mi_command = (struct gdbwire_mi_command *)
+        calloc(1, sizeof(struct gdbwire_mi_command));
+    if (!mi_command) {
+        gdbwire_mi_stack_list_variables_free(variables);
+        return GDBWIRE_NOMEM;
+    }
+
+    mi_command->kind = GDBWIRE_MI_STACK_LIST_VARIABLES;
+    mi_command->variant.stack_list_variables.variables = variables;
+
+    *out = mi_command;
+
+    return GDBWIRE_OK;
+}
+
+/**
  * Handle the -file-list-exec-source-file command.
  *
  * @param result_record
@@ -3411,6 +3547,9 @@ gdbwire_get_mi_command(enum gdbwire_mi_command_kind kind,
         case GDBWIRE_MI_STACK_INFO_FRAME:
             result = stack_info_frame(result_record, out);
             break;
+        case GDBWIRE_MI_STACK_LIST_VARIABLES:
+            result = stack_list_variables(result_record, out);
+            break;
         case GDBWIRE_MI_FILE_LIST_EXEC_SOURCE_FILE:
             result = file_list_exec_source_file(result_record, out);
             break;
@@ -3433,6 +3572,10 @@ void gdbwire_mi_command_free(struct gdbwire_mi_command *mi_command)
             case GDBWIRE_MI_STACK_INFO_FRAME:
                 gdbwire_mi_stack_frame_free(
                     mi_command->variant.stack_info_frame.frame);
+                break;
+            case GDBWIRE_MI_STACK_LIST_VARIABLES:
+                gdbwire_mi_stack_list_variables_free(
+                    mi_command->variant.stack_list_variables.variables);
                 break;
             case GDBWIRE_MI_FILE_LIST_EXEC_SOURCE_FILE:
                 free(mi_command->variant.file_list_exec_source_file.file);
